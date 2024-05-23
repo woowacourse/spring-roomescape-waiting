@@ -76,8 +76,8 @@ public class ReservationService {
         return new Reservation(member, reservationDetail, Status.RESERVED);
     }
 
-    public List<ReservationResponse> findAllReservation() {
-        List<Reservation> reservations = reservationRepository.findAll();
+    public List<ReservationResponse> findAllReservationWithoutCancel() {
+        List<Reservation> reservations = reservationRepository.findAllByStatusNot(Status.CANCELED);
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();

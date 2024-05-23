@@ -38,6 +38,12 @@ public class AdminReservationController {
     }
 
     @GetMapping("/admin/reservations")
+    public ResponseEntity<List<ReservationResponse>> findAllReservations() {
+        List<ReservationResponse> response = reservationService.findAllReservationWithoutCancel();
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/admin/reservations/search")
     public ResponseEntity<List<ReservationResponse>> searchAllReservations(
             @RequestParam("from") LocalDate start,
             @RequestParam("to") LocalDate end,

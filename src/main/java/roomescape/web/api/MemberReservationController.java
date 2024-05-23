@@ -41,12 +41,6 @@ public class MemberReservationController {
                 .body(response);
     }
 
-    @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAllMemberReservations() {
-        List<ReservationResponse> response = reservationService.findAllReservation();
-        return ResponseEntity.ok().body(response);
-    }
-
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<UserReservationResponse>> findAllMyReservations(MemberInfo memberInfo) {
         List<UserReservationResponse> reservations = reservationService.findAllWithRank(memberInfo.id());

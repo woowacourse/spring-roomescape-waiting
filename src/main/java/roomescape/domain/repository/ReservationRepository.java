@@ -24,6 +24,8 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findAll();
 
+    List<Reservation> findAllByStatusNot(Status status);
+
     List<Reservation> findAllByStatus(Status status);
 
     @Query(""" 

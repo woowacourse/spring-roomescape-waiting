@@ -151,4 +151,27 @@ class AdminReservationTest {
                 .statusCode(200)
                 .body("status", equalTo("RESERVED"));
     }
+
+    @DisplayName("예약을 취소하면, 조회되지 않는다")
+    @Test
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
+            "/test-data/reservations-details.sql", "/test-data/reservations.sql"})
+    void when_cancelReservation_then_notFound() {
+        // when
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when().delete("/admin/reservations/" + 1)
+                .then().log().all()
+                .assertThat()
+                .statusCode(204);
+
+        // then
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .assertThat()
+                .statusCode(200)
+                .body("size()", equalTo(13));
+    }
 }

@@ -224,7 +224,7 @@ function requestCreate(reservation) {
         body: JSON.stringify(reservation)
     };
 
-    return fetch('/admin/reservations', requestOptions)
+    return fetch(RESERVATION_API_ENDPOINT, requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');
