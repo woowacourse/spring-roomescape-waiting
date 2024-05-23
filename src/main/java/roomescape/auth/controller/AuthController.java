@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
-import roomescape.member.dto.MemberResponse;
 import roomescape.common.util.CookieUtils;
+import roomescape.member.dto.MemberResponse;
 
 @RestController
 public class AuthController {

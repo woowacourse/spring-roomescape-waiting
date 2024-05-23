@@ -7,8 +7,8 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.config.IntegrationTest;
-import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.common.util.CookieUtils;
+import roomescape.member.dto.MemberSignUpRequest;
 
 class MemberControllerTest extends IntegrationTest {
 
