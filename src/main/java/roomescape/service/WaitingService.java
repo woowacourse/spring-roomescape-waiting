@@ -53,6 +53,16 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    public void deleteUserWaiting(long waitingId, long memberId) {
+        Member member = reservationDbService.findMemberById(memberId);
+        Waiting waiting = findWaitingById(waitingId);
+
+        if (!member.hasWaiting(waiting)) {
+            throw new RoomEscapeBusinessException("본인의 대기가 아니면 삭제할 수 없습니다.");
+        }
+        waitingRepository.delete(waiting);
+    }
+
     private void validateAlreadyReservedMember(Waiting waiting, Reservation alreadyBookedReservation) {
         Member requestMember = waiting.getMember();
         Member alreadyBookedMember = alreadyBookedReservation.getMember();

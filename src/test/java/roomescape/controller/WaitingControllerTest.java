@@ -115,6 +115,14 @@ class WaitingControllerTest extends IntegrationTestSupport {
                             .extract().as(WaitingResponse.class)
                             .id();
                 }),
+                dynamicTest("유저는 다른 유저의 예약 대기를 삭제할 수 없다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", USER_TOKEN)
+                            .when().delete("/waitings?id=" + createdId)
+                            .then().log().all()
+                            .statusCode(400);
+                }),
                 dynamicTest("유저는 예약 대기를 삭제할 수 있다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
