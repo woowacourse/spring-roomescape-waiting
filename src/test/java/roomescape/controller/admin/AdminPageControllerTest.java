@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.admin;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +10,7 @@ class AdminPageControllerTest extends IntegrationTestSupport {
 
     @DisplayName("어드민 권한이 있으면 어드민 페이지에 접근할 수 있다.")
     @ParameterizedTest
-    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/time", "/admin/theme"})
+    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/time", "/admin/theme", "admin/waitings"})
     void admin(String url) {
         RestAssured.given().log().all()
                 .cookie("token", ADMIN_TOKEN)
@@ -21,7 +21,7 @@ class AdminPageControllerTest extends IntegrationTestSupport {
 
     @DisplayName("유저는 어드민 페이지에 접근할 수 없다.")
     @ParameterizedTest
-    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/time", "/admin/theme"})
+    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/time", "/admin/theme", "admin/waitings"})
     void user(String url) {
         RestAssured.given().log().all()
                 .cookie("token", USER_TOKEN)

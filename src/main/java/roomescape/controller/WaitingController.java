@@ -28,9 +28,10 @@ public class WaitingController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteWaiting(@RequestParam(name = "id") long id) {
-        waitingService.deleteWaiting(id);
+    public ResponseEntity<Void> deleteWaiting(
+            @Login LoginMember member,
+            @RequestParam(name = "id") long id) {
+        waitingService.deleteUserWaiting(id, member.id());
         return ResponseEntity.noContent().build();
-
     }
 }

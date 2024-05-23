@@ -6,11 +6,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.IntegrationTestSupport;
-import roomescape.service.dto.request.WaitingRequest;
 import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.dto.response.UserReservationResponses;
-import roomescape.service.dto.response.WaitingResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +17,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.domain.ReservationStatus.WAITING;
 
 class ReservationControllerTest extends IntegrationTestSupport {
 
@@ -208,7 +205,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .then().log().all()
                             .statusCode(400);
                 }),
-                               dynamicTest("유저는 예약을 삭제할 수 없다.", () -> {
+                dynamicTest("유저는 예약을 삭제할 수 없다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)

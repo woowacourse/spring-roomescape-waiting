@@ -1,10 +1,6 @@
 package roomescape.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
 import io.restassured.RestAssured;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -13,6 +9,11 @@ import org.springframework.http.MediaType;
 import roomescape.IntegrationTestSupport;
 import roomescape.controller.dto.TokenRequest;
 import roomescape.service.dto.response.MemberResponse;
+
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class LoginControllerTest extends IntegrationTestSupport {
 
