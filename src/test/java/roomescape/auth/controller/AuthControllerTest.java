@@ -10,7 +10,7 @@ import roomescape.common.config.IntegrationTest;
 import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.common.util.CookieUtils;
 
-class AuthApiControllerTest extends IntegrationTest {
+class AuthControllerTest extends IntegrationTest {
 
     @DisplayName("회원 가입 후 로그인에 성공하면 200 응답을 받고 쿠키가 존재하는지 확인하고 로그인 체크 한다.")
     @Test

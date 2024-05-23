@@ -1,85 +1,71 @@
 package roomescape.reservation.controller;
 
-import static org.hamcrest.Matchers.hasSize;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.common.config.IntegrationTest;
-import roomescape.reservation.dto.request.TimeSaveRequest;
+import roomescape.reservation.dto.request.ThemeSaveRequest;
 import roomescape.common.util.CookieUtils;
 
-class ReservationTimeApiControllerTest extends IntegrationTest {
+class ThemeControllerTest extends IntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @DisplayName("모든 시간 조회 성공 시 200 응답을 받는다.")
+    @DisplayName("인기 테마 목록 조회를 성공하면 200 응답을 받는다.")
+    @Test
+    void findTopTenThemesOfLastWeek() {
+        RestAssured.given().log().all()
+                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .accept(ContentType.JSON)
+                .when()
+                .get("/themes/popular")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @DisplayName("테마 목록 조회에 성공하면 200 응답을 받는다.")
     @Test
     void findAll() {
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .accept(ContentType.JSON)
                 .when()
-                .get("/times")
+                .get("/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
     }
 
-    @DisplayName("예약 가능한 시간 조회 성공 시 200응답을 받는다.")
-    @Test
-    void findAvailableTimes() {
-        saveAdminMember();
-        saveThemeAsHorror();
-        saveReservationTimeAsTen();
-        saveSuccessReservationAsDateNow();
-
-        RestAssured.given()
-                .param("date", LocalDate.now().toString())
-                .param("theme-id", 1)
-                .log().all()
-                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
-                .accept(ContentType.JSON)
-                .when()
-                .get("/times/available")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .contentType(ContentType.JSON)
-                .body("resources.$", hasSize(1));
-    }
-
-    @DisplayName("시간 정보를 저장 성공 시 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
+    @DisplayName("테마를 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
     @Test
     void save() throws JsonProcessingException {
-        TimeSaveRequest timeSaveRequest = new TimeSaveRequest(LocalTime.now());
+        ThemeSaveRequest themeSaveRequest = new ThemeSaveRequest("공포", "진짜 무서움", "https://i.pinimg.com/236x.jpg");
 
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(timeSaveRequest))
+                .body(objectMapper.writeValueAsString(themeSaveRequest))
                 .accept(ContentType.JSON)
                 .when()
-                .post("/times")
+                .post("/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
-                .header("Location", "/times/1");
+                .header("Location", "/themes/1");
     }
 
-    @DisplayName("시간 삭제 성공시 204 응답을 받는다.")
+    @DisplayName("테마를 성공적으로 제거하면 204 응답을 받는다.")
     @Test
     void delete() {
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .accept(ContentType.JSON)
                 .when()
-                .delete("/times/{id}", 1L)
+                .delete("/themes/{id}", 1L)
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }

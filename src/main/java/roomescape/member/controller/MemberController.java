@@ -14,11 +14,11 @@ import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.member.service.MemberService;
 
 @RestController
-public class MemberApiController {
+public class MemberController {
 
     private final MemberService memberService;
 
-    public MemberApiController(MemberService memberService) {
+    public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
 

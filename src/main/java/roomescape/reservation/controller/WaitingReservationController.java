@@ -19,11 +19,11 @@ import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
-public class WaitingReservationApiController {
+public class WaitingReservationController {
 
     private final ReservationService reservationService;
 
-    public WaitingReservationApiController(ReservationService reservationService) {
+    public WaitingReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 

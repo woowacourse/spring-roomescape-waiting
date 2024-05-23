@@ -13,11 +13,11 @@ import roomescape.member.dto.MemberResponse;
 import roomescape.common.util.CookieUtils;
 
 @RestController
-public class AuthApiController {
+public class AuthController {
 
     private final AuthService authService;
 
-    public AuthApiController(AuthService authService) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
 

@@ -19,11 +19,11 @@ import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.reservation.service.ReservationTimeService;
 
 @RestController
-public class ReservationTimeApiController {
+public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
 
-    public ReservationTimeApiController(ReservationTimeService reservationTimeService) {
+    public ReservationTimeController(ReservationTimeService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
     }
 

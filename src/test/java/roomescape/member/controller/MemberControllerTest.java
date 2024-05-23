@@ -10,7 +10,7 @@ import roomescape.common.config.IntegrationTest;
 import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.common.util.CookieUtils;
 
-class MemberApiControllerTest extends IntegrationTest {
+class MemberControllerTest extends IntegrationTest {
 
     @DisplayName("회원가입에 성공하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
     @Test

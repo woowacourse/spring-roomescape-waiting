@@ -26,7 +26,7 @@ import roomescape.member.domain.MemberName;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.common.util.CookieUtils;
 
-class WaitingReservationApiControllerTest extends IntegrationTest {
+class WaitingReservationControllerTest extends IntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
