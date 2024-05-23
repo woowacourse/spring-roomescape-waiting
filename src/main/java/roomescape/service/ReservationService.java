@@ -2,6 +2,8 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -56,7 +58,7 @@ public class ReservationService {
         TimeSlot timeSlot = findTimeSlotById(reservationRequest.timeId());
         Theme theme = findThemeById(reservationRequest.themeId());
 
-        validate(reservationRequest.date(), timeSlot, theme);
+        validate(reservationRequest.date(), timeSlot, theme, member);
 
         Reservation reservation = reservationRequest.toEntity(member, timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
@@ -65,19 +67,19 @@ public class ReservationService {
 
     public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
         Member member = findMemberById(loginMember.id());
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        List<Reservation> reservations = reservationRepository.findAllByMemberOrderByDateAsc(member);
         return reservations.stream()
                 .map(ReservationMineResponse::from)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public void delete(Long id) {
         reservationRepository.deleteById(id);
     }
 
-    private void validate(LocalDate date, TimeSlot timeSlot, Theme theme) {
+    private void validate(LocalDate date, TimeSlot timeSlot, Theme theme, Member member) {
         validateReservation(date, timeSlot);
-        validateDuplicatedReservation(date, timeSlot, theme);
+        validateDuplicatedReservation(date, timeSlot, theme, member);
     }
 
     private void validateReservation(LocalDate date, TimeSlot time) {
@@ -86,9 +88,17 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Theme theme) {
+    private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Theme theme, Member member) {
+        if (reservationRepository.existsByDateAndTimeAndThemeAndMember(date, timeSlot, theme, member)) {
+            throw new IllegalArgumentException("[ERROR] 이미 예약이 완료되었습니다");
+        }
+
         if (reservationRepository.existsByDateAndTimeAndTheme(date, timeSlot, theme)) {
             throw new IllegalArgumentException("[ERROR] 예약이 종료되었습니다");
+        }
+
+        if (reservationRepository.existsByDateAndTimeAndMember(date, timeSlot, member)) {
+            throw new IllegalArgumentException("[ERROR] 동일한 시간대에 예약을 두 개 이상 할 수 없습니다.");
         }
     }
 

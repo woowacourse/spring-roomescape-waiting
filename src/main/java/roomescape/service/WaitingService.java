@@ -31,7 +31,7 @@ public class WaitingService {
         TimeSlot timeSlot = findTimeSlotById(waitingRequest.timeId());
         Theme theme = findThemeById(waitingRequest.themeId());
 
-        validate(waitingRequest.date(), timeSlot, member);
+        validate(waitingRequest.date(), timeSlot, theme, member);
 
         Waiting waiting = waitingRequest.toEntity(member, timeSlot, theme);
         Waiting createdWaiting = waitingRepository.save(waiting);
@@ -40,7 +40,7 @@ public class WaitingService {
 
     private void validate(LocalDate date, TimeSlot timeSlot, Member member) {
         validateReservation(date, timeSlot);
-        validateDuplicatedReservation(date, timeSlot, member);
+        validateDuplicatedReservation(date, timeSlot, theme, member);
     }
 
     private void validateReservation(LocalDate date, TimeSlot time) {
@@ -49,12 +49,12 @@ public class WaitingService {
         }
     }
 
-    private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Member member) {
-        if (reservationRepository.existsByDateAndTimeAndMember(date, timeSlot, member)) {
+    private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Theme theme, Member member) {
+        if (reservationRepository.existsByDateAndTimeAndThemeAndMember(date, timeSlot, theme, member)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약한 테마에 예약 대기를 걸 수 없습니다.");
         }
 
-        if (waitingRepository.existsByDateAndTimeAndMember(date, timeSlot, member)) {
+        if (waitingRepository.existsByDateAndTimeAndThemeAndMember(date, timeSlot, theme, member)) {
             throw new IllegalArgumentException("[ERROR] 예약 대기는 중복으로 신청할 수 없습니다.");
         }
     }
