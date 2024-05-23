@@ -15,6 +15,8 @@ import roomescape.service.auth.dto.LoginResponse;
 import roomescape.service.auth.dto.SignUpRequest;
 import roomescape.service.member.dto.MemberResponse;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
     private final TokenProvider tokenProvider;
@@ -64,10 +66,9 @@ public class AuthService {
     }
 
     public void validateAdmin(long memberId) {
-        memberRepository.findById(memberId).ifPresent(member -> {
-            if (member.isGuest()) {
-                throw new ForbiddenException("권한이 없습니다. 관리자에게 문의해주세요.");
-            }
-        });
+        Optional<Member> member = memberRepository.findById(memberId);
+        if(member.isEmpty() || !member.get().isAdmin()) {
+            throw new ForbiddenException("권한이 없습니다. 관리자에게 문의해주세요.");
+        }
     }
 }
