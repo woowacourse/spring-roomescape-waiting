@@ -44,8 +44,7 @@ public class ReservationTimeService {
     }
 
     public FindReservationTimeResponse getReservationTime(final Long id) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 시간을 조회할 수 없습니다."));
+        ReservationTime reservationTime = reservationTimeRepository.getById(id);
         return FindReservationTimeResponse.from(reservationTime);
     }
 

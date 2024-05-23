@@ -36,12 +36,14 @@ public class MemberController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<FindReservationResponse>> getMembersWithReservations(@AuthenticationPrincipal AuthInfo authInfo) {
+    public ResponseEntity<List<FindReservationResponse>> getReservationsByMember(
+            @AuthenticationPrincipal AuthInfo authInfo) {
         return ResponseEntity.ok(reservationService.getReservationsByMember(authInfo));
     }
 
     @GetMapping("/waitings")
-    public ResponseEntity<List<FindWaitingResponse>> getWaitings(@AuthenticationPrincipal AuthInfo authInfo) {
+    public ResponseEntity<List<FindWaitingResponse>> getWaitingsByMember(
+            @AuthenticationPrincipal AuthInfo authInfo) {
         return ResponseEntity.ok(waitingService.getWaitings(authInfo));
     }
 }

@@ -24,8 +24,7 @@ public class AuthService {
 
     public LoginResponse login(final LoginRequest loginMemberRequest) {
         String email = loginMemberRequest.email();
-        Member member = memberRepository.findByEmail(new Email(email))
-                .orElseThrow(() -> new IllegalArgumentException("로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요."));
+        Member member = memberRepository.getByEmail(new Email(email), "로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요.");
         checkInvalidAuthInfo(member, loginMemberRequest.password());
         return new LoginResponse(tokenProvider.createToken(member));
     }
@@ -37,8 +36,7 @@ public class AuthService {
     }
 
     public GetAuthInfoResponse getMemberAuthInfo(final AuthInfo authInfo) {
-        Member member = memberRepository.findById(authInfo.getMemberId())
-                .orElseThrow(() -> new UnAuthorizationException("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요."));
+        Member member = memberRepository.getById(authInfo.getMemberId(), "회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요.");
         return GetAuthInfoResponse.from(member);
     }
 }

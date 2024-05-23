@@ -10,6 +10,18 @@ import roomescape.reservation.model.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    default Reservation getById(Long id) {
+        return findById(id).orElseThrow(
+                () -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않습니다."));
+    }
+
+    Optional<Reservation> findByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    default Reservation getByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).orElseThrow(() ->
+                new NoSuchElementException(date + "의 time: " + timeId + ", theme: " + themeId + "의 예약이 존재하지 않습니다."));
+    }
+
     @Query("""
             select r, m, rt, t
             from Reservation r
@@ -50,13 +62,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
                                                                 LocalDate dateTo);
-
-    Optional<Reservation> findByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
-
-    default Reservation getByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).orElseThrow(() ->
-                new NoSuchElementException(date + "의 time: " + timeId + ", theme: " + themeId + "의 예약이 존재하지 않습니다."));
-    }
 
     boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

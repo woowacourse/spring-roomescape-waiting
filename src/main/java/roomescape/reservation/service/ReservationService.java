@@ -39,9 +39,9 @@ public class ReservationService {
 
     public CreateReservationResponse createReservation(final AuthInfo authInfo,
                                                        final CreateReservationRequest createReservationRequest) {
-        ReservationTime reservationTime = findReservationTime(createReservationRequest.timeId());
-        Theme theme = findTheme(createReservationRequest.themeId());
-        Member member = findMember(authInfo.getMemberId());
+        ReservationTime reservationTime = reservationTimeRepository.getById(createReservationRequest.timeId());
+        Theme theme = themeRepository.getById(createReservationRequest.themeId());
+        Member member = memberRepository.getById(authInfo.getMemberId());
 
         checkAlreadyExistReservation(createReservationRequest, createReservationRequest.date(), theme.getName(),
                 reservationTime.getStartAt());
@@ -60,21 +60,6 @@ public class ReservationService {
         }
     }
 
-    private ReservationTime findReservationTime(final Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    private Theme findTheme(final Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    private Member findMember(final Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
     public List<FindReservationResponse> getReservations() {
         return reservationRepository.findAll().stream()
                 .map(FindReservationResponse::from)
@@ -82,13 +67,8 @@ public class ReservationService {
     }
 
     public FindReservationResponse getReservation(final Long id) {
-        Reservation reservation = findReservation(id);
+        Reservation reservation = reservationRepository.getById(id);
         return FindReservationResponse.from(reservation);
-    }
-
-    private Reservation findReservation(final Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
     }
 
     public List<FindAvailableTimesResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
@@ -115,14 +95,10 @@ public class ReservationService {
     }
 
     public void deleteReservation(final Long id) {
-        validateExistReservation(id);
-        reservationRepository.deleteById(id);
-    }
-
-    private void validateExistReservation(final Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않습니다. 삭제가 불가능합니다.");
         }
+        reservationRepository.deleteById(id);
     }
 
     public List<roomescape.member.dto.response.FindReservationResponse> getReservationsByMember(
