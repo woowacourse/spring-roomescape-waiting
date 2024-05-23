@@ -1,5 +1,7 @@
 package roomescape.waiting.controller;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookies;
@@ -31,7 +33,7 @@ class WaitingControllerTest {
 
     @DisplayName("이미 예약되어 있는 방탈출에 대해 예약 대기를 할 수 있다.")
     @Test
-    void createReservation() {
+    void createWaiting() {
         ReservationCreateRequest reservationParams = new ReservationCreateRequest(
                 null, LocalDate.of(2040, 8, 5), 1L, 1L);
         Cookies adminCookies = CookieProvider.makeAdminCookie();
@@ -57,5 +59,23 @@ class WaitingControllerTest {
                 .then().log().all()
                 .statusCode(201)
                 .header("Location", "/waitings/" + expectedId);
+    }
+
+    @DisplayName("존재하지 않는 예약에 대해 예약 대기를 할 수 없다.")
+    @Test
+    void createWaiting_whenNotExistReservation() {
+        WaitingCreateRequest waitingParams = new WaitingCreateRequest(
+                LocalDate.of(2040, 8, 5), 1L, 1L);
+        long expectedId = 1L;
+        Cookies userCookies = CookieProvider.makeUserCookie();
+
+        RestAssured.given().log().all()
+                .cookies(userCookies)
+                .contentType(ContentType.JSON)
+                .body(waitingParams)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", is("존재하지 않는 예약에 대해 대기할 수 없습니다."));
     }
 }

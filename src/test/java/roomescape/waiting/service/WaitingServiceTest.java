@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -68,5 +69,26 @@ class WaitingServiceTest {
         assertThat(actual)
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
+    }
+
+    @DisplayName("예약 대기시, 예약이 존재하지 않는다면 예외를 던진다.")
+    @Test
+    void createWaitingTest_whenReservationNotExist() {
+        LocalDate date = LocalDate.now().plusDays(7);
+        WaitingCreateRequest request = new WaitingCreateRequest(date, 1L, 1L);
+        Reservation reservation = new Reservation(
+                1L,
+                new Member(1L, "브라운", "brown@abc.com"),
+                LocalDate.of(2024, 8, 15),
+                new ReservationTime(1L, LocalTime.of(19, 0)),
+                new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg"));
+        Member waitingMember = new Member(2L, "낙낙", "naknak@abc.com");
+
+        given(reservationRepository.findByDateAndTime_idAndTheme_id(date, 1L, 1L))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> waitingService.createWaiting(request, waitingMember.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("존재하지 않는 예약에 대해 대기할 수 없습니다.");
     }
 }
