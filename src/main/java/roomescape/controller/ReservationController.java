@@ -38,20 +38,20 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
     }
 
-    @PostMapping("/reservations")
+    @PostMapping({"/reservations", "/reservations/waiting"})
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationCreateMemberRequest memberRequest, AuthInfo authInfo
     ) {
         ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.from(memberRequest, authInfo.id());
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
-        return ResponseEntity.created(URI.create("admin/reservation")).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations" + reservationResponse.id())).body(reservationResponse);
     }
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationCreateRequest reservationCreateRequest) {
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
-        return ResponseEntity.created(URI.create("admin/reservation")).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations" + reservationResponse.id())).body(reservationResponse);
     }
 
     @GetMapping("/admin/reservations")
