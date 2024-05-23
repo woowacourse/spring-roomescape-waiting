@@ -10,7 +10,6 @@ import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,58 +18,28 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.Fixture;
-import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-class ReservationServiceTest {
+class ReservationServiceTest extends FixtureUsingTest {
 
-    private final LoginMemberRequest loginMemberRequest = Fixture.defaultLoginuser;
-    private final Member member = Fixture.defaultMember;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private ReservationRepository reservationRepository;
     @Autowired
     private ReservationService reservationService;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    private ReservationTime defaultTime = new ReservationTime(LocalTime.now());
-    private Theme defaultTheme = new Theme("name", "description", "thumbnail");
-
-    @BeforeEach
-    void initService() {
-        defaultTime = reservationTimeRepository.save(defaultTime);
-        defaultTheme = themeRepository.save(defaultTheme);
-        memberRepository.save(member);
-    }
 
     @DisplayName("지나지 않은 시간에 대한 예약을 생성할 수 있다.")
     @Test
     void createFutureReservationTest() {
         //when
         ReservationResponse saved = reservationService.saveByUser(
-                loginMemberRequest,
+                LoginMemberRequest.from(USER),
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
-                        defaultTime.getId(),
-                        defaultTheme.getId()
+                        reservationTime_10_0.getId(),
+                        theme1.getId()
                 ));
 
         //then
@@ -85,11 +54,11 @@ class ReservationServiceTest {
     @Test
     void createPastReservationFailTest() {
         assertThatThrownBy(() -> reservationService.saveByUser(
-                loginMemberRequest,
+                LoginMemberRequest.from(USER),
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
-                        defaultTime.getId(),
-                        defaultTheme.getId()
+                        reservationTime_10_0.getId(),
+                        theme1.getId()
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(PAST_TIME_RESERVATION.getMessage());
@@ -99,11 +68,11 @@ class ReservationServiceTest {
     @Test
     void createReservationWithTimeNotExistsTest() {
         assertThatThrownBy(() -> reservationService.saveByUser(
-                loginMemberRequest,
+                LoginMemberRequest.from(USER),
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
-                        2L,
-                        defaultTheme.getId()
+                        reservationTimeIdNotExists,
+                        theme1.getId()
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(NOT_FOUND_RESERVATION_TIME.getMessage());
@@ -113,11 +82,11 @@ class ReservationServiceTest {
     @Test
     void createReservationWithThemeNotExistsTest() {
         assertThatThrownBy(() -> reservationService.saveByUser(
-                loginMemberRequest,
+                LoginMemberRequest.from(USER),
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
-                        defaultTime.getId(),
-                        2L
+                        reservationTime_10_0.getId(),
+                        themeIdNotSaved
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(NOT_FOUND_THEME.getMessage());
@@ -127,14 +96,14 @@ class ReservationServiceTest {
     @Test
     void findAllTest() {
         //given
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
-                member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
-                member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme,
-                member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme,
-                member));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), reservationTime_10_0, theme1,
+                USER));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), reservationTime_10_0, theme1,
+                USER));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), reservationTime_10_0, theme1,
+                USER));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), reservationTime_10_0, theme1,
+                USER));
 
         //when
         List<ReservationResponse> reservationResponses = reservationService.findAll();
@@ -152,7 +121,7 @@ class ReservationServiceTest {
 
         @BeforeEach
         void addDefaultReservation() {
-            defaultReservation = new Reservation(defaultDate, defaultTime, defaultTheme, member);
+            defaultReservation = new Reservation(defaultDate, reservationTime_10_0, theme1, USER);
             defaultReservation = reservationRepository.save(defaultReservation);
         }
 
@@ -160,8 +129,8 @@ class ReservationServiceTest {
         @Test
         void duplicatedReservationFailTest() {
             assertThatThrownBy(() -> reservationService.saveByUser(
-                    loginMemberRequest,
-                    new ReservationRequest(defaultDate, defaultTime.getId(), defaultTheme.getId())))
+                    LoginMemberRequest.from(USER),
+                    new ReservationRequest(defaultDate, reservationTime_10_0.getId(), theme1.getId())))
                     .isInstanceOf(RoomescapeException.class)
                     .hasMessage(DUPLICATE_RESERVATION.getMessage());
         }
