@@ -1,11 +1,19 @@
 package roomescape.support.fixture;
 
+import org.springframework.boot.test.context.TestComponent;
 import roomescape.domain.theme.Theme;
 
-public class ThemeFixture {
-    public static final Theme THEME = name("테마");
+@TestComponent
+public class ThemeFixture extends Fixture {
 
-    public static Theme name(String name) {
-        return new Theme(name, "테마 설명", "https://example.com");
+    public Theme save() {
+        return save("테마명");
+    }
+
+    public Theme save(String name) {
+        Theme theme = new Theme(name, "테마 설명", "https://example.com");
+        em.persist(theme);
+        synchronize();
+        return theme;
     }
 }

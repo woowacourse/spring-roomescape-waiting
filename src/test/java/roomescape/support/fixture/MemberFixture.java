@@ -1,12 +1,20 @@
 package roomescape.support.fixture;
 
+import org.springframework.boot.test.context.TestComponent;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 
-public class MemberFixture {
-    public static final Member ADMIN = email("admin@gmail.com");
+@TestComponent
+public class MemberFixture extends Fixture {
 
-    public static Member email(String email) {
-        return new Member(email, "password", "프린", Role.USER);
+    public Member save() {
+        return save("prin@email.com");
+    }
+
+    public Member save(String email) {
+        Member member = new Member(email, "password", "프린", Role.USER);
+        em.persist(member);
+        synchronize();
+        return member;
     }
 }
