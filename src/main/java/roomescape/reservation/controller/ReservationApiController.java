@@ -65,7 +65,7 @@ public class ReservationApiController {
         final Long memberId = loginMemberInToken.id();
 
         myReservationResponses.addAll(reservationService.findAllByMemberId(memberId));
-        myReservationResponses.addAll(waitingService.findAllByMemberId(memberId));
+        myReservationResponses.addAll(waitingService.findWaitingWithRanksByMemberId(memberId));
 
         return ResponseEntity.ok(myReservationResponses);
     }
