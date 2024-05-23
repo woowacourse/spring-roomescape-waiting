@@ -13,7 +13,7 @@ public record ReservationResponse(
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        ReservationStatus status) {
+        String status) {
 
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
@@ -22,7 +22,7 @@ public record ReservationResponse(
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservation.getStatus()
+                reservation.getStatus().getStatusName()
         );
     }
 }

@@ -13,7 +13,7 @@ public record WaitingResponse(
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        ReservationStatus status,
+        String status,
         Long sequence) {
 
     public static WaitingResponse of(Reservation reservation, Long sequence) {
@@ -23,7 +23,7 @@ public record WaitingResponse(
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservation.getStatus(),
+                reservation.getStatus().getStatusName(),
                 sequence);
     }
 }
