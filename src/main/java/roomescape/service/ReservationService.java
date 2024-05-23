@@ -80,7 +80,6 @@ public class ReservationService {
                 .toList();
     }
 
-    //Todo 사이드 이펙트?
     public void delete(long requestMemberId, long reservationId) {
         if (!canDelete(requestMemberId, reservationId)) {
             throw new RoomescapeException(PERMISSION_DENIED);
