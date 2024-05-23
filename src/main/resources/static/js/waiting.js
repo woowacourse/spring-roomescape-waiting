@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('/admin/reservations/waitings') // 내 예약 목록 조회 API 호출
+    fetch('/admin/waitings')
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -38,7 +38,7 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = '/admin/reservations/waitings/' + id;
+    const endpoint = '/admin/waitings/' + id;
     return fetch(endpoint, {
         method: 'POST'
     }).then(response => {
@@ -51,11 +51,11 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = '/admin/reservations/waitings/' + id;
+    const endpoint = '/admin/waitings/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
+        if (response.status === 204) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
 }

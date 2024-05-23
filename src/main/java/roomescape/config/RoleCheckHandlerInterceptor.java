@@ -22,11 +22,7 @@ public class RoleCheckHandlerInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Object handler
-    ) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (request.getCookies() == null) {
             throw new UnauthorizedException("사용자 인증 정보가 없습니다.");
         }

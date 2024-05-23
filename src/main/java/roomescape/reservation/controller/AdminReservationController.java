@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/reservations")
+@RequestMapping("/admin")
 public class AdminReservationController {
 
     private final ReservationService reservationService;
@@ -21,7 +21,7 @@ public class AdminReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ReservationResponse createReservation(@Valid @RequestBody ReservationCreateRequest request) {
         return reservationService.createReservation(request);
     }
@@ -31,12 +31,12 @@ public class AdminReservationController {
         return reservationService.approveWaiting(id);
     }
 
-    @GetMapping
+    @GetMapping("/reservations")
     public List<ReservationResponse> readReservations() {
         return reservationService.readReservations();
     }
 
-    @GetMapping("/search")
+    @GetMapping("/reservations/search")
     public List<ReservationResponse> readReservations(
             @RequestParam LocalDate dateFrom,
             @RequestParam LocalDate dateTo,
@@ -51,7 +51,7 @@ public class AdminReservationController {
         return reservationService.readWaitings();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
