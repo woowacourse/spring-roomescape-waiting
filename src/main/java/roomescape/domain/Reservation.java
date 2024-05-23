@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
 
@@ -23,6 +24,7 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     private RoomTheme theme;
+    private LocalDateTime createdAt;
 
     protected Reservation() {
     }
@@ -41,6 +43,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.createdAt = LocalDateTime.now();
     }
 
     private void validateRoomTheme(RoomTheme theme) {
