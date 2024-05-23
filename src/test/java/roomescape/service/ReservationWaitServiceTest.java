@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWait;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
@@ -62,4 +63,25 @@ class ReservationWaitServiceTest {
                 .hasSize(1);
     }
 
+    @Test
+    @DisplayName("예약 대기를 삭제한다")
+    void deleteReservation_ShouldRemoveReservationWaitPersistence() {
+        // given
+        Member member = new Member("aa", "aa@aa.aa", "aa");
+        Theme theme = new Theme("n", "d", "t");
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        Reservation reservation = new Reservation(LocalDate.of(2023, 12, 11), time, theme);
+        memberRepository.save(member);
+        themeRepository.save(theme);
+        timeRepository.save(time);
+        reservationRepository.save(reservation);
+        ReservationWait savedWait = waitRepository.save(new ReservationWait(member, reservation, 0));
+
+        // when
+        waitService.deleteReservationWait(savedWait.getId());
+
+        // then
+        Assertions.assertThat(waitRepository.findAll())
+                .isEmpty();
+    }
 }

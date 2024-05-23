@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
@@ -75,10 +76,11 @@ class ThemeRepositoryTest {
         reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 2), savedTime, savedTheme2));
         reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 3), savedTime, savedTheme3));
         reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 4), savedTime, savedTheme4));
-
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        
         // when
         List<Theme> themesByPeriodWithLimit = themeRepository.findThemeByPeriodWithLimit(LocalDate.of(2023, 2, 2),
-                LocalDate.of(2023, 2, 3), 5);
+                LocalDate.of(2023, 2, 3), pageRequest);
 
         // then
 

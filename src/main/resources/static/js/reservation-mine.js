@@ -24,7 +24,7 @@ function render(data) {
         row.insertCell(2).textContent = item.date;
         row.insertCell(3).textContent = item.time;
         row.insertCell(4).textContent = item.status;
-        
+
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
          */
@@ -45,9 +45,9 @@ function render(data) {
 
 function requestDeleteWaiting(id) {
     /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
+     [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = '/reservation-wait/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

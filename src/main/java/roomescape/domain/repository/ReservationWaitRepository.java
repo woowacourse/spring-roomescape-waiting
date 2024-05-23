@@ -2,6 +2,7 @@ package roomescape.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
@@ -40,6 +41,16 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
 
     long countByReservation(Reservation reservation);
 
+    @Query("""
+            SELECT w.priority
+            FROM ReservationWait w
+            ORDER BY w.priority DESC
+            LIMIT 1
+            """)
+    Optional<Long> findPriorityIndex();
+
+    void deleteById(Long id);
+    
     void deleteByMemberId(Long memberId);
 
     void deleteByReservationId(Long reservationId);

@@ -5,6 +5,8 @@ import java.net.URI;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,5 +29,11 @@ public class WaitController {
 
         return ResponseEntity.created(URI.create("/"))
                 .build();
+    }
+
+    @DeleteMapping("/{waitId}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable("waitId") Long waitId) {
+
+        return ResponseEntity.noContent().build();
     }
 }

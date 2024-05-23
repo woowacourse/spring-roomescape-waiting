@@ -28,8 +28,14 @@ public class ReservationWaitService {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(AuthenticationFailureException::new);
-        
-        long waitCount = waitRepository.countByReservation(reservation);
+
+        long waitCount = waitRepository.findPriorityIndex()
+                .orElse(0L);
         waitRepository.save(new ReservationWait(member, reservation, waitCount + 1L));
+    }
+
+    @Transactional
+    public void deleteReservationWait(Long waitId) {
+        waitRepository.deleteById(waitId);
     }
 }

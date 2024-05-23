@@ -6,6 +6,7 @@ import static roomescape.domain.ReservationStatus.WAITING;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -178,27 +179,38 @@ class ReservationWaitRepositoryTest {
     }
 
     @Test
-    @DisplayName("단일 예약대기의 갯수를 예약기준으로 찾는다")
-    void countByReservation_ShouldCountNumberOfReservationWait_ByReservationInfo() {
+    @DisplayName("예약 대기 우선순위 중 가장 높은 값을 찾아온다")
+    void findPriorityIndex_ShouldFindTopIndexOfPriority() {
         // given
-        Reservation reservation1 = new Reservation(LocalDate.of(2018, 12, 11), dummyTime, dummyTheme);
-        Reservation reservation2 = new Reservation(LocalDate.of(2018, 12, 11), dummyTime, dummyTheme);
-
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
-
-        ReservationWait reservationWait1 = new ReservationWait(dummyMember, reservation1, 0);
-        ReservationWait reservationWait2 = new ReservationWait(dummyMember, reservation2, 0);
-        ReservationWait reservationWait3 = new ReservationWait(dummyMember, reservation1, 0);
-
-        waitRepository.save(reservationWait1);
-        waitRepository.save(reservationWait2);
-        waitRepository.save(reservationWait3);
+        ReservationWait wait1 = new ReservationWait(dummyMember, dummyReservation, 123);
+        ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 1238);
+        waitRepository.save(wait1);
+        waitRepository.save(wait2);
 
         // when
-        long count = waitRepository.countByReservation(reservation1);
+        Optional<Long> priorityIndex = waitRepository.findPriorityIndex();
 
         // then
-        Assertions.assertThat(count).isEqualTo(2L);
+        Assertions.assertThat(priorityIndex).isPresent()
+                .hasValue(1238L);
+
+    }
+
+    @Test
+    @DisplayName("예약 대기를 바탕으로 영속성을 삭제한다")
+    void deleteById_ShouldRemoveSpecificPersistence() {
+        // given
+        ReservationWait wait1 = new ReservationWait(dummyMember, dummyReservation, 1);
+        ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 2);
+        waitRepository.save(wait1);
+        waitRepository.save(wait2);
+
+        // when
+        waitRepository.deleteById(wait1.getId());
+
+        // then
+        Assertions.assertThat(waitRepository.findAll())
+                .hasSize(1)
+                .containsExactlyInAnyOrder(wait2);
     }
 }

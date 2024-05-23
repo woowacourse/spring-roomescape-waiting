@@ -32,6 +32,7 @@ import roomescape.service.dto.response.reservation.UserReservationResponse;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReservationService {
+    private static final long RESERVED_NUMBER = 0;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -65,25 +66,17 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse saveReservation(ReservationRequest request) {
-        ReservationTime time = findReservationTimeById(request.timeId());
-        Theme theme = findThemeById(request.themeId());
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(NotFoundTimeException::new);
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(NotFoundThemeException::new);
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(AuthenticationFailureException::new);
         Reservation verifiedReservation = verifyReservation(request, time, theme);
         Reservation savedReservation = reservationRepository.save(verifiedReservation);
 
-        waitRepository.save(new ReservationWait(member, savedReservation, 0));
+        waitRepository.save(new ReservationWait(member, savedReservation, RESERVED_NUMBER));
         return ReservationResponse.from(savedReservation, member);
-    }
-
-    private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(NotFoundThemeException::new);
-    }
-
-    private ReservationTime findReservationTimeById(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(NotFoundTimeException::new);
     }
 
     private Reservation verifyReservation(ReservationRequest request, ReservationTime time, Theme theme) {
@@ -97,13 +90,10 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long reservationId) {
-        Reservation reservation = findReservationById(reservationId);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(NotFoundReservationException::new);
+
         waitRepository.deleteByReservationId(reservationId);
         reservationRepository.delete(reservation);
-    }
-
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(NotFoundReservationException::new);
     }
 }
