@@ -29,15 +29,28 @@ public class TimeSlot {
         return startAt.isBefore(currentTime);
     }
 
-    public boolean isSame(TimeSlot other) {
-        return Objects.equals(id, other.id);
-    }
-
     public Long getId() {
         return id;
     }
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TimeSlot other = (TimeSlot) o;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

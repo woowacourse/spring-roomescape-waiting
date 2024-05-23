@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 public class Reservation {
@@ -51,7 +52,7 @@ public class Reservation {
     }
 
     public boolean hasSameTime(TimeSlot other) {
-        return time.isSame(other);
+        return time.equals(other);
     }
 
     public Long getId() {
@@ -76,5 +77,22 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Reservation other = (Reservation) o;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
