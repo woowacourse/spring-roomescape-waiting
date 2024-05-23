@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,7 +25,8 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public Waiting(Long id, LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
+    public Waiting(Long id, LocalDate date, Member member, ReservationTime time, Theme theme,
+                   ReservationStatus status) {
         this.id = id;
         this.date = date;
         this.member = member;

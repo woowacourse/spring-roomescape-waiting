@@ -6,8 +6,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 
 @Component
 @Transactional
@@ -47,7 +52,8 @@ public class DatabaseInitializer {
     }
 
     private Reservation createReservation(Member member, ReservationTime time, Theme theme) {
-        Reservation reservation = new Reservation(LocalDate.of(2024, 8, 5), member, time, theme, ReservationStatus.BOOKED);
+        Reservation reservation = new Reservation(LocalDate.of(2024, 8, 5), member, time, theme,
+                ReservationStatus.BOOKED);
         entityManager.persist(reservation);
         return reservation;
     }

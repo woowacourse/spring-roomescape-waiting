@@ -7,7 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.Theme;
+import roomescape.domain.ThemeRepository;
+import roomescape.domain.WaitingRepository;
+import roomescape.domain.WaitingWithRank;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
@@ -16,7 +25,6 @@ import roomescape.exception.time.NotFoundTimeException;
 import roomescape.service.dto.ReservationMineResponse;
 import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.ReservationResponse;
-import roomescape.service.dto.WaitingResponse;
 
 @Service
 @Transactional(readOnly = true)
@@ -39,7 +47,8 @@ public class ReservationService {
 
     public List<ReservationResponse> findAllReservation(
             Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo);
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId,
+                themeId, dateFrom, dateTo);
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -50,11 +59,11 @@ public class ReservationService {
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(member.getId());
         List<ReservationMineResponse> responses = new ArrayList<>();
 
-        for(Reservation reservation : reservations) {
+        for (Reservation reservation : reservations) {
             responses.add(new ReservationMineResponse(reservation));
         }
 
-        for(WaitingWithRank waitingWithRank : waitingWithRanks) {
+        for (WaitingWithRank waitingWithRank : waitingWithRanks) {
             Long rank = waitingWithRank.getRank();
             responses.add(new ReservationMineResponse(waitingWithRank.getWaiting(), rank + 1));
         }
