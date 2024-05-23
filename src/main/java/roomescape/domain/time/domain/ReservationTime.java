@@ -14,7 +14,7 @@ public class ReservationTime {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "startAt", nullable = false)
+    @Column(name = "start_at", nullable = false)
     private LocalTime startAt;
 
     protected ReservationTime() {
