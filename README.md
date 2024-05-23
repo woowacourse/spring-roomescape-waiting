@@ -388,7 +388,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBR
 }
 ```
 
-API 응답 예시
+## 본인 예약 조회
 
 ### request
 
