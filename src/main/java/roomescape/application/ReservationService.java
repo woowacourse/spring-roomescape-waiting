@@ -51,9 +51,9 @@ public class ReservationService {
     public ReservationResponse addReservation(ReservationRequest request) {
         Reservation reservation = createReservation(
                 request.date(),
-                request.memberId(),
                 request.timeId(),
-                request.themeId()
+                request.themeId(),
+                request.memberId()
         );
 
         validateReservationExists(reservation);
@@ -84,7 +84,7 @@ public class ReservationService {
         reservationRepository.delete(reservation);
     }
 
-    private Reservation createReservation(LocalDate date, Long memberId, Long timeId, Long themeId) {
+    private Reservation createReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
         Member member = memberRepository.getById(memberId);
         ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
         Theme theme = themeRepository.getById(themeId);
