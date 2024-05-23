@@ -8,9 +8,11 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
+import roomescape.admin.dto.AdminWaitingResponse;
 import roomescape.admin.dto.ReservationFilterRequest;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
+import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.exception.model.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Date;
@@ -19,7 +21,6 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -102,7 +103,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationWaitingResponse> findMemberReservations(long id) {
+    public List<MemberReservationResponse> findMemberReservations(long id) {
         List<Reservation> reservations = reservationRepository.findAllByMemberIdAndReservationStatus(id,
                 ReservationStatus.RESERVED);
 
@@ -110,25 +111,25 @@ public class ReservationService {
                 ReservationStatus.WAITING);
         List<Waiting> waitingRanks = findWaitingWithRank(waitingReservations);
 
-        List<ReservationWaitingResponse> reservationWaitingResponses = makeResponse(
+        List<MemberReservationResponse> memberReservationRespons = makeResponse(
                 reservations, waitingRanks);
 
-        return reservationWaitingResponses.stream()
-                .sorted(Comparator.comparing(ReservationWaitingResponse::date))
+        return memberReservationRespons.stream()
+                .sorted(Comparator.comparing(MemberReservationResponse::date))
                 .toList();
     }
 
-    private static List<ReservationWaitingResponse> makeResponse(List<Reservation> reservations,
-                                                                 List<Waiting> waitingRanks) {
-        List<ReservationWaitingResponse> reservationWaitingResponses = new ArrayList<>();
+    private static List<MemberReservationResponse> makeResponse(List<Reservation> reservations,
+                                                                List<Waiting> waitingRanks) {
+        List<MemberReservationResponse> memberReservationRespons = new ArrayList<>();
 
-        reservations.forEach(reservation -> reservationWaitingResponses
-                .add(ReservationWaitingResponse.from(reservation)));
+        reservations.forEach(reservation -> memberReservationRespons
+                .add(MemberReservationResponse.from(reservation)));
 
-        waitingRanks.forEach(waiting -> reservationWaitingResponses
-                .add(ReservationWaitingResponse.from(waiting)));
+        waitingRanks.forEach(waiting -> memberReservationRespons
+                .add(MemberReservationResponse.from(waiting)));
 
-        return reservationWaitingResponses;
+        return memberReservationRespons;
     }
 
     public void removeReservations(long reservationId) {
@@ -181,5 +182,14 @@ public class ReservationService {
 
     private boolean isTimeBooked(Time time, List<Time> bookedTimes) {
         return bookedTimes.contains(time);
+    }
+
+    public List<AdminWaitingResponse> findWaitings() {
+        List<Reservation> reservations = reservationRepository.findByReservationStatus(ReservationStatus.WAITING);
+        return reservations.stream()
+                .map(reservation -> new AdminWaitingResponse(reservation.getId(), reservation.getMember().getName(),
+                        reservation.getTheme().getName(), reservation.getDate(),
+                        reservation.getReservationTime().getStartAt()))
+                .toList();
     }
 }

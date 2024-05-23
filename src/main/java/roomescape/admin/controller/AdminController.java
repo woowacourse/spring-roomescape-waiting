@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.admin.dto.AdminReservationRequest;
+import roomescape.admin.dto.AdminWaitingResponse;
 import roomescape.admin.dto.ReservationFilterRequest;
 import roomescape.global.annotation.Auth;
 import roomescape.member.role.MemberRole;
@@ -38,4 +39,10 @@ public class AdminController {
             @ModelAttribute ReservationFilterRequest reservationFilterRequest) {
         return reservationService.findFilteredReservations(reservationFilterRequest);
     }
+
+    @GetMapping("/admin/waitings")
+    public List<AdminWaitingResponse> waitingList() {
+        return reservationService.findWaitings();
+    }
+
 }

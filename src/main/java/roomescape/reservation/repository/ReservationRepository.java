@@ -28,6 +28,8 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findByThemeId(long themeId);
 
+    List<Reservation> findByReservationStatus(ReservationStatus reservationStatus);
+
     @Query("SELECT r.theme " +
             "FROM Reservation r " +
             "WHERE r.date.date between :startDate AND :endDate " +

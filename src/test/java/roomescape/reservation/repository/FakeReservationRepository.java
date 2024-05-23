@@ -92,6 +92,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findByReservationStatus(ReservationStatus reservationStatus) {
+        return reservations.values().stream()
+                .filter(reservation -> isSameStatus(reservationStatus, reservation))
+                .toList();
+    }
+
+    @Override
     public List<Theme> findAllByDateOrderByThemeIdCountLimit(LocalDate startDate, LocalDate endDate, int limitCount) {
         return reservations.values().stream()
                 .filter(reservation -> isBetweenDate(Date.dateFrom(startDate), Date.dateFrom(endDate), reservation))
@@ -102,14 +109,25 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, long waitingId) {
+        return (int) reservations.values().stream()
+                .filter(reservation -> isSameThemeId(theme.getId(), reservation))
+                .filter(reservation -> isSameTime(time.getId(), reservation))
+                .filter(reservation -> isSameDate(date, reservation))
+                .filter(reservation -> reservation.getId() < waitingId)
+                .count();
+    }
+
+    @Override
     public void deleteById(long reservationId) {
         reservations.remove((reservationId));
     }
 
     @Override
-    public List<Reservation> findAllByMemberId(long id) {
+    public List<Reservation> findAllByMemberIdAndReservationStatus(long id, ReservationStatus reservationStatus) {
         return reservations.values().stream()
                 .filter(reservation -> isSameMember(id, reservation))
+                .filter(reservation -> isSameStatus(reservationStatus, reservation))
                 .toList();
     }
 
@@ -132,6 +150,10 @@ public class FakeReservationRepository implements ReservationRepository {
     private boolean isBetweenDate(Date fromDate, Date toDate, Reservation reservation) {
         return reservation.getDate().isAfter(fromDate.getDate()) && reservation.getDate()
                 .isBefore(toDate.getDate());
+    }
+
+    private boolean isSameStatus(ReservationStatus reservationStatus, Reservation reservation) {
+        return reservationStatus.getStatus().equals(reservation.getReservationStatus());
     }
 
     private Reservation makeReservation(Reservation reservation, long id) {

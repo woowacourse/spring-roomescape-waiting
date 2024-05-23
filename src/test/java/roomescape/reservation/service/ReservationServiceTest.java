@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.admin.dto.AdminWaitingResponse;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.model.MemberNotFoundException;
@@ -99,6 +101,23 @@ class ReservationServiceTest {
                 () -> reservationService.addWaitingReservation(reservationRequest, 1));
 
         assertEquals(duplicateReservation.getMessage(), ReservationExceptionCode.DUPLICATE_RESERVATION.getMessage());
+    }
+
+    @Test
+    @DisplayName("상태가 대기인 예약 목록만을 가져온다.")
+    void getWaitingReservation() {
+        ReservationResponse reservationResponse = reservationService.addWaitingReservation(
+                new ReservationRequest(LocalDate.now().plusDays(1), 1, 1), 1);
+
+        List<AdminWaitingResponse> waitingResponses = reservationService.findWaitings();
+        AdminWaitingResponse adminWaitingResponse = waitingResponses.get(0);
+
+        assertAll(
+                () -> assertEquals(waitingResponses.size(), 1),
+                () -> assertEquals(adminWaitingResponse.memberName(), reservationResponse.memberName()),
+                () -> assertEquals(adminWaitingResponse.time(), reservationResponse.startAt()),
+                () -> assertEquals(adminWaitingResponse.themeName(), reservationResponse.themeName())
+        );
     }
 
     @Test

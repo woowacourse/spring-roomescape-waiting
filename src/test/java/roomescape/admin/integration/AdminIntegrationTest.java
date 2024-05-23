@@ -48,4 +48,18 @@ public class AdminIntegrationTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(201);
     }
+
+    @Test
+    @DisplayName("대기 목록을 불러올 수 있다.")
+    void waitingList() {
+        Token token = tokenProvider.getAccessToken(1);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .when().get("/admin/waitings")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
