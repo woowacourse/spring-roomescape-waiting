@@ -19,8 +19,10 @@ public class Theme {
     @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private ThemeName name;
 
+    @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
     private String thumbnail;
 
     protected Theme() {

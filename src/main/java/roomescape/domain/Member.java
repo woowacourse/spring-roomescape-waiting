@@ -21,11 +21,14 @@ public class Member {
     @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private MemberName name;
 
+    @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     protected Member() {
