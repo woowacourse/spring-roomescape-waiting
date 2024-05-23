@@ -9,6 +9,7 @@ import static roomescape.time.fixture.ReservationTimeFixture.RESERVATION_TIME_10
 import static roomescape.time.fixture.ReservationTimeFixture.TIME_ADD_REQUEST_10_00;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,24 @@ class ReservationTimeServiceTest {
 
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
+
+    @DisplayName("아이디로 단건 조회 시 존재하지 않을 경우 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_find_with_non_exist_id() {
+        when(reservationTimeRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationTimeService.findById(1L))
+                .isInstanceOf(IllegalRequestException.class);
+    }
+
+    @DisplayName("아이디를 기반으로 단건 조회가 가능하다")
+    @Test
+    void should_find_reservation_time_with_exist_id() {
+        when(reservationTimeRepository.findById(any(Long.class))).thenReturn(Optional.of(RESERVATION_TIME_10_00_ID_1));
+
+        assertThat(reservationTimeService.findById(1L)).isEqualTo(RESERVATION_TIME_10_00_ID_1);
+    }
+
 
     @DisplayName("모든 예약 시간을 조회하고 응답 형태로 반환할 수 있다")
     @Test

@@ -4,35 +4,30 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.IllegalRequestException;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingResponse;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.theme.service.ThemeService;
+import roomescape.time.service.ReservationTimeService;
 
 @Service
 public class ReservationService {
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+    private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
 
-    public ReservationService(MemberRepository memberRepository,
-                              ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository) {
-        this.memberRepository = memberRepository;
+    public ReservationService(MemberService memberService, ReservationTimeService reservationTimeService,
+                              ThemeService themeService, ReservationRepository reservationRepository) {
+        this.memberService = memberService;
+        this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> findAllReservation() {
@@ -71,10 +66,10 @@ public class ReservationService {
 
         Reservation reservation = new Reservation(
                 null,
-                getMember(memberId),
+                memberService.findById(memberId),
                 request.date(),
-                getReservationTime(request.timeId()),
-                getTheme(request.themeId())
+                reservationTimeService.findById(request.timeId()),
+                themeService.findById(request.themeId())
         );
 
         if (reservation.isPast()) {
@@ -86,21 +81,6 @@ public class ReservationService {
 
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
-    }
-
-    private Member getMember(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalRequestException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
-    }
-
-    private ReservationTime getReservationTime(long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalRequestException("해당하는 예약시간이 존재하지 않습니다 ID: " + timeId));
-    }
-
-    private Theme getTheme(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalRequestException("해당하는 테마가 존재하지 않습니다 ID: " + themeId));
     }
 
     public void removeReservation(long id) {

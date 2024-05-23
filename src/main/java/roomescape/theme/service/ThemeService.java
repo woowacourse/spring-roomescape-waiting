@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.dto.ThemeAddRequest;
@@ -20,6 +21,11 @@ public class ThemeService {
 
     public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
+    }
+
+    public Theme findById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new IllegalRequestException("해당하는 테마가 존재하지 않습니다 ID: " + id));
     }
 
     public List<ThemeResponse> findAllTheme() {

@@ -19,6 +19,11 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    public ReservationTime findById(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new IllegalRequestException("해당하는 예약시간이 존재하지 않습니다 ID: " + id));
+    }
+
     public List<ReservationTimeResponse> findAllReservationTime() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::new)
