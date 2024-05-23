@@ -50,7 +50,8 @@ class ReservationControllerTest extends ControllerTest {
                 .body(reservationAddRequest)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("status", is("RESERVATION"));
     }
 
     @DisplayName("예약 가능 시각 목록을 불러올 수 있다. (200 OK)")

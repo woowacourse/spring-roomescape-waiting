@@ -17,6 +17,6 @@ public record ReservationAddRequest(LocalDate date, Long timeId, Long themeId, L
     }
 
     public Reservation toEntity(ReservationTime reservationTime, Theme theme, Member member) {
-        return new Reservation(null, date, Status.RESERVATION_WAIT, reservationTime, theme, member);
+        return new Reservation(null, date, Status.RESERVATION, reservationTime, theme, member);
     }
 }
