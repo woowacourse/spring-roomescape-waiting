@@ -15,11 +15,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     List<Reservation> findByReservationTime(ReservationTime reservationTime);
 
-    Optional<Reservation> findOneByReservationTimeAndDateAndThemeAndReservationStatus(
+    Optional<Reservation> findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
             ReservationTime reservationTime,
             LocalDate date,
             Theme theme,
-            final ReservationStatus waiting);
+            final ReservationStatus waiting
+    );
 
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 

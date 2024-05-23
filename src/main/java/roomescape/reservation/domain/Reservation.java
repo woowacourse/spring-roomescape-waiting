@@ -89,6 +89,8 @@ public class Reservation {
         return reservationStatus == ReservationStatus.RESERVED;
     }
 
+    public Long getMemberId() {
+        return member.getId();}
     public Long getId() {
         return id;
     }

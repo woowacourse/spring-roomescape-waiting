@@ -93,15 +93,44 @@ public class ReservationService {
                         String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
     }
 
-    public void removeReservationById(final Long reservationId, final Long requestMemberId) {
-        final Member member = memberService.findMemberById(requestMemberId);
-        final Reservation reservation = findReservationById(reservationId);
-        final Long reservationMemberId = reservation.getMember().getId();
+    public void removeReservationById(final Long targetReservationId, final Long myMemberId) {
+        final Member requestMember = memberService.findMemberById(myMemberId);
+        final Reservation requestReservation = findReservationById(targetReservationId);
 
-        if (member.isAdmin() || reservationMemberId.equals(requestMemberId)) {
-            reservationRepository.delete(reservation);
+        /*
+        TODO: 주석 삭제
+            1. 예약된 예약이 있으면 삭제한다.
+                1.1 내가 삭제하려는 예약이 이미 예약된 경우
+                    1.1.1 대기중인 예약이 있다면, 삭제 후 가장 처음 대기 예약의 상태를 예약됨으로 바꿔준다.
+                    1.1.2 아니라면, 그냥 삭제한다.
+                1.2 내가 삭제하려는 예약이 대기중인 예약인 경우
+                    1.2.1 대기중인 예약이 있어도, 그냥 지워주기만 하면 된다.
+
+         */
+
+        if (requestMember.isAdmin() || requestReservation.getMemberId().equals(myMemberId)) {
+            reservationRepository.delete(requestReservation);
+            Optional<Reservation> waitingOptional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
+                    requestReservation.getReservationTime(),
+                    requestReservation.getDate(),
+                    requestReservation.getTheme(),
+                    ReservationStatus.WAITING
+            );
+
+            if (requestReservation.isReserved() && waitingOptional.isPresent()) {
+                Reservation waitingReservation = waitingOptional.get();
+                reservationRepository.delete(waitingReservation);
+                reservationRepository.save(new Reservation(
+                        waitingReservation.getDate(),
+                        waitingReservation.getReservationTime(),
+                        waitingReservation.getTheme(),
+                        waitingReservation.getMember(),
+                        ReservationStatus.RESERVED
+                ));
+            }
             return;
         }
+
         throw new ForbiddenException(
                 ErrorType.PERMISSION_DOES_NOT_EXIST,
                 "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다."
@@ -122,6 +151,7 @@ public class ReservationService {
         // TODO: 예약대기 추가 시, ReservationStatus 값 설정 로직 추가
 
         /*
+            TODO: 주석 삭제
             1. 예약 추가
             2. reservationRepository에서 (X일,Y시간,Z테마)인 예약을 가져온다.
                 2.1 예약이 있고 요청이 예약 대기라면 예약을 저장소에 추가한다.
@@ -135,7 +165,7 @@ public class ReservationService {
                 3.3 예약저장소에 예약이 없으면 예약을 예약됨으로 바꾸고 집어넣는다.
          */
 
-        Optional<Reservation> optional = reservationRepository.findOneByReservationTimeAndDateAndThemeAndReservationStatus(
+        Optional<Reservation> optional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
                 requestTime, requestDate, requestTheme, ReservationStatus.RESERVED
         );
         ReservationStatus state = optional.isEmpty() ? ReservationStatus.RESERVED : ReservationStatus.WAITING;
@@ -178,7 +208,7 @@ public class ReservationService {
     ) {
         final ReservationTime time = reservationTimeService.findTimeById(reservationRequest.timeId());
 
-        Optional<Reservation> optional = reservationRepository.findOneByReservationTimeAndDateAndThemeAndReservationStatus(
+        Optional<Reservation> optional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
                 time, reservationRequest.date(), theme, ReservationStatus.RESERVED);
 
         if (optional.isPresent()) {
