@@ -1,6 +1,6 @@
-package roomescape.global.dto.response;
+package roomescape.system.dto.response;
 
-import roomescape.global.exception.error.ErrorType;
+import roomescape.system.exception.error.ErrorType;
 
 public record ErrorResponse(ErrorType errorType, String message) {
     public static ErrorResponse of(final ErrorType errorType, final String message) {

@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.UnauthorizedException;
+import roomescape.system.auth.jwt.JwtHandler;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.UnauthorizedException;
 
 import java.util.Date;
 
-import static roomescape.global.exception.error.ErrorType.EXPIRED_TOKEN;
+import static roomescape.system.exception.error.ErrorType.EXPIRED_TOKEN;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

@@ -3,10 +3,10 @@ package roomescape.auth.service;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.global.auth.jwt.JwtHandler;
-import roomescape.global.auth.jwt.dto.TokenDto;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.UnauthorizedException;
+import roomescape.system.auth.jwt.JwtHandler;
+import roomescape.system.auth.jwt.dto.TokenDto;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 

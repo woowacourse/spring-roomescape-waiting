@@ -4,8 +4,8 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import org.springframework.format.annotation.DateTimeFormat;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.ValidateException;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.ValidateException;
 import roomescape.reservation.domain.ReservationTime;
 
 public record ReservationTimeRequest(

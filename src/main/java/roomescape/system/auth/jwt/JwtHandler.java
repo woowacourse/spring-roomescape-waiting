@@ -1,4 +1,4 @@
-package roomescape.global.auth.jwt;
+package roomescape.system.auth.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -9,9 +9,9 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.global.auth.jwt.dto.TokenDto;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.UnauthorizedException;
+import roomescape.system.auth.jwt.dto.TokenDto;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.UnauthorizedException;
 
 @Component
 public class JwtHandler {

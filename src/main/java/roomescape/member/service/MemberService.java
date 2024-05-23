@@ -1,8 +1,8 @@
 package roomescape.member.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.NotFoundException;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.dto.MemberResponse;

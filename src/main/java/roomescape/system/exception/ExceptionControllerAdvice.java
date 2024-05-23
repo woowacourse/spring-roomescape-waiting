@@ -1,4 +1,4 @@
-package roomescape.global.exception;
+package roomescape.system.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,15 +9,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.global.dto.response.ErrorResponse;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.AssociatedDataExistsException;
-import roomescape.global.exception.model.CustomException;
-import roomescape.global.exception.model.DataDuplicateException;
-import roomescape.global.exception.model.ForbiddenException;
-import roomescape.global.exception.model.NotFoundException;
-import roomescape.global.exception.model.UnauthorizedException;
-import roomescape.global.exception.model.ValidateException;
+import roomescape.system.dto.response.ErrorResponse;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.AssociatedDataExistsException;
+import roomescape.system.exception.model.CustomException;
+import roomescape.system.exception.model.DataDuplicateException;
+import roomescape.system.exception.model.ForbiddenException;
+import roomescape.system.exception.model.NotFoundException;
+import roomescape.system.exception.model.UnauthorizedException;
+import roomescape.system.exception.model.ValidateException;
 
 @RestControllerAdvice
 public class ExceptionControllerAdvice {

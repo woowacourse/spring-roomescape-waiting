@@ -1,6 +1,6 @@
-package roomescape.global.exception.model;
+package roomescape.system.exception.model;
 
-import roomescape.global.exception.error.ErrorType;
+import roomescape.system.exception.error.ErrorType;
 
 public class ForbiddenException extends CustomException {
     public ForbiddenException(final ErrorType errorType, final String message) {

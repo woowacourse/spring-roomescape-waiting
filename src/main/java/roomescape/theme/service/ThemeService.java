@@ -1,8 +1,8 @@
 package roomescape.theme.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.NotFoundException;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.ThemeRequest;

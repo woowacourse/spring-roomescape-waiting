@@ -2,7 +2,7 @@ package roomescape.view.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import roomescape.global.auth.annotation.Admin;
+import roomescape.system.auth.annotation.Admin;
 
 @Controller
 public class AdminPageController {

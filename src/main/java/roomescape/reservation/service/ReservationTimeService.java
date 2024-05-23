@@ -1,10 +1,10 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.AssociatedDataExistsException;
-import roomescape.global.exception.model.DataDuplicateException;
-import roomescape.global.exception.model.NotFoundException;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.AssociatedDataExistsException;
+import roomescape.system.exception.model.DataDuplicateException;
+import roomescape.system.exception.model.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;

@@ -1,4 +1,4 @@
-package roomescape.global.exception.error;
+package roomescape.system.exception.error;
 
 public enum ErrorType {
 

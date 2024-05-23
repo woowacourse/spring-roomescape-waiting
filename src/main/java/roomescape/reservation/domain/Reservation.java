@@ -11,8 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.ValidateException;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 

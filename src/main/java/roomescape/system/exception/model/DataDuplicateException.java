@@ -1,6 +1,6 @@
-package roomescape.global.exception.model;
+package roomescape.system.exception.model;
 
-import roomescape.global.exception.error.ErrorType;
+import roomescape.system.exception.error.ErrorType;
 
 public class DataDuplicateException extends CustomException {
     public DataDuplicateException(final ErrorType errorType, final String message) {
