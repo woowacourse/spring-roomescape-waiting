@@ -91,10 +91,6 @@ public class Reservation {
         return theme;
     }
 
-//    public ReservationStatus getStatus() {
-//        return status;
-//    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
