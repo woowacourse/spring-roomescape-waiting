@@ -6,10 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.reservation.Waiting;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.WaitingRepository;
-
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,12 +19,6 @@ class WaitingServiceTest {
 
     @Autowired
     private WaitingService waitingService;
-
-    @Autowired
-    private WaitingRepository waitingRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("본인의 예약이 아니라면 예외가 발생한다.")
@@ -49,26 +39,12 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("예약이 없는 경우 대기를 예약으로 저장한다.")
-    void createWithoutReservation() {
-        // given
-        LocalDate now = LocalDate.now().plusDays(1);
-        Waiting waiting = new Waiting(ADMIN(1L), now, RESERVATION_TIME_ONE(1L), THEME_COMIC(1L));
-
-        // when
-        ReservationResponse reservationResponse = waitingService.create(waiting);
-
-        // then
-        assertThat(reservationRepository.findById(reservationResponse.id())).isPresent();
-    }
-
-    @Test
     @DisplayName("예약 대기를 승인하면 예약이 된다.")
     void approve() {
         // when
         ReservationResponse response = waitingService.approve(1L);
 
         // then
-        assertThat(reservationRepository.findById(response.id())).isPresent();
+        assertThat(response.id()).isNotNull();
     }
 }

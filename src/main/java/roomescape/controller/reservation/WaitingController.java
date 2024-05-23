@@ -12,11 +12,13 @@ import roomescape.controller.auth.AuthenticationPrincipal;
 import roomescape.domain.reservation.Waiting;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
+import roomescape.dto.reservation.AutoReservedFilter;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
+import roomescape.service.AutoReserveService;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -30,15 +32,18 @@ public class WaitingController {
     private final WaitingService waitingService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final AutoReserveService autoReserveService;
 
     public WaitingController(final MemberService memberService,
                              final WaitingService waitingService,
                              final ReservationTimeService reservationTimeService,
-                             final ThemeService themeService) {
+                             final ThemeService themeService,
+                             final AutoReserveService autoReserveService) {
         this.memberService = memberService;
         this.waitingService = waitingService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.autoReserveService = autoReserveService;
     }
 
     @PostMapping
@@ -46,12 +51,15 @@ public class WaitingController {
                                                              @RequestBody final MemberReservationSaveRequest request) {
         final MemberResponse memberResponse = memberService.findById(loginMember.id());
         final ReservationSaveRequest saveRequest = request.generateReservationSaveRequest(memberResponse);
-
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
         final Waiting waiting = saveRequest.toWaiting(memberResponse, themeResponse, reservationTimeResponse);
-        ReservationResponse response = waitingService.create(waiting);
+        ReservationResponse waitingResponse = waitingService.create(waiting);
+
+        AutoReservedFilter filter = AutoReservedFilter.from(waitingResponse);
+        ReservationResponse response = autoReserveService.reserveWaiting(filter).orElse(waitingResponse);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

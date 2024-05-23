@@ -38,15 +38,7 @@ public class WaitingService {
         if (duplicated) {
             throw new IllegalArgumentException("이미 예약 대기가 있습니다.");
         }
-
-        final boolean isReserved = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
-                waiting.getDate(), waiting.getTimeId(), waiting.getThemeId());
-        if (isReserved) {
-            final Waiting saved = waitingRepository.save(waiting);
-            return ReservationResponse.from(saved);
-        }
-        final Reservation reservation = waiting.toReservation();
-        final Reservation saved = reservationRepository.save(reservation);
+        final Waiting saved = waitingRepository.save(waiting);
         return ReservationResponse.from(saved);
     }
 

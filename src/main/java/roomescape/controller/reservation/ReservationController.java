@@ -13,6 +13,7 @@ import roomescape.controller.auth.AuthenticationPrincipal;
 import roomescape.domain.reservation.Reservation;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
+import roomescape.dto.reservation.AutoReservedFilter;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
 import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.MyReservationsResponse;
@@ -20,6 +21,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
+import roomescape.service.AutoReserveService;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
@@ -37,17 +39,20 @@ public class ReservationController {
     private final WaitingService waitingService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final AutoReserveService autoReserveService;
 
     public ReservationController(final MemberService memberService,
                                  final ReservationService reservationService,
                                  final WaitingService waitingService,
                                  final ReservationTimeService reservationTimeService,
-                                 final ThemeService themeService) {
+                                 final ThemeService themeService,
+                                 final AutoReserveService autoReserveService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
         this.waitingService = waitingService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.autoReserveService = autoReserveService;
     }
 
     @PostMapping
@@ -70,7 +75,9 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable final Long id) {
-        reservationService.delete(id);
+        final ReservationResponse response = reservationService.delete(id);
+        final AutoReservedFilter filter = AutoReservedFilter.from(response);
+        autoReserveService.reserveWaiting(filter);
         return ResponseEntity.noContent().build();
     }
 
