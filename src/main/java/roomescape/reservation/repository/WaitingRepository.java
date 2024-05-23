@@ -1,33 +1,41 @@
 package roomescape.reservation.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.dto.response.FindWaitingRankResponse;
+import roomescape.reservation.model.Slot;
 import roomescape.reservation.model.Waiting;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
-    boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    boolean existsByDateAndReservationTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId,
-                                                                  Long memberId);
+    @Query("""
+            SELECT w
+            FROM Waiting w
+            JOIN FETCH w.member m
+            JOIN FETCH w.slot.reservationTime rt
+            JOIN FETCH w.slot.theme t
+            """)
+    List<Waiting> findAll();
+
+    boolean existsBySlot(Slot slot);
+
+    boolean existsBySlotAndMemberId(Slot slot, Long memberId);
 
     @Query("""
                 SELECT new roomescape.member.dto.response.FindWaitingRankResponse(
                     myWaiting.id AS waitingId,
-                    myWaiting.theme.name AS theme,
-                    myWaiting.date AS date,
-                    myWaiting.reservationTime.startAt AS time,
+                    myWaiting.slot.theme.name AS theme,
+                    myWaiting.slot.date AS date,
+                    myWaiting.slot.reservationTime.startAt AS time,
                     COUNT(otherWaiting.id) AS waitingNumber
                 )
-                FROM Waiting otherWaiting
-                JOIN Waiting myWaiting ON otherWaiting.date = myWaiting.date AND otherWaiting.reservationTime = myWaiting.reservationTime AND otherWaiting.theme = myWaiting.theme
+                FROM Waiting myWaiting
+                JOIN Waiting otherWaiting ON myWaiting.slot = otherWaiting.slot
                 WHERE myWaiting.member.id = :memberId AND otherWaiting.id <= myWaiting.id
-                GROUP BY otherWaiting.date, otherWaiting.reservationTime, otherWaiting.theme
+                GROUP BY otherWaiting.slot
             """)
     List<FindWaitingRankResponse> findAllWaitingResponses(Long memberId);
 
-    boolean existsByDateAndReservationTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long reservationTimeId,
-                                                                    Long themeId, Long id);
+    boolean existsBySlotAndIdLessThan(Slot slot, Long id);
 }

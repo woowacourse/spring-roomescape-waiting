@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.dto.request.CreateThemeRequest;
 import roomescape.reservation.dto.response.CreateThemeResponse;
 import roomescape.reservation.dto.response.FindPopularThemesResponse;
 import roomescape.reservation.dto.response.FindThemeResponse;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
@@ -56,7 +56,7 @@ public class ThemeService {
     }
 
     private void validateThemeUsage(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsBySlot_ThemeId(id)) {
             throw new IllegalStateException("식별자 " + id + "인 테마를 사용 중인 예약이 존재합니다. 삭제가 불가능합니다.");
         }
     }

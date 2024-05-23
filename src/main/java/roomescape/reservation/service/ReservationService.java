@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.dto.response.FindReservationResponse;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.Slot;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -50,34 +50,25 @@ public class ReservationService {
 
     public CreateReservationResponse createReservation(final AuthInfo authInfo,
                                                        final CreateReservationRequest createReservationRequest) {
+        Member member = findMember(authInfo.getMemberId());
         ReservationTime reservationTime = findReservationTime(createReservationRequest.timeId());
         Theme theme = findTheme(createReservationRequest.themeId());
-        Member member = findMember(authInfo.getMemberId());
+        Slot slot = new Slot(createReservationRequest.date(), reservationTime, theme);
 
-        checkAlreadyExistReservation(createReservationRequest, createReservationRequest.date(), theme.getName(),
-                reservationTime.getStartAt());
-        checkWaitingExists(createReservationRequest, authInfo);
+        checkAlreadyExistReservation(slot);
+        checkWaitingExists(slot);
 
-        Reservation reservation = createReservationRequest.toReservation(member, reservationTime, theme);
-        return CreateReservationResponse.from(reservationRepository.save(reservation));
+        return CreateReservationResponse.from(reservationRepository.save(new Reservation(member, slot)));
     }
 
-    private void checkAlreadyExistReservation(final CreateReservationRequest createReservationRequest,
-                                              final LocalDate date, final String themeName, final LocalTime time) {
-        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(
-                createReservationRequest.date(),
-                createReservationRequest.timeId(),
-                createReservationRequest.themeId())) {
-            throw new IllegalArgumentException("이미 " + date + "의 " + themeName + " 테마에는 " + time
-                    + " 시의 예약이 존재하여 예약을 생성할 수 없습니다.");
+    private void checkAlreadyExistReservation(final Slot slot) {
+        if (reservationRepository.existsBySlot(slot)) {
+            throw new IllegalArgumentException("이미 예약이 존재하여 예약을 생성할 수 없습니다.");
         }
     }
 
-    private void checkWaitingExists(CreateReservationRequest createReservationRequest, AuthInfo authInfo) {
-        if (waitingRepository.existsByDateAndReservationTimeIdAndThemeId(
-                createReservationRequest.date(),
-                createReservationRequest.timeId(),
-                createReservationRequest.themeId())) {
+    private void checkWaitingExists(Slot slot) {
+        if (waitingRepository.existsBySlot(slot)) {
             throw new IllegalArgumentException("대기자가 있어 예약을 생성할 수 없습니다.");
         }
     }
@@ -102,8 +93,7 @@ public class ReservationService {
     }
 
     public FindReservationResponse getReservation(final Long id) {
-        Reservation reservation = findReservation(id);
-        return FindReservationResponse.from(reservation);
+        return FindReservationResponse.from(findReservation(id));
     }
 
     private Reservation findReservation(final Long id) {
@@ -113,7 +103,7 @@ public class ReservationService {
 
     public List<FindAvailableTimesResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(date, themeId);
+        List<Reservation> reservations = reservationRepository.findAllBySlot_DateAndSlot_ThemeId(date, themeId);
         return reservationTimes.stream()
                 .map(reservationTime -> generateFindAvailableTimesResponse(reservations, reservationTime))
                 .toList();

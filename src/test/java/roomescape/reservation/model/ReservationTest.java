@@ -2,8 +2,8 @@ package roomescape.reservation.model;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -65,29 +65,17 @@ class ReservationTest {
 
         @Test
         @DisplayName("예약 객체 생성 시 예약하려는 날짜가 과거인 경우 예외를 반환한다.")
-        void createReservation_WhenReservationDateInPast() {
-            assertThatThrownBy(
-                    () -> Reservation.create(
-                            MemberFixture.getOne(),
-                            LocalDate.parse("2024-01-01"),
-                            ReservationTimeFixture.getOne(),
-                            ThemeFixture.getOne()))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("2024-01-01는 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
-        }
-
-        @Test
-        @DisplayName("예약 객체 생성 시 예약하려는 날짜가 과거인 경우 예외를 반환한다.")
         void createReservation_WhenReservationTimeInPast() {
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime dateTime = LocalDateTime.now().minusHours(1);
             assertThatThrownBy(
                     () -> Reservation.create(
                             MemberFixture.getOne(),
-                            now.toLocalDate(),
-                            new ReservationTime(now.toLocalTime().minusHours(1)),
+                            dateTime.toLocalDate(),
+                            new ReservationTime(dateTime.toLocalTime()),
                             ThemeFixture.getOne()))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage(now.minusHours(1) + "는 현재보다 동일하거나 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
+                    .hasMessage(dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"))
+                            + "는 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
         }
     }
 }

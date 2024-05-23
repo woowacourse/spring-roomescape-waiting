@@ -9,6 +9,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.response.ConfirmReservationResponse;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.Slot;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.model.Waiting;
 import roomescape.reservation.repository.ReservationRepository;
@@ -63,26 +64,26 @@ public class AdminService {
 
     public ConfirmReservationResponse confirmWaiting(Long id) {
         Waiting waiting = findWaiting(id);
-        checkReservationExists(waiting);
-        checkFirstWaiting(waiting);
+        Slot slot = waiting.getSlot();
 
-        Reservation reservation = new Reservation(waiting.getMember(), waiting.getDate(), waiting.getReservationTime(),
-                waiting.getTheme());
+        checkReservationExists(slot);
+        checkFirstWaiting(slot, id);
+
         waitingRepository.deleteById(id);
-        return ConfirmReservationResponse.from(reservationRepository.save(reservation));
+        Reservation reservation = reservationRepository.save(new Reservation(waiting.getMember(), slot));
+
+        return ConfirmReservationResponse.from(reservation);
     }
 
-    private void checkReservationExists(Waiting waiting) {
-        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(
-                waiting.getDate(), waiting.getReservationTime().getId(), waiting.getTheme().getId())) {
+    private void checkReservationExists(Slot slot) {
+        if (reservationRepository.existsBySlot(slot)) {
             throw new IllegalArgumentException("이미 예약이 존재하여 대기를 예약으로 변경할 수 없습니다.");
         }
     }
 
-    private void checkFirstWaiting(Waiting waiting) {
-        if (waitingRepository.existsByDateAndReservationTimeIdAndThemeIdAndIdLessThan(
-                waiting.getDate(), waiting.getReservationTime().getId(), waiting.getTheme().getId(), waiting.getId())) {
-            throw new IllegalArgumentException(waiting.getId() + "보다 앞선 대기가 존재하여 예약으로 변경할 수 없습니다.");
+    private void checkFirstWaiting(Slot slot, Long id) {
+        if (waitingRepository.existsBySlotAndIdLessThan(slot, id)) {
+            throw new IllegalArgumentException(id + "번 예약 대기보다 앞선 대기가 존재하여 예약으로 변경할 수 없습니다.");
         }
     }
 

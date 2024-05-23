@@ -1,6 +1,6 @@
 package roomescape.reservation.model;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -10,6 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 
@@ -24,16 +26,12 @@ public class Waiting {
     @JoinColumn(nullable = false)
     private Member member;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Embedded
+    private Slot slot;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private ReservationTime reservationTime;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Theme theme;
+    public Waiting(final Member member, final Slot slot) {
+        this(null, member, slot);
+    }
 
     public Waiting(final Member member, final LocalDate date, final ReservationTime reservationTime,
                    final Theme theme) {
@@ -42,56 +40,50 @@ public class Waiting {
 
     public Waiting(final Long id,
                    final Member member,
-                   final LocalDate date,
-                   final ReservationTime reservationTime,
-                   final Theme theme) {
+                   final Slot slot) {
         validateReservationMemberIsNull(member);
-        validateReservationDateIsNull(date);
-        validateReservationTimeIsNull(reservationTime);
-        validateReservationThemeIsNull(theme);
+        validateReservationDateIsNull(slot.date());
+        validateReservationTimeIsNull(slot.reservationTime());
+        validateReservationThemeIsNull(slot.theme());
 
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.reservationTime = reservationTime;
-        this.theme = theme;
+        this.slot = slot;
+    }
+
+    public Waiting(final Long id,
+                   final Member member,
+                   final LocalDate date,
+                   final ReservationTime reservationTime,
+                   final Theme theme) {
+        this(id, member, new Slot(date, reservationTime, theme));
     }
 
     protected Waiting() {
+    }
+
+    public static Waiting create(final Member member, final Slot slot) {
+        validateCreateTimeIsPast(slot.date(), slot.reservationTime());
+        return new Waiting(null, member, slot);
     }
 
     public static Waiting create(final Member member,
                                  final LocalDate date,
                                  final ReservationTime reservationTime,
                                  final Theme theme) {
-        validateCreateTimeIsPast(date, reservationTime);
-        return new Waiting(
-                null,
-                member,
-                date,
-                reservationTime,
-                theme);
+        return create(member, new Slot(date, reservationTime, theme));
     }
 
-    private static void validateCreateTimeIsPast(final LocalDate dateToCreate, final ReservationTime reservationTime) {
+    private static void validateCreateTimeIsPast(final LocalDate date, final ReservationTime reservationTime) {
+        checkDateTimeIsPast(date, reservationTime.getStartAt());
+    }
+
+    private static void checkDateTimeIsPast(final LocalDate date, final LocalTime startAt) {
         LocalDateTime now = LocalDateTime.now();
-        checkDateToCreateIsPast(dateToCreate, now.toLocalDate());
-        checkTimeToCreateIsPastWhenSameDate(now, dateToCreate, reservationTime);
-    }
-
-    private static void checkDateToCreateIsPast(final LocalDate dateToCreate, final LocalDate now) {
-        if (dateToCreate.isBefore(now)) {
-            throw new IllegalArgumentException(dateToCreate + "는 지나간 시간임으로 예약 대기 생성이 불가능합니다. 현재 이후 날짜로 재예약 대기해주세요.");
-        }
-    }
-
-    private static void checkTimeToCreateIsPastWhenSameDate(final LocalDateTime now,
-                                                            final LocalDate dateToCreate,
-                                                            final ReservationTime timeToCreate) {
-        LocalDateTime newDateTime = LocalDateTime.of(dateToCreate, timeToCreate.getStartAt());
-        if (newDateTime.isEqual(now) || newDateTime.isBefore(now)) {
-            throw new IllegalArgumentException(
-                    newDateTime + "는 현재보다 동일하거나 지나간 시간임으로 예약 대기 생성이 불가능합니다. 현재 이후 날짜로 재예약 대기해주세요.");
+        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
+        if (dateTime.isBefore(now)) {
+            throw new IllegalArgumentException(dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"))
+                    + "는 지나간 시간임으로 예약 대기 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
         }
     }
 
@@ -119,12 +111,9 @@ public class Waiting {
         }
     }
 
-    public boolean hasSameTime(final ReservationTime reservationTime) {
-        return this.reservationTime.isSameTo(reservationTime.getId());
-    }
-
     public Slot getSlot() {
-        return new Slot(date, reservationTime, theme);
+        return slot;
+//        return new Slot(date, reservationTime, theme);
     }
 
     public Long getId() {
@@ -136,15 +125,15 @@ public class Waiting {
     }
 
     public LocalDate getDate() {
-        return date;
+        return slot.date();
     }
 
     public ReservationTime getReservationTime() {
-        return reservationTime;
+        return slot.reservationTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.theme();
     }
 
     @Override

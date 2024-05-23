@@ -9,11 +9,11 @@ import roomescape.reservation.model.Theme;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(value = """
-            select t
-            from Theme as t
-            left join Reservation r on r.theme.id = t.id
-            group by t.id
-            order by count(t.id) desc
+            SELECT t
+            FROM Theme as t
+            LEFT JOIN Reservation r ON r.slot.theme = t
+            GROUP BY t.id
+            ORDER BY count(t.id) DESC
             """)
     List<Theme> findAllOrderByReservationCount(Pageable pageable);
 }

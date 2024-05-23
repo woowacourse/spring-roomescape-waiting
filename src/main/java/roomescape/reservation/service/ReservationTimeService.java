@@ -4,11 +4,11 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.dto.request.CreateReservationTimeRequest;
 import roomescape.reservation.dto.response.CreateReservationTimeResponse;
 import roomescape.reservation.dto.response.FindReservationTimeResponse;
 import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
@@ -63,7 +63,7 @@ public class ReservationTimeService {
     }
 
     private void validateReservationTimeUsage(final Long id) {
-        if (reservationRepository.existsByReservationTimeId(id)) {
+        if (reservationRepository.existsBySlot_ReservationTimeId(id)) {
             throw new IllegalStateException("식별자 " + id + "인 시간을 사용 중인 예약이 존재합니다. 삭제가 불가능합니다.");
         }
     }
