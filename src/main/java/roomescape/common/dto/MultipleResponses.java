@@ -1,6 +1,6 @@
 package roomescape.common.dto;
 
-import java.util.List;
+import java.util.Collection;
 
-public record MultipleResponses<T>(List<T> responses) {
+public record MultipleResponses<T>(Collection<T> responses) {
 }
