@@ -447,7 +447,6 @@
 - 204 No Content
 - Set-Cookie: token=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/; HttpOnly
 
-
 ---
 
 ## 관리자 예약 대기 조회
@@ -457,7 +456,7 @@
 - GET /waiting
 - cookie: token={token}
 - content-type: application/json
-- 
+-
 
 ### Response
 

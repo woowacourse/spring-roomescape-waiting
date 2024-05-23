@@ -181,7 +181,8 @@ class WaitingServiceTest {
         waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
 
         Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
-        Waiting firstWaiting = waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+        Waiting firstWaiting = waitingRepository.save(
+                new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
 
         Optional<Waiting> waiting = waitingService.findFirstByReservationId(reservation.getId());
         assertAll(
