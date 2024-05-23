@@ -4,6 +4,7 @@ import static roomescape.exception.ExceptionType.EMPTY_DATE;
 import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_THEME;
 import static roomescape.exception.ExceptionType.EMPTY_TIME;
+import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -85,8 +86,10 @@ public class Reservation extends BaseEntity implements Comparable<Reservation> {
         return dateTime.compareTo(otherDateTime);
     }
 
-    public void updateReservationMember(Member newReservationMember) {
-        this.reservationMember = newReservationMember;
+    public void validatePastTimeReservation() {
+        if (this.isBefore(LocalDateTime.now())) {
+            throw new RoomescapeException(PAST_TIME_RESERVATION);
+        }
     }
 
     public boolean isBefore(LocalDateTime base) {
@@ -95,6 +98,10 @@ public class Reservation extends BaseEntity implements Comparable<Reservation> {
 
     public LocalTime getTime() {
         return time.getStartAt();
+    }
+
+    public void updateReservationMember(Member newReservationMember) {
+        this.reservationMember = newReservationMember;
     }
 
     public boolean hasIdOf(long id) {

@@ -1,12 +1,10 @@
 package roomescape.service;
 
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION;
-import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,16 +42,10 @@ public class ReservationService {
     public ReservationResponse save(ReservationRequest reservationRequest) {
         Reservation beforeSave = reservationFinder.createWhenNotExists(reservationRequest);
 
-        validatePastTimeReservation(beforeSave);
+        beforeSave.validatePastTimeReservation();
 
         Reservation saved = reservationRepository.save(beforeSave);
         return toResponse(saved);
-    }
-
-    private void validatePastTimeReservation(Reservation beforeSave) {
-        if (beforeSave.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
-        }
     }
 
     public List<ReservationResponse> findAll() {
@@ -84,7 +76,7 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION));
-        
+
         waitingRepository.findTopWaitingByReservation(reservation)
                 .ifPresentOrElse(waiting -> updateReservationAndDeleteTopWaiting(reservation, waiting),
                         () -> deleteReservation(reservationId));
