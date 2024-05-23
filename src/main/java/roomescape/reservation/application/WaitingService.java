@@ -22,4 +22,9 @@ public class WaitingService {
         WaitingWithRank waitingWithRank = waitingRepository.findByMember(reservation.getMember());
         return waitingWithRank.getRank() + 1;
     }
+
+    @Transactional
+    public void deleteById(Long id) {
+        waitingRepository.deleteById(id);
+    }
 }

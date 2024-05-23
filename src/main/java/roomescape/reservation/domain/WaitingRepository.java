@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 
+import java.time.LocalDate;
+
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("SELECT new roomescape.reservation.domain.WaitingWithRank(" +
@@ -18,4 +20,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             "FROM Waiting w " +
             "WHERE w.member = :member")
     WaitingWithRank findByMember(@Param(value = "member") Member member);
+
+    void deleteByMemberAndDateAndTimeAndTheme(Member member, LocalDate date, ReservationTime time, Theme theme);
 }

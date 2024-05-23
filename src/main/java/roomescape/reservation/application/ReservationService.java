@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.*;
@@ -62,8 +63,21 @@ public class ReservationService {
         return reservationRepository.findAllByMember(loginMember);
     }
 
-    @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteWaitingReservation(final Long id) {
+        Reservation reservation = findReservation(id);
+        reservationRepository.deleteById(id);
+
+        waitingRepository.deleteByMemberAndDateAndTimeAndTheme(
+                reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+    }
+
+    private Reservation findReservation(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 ID의 예약이 없습니다."));
     }
 }
