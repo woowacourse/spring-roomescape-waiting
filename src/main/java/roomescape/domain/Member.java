@@ -81,6 +81,10 @@ public class Member extends BaseEntity {
         return role;
     }
 
+    public String getRoleName() {
+        return role.name();
+    }
+
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;

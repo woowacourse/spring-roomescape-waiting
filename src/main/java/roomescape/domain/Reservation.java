@@ -125,6 +125,10 @@ public class Reservation extends BaseEntity implements Comparable<Reservation> {
         return theme;
     }
 
+    public String getThemeName() {
+        return theme.getName();
+    }
+
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;

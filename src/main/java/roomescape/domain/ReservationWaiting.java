@@ -83,6 +83,10 @@ public class ReservationWaiting extends BaseEntity {
         return this.id == id;
     }
 
+    public String getWaitingMemberName() {
+        return waitingMember.getName();
+    }
+
     public Long getId() {
         return id;
     }

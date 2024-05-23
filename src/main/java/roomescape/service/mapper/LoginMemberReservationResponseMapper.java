@@ -8,7 +8,7 @@ public class LoginMemberReservationResponseMapper {
     public static LoginMemberReservationResponse toResponse(Reservation reservation) {
         return new LoginMemberReservationResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
+                reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getTime(),
                 "예약");
@@ -17,9 +17,9 @@ public class LoginMemberReservationResponseMapper {
     public static LoginMemberReservationResponse from(ReservationWaitingResponse waitingResponse) {
         return new LoginMemberReservationResponse(
                 waitingResponse.id(),
-                waitingResponse.theme().name(),
+                waitingResponse.themeName(),
                 waitingResponse.date(),
-                waitingResponse.time().startAt(),
+                waitingResponse.startAt(),
                 "%d번째 예약 대기".formatted(waitingResponse.priority())
         );
     }

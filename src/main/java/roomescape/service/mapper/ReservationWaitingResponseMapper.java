@@ -18,7 +18,7 @@ public class ReservationWaitingResponseMapper {
         Theme theme = reservation.getTheme();
         ThemeResponse themeResponse = ThemeResponseMapper.toResponse(theme);
 
-        String waitingMemberName = reservationWaiting.getWaitingMember().getName();
+        String waitingMemberName = reservationWaiting.getWaitingMemberName();
 
         return new ReservationWaitingResponse(reservationWaiting.getId(), waitingMemberName,
                 reservation.getDate(), timeResponse, themeResponse, null);
@@ -33,7 +33,7 @@ public class ReservationWaitingResponseMapper {
         Theme theme = reservation.getTheme();
         ThemeResponse themeResponse = ThemeResponseMapper.toResponse(theme);
 
-        String waitingMemberName = target.getWaitingMember().getName();
+        String waitingMemberName = target.getWaitingMemberName();
 
         return new ReservationWaitingResponse(target.getId(), waitingMemberName,
                 reservation.getDate(), timeResponse, themeResponse, priority);
