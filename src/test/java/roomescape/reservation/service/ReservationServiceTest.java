@@ -78,7 +78,7 @@ class ReservationServiceTest {
         LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, loginMember, SUCCESS))
+        assertThatThrownBy(() -> reservationService.saveByLoginMember(reservationSaveRequest, loginMember, SUCCESS))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -96,10 +96,10 @@ class ReservationServiceTest {
                 theme.getId(),
                 reservationTime.getId()
         );
-        reservationService.save(reservationSaveRequest, LOGIN_JOJO, SUCCESS);
+        reservationService.saveByLoginMember(reservationSaveRequest, LOGIN_JOJO, SUCCESS);
 
         // then
-        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, LOGIN_JOJO, SUCCESS))
+        assertThatThrownBy(() -> reservationService.saveByLoginMember(reservationSaveRequest, LOGIN_JOJO, SUCCESS))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -119,7 +119,7 @@ class ReservationServiceTest {
         );
 
         // then
-        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, LOGIN_JOJO, WAIT))
+        assertThatThrownBy(() -> reservationService.saveByLoginMember(reservationSaveRequest, LOGIN_JOJO, WAIT))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

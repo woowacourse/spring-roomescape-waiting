@@ -39,7 +39,7 @@ public class WaitingReservationApiController {
             @Valid @RequestBody ReservationSaveRequest reservationSaveRequest,
             LoginMember loginMember
     ) {
-        ReservationResponse reservationResponse = reservationService.save(
+        ReservationResponse reservationResponse = reservationService.saveByLoginMember(
                 reservationSaveRequest,
                 loginMember,
                 Status.WAIT

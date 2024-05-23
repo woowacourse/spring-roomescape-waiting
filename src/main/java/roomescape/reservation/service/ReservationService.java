@@ -11,6 +11,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
@@ -42,31 +43,39 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse save(
-            ReservationSaveRequest reservationSaveRequest,
+    public ReservationResponse saveByLoginMember(
+            ReservationSaveRequest saveRequest,
             LoginMember loginMember,
             Status status
     ) {
-        Reservation reservation = createValidReservation(reservationSaveRequest, loginMember, status);
-        validateUniqueMemberReservation(reservation);
-        validateReservationWithStatus(reservation);
-        Reservation savedReservation = reservationRepository.save(reservation);
+        Reservation reservation = createValidReservation(saveRequest, loginMember.id(), status);
 
-        return ReservationResponse.toResponse(savedReservation);
+        return saveReservation(reservation);
+    }
+
+    public ReservationResponse saveByAdmin(AdminReservationSaveRequest adminRequest, Status status) {
+        ReservationSaveRequest saveRequest = new ReservationSaveRequest(
+                adminRequest.date(),
+                adminRequest.themeId(),
+                adminRequest.timeId()
+        );
+        Reservation reservation = createValidReservation(saveRequest, adminRequest.memberId(), status);
+
+        return saveReservation(reservation);
     }
 
     private Reservation createValidReservation(
             ReservationSaveRequest reservationSaveRequest,
-            LoginMember loginMember,
+            Long memberId,
             Status status
     ) {
-        Member member = memberRepository.findById(loginMember.id())
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        Theme theme = themeRepository.findById(reservationSaveRequest.getThemeId())
+        Theme theme = themeRepository.findById(reservationSaveRequest.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
+        ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
         return reservationSaveRequest.toReservation(member, theme, reservationTime, status);
@@ -106,6 +115,14 @@ public class ReservationService {
         if (reservationStatus.isWait() && savedReservation.isEmpty()) {
             throw new IllegalArgumentException("추가된 예약이 없습니다. 예약을 추가해 주세요.");
         }
+    }
+
+    private ReservationResponse saveReservation(Reservation reservation) {
+        validateUniqueMemberReservation(reservation);
+        validateReservationWithStatus(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
+
+        return ReservationResponse.toResponse(savedReservation);
     }
 
     public ReservationResponse findById(Long id) {
