@@ -33,19 +33,14 @@ public class Waiting {
     private Theme theme;
 
     public Waiting(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme);
-    }
-
-    public Waiting(final Long id, final Member member, final LocalDate date, final ReservationTime time,
-                   final Theme theme) {
-        this.id = id;
+        this.id = null;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public Waiting() {
+    protected Waiting() {
     }
 
     public Long getId() {

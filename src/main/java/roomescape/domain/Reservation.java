@@ -35,16 +35,12 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this.id = id;
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this.id = null;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-    }
-
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
     }
 
     public boolean isSameTime(ReservationTime reservationTime) {
