@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.config.ControllerConfig;
-import roomescape.reservation.dto.ThemeCreateRequest;
-import roomescape.reservation.dto.ThemeResponse;
+import roomescape.reservation.dto.request.ThemeCreateRequest;
+import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.service.ThemeService;
 
 @WebMvcTest(ThemeApiController.class)

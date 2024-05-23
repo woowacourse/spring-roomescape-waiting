@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.config.DatabaseCleaner;
-import roomescape.reservation.dto.ThemeCreateRequest;
+import roomescape.reservation.dto.request.ThemeCreateRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ThemeServiceTest {

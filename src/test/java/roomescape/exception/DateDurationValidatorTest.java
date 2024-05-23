@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import roomescape.reservation.dto.ReservationSearchRequest;
+import roomescape.reservation.dto.request.ReservationSearchRequest;
 
 class DateDurationValidatorTest {
 

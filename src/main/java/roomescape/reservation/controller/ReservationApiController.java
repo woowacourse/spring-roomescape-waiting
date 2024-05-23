@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationSearchRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.request.ReservationSearchRequest;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingService;
 
