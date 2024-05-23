@@ -12,9 +12,12 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     private ThemeName name;
+
     private String description;
+    
     private String thumbnail;
 
     protected Theme() {
