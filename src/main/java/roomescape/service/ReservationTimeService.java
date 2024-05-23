@@ -42,13 +42,11 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTimeById(Long id) {
-        findValidatedReservationTime(id);
         boolean exist = reservationRepository.existsByReservationTimeId(id);
         if (exist) {
             throw new OperationNotAllowedException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
         }
-
-        reservationTimeRepository.deleteById(id);
+        reservationTimeRepository.delete(findValidatedReservationTime(id));
     }
 
     public List<AvailableReservationTimeResponse> getReservationTimeBookedStatus(LocalDate date, Long themeId) {
@@ -65,7 +63,6 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    // TODO: 이거 삭제
     private ReservationTime findValidatedReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
