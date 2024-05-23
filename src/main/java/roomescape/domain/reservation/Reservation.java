@@ -17,20 +17,26 @@ import roomescape.domain.member.Member;
 @Entity
 @Table(name = "reservation")
 public class Reservation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
     @Column(name = "date", nullable = false)
     private LocalDate date;
+
     @ManyToOne
     @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
+
     @ManyToOne
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

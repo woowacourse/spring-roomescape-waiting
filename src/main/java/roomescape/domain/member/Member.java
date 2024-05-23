@@ -14,15 +14,20 @@ import java.util.Objects;
 @Entity
 @Table(name = "member")
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     private PlayerName name;
+
     @Embedded
     private Email email;
+
     @Embedded
     private Password password;
+
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
