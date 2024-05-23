@@ -9,3 +9,6 @@ INSERT INTO member (name, email, password, role) VALUES ('관리자', 'admin@gma
 
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-08', 1, 1, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-08', 2, 2, 2);
+
+INSERT INTO waiting (date, time_id, theme_id, member_id) VALUES ('2024-05-08', 1, 1, 2);
+INSERT INTO waiting (date, time_id, theme_id, member_id) VALUES ('2024-05-08', 2, 2, 1);
