@@ -28,7 +28,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LogInRequest logInRequest) {
         String token = "token=" + memberService.logIn(logInRequest);
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, token)
                 .build();
@@ -37,17 +36,14 @@ public class AuthController {
     @GetMapping("/login/check")
     public ResponseEntity<MemberPreviewResponse> loginCheck(Member member) {
         MemberPreviewResponse name = MemberPreviewResponse.from(member);
-
         return ResponseEntity.ok()
                 .body(name);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = CookieUtil.makeCookieExpired();
-        cookie.setMaxAge(0);
+        Cookie cookie = CookieUtil.expired();
         response.addCookie(cookie);
-
         return ResponseEntity.ok().build();
     }
 }
