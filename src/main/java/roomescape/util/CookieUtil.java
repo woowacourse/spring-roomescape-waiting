@@ -13,7 +13,7 @@ public class CookieUtil {
 
     private static final String TOKEN_NAME = "token";
 
-    private CookieUtil() {}
+    protected CookieUtil() {}
 
     public static Optional<String> extractToken(Cookie[] cookies) {
         return Arrays.stream(cookies)
@@ -22,7 +22,7 @@ public class CookieUtil {
                 .findFirst();
     }
 
-    public static Cookie makeCookieExpired() {
+    public static Cookie expired() {
         Cookie cookie = new Cookie(TOKEN_NAME, null);
         cookie.setMaxAge(0);
         return cookie;

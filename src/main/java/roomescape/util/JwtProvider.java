@@ -8,7 +8,6 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import roomescape.domain.Member;
@@ -22,35 +21,28 @@ public class JwtProvider {
     @Value("${jwt.expire-length}")
     private long validityInMilliseconds;
 
+    protected JwtProvider() {}
+
     public String createToken(Member member) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
-        SecretKey key = getSigningKey();
-
+        Date expiration = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
                 .subject(member.getId().toString())
-                .expiration(validity)
-                .signWith(key)
+                .expiration(expiration)
+                .signWith(secretKey())
                 .compact();
     }
 
     public String getSubject(String token) {
-        Claims claim = parseClaims(token);
-
-        return claim.getSubject();
-    }
-
-    private Claims parseClaims(String token) {
-        SecretKey key = getSigningKey();
-
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(secretKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload();
+                .getPayload()
+                .getSubject();
     }
 
-    private SecretKey getSigningKey() {
+    private SecretKey secretKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 }
