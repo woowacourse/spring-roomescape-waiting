@@ -108,8 +108,8 @@ public class ReservationService {
 
     private boolean isMembersReservation(long memberId, long reservationId) {
         return reservationRepository.findById(reservationId)
-                .stream()
                 .map(Reservation::getReservationMember)
-                .anyMatch(member -> member.hasIdOf(memberId));
+                .map(member -> member.hasIdOf(memberId))
+                .orElse(false);
     }
 }
