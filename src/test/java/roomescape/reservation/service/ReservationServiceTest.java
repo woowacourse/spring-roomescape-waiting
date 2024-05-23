@@ -3,8 +3,6 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.reservation.domain.Status.SUCCESS;
-import static roomescape.reservation.domain.Status.WAIT;
 import static roomescape.Fixture.HORROR_DESCRIPTION;
 import static roomescape.Fixture.HORROR_THEME;
 import static roomescape.Fixture.HORROR_THEME_NAME;
@@ -17,6 +15,8 @@ import static roomescape.Fixture.RESERVATION_TIME_10_00;
 import static roomescape.Fixture.THUMBNAIL;
 import static roomescape.Fixture.TODAY;
 import static roomescape.Fixture.TOMORROW;
+import static roomescape.reservation.domain.Status.SUCCESS;
+import static roomescape.reservation.domain.Status.WAIT;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,9 +34,9 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -143,9 +143,12 @@ class ReservationServiceTest {
         reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, WAIT));
         Reservation secondWait = reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, WAIT));
 
-        MemberReservationResponse expectedSuccess = MemberReservationResponse.toResponse(success);
-        MemberReservationResponse expectedWait = MemberReservationResponse.toWaitResponse(
-                new WaitingWithRank(secondWait, 2));
+        MemberReservationResponse expectedSuccess = MemberReservationResponse.toResponse(
+                new ReservationWithRank(success, 0)
+        );
+        MemberReservationResponse expectedWait = MemberReservationResponse.toResponse(
+                new ReservationWithRank(secondWait, 2)
+        );
 
         // when
         LoginMember loginJojo = new LoginMember(1L, Role.MEMBER, jojo.getName(), jojo.getEmail());

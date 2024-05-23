@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.Fixture.HORROR_DESCRIPTION;
 import static roomescape.Fixture.HORROR_THEME;
 import static roomescape.Fixture.HORROR_THEME_NAME;
@@ -32,10 +33,10 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 
 @DataJpaTest
@@ -101,7 +102,7 @@ class ReservationRepositoryTest {
 
     @DisplayName("회원 id로 예약 대기 순번 목록을 조회한다.")
     @Test
-    void findWaitingWithRanksByMemberId() {
+    void findReservationWithRanksByMemberId() {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
         Theme theme = themeRepository.save(HORROR_THEME);
         Member jojo = memberRepository.save(MEMBER_JOJO);
@@ -112,11 +113,14 @@ class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.WAIT));
         reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, Status.WAIT));
 
-        List<WaitingWithRank> waitings = reservationRepository.findWaitingWithRanksByMemberId(jojo.getId());
-        assertThat(waitings).hasSize(1)
-                .first()
-                .extracting(WaitingWithRank::getRank)
-                .isEqualTo(2L);
+        List<ReservationWithRank> reservationWithRanks = reservationRepository.findReservationWithRanksByMemberId(jojo.getId());
+
+        assertAll(
+                () -> assertThat(reservationWithRanks).hasSize(2),
+                () -> assertThat(reservationWithRanks.get(1)
+                        .getRank())
+                        .isEqualTo(2L)
+        );
     }
 
     @DisplayName("id 값을 받아 Reservation 반환")
