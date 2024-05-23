@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import roomescape.auth.dto.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import java.time.LocalDate;
@@ -20,6 +21,10 @@ public record ReservationCreateRequest(
     }
 
     public Reservation toReservation(Member member, ReservationTime time, Theme theme) {
-        return new Reservation(member, date, time, theme);
+        return new Reservation(member, date, time, theme, ReservationStatus.CONFIRMATION);
+    }
+
+    public Reservation toWaitingReservation(Member member, ReservationTime time, Theme theme) {
+        return new Reservation(member, date, time, theme, ReservationStatus.WAITING);
     }
 }

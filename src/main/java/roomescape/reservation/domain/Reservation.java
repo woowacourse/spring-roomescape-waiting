@@ -56,12 +56,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, member, date, time, theme, ReservationStatus.CONFIRMATION);
-    }
-
-    public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
-        this(null, member, date, reservationTime, theme);
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
     public boolean isSameMember(Reservation other) {

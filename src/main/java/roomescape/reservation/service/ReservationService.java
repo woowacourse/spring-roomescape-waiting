@@ -5,23 +5,26 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Service
 public class ReservationService {
@@ -71,34 +74,35 @@ public class ReservationService {
         Theme theme = findThemeById(request.themeId());
 
         Reservation reservation = request.toReservation(member, time, theme);
-
-        validateDuplicated(reservation);
+        validateDuplicatedReservation(reservation);
         validateRequestedTime(reservation, time);
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateDuplicated(Reservation reservation) {
-        Optional<Reservation> existsReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        );
-
-        existsReservation.ifPresent((duplicated) -> {
-            if (duplicated.isSameMember(reservation)) {
-                throw new BadRequestException("중복된 예약입니다.");
-            }
-            throw new BadRequestException("이미 예약된 테마입니다.");
-        });
+    @Transactional
+    public WaitingResponse createWaitingReservation(MemberReservationCreateRequest request, LoginMember loginMember) {
+        ReservationCreateRequest createRequest = ReservationCreateRequest.of(request, loginMember);
+        return createWaitingReservation(createRequest);
     }
 
-    private void validateRequestedTime(Reservation reservation, ReservationTime reservationTime) {
-        LocalDateTime requestedDateTime = LocalDateTime.of(reservation.getDate(), reservationTime.getStartAt());
-        if (requestedDateTime.isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("이미 지난 날짜는 예약할 수 없습니다.");
-        }
+    @Transactional
+    public WaitingResponse createWaitingReservation(ReservationCreateRequest request) {
+        Member member = findMemberById(request.memberId());
+        ReservationTime time = findReservationTimeById(request.timeId());
+        Theme theme = findThemeById(request.themeId());
+
+        Reservation reservation = request.toWaitingReservation(member, time, theme);
+
+        validateRequestedTime(reservation, time);
+        validateDuplicatedWaiting(reservation);
+        validateNoReservation(reservation);
+
+        Reservation savedWaitingReservation = reservationRepository.save(reservation);
+        Long sequence = findSequence(savedWaitingReservation);
+
+        return WaitingResponse.of(savedWaitingReservation, sequence);
     }
 
     @Transactional(readOnly = true)
@@ -111,9 +115,8 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> readMemberReservations(LoginMember loginMember) {
         return reservationRepository.findByMemberId(loginMember.id()).stream()
-                .map(MemberReservationResponse::from)
+                .map(reservation -> MemberReservationResponse.of(reservation, findSequence(reservation)))
                 .toList();
-
     }
 
     @Transactional(readOnly = true)
@@ -133,5 +136,85 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteWaitingReservation(Long id, LoginMember loginMember) {
+        Reservation waitingReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
+        Member member = memberRepository.findByEmail(loginMember.email())
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 멤버입니다."));
+
+        if (!waitingReservation.getMember().isSameMember(member)) {
+            throw new UnauthorizedException("삭제할 수 없는 예약입니다");
+        }
+        if (waitingReservation.getStatus() != ReservationStatus.WAITING) {
+            throw new UnauthorizedException("예약 대기만 삭제할 수 있습니다");
+        }
+
+        deleteReservation(id);
+    }
+
+    private void validateDuplicatedReservation(Reservation reservation) {
+        Optional<Reservation> existsReservation = reservationRepository.findByDateAndTimeIdAndThemeIdAndStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                ReservationStatus.CONFIRMATION
+        );
+
+        existsReservation.ifPresent((duplicated) -> {
+            if (duplicated.isSameMember(reservation)) {
+                throw new BadRequestException("중복된 예약입니다.");
+            }
+            throw new BadRequestException("이미 예약된 테마입니다.");
+        });
+    }
+
+    private void validateNoReservation(Reservation waitingReservation) {
+        Optional<Reservation> existsReservation = reservationRepository.findByDateAndTimeIdAndThemeIdAndStatus(
+                waitingReservation.getDate(),
+                waitingReservation.getTime().getId(),
+                waitingReservation.getTheme().getId(),
+                ReservationStatus.CONFIRMATION
+        );
+        if (existsReservation.isEmpty()) {
+            throw new BadRequestException("예약 내역이 없습니다.");
+        }
+    }
+
+    private void validateDuplicatedWaiting(Reservation waitingReservation) {
+        Optional<Reservation> existsReservation = reservationRepository.findByDateAndTimeIdAndThemeIdAndStatus(
+                waitingReservation.getDate(),
+                waitingReservation.getTime().getId(),
+                waitingReservation.getTheme().getId(),
+                ReservationStatus.WAITING
+        );
+
+        existsReservation.ifPresent((duplicated) -> {
+            if (duplicated.isSameMember(waitingReservation)) {
+                throw new BadRequestException("중복된 예약 대기입니다.");
+            }
+        });
+    }
+
+    private void validateRequestedTime(Reservation reservation, ReservationTime reservationTime) {
+        LocalDateTime requestedDateTime = LocalDateTime.of(reservation.getDate(), reservationTime.getStartAt());
+        if (requestedDateTime.isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("이미 지난 날짜는 예약할 수 없습니다.");
+        }
+    }
+
+    private Long findSequence(Reservation reservation) {
+        List<Reservation> reservations = reservationRepository.findByDateAndThemeAndTime(
+                reservation.getDate(),
+                reservation.getTheme(),
+                reservation.getTime()
+        );
+
+        reservations.sort((r1, r2) -> r1.getCreatedAt().isBefore(r2.getCreatedAt()) ? -1 :
+                r1.getCreatedAt().isEqual(r2.getCreatedAt()) ? 0 : 1);
+
+        return (long) reservations.indexOf(reservation);
     }
 }

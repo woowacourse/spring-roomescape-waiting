@@ -7,22 +7,23 @@ import roomescape.theme.dto.ThemeResponse;
 import roomescape.time.dto.ReservationTimeResponse;
 import java.time.LocalDate;
 
-public record ReservationResponse(
+public record WaitingResponse(
         Long id,
         MemberResponse member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        ReservationStatus status) {
+        ReservationStatus status,
+        Long sequence) {
 
-    public static ReservationResponse from(Reservation reservation) {
-        return new ReservationResponse(
+    public static WaitingResponse of(Reservation reservation, Long sequence) {
+        return new WaitingResponse(
                 reservation.getId(),
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservation.getStatus()
-        );
+                reservation.getStatus(),
+                sequence);
     }
 }

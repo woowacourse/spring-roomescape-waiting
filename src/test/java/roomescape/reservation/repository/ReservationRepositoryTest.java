@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixtures;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -22,11 +23,11 @@ public class ReservationRepositoryTest {
     @Test
     void dateNullableFalseTest() {
         Reservation reservation = new Reservation(
-                null,
                 Fixtures.memberFixture,
                 null,
                 Fixtures.reservationTimeFixture,
-                Fixtures.themeFixture
+                Fixtures.themeFixture,
+                ReservationStatus.CONFIRMATION
         );
 
         assertThatThrownBy(() -> reservationRepository.save(reservation))

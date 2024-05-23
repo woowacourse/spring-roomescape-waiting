@@ -28,7 +28,7 @@ create table reservation
     member_id  bigint,
     theme_id   bigint,
     time_id    bigint,
-    status     varchar(255) default 'CONFIRMATION' check (status in ('CONFIRMATION')),
+    status     varchar(255) default 'CONFIRMATION' check (status in ('CONFIRMATION', 'WAITING')),
     created_at datetime not null,
     primary key (id),
     foreign key (member_id) references member,

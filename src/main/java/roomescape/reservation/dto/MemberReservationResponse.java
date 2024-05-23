@@ -10,16 +10,18 @@ public record MemberReservationResponse(
         String theme,
         LocalDate date,
         LocalTime time,
-        String status
+        String status,
+        Long sequence
 ) {
 
-    public static MemberReservationResponse from(Reservation reservation) {
+    public static MemberReservationResponse of(Reservation reservation, Long sequence) {
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getStatusName()
+                reservation.getStatus().getStatusName(),
+                sequence
         );
     }
 }
