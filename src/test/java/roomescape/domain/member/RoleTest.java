@@ -1,14 +1,15 @@
 package roomescape.domain.member;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.TestFixture.ADMIN;
+import static roomescape.TestFixture.MEMBER_TENNY;
 
 class RoleTest {
 
@@ -29,7 +30,7 @@ class RoleTest {
     private static Stream<Arguments> memberAndExpected() {
         return Stream.of(
                 Arguments.of(ADMIN(), false),
-                Arguments.of(MEMBER_MIA(), true)
+                Arguments.of(MEMBER_TENNY(), true)
         );
     }
 }

@@ -23,7 +23,7 @@ class ReservationSaveRequestTest {
     @DisplayName("예약 날짜 입력 값이 유효하지 않으면 예외가 발생한다.")
     void throwExceptionWhenCannotConvertToLocalDate(final String invalidDate) {
         final ReservationSaveRequest request = new ReservationSaveRequest(1L, invalidDate, 1L, 1L, "RESERVED");
-        final MemberResponse memberResponse = new MemberResponse(1L, MEMBER_MIA_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
+        final MemberResponse memberResponse = new MemberResponse(1L, MEMBER_TENNY_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
         final ThemeResponse themeResponse = new ThemeResponse(1L, THEME_HORROR_NAME, THEME_HORROR_DESCRIPTION, THEME_HORROR_THUMBNAIL);
         final ReservationTimeResponse timeResponse = new ReservationTimeResponse(1L, START_AT_SIX);
 
@@ -37,7 +37,7 @@ class ReservationSaveRequestTest {
     @DisplayName("예약 날짜가 현재 날짜 이후가 아닌 경우 예외가 발생한다.")
     void throwExceptionWhenInvalidDate(final String invalidDate) {
         final ReservationSaveRequest request = new ReservationSaveRequest(1L, invalidDate, 1L, 1L, "RESERVED");
-        final MemberResponse memberResponse = new MemberResponse(1L, MEMBER_MIA_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
+        final MemberResponse memberResponse = new MemberResponse(1L, MEMBER_TENNY_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
         final ThemeResponse themeResponse = new ThemeResponse(1L, THEME_HORROR_NAME, THEME_HORROR_DESCRIPTION, THEME_HORROR_THUMBNAIL);
         final ReservationTimeResponse timeResponse = new ReservationTimeResponse(1L, START_AT_SIX);
 

@@ -18,7 +18,7 @@ class ReservationTest {
     @Test
     @DisplayName("예약이 생성된다.")
     void createReservation() {
-        assertThatCode(() -> new Reservation(MEMBER_MIA(), LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED))
+        assertThatCode(() -> new Reservation(MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED))
                 .doesNotThrowAnyException();
     }
 
@@ -27,7 +27,7 @@ class ReservationTest {
     @DisplayName("예약이 동일한 예약 시간을 갖는지 확인한다.")
     void hasSameDateTime(final LocalDate date, final String time, final boolean expectedResult) {
         // given
-        final Reservation reservation = new Reservation(MEMBER_MIA(), LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation = new Reservation(MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
 
         // when
         final boolean actual = reservation.hasSameDateTime(date, new ReservationTime(time));

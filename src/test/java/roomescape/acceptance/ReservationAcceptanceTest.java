@@ -23,11 +23,11 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
 
         final ReservationResponse response = assertPostResponseWithToken(
-                request, MEMBER_MIA_EMAIL, "/reservations", 201)
+                request, MEMBER_TENNY_EMAIL, "/reservations", 201)
                 .extract().as(ReservationResponse.class);
 
         assertAll(() -> {
-            assertThat(response.name()).isEqualTo(MEMBER_MIA_NAME);
+            assertThat(response.name()).isEqualTo(MEMBER_TENNY_NAME);
             assertThat(response.date()).isEqualTo(DATE_MAY_EIGHTH);
             assertThat(response.time().id()).isEqualTo(timeId);
             assertThat(response.theme().id()).isEqualTo(themeId);
@@ -61,7 +61,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         final ReservationSaveRequest request
                 = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, 0L, themeId, "RESERVED");
 
-        assertPostResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
+        assertPostResponseWithToken(request, MEMBER_TENNY_EMAIL, "/reservations", 400);
     }
 
     @Test
@@ -72,7 +72,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         final ReservationSaveRequest request
                 = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, 0L, "RESERVED");
 
-        assertPostResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
+        assertPostResponseWithToken(request, MEMBER_TENNY_EMAIL, "/reservations", 400);
     }
 
     @Test
@@ -84,7 +84,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .extract().response().jsonPath();
 
         assertAll(() -> {
-            assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_MIA_NAME);
+            assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_TENNY_NAME);
             assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH);
             assertThat(jsonPath.getString("time[0].startAt")).isEqualTo(START_AT_SIX);
             assertThat(jsonPath.getString("theme[0].name")).isEqualTo(THEME_HORROR_NAME);
@@ -95,7 +95,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("테마, 사용자, 예약 날짜로 예약 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFilteredFindReservations() {
         saveReservation();
-        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
 
         final JsonPath jsonPath = RestAssured.given().log().all()
                 .queryParam("themeId", 1L)
@@ -109,7 +109,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .extract().response().jsonPath();
 
         assertAll(() -> {
-            assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_MIA_NAME);
+            assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_TENNY_NAME);
             assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH);
             assertThat(jsonPath.getString("time[0].startAt")).isEqualTo(START_AT_SIX);
             assertThat(jsonPath.getString("theme[0].name")).isEqualTo(THEME_HORROR_NAME);
@@ -138,7 +138,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondOkWhenFindMyReservations() {
         saveReservation();
         saveReservationWaiting();
-        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
 
         final JsonPath jsonPath = assertGetResponseWithToken(accessToken, "/reservations/mine", 200)
                 .extract().response().jsonPath();

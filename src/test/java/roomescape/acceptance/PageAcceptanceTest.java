@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.hamcrest.Matchers.containsString;
 import static roomescape.TestFixture.ADMIN_EMAIL;
-import static roomescape.TestFixture.MEMBER_MIA_EMAIL;
+import static roomescape.TestFixture.MEMBER_TENNY_EMAIL;
 
 class PageAcceptanceTest extends AcceptanceTest {
 
@@ -24,7 +24,7 @@ class PageAcceptanceTest extends AcceptanceTest {
     @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/time", "/admin/theme", "admin/waiting"})
     @DisplayName("사용자가 관리자 페이지에 접근하면 403을 응답한다.")
     void respondForbiddenWhenMemberAccessAdminPage(final String adminPath) {
-        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
 
         assertGetResponseWithToken(accessToken, adminPath, 403);
     }

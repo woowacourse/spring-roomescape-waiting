@@ -43,7 +43,7 @@ class ReservationRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(MEMBER_BROWN());
+        member = memberRepository.save(MEMBER_MIA());
         reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SIX());
         theme = themeRepository.save(THEME_HORROR());
         reservation = reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.RESERVED));

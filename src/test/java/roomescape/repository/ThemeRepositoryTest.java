@@ -99,7 +99,7 @@ class ThemeRepositoryTest {
     }
 
     private void loadPopularThemeData() {
-        final Member member = MEMBER_MIA();
+        final Member member = MEMBER_TENNY();
         testEntityManager.persist(member);
 
         final ReservationTime reservationTimeSix = RESERVATION_TIME_SIX();

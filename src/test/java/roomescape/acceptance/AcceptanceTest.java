@@ -62,7 +62,7 @@ abstract class AcceptanceTest {
     protected Long saveReservation() {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
-        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
         final ReservationSaveRequest request
                 = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
 
@@ -82,7 +82,7 @@ abstract class AcceptanceTest {
     protected Long saveReservationWaiting() {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
-        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
         final ReservationSaveRequest request
                 = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "WAITING");
 

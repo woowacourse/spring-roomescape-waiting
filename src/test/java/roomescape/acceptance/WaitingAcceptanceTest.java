@@ -22,11 +22,11 @@ public class WaitingAcceptanceTest extends AcceptanceTest {
         final ReservationSaveRequest request
                 = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "WAITING");
 
-        final ReservationResponse response = assertPostResponseWithToken(request, MEMBER_MIA_EMAIL, "/waitings", 201)
+        final ReservationResponse response = assertPostResponseWithToken(request, MEMBER_TENNY_EMAIL, "/waitings", 201)
                 .extract().as(ReservationResponse.class);
 
         assertAll(() -> {
-            assertThat(response.name()).isEqualTo(MEMBER_MIA_NAME);
+            assertThat(response.name()).isEqualTo(MEMBER_TENNY_NAME);
             assertThat(response.status()).isEqualTo(ReservationStatus.WAITING);
         });
     }
@@ -41,7 +41,7 @@ public class WaitingAcceptanceTest extends AcceptanceTest {
                 .extract().response().jsonPath();
 
         assertAll(() -> {
-            assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_MIA_NAME);
+            assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_TENNY_NAME);
             assertThat(jsonPath.getString("status[0]")).isEqualTo(ReservationStatus.WAITING.name());
         });
     }
