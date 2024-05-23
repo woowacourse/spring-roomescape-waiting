@@ -4,10 +4,6 @@ import java.time.format.DateTimeFormatter;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.WaitingWithRank;
 
-/*
-TODO: ReservationResponse와 WaitingResponse가 있는데... 이 DTO를 갖는게 최선일지 고민해보기
- */
-
 public record ReservationOrWaitingResponse(
         Long id,
         String themeName,
