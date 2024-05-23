@@ -28,7 +28,7 @@ public class ThemeApiController {
 
     @GetMapping("/themes/popular")
     public ResponseEntity<MultipleResponses<PopularThemeResponse>> findTopTenThemesOfLastWeek(
-            @RequestParam(value = "limitCount", defaultValue = "10") int limitCount
+            @RequestParam(name = "limitCount", defaultValue = "10") int limitCount
     ) {
         List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(limitCount);
 
