@@ -30,6 +30,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.reservation.AlreadyBookedException;
 import roomescape.fixture.ReservationFixture;
 
 @ServiceTest
@@ -76,8 +77,7 @@ class ReservationBookingServiceTest {
         );
 
         assertThatCode(() -> reservationBookingService.bookReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 존재하는 예약입니다.");
+                .isInstanceOf(AlreadyBookedException.class);
     }
 
     @Test

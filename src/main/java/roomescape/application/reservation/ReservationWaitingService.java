@@ -12,6 +12,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.reservation.DuplicatedReservationException;
+import roomescape.exception.reservation.WaitingListExceededException;
 
 @Service
 public class ReservationWaitingService {
@@ -33,14 +35,14 @@ public class ReservationWaitingService {
     public ReservationWaitingResponse enqueueWaitingList(ReservationRequest request) {
         Reservation reservation = reservationService.create(request);
         if (reservationStatusRepository.existsAlreadyWaitingOrBooked(reservation)) {
-            throw new IllegalArgumentException("이미 예약했거나 대기한 항목입니다.");
+            throw new DuplicatedReservationException(reservation.getId());
         }
         ReservationStatus status = reservationStatusRepository.save(
                 new ReservationStatus(reservation, BookStatus.WAITING)
         );
         long waitingCount = reservationStatusRepository.getWaitingCount(status.getReservation());
         if (waitingCount > MAX_WAITING_COUNT) {
-            throw new IllegalArgumentException("대기 인원이 초과되었습니다.");
+            throw new WaitingListExceededException(reservation.getId());
         }
         return new ReservationWaitingResponse(
                 ReservationResponse.from(reservation),

@@ -24,8 +24,9 @@ public class RoomescapeControllerAdvice {
     public ProblemDetail handleDateTimeParseException(MethodArgumentNotValidException exception) {
         logger.error(exception.getMessage(), exception);
         FieldError fieldError = exception.getBindingResult().getFieldError();
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                fieldError.getDefaultMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, fieldError.getDefaultMessage()
+        );
         problemDetail.setTitle("요청 값 검증에 실패했습니다.");
         return problemDetail;
     }

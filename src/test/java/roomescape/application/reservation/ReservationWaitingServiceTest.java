@@ -29,6 +29,8 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.exception.reservation.DuplicatedReservationException;
+import roomescape.exception.reservation.WaitingListExceededException;
 import roomescape.fixture.MemberFixture;
 
 @ServiceTest
@@ -107,8 +109,7 @@ class ReservationWaitingServiceTest {
         reservationStatusRepository.save(new ReservationStatus(reservation, status));
 
         assertThatCode(() -> reservationWaitingService.enqueueWaitingList(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 예약했거나 대기한 항목입니다.");
+                .isInstanceOf(DuplicatedReservationException.class);
     }
 
     @Test
@@ -133,8 +134,7 @@ class ReservationWaitingServiceTest {
         }
 
         assertThatThrownBy(() -> reservationWaitingService.enqueueWaitingList(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("대기 인원이 초과되었습니다.");
+                .isInstanceOf(WaitingListExceededException.class);
     }
 
 }

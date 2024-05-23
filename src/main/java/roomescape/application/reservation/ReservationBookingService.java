@@ -12,6 +12,7 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.reservation.AlreadyBookedException;
 
 @Service
 public class ReservationBookingService {
@@ -34,7 +35,7 @@ public class ReservationBookingService {
     public ReservationResponse bookReservation(ReservationRequest request) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(), request.timeId(), request.themeId())) {
-            throw new IllegalArgumentException("이미 존재하는 예약입니다.");
+            throw new AlreadyBookedException(request.date(), request.timeId(), request.themeId());
         }
         Reservation reservation = reservationService.create(request);
         ReservationStatus reservationStatus = new ReservationStatus(reservation, BookStatus.BOOKED);
