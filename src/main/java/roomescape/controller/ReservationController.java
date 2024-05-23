@@ -35,10 +35,10 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> postReservation(
             @RequestBody @Valid UserReservationRequest userReservationRequest,
-            @MemberId Long id
+            @MemberId Long memberId
     ) {
-        ReservationRequest reservationRequest = userReservationRequest.toReservationRequest(id);
-        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest, id);
+        ReservationRequest reservationRequest = userReservationRequest.toReservationRequest(memberId);
+        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest, memberId);
         URI location = UriComponentsBuilder.newInstance()
                 .path("/reservations/{id}")
                 .buildAndExpand(reservationResponse.id())

@@ -28,9 +28,9 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<WaitingResponse> postWaiting(
             @RequestBody @Valid WaitingRequest waitingRequest,
-            @MemberId Long id
+            @MemberId Long memberId
     ) {
-        WaitingResponse waitingResponse = waitingService.createWaiting(waitingRequest, id);
+        WaitingResponse waitingResponse = waitingService.createWaiting(waitingRequest, memberId);
         URI location = UriComponentsBuilder.newInstance()
                 .path("/waitings/{id}")
                 .buildAndExpand(waitingResponse.id())
