@@ -2,7 +2,8 @@ package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static roomescape.model.Role.MEMBER;
+import static roomescape.model.Member.createMember;
+import static roomescape.model.Reservation.createAcceptReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,7 +19,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 
 import roomescape.model.Member;
-import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 
@@ -102,13 +102,13 @@ class ReservationTimeRepositoryTest {
         entityManager.persist(reservedTime);
         entityManager.persist(notReservedTime);
 
-        Member member = new Member("무빈", MEMBER, "movin@email.com", "1234");
+        Member member = createMember("무빈", "movin@email.com", "1234");
         entityManager.persist(member);
 
         Theme theme = new Theme("theme", "설명", "thumbnail");
         entityManager.persist(theme);
 
-        entityManager.persist(new Reservation(LocalDate.now(), reservedTime, theme, member));
+        entityManager.persist(createAcceptReservation(LocalDate.now(), reservedTime, theme, member));
 
         List<ReservationTime> allReservedTimes = reservationTimeRepository.findAllReservedTimes(LocalDate.now(), 1L);
 

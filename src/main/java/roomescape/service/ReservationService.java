@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import static roomescape.model.Reservation.createAcceptReservation;
+import static roomescape.model.Reservation.createWaiting;
 import static roomescape.model.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
@@ -9,9 +11,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +38,6 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-
-    @PersistenceContext
-    EntityManager entityManager;
-
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
@@ -67,7 +62,7 @@ public class ReservationService {
         validateDuplicatedReservation(request.date(), request.timeId(), request.themeId());
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = findThemeByThemeId(request.themeId());
-        Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
+        Reservation reservation = createAcceptReservation(request.date(), reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
 
@@ -75,7 +70,7 @@ public class ReservationService {
         validateDuplicatedWaitingReservation(request.date(), request.timeId(), request.themeId(), member.getId());
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = findThemeByThemeId(request.themeId());
-        Reservation reservation = new Reservation(request.date(), WAITING, reservationTime, theme, member);
+        Reservation reservation = createWaiting(request.date(), reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
 
@@ -84,7 +79,7 @@ public class ReservationService {
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = findThemeByThemeId(request.themeId());
         Member member = findMemberById(request.memberId());
-        Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
+        Reservation reservation = createAcceptReservation(request.date(), reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
 

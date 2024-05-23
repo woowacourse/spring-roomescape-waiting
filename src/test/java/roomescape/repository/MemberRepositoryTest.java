@@ -2,7 +2,7 @@ package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static roomescape.model.Role.MEMBER;
+import static roomescape.model.Member.createMember;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +32,7 @@ class MemberRepositoryTest {
     @DisplayName("아이디와 비밀번호로 사용자를 조회한다.")
     @Test
     void should_find_member_when_given_email_and_password() {
-        Member member = new Member("썬", MEMBER, "sun@email.com", "1234");
+        Member member = createMember("썬", "sun@email.com", "1234");
         entityManager.persist(member);
 
         Optional<Member> findMember = memberRepository.findByEmailAndPassword("sun@email.com", "1234");
@@ -43,7 +43,7 @@ class MemberRepositoryTest {
     @DisplayName("아이디로 사용자를 조회한다.")
     @Test
     void should_find_member_when_given_member_id() {
-        Member member = new Member("썬", MEMBER, "sun@email.com", "1234");
+        Member member = createMember("썬", "sun@email.com", "1234");
         entityManager.persist(member);
 
         Optional<Member> memberById = memberRepository.findById(1L);
@@ -54,8 +54,8 @@ class MemberRepositoryTest {
     @DisplayName("모든 사용자를 조회한다.")
     @Test
     void should_find_all_member() {
-        Member member1 = new Member("무빈", MEMBER, "movin@email.com", "1111");
-        Member member2 = new Member("배키", MEMBER, "dmsgml@email.com", "2222");
+        Member member1 = createMember("썬", "sun@email.com", "1234");
+        Member member2 = createMember("배키", "dmsgml@email.com", "2222");
         entityManager.persist(member1);
         entityManager.persist(member2);
 

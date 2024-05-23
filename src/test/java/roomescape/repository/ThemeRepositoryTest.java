@@ -3,7 +3,8 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import static roomescape.model.Role.MEMBER;
+import static roomescape.model.Member.createMember;
+import static roomescape.model.Reservation.createAcceptReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 
 import roomescape.model.Member;
-import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 
@@ -81,7 +81,7 @@ class ThemeRepositoryTest {
     void should_find_ranking_theme_by_date() {
         entityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
         ReservationTime reservationTime = entityManager.find(ReservationTime.class, 1L);
-        entityManager.persist(new Member("무빈", MEMBER, "email@email", "1234"));
+        entityManager.persist(createMember("무빈", "movin@email.com", "1234"));
         Member member = entityManager.find(Member.class, 1L);
 
         for (int i = 1; i <= 15; i++) {
@@ -90,16 +90,16 @@ class ThemeRepositoryTest {
 
         for (int i = 1; i <= 10; i++) {
             Theme theme = entityManager.find(Theme.class, i);
-            entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme, member));
+            entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme, member));
         }
         Theme theme10 = entityManager.find(Theme.class, 10);
         Theme theme9 = entityManager.find(Theme.class, 9);
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
-//
+        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme10, member));
+        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme10, member));
+        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme10, member));
+        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme9, member));
+        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme9, member));
+
         LocalDate before = LocalDate.now().minusDays(8);
         LocalDate after = LocalDate.now().plusDays(1);
         List<Theme> themes = themeRepository.findByDateBetweenOrderByTheme(before, after);

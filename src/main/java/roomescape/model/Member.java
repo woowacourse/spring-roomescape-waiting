@@ -1,5 +1,8 @@
 package roomescape.model;
 
+import static roomescape.model.Role.ADMIN;
+import static roomescape.model.Role.MEMBER;
+
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
@@ -35,12 +38,20 @@ public class Member {
         this.password = password;
     }
 
-    public Member(String name, Role role, String email, String password) {
-        this(null, name, role, email, password);
+    public static Member createMember(String name, String email, String password) {
+        return new Member(null, name, MEMBER, email, password);
     }
 
-    public Member(Long id, String name, Role role) {
-        this(id, name, role, null, null);
+    public static Member createMember(Long id, String name, String email, String password) {
+        return new Member(id, name, MEMBER, email, password);
+    }
+
+    public static Member createAdmin(Long id, String name, String email, String password) {
+        return new Member(id, name, ADMIN, email, password);
+    }
+
+    public static Member createAdmin(String name, String email, String password) {
+        return new Member(null, name, ADMIN, email, password);
     }
 
     private void validateNullOrBlank(String value, String fieldName) {

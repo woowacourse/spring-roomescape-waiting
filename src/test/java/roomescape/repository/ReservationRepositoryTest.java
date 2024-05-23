@@ -2,7 +2,8 @@ package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static roomescape.model.Role.MEMBER;
+import static roomescape.model.Member.createMember;
+import static roomescape.model.Reservation.createAcceptReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,15 +42,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -65,15 +66,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -90,15 +91,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -114,14 +115,14 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        reservationRepository.save(new Reservation(day, time2, theme, member));
+        reservationRepository.save(createAcceptReservation(day, time2, theme, member));
 
         assertThat(reservationRepository.count()).isEqualTo(1);
     }
@@ -133,15 +134,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -158,15 +159,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -182,15 +183,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -206,15 +207,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -230,15 +231,15 @@ class ReservationRepositoryTest {
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+        Member member = createMember("무빈", "movin@email.com", "password");
 
         entityManager.persist(time1);
         entityManager.persist(time2);
         entityManager.persist(theme);
         entityManager.persist(member);
 
-        Reservation reservation1 = new Reservation(day, time1, theme, member);
-        Reservation reservation2 = new Reservation(day, time2, theme, member);
+        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
+        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);

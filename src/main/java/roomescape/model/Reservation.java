@@ -1,6 +1,7 @@
 package roomescape.model;
 
 import static roomescape.model.ReservationStatus.ACCEPT;
+import static roomescape.model.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,25 +54,18 @@ public class Reservation {
         this.member = member;
     }
 
-    public Reservation(Long id,
-                       LocalDate date,
-                       ReservationStatus status,
-                       ReservationTime time,
-                       Theme theme,
-                       Member member) {
-        this(id, date, status, null, time, theme, member);
+    public static Reservation createWaiting(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        return new Reservation(null, date, WAITING, LocalDateTime.now(), time, theme, member);
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(id, date, ACCEPT, time, theme, member);
+    public static Reservation createAcceptReservation(LocalDate date, ReservationTime time, Theme theme,
+                                                      Member member) {
+        return new Reservation(null, date, ACCEPT, LocalDateTime.now(), time, theme, member);
     }
 
-    public Reservation(LocalDate date, ReservationStatus status, ReservationTime time, Theme theme, Member member) {
-        this(null, date, status, time, theme, member);
-    }
-
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public static Reservation createAcceptReservation(Long id, LocalDate date, ReservationTime time, Theme theme,
+                                                      Member member) {
+        return new Reservation(id, date, ACCEPT, LocalDateTime.now(), time, theme, member);
     }
 
     public long getId() {
