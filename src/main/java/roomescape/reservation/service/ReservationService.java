@@ -7,6 +7,7 @@ import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -58,11 +59,11 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        List<Reservation> earlierReservations = reservationRepository.findByDateAndTimeAndTheme(
+        Reservations sameSlotReservations = new Reservations(reservationRepository.findByDateAndTimeAndTheme(
                 request.date(),
                 request.timeId(),
                 request.themeId()
-        );
+        ));
 
         Reservation reservation = new Reservation(
                 null,
@@ -75,7 +76,7 @@ public class ReservationService {
         if (reservation.isPast()) {
             throw new IllegalRequestException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
         }
-        if (earlierReservations.stream().anyMatch(earlierReservation -> earlierReservation.isReservedBy(memberId))) {
+        if (sameSlotReservations.hasReservationMadeBy(memberId)) {
             throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
         }
 
