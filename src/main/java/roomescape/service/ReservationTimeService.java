@@ -4,10 +4,9 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.BookResponse;
-import roomescape.domain.dto.BookResponses;
 import roomescape.domain.dto.ReservationTimeRequest;
 import roomescape.domain.dto.ReservationTimeResponse;
-import roomescape.domain.dto.ReservationTimeResponses;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.exception.DeleteNotAllowException;
 import roomescape.exception.DuplicateNotAllowException;
 import roomescape.repository.ReservationRepository;
@@ -27,12 +26,12 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ReservationTimeResponses findAll() {
+    public ResponsesWrapper<ReservationTimeResponse> findAll() {
         final List<ReservationTimeResponse> reservationTimeRespons = reservationTimeRepository.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
-        return new ReservationTimeResponses(reservationTimeRespons);
+        return new ResponsesWrapper<>(reservationTimeRespons);
     }
 
     public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
@@ -58,7 +57,7 @@ public class ReservationTimeService {
         }
     }
 
-    public BookResponses findAvailableBookList(final LocalDate date, final Long themeId) {
+    public ResponsesWrapper<BookResponse> findAvailableBookList(final LocalDate date, final Long themeId) {
         List<ReservationTime> reservedReservationTimes = reservationRepository
                 .findByDateAndThemeId(date, themeId)
                 .stream().map(Reservation::getTime).toList();
@@ -67,7 +66,7 @@ public class ReservationTimeService {
         final List<BookResponse> bookResponses = reservationTimes.stream()
                 .map(reservationTime -> getBookResponse(reservationTime, reservedReservationTimes))
                 .toList();
-        return new BookResponses(bookResponses);
+        return new ResponsesWrapper<>(bookResponses);
     }
 
     private BookResponse getBookResponse(final ReservationTime reservationTime,

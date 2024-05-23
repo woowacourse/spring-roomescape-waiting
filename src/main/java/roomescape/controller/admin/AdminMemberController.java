@@ -4,7 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.dto.MemberResponses;
+import roomescape.domain.dto.MemberResponse;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.MemberService;
 
 @RestController
@@ -17,8 +18,8 @@ public class AdminMemberController {
     }
 
     @GetMapping
-    ResponseEntity<MemberResponses> read() {
-        final MemberResponses memberResponses = memberService.findEntireMembers();
+    ResponseEntity<ResponsesWrapper<MemberResponse>> read() {
+        final ResponsesWrapper<MemberResponse> memberResponses = memberService.findEntireMembers();
         return ResponseEntity.ok(memberResponses);
     }
 }

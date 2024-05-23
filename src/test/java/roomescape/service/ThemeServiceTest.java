@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.domain.dto.ThemeRequest;
 import roomescape.domain.dto.ThemeResponse;
-import roomescape.domain.dto.ThemeResponses;
 import roomescape.exception.DeleteNotAllowException;
 
 import java.time.LocalDate;
@@ -81,7 +81,7 @@ class ThemeServiceTest {
         LocalDate endDate = LocalDate.parse("2024-05-02");
         Long count = 10L;
         //when
-        final ThemeResponses popularThemeList = service.getPopularThemeList(startDate, endDate, count);
+        final ResponsesWrapper<ThemeResponse> popularThemeList = service.getPopularThemeList(startDate, endDate, count);
         assertThat(popularThemeList.getData().get(0).id()).isEqualTo(2L);
     }
 }

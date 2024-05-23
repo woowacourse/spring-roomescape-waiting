@@ -4,7 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.dto.ReservationTimeResponses;
+import roomescape.domain.dto.ReservationTimeResponse;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.ReservationTimeService;
 
 @RestController
@@ -17,7 +18,7 @@ public class ClientTimeController {
     }
 
     @GetMapping
-    public ResponseEntity<ReservationTimeResponses> findAll() {
+    public ResponseEntity<ResponsesWrapper<ReservationTimeResponse>> findAll() {
         return ResponseEntity.ok(reservationTimeService.findAll());
     }
 }

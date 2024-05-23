@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.domain.Member;
@@ -8,13 +7,15 @@ import roomescape.domain.Password;
 import roomescape.domain.PasswordEncoder;
 import roomescape.domain.dto.LoginRequest;
 import roomescape.domain.dto.MemberResponse;
-import roomescape.domain.dto.MemberResponses;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.domain.dto.SignupRequest;
 import roomescape.domain.dto.SignupResponse;
 import roomescape.domain.dto.TokenResponse;
 import roomescape.exception.AccessNotAllowException;
 import roomescape.exception.SignupFailException;
 import roomescape.repository.MemberRepository;
+
+import java.util.List;
 
 @Service
 public class MemberService {
@@ -29,12 +30,12 @@ public class MemberService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public MemberResponses findEntireMembers() {
+    public ResponsesWrapper<MemberResponse> findEntireMembers() {
         final List<MemberResponse> memberResponses = memberRepository.findAll()
                 .stream()
                 .map(MemberResponse::from)
                 .toList();
-        return new MemberResponses(memberResponses);
+        return new ResponsesWrapper<>(memberResponses);
     }
 
     public SignupResponse createUser(final SignupRequest signupRequest) {

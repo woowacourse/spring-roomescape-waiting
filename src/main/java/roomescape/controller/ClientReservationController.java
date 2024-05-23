@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Member;
-import roomescape.domain.dto.BookResponses;
+import roomescape.domain.dto.BookResponse;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 
@@ -31,8 +32,8 @@ public class ClientReservationController {
     }
 
     @GetMapping("/books/{date}/{theme_id}")
-    public ResponseEntity<BookResponses> read(@PathVariable(value = "date") LocalDate date,
-                                              @PathVariable(value = "theme_id") Long themeId) {
+    public ResponseEntity<ResponsesWrapper<BookResponse>> read(@PathVariable(value = "date") LocalDate date,
+                                                               @PathVariable(value = "theme_id") Long themeId) {
         return ResponseEntity.ok(reservationTimeService.findAvailableBookList(date, themeId));
     }
 

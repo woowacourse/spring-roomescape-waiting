@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
-import roomescape.domain.dto.ReservationResponses;
 import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.ReservationService;
@@ -29,7 +28,7 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<ReservationResponses> read() {
+    public ResponseEntity<ResponsesWrapper<ReservationResponse>> read() {
         return ResponseEntity.ok(reservationService.findEntireReservationList());
     }
 
@@ -51,7 +50,7 @@ public class AdminReservationController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ReservationResponses> search(@RequestParam Long themeId, @RequestParam Long memberId, @RequestParam LocalDate dateFrom, @RequestParam LocalDate dateTo) {
+    public ResponseEntity<ResponsesWrapper<ReservationResponse>> search(@RequestParam Long themeId, @RequestParam Long memberId, @RequestParam LocalDate dateFrom, @RequestParam LocalDate dateTo) {
         return ResponseEntity.ok(reservationService.findReservations(themeId, memberId, dateFrom, dateTo));
     }
 

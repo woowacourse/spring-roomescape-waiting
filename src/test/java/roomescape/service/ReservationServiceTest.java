@@ -11,7 +11,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
-import roomescape.domain.dto.ReservationResponses;
 import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
@@ -145,7 +144,7 @@ class ReservationServiceTest {
         LocalDate dateFrom = LocalDate.parse("2024-04-30");
         LocalDate dateTo = LocalDate.parse("2024-05-01");
         //when
-        final ReservationResponses reservationResponses = service.findReservations(themeId, memberId, dateFrom, dateTo);
+        final ResponsesWrapper<ReservationResponse> reservationResponses = service.findReservations(themeId, memberId, dateFrom, dateTo);
         //then
         assertThat(reservationResponses.getData()).hasSize(3);
     }

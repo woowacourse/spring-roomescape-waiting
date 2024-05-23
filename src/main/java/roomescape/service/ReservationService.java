@@ -9,7 +9,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
-import roomescape.domain.dto.ReservationResponses;
 import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
@@ -43,12 +42,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationResponses findEntireReservationList() {
+    public ResponsesWrapper<ReservationResponse> findEntireReservationList() {
         final List<ReservationResponse> reservationResponses = reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
-        return new ReservationResponses(reservationResponses);
+        return new ResponsesWrapper<>(reservationResponses);
     }
 
     @Transactional(readOnly = true)
@@ -130,14 +129,14 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationResponses findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
-                                                 final LocalDate dateTo) {
+    public ResponsesWrapper<ReservationResponse> findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
+                                                                  final LocalDate dateTo) {
         final List<ReservationResponse> reservationResponses = reservationRepository
                 .findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
-        return new ReservationResponses(reservationResponses);
+        return new ResponsesWrapper<>(reservationResponses);
     }
 
     @Transactional(readOnly = true)
