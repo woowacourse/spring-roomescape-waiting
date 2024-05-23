@@ -51,6 +51,8 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
             from Reservation mine
             where mine.member.id = :memberId
             and mine.status in (roomescape.domain.Status.RESERVED, roomescape.domain.Status.WAITING)
+            and (mine.detail.date > current_date or (mine.detail.date = current_date
+                and mine.detail.time.startAt > current_time))
             """)
     List<ReservationWithRank> findWithRank(@Param("memberId") Long memberId);
 
