@@ -7,14 +7,14 @@ import java.time.LocalTime;
 import roomescape.domain.Waiting;
 
 public class ReservationMineResponse {
-    private final Long reservationId;
+    private final Long id;
     private final String theme;
     private final LocalDate date;
     private final LocalTime time;
     private final String status;
 
-    public ReservationMineResponse(Long reservationId, String theme, LocalDate date, LocalTime time, String status) {
-        this.reservationId = reservationId;
+    public ReservationMineResponse(Long id, String theme, LocalDate date, LocalTime time, String status) {
+        this.id = id;
         this.theme = theme;
         this.date = date;
         this.time = time;
@@ -39,8 +39,8 @@ public class ReservationMineResponse {
         );
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public Long getId() {
+        return id;
     }
 
     public String getTheme() {
