@@ -31,7 +31,7 @@ public class AdminReservationController {
         return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
     }
 
-    @DeleteMapping("/admin/reservations/{id}")
+    @DeleteMapping("/admin/reservations/all/{id}")
     public ResponseEntity<Void> removeReservation(@PathVariable("id") Long id) {
         reservationService.removeReservation(id);
         return ResponseEntity.noContent().build();
