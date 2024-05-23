@@ -39,11 +39,7 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    public Reservation(Long id,
-                       Member member,
-                       ReservationDate date,
-                       ReservationTime time,
-                       Theme theme) {
+    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
@@ -53,6 +49,10 @@ public class Reservation {
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this(id, member, new ReservationDate(date), time, theme);
+    }
+
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(null, member, new ReservationDate(date), time, theme);
     }
 
     public Reservation(Long id, Reservation reservation) {

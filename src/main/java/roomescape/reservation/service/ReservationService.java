@@ -65,16 +65,16 @@ public class ReservationService {
                 request.themeId()
         ));
 
+        if (sameSlotReservations.hasReservationMadeBy(memberId)) {
+            throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
+        }
+
         Reservation reservation = new Reservation(
-                null,
                 memberService.findById(memberId),
                 request.date(),
                 reservationTimeService.findById(request.timeId()),
                 themeService.findById(request.themeId())
         );
-        if (sameSlotReservations.hasReservationMadeBy(memberId)) {
-            throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
-        }
 
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
