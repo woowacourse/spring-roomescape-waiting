@@ -40,12 +40,6 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
-    private static void validateDoesNotAlreadyReservateMember(Reservation reservation, Member member) {
-        if (reservation.isSameMember(member)) {
-            throw new DuplicationException("이미 예약에 성공하셨습니다.");
-        }
-    }
-
     @Transactional
     public WaitingResponse addWaiting(WaitingRequest waitingRequest, MemberRequest memberRequest) {
         Reservation reservation = getReservationByWaiting(waitingRequest);
@@ -78,20 +72,26 @@ public class WaitingService {
         validateIsNotAlreadyWaitingMember(reservation, member);
     }
 
+    private void validateDoesNotAlreadyReservateMember(Reservation reservation, Member member) {
+        if (reservation.isSameMember(member)) {
+            throw new DuplicationException("이미 예약에 성공하셨습니다.");
+        }
+    }
+
     private void validateIsNotAlreadyWaitingMember(Reservation reservation, Member member) {
-        boolean existsAlreadyWaiting = waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
+        boolean isAlreadyWaiting = waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
                 reservation.getDate(),
                 reservation.getReservationTime(),
                 reservation.getTheme(),
                 member
         );
 
-        if (existsAlreadyWaiting) {
+        if (isAlreadyWaiting) {
             throw new DuplicationException("이미 예약 대기를 거셨습니다.");
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ReservationOrWaitingResponse> findWaitingsByMember(MemberRequest memberRequest) {
         return waitingRepository.findWaitingsWithRankByMemberId(memberRequest.id())
                 .stream()
