@@ -92,4 +92,30 @@ class WaitingServiceTest {
 
         assertThat(waitingService.findAll()).isEmpty();
     }
+
+    @Test
+    @DisplayName("예약 대기를 삭제할 때, 본인의 예약 대기가 아니면 예외가 발생한다.")
+    void deleteNotMyWaiting() {
+        final WaitingRequest request = new WaitingRequest(1L, TOMORROW, 1L, 1L);
+        final WaitingResponse response = waitingService.create(request);
+        final Long waitingId = response.getId();
+        final LoginMember loginMember = new LoginMember(2L);
+
+        assertThatThrownBy(() -> waitingService.delete(waitingId, loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(WaitingService.WAITING_IS_NOT_YOURS_EXCEPTION_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 삭제할 때, 관리자용 삭제를 시도한 사용자가 관리자가 아니면 예외가 발생한다.")
+    void deleteReservationByAdminRole() {
+        final WaitingRequest request = new WaitingRequest(2L, TOMORROW, 1L, 1L);
+        final WaitingResponse response = waitingService.create(request);
+        final Long waitingId = response.getId();
+        final LoginMember loginMember = new LoginMember(2L);
+
+        assertThatThrownBy(() -> waitingService.deleteByAdmin(waitingId, loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(WaitingService.ALLOWED_TO_ADMIN_ONLY_EXCEPTION_MESSAGE);
+    }
 }

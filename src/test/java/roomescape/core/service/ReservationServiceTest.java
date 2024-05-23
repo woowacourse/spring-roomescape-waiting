@@ -179,4 +179,28 @@ class ReservationServiceTest {
 
         waitingRepository.save(new Waiting(member, date, time, theme));
     }
+
+    @Test
+    @DisplayName("예약을 삭제할 때, 본인의 예약이 아니면 예외가 발생한다.")
+    void deleteNotMyReservation() {
+        final ReservationRequest request = new ReservationRequest(1L, TestFixture.getTomorrowDate(), 1L, 1L);
+        final ReservationResponse response = reservationService.create(request);
+        final LoginMember loginMember = new LoginMember(2L);
+
+        assertThatThrownBy(() -> reservationService.delete(response.getId(), loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(ReservationService.RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("예약을 삭제할 때, 관리자용 삭제를 시도한 사용자가 관리자가 아니면 예외가 발생한다.")
+    void deleteReservationByAdminRole() {
+        final ReservationRequest request = new ReservationRequest(2L, TestFixture.getTomorrowDate(), 1L, 1L);
+        final ReservationResponse response = reservationService.create(request);
+        final LoginMember loginMember = new LoginMember(2L);
+
+        assertThatThrownBy(() -> reservationService.deleteByAdmin(response.getId(), loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(ReservationService.NOT_ALLOWED_TO_MEMBER_EXCEPTION_MESSAGE);
+    }
 }
