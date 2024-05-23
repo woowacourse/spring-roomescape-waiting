@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.reservation.dto.ReservationWaitAddRequest;
 import roomescape.domain.time.dto.BookableTimeResponse;
 import roomescape.domain.time.dto.BookableTimesRequest;
 import roomescape.global.exception.DataConflictException;
@@ -67,18 +68,44 @@ class ReservationServiceTest extends ServiceTest {
         );
     }
 
-    @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약인 경우 예외를 발생합니다.")
+    @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약이 있는 경우 예약 생성에 예외를 발생합니다.")
     @Test
-    void should_throw_DataConflictException_when_reserve_date_and_time__and_theme_and_status_duplicated() {
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 1L);
-        reservationService.addReservation(reservationAddRequest);
+    void should_throw_DataConflictException_when_reserve_date_and_time_and_theme_and_status_duplicated() {
+        ReservationAddRequest firstReservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 1L);
+        ReservationAddRequest secondReservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 2L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
+        reservationService.addReservation(firstReservationAddRequest);
+
+        assertThatThrownBy(() -> reservationService.addReservation(secondReservationAddRequest))
                 .isInstanceOf(DataConflictException.class)
-                .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
+                .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약을 할 수 없습니다.");
     }
 
-    // TODO: (멤버, 날짜, 테마, 시간, "예약대기")의 예약이 있으면 실패하는 테스트 작성 (예약대기 생성 메서드 필요)
+    // TODO: 멤버와 예약 날짜 그리고 예약시각, 테마 아이디가 같은 예약대기가 있는 경우 예약 생성에 예외를 발생하는 테스트 필요 (예약 삭제 메서드 필요)
+
+    @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약이 없는 경우 예약대기 생성에 예외를 발생합니다.")
+    @Test
+    void should_throw_DataConflictException_when_reserve_wait_date_and_time_and_theme_and_status_not_exist() {
+        ReservationWaitAddRequest reservationWaitAddRequest = new ReservationWaitAddRequest(LocalDate.MAX, 1L, 1L, 1L);
+
+        assertThatThrownBy(() -> reservationService.addReservationWait(reservationWaitAddRequest))
+                .isInstanceOf(DataConflictException.class)
+                .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 없으면 예약대기를 할 수 없습니다.");
+    }
+
+    @DisplayName("멤버와 예약 날짜 그리고 예약시각, 테마 아이디가 같은 예약대기가 있는 경우 예약대기 생성에 예외를 발생합니다.")
+    @Test
+    void should_throw_DataConflictException_when_reserve_wait_member_and_date_and_time_and_theme_and_status_duplicated() {
+        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 2L);
+        ReservationWaitAddRequest reservationWaitAddRequest = new ReservationWaitAddRequest(LocalDate.MAX, 1L, 1L, 1L);
+        reservationService.addReservation(reservationAddRequest);
+
+        reservationService.addReservationWait(reservationWaitAddRequest);
+
+        assertThatThrownBy(() -> reservationService.addReservationWait(reservationWaitAddRequest))
+                .isInstanceOf(DataConflictException.class)
+                .hasMessage("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약대기가 있으면 예약대기를 할 수 없습니다.");
+    }
 
     @DisplayName("없는 id의 예약을 삭제하면 예외를 발생합니다.")
     @Test
