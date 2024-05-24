@@ -13,10 +13,10 @@ import roomescape.controller.helper.LoginMember;
 import roomescape.controller.helper.RoleAllowed;
 import roomescape.domain.Member;
 import roomescape.service.LoginService;
-import roomescape.service.dto.LoginCheckResponse;
-import roomescape.service.dto.LoginRequest;
-import roomescape.service.dto.SignupRequest;
-import roomescape.service.dto.SignupResponse;
+import roomescape.service.dto.response.LoginCheckResponse;
+import roomescape.service.dto.request.LoginRequest;
+import roomescape.service.dto.request.SignupRequest;
+import roomescape.service.dto.response.SignupResponse;
 
 @RestController
 public class LoginController {

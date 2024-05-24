@@ -1,4 +1,4 @@
-package roomescape.service.dto;
+package roomescape.service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import roomescape.domain.Member;

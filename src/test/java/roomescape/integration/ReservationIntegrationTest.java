@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import roomescape.service.dto.LoginRequest;
+import roomescape.service.dto.request.LoginRequest;
 
 class ReservationIntegrationTest extends IntegrationTest {
     @Nested

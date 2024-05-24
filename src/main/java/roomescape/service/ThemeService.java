@@ -10,8 +10,8 @@ import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.theme.ReservationReferencedThemeException;
-import roomescape.service.dto.ThemeRequest;
-import roomescape.service.dto.ThemeResponse;
+import roomescape.service.dto.request.ThemeRequest;
+import roomescape.service.dto.response.ThemeResponse;
 
 @Service
 @Transactional(readOnly = true)

@@ -22,9 +22,9 @@ import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
-import roomescape.service.dto.ReservationMineResponse;
-import roomescape.service.dto.ReservationRequest;
-import roomescape.service.dto.ReservationResponse;
+import roomescape.service.dto.response.ReservationMineResponse;
+import roomescape.service.dto.request.ReservationRequest;
+import roomescape.service.dto.response.ReservationResponse;
 
 @Service
 @Transactional(readOnly = true)

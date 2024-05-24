@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.helper.RoleAllowed;
 import roomescape.domain.MemberRole;
 import roomescape.service.MemberService;
-import roomescape.service.dto.MemberResponse;
+import roomescape.service.dto.response.MemberResponse;
 
 @RestController
 public class MemberController {

@@ -16,8 +16,8 @@ import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
-import roomescape.service.dto.WaitingRequest;
-import roomescape.service.dto.WaitingResponse;
+import roomescape.service.dto.request.WaitingRequest;
+import roomescape.service.dto.response.WaitingResponse;
 
 @Service
 @Transactional(readOnly = true)

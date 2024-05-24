@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.Cookies;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import roomescape.service.dto.LoginRequest;
+import roomescape.service.dto.request.LoginRequest;
 
 @Component
 public class CookieProvider {

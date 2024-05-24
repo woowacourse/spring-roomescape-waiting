@@ -11,8 +11,8 @@ import roomescape.controller.helper.LoginMember;
 import roomescape.controller.helper.RoleAllowed;
 import roomescape.domain.Member;
 import roomescape.service.WaitingService;
-import roomescape.service.dto.WaitingRequest;
-import roomescape.service.dto.WaitingResponse;
+import roomescape.service.dto.request.WaitingRequest;
+import roomescape.service.dto.response.WaitingResponse;
 
 @RestController
 public class WaitingController {

@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import roomescape.service.dto.LoginCheckResponse;
-import roomescape.service.dto.LoginRequest;
+import roomescape.service.dto.response.LoginCheckResponse;
+import roomescape.service.dto.request.LoginRequest;
 
 class LoginIntegrationTest extends IntegrationTest {
     @Nested
