@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
 import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
@@ -12,9 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Member;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationRequest;
+import roomescape.dto.ReservationResponse;
 import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
@@ -94,20 +97,32 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약 시도시 실패하는지 확인")
-    void saveFailWhenDuplicateReservation() {
+    @DisplayName("첫 예약 시도시 status가 APPROVED 인지 확인")
+    void saveFirstReservationApprove() {
         Member member = memberRepository.save(DEFAULT_MEMBER);
         ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
         Theme theme = themeRepository.save(DEFAULT_THEME);
         LocalDate date = LocalDate.now().plusDays(1);
 
         ReservationRequest reservationRequest = new ReservationRequest(date, member.getId(), time.getId(), theme.getId());
+        ReservationResponse reservationResponse = reservationService.save(reservationRequest);
 
+        assertThat(reservationResponse.status()).isEqualTo(ReservationStatus.APPROVED);
+    }
+
+    @Test
+    @DisplayName("중복 예약 시도시 status가 PENDING 인지 확인")
+    void saveDuplicateReservationPending() {
+        Member member = memberRepository.save(DEFAULT_MEMBER);
+        ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
+        Theme theme = themeRepository.save(DEFAULT_THEME);
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        ReservationRequest reservationRequest = new ReservationRequest(date, member.getId(), time.getId(), theme.getId());
         reservationService.save(reservationRequest);
+        ReservationResponse duplicateReservationResponse = reservationService.save(reservationRequest);
 
-        assertThatThrownBy(() -> reservationService.save(reservationRequest))
-                .isInstanceOf(RoomescapeException.class)
-                .hasMessage(ExceptionType.DUPLICATE_RESERVATION.getMessage());
+        assertThat(duplicateReservationResponse.status()).isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test

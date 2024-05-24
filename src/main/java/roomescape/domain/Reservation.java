@@ -33,23 +33,69 @@ public class Reservation implements Comparable<Reservation> {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
+    // TODO: 생성자 오바
     protected Reservation() {
     }
 
-    public Reservation(Member reservationMember, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, reservationMember, date, time, theme);
+    public Reservation(
+            Member reservationMember,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    ) {
+        this(null, reservationMember, date, time, theme, null);
     }
 
-    public Reservation(Long id, Member reservationMember, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(long id, Reservation reservationBeforeSave) {
+        this(
+                id,
+                reservationBeforeSave.reservationMember,
+                reservationBeforeSave.date,
+                reservationBeforeSave.time,
+                reservationBeforeSave.theme,
+                reservationBeforeSave.status
+        );
+    }
+
+    public Reservation(
+            Long id,
+            Member reservationMember,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    ) {
+        this(id, reservationMember, date, time, theme, null);
+    }
+
+    public Reservation(
+            Member reservationMember,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            ReservationStatus status
+    ) {
+        this(null, reservationMember, date, time, theme, status);
+    }
+
+    public Reservation(
+            Long id,
+            Member reservationMember,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            ReservationStatus status
+    ) {
         validateMember(reservationMember);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
+
         this.id = id;
         this.reservationMember = reservationMember;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     private void validateMember(Member reservationMember) {
@@ -76,19 +122,11 @@ public class Reservation implements Comparable<Reservation> {
         }
     }
 
-    public Reservation(long id, Reservation reservationBeforeSave) {
-        this(id, reservationBeforeSave.reservationMember, reservationBeforeSave.date, reservationBeforeSave.time, reservationBeforeSave.theme);
-    }
-
     @Override
     public int compareTo(Reservation other) {
         LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
         LocalDateTime otherDateTime = LocalDateTime.of(other.date, other.time.getStartAt());
         return dateTime.compareTo(otherDateTime);
-    }
-
-    public boolean isBefore(LocalDateTime base) {
-        return LocalDateTime.of(date, getTime()).isBefore(base);
     }
 
     public LocalTime getTime() {

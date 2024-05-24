@@ -6,6 +6,7 @@ import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 
@@ -30,6 +31,7 @@ public class ReservationFixture {
             DEFAULT_MEMBER.getName(),
             DEFAULT_RESERVATION.getDate(),
             ReservationTimeFixture.DEFAULT_RESPONSE,
-            ThemeFixture.DEFAULT_RESPONSE
+            ThemeFixture.DEFAULT_RESPONSE,
+            ReservationStatus.APPROVED
     );
 }
