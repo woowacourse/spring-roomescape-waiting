@@ -5,13 +5,13 @@ import java.time.LocalTime;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationEntry;
 
-public record MyReservationResponse(Long id,
-                                    LocalDate date,
-                                    LocalTime time,
-                                    String theme,
-                                    String status) {
+public record MyReservationEntryResponse(Long id,
+                                         LocalDate date,
+                                         LocalTime time,
+                                         String theme,
+                                         String status) {
 
-    public static MyReservationResponse from(final ReservationEntry reservationEntry) {
+    public static MyReservationEntryResponse from(final ReservationEntry reservationEntry) {
         String status = "";
         if (reservationEntry.getStatus() == ReservationStatus.RESERVATION) {
             status = "예약";
@@ -20,7 +20,7 @@ public record MyReservationResponse(Long id,
             status = reservationEntry.getRank() + "번째 예약대기";
         }
 
-        return new MyReservationResponse(
+        return new MyReservationEntryResponse(
                 reservationEntry.getId(),
                 reservationEntry.getDate(),
                 reservationEntry.getTime().getStartAt(),

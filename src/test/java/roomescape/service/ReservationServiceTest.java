@@ -29,7 +29,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.response.MemberResponse;
-import roomescape.service.dto.response.MyReservationResponse;
+import roomescape.service.dto.response.MyReservationEntryResponse;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.service.dto.response.ThemeResponse;
@@ -181,7 +181,7 @@ class ReservationServiceTest {
         reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12), reservationTime1, theme));
         reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12), reservationTime2, theme));
 
-        List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.getId());
+        List<MyReservationEntryResponse> reservations = reservationService.findAllByMemberId(member1.getId());
 
         assertThat(reservations).hasSize(1);
     }

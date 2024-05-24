@@ -22,7 +22,7 @@ import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.request.ReservationTimeRequest;
 import roomescape.service.dto.request.ThemeRequest;
 import roomescape.service.dto.request.UserReservationRequest;
-import roomescape.service.dto.response.MyReservationResponse;
+import roomescape.service.dto.response.MyReservationEntryResponse;
 
 class WaitingTest extends AcceptanceTest {
 
@@ -69,15 +69,15 @@ class WaitingTest extends AcceptanceTest {
                 }),
 
                 dynamicTest("사용자 asd가 자신의 예약 및 예약 대기를 조회한다.", () -> {
-                    List<MyReservationResponse> myReservationResponses = RestAssured.given().log().all()
+                    List<MyReservationEntryResponse> myReservationEntryRespons = RestAssured.given().log().all()
                             .cookies("token", userToken)
                             .when().get("/reservations/mine")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .jsonPath().getList(".", MyReservationResponse.class);
+                            .jsonPath().getList(".", MyReservationEntryResponse.class);
 
-                    assertThat(myReservationResponses).contains(
-                            new MyReservationResponse(1L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
+                    assertThat(myReservationEntryRespons).contains(
+                            new MyReservationEntryResponse(1L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
                                     "1번째 예약대기"));
                 }),
 
@@ -129,15 +129,15 @@ class WaitingTest extends AcceptanceTest {
                 }),
 
                 dynamicTest("사용자 asd가 자신의 예약 대기순서가 1번이 됐음을 확인한다.", () -> {
-                    List<MyReservationResponse> myReservationResponses = RestAssured.given().log().all()
+                    List<MyReservationEntryResponse> myReservationEntryRespons = RestAssured.given().log().all()
                             .cookies("token", userToken)
                             .when().get("/reservations/mine")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .jsonPath().getList(".", MyReservationResponse.class);
+                            .jsonPath().getList(".", MyReservationEntryResponse.class);
 
-                    assertThat(myReservationResponses).contains(
-                            new MyReservationResponse(2L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
+                    assertThat(myReservationEntryRespons).contains(
+                            new MyReservationEntryResponse(2L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
                                     "1번째 예약대기"));
                 })
         );
@@ -179,15 +179,15 @@ class WaitingTest extends AcceptanceTest {
                 }),
 
                 dynamicTest("사용자 asd가 자신의 예약 대기가 예약으로 자동 승인됐음을 확인한다.", () -> {
-                    List<MyReservationResponse> myReservationResponses = RestAssured.given().log().all()
+                    List<MyReservationEntryResponse> myReservationEntryRespons = RestAssured.given().log().all()
                             .cookies("token", userToken)
                             .when().get("/reservations/mine")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .jsonPath().getList(".", MyReservationResponse.class);
+                            .jsonPath().getList(".", MyReservationEntryResponse.class);
 
-                    assertThat(myReservationResponses).contains(
-                            new MyReservationResponse(2L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
+                    assertThat(myReservationEntryRespons).contains(
+                            new MyReservationEntryResponse(2L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
                                     "예약"));
                 })
         );

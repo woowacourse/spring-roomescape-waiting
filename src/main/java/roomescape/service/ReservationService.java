@@ -18,7 +18,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
-import roomescape.service.dto.response.MyReservationResponse;
+import roomescape.service.dto.response.MyReservationEntryResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 @Service
@@ -82,7 +82,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findAllByMemberId(Long id) {
+    public List<MyReservationEntryResponse> findAllByMemberId(Long id) {
         Member member = getMember(id);
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         List<WaitingWithRank> waitingWithRanks = waitingService.findAllWithRankByMember(member);
@@ -90,7 +90,7 @@ public class ReservationService {
         List<ReservationEntry> reservationEntries = ReservationEntry.of(reservations, waitingWithRanks);
 
         return reservationEntries.stream()
-                .map(MyReservationResponse::from)
+                .map(MyReservationEntryResponse::from)
                 .toList();
     }
 
