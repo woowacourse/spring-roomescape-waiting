@@ -29,24 +29,24 @@ class ReservationTest {
     @Test
     @DisplayName("예약을 건 회원은 예약을 삭제할 권한이 있다.")
     void MemberWhoReservatedHasDeleteAuth() {
-        boolean hasDeleteAuth = RESERVATION_1.isDeletableMemeber(MEMBER_1);
+        boolean hasDeleteAuth = RESERVATION_1.isNotDeletableMemeber(MEMBER_1);
 
-        assertThat(hasDeleteAuth).isTrue();
+        assertThat(hasDeleteAuth).isFalse();
     }
 
     @Test
     @DisplayName("관리자는 모든 예약에 대해 삭제할 권한이 있다.")
     void AdminHasDeleteAuth() {
-        boolean hasDeleteAuth = RESERVATION_1.isDeletableMemeber(ADMIN);
+        boolean hasDeleteAuth = RESERVATION_1.isNotDeletableMemeber(ADMIN);
 
-        assertThat(hasDeleteAuth).isTrue();
+        assertThat(hasDeleteAuth).isFalse();
     }
 
     @Test
     @DisplayName("관련 없는 회원은 예약을 삭제할 권한이 없다.")
     void NotRelatedMemberCanNotDeleteReservation() {
-        boolean hasDeleteAuth = RESERVATION_1.isDeletableMemeber(MEMBER_2);
+        boolean hasDeleteAuth = RESERVATION_1.isNotDeletableMemeber(MEMBER_2);
 
-        assertThat(hasDeleteAuth).isFalse();
+        assertThat(hasDeleteAuth).isTrue();
     }
 }

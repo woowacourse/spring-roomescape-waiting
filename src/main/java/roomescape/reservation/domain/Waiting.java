@@ -47,12 +47,8 @@ public class Waiting {
         this(null, date, reservationTime, theme, member);
     }
 
-    public boolean hasDeleteAuth(Member member) {
-        return member.isAdmin() || Objects.equals(this.member, member);
-    }
-
     public boolean doesNotHaveDeleteAuth(Member member) {
-        return !hasDeleteAuth(member);
+        return !(member.isAdmin()) && !(Objects.equals(this.member, member));
     }
 
     public Long getId() {
