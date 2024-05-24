@@ -68,7 +68,7 @@ public class WaitingService {
         return waiting;
     }
 
-    private void validateWaiting(Waiting waiting) {
+    private void validateWaiting(final Waiting waiting) {
         Reservation reservation = reservationRepository.findByThemeIdAndDateAndReservationTimeStartAt(
                         waiting.getTheme().getId(), waiting.getDate(), waiting.getReservationTime().getStartAt())
                 .orElseThrow(() -> new IllegalArgumentException("예약이 없어 예약 대기를 할 수 없습니다."));
@@ -99,18 +99,18 @@ public class WaitingService {
         return waitingResponses;
     }
 
-    public List<MyReservationResponse> findWaitingWithRanksByMemberId(Long memberId) {
+    public List<MyReservationResponse> findWaitingWithRanksByMemberId(final Long memberId) {
         return waitingRepository.findWaitingWithRanksByMemberId(memberId).stream()
                 .map(MyReservationResponse::new)
                 .toList();
     }
 
-    public void delete(final Long id, final LoginMemberInToken loginMemberInToken) {
+    public void delete(final Long id, final LoginMemberInToken loginMember) {
         final Waiting target = waitingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 대기 입니다."));
 
         final Long MemberIdOfTarget = target.getMember().getId();
-        if (!loginMemberInToken.role().isAdmin() && !MemberIdOfTarget.equals(loginMemberInToken.id())) {
+        if (!loginMember.role().isAdmin() && !MemberIdOfTarget.equals(loginMember.id())) {
             throw new IllegalArgumentException("본인의 예약 대기만 취소할 수 있습니다.");
         }
 

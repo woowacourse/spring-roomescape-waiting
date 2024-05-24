@@ -8,10 +8,10 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.request.ReservationSearchRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -36,28 +36,33 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Reservation save(ReservationCreateRequest reservationCreateRequest, LoginMemberInToken loginMemberInToken) {
-        Reservation reservation = getValidatedReservation(reservationCreateRequest, loginMemberInToken);
+    public Reservation save(
+            final ReservationCreateRequest request,
+            final LoginMemberInToken loginMember
+    ) {
+        Reservation reservation = getValidatedReservation(request, loginMember);
         validateDuplicateReservation(reservation);
 
         return reservationRepository.save(reservation);
     }
 
-    private Reservation getValidatedReservation(ReservationCreateRequest reservationCreateRequest,
-            LoginMemberInToken loginMemberInToken) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
+    private Reservation getValidatedReservation(
+            final ReservationCreateRequest request,
+            final LoginMemberInToken loginMember
+    ) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
-        Theme theme = themeRepository.findById(reservationCreateRequest.themeId())
+        Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        Member member = memberRepository.findById(loginMemberInToken.id())
+        Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        return reservationCreateRequest.toReservation(member, theme, reservationTime);
+        return request.toReservation(member, theme, reservationTime);
     }
 
-    private void validateDuplicateReservation(Reservation reservation) {
+    private void validateDuplicateReservation(final Reservation reservation) {
         if (reservationRepository.existsByDateAndReservationTimeStartAt(reservation.getDate(), reservation.getTime()
                 .getStartAt())) {
             throw new IllegalArgumentException("중복된 예약이 있습니다.");
@@ -70,29 +75,37 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllBySearch(ReservationSearchRequest reservationSearchRequest) {
-        Member member = memberRepository.findById(reservationSearchRequest.memberId())
+    public List<ReservationResponse> findAllBySearch(final ReservationSearchRequest request) {
+        Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-        Theme theme = themeRepository.findById(reservationSearchRequest.themeId())
+        Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(
                         member,
                         theme,
-                        reservationSearchRequest.dateFrom(),
-                        reservationSearchRequest.dateTo()
+                        request.dateFrom(),
+                        request.dateTo()
                 ).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
-    public List<MyReservationResponse> findAllByMemberId(Long memberId) {
+    public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(MyReservationResponse::new)
                 .toList();
     }
 
-    public void delete(Long id) {
+    public void delete(final Long id, final LoginMemberInToken loginMember) {
+        final Reservation target = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 입니다."));
+
+        final Long MemberIdOfTarget = target.getMember().getId();
+        if (!loginMember.role().isAdmin() && !MemberIdOfTarget.equals(loginMember.id())) {
+            throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
+        }
+
         reservationRepository.deleteById(id);
     }
 }

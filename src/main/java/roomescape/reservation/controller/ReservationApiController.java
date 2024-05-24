@@ -34,10 +34,10 @@ public class ReservationApiController {
 
     @PostMapping(path = {"/reservations", "/admin/reservations"})
     public ResponseEntity<ReservationResponse> createMemberReservation(
-            @Valid @RequestBody ReservationCreateRequest reservationCreateRequest,
-            @Login LoginMemberInToken loginMemberInToken
+            @Valid @RequestBody final ReservationCreateRequest request,
+            @Login final LoginMemberInToken loginMember
     ) {
-        Reservation reservation = reservationService.save(reservationCreateRequest, loginMemberInToken);
+        Reservation reservation = reservationService.save(request, loginMember);
         ReservationResponse reservationResponse = new ReservationResponse(reservation);
 
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
@@ -51,18 +51,16 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations/search")
-    public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
-            @Valid ReservationSearchRequest reservationSearchRequest
-    ) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllBySearch(reservationSearchRequest);
+    public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(@Valid ReservationSearchRequest request) {
+        List<ReservationResponse> reservationResponses = reservationService.findAllBySearch(request);
 
         return ResponseEntity.ok(reservationResponses);
     }
 
     @GetMapping("/reservations/me")
-    public ResponseEntity<List<MyReservationResponse>> myReservations(@Login LoginMemberInToken loginMemberInToken) {
+    public ResponseEntity<List<MyReservationResponse>> myReservations(@Login LoginMemberInToken loginMember) {
         List<MyReservationResponse> myReservationResponses = new ArrayList<>();
-        final Long memberId = loginMemberInToken.id();
+        final Long memberId = loginMember.id();
 
         myReservationResponses.addAll(reservationService.findAllByMemberId(memberId));
         myReservationResponses.addAll(waitingService.findWaitingWithRanksByMemberId(memberId));
@@ -71,8 +69,8 @@ public class ReservationApiController {
     }
 
     @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
-        reservationService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id, @Login LoginMemberInToken loginMember) {
+        reservationService.delete(id, loginMember);
 
         return ResponseEntity.noContent().build();
     }
