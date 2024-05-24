@@ -6,16 +6,17 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 @DataJpaTest
 public abstract class BaseRepositoryTest {
+
     @PersistenceContext
     protected EntityManager em;
 
     protected <T> T save(T entity) {
         em.persist(entity);
-        synchronize();
+        flushAndClear();
         return entity;
     }
 
-    private void synchronize() {
+    private void flushAndClear() {
         em.flush();
         em.clear();
     }
