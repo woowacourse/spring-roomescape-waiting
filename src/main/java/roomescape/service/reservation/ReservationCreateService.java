@@ -60,6 +60,7 @@ public class ReservationCreateService {
 
     private Reservation saveReservation(Reservation request) {
         validateDateIsFuture(request.getDate(), request.getReservationTime());
+        validateHasWait(request.getDate(), request.getReservationTime().getId(), request.getTheme().getId());
         validateAlreadyBooked(request.getDate(), request.getReservationTime().getId(), request.getTheme().getId());
         return reservationRepository.save(request);
     }
@@ -77,6 +78,12 @@ public class ReservationCreateService {
     private Member getMember(long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidRequestException("존재하지 않는 사용자입니다."));
+    }
+
+    private void validateHasWait(LocalDate date, long timeId, long themeId) {
+        if (reservationWaitRepository.existsByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, WAITING)) {
+            throw new InvalidRequestException("예약 대기가 존재합니다.");
+        }
     }
 
     private void validateAlreadyBooked(LocalDate date, long timeId, long themeId) {
