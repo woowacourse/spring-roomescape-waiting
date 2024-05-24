@@ -10,17 +10,14 @@ import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
 import static roomescape.fixture.ThemeFixture.getTheme2;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
@@ -33,10 +30,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.ReservationTimeRepository;
-import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
 import roomescape.util.ServiceTest;
@@ -260,7 +253,7 @@ class MemberReservationServiceTest extends ServiceTest {
 
         entityManager.clear();
         entityManager.flush();
-        
+
         //when
         memberReservationService.deleteMemberReservation(AuthInfo.from(memberChoco), firstReservation.getId());
 

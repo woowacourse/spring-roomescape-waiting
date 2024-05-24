@@ -57,7 +57,11 @@ class AuthServiceTest extends ServiceTest {
         AuthInfo authInfo = authService.fetchByToken(accessToken);
 
         //then
-        assertThat(authInfo.getEmail()).isEqualTo(member.getEmail());
+        assertAll(
+                () -> assertThat(authInfo.getName()).isEqualTo(member.getName()),
+                () -> assertThat(authInfo.getEmail()).isEqualTo(member.getEmail()),
+                () -> assertThat(authInfo.getRole()).isEqualTo(member.getRole())
+        );
     }
 
     @DisplayName("유효하지 않는 토큰에 예외가 발생한다.")
