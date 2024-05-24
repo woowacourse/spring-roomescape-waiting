@@ -26,6 +26,7 @@ public record ReservationCreateRequest(@NotNull(message = "예약자 정보가 �
                 .reservationDetail(detail)
                 .build();
     }
+
     public ReservationDetail toReservationDetail(Theme theme, Time time) {
         return new ReservationDetail(theme, time, date);
     }

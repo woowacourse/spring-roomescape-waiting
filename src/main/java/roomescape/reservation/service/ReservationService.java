@@ -79,9 +79,9 @@ public class ReservationService {
                 .ifPresent(reservation -> {
                     throw new ConflictException(
                             "해당 테마(%s)의 해당 시간(%s)에는 이미 예약이 존재합니다."
-                            .formatted(
-                                    reservation.getTheme().getName(),
-                                    reservation.getTime().getStartAt()));
+                                    .formatted(
+                                            reservation.getTheme().getName(),
+                                            reservation.getTime().getStartAt()));
                 });
     }
 

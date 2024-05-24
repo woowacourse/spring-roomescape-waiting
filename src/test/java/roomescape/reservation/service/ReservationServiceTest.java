@@ -94,7 +94,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("특정 테마의 예약이 존재하는 시간에 예약을 요청할 때 예외를 던진다.")
     void addReservation_ShouldThrowException_WhenDuplicatedReservationRequestOccurs() {
-          Mockito.when(detailRepository.findById(any(Long.class)))
+        Mockito.when(detailRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getDetail()));
         Mockito.when(memberRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getMember()));
