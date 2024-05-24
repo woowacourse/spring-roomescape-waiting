@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS reservation
     id             BIGINT NOT NULL AUTO_INCREMENT,
     member_id      BIGINT NOT NULL,
     reservation_slot_id BIGINT NOT NULL,
-    created_time DATETIME NOT NULL,
+    created_at DATETIME NOT NULL,
     status VARCHAR(255),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id),

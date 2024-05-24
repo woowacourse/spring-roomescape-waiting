@@ -19,7 +19,7 @@ public record MyReservationResponse(long reservationId, String themeName, LocalD
 
     public static MyReservationResponse from(MyReservationWithStatus myReservationWithStatus) {
         return new MyReservationResponse(
-                myReservationWithStatus.memberReservationId(),
+                myReservationWithStatus.reservationId(),
                 myReservationWithStatus.themeName(),
                 myReservationWithStatus.date(),
                 myReservationWithStatus.time(),
@@ -29,7 +29,7 @@ public record MyReservationResponse(long reservationId, String themeName, LocalD
 
     public static MyReservationResponse from(MyReservationWithStatus myReservationWithStatus, int waitingCount) {
         return new MyReservationResponse(
-                myReservationWithStatus.memberReservationId(),
+                myReservationWithStatus.reservationId(),
                 myReservationWithStatus.themeName(),
                 myReservationWithStatus.date(),
                 myReservationWithStatus.time(),

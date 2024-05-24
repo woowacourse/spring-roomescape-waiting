@@ -19,7 +19,7 @@ public class Reservation {
     @ManyToOne
     private ReservationSlot reservationSlot;
 
-    private LocalDateTime createdTime;
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
@@ -29,11 +29,11 @@ public class Reservation {
 
     public Reservation(Member member,
                        ReservationSlot reservationSlot,
-                       LocalDateTime createdTime,
+                       LocalDateTime createdAt,
                        ReservationStatus status) {
         this.member = member;
         this.reservationSlot = reservationSlot;
-        this.createdTime = createdTime;
+        this.createdAt = createdAt;
         this.status = status;
     }
 
@@ -46,7 +46,7 @@ public class Reservation {
     public Reservation(Member member, ReservationSlot reservationSlot) {
         this.member = member;
         this.reservationSlot = reservationSlot;
-        this.createdTime = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
         this.status = ReservationStatus.BOOKED;
     }
 

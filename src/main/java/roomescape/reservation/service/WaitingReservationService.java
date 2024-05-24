@@ -38,7 +38,7 @@ public class WaitingReservationService {
     private MyReservationResponse handler(MyReservationWithStatus myReservationWithStatus) {
         if (myReservationWithStatus.status().isWaiting()) {
             int waitingCount = reservationRepository
-                    .countWaitingReservation(myReservationWithStatus.memberReservationId());
+                    .countWaitingReservation(myReservationWithStatus.reservationId());
             return MyReservationResponse.from(myReservationWithStatus, waitingCount);
         }
         return MyReservationResponse.from(myReservationWithStatus);
@@ -61,7 +61,7 @@ public class WaitingReservationService {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
         reservationRepository.deleteById(memberReservationId);
-        reservationRepository.findFirstByReservationSlotOrderByCreatedTime(memberReservation.getReservationSlot())
+        reservationRepository.findFirstByReservationSlotOrderByCreatedAt(memberReservation.getReservationSlot())
                         .ifPresent(Reservation::confirmReservation);
     }
 }

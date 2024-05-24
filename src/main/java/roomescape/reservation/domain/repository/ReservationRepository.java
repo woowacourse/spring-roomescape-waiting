@@ -18,7 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     List<Reservation> findAllByStatus(ReservationStatus status);
 
-    Optional<Reservation> findFirstByReservationSlotOrderByCreatedTime(ReservationSlot reservationSlot);
+    Optional<Reservation> findFirstByReservationSlotOrderByCreatedAt(ReservationSlot reservationSlot);
 
     @Query("""
     SELECT count(*)
