@@ -28,7 +28,6 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Member member;
 
-
     protected Reservation() {
     }
 
