@@ -28,15 +28,15 @@ public class Waiting {
     protected Waiting() {
     }
 
-    // TODO : 메서드 정리, getter 정리
     public Waiting(Member member, Reservation reservation) {
-        if (reservation.isOwner(member)) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 자신의 예약에 대한 예약 대기를 생성할 수 없습니다.",
-                    new Throwable("reservation_id : " + reservation.getId())
-            );
-        }
+        validateIsReservationOwner(member, reservation);
+        validateDateTime(reservation);
 
+        this.member = member;
+        this.reservation = reservation;
+    }
+
+    private void validateDateTime(Reservation reservation) {
         LocalDate date = reservation.getDate();
         LocalTime time = reservation.getTime().getStartAt();
         if (DateUtil.isPastDateTime(date, time)) {
@@ -45,9 +45,15 @@ public class Waiting {
                     new Throwable("생성 예약 대기 시간 : " + date + " " + time)
             );
         }
+    }
 
-        this.member = member;
-        this.reservation = reservation;
+    private void validateIsReservationOwner(Member member, Reservation reservation) {
+        if (reservation.isOwner(member)) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 자신의 예약에 대한 예약 대기를 생성할 수 없습니다.",
+                    new Throwable("reservation_id : " + reservation.getId())
+            );
+        }
     }
 
     public void approve() {

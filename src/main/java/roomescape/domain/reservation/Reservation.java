@@ -33,22 +33,22 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(
-            LocalDate date,
-            ReservationTime reservationTime,
-            Theme theme,
-            Member member
-    ) {
+    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        validateDateTime(date, reservationTime);
+
+        this.date = date;
+        this.time = reservationTime;
+        this.theme = theme;
+        this.member = member;
+    }
+
+    private void validateDateTime(LocalDate date, ReservationTime reservationTime) {
         if (DateUtil.isPastDateTime(date, reservationTime.getStartAt())) {
             throw new IllegalArgumentException(
                     "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
                     new Throwable("생성 예약 시간 : " + date + " " + reservationTime.getStartAt())
             );
         }
-        this.date = date;
-        this.time = reservationTime;
-        this.theme = theme;
-        this.member = member;
     }
 
     public void changeOwner(Member member) {
