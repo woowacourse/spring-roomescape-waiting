@@ -22,12 +22,11 @@ public class ReservationAndWaitingService {
     }
 
     @Transactional
-    public void changeWaitingToReservation(Long reservationId) {
+    public void deleteReservation(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 삭제 실패: 존재하지 않는 예약입니다. (id: %d)", reservationId)));
-        findWaitingOfReservation(reservation).ifPresentOrElse(
-                waiting -> updateReservationByWaiting(waiting, reservation),
-                () -> deleteReservation(reservationId));
+        reservationRepository.deleteById(reservationId);
+        findWaitingOfReservation(reservation).ifPresent(this::changeWaitingToReservation);
     }
 
     private Optional<ReservationWaiting> findWaitingOfReservation(Reservation reservation) {
@@ -37,17 +36,14 @@ public class ReservationAndWaitingService {
         return reservationWaitingRepository.findTopByDateAndTimeIdAndThemeIdOrderById(date, timeId, themeId);
     }
 
-    private void updateReservationByWaiting(ReservationWaiting waiting, Reservation reservation) {
-        Reservation changedReservation = new Reservation(reservation.getId(),
+    private void changeWaitingToReservation(ReservationWaiting waiting) {
+        Reservation reservation = new Reservation(
                 waiting.getMember(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme());
-        reservationRepository.save(changedReservation);
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme()
+        );
         reservationWaitingRepository.deleteById(waiting.getId());
-    }
-
-    private void deleteReservation(Long reservationId) {
-        reservationRepository.deleteById(reservationId);
+        reservationRepository.save(reservation);
     }
 }

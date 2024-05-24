@@ -65,7 +65,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBy(@PathVariable Long id) {
-        reservationAndWaitingService.changeWaitingToReservation(id);
+        reservationAndWaitingService.deleteReservation(id);
 
         return ResponseEntity.noContent().build();
     }
