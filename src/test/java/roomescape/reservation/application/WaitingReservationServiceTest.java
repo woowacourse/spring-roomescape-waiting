@@ -24,6 +24,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TOMMY_NAME;
 import static roomescape.TestFixture.TOMMY_RESERVATION;
 import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
+import static roomescape.TestFixture.USER_ADMIN;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.USER_TOMMY;
 import static roomescape.TestFixture.WOOTECO_THEME;
@@ -103,7 +104,24 @@ class WaitingReservationServiceTest extends ServiceTest {
         Reservation waitingReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING));
 
         // when
-        waitingReservationService.deleteWaitingReservationByMember(waitingReservation.getId(), mia);
+        waitingReservationService.deleteWaitingReservation(waitingReservation.getId(), mia);
+
+        // then
+        List<WaitingReservation> waitingReservations = waitingReservationService.findWaitingReservationsWithPreviousCountByMember(mia);
+        assertThat(waitingReservations).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("관리자가 대기 예약을 취소한다.")
+    void deleteWaitingReservationWithAdmin() {
+        // given
+        Member admin = memberService.create(USER_ADMIN());
+
+        reservationService.create(new Reservation(tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme, BOOKING));
+        Reservation waitingReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING));
+
+        // when
+        waitingReservationService.deleteWaitingReservation(waitingReservation.getId(), admin);
 
         // then
         List<WaitingReservation> waitingReservations = waitingReservationService.findWaitingReservationsWithPreviousCountByMember(mia);
@@ -119,7 +137,7 @@ class WaitingReservationServiceTest extends ServiceTest {
         Reservation miaWaitingReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING));
 
         // when & then
-        assertThatThrownBy(() -> waitingReservationService.deleteWaitingReservationByMember(miaWaitingReservation.getId(), tommy))
+        assertThatThrownBy(() -> waitingReservationService.deleteWaitingReservation(miaWaitingReservation.getId(), tommy))
                 .isInstanceOf(ViolationException.class);
     }
 
@@ -130,7 +148,7 @@ class WaitingReservationServiceTest extends ServiceTest {
         Reservation reservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
 
         // when & then
-        assertThatThrownBy(() -> waitingReservationService.deleteWaitingReservationByMember(reservation.getId(), mia))
+        assertThatThrownBy(() -> waitingReservationService.deleteWaitingReservation(reservation.getId(), mia))
                 .isInstanceOf(ViolationException.class);
     }
 }

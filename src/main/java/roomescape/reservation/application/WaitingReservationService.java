@@ -29,7 +29,7 @@ public class WaitingReservationService {
     }
 
     @Transactional
-    public void deleteWaitingReservationByMember(Long reservationId, Member member) {
+    public void deleteWaitingReservation(Long reservationId, Member member) {
         reservationRepository.findById(reservationId).ifPresent(reservation -> {
             validateInWaiting(reservation);
             validateOwnerShip(reservation, member);
@@ -38,17 +38,9 @@ public class WaitingReservationService {
     }
 
     private void validateOwnerShip(Reservation reservation, Member member) {
-        if (!reservation.isOwnedBy(member)) {
-            throw new ViolationException("본인의 예약 대기만 삭제할 수 있습니다.");
+        if (!reservation.hasModificationPermission(member)) {
+            throw new ViolationException("예약 대기를 삭제할 권한이 없습니다. 예약자 혹은 관리자만 삭제할 수 있습니다.");
         }
-    }
-
-    @Transactional
-    public void deleteWaitingReservationByAdmin(Long reservationId) {
-        reservationRepository.findById(reservationId).ifPresent(reservation -> {
-            validateInWaiting(reservation);
-            reservationRepository.delete(reservation);
-        });
     }
 
     private void validateInWaiting(Reservation reservation) {

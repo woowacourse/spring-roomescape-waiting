@@ -74,19 +74,14 @@ public class Reservation {
         return status.isWaiting();
     }
 
-    public boolean isOwnedBy(Member member) {
+    public boolean hasModificationPermission(Member member) {
         Long memberId = member.getId();
         Long ownerId = this.member.getId();
-        return ownerId.equals(memberId);
+        return ownerId.equals(memberId) || member.isAdmin();
     }
 
     public void changeToBooking() {
         this.status = ReservationStatus.BOOKING;
-    }
-
-    public boolean hasSameOwner(Member member) {
-        Long otherId = member.getId();
-        return this.member.getId().equals(otherId);
     }
 
     public String getMemberName() {

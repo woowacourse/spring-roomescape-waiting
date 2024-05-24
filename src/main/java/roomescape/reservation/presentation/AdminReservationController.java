@@ -90,8 +90,8 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable Long id) {
-        waitingReservationService.deleteWaitingReservationByAdmin(id);
+    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable Long id, Member loginAdminMember) {
+        waitingReservationService.deleteWaitingReservation(id, loginAdminMember);
         return ResponseEntity.noContent().build();
     }
 }

@@ -52,6 +52,10 @@ public class TestFixture {
         return new Member(ADMIN_NAME, ADMIN_EMAIL, TEST_PASSWORD, ADMIN);
     }
 
+    public static Member USER_ADMIN(Long id) {
+        return new Member(id, ADMIN_NAME, ADMIN_EMAIL, TEST_PASSWORD, ADMIN);
+    }
+
     public static Reservation MIA_RESERVATION() {
         return MIA_RESERVATION(new ReservationTime(MIA_RESERVATION_TIME), WOOTECO_THEME(), USER_MIA(), BOOKING);
     }
