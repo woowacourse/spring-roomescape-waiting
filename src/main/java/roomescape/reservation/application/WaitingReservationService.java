@@ -38,9 +38,7 @@ public class WaitingReservationService {
     }
 
     private void validateOwnerShip(Reservation reservation, Member member) {
-        Long memberId = member.getId();
-        Long ownerId = reservation.getMember().getId();
-        if (!memberId.equals(ownerId)) {
+        if (!reservation.isOwnedBy(member)) {
             throw new ViolationException("본인의 예약 대기만 삭제할 수 있습니다.");
         }
     }

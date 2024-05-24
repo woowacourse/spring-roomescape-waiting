@@ -74,8 +74,10 @@ public class Reservation {
         return status.isWaiting();
     }
 
-    public boolean hasSameStatus(ReservationStatus status) {
-        return this.status == status;
+    public boolean isOwnedBy(Member member) {
+        Long memberId = member.getId();
+        Long ownerId = this.member.getId();
+        return ownerId.equals(memberId);
     }
 
     public void updateStatus(ReservationStatus status) {
