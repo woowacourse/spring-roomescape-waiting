@@ -18,4 +18,5 @@ VALUES ('2024-04-30', 1, 1, 1),
 
 INSERT INTO waiting (date, reservation_time_id, theme_id, member_id)
 VALUES ('2024-04-30', 1, 1, 2),
-       ('2024-05-01', 2, 2, 1);
+       ('2024-05-01', 2, 2, 1),
+       ('2024-04-30', 1, 1, 1);
