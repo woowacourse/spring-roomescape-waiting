@@ -295,7 +295,10 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .filter(resposne -> resposne.id() == Long.parseLong(adminReservationId))
                             .findAny().get();
 
-                    assertThat(userReservationResponse.status()).isEqualTo("1번째 " + ReservationStatus.WAIT.getValue());
+                    assertAll(
+                            () -> assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.WAIT.getValue()),
+                            () -> assertThat(userReservationResponse.rank()).isEqualTo(1L)
+                    );
                 }),
                 dynamicTest("자신의 예약 대기를 삭제한다.", () -> {
                     RestAssured.given().log().all()

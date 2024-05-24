@@ -156,11 +156,11 @@ class ReservationServiceTest extends IntegrationTestSupport {
 
         // then
         assertThat(allUserReservation).hasSize(3)
-                .extracting("id", "status")
+                .extracting("id", "status", "rank")
                 .containsExactly(
-                        tuple(14L, "예약"),
-                        tuple(2L, "2번째 예약대기"),
-                        tuple(3L, "1번째 예약대기")
+                        tuple(14L, "예약", 0L),
+                        tuple(2L, "예약대기", 2L),
+                        tuple(3L, "예약대기", 1L)
                 );
     }
 

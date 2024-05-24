@@ -37,7 +37,10 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        let status = item.status;
+        if (item.status === '예약대기') {
+            status = item.rank + '번째 ' + item.status;
+        }
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
