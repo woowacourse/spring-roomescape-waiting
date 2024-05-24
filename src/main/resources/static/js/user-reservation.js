@@ -1,11 +1,16 @@
 const THEME_API_ENDPOINT = '/themes';
 const RESERVATION_API_ENDPOINT = '/reservations'
 
+const oneWeekFromToday = new Date();
+oneWeekFromToday.setDate(oneWeekFromToday.getDate() + 7);
+
 document.addEventListener('DOMContentLoaded', () => {
   requestRead(THEME_API_ENDPOINT)
       .then(renderTheme)
       .catch(error => console.error('Error fetching times:', error));
   flatpickr("#datepicker", {
+    minDate: 'today',
+    maxDate: oneWeekFromToday,
     inline: true,
     onChange: function (selectedDates, dateStr, instance) {
       if (dateStr === '') return;
