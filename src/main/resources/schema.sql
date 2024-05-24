@@ -24,35 +24,35 @@ VALUES ('우테코 살아남기', '우테코는 어떤 곳인가 과연.. 그곳
         'https://techblog.woowahan.com/wp-content/uploads/img/2019-02-08/techcourse_poster.jpeg');
 
 INSERT INTO reservation_detail(theme_id, time_id, date)
-VALUES (1, 4, CURRENT_DATE - 5);
+VALUES (4, 1, CURRENT_DATE - 5);
 INSERT INTO reservation_detail(theme_id, time_id, date)
-VALUES (2, 4, CURRENT_DATE - 4);
+VALUES (4, 2, CURRENT_DATE - 4);
 INSERT INTO reservation_detail(theme_id, time_id, date)
-VALUES (2, 4, CURRENT_DATE - 5);
+VALUES (4, 2, CURRENT_DATE - 5);
 INSERT INTO reservation_detail(theme_id, time_id, date)
-VALUES (1, 2, CURRENT_DATE - 3);
+VALUES (2, 1, CURRENT_DATE - 3);
 INSERT INTO reservation_detail(theme_id, time_id, date)
 VALUES (2, 2, CURRENT_DATE - 3);
 INSERT INTO reservation_detail(theme_id, time_id, date)
-VALUES (1, 3, CURRENT_DATE - 2);
+VALUES (3, 1, CURRENT_DATE - 2);
 INSERT INTO reservation_detail(theme_id, time_id, date)
-VALUES (2, 3, CURRENT_DATE - 2);
+VALUES (3, 2, CURRENT_DATE - 2);
 INSERT INTO reservation_detail(theme_id, time_id, date)
 VALUES (1, 1, CURRENT_DATE - 1);
 
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
-INSERT INTO reservation(date, member_id, detail_id)
-VALUES (1,);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,1);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,2);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,3);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,4);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,5);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,6);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,7);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,8);
