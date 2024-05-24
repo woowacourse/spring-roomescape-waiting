@@ -3,5 +3,14 @@ package roomescape.domain;
 public enum ReservationStatus {
 
     RESERVED,
-    WAITING
+    WAITING,
+    ;
+
+    public boolean isReserved() {
+        return this == RESERVED;
+    }
+
+    public boolean isWaiting() {
+        return this == WAITING;
+    }
 }
