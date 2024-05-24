@@ -25,9 +25,7 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final Reservation reservation) {
-        if (reservation.getStatus() == ReservationStatus.RESERVED) {
-            validateDuplicatedReservation(reservation);
-        }
+        validateDuplicatedReservation(reservation);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 

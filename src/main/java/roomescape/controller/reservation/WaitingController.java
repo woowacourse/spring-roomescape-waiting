@@ -15,29 +15,29 @@ import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.MemberService;
-import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
+import roomescape.service.WaitingService;
 
 @RequestMapping("/waitings")
 @RestController
 public class WaitingController {
 
     private final MemberService memberService;
-    private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final WaitingService waitingService;
 
     public WaitingController(
             final MemberService memberService,
-            final ReservationService reservationService,
             final ReservationTimeService reservationTimeService,
-            final ThemeService themeService)
+            final ThemeService themeService,
+            final WaitingService waitingService)
     {
         this.memberService = memberService;
-        this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -49,6 +49,6 @@ public class WaitingController {
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
         final Reservation reservation = request.toModel(memberResponse, themeResponse, reservationTimeResponse, request.status());
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.create(reservation));
+        return ResponseEntity.status(HttpStatus.CREATED).body(waitingService.createReservationWaiting(reservation));
     }
 }

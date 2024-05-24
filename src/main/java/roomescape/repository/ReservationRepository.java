@@ -3,6 +3,7 @@ package roomescape.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
@@ -59,4 +60,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByThemeAndDateAndTimeAndStatus(final Theme theme, final LocalDate date,
                                                  final ReservationTime time, final ReservationStatus status);
+
+    boolean existsByThemeAndDateAndTimeAndStatusAndMember(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime time,
+            final ReservationStatus status,
+            final Member member);
 }

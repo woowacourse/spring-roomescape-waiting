@@ -172,9 +172,18 @@ class ReservationRepositoryTest {
 
     @Test
     @DisplayName("테마, 날짜, 시간에 해당하는 예약이 있는지 확인한다.")
-    void findByThemeAndDateAndTime() {
+    void existsByThemeAndDateAndTimeAndStatus() {
         final boolean actual = reservationRepository.existsByThemeAndDateAndTimeAndStatus(
                 theme, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, ReservationStatus.RESERVED);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @DisplayName("테마, 날짜, 시간, 멤버에 해당하는 예약이 있는지 확인한다.")
+    void existsByThemeAndDateAndTimeAndStatusAndMember() {
+        final boolean actual = reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
+                theme, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, ReservationStatus.RESERVED, member);
 
         assertThat(actual).isTrue();
     }
