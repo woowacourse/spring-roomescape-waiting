@@ -14,7 +14,7 @@ public class Email {
 
     private static final Pattern pattern = Pattern.compile(EMAIL_REGEX);
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String address;
 
     public Email(String address) {
