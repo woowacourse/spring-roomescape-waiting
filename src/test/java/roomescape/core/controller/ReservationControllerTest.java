@@ -202,6 +202,13 @@ class ReservationControllerTest {
                 .body("size()", is(2));
     }
 
+    /*
+    예약 정보
+    {"date": '2024-05-07', "member_id": 1, "time_id": 1, "theme_id": 1, "status": 'BOOKED'}
+    {"date": '2224-05-08', "member_id": 2, "time_id": 1, "theme_id": 1, "status": 'BOOKED'}
+    {"date": '2224-05-08', "member_id": 3, "time_id": 1, "theme_id": 1, "status": 'STANDBY'}
+    {"date": '2224-05-08', "member_id": 1, "time_id": 1, "theme_id": 1, "status": 'STANDBY'}
+    */
     @Test
     @DisplayName("나의 예약 목록의 예약 대기 상태에 대기 순번을 표시한다.")
     void findReservationWaitingRank() {
