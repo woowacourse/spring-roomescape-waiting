@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Embeddable
 public class ReservationDate {
-    @Column(name = "DATE")
+    @Column(name = "VISIT_DATE")
     private LocalDate value;
 
     protected ReservationDate() {
