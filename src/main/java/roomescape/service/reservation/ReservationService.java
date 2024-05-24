@@ -17,10 +17,10 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.reservation.dto.ReservationConditionRequest;
-import roomescape.service.reservation.dto.ReservationRequest;
-import roomescape.service.reservation.dto.MyReservationResponse;
-import roomescape.service.reservation.dto.ReservationResponse;
+import roomescape.service.reservation.dto.request.ReservationConditionRequest;
+import roomescape.service.reservation.dto.request.ReservationRequest;
+import roomescape.service.reservation.dto.response.MyReservationResponse;
+import roomescape.service.reservation.dto.response.ReservationResponse;
 
 @Service
 public class ReservationService {

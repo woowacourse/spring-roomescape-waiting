@@ -11,10 +11,10 @@ import roomescape.global.handler.exception.ExceptionCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.reservation.dto.AvailableTimeRequest;
-import roomescape.service.reservation.dto.ReservationTimeRequest;
-import roomescape.service.reservation.dto.AvailableTimeResponse;
-import roomescape.service.reservation.dto.ReservationTimeResponse;
+import roomescape.service.reservation.dto.request.AvailableTimeRequest;
+import roomescape.service.reservation.dto.request.ReservationTimeRequest;
+import roomescape.service.reservation.dto.response.AvailableTimeResponse;
+import roomescape.service.reservation.dto.response.ReservationTimeResponse;
 
 @Service
 public class ReservationTimeService {

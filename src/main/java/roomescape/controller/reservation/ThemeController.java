@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.service.reservation.ThemeService;
-import roomescape.service.reservation.dto.ThemeRequest;
-import roomescape.service.reservation.dto.ThemeResponse;
+import roomescape.service.reservation.dto.request.ThemeRequest;
+import roomescape.service.reservation.dto.response.ThemeResponse;
 
 @RestController
 @RequestMapping("/themes")

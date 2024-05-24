@@ -11,8 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.reservation.dto.ThemeRequest;
-import roomescape.service.reservation.dto.ThemeResponse;
+import roomescape.service.reservation.dto.request.ThemeRequest;
+import roomescape.service.reservation.dto.response.ThemeResponse;
 import roomescape.service.reservation.ThemeService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)

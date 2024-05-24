@@ -12,11 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import roomescape.service.reservation.dto.ReservationRequest;
-import roomescape.service.reservation.dto.ReservationTimeRequest;
-import roomescape.service.reservation.dto.ThemeRequest;
-import roomescape.service.reservation.dto.UserReservationRequest;
-import roomescape.service.reservation.dto.WaitingRequest;
+import roomescape.service.reservation.dto.request.ReservationRequest;
+import roomescape.service.reservation.dto.request.ReservationTimeRequest;
+import roomescape.service.reservation.dto.request.ThemeRequest;
+import roomescape.service.reservation.dto.request.UserReservationRequest;
+import roomescape.service.reservation.dto.request.WaitingRequest;
 
 class WaitingTest extends AcceptanceTest {
 

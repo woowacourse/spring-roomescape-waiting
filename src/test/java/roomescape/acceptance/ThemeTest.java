@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.service.reservation.dto.ThemeRequest;
+import roomescape.service.reservation.dto.request.ThemeRequest;
 
 class ThemeTest extends AcceptanceTest {
 

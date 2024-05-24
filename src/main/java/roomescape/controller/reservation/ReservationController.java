@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.infrastructure.MemberId;
 import roomescape.service.reservation.ReservationService;
-import roomescape.service.reservation.dto.ReservationConditionRequest;
-import roomescape.service.reservation.dto.ReservationRequest;
-import roomescape.service.reservation.dto.UserReservationRequest;
-import roomescape.service.reservation.dto.MyReservationResponse;
-import roomescape.service.reservation.dto.ReservationResponse;
+import roomescape.service.reservation.dto.request.ReservationConditionRequest;
+import roomescape.service.reservation.dto.request.ReservationRequest;
+import roomescape.service.reservation.dto.request.UserReservationRequest;
+import roomescape.service.reservation.dto.response.MyReservationResponse;
+import roomescape.service.reservation.dto.response.ReservationResponse;
 
 
 @RestController

@@ -24,12 +24,12 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.reservation.dto.ReservationRequest;
+import roomescape.service.reservation.dto.request.ReservationRequest;
 import roomescape.service.member.dto.MemberResponse;
-import roomescape.service.reservation.dto.MyReservationResponse;
-import roomescape.service.reservation.dto.ReservationResponse;
-import roomescape.service.reservation.dto.ReservationTimeResponse;
-import roomescape.service.reservation.dto.ThemeResponse;
+import roomescape.service.reservation.dto.response.MyReservationResponse;
+import roomescape.service.reservation.dto.response.ReservationResponse;
+import roomescape.service.reservation.dto.response.ReservationTimeResponse;
+import roomescape.service.reservation.dto.response.ThemeResponse;
 import roomescape.service.reservation.ReservationService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)

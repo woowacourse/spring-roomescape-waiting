@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.infrastructure.MemberId;
 import roomescape.service.reservation.WaitingService;
-import roomescape.service.reservation.dto.WaitingRequest;
-import roomescape.service.reservation.dto.WaitingResponse;
+import roomescape.service.reservation.dto.request.WaitingRequest;
+import roomescape.service.reservation.dto.response.WaitingResponse;
 
 @RestController
 @RequestMapping("/waitings")

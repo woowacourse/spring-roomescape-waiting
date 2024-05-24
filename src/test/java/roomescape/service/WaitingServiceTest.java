@@ -25,11 +25,11 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.reservation.dto.WaitingRequest;
+import roomescape.service.reservation.dto.request.WaitingRequest;
 import roomescape.service.member.dto.MemberResponse;
-import roomescape.service.reservation.dto.ReservationTimeResponse;
-import roomescape.service.reservation.dto.ThemeResponse;
-import roomescape.service.reservation.dto.WaitingResponse;
+import roomescape.service.reservation.dto.response.ReservationTimeResponse;
+import roomescape.service.reservation.dto.response.ThemeResponse;
+import roomescape.service.reservation.dto.response.WaitingResponse;
 import roomescape.service.reservation.WaitingService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
