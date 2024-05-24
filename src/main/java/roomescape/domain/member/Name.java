@@ -39,7 +39,6 @@ public class Name {
             throw new IllegalArgumentException(
                     "[ERROR] 이름은 2~10자만 가능합니다.",
                     new Throwable("member_name : " + name)
-
             );
         }
     }

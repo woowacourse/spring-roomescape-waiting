@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Status;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.ReservationTime;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -41,9 +44,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Long> findTopThemeIdsByReservationCountsForDate(LocalDate startDate, LocalDate endDate);
 
+    int countByDateAndTimeAndThemeAndStatus(LocalDate date, ReservationTime time, Theme theme, Status status);
+
     boolean existsByTimeId(Long id);
 
     boolean existsByThemeId(Long id);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 }

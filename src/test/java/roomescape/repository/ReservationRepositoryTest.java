@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 
@@ -178,6 +179,6 @@ class ReservationRepositoryTest {
         Theme theme = themeRepository.findById(themeId).orElseThrow();
         Member member = memberRepository.findById(memberId).orElseThrow();
 
-        return new Reservation(date, reservationTime, theme, member);
+        return new Reservation(date, reservationTime, theme, member, Status.RESERVED);
     }
 }

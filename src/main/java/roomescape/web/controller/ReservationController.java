@@ -16,13 +16,14 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.UserReservationRequest;
 import roomescape.dto.reservation.UserReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 
 @RestController
 class ReservationController {
 
     private final ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
     }
 
@@ -40,6 +41,16 @@ class ReservationController {
             LoginMember loginMember) {
         ReservationRequest reservationRequest = ReservationRequest.from(userReservationRequest, loginMember.id());
         Long savedId = reservationService.addReservation(reservationRequest);
+        ReservationResponse reservationResponse = reservationService.getReservation(savedId);
+        return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
+    }
+
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<ReservationResponse> addReservationWaitByUser(
+            @RequestBody UserReservationRequest userReservationRequest,
+            LoginMember loginMember) {
+        ReservationRequest reservationRequest = ReservationRequest.from(userReservationRequest, loginMember.id());
+        Long savedId = reservationService.addReservationWait(reservationRequest);
         ReservationResponse reservationResponse = reservationService.getReservation(savedId);
         return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
     }

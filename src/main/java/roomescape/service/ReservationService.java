@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
+import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -16,6 +18,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.util.DateUtil;
 
 @Service
@@ -25,23 +28,33 @@ public class ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository timeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
-    ) {
+            MemberRepository memberRepository,
+            WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public Long addReservation(ReservationRequest request) {
-        Reservation reservation = convertReservation(request);
+        Reservation reservation = convertReservation(request, Status.RESERVED);
         validateAddable(reservation);
         return reservationRepository.save(reservation).getId();
+    }
+
+    public Long addReservationWait(ReservationRequest request) {
+        Reservation reservation = convertReservation(request, Status.WAITING);
+        validateAddableWaiting(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        addWaiting(savedReservation);
+        return savedReservation.getId();
     }
 
     public List<ReservationResponse> getAllReservations() {
@@ -58,8 +71,7 @@ public class ReservationService {
 
     public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
-        return reservations.stream().map(UserReservationResponse::from)
-                .toList();
+        return convertUserReservationResponses(reservations);
     }
 
     public List<ReservationResponse> getReservationsByFilter(ReservationFilter filter) {
@@ -79,11 +91,36 @@ public class ReservationService {
         reservationRepository.deleteById(reservation.getId());
     }
 
-    private Reservation convertReservation(ReservationRequest request) {
+    private Reservation convertReservation(ReservationRequest request, Status status) {
         ReservationTime reservationTime = findReservationTime(request.timeId());
         Theme theme = findTheme(request.themeId());
         Member member = findMember(request.memberId());
-        return request.toEntity(reservationTime, theme, member);
+        return request.toEntityByReserved(reservationTime, theme, member, status);
+    }
+
+    private List<UserReservationResponse> convertUserReservationResponses(List<Reservation> reservations) {
+        return reservations.stream()
+                .map(this::createUserReservationResponse)
+                .toList();
+    }
+
+    private UserReservationResponse createUserReservationResponse(Reservation reservation) {
+        if (reservation.getStatus() == Status.RESERVED) {
+            return UserReservationResponse.creat(reservation);
+        }
+
+        Waiting waiting = findWaitingByReservationId(reservation.getId());
+        return UserReservationResponse.createWithWaiting(reservation, waiting);
+    }
+
+    private void addWaiting(Reservation savedReservation) {
+        int waitingOrder = reservationRepository.countByDateAndTimeAndThemeAndStatus(
+                savedReservation.getDate(),
+                savedReservation.getTime(),
+                savedReservation.getTheme(),
+                savedReservation.getStatus()
+        );
+        waitingRepository.save(new Waiting(savedReservation, waitingOrder));
     }
 
     private Reservation findReservationById(Long id) {
@@ -118,9 +155,31 @@ public class ReservationService {
                 ));
     }
 
+    private Waiting findWaitingByReservationId(Long reservationId) {
+        return waitingRepository.findByReservationId(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "[ERROR] 예약 대기 정보가 존재하지 않습니다.",
+                        new Throwable("reservation_id : " + reservationId)
+                ));
+    }
+
     private void validateAddable(Reservation reservation) {
-        validateReservationNotDuplicate(reservation);
         validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
+        validateReservationNotDuplicate(reservation);
+    }
+
+    private void validateAddableWaiting(Reservation reservation) {
+        validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
+        validateWaitingDuplicate(reservation);
+    }
+
+    private void validateUnPassedDate(LocalDate date, LocalTime time) {
+        if (DateUtil.isPastDateTime(date, time)) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
+                    new Throwable("생성 예약 시간 : " + date + " " + time)
+            );
+        }
     }
 
     private void validateReservationNotDuplicate(Reservation reservation) {
@@ -136,11 +195,16 @@ public class ReservationService {
         }
     }
 
-    private void validateUnPassedDate(LocalDate date, LocalTime time) {
-        if (DateUtil.isPastDateTime(date, time)) {
+    private void validateWaitingDuplicate(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getMember().getId())
+        ) {
             throw new IllegalArgumentException(
-                    "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
-                    new Throwable("생성 예약 시간 : " + date + " " + time)
+                    "[ERROR] 이미 대기해놓은 예약이 있습니다..",
+                    new Throwable("생성 예약 대기 정보 : " + reservation)
             );
         }
     }
