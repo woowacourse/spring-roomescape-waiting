@@ -3,6 +3,7 @@ package roomescape.auth.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.dto.response.GetAuthInfoResponse;
 import roomescape.auth.dto.response.LoginResponse;
-import roomescape.common.exception.UnAuthorizationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -86,7 +86,7 @@ class AuthServiceTest {
 
         // when & then
         assertThatThrownBy(() -> authService.getMemberAuthInfo(authInfo))
-                .isInstanceOf(UnAuthorizationException.class)
+                .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("식별자 1에 해당하는 회원이 존재하지 않습니다.");
     }
 }

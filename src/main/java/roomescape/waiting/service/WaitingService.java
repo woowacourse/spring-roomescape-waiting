@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.common.exception.ForbiddenException;
@@ -77,7 +78,7 @@ public class WaitingService {
     public void rejectWaiting(final Long waitingId) {
         waitingRepository.findById(waitingId)
                 .ifPresentOrElse(waitingRepository::delete, () -> {
-                    throw new IllegalArgumentException("식별자 " + waitingId + "인 예약 대기가 존재하지 않아 거절할 수 없습니다.");
+                    throw new NoSuchElementException("식별자 " + waitingId + "인 예약 대기가 존재하지 않아 거절할 수 없습니다.");
                 });
     }
 }

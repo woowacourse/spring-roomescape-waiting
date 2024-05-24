@@ -68,7 +68,7 @@ class WaitingIntegrationTest {
                 .then().log().cookies().extract().cookie("token");
     }
 
-    @DisplayName("방탈출 예약 대기 성공 시, 생성된 대기에 대한 정보를 반환한다.")
+    @DisplayName("방탈출 예약 대기 성공")
     @Test
     void createReservationWaiting() {
         LocalDate date = LocalDate.parse("2024-11-30");
@@ -92,7 +92,7 @@ class WaitingIntegrationTest {
                 .body("memberId", equalTo(1));
     }
 
-    @DisplayName("방탈출 예약 대기 요청 시, 예약이 존재하지 않는다면 예외를 반환한다.")
+    @DisplayName("방탈출 예약 대기 실패: 예약 없음")
     @Test
     void createReservationWaiting_WhenReservationNotExists() {
         LocalDate date = LocalDate.parse("2024-11-30");
@@ -113,7 +113,7 @@ class WaitingIntegrationTest {
                 .body("detail", equalTo("2024-11-30의 time: 1, theme: 1의 예약이 존재하지 않습니다."));
     }
 
-    @DisplayName("방탈출 예약 대기 요청 시 이미 회원에 대한 대기가 존재할 경우, 예외를 반환한다.")
+    @DisplayName("방탈출 예약 대기 실패: 중복 대기")
     @Test
     void createReservationWaiting_WhenMemberNotExistsReservationsAndMember() {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
@@ -136,7 +136,7 @@ class WaitingIntegrationTest {
                 .body("detail", equalTo("memberId: 1 회원이 reservationId: 1인 예약에 대해 이미 대기를 신청했습니다."));
     }
 
-    @DisplayName("회원의 방탈출 예약 대기 정보 목록을 조회한다.")
+    @DisplayName("예약 대기 정보 목록 조회")
     @Test
     void getWaitings() {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
@@ -166,7 +166,7 @@ class WaitingIntegrationTest {
                 FindWaitingWithRankingResponse.of(new WaitingWithRanking(waiting3, 1L))));
     }
 
-    @DisplayName("방탈출 예약 대기를 삭제한다.")
+    @DisplayName("방탈출 예약 대기 삭제 성공")
     @Test
     void deleteWaiting() {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
@@ -186,7 +186,7 @@ class WaitingIntegrationTest {
                 .statusCode(204);
     }
 
-    @DisplayName("방탈출 예약 대기 삭제 시, 예약 대기가 없는 경우 예외를 반환한다.")
+    @DisplayName("예약 대기 삭제 실패: 예약 대기 없음")
     @Test
     void deleteWaiting_WhenWaitingNotExists() {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
@@ -204,7 +204,7 @@ class WaitingIntegrationTest {
                 .body("detail", equalTo("식별자 1에 해당하는 예약 대기가 존재하지 않습니다."));
     }
 
-    @DisplayName("방탈출 예약 대기 삭제 실패: 회원의 권한이 없는 경우")
+    @DisplayName("예약 대기 삭제 실패: 회원의 권한이 없는 경우")
     @Test
     void deleteWaiting_WhenMember() {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
@@ -226,7 +226,7 @@ class WaitingIntegrationTest {
                 .body("detail", equalTo("회원의 권한이 없어, 식별자 2인 예약 대기를 삭제할 수 없습니다."));
     }
 
-    @DisplayName("방탈출 예약 대기 거절 성공")
+    @DisplayName("예약 대기 거절 성공")
     @Test
     void rejectWaiting() {
         Member admin = memberRepository.save(MemberFixture.getAdmin());
@@ -244,5 +244,24 @@ class WaitingIntegrationTest {
                 .then().log().all()
 
                 .statusCode(204);
+    }
+
+    @DisplayName("예약 대기 거절 실패: 대기 없음")
+    @Test
+    void rejectWaiting_WhenWaitingNotExist_throwException() {
+        Member admin = memberRepository.save(MemberFixture.getAdmin());
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(admin, LocalDate.parse("2024-11-30"), reservationTime, theme));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin(admin))
+                .when().delete("/admin/waitings/reject/1")
+                .then().log().all()
+
+                .statusCode(404)
+                .body("detail", equalTo("식별자 1인 예약 대기가 존재하지 않아 거절할 수 없습니다."));
     }
 }

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +45,9 @@ class WaitingRepositoryTest {
     @DisplayName("주어진 예약에 대해 가장 빨리 저장된 예약 대기 조회 성공")
     void getFirstByReservation() {
         // given
-        memberRepository.saveAll(MemberFixture.get(4));
+        List<Member> members = memberRepository.saveAll(MemberFixture.get(4));
         Reservation reservation = reservationRepository.save(new Reservation(
-                memberRepository.getById(1L),
+                members.get(0),
                 LocalDate.parse("2099-04-11"),
                 reservationTimeRepository.save(ReservationTimeFixture.getOne()),
                 themeRepository.save(ThemeFixture.getOne())));
