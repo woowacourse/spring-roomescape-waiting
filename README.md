@@ -30,9 +30,6 @@
 - [x] 자신의 예약 목록 조회 기능 추가
   - [x] 예약 목록에 예약 대기 목록도 포함하도록 변경
 
-- [ ] 예약 대기 기능 추가
-  - [ ] 이미 예약이 존재하는 날짜, 테마, 시간에 대해 예약 대기 가능 추가
-
 # API 명세
 
 ## 예약 조회 API
@@ -106,8 +103,7 @@
 > POST /reservations HTTP/1.1  
 > content-type: application/json  
 > cookie:
->
-token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI  
+> token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI  
 > host: localhost:8080
 
 ```JSON
