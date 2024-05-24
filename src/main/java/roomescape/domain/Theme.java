@@ -40,8 +40,8 @@ public class Theme {
         return description;
     }
 
-    public Thumbnail getThumbnail() {
-        return thumbnail;
+    public String getThumbnail() {
+        return thumbnail.getValue();
     }
 
     @Override

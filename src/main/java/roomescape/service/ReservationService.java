@@ -102,7 +102,7 @@ public class ReservationService {
 
     public void delete(Long id) {
         Reservation reservation = reservationRepository.getReservationBy(id);
-        if (!reservation.getStatus().isPending()) {
+        if (!reservation.isPending()) {
             Optional<Reservation> pendingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatusOrderById(
                     reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.PENDING);
             pendingReservation.ifPresent(Reservation::updateStatusBooked);

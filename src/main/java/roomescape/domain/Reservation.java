@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
@@ -55,6 +56,10 @@ public class Reservation {
         return time.equals(other);
     }
 
+    public boolean isPending() {
+        return status.isPending();
+    }
+
     public Long getId() {
         return id;
     }
@@ -71,12 +76,24 @@ public class Reservation {
         return time;
     }
 
+    public LocalTime getStartAt() {
+        return time.getStartAt();
+    }
+
     public Theme getTheme() {
         return theme;
     }
 
+    public String getThemeName() {
+        return theme.getName();
+    }
+
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public String getStatusName() {
+        return status.getName();
     }
 
     @Override
