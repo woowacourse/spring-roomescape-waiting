@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public class WaitingResponse {
 
-    private final long id; // TODO: id == 예약 대기 번호 ?
+    private final long id;
     private final LocalDate date;
     private final ReservationTimeResponse time;
     private final ThemeResponse theme;
@@ -27,7 +27,9 @@ public class WaitingResponse {
         ReservationTime time = waiting.getTime();
         Theme theme = waiting.getTheme();
         Member member = waiting.getMember();
-        return new WaitingResponse(waiting.getId(), waiting.getDate(),
+        return new WaitingResponse(
+                waiting.getId(),
+                waiting.getDate(),
                 ReservationTimeResponse.from(time),
                 ThemeResponse.from(theme),
                 MemberResponse.from(member));
