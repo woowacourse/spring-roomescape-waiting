@@ -13,8 +13,6 @@ import java.util.Objects;
 @Entity
 public class ReservationTime {
 
-    private static final int AVAILABLE_TIME_UNIT = 10;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +32,6 @@ public class ReservationTime {
     }
 
     public ReservationTime(final Long id, final LocalTime startAt) {
-        validateTimeUnit(startAt);
         this.id = id;
         this.startAt = startAt;
     }
@@ -50,10 +47,8 @@ public class ReservationTime {
         }
     }
 
-    private void validateTimeUnit(final LocalTime time) {
-        if (time.getMinute() % AVAILABLE_TIME_UNIT != 0) {
-            throw new IllegalArgumentException("예약 시간은 " + AVAILABLE_TIME_UNIT + "분 단위로 등록할 수 있습니다.");
-        }
+    public boolean isAvailable() {
+        return LocalTime.now().isBefore(startAt);
     }
 
     public Long getId() {

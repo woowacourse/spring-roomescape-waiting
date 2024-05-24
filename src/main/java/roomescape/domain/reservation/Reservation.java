@@ -51,6 +51,11 @@ public class Reservation {
         return this.time.equals(time) && this.date.equals(date);
     }
 
+    public boolean isAvailable() {
+        LocalDate now = LocalDate.now();
+        return now.isBefore(date) || (now.equals(date) && time.isAvailable());
+    }
+
     public Long getReservationTimeId() {
         return time.getId();
     }

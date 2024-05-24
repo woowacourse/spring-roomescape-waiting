@@ -8,7 +8,6 @@ import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.ReservationRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,20 +21,20 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final Reservation reservation) {
-        validateDate(reservation.getDate());
-        final boolean isReserved = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
-                reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId());
-        if (isReserved) {
-            throw new IllegalArgumentException("해당 시간대에 예약이 모두 찼습니다.");
-        }
-
+        validate(reservation);
         final Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);
     }
 
-    private void validateDate(final LocalDate date) {
-        if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
+    private void validate(final Reservation reservation) {
+        if (!reservation.isAvailable()) {
             throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
+        }
+
+        final boolean isReserved = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
+                reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId());
+        if (isReserved) {
+            throw new IllegalArgumentException("해당 시간대에 예약이 모두 찼습니다.");
         }
     }
 

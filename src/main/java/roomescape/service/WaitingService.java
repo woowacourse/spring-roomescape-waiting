@@ -12,7 +12,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -32,19 +31,20 @@ public class WaitingService {
     }
 
     public ReservationResponse create(final Waiting waiting) {
-        validateDate(waiting.getDate());
-        final boolean duplicated = waitingRepository.existsByDateAndTime_IdAndTheme_IdAndMember_Id(
-                waiting.getDate(), waiting.getTimeId(), waiting.getThemeId(), waiting.getMemberId());
-        if (duplicated) {
-            throw new IllegalArgumentException("이미 예약 대기가 있습니다.");
-        }
+        validate(waiting);
         final Waiting saved = waitingRepository.save(waiting);
         return ReservationResponse.from(saved);
     }
 
-    private void validateDate(final LocalDate date) {
-        if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
+    private void validate(final Waiting waiting) {
+        if (!waiting.isAvailable()) {
             throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
+        }
+
+        final boolean duplicated = waitingRepository.existsByDateAndTime_IdAndTheme_IdAndMember_Id(
+                waiting.getDate(), waiting.getTimeId(), waiting.getThemeId(), waiting.getMemberId());
+        if (duplicated) {
+            throw new IllegalArgumentException("이미 예약 대기가 있습니다.");
         }
     }
 

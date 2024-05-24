@@ -55,6 +55,11 @@ public class Waiting {
         return this.member != member;
     }
 
+    public boolean isAvailable() {
+        LocalDate now = LocalDate.now();
+        return now.isBefore(date) || (now.equals(date) && time.isAvailable());
+    }
+
     public Long getId() {
         return id;
     }
