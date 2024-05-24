@@ -35,6 +35,7 @@ public class ReservationWaitingQueue implements AtomicQueue<ReservationSlot, Mem
         }
 
         sleepWhileLock(lock, 500L);
+        reset(slot);
         return false;
     }
 
@@ -63,5 +64,11 @@ public class ReservationWaitingQueue implements AtomicQueue<ReservationSlot, Mem
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void reset(ReservationSlot slot) {
+        waitingMembers.remove(slot);
+        locks.remove(slot);
     }
 }

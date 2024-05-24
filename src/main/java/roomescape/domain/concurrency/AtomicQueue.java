@@ -2,6 +2,7 @@ package roomescape.domain.concurrency;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import roomescape.domain.reservation.slot.ReservationSlot;
 
 public interface AtomicQueue<K, V> {
 
@@ -14,4 +15,6 @@ public interface AtomicQueue<K, V> {
     boolean isFirst(V value, K key);
 
     void sleepWhileLock(AtomicBoolean lock, long time);
+
+    void reset(ReservationSlot slot);
 }
