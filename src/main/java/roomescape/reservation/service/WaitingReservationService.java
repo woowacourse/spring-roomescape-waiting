@@ -15,7 +15,6 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.service.ReservationCommonService;
 import roomescape.reservation.service.dto.WaitingCreate;
 
 @Service

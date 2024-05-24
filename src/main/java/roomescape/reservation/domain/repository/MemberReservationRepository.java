@@ -1,7 +1,6 @@
 package roomescape.reservation.domain.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -64,6 +63,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
                 WHERE rn_table.rn = :waitingNumber
             )
             """)
-    void updateStatusBy(ReservationStatus toSetStatus, Reservation reservation, ReservationStatus toChangeStatus, int waitingNumber);
+    void updateStatusBy(ReservationStatus toSetStatus, Reservation reservation, ReservationStatus toChangeStatus,
+                        int waitingNumber);
 
 }
