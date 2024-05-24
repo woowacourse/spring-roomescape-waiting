@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.Status;
 import roomescape.domain.reservationwaiting.WaitingWithRank;
 
 public record PersonalReservationResponse(
@@ -22,7 +21,7 @@ public record PersonalReservationResponse(
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getTheme().getRawName(),
-                Status.RESERVED.getName()
+                "예약"
         );
     }
 
@@ -32,7 +31,7 @@ public record PersonalReservationResponse(
                 waitingWithRank.date(),
                 waitingWithRank.time(),
                 waitingWithRank.themeName(),
-                String.format("%d번째 %s", waitingWithRank.rank(), Status.WAITING.getName())
+                String.format("%d번째 예약 대기", waitingWithRank.rank())
         );
     }
 }
