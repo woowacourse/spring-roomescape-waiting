@@ -3,8 +3,11 @@ package roomescape.reservation.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingRepository;
 import roomescape.reservation.domain.WaitingWithRank;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,5 +29,9 @@ public class WaitingService {
     @Transactional
     public void deleteById(Long id) {
         waitingRepository.deleteById(id);
+    }
+
+    public List<Waiting> findAll() {
+        return waitingRepository.findAll();
     }
 }
