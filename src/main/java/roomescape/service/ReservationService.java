@@ -51,6 +51,7 @@ public class ReservationService {
                 .date(request.date())
                 .reservationTime(reservationTime)
                 .theme(theme)
+                .reservationStatus(ReservationStatus.RESERVED)
                 .build();
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -69,6 +70,7 @@ public class ReservationService {
                 .date(request.date())
                 .reservationTime(reservationTime)
                 .theme(theme)
+                .reservationStatus(ReservationStatus.RESERVED)
                 .build();
         Reservation savedReservation = reservationRepository.save(reservation);
 

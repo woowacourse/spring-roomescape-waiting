@@ -5,6 +5,8 @@ import roomescape.domain.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static roomescape.domain.ReservationStatus.*;
+
 public class PreInsertedData {
 
     public static final ReservationTime TIME_10_O0 = new ReservationTime(
@@ -72,7 +74,8 @@ public class PreInsertedData {
             CUSTOMER_1,
             LocalDate.parse("2024-05-01"),
             TIME_11_00,
-            THEME_2
+            THEME_2,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER1_THEME3_240502_1100 = new Reservation(
@@ -80,7 +83,8 @@ public class PreInsertedData {
             CUSTOMER_1,
             LocalDate.parse("2024-05-02"),
             TIME_11_00,
-            THEME_3
+            THEME_3,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER1_THEME2_240501_1200 = new Reservation(
@@ -88,7 +92,8 @@ public class PreInsertedData {
             CUSTOMER_1,
             LocalDate.parse("2024-05-01"),
             TIME_12_00,
-            THEME_2
+            THEME_2,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER2_THEME3_240502_1200 = new Reservation(
@@ -96,7 +101,8 @@ public class PreInsertedData {
             CUSTOMER_2,
             LocalDate.parse("2024-05-02"),
             TIME_12_00,
-            THEME_3
+            THEME_3,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER2_THEME3_240503_1200 = new Reservation(
@@ -104,6 +110,7 @@ public class PreInsertedData {
             CUSTOMER_2,
             LocalDate.parse("2024-05-03"),
             TIME_12_00,
-            THEME_3
+            THEME_3,
+            RESERVED
     );
 }

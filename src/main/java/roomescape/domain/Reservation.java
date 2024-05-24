@@ -19,6 +19,10 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus reservationStatus;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
@@ -32,16 +36,17 @@ public class Reservation {
     }
 
     @Builder
-    public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
-        this(null, member, date, reservationTime, theme);
+    public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme, ReservationStatus reservationStatus) {
+        this(null, member, date, reservationTime, theme, reservationStatus);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme, ReservationStatus reservationStatus) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
+        this.reservationStatus = reservationStatus;
     }
 
     @Override

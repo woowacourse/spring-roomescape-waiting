@@ -22,6 +22,6 @@ public record MemberReservationResponse(
                 ThemeResponse.from(reservation.getTheme()),
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt(),
-                ReservationStatus.RESERVED); // reservation.getStatus()로 받아올 수 있게 하기
+                reservation.getReservationStatus());
     }
 }
