@@ -54,7 +54,7 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    public ReservationResponse wait(ReservationCreateRequest request) {
+    public ReservationResponse saveWaiting(ReservationCreateRequest request) {
         validateDuplicate(request);
         Reservation reservation = getReservationForSave(request, Status.WAITING);
         Reservation savedReservation = reservationRepository.save(reservation);

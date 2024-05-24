@@ -55,7 +55,7 @@ public class ReservationController {
             @Authenticated AuthInfo authInfo
     ) {
         ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.from(memberRequest, authInfo.id());
-        ReservationResponse reservationResponse = reservationService.wait(reservationCreateRequest);
+        ReservationResponse reservationResponse = reservationService.saveWaiting(reservationCreateRequest);
         return ResponseEntity.created(URI.create("/reservations" + reservationResponse.id())).body(reservationResponse);
     }
 
