@@ -40,6 +40,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT r
             FROM Reservation AS r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
             JOIN FETCH r.member
             WHERE r.date.value =:date
             AND r.time.id =:timeId
@@ -60,6 +62,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             AND r1.id>r2.id) > 0
             """)
     List<Reservation> findReservationOnWaiting();
-
-
 }
