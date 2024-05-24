@@ -5,7 +5,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 import org.assertj.core.api.SoftAssertions;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.BaseControllerTest;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -28,6 +26,8 @@ import roomescape.dto.response.PersonalReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.support.fixture.ReservationTimeFixture;
+import roomescape.support.fixture.ThemeFixture;
 
 class ReservationControllerTest extends BaseControllerTest {
 
@@ -37,10 +37,14 @@ class ReservationControllerTest extends BaseControllerTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    private ReservationTime time;
+
+    private Theme theme;
+
     @BeforeEach
     void setUp() {
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-        themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
+        time = reservationTimeRepository.save(ReservationTimeFixture.create());
+        theme = themeRepository.save(ThemeFixture.create());
 
         userLogin();
     }
@@ -100,10 +104,8 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("나의 예약들을 조회한다")
     void getMyReservations() {
-        LocalDate reservationDate = LocalDate.of(2024, 4, 9);
-        long timeId = 1L;
-        long themeId = 1L;
-        ReservationRequest saveRequest = new ReservationRequest(reservationDate, timeId, themeId);
+        LocalDate date = LocalDate.of(2024, 4, 9);
+        ReservationRequest saveRequest = new ReservationRequest(date, time.getId(), theme.getId());
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
@@ -124,15 +126,16 @@ class ReservationControllerTest extends BaseControllerTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(personalReservationResponses).hasSize(1);
-            softly.assertThat(personalReservationResponse.date()).isEqualTo(reservationDate);
-            softly.assertThat(personalReservationResponse.time().id()).isEqualTo(timeId);
-            softly.assertThat(personalReservationResponse.theme().id()).isEqualTo(themeId);
-            softly.assertThat(personalReservationResponse.status()).isEqualTo("예약 대기");
+            softly.assertThat(personalReservationResponse.date()).isEqualTo(date);
+            softly.assertThat(personalReservationResponse.time()).isEqualTo(time.getStartAt());
+            softly.assertThat(personalReservationResponse.theme()).isEqualTo(theme.getRawName());
+            softly.assertThat(personalReservationResponse.status()).isEqualTo("예약");
         });
     }
 
     private void addReservation() {
-        ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
+        LocalDate date = LocalDate.of(2024, 4, 9);
+        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId());
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
@@ -151,10 +154,10 @@ class ReservationControllerTest extends BaseControllerTest {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
             softly.assertThat(response.header("Location")).isEqualTo("/reservations/1");
 
-            softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "유저", Role.USER));
-            softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
-            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
+            softly.assertThat(reservationResponse.date()).isEqualTo(date);
+            softly.assertThat(memberResponse.id()).isEqualTo(2L);
+            softly.assertThat(reservationTimeResponse.id()).isEqualTo(time.getId());
+            softly.assertThat(themeResponse.id()).isEqualTo(theme.getId());
         });
     }
 
@@ -178,9 +181,9 @@ class ReservationControllerTest extends BaseControllerTest {
             softly.assertThat(reservationResponses).hasSize(1);
 
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "유저", Role.USER));
-            softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
-            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
+            softly.assertThat(memberResponse.id()).isEqualTo(2L);
+            softly.assertThat(reservationTimeResponse.id()).isEqualTo(time.getId());
+            softly.assertThat(themeResponse.id()).isEqualTo(theme.getId());
         });
     }
 
