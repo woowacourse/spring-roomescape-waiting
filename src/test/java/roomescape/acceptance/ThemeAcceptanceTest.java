@@ -78,7 +78,7 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookies("token", token)
                 .body(themeRequest)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(expectedHttpCode)
                 .extract().response();
@@ -105,7 +105,7 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
     private void deleteTheme(String token, Long themeId, int expectedHttpCode) {
         RestAssured.given().log().all()
                 .cookies("token", token)
-                .when().delete("/themes/" + themeId)
+                .when().delete("/admin/themes/" + themeId)
                 .then().log().all()
                 .statusCode(expectedHttpCode);
     }

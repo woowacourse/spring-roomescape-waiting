@@ -81,7 +81,7 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookies("token", token)
                 .body(reservationTimeRequest)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(expectedHttpCode)
                 .extract().response();
@@ -108,7 +108,7 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
     private void deleteReservationTime(String token, Long reservationTimeId, int expectedHttpCode) {
         RestAssured.given().log().all()
                 .cookies("token", token)
-                .when().delete("/times/" + reservationTimeId)
+                .when().delete("/admin/times/" + reservationTimeId)
                 .then().log().all()
                 .statusCode(expectedHttpCode);
     }
