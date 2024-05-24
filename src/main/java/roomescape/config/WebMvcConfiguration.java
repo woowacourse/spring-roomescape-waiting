@@ -17,7 +17,9 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final MemberRequestArgumentResolver memberRequestArgumentResolver;
     private final LoginCheckInterceptor loginCheckInterceptor;
 
-    public WebMvcConfiguration(MemberNameResponseArgumentResolver memberNameResponseArgumentResolver, MemberRequestArgumentResolver memberRequestArgumentResolver, LoginCheckInterceptor loginCheckInterceptor) {
+    public WebMvcConfiguration(MemberNameResponseArgumentResolver memberNameResponseArgumentResolver,
+                               MemberRequestArgumentResolver memberRequestArgumentResolver,
+                               LoginCheckInterceptor loginCheckInterceptor) {
         this.memberNameResponseArgumentResolver = memberNameResponseArgumentResolver;
         this.memberRequestArgumentResolver = memberRequestArgumentResolver;
         this.loginCheckInterceptor = loginCheckInterceptor;

@@ -28,7 +28,11 @@ public class WaitingService {
     private final ThemeService themeService;
     private final MemberService memberService;
 
-    public WaitingService(WaitingJpaRepository waitingJpaRepository, ReservationTimeService reservationTimeService, ThemeService themeService, MemberService memberService) {
+    public WaitingService(WaitingJpaRepository waitingJpaRepository,
+                          ReservationTimeService reservationTimeService,
+                          ThemeService themeService,
+                          MemberService memberService
+    ) {
         this.waitingJpaRepository = waitingJpaRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
@@ -56,7 +60,12 @@ public class WaitingService {
     }
 
     private void validateIsDuplicated(Waiting waiting) {
-        if (waitingJpaRepository.existsByDateAndReservationTimeAndThemeAndMember(waiting.getDate(), waiting.getReservationTime(), waiting.getTheme(), waiting.getMember())) {
+        if (waitingJpaRepository.existsByDateAndReservationTimeAndThemeAndMember(
+                waiting.getDate(),
+                waiting.getReservationTime(),
+                waiting.getTheme(),
+                waiting.getMember())
+        ) {
             throw new DuplicationException("이미 예약 대기중 입니다.");
         }
     }
@@ -77,6 +86,10 @@ public class WaitingService {
     }
 
     public Optional<Waiting> findWaitingByReservation(Reservation reservation) {
-        return waitingJpaRepository.findTopByDateAndReservationTimeAndTheme(reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
+        return waitingJpaRepository.findTopByDateAndReservationTimeAndTheme(
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme()
+        );
     }
 }

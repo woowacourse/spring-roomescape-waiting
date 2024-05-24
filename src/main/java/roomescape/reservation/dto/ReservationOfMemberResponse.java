@@ -7,7 +7,8 @@ import roomescape.reservation.domain.WaitingWithRank;
 
 import java.time.format.DateTimeFormatter;
 
-public record ReservationOfMemberResponse(Long id, String themeName, String date, String reservationTime, String status) {
+public record ReservationOfMemberResponse(
+        Long id, String themeName, String date, String reservationTime, String status) {
 
     public static ReservationOfMemberResponse from(Reservation reservation) {
         return new ReservationOfMemberResponse(

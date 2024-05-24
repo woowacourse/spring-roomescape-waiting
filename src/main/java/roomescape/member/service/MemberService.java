@@ -115,7 +115,8 @@ public class MemberService {
     }
 
     public Member getById(Long memberId) {
-        return memberJpaRepository.findById(memberId).orElseThrow(() -> new NotFoundException("id에 맞는 멤버가 없습니다. memberId = " + memberId));
+        return memberJpaRepository.findById(memberId).orElseThrow(() ->
+                new NotFoundException("id에 맞는 멤버가 없습니다. memberId = " + memberId));
     }
 
     public String signUp(SignUpRequest signUpRequest) {

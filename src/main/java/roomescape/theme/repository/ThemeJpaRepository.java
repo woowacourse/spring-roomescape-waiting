@@ -21,5 +21,9 @@ public interface ThemeJpaRepository extends JpaRepository<Theme, Long> {
             GROUP BY r.theme
             ORDER BY COUNT(r.theme) DESC
             """)
-    List<Theme> findTrendingThemesBetweenDates(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, Pageable pageable);
+    List<Theme> findTrendingThemesBetweenDates(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable
+    );
 }

@@ -51,7 +51,12 @@ public class ThemeService {
         LocalDate trendingStatsStart = now.minusDays(7);
         LocalDate trendingStatsEnd = now.minusDays(1);
 
-        List<Theme> mostReservedThemesBetweenDates = themeJpaRepository.findTrendingThemesBetweenDates(trendingStatsStart, trendingStatsEnd, PageRequest.of(0, Math.toIntExact(limit)));
+        List<Theme> mostReservedThemesBetweenDates = themeJpaRepository.findTrendingThemesBetweenDates(
+                trendingStatsStart,
+                trendingStatsEnd,
+                PageRequest.of(0, Math.toIntExact(limit))
+        );
+
         return mostReservedThemesBetweenDates
                 .stream()
                 .map(ThemeResponse::new)

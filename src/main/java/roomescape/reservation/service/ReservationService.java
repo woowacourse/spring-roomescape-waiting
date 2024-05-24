@@ -89,7 +89,11 @@ public class ReservationService {
     }
 
     private void validateIsDuplicated(Reservation reservation) {
-        if (reservationJpaRepository.existsByDateAndReservationTimeAndTheme(reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())) {
+        if (reservationJpaRepository.existsByDateAndReservationTimeAndTheme(
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme())
+        ) {
             throw new DuplicationException("이미 예약이 존재합니다.");
         }
     }
@@ -117,11 +121,13 @@ public class ReservationService {
     }
 
     public List<ReservationOfMemberResponse> findReservationsByMember(MemberRequest memberRequest) {
-        Stream<ReservationOfMemberResponse> reservations = reservationJpaRepository.findByMember(memberRequest.toLoginMember())
+        Stream<ReservationOfMemberResponse> reservations =
+                reservationJpaRepository.findByMember(memberRequest.toLoginMember())
                 .stream()
                 .map(ReservationOfMemberResponse::from);
 
-        Stream<ReservationOfMemberResponse> waitings = waitingService.findWaitingsByMember(memberRequest.toLoginMember())
+        Stream<ReservationOfMemberResponse> waitings =
+                waitingService.findWaitingsByMember(memberRequest.toLoginMember())
                 .stream()
                 .map(ReservationOfMemberResponse::from);
 

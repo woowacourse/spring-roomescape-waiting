@@ -43,7 +43,8 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationOfMemberResponse>> findReservationsByMember(@MemberArgumentResolver MemberRequest memberRequest) {
+    public ResponseEntity<List<ReservationOfMemberResponse>> findReservationsByMember(
+            @MemberArgumentResolver MemberRequest memberRequest) {
         List<ReservationOfMemberResponse> myReservations = reservationService.findReservationsByMember(memberRequest);
         return ResponseEntity.ok(myReservations);
     }

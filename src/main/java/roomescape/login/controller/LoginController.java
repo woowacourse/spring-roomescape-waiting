@@ -36,7 +36,8 @@ public class LoginController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<MemberNameResponse> getLoginMemberName(@MemberNameArgumentResolver MemberNameResponse memberNameResponse) {
+    public ResponseEntity<MemberNameResponse> getLoginMemberName(
+            @MemberNameArgumentResolver MemberNameResponse memberNameResponse) {
         return ResponseEntity.ok(memberNameResponse);
     }
 }

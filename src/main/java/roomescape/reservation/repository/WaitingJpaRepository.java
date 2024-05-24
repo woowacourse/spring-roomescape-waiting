@@ -15,7 +15,8 @@ import java.util.Optional;
 
 @Repository
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
-    boolean existsByDateAndReservationTimeAndThemeAndMember(LocalDate date, ReservationTime reservationTime, Theme theme, Member member);
+    boolean existsByDateAndReservationTimeAndThemeAndMember(
+            LocalDate date, ReservationTime reservationTime, Theme theme, Member member);
 
     @Query("SELECT new roomescape.reservation.domain.WaitingWithRank(" +
             "    w, " +
@@ -30,5 +31,6 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
             "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
-    Optional<Waiting> findTopByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime reservationTime, Theme theme);
+    Optional<Waiting> findTopByDateAndReservationTimeAndTheme(
+            LocalDate date, ReservationTime reservationTime, Theme theme);
 }
