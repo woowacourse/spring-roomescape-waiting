@@ -51,6 +51,10 @@ public class ReservationWaiting {
         return reservation.isPast();
     }
 
+    public void approve() {
+        reservation.changeMember(member);
+    }
+
     public Long getId() {
         return id;
     }

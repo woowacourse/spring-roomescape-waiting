@@ -89,4 +89,8 @@ public class Reservation {
     public Theme getTheme() {
         return theme;
     }
+
+    public void changeMember(Member member) {
+        this.member = member;
+    }
 }

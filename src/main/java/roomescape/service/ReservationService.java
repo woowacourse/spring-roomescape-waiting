@@ -2,15 +2,22 @@ package roomescape.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.MemberRepository;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
+import roomescape.infrastructure.ReservationWaitingRepository;
 import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
@@ -18,24 +25,29 @@ import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository, MemberRepository memberRepository) {
+            ThemeRepository themeRepository, MemberRepository memberRepository,
+            ReservationWaitingRepository reservationWaitingRepository) {
 
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
+    @Transactional
     public ReservationAppResponse save(ReservationAppRequest request) {
         Member member = findMember(request.memberId());
         ReservationDate date = new ReservationDate(request.date());
@@ -77,8 +89,18 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
-        reservationRepository.deleteById(id);
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<ReservationWaiting> page = reservationWaitingRepository.findAllByReservationIdOrderByPriorityAsc(
+                pageable, id);
+        Optional<ReservationWaiting> nextWaiting = page.getContent().stream().findFirst();
+        nextWaiting.ifPresentOrElse(reservationWaiting -> {
+                    reservationWaiting.approve();
+                    reservationWaitingRepository.delete(reservationWaiting);
+                },
+                () -> reservationRepository.deleteById(id)
+        );
     }
 
     public List<ReservationAppResponse> findAll() {
