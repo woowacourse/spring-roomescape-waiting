@@ -18,12 +18,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
+import roomescape.domain.Name;
+import roomescape.domain.Password;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationResponse;
 import roomescape.repository.MemberRepository;
@@ -55,11 +60,25 @@ public class ReservationControllerTest {
 
     private ReservationTime defaultTime = new ReservationTime(LocalTime.of(11, 30));
     private Member defaultMember = Fixture.defaultMember;
+    private Member otherMember = new Member(
+            new Name("otherName"),
+            Role.USER,
+            new Email("other@email.com"),
+            new Password("otherPassword"));
     private String token;
+    private String othersToken;
 
     @BeforeEach
     void initData() {
         RestAssured.port = port;
+
+        defaultTheme1 = themeRepository.save(defaultTheme1);
+        defaultTheme2 = themeRepository.save(defaultTheme2);
+        defaultTime = reservationTimeRepository.save(defaultTime);
+        defaultMember = memberRepository.save(defaultMember);
+        System.out.println("defaultMember = " + defaultMember);
+        otherMember = memberRepository.save(otherMember);
+        System.out.println("otherMember = " + otherMember);
         token = JWT_GENERATOR.generateWith(
                 Map.of(
                         "id", defaultMember.getId(),
@@ -67,11 +86,13 @@ public class ReservationControllerTest {
                         "role", defaultMember.getRole().getTokenValue()
                 )
         );
-
-        defaultTheme1 = themeRepository.save(defaultTheme1);
-        defaultTheme2 = themeRepository.save(defaultTheme2);
-        defaultTime = reservationTimeRepository.save(defaultTime);
-        defaultMember = memberRepository.save(defaultMember);
+        othersToken = JWT_GENERATOR.generateWith(
+                Map.of(
+                        "id", otherMember.getId(),
+                        "name", otherMember.getName().getValue(),
+                        "role", otherMember.getRole().getTokenValue()
+                )
+        );
     }
 
     @DisplayName("예약이 10개 존재할 때")
@@ -120,6 +141,9 @@ public class ReservationControllerTest {
             reservation10 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme2,
                             defaultMember));
+
+            System.out.println("defaultMember = " + defaultMember);
+            System.out.println("otherMember = " + otherMember);
         }
 
         @DisplayName("존재하는 모든 예약을 조회할 수 있다.")
@@ -172,6 +196,35 @@ public class ReservationControllerTest {
                     .body("size()", is(11));
         }
 
+        @DisplayName("예약이 이미 존재해도 예약을 추가로 생성할 수 있다. -> 예약 대기")
+        @Test
+        void createReservationWaitTest() {
+            Map<String, Object> reservationParam = Map.of(
+                    "date", reservation10.getDate().toString(),
+                    "timeId", reservation10.getReservationTime().getId(),
+                    "themeId", reservation10.getTheme().getId());
+
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParam)
+                    .post("/reservations")
+                    .then().log().all()
+                    .statusCode(201)
+                    .body("id", is(11),
+                            "member.name", is(defaultMember.getName().getValue()),
+                            "date", is(reservationParam.get("date")),
+                            "time.startAt", is(reservation10.getReservationTime().getStartAt().toString()),
+                            "theme.name", is(reservation10.getTheme().getName()));
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(11));
+        }
+
         @DisplayName("지난 시간에 예약을 생성할 수 없다.")
         @Test
         void createPastReservationTest() {
@@ -204,6 +257,101 @@ public class ReservationControllerTest {
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(9));
+        }
+
+        @DisplayName("나의 예약 대기를 삭제할 수 있다.")
+        @Test
+        void deleteReservationWaitTest() {
+            //given
+            Map<String, Object> reservationParam = Map.of(
+                    "date", reservation10.getDate().toString(),
+                    "timeId", reservation10.getReservationTime().getId(),
+                    "themeId", reservation10.getTheme().getId());
+
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParam)
+                    .post("/reservations")
+                    .then().log().all();
+
+            //when & then
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .delete("/reservations/waiting/11")
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(10));
+        }
+
+        @DisplayName("로그인 없이 예약 대기를 삭제할 수 없다.")
+        @Test
+        void deleteReservationWaitWithoutLoginFailTest() {
+            //given
+            Map<String, Object> reservationParam = Map.of(
+                    "date", reservation10.getDate().toString(),
+                    "timeId", reservation10.getReservationTime().getId(),
+                    "themeId", reservation10.getTheme().getId());
+
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParam)
+                    .post("/reservations")
+                    .then().log().all();
+
+            //when & then
+            RestAssured.given().log().all()
+                    .when()
+                    .delete("/reservations/waiting/11")
+                    .then().log().all()
+                    .statusCode(401);
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(11));
+        }
+
+        @DisplayName("다른 사람의 예약 대기를 삭제할 수 없다.")
+        @Test
+        void deleteOthersReservationWaitFailTest() {
+            //given
+            Map<String, Object> reservationParam = Map.of(
+                    "date", reservation10.getDate().toString(),
+                    "timeId", reservation10.getReservationTime().getId(),
+                    "themeId", reservation10.getTheme().getId());
+
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParam)
+                    .post("/reservations")
+                    .then().log().all();
+
+            //when & then
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", othersToken)
+                    .delete("/reservations/waiting/11")
+                    .then().log().all()
+                    .statusCode(403);
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(11));
         }
 
         @DisplayName("날짜를 이용해서 검색할 수 있다.")

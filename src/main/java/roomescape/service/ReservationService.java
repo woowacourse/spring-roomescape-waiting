@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
+import static roomescape.exception.ExceptionType.*;
 import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -19,6 +20,7 @@ import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -115,4 +117,25 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteWaiting(LoginMemberRequest loginMemberRequest, long id) {
+        Reservation requestedReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION));
+
+        if (requestedReservation.getMember().getId() != loginMemberRequest.id()) {
+            throw new RoomescapeException(FORBIDDEN_DELETE);
+        }
+        if(isNotWaiting(requestedReservation)) {
+            //todo 예외를 다른 예외로 구분하는 것이 좋을 것 같음
+            throw new RoomescapeException(FORBIDDEN_DELETE);
+        }
+
+        reservationRepository.delete(requestedReservation);
+    }
+
+    private boolean isNotWaiting(Reservation requestedReservation) {
+        long index = reservationRepository.calculateIndexOf(requestedReservation);
+        //todo 상수 처리, 또는 다른 방법의 구현 고민
+        return index == 1;
+    }
 }

@@ -194,6 +194,26 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 > HTTP/1.1 204
 
+## 예약대기 취소 API
+
+### Request
+
+> DELETE /reservations/waiting/11 HTTP/1.1
+
+### Response
+
+#### 예약 대기 삭제 성공
+
+> HTTP/1.1 204
+
+#### 로그인이 필요할 경우
+
+> HTTP/1.1 401
+
+#### 예약 대기가 아닐 경우
+
+> HTTP/1.1 403
+
 ## 시간 추가 API
 
 ### request

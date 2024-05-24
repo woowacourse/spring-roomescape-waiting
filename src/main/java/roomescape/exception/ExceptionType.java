@@ -22,6 +22,7 @@ public enum ExceptionType {
     INVALID_DATE_TIME_FORMAT(BAD_REQUEST, "해석할 수 없는 날짜, 시간 포맷입니다."),
     DELETE_USED_TIME(BAD_REQUEST, "예약이 존재하는 시간은 삭제할 수 없습니다."),
     DELETE_USED_THEME(BAD_REQUEST, "예약이 존재하는 테마는 삭제할 수 없습니다."),
+    NOT_FOUND_RESERVATION(BAD_REQUEST, "존재하지 않는 예약입니다."),
     NOT_FOUND_RESERVATION_TIME(BAD_REQUEST, "존재하지 않는 시간입니다."),
     NOT_FOUND_THEME(BAD_REQUEST, "없는 테마입니다."),
     NOT_FOUND_MEMBER(BAD_REQUEST, "존재하지 않는 유저입니다."),
@@ -34,6 +35,7 @@ public enum ExceptionType {
     INVALID_NAME(BAD_REQUEST, "잘못된 이름 형식입니다. 빈 값이 아닌 문자열을 입력해 주세요."),
     INVALID_PASSWORD(BAD_REQUEST,
             String.format("잘못된 비밀번호 형식입니다. 비밀번호는 %d자 이상의 문자열이어야 합니다.", Password.MIN_PASSWORD_LENGTH)),
+    FORBIDDEN_DELETE(FORBIDDEN, "삭제 권한이 없습니다.")
     ;
 
     private final HttpStatus status;
