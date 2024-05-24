@@ -11,8 +11,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
+import roomescape.dto.reservation.ReservationWaitingSaveRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationTimeService;
@@ -43,12 +43,12 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservationWaiting(
             @AuthenticationPrincipal final LoginMember loginMember,
-            @RequestBody final ReservationSaveRequest request) {
+            @RequestBody final ReservationWaitingSaveRequest request) {
         final MemberResponse memberResponse = memberService.findById(loginMember.id());
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
-        final Reservation reservation = request.toModel(memberResponse, themeResponse, reservationTimeResponse, request.status());
+        final Reservation reservation = request.toModel(memberResponse, themeResponse, reservationTimeResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(waitingService.createReservationWaiting(reservation));
     }
 }

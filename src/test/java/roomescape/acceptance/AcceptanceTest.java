@@ -12,6 +12,7 @@ import roomescape.dto.auth.TokenRequest;
 import roomescape.dto.auth.TokenResponse;
 import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeSaveRequest;
+import roomescape.dto.reservation.ReservationWaitingSaveRequest;
 import roomescape.dto.theme.ThemeSaveRequest;
 
 import static roomescape.TestFixture.*;
@@ -64,7 +65,7 @@ abstract class AcceptanceTest {
         final Long themeId = saveTheme();
         final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
         final ReservationSaveRequest request
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
+                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId);
 
         Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
@@ -83,14 +84,14 @@ abstract class AcceptanceTest {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
         final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
-        final ReservationSaveRequest request
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "WAITING");
+        final ReservationWaitingSaveRequest request
+                = new ReservationWaitingSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
 
         Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/reservations")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201)
                 .extract()

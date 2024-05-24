@@ -162,8 +162,7 @@ function saveRow(event) {
     date: dateInput.value,
     themeId: themeSelect.value,
     timeId: timeSelect.value,
-    memberId: memberSelect.value,
-    status: "RESERVED"
+    memberId: memberSelect.value
   };
 
   requestCreate(reservation)
