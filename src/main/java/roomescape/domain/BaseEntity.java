@@ -12,7 +12,9 @@ public abstract class BaseEntity {
 
     @PrePersist
     public void prePersist() {
-        createAt = LocalDateTime.now();
+        if (createAt == null) {
+            createAt = LocalDateTime.now();
+        }
     }
 
     public LocalDateTime getCreateAt() {
