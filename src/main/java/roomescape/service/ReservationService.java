@@ -53,7 +53,7 @@ public class ReservationService {
         Theme theme = findTheme(reservationDto);
         Member member = findMember(reservationDto);
 
-        validateIsFuture(date, time); // TODO: unique 조건?
+        validateIsFuture(date, time);
         validateDuplication(date, time, theme);
 
         Reservation reservation = reservationDto.toReservation(time, theme, member);

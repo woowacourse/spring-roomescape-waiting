@@ -17,7 +17,7 @@ public class ReservationTime {
     @NotNull
     private LocalTime startAt;
     @OneToMany(mappedBy = "reservationInfo.time")
-    private Set<Reservation> reservations; // TODO: 양방향 고려
+    private Set<Reservation> reservations;
 
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> { // TODO: 파라미터 id or object 통일
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     boolean existsByReservationInfo(ReservationInfo reservationInfo);
 

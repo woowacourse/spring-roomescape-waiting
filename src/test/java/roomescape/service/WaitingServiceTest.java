@@ -47,8 +47,7 @@ class WaitingServiceTest {
 
     @BeforeEach
     void setUp() { // TODO: reservation 추가 및 save 전 검증 테스트 추가
-        // TODO: waiting 보다 Reservation 이 우선 들어와야한다는 것이 테이블 설계만을 통해서는 드러나지 않는다. -> 외래키의 이점
-        memberRepository.save(new Member("후에버", "whoever@gmail.com", "whoever123!", Role.USER)); // TODO
+        memberRepository.save(new Member("후에버", "whoever@gmail.com", "whoever123!", Role.USER));
         reservationRepository.saveAll(List.of(
                 new Reservation(
                         LocalDate.of(2000, 1, 1),
@@ -85,7 +84,7 @@ class WaitingServiceTest {
 
     @DisplayName("예약 대기를 추가한다.")
     @Test
-    @Transactional // TODO: study
+    @Transactional
     void should_save_reservation_waiting() {
         ReservationDto reservationDto = new ReservationDto(LocalDate.of(9999, 9, 9), 1L, 1L, 3L);
         waitingService.saveWaiting(reservationDto);

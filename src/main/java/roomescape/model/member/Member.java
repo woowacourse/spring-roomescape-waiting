@@ -46,7 +46,7 @@ public class Member {
 
     public Member(Long id, String name, String email, String password, Role role) {
         this(id, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
-    } // TODO: delete?
+    }
 
     protected Member() {
     }

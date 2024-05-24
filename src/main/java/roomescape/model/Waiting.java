@@ -30,14 +30,14 @@ public class Waiting {
         this.reservationInfo = reservationInfo;
     }
 
-    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) { // TODO: 파라미터 순서 변경 + DTO
+    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(0L, member, new ReservationInfo(date, time, theme));
     }
 
     protected Waiting() {
     }
 
-    public Reservation toReservation() { // TODO: 도메인 간 변환 로직 괜찮을까?
+    public Reservation toReservation() {
         return new Reservation(this.member, this.reservationInfo);
     }
 
