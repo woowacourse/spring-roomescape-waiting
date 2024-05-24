@@ -79,7 +79,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("날짜와 테마 id로 예약 가능한 시간들을 조회한다.")
     void getAvailableReservationTimes() {
-        Member member = memberRepository.save(MemberFixture.create());
+        Member member = memberRepository.save(MemberFixture.user());
         Theme theme = themeRepository.save(ThemeFixture.create());
         ReservationTime nine = reservationTimeRepository.save(ReservationTimeFixture.create("09:00"));
         ReservationTime ten = reservationTimeRepository.save(ReservationTimeFixture.create("10:00"));

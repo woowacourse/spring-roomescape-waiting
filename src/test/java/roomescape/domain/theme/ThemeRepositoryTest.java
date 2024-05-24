@@ -24,7 +24,7 @@ class ThemeRepositoryTest extends BaseRepositoryTest {
     @Test
     @DisplayName("기간 내의 인기 있는 테마들을 내림차순으로 조회한다.")
     void findPopularThemes() {
-        Member member = save(MemberFixture.create());
+        Member member = save(MemberFixture.user());
         ReservationTime reservationTime = save(ReservationTimeFixture.create());
         Theme theme1 = save(ThemeFixture.create("테마1"));
         Theme theme2 = save(ThemeFixture.create("테마2"));

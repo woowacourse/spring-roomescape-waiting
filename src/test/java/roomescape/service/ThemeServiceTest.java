@@ -82,7 +82,7 @@ class ThemeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("인기있는 테마를 내림차순으로 3개 조회한다.")
     void getPopularThemes() {
-        Member member = memberRepository.save(MemberFixture.create());
+        Member member = memberRepository.save(MemberFixture.user());
         ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.create());
         Theme theme1 = themeRepository.save(ThemeFixture.create("우주 탐험"));
         Theme theme2 = themeRepository.save(ThemeFixture.create("시간여행"));

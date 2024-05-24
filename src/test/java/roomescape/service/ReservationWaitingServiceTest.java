@@ -53,15 +53,15 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
 
     private Reservation notSavedReservation;
 
-    private Member waitingMember;
+    private Member prin;
 
     @BeforeEach
     void setUp() {
-        Member member = memberRepository.save(MemberFixture.create());
+        Member member = memberRepository.save(MemberFixture.user());
         theme = themeRepository.save(ThemeFixture.create());
         time = reservationTimeRepository.save(ReservationTimeFixture.create());
         notSavedReservation = ReservationFixture.create("2024-05-24", member, time, theme);
-        waitingMember = memberRepository.save(MemberFixture.create("abc@email.com"));
+        prin = memberRepository.save(MemberFixture.prin());
     }
 
     @Test
@@ -69,13 +69,13 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     void createReservationWaiting() {
         Reservation reservation = reservationRepository.save(notSavedReservation);
         CreateReservationRequest request = new CreateReservationRequest(reservation.getDate(), time.getId(),
-                theme.getId(), waitingMember.getId());
+                theme.getId(), prin.getId());
 
         ReservationResponse response = reservationWaitingService.addReservationWaiting(request);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.date()).isEqualTo(reservation.getDate());
-            softly.assertThat(response.member().id()).isEqualTo(waitingMember.getId());
+            softly.assertThat(response.member().id()).isEqualTo(prin.getId());
             softly.assertThat(response.theme().id()).isEqualTo(theme.getId());
             softly.assertThat(response.time().id()).isEqualTo(time.getId());
         });
@@ -86,7 +86,7 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     void createReservationWaitingFailWhenReservationNotFound() {
         LocalDate date = LocalDate.parse("2024-05-24");
         CreateReservationRequest request = new CreateReservationRequest(date, time.getId(), theme.getId(),
-                waitingMember.getId());
+                prin.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -102,7 +102,7 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
             reservationWaitingRepository.save(ReservationWaitingFixture.create(reservation, prevWaitingMember));
         }
         CreateReservationRequest request = new CreateReservationRequest(reservation.getDate(), time.getId(),
-                theme.getId(), waitingMember.getId());
+                theme.getId(), prin.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -113,9 +113,9 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     @DisplayName("멤버는 한 예약에 대해 두 개 이상의 예약 대기를 생성할 수 없다.")
     void createReservationWaitingFailWhenAlreadyWaiting() {
         Reservation reservation = reservationRepository.save(notSavedReservation);
-        reservationWaitingRepository.save(ReservationWaitingFixture.create(reservation, waitingMember));
+        reservationWaitingRepository.save(ReservationWaitingFixture.create(reservation, prin));
         CreateReservationRequest request = new CreateReservationRequest(reservation.getDate(), time.getId(),
-                theme.getId(), waitingMember.getId());
+                theme.getId(), prin.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -127,9 +127,9 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     void deleteReservationWaiting() {
         Reservation reservation = reservationRepository.save(notSavedReservation);
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(
-                ReservationWaitingFixture.create(reservation, waitingMember));
+                ReservationWaitingFixture.create(reservation, prin));
 
-        reservationWaitingService.deleteReservationWaiting(savedWaiting.getId(), waitingMember.getId());
+        reservationWaitingService.deleteReservationWaiting(savedWaiting.getId(), prin.getId());
 
         assertThat(reservationWaitingRepository.findById(savedWaiting.getId())).isEmpty();
     }
@@ -138,7 +138,7 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     @DisplayName("존재하지 않은 예약 대기는 삭제할 수 없다.")
     void deleteReservationWaitingFailWhenNotFound() {
         assertThatThrownBy(
-                () -> reservationWaitingService.deleteReservationWaiting(1L, waitingMember.getId()))
+                () -> reservationWaitingService.deleteReservationWaiting(1L, prin.getId()))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재하지 않는 예약 대기입니다.");
     }
@@ -148,9 +148,9 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     void deleteReservationWaitingFailWhenNotAdmin() {
         Reservation reservation = reservationRepository.save(notSavedReservation);
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(
-                ReservationWaitingFixture.create(reservation, waitingMember));
+                ReservationWaitingFixture.create(reservation, prin));
 
-        Member notAdmin = memberRepository.save(MemberFixture.USER);
+        Member notAdmin = memberRepository.save(MemberFixture.jamie());
         assertThatThrownBy(
                 () -> reservationWaitingService.deleteReservationWaiting(savedWaiting.getId(), notAdmin.getId()))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -162,9 +162,9 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     void deleteReservationWaitingSuccessWhenAdmin() {
         Reservation reservation = reservationRepository.save(notSavedReservation);
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(
-                ReservationWaitingFixture.create(reservation, waitingMember));
+                ReservationWaitingFixture.create(reservation, prin));
 
-        Member admin = memberRepository.save(MemberFixture.ADMIN);
+        Member admin = memberRepository.save(MemberFixture.admin());
         reservationWaitingService.deleteReservationWaiting(savedWaiting.getId(), admin.getId());
 
         assertThat(reservationWaitingRepository.findById(savedWaiting.getId())).isEmpty();

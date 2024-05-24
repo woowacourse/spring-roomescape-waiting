@@ -25,7 +25,7 @@ class ReservationTimeRepositoryTest extends BaseRepositoryTest {
     @Test
     @DisplayName("예약 가능한 시간들을 조회한다.")
     void findAvailableReservationTimes() {
-        Member member = save(MemberFixture.create());
+        Member member = save(MemberFixture.user());
         Theme theme = save(ThemeFixture.create());
         ReservationTime nine = save(ReservationTimeFixture.create("09:00"));
         ReservationTime twelve = save(ReservationTimeFixture.create("12:00"));

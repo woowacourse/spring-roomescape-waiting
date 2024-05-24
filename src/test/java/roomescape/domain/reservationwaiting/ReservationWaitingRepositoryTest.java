@@ -30,7 +30,7 @@ class ReservationWaitingRepositoryTest extends BaseRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        Member member = save(MemberFixture.create("abc@email.com"));
+        Member member = save(MemberFixture.user());
         ReservationTime reservationTime = save(ReservationTimeFixture.create());
         Theme theme = save(ThemeFixture.create());
         reservation = save(ReservationFixture.create(member, reservationTime, theme));
@@ -39,8 +39,8 @@ class ReservationWaitingRepositoryTest extends BaseRepositoryTest {
     @Test
     @DisplayName("예약의 전체 예약 대기를 조회한다.")
     void findAllByReservation() {
-        Member jamie = save(MemberFixture.create("jamie@email.com"));
-        Member prin = save(MemberFixture.create("prin@email.com"));
+        Member jamie = save(MemberFixture.jamie());
+        Member prin = save(MemberFixture.prin());
         save(ReservationWaitingFixture.create(reservation, jamie));
         save(ReservationWaitingFixture.create(reservation, prin));
 
@@ -52,11 +52,11 @@ class ReservationWaitingRepositoryTest extends BaseRepositoryTest {
     @Test
     @DisplayName("중복으로 예약 대기를 생성하면 예외가 발생한다")
     void createDuplicate() {
-        Member waitingMember = save(MemberFixture.create("jamie@email.com"));
-        ReservationWaiting reservationWaiting = ReservationWaitingFixture.create(reservation, waitingMember);
+        Member jamie = save(MemberFixture.jamie());
+        ReservationWaiting reservationWaiting = ReservationWaitingFixture.create(reservation, jamie);
         save(reservationWaiting);
 
-        ReservationWaiting duplicatedWaiting = ReservationWaitingFixture.create(reservation, waitingMember);
+        ReservationWaiting duplicatedWaiting = ReservationWaitingFixture.create(reservation, jamie);
         assertThatThrownBy(() -> reservationWaitingRepository.save(duplicatedWaiting))
                 .isExactlyInstanceOf(DataIntegrityViolationException.class);
     }
@@ -68,7 +68,7 @@ class ReservationWaitingRepositoryTest extends BaseRepositoryTest {
             Member waitedMember = save(MemberFixture.create("waited" + cnt + "@email.com"));
             save(ReservationWaitingFixture.create(reservation, waitedMember));
         }
-        Member prin = save(MemberFixture.create("prin@email.com"));
+        Member prin = save(MemberFixture.prin());
         save(ReservationWaitingFixture.create(reservation, prin));
 
         List<WaitingWithRank> waitingWithRanks = reservationWaitingRepository.findAllWithRankByMember(prin);

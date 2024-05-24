@@ -40,7 +40,7 @@ class ReservationWaitingControllerTest extends BaseControllerTest {
     void setUp() {
         ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.create());
         Theme theme = themeRepository.save(ThemeFixture.create());
-        Member member = memberRepository.save(MemberFixture.create());
+        Member member = memberRepository.save(MemberFixture.user());
         reservationRepository.save(ReservationFixture.create(RESERVATION_DATE, member, time, theme));
         userLogin();
     }

@@ -35,8 +35,8 @@ class MemberServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("모든 회원을 조회한다.")
     void getAllMembers() {
-        Member jamie = memberRepository.save(MemberFixture.create("jamie@email.com"));
-        Member prin = memberRepository.save(MemberFixture.create("prin@email.com"));
+        Member jamie = memberRepository.save(MemberFixture.jamie());
+        Member prin = memberRepository.save(MemberFixture.prin());
 
         List<MemberResponse> memberResponses = memberService.getAllMembers();
 
