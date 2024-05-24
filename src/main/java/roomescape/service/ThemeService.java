@@ -33,7 +33,7 @@ public class ThemeService {
 
     public Theme saveTheme(ThemeDto themeDto) {
         validateDuplication(themeDto.getName());
-        Theme theme = Theme.from(themeDto);
+        Theme theme = themeDto.toTheme();
         return themeRepository.save(theme);
     }
 

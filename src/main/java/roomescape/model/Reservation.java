@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
-import roomescape.service.dto.ReservationDto;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -36,10 +35,6 @@ public class Reservation {
 
     protected Reservation() {
     }
-
-    public static Reservation of(ReservationDto reservationDto, ReservationTime time, Theme theme, Member member) {
-        return new Reservation(0L, member, new ReservationInfo(reservationDto.getDate(), time, theme));
-    } // TODO: dto 로 위임
 
     public Long getId() {
         return id;

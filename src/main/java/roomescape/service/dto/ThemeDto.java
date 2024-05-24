@@ -1,8 +1,8 @@
 package roomescape.service.dto;
 
-import roomescape.controller.request.ThemeRequest;
 import roomescape.model.theme.Description;
 import roomescape.model.theme.Name;
+import roomescape.model.theme.Theme;
 import roomescape.model.theme.Thumbnail;
 
 public class ThemeDto {
@@ -15,6 +15,10 @@ public class ThemeDto {
         this.name = new Name(name);
         this.description = new Description(description);
         this.thumbnail = new Thumbnail(thumbnail);
+    }
+
+    public Theme toTheme() {
+        return new Theme(this.name, this.description, this.thumbnail);
     }
 
     public Name getName() {

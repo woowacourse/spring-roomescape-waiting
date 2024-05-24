@@ -1,6 +1,5 @@
 package roomescape.service.dto;
 
-import roomescape.controller.request.ReservationTimeRequest;
 import roomescape.model.ReservationTime;
 
 import java.time.LocalTime;
@@ -19,8 +18,8 @@ public class ReservationTimeDto {
         this(null, startAt);
     }
 
-    public static ReservationTimeDto from(ReservationTime reservationTime) {
-        return new ReservationTimeDto(reservationTime.getId(), reservationTime.getStartAt());
+    public ReservationTime toReservationTime() {
+        return new ReservationTime(this.id, this.startAt);
     }
 
     public Long getId() {

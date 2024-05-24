@@ -53,11 +53,11 @@ public class ReservationService {
         Member member = findMember(reservationDto);
 
         LocalDate date = reservationDto.getDate();
-        validateIsFuture(date, time.getStartAt());
+        validateIsFuture(date, time);
         validateDuplication(date, time, theme);
 
         // TODO: 이렇게 모든 객체를 다 찾아서 Reservation 객체를 만드는 게 맞을까?
-        Reservation reservation = Reservation.of(reservationDto, time, theme, member);
+        Reservation reservation = reservationDto.toReservation(time, theme, member);
         return reservationRepository.save(reservation);
     }
 
@@ -124,7 +124,8 @@ public class ReservationService {
         return reservationRepository.findByMemberId(member.getId());
     }
 
-    private void validateIsFuture(LocalDate date, LocalTime time) {
+    private void validateIsFuture(LocalDate date, ReservationTime reservationTime) {
+        LocalTime time = reservationTime.getStartAt();
         LocalDateTime timeToBook = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         if (timeToBook.isBefore(now)) {

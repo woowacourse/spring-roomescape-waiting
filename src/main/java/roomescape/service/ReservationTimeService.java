@@ -30,7 +30,7 @@ public class ReservationTimeService {
 
     public ReservationTime saveReservationTime(ReservationTimeDto timeDto) {
         validateDuplication(timeDto.getStartAt());
-        ReservationTime time = ReservationTime.from(timeDto);
+        ReservationTime time = timeDto.toReservationTime();
         return reservationTimeRepository.save(time);
     }
 

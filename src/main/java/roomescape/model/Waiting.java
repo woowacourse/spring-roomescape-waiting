@@ -30,13 +30,9 @@ public class Waiting {
         this.reservationInfo = reservationInfo;
     }
 
-    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) { // TODO: 파라미터 순서 변경
+    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) { // TODO: 파라미터 순서 변경 + DTO
         this(0L, member, new ReservationInfo(date, time, theme));
     }
-
-    public static Waiting of(ReservationDto reservationDto, ReservationTime time, Theme theme, Member member) {
-        return new Waiting(0L, member, new ReservationInfo(reservationDto.getDate(), time, theme));
-    } // TODO: to dto
 
     protected Waiting() {
     }

@@ -1,8 +1,10 @@
 package roomescape.service.dto;
 
-import roomescape.controller.request.AdminReservationRequest;
-import roomescape.controller.request.ReservationRequest;
-import roomescape.model.member.LoginMember;
+import roomescape.model.Reservation;
+import roomescape.model.ReservationTime;
+import roomescape.model.Waiting;
+import roomescape.model.member.Member;
+import roomescape.model.theme.Theme;
 
 import java.time.LocalDate;
 
@@ -18,6 +20,14 @@ public class ReservationDto {
         this.timeId = timeId;
         this.themeId = themeId;
         this.memberId = memberId;
+    }
+
+    public Reservation toReservation(ReservationTime time, Theme theme, Member member) {
+        return new Reservation(this.date, time, theme, member);
+    }
+
+    public Waiting toWaiting(Member member, ReservationTime time, Theme theme) {
+        return new Waiting(this.date, time, theme, member);
     }
 
     public LocalDate getDate() {

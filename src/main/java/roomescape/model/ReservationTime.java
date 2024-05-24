@@ -31,10 +31,6 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
-    public static ReservationTime from(ReservationTimeDto reservationTimeDto) {
-        return new ReservationTime(0L, reservationTimeDto.getStartAt());
-    }
-
     public Long getId() {
         return id;
     }

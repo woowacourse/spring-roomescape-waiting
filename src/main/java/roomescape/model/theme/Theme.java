@@ -37,6 +37,10 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
+    public Theme(Name name, Description description, Thumbnail thumbnail) {
+        this(0L, name, description, thumbnail);
+    }
+
     public Theme(String name, String description, String thumbnail) {
         this(0L, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
@@ -46,10 +50,6 @@ public class Theme {
     }
 
     protected Theme() {
-    }
-
-    public static Theme from(ThemeDto themeDto) {
-        return new Theme(0L, themeDto.getName(), themeDto.getDescription(), themeDto.getThumbnail());
     }
 
     public Long getId() {
