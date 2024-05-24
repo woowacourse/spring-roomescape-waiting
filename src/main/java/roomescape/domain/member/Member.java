@@ -58,11 +58,10 @@ public class Member {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Member member)) {
             return false;
         }
-        Member member = (Member) o;
-        return Objects.equals(id, member.id);
+        return getId() != null && Objects.equals(getId(), member.getId());
     }
 
     @Override
@@ -88,5 +87,9 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean isNotAdmin() {
+        return !role.isAdmin();
     }
 }

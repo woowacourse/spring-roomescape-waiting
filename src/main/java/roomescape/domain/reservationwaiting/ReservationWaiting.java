@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 import roomescape.domain.AuditingEntity;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -48,6 +49,28 @@ public class ReservationWaiting extends AuditingEntity {
         return this.member.equals(member);
     }
 
+    public void validateOwner(Member member) {
+        if (!isSameMember(member)) {
+            throw new IllegalArgumentException("예약 대기한 회원이 아닙니다.");
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ReservationWaiting reservationWaiting)) {
+            return false;
+        }
+        return getId() != null && Objects.equals(getId(), reservationWaiting.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     // todo 시간 검증
 
     public Long getId() {
@@ -65,7 +88,6 @@ public class ReservationWaiting extends AuditingEntity {
     public LocalTime getTime() {
         return reservation.getTime().getStartAt();
     }
-
 
     public Reservation getReservation() {
         return reservation;
