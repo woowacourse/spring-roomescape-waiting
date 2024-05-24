@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
@@ -61,6 +62,7 @@ public class ReservationService {
         return ReservationOutput.toOutputs(themeReservationInfos);
     }
 
+    @Transactional
     public void deleteReservationWithAdmin(final long id) {
         final Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotExistException(RESERVATION, id));
