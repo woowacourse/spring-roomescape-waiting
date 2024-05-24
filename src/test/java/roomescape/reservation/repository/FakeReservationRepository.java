@@ -145,6 +145,17 @@ public class FakeReservationRepository implements ReservationRepository {
                 .toList();
     }
 
+    @Override
+    public int countByThemeIdAndDateAndTimeIdAndReservationStatus(long themeId, Date date, long timeId,
+                                                                  ReservationStatus status) {
+        return (int) reservations.values().stream()
+                .filter(reservation -> isSameThemeId(themeId, reservation))
+                .filter(reservation -> isSameStatus(status, reservation))
+                .filter(reservation -> isSameDate(date, reservation))
+                .filter(reservation -> isSameTimeId(timeId, reservation))
+                .count();
+    }
+
     private boolean isSameMember(long memberId, Reservation reservation) {
         return reservation.getMember().getId() == memberId;
     }

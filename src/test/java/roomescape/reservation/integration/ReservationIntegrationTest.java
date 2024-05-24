@@ -111,4 +111,21 @@ class ReservationIntegrationTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @Test
+    @DisplayName("이미 대기 최대 인원인 경우 예외를 발생한다.")
+    void throwException_WhenWaitingCountIsMax() {
+        Token token = tokenProvider.getAccessToken(7);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2025, 5, 20), 1L, 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(400);
+    }
 }

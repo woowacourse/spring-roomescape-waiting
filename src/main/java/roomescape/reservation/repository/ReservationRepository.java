@@ -45,6 +45,9 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, long waitingId);
 
+    int countByThemeIdAndDateAndTimeIdAndReservationStatus(long themeId, Date date, long timeId,
+                                                           ReservationStatus status);
+
     void deleteById(long reservationId);
 
     List<Reservation> findAllByMemberIdAndReservationStatus(long id, ReservationStatus reservationStatus);
