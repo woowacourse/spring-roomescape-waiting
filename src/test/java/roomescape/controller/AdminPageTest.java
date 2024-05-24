@@ -79,6 +79,16 @@ class AdminPageTest {
                 .statusCode(200);
     }
 
+    @DisplayName("waiting 페이지 URL 요청이 올바르게 연결된다.")
+    @Test
+    void given_when_GetWaitingPage_then_statusCodeIsOkay() {
+        RestAssured.given().log().all()
+                .cookies(TOKEN, accessToken)
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
+
     @DisplayName("토큰이 유효하지 않을 경우 'admin' 페이지에 접근할 수 없다.")
     @ParameterizedTest
     @ValueSource(strings = {"/admin", "/admin/theme", "/admin/reservation", "/admin/time"})
