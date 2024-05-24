@@ -34,7 +34,6 @@ public class Waiting {
     }
 
     public Waiting() {
-
     }
 
     public Long getId() {
