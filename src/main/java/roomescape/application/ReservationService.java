@@ -54,10 +54,10 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(HttpStatus.NOT_FOUND,
                         String.format("존재하지 않는 예약입니다. 요청 예약 id:%d", id)));
         reservationRepository.deleteById(reservation.getId());
-        updateReservation(reservation);
+        updateWaitingToReservation(reservation);
     }
 
-    private void updateReservation(Reservation reservation) {
+    private void updateWaitingToReservation(Reservation reservation) {
         if (isWaitingUpdatableToReservation(reservation)) {
             reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), Status.WAITING
