@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,18 +22,24 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
+import roomescape.validation.ReservationValidator;
 
 @Service
 @Transactional
 public class ReservationService {
 
+    private final ReservationValidator reservationValidator;
     private final MemberRepository memberRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationService(MemberRepository memberRepository, TimeSlotRepository timeSlotRepository,
-                              ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ReservationService(ReservationValidator reservationValidator,
+                              MemberRepository memberRepository,
+                              TimeSlotRepository timeSlotRepository,
+                              ThemeRepository themeRepository,
+                              ReservationRepository reservationRepository) {
+        this.reservationValidator = reservationValidator;
         this.memberRepository = memberRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
@@ -76,7 +81,7 @@ public class ReservationService {
         Theme theme = themeRepository.getThemeById(request.themeId());
         Reservation reservation = getReservation(request, member, timeSlot, theme);
         reservation.validatePast(now);
-        validateDuplicatedReservation(member, request.date(), timeSlot, theme);
+        reservationValidator.validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -87,7 +92,7 @@ public class ReservationService {
         Theme theme = themeRepository.getThemeById(request.themeId());
         Reservation reservation = getReservation(request, member, timeSlot, theme);
         reservation.validatePast(now);
-        validateDuplicatedReservation(member, request.date(), timeSlot, theme);
+        reservationValidator.validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -108,12 +113,6 @@ public class ReservationService {
             pendingReservation.ifPresent(Reservation::updateStatusBooked);
         }
         reservationRepository.deleteById(id);
-    }
-
-    private void validateDuplicatedReservation(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {
-        if (reservationRepository.existsByMemberAndDateAndTimeAndTheme(member, date, timeSlot, theme)) {
-            throw new IllegalArgumentException("이미 예약을 시도 하였습니다.");
-        }
     }
 
     private Reservation getReservation(AdminReservationRequest request,

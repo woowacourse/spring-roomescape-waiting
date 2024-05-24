@@ -5,18 +5,18 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.validation.ThemeValidator;
 
 @Service
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ThemeValidator themeValidator;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository, ThemeValidator themeValidator) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
+        this.themeValidator = themeValidator;
     }
 
     public List<ThemeResponse> findAll() {
@@ -33,14 +33,8 @@ public class ThemeService {
     }
 
     public void delete(Long id) {
-        validateExistReservation(id);
-        themeRepository.deleteById(id);
-    }
-
-    private void validateExistReservation(Long id) {
         Theme theme = themeRepository.getThemeById(id);
-        if (reservationRepository.existsByTheme(theme)) {
-            throw new IllegalArgumentException("예약이 등록된 테마는 제거할 수 없습니다");
-        }
+        themeValidator.validateExistReservation(theme);
+        themeRepository.deleteById(id);
     }
 }
