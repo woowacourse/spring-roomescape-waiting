@@ -43,7 +43,7 @@ public class WaitingService {
 
     public List<ReservationMineResponse> findMyWaitings(LoginMember loginMember) {
         Member member = findMemberById(loginMember.id());
-        List<Waiting> waitings = waitingRepository.findAllByMemberOrderByDateAsc(member);
+        List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberIdByDateAsc(member);
         return waitings.stream()
                 .map(ReservationMineResponse::from)
                 .toList();
