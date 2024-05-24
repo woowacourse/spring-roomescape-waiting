@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -53,6 +54,7 @@ public class ReservationCreateService {
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 테마입니다."));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public MemberReservationResponse createReservation(ReservationCreateRequest request) {
         Member member = findMemberById(request.memberId());
         Reservation reservation = findReservationOrSave(request);
