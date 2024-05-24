@@ -80,6 +80,7 @@ public class ReservationService {
         return rank + "번째";
     }
 
+    @Transactional
     public List<ReservationResponse> searchReservations(
             final ReservationSearchCondition condition) {
         validateDateRange(condition);
