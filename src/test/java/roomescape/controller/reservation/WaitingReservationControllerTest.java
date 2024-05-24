@@ -15,7 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.MemberLoginRequest;
-import roomescape.controller.reservation.dto.UserCreateReservationRequest;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(value = "/data.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
@@ -66,7 +66,7 @@ public class WaitingReservationControllerTest {
     @Test
     @DisplayName("예약 대기를 추가한다.")
     void addWaitingReservation() {
-        UserCreateReservationRequest request = new UserCreateReservationRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
                 LocalDate.now().plusDays(1), 1L, 1L);
         RestAssured.given().log().all()
                 .cookie("token", memberToken)

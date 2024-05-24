@@ -13,12 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.controller.member.dto.LoginMember;
-import roomescape.controller.reservation.dto.CreateReservationDto;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.MyReservationResponse;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
-import roomescape.controller.reservation.dto.UserCreateReservationRequest;
-import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -43,12 +41,10 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(
-            @RequestBody @Valid final UserCreateReservationRequest userRequest,
+            @RequestBody @Valid final CreateReservationRequest reservationRequest,
             @Valid final LoginMember loginMember) {
-        final CreateReservationDto reservationDto = new CreateReservationDto(
-                loginMember.id(), userRequest.themeId(), userRequest.date(),
-                userRequest.timeId(), Status.RESERVED);
-        final ReservationResponse reservation = reservationService.addReservation(reservationDto);
+        final ReservationResponse reservation
+                = reservationService.addReservation(reservationRequest, loginMember.id());
 
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
                 .buildAndExpand(reservation.id())

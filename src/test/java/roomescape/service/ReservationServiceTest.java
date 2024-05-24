@@ -15,10 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.LoginMember;
-import roomescape.controller.reservation.dto.CreateReservationDto;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.MyReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
-import roomescape.domain.Status;
 import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 
@@ -46,8 +45,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("from, to 날짜가 역순이면 예외가 발생한다.")
     void searchReservationsByReversedFromToThrowsException() {
-        LocalDate now = LocalDate.now();
-        ReservationSearchCondition condition = new ReservationSearchCondition(1L, 1L, now,
+        final LocalDate now = LocalDate.now();
+        final ReservationSearchCondition condition = new ReservationSearchCondition(1L, 1L, now,
                 now.minusDays(1));
         assertThatThrownBy(() -> reservationService.searchReservations(condition))
                 .isInstanceOf(InvalidSearchDateException.class);
@@ -57,12 +56,12 @@ class ReservationServiceTest {
     @DisplayName("중복된 예약을 시도하면 예외가 발생한다.")
     void addDuplicatedReservationThrowsException() {
         final LocalDate now = LocalDate.now();
-        CreateReservationDto reservationDto = new CreateReservationDto(
-                1L, 2L, now.plusDays(1), 3L, Status.RESERVED);
+        final CreateReservationRequest reservationRequest = new CreateReservationRequest(
+                now.plusDays(1), 3L, 2L);
 
-        reservationService.addReservation(reservationDto);
+        reservationService.addReservation(reservationRequest, 1L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationDto))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, 1L))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 
@@ -70,10 +69,10 @@ class ReservationServiceTest {
     @DisplayName("예약이 존재하지 않는데 예약 대기를 시도하면 예외가 발생한다.")
     void addReservationWaitingNotDuplicatedReservationThrowsException() {
         final LocalDate now = LocalDate.now();
-        CreateReservationDto reservationDto = new CreateReservationDto(
-                1L, 2L, now.plusDays(15), 3L, Status.WAITING);
+        final CreateReservationRequest reservationRequest = new CreateReservationRequest(
+                now.plusDays(15), 3L, 2L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationDto))
+        assertThatThrownBy(() -> reservationService.addWaiting(reservationRequest, 1L))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 
@@ -81,12 +80,11 @@ class ReservationServiceTest {
     @DisplayName("내가 한 예약 혹은 대기가 존재하는데 예약 대기를 시도하면 예외가 발생한다.")
     void addReservationWaitingDuplicatedThrowsException() {
         final LocalDate now = LocalDate.now();
-        CreateReservationDto reservationDto = new CreateReservationDto(
-                1L, 2L, now.plusDays(1), 3L, Status.WAITING);
-        reservationService.addReservation(new CreateReservationDto(
-                1L, 2L, now.plusDays(1), 3L, Status.RESERVED));
+        final CreateReservationRequest reservationRequest = new CreateReservationRequest(
+                now.plusDays(1), 3L, 2L);
+        reservationService.addReservation(reservationRequest, 1L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationDto))
+        assertThatThrownBy(() -> reservationService.addWaiting(reservationRequest, 1L))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 

@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
-import roomescape.controller.reservation.dto.CreateReservationDto;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.MyReservationResponse;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
@@ -16,6 +16,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.InvalidRequestException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -93,29 +94,52 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse addReservation(final CreateReservationDto reservationDto) {
-        validateDuplicate(reservationDto);
-        validateDuplicateWaiting(reservationDto);
-        final LocalDate date = reservationDto.date();
-        final ReservationTime time = reservationTimeRepository
-                .findByIdOrThrow(reservationDto.timeId());
+    public ReservationResponse addReservation(
+            final CreateReservationRequest reservationRequest,
+            final Long memberId) {
+        return createReservation(reservationRequest, memberId, Status.RESERVED);
+    }
+
+    public ReservationResponse addWaiting(
+            final CreateReservationRequest reservationRequest,
+            final Long memberId) {
+        validateDuplicateWaiting(reservationRequest, memberId);
+        return createReservation(reservationRequest, memberId, Status.WAITING);
+    }
+
+    private ReservationResponse createReservation(
+            final CreateReservationRequest reservationRequest,
+            final Long memberId,
+            final Status status) {
+        validateDuplicate(reservationRequest, status);
+        final LocalDate date = reservationRequest.date();
+        final ReservationTime time
+                = reservationTimeRepository.findByIdOrThrow(reservationRequest.timeId());
         validateBeforeDay(date, time);
 
-        final Theme theme = themeRepository.findByIdOrThrow(reservationDto.themeId());
-        final Member member = memberRepository.findByIdOrThrow(reservationDto.memberId());
-        final Reservation reservation = new Reservation(null, member, date, time, theme,
-                reservationDto.status());
+        final Theme theme = themeRepository.findByIdOrThrow(reservationRequest.themeId());
+        final Member member = memberRepository.findByIdOrThrow(memberId);
+        final Reservation reservation = new Reservation(null, member, date, time, theme, status);
         reservationRepository.save(reservation);
         return ReservationResponse.from(reservation);
     }
 
     @Transactional
-    public void deleteReservation(final long id) {
+    public void deleteReservation(final Long id) {
         final Reservation deleteReservation = reservationRepository.findByIdOrThrow(id);
-        reservationRepository.deleteById(deleteReservation.getId());
         if (deleteReservation.isReserved()) {
+            reservationRepository.deleteById(deleteReservation.getId());
             reserveFirstWaitingIfPresent(deleteReservation);
         }
+        throw new InvalidRequestException("이 예약은 현재 대기 상태입니다.");
+    }
+
+    public void deleteWaiting(final Long id) {
+        final Reservation deleteWaiting = reservationRepository.findByIdOrThrow(id);
+        if (deleteWaiting.isReserved()) {
+            throw new InvalidRequestException("이 예약 대기는 현재 예약 상태입니다.");
+        }
+        reservationRepository.deleteById(id);
     }
 
     private void reserveFirstWaitingIfPresent(Reservation deleteReservation) {
@@ -129,22 +153,6 @@ public class ReservationService {
                 .ifPresent(Reservation::reserveWaiting);
     }
 
-    @Transactional
-    public ReservationResponse reserveWaitingReservation(final long id) {
-        final Reservation waitingReservation = reservationRepository.findByIdOrThrow(id);
-        final boolean reservationExists = reservationRepository
-                .existsByThemeIdAndTimeIdAndDateAndStatus(
-                        waitingReservation.getTheme().getId(),
-                        waitingReservation.getTime().getId(),
-                        waitingReservation.getDate(),
-                        Status.RESERVED);
-        if (reservationExists) {
-            throw new DuplicateReservationException("예약이 존재하여 승인할 수 없습니다.");
-        }
-        waitingReservation.reserveWaiting();
-        return ReservationResponse.from(waitingReservation);
-    }
-
     private void validateDateRange(final ReservationSearchCondition request) {
         if (request.dateFrom() == null || request.dateTo() == null) {
             return;
@@ -154,29 +162,31 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicate(final CreateReservationDto reservationDto) {
+    private void validateDuplicate(final CreateReservationRequest reservationRequest,
+                                   final Status status) {
         final boolean isExistReservation =
                 reservationRepository.existsByThemeIdAndTimeIdAndDateAndStatus(
-                        reservationDto.themeId(),
-                        reservationDto.timeId(),
-                        reservationDto.date(),
+                        reservationRequest.themeId(),
+                        reservationRequest.timeId(),
+                        reservationRequest.date(),
                         Status.RESERVED);
-        if (isExistReservation && reservationDto.status() == Status.RESERVED) {
+        if (isExistReservation && Status.RESERVED == status) {
             throw new DuplicateReservationException("중복된 시간으로 예약이 불가합니다.");
         }
-        if (!isExistReservation && reservationDto.status() == Status.WAITING) {
+        if (!isExistReservation && Status.WAITING == status) {
             throw new DuplicateReservationException("예약이 존재하지 않을 경우 예약대기할 수 없습니다.");
         }
     }
 
-    private void validateDuplicateWaiting(final CreateReservationDto reservationDto) {
-        final boolean isExistReservation =
+    private void validateDuplicateWaiting(final CreateReservationRequest reservationRequest,
+                                          final Long memberId) {
+        final boolean isReservedByMember =
                 reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
-                        reservationDto.memberId(),
-                        reservationDto.themeId(),
-                        reservationDto.timeId(),
-                        reservationDto.date());
-        if (isExistReservation && Status.WAITING == reservationDto.status()) {
+                        memberId,
+                        reservationRequest.themeId(),
+                        reservationRequest.timeId(),
+                        reservationRequest.date());
+        if (isReservedByMember) {
             throw new DuplicateReservationException("중복된 시간으로 예약대기가 불가합니다.");
         }
     }
