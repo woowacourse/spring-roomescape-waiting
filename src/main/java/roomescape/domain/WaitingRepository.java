@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
-    List<Waiting> findByMemberId(Long id);
-
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 
     @Query("SELECT new roomescape.domain.WaitingWithRank(" +
