@@ -1,7 +1,5 @@
 package roomescape.domain;
 
-import roomescape.domain.Waiting;
-
 public class WaitingWithRank {
     private final Waiting waiting;
     private final Long rank;
