@@ -99,7 +99,7 @@ class ReservationWaitServiceTest {
         ReservationWait savedWait = waitRepository.save(new ReservationWait(member, reservation, 0));
 
         // when
-        waitService.deleteReservationWait(savedWait.getId());
+        waitService.deleteReservationWait(reservation.getId(), member.getId());
 
         // then
         Assertions.assertThat(waitRepository.findAll())

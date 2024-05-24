@@ -19,8 +19,10 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ReservationWaitRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.member.AuthenticationFailureException;
+import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.time.NotFoundTimeException;
 import roomescape.service.dto.request.wait.WaitRequest;
+import roomescape.service.dto.response.wait.WaitResponse;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,6 +33,16 @@ public class ReservationWaitService {
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
+
+    public List<WaitResponse> findAllByMemberId(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(AuthenticationFailureException::new);
+
+        return waitRepository.findAllByMember(member)
+                .stream()
+                .map(wait -> WaitResponse.from(wait, waitRepository.countByPriorityBefore(wait.getPriority())))
+                .toList();
+    }
 
     @Transactional
     public void saveReservationWait(WaitRequest request, long memberId) {
@@ -71,7 +83,11 @@ public class ReservationWaitService {
     }
 
     @Transactional
-    public void deleteReservationWait(Long waitId) {
-        waitRepository.deleteById(waitId);
+    public void deleteReservationWait(Long reservationId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(AuthenticationFailureException::new);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(NotFoundReservationException::new);
+        waitRepository.deleteByMemberAndReservation(member, reservation);
     }
 }

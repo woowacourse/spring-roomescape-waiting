@@ -49,9 +49,15 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
 
     List<ReservationWait> findByMemberAndReservation(Member member, Reservation reservation);
 
+    List<ReservationWait> findAllByMember(Member member);
+
+    long countByPriorityBefore(long priority);
+
     void deleteById(Long id);
 
     void deleteByMemberId(Long memberId);
+
+    void deleteByMemberAndReservation(Member member, Reservation reservation);
 
     void deleteByReservationId(Long reservationId);
 

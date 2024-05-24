@@ -162,7 +162,6 @@ class ReservationWaitRepositoryTest {
                 .isEmpty();
     }
 
-
     @Test
     @DisplayName("예약의 ID로 예약 대기 정보를 삭제할 수 있다")
     void deleteByReservationId_ShouldRemovePersistence() {
@@ -227,5 +226,31 @@ class ReservationWaitRepositoryTest {
         // then
         Assertions.assertThat(foundWaits).hasSize(1)
                 .containsExactlyInAnyOrder(savedWaits);
+    }
+
+    @Test
+    @DisplayName("회원정보와 예약정보 바탕으로 예약 대기를 삭제한다")
+    void deleteByMemberAndReservation_ShouldRemovePersistence() {
+        // given
+        Member member = new Member("aa", "aa@aa.aa", "aa");
+        Theme theme = new Theme("n", "d", "t");
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        Reservation reservation = new Reservation(LocalDate.of(2017, 12, 11), time, theme);
+        memberRepository.save(member);
+        themeRepository.save(theme);
+        timeRepository.save(time);
+        reservationRepository.save(reservation);
+
+        ReservationWait wait = new ReservationWait(member, reservation, 0L);
+
+        waitRepository.save(wait);
+
+        // when
+        waitRepository.deleteByMemberAndReservation(member, reservation);
+
+        // then
+        Assertions.assertThat(waitRepository.findAll())
+                .isEmpty();
+
     }
 }

@@ -203,8 +203,8 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
         /*
@@ -219,7 +219,6 @@ function onWaitButtonClick() {
         })
             .then(response => {
                 if (!response.ok) throw new Error('Reservation waiting failed');
-                return response.json();
             })
             .then(data => {
                 alert('Reservation waiting successful!');

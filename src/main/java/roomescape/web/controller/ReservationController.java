@@ -22,7 +22,6 @@ import roomescape.service.dto.request.reservation.ReservationRequest;
 import roomescape.service.dto.request.reservation.ReservationSearchCond;
 import roomescape.service.dto.request.reservation.UserReservationRequest;
 import roomescape.service.dto.response.reservation.ReservationResponse;
-import roomescape.service.dto.response.reservation.UserReservationResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,13 +44,6 @@ public class ReservationController {
         ReservationSearchCond searchCond = new ReservationSearchCond(start, end, memberName, themeName);
         List<ReservationResponse> reservations = reservationService.findAllReservationByConditions(
                 searchCond);
-
-        return ResponseEntity.ok(reservations);
-    }
-
-    @GetMapping("/reservations-mine")
-    public ResponseEntity<List<UserReservationResponse>> findAllByMemberId(MemberInfo memberInfo) {
-        List<UserReservationResponse> reservations = reservationService.findAllByMemberId(memberInfo.id());
 
         return ResponseEntity.ok(reservations);
     }
