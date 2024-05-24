@@ -44,8 +44,10 @@ public class ReservationService {
     }
 
     public ReservationResponse save(ReservationRequest reservationRequest) {
+        System.out.println(reservationRequest.timeId());
         ReservationTime time = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
+        System.out.println(time.getId());
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
         Member member = memberRepository.findById(reservationRequest.memberId())
