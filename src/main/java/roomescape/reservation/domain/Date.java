@@ -11,6 +11,7 @@ import roomescape.reservation.exception.ReservationExceptionCode;
 public class Date {
 
     private static final int CANCEL_MIN_DATE = 2;
+    private static final int RESERVATION_POSSIBLE_MAX_DATE = 7;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -40,8 +41,13 @@ public class Date {
     }
 
     private static void validateAtSave(LocalDate date) {
-        if (date.isBefore(LocalDate.now())) {
+        LocalDate today = LocalDate.now();
+
+        if (date.isBefore(today)) {
             throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION);
+        }
+        if (date.isAfter(today.plusDays(RESERVATION_POSSIBLE_MAX_DATE))) {
+            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_DATE_IS_OVER_RANGE_EXCEPTION);
         }
     }
 

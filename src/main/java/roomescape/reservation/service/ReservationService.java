@@ -36,6 +36,8 @@ import roomescape.waiting.domain.Waiting;
 @Service
 public class ReservationService {
 
+    private static final int MAX_WAITING_COUNT = 5;
+
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
@@ -57,6 +59,8 @@ public class ReservationService {
 
     public ReservationResponse addWaitingReservation(ReservationRequest reservationRequest, long memberId) {
         validateDuplicateReservation(reservationRequest, memberId);
+        validateIsOverMaxWaitingCount(reservationRequest);
+
         Reservation saveReservation = makeReservation(reservationRequest, memberId, ReservationStatus.WAITING);
 
         return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
@@ -123,15 +127,15 @@ public class ReservationService {
 
     private static List<MemberReservationResponse> makeResponse(List<Reservation> reservations,
                                                                 List<Waiting> waitingRanks) {
-        List<MemberReservationResponse> memberReservationRespons = new ArrayList<>();
+        List<MemberReservationResponse> memberReservationResponses = new ArrayList<>();
 
-        reservations.forEach(reservation -> memberReservationRespons
+        reservations.forEach(reservation -> memberReservationResponses
                 .add(MemberReservationResponse.from(reservation)));
 
-        waitingRanks.forEach(waiting -> memberReservationRespons
+        waitingRanks.forEach(waiting -> memberReservationResponses
                 .add(MemberReservationResponse.from(waiting)));
 
-        return memberReservationRespons;
+        return memberReservationResponses;
     }
 
     @Transactional
@@ -212,6 +216,16 @@ public class ReservationService {
         if (topWaiting.isPresent()) {
             Reservation nextReservation = topWaiting.get();
             nextReservation.setReservationStatus(ReservationStatus.RESERVED);
+        }
+    }
+
+    private void validateIsOverMaxWaitingCount(ReservationRequest reservationRequest) {
+        int countWaiting = reservationRepository.countByThemeIdAndDateAndTimeIdAndReservationStatus(
+                reservationRequest.themeId(), Date.dateFrom(reservationRequest.date()), reservationRequest.timeId(),
+                ReservationStatus.WAITING);
+
+        if (countWaiting >= MAX_WAITING_COUNT) {
+            throw new RoomEscapeException(ReservationExceptionCode.WAITING_IS_MAX);
         }
     }
 }
