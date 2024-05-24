@@ -37,7 +37,11 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme(Long id, String name, String description, String thumbnail) {
+    public Theme(String name, String description, String thumbnail) {
+        this(0L, new Name(name), new Description(description), new Thumbnail(thumbnail));
+    }
+
+    public Theme(Long id, String name, String description, String thumbnail) { // TODO: for test?
         this(id, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
 

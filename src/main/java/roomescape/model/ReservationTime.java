@@ -24,6 +24,10 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
+    public ReservationTime(LocalTime startAt) {
+        this(0L, startAt);
+    }
+
     protected ReservationTime() {
     }
 

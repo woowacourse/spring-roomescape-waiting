@@ -40,6 +40,10 @@ public class Member {
         this.role = role;
     }
 
+    public Member(String name, String email, String password, Role role) {
+        this(0L, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
+    }
+
     public Member(Long id, String name, String email, String password, Role role) {
         this(id, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
     }

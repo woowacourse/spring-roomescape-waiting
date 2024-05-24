@@ -17,7 +17,7 @@ import roomescape.repository.ThemeRepository;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class ValidationTest { // TODO: 생성자 id 제거
+class ValidationTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -31,7 +31,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\n", "\t"})
     void should_throw_exception_when_member_name_null_or_blank(String name) {
-        Member member = new Member(5L, name, "email@goole.com", "pw", Role.USER);
+        Member member = new Member(name, "email@goole.com", "pw", Role.USER);
         assertThatThrownBy(() -> memberRepository.save(member))
                 .isInstanceOf(ConstraintViolationException.class);
     }
@@ -41,7 +41,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\n", "\t", "email", "email#gmail.com"})
     void should_throw_exception_when_member_email_null_or_blank_or_invalid_format(String email) {
-        Member member = new Member(5L, "name", email, "pw", Role.USER);
+        Member member = new Member("name", email, "pw", Role.USER);
         assertThatThrownBy(() -> memberRepository.save(member))
                 .isInstanceOf(ConstraintViolationException.class);
     }
@@ -51,7 +51,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\n", "\t"})
     void should_throw_exception_when_member_password_null_or_blank(String password) {
-        Member member = new Member(5L, "name", "email@goole.com", password, Role.USER);
+        Member member = new Member("name", "email@goole.com", password, Role.USER);
         assertThatThrownBy(() -> memberRepository.save(member))
                 .isInstanceOf(ConstraintViolationException.class);
     }
@@ -61,7 +61,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\n", "\t"})
     void should_throw_exception_when_theme_name_null_or_blank(String name) {
-        Theme theme = new Theme(5L, name, "description", "thumbnail");
+        Theme theme = new Theme(name, "description", "thumbnail");
         assertThatThrownBy(() -> themeRepository.save(theme))
                 .isInstanceOf(ConstraintViolationException.class);
     }
@@ -71,7 +71,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\n", "\t"})
     void should_throw_exception_when_theme_description_null_or_blank(String description) {
-        Theme theme = new Theme(5L, "name", description, "thumbnail");
+        Theme theme = new Theme("name", description, "thumbnail");
         assertThatThrownBy(() -> themeRepository.save(theme))
                 .isInstanceOf(ConstraintViolationException.class);
     }
@@ -81,7 +81,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\n", "\t"})
     void should_throw_exception_when_theme_thumbnail_null_or_blank(String thumbnail) {
-        Theme theme = new Theme(5L, "name", "description", thumbnail);
+        Theme theme = new Theme("name", "description", thumbnail);
         assertThatThrownBy(() -> themeRepository.save(theme))
                 .isInstanceOf(ConstraintViolationException.class);
     }
@@ -89,7 +89,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @DisplayName("예약 시간의 시간 시간이 null인 경우 예외가 발생한다.")
     @Test
     void should_throw_exception_when_time_startAt_null() {
-        ReservationTime reservationTime = new ReservationTime(5L, null);
+        ReservationTime reservationTime = new ReservationTime(null);
         assertThatThrownBy(() -> reservationTimeRepository.save(reservationTime))
                 .isInstanceOf(ConstraintViolationException.class);
     }
