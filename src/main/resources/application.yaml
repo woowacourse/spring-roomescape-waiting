@@ -13,9 +13,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    defer-datasource-initialization: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     open-in-view: false
 
 security:
