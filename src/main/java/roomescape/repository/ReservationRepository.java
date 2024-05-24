@@ -4,10 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.model.member.LoginMember;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -34,4 +34,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByThemeId(long themeId);
 
     boolean existsByIdAndMemberId(long id, long memberId);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId); // TODO: date, time, theme 객체로 추출
 }

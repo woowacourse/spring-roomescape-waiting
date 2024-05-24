@@ -35,6 +35,7 @@ class WaitingControllerTest {
     private final SimpleJdbcInsert themeInsertActor;
     private final SimpleJdbcInsert timeInsertActor;
     private final SimpleJdbcInsert memberInsertActor;
+    private final SimpleJdbcInsert reservationInsertActor;
     private final SimpleJdbcInsert waitingInsertActor;
 
     @Autowired
@@ -50,6 +51,9 @@ class WaitingControllerTest {
         this.memberInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("member")
                 .usingGeneratedKeyColumns("id");
+        this.reservationInsertActor = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("reservation")
+                .usingGeneratedKeyColumns("id");
         this.waitingInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
                 .usingGeneratedKeyColumns("id");
@@ -63,11 +67,17 @@ class WaitingControllerTest {
 
         insertMember("에버", "treeboss@gmail.com", "treeboss123!", "USER");
         insertMember("우테코", "wtc@gmail.com", "wtc123!", "ADMIN");
+        insertMember("후에버", "whoever@gmail.com", "whoever123!", "USER");
 
         LocalDate now = LocalDate.now();
-        IntStream.range(0, 5).forEach(i -> insertWaiting(now.minusDays(i), 1L, 1L, 1L));
-        IntStream.range(0, 5).forEach(i -> insertWaiting(now.minusDays(i), 2L, 1L, 1L));
-        IntStream.range(0, 5).forEach(i -> insertWaiting(now.minusDays(i), 3L, 1L, 1L));
+        IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 1L, 1L, 1L));
+        IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 2L, 1L, 1L));
+        IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 3L, 1L, 1L));
+        insertReservation(now.plusDays(1), 1L, 1L, 1L);
+
+        IntStream.range(0, 5).forEach(i -> insertWaiting(now.minusDays(i), 1L, 1L, 2L));
+        IntStream.range(0, 5).forEach(i -> insertWaiting(now.minusDays(i), 2L, 1L, 2L));
+        IntStream.range(0, 5).forEach(i -> insertWaiting(now.minusDays(i), 3L, 1L, 2L));
     }
 
     private void initDatabase() {
@@ -75,6 +85,7 @@ class WaitingControllerTest {
         jdbcTemplate.execute("TRUNCATE TABLE member RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE theme RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE reservation_time RESTART IDENTITY");
+        jdbcTemplate.execute("TRUNCATE TABLE reservation RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE waiting RESTART IDENTITY");
     }
 
@@ -101,6 +112,15 @@ class WaitingControllerTest {
         memberInsertActor.execute(parameters);
     }
 
+    private void insertReservation(LocalDate date, long timeId, long themeId, long memberId) {
+        Map<String, Object> parameters = new HashMap<>(4);
+        parameters.put("date", date);
+        parameters.put("time_id", timeId);
+        parameters.put("theme_id", themeId);
+        parameters.put("member_id", memberId);
+        reservationInsertActor.execute(parameters);
+    }
+
     private void insertWaiting(LocalDate date, long timeId, long themeId, long memberId) {
         Map<String, Object> parameters = new HashMap<>(4);
         parameters.put("date", date);
@@ -125,6 +145,7 @@ class WaitingControllerTest {
     @DisplayName("예약 대기를 추가할 수 있다.")
     @Test
     void should_insert_reservation_waiting() {
+        AuthDto userDto = new AuthDto("whoever@gmail.com", "whoever123!");
         String token = authService.createToken(userDto); // TODO: can change to TokenManager.create()
         WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), 1L, 1L);
 

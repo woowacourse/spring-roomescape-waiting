@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
 import roomescape.model.WaitingWithRank;
@@ -15,6 +18,8 @@ import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ReservationDto;
 
@@ -35,9 +40,31 @@ class WaitingServiceTest {
     private WaitingService waitingService;
     @Autowired
     private WaitingRepository waitingRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() { // TODO: reservation 추가 및 save 전 검증 테스트 추가
+        // TODO: waiting 보다 Reservation 이 우선 들어와야한다는 것이 테이블 설계만을 통해서는 드러나지 않는다. -> 외래키의 이점
+        memberRepository.save(new Member("후에버", "whoever@gmail.com", "whoever123!", Role.USER)); // TODO
+        reservationRepository.saveAll(List.of(
+                new Reservation(
+                        LocalDate.of(2000, 1, 1),
+                        new ReservationTime(1L, LocalTime.of(1, 0)),
+                        new Theme(1L, "n1", "d1", "t1"),
+                        new Member(2L, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN)),
+                new Reservation(
+                        LocalDate.of(2000, 1, 2),
+                        new ReservationTime(2L, LocalTime.of(2, 0)),
+                        new Theme(2L, "n2", "d2", "t2"),
+                        new Member(1L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
+                new Reservation(
+                        LocalDate.of(9999, 9, 9),
+                        new ReservationTime(1L, LocalTime.of(1, 0)),
+                        new Theme(1L, "n1", "d1", "t1"),
+                        new Member(1L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER))));
         waitingRepository.saveAll(List.of(
                 new Waiting(
                         LocalDate.of(2000, 1, 1),
@@ -60,12 +87,45 @@ class WaitingServiceTest {
     @Test
     @Transactional // TODO: study
     void should_save_reservation_waiting() {
-        ReservationDto reservationDto = new ReservationDto(LocalDate.of(3333, 3, 3), 1L, 1L, 1L);
+        ReservationDto reservationDto = new ReservationDto(LocalDate.of(9999, 9, 9), 1L, 1L, 3L);
         waitingService.saveWaiting(reservationDto);
         assertThat(waitingRepository.count()).isEqualTo(INITIAL_WAITING_COUNT + 1);
     }
 
-    @DisplayName("예약을 삭제한다.")
+    @DisplayName("본인의 예약에 대한 대기를 저장하려 하면 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_reservation_owner() {
+        ReservationDto waitingDto = new ReservationDto(
+                LocalDate.of(9999, 9, 9), 1L, 1L, 1L);
+
+        assertThatThrownBy(() -> waitingService.saveWaiting(waitingDto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("[ERROR] 본인의 예약에는 대기할 수 없습니다.");
+    }
+
+    @DisplayName("과거의 예약 대기를 저장하려 하면 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_past_waiting() {
+        ReservationDto waitingDto = new ReservationDto(
+                LocalDate.of(2000, 1, 1), 1L, 1L, 3L);
+
+        assertThatThrownBy(() -> waitingService.saveWaiting(waitingDto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("[ERROR] 현재 이전 예약은 대기할 수 없습니다.");
+    }
+
+    @DisplayName("중복된 예약 대기를 저장하려 하면 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_duplicated_waiting() {
+        ReservationDto waitingDto = new ReservationDto(
+                LocalDate.of(9999, 9, 9), 1L, 1L, 2L);
+
+        assertThatThrownBy(() -> waitingService.saveWaiting(waitingDto))
+                .isInstanceOf(DuplicatedException.class)
+                .hasMessage("[ERROR] 중복된 예약 대기는 추가할 수 없습니다.");
+    }
+
+    @DisplayName("예약 대기를 삭제한다.")
     @Test
     void should_delete_reservation() {
         waitingService.deleteWaiting(1L);
@@ -85,6 +145,15 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.deleteWaiting(999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[ERROR] 존재하지 않는 예약 대기입니다.");
+    }
+
+    @DisplayName("본인의 소유가 아닌 예약 대기를 삭제하려 하면 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_not_owned_reservation_waiting() {
+        LoginMember otherMember = new LoginMember(2L);
+        assertThatThrownBy(() -> waitingService.deleteWaitingOfMember(1L, otherMember))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("[ERROR] 해당 예약 대기의 소유자가 아닙니다.");
     }
 
     @DisplayName("특정 멤버의 예약을 조회한다.")

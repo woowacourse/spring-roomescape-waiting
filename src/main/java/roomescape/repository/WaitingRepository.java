@@ -35,4 +35,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             LIMIT 1
             """)
     Optional<Waiting> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, long timeId, long themeId, long memberId);
 }
