@@ -43,7 +43,7 @@ function render(data) {
 function requestDeleteWaiting(id) {
   const endpoint = `/reservations/wait/${id}`;
   return fetch(endpoint, {
-    method: 'DELETE'
+    method: 'PUT'
   }).then(response => {
     if (response.status === 204) return;
     throw new Error('Delete failed');

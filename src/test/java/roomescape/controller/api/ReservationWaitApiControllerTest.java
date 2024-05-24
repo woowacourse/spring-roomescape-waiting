@@ -47,7 +47,7 @@ class ReservationWaitApiControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("예약 대기 삭제를 정상적으로 수행한다.")
-    void reservationDelete_Success() {
+    void reservationCancel_Success() {
         jdbcTemplate.update(
                 "INSERT INTO member (name, email, password, `role`) VALUES ('사용자1', 'user@wooteco.com', '1234', 'USER')");
         jdbcTemplate.update(
@@ -56,7 +56,7 @@ class ReservationWaitApiControllerTest extends BaseControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", TokenGenerator.makeUserToken())
-                .when().delete("/reservations/wait/{reservationWaitId}", 1)
+                .when().put("/reservations/wait/{reservationWaitId}", 1)
                 .then().log().all()
                 .statusCode(204);
     }

@@ -3,9 +3,9 @@ package roomescape.controller.api;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
@@ -37,8 +37,8 @@ public class ReservationWaitApiController {
                 .body(new ReservationWaitResponse(newReservationWait));
     }
 
-    @DeleteMapping("/reservations/wait/{reservationWaitId}")
-    public ResponseEntity<Void> deleteReservationWait(@PathVariable long reservationWaitId) {
+    @PutMapping("/reservations/wait/{reservationWaitId}")
+    public ResponseEntity<Void> cancelReservationWait(@PathVariable long reservationWaitId) {
         reservationWaitDeleteService.cancelById(reservationWaitId);
         return ResponseEntity.noContent().build();
     }

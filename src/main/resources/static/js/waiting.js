@@ -57,7 +57,7 @@ function deny(event) {
 
   const endpoint = `/admin/reservations/${id}`;
   return fetch(endpoint, {
-    method: 'DELETE'
+    method: 'PUT'
   }).then(response => {
     if (response.status === 204) return;
     throw new Error('Delete failed');
