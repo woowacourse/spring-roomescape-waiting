@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
@@ -9,8 +10,9 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -39,24 +41,29 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
-    public Waiting save(WaitingCreateRequest WaitingCreateRequest, LoginMemberInToken loginMemberInToken) {
-        Waiting waiting = getValidatedWaiting(WaitingCreateRequest, loginMemberInToken);
+    public Waiting save(
+            final WaitingCreateRequest request,
+            final LoginMemberInToken loginMember
+    ) {
+        Waiting waiting = getValidatedWaiting(request, loginMember);
 
         return waitingRepository.save(waiting);
     }
 
-    private Waiting getValidatedWaiting(WaitingCreateRequest waitingCreateRequest,
-            LoginMemberInToken loginMemberInToken) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(waitingCreateRequest.timeId())
+    private Waiting getValidatedWaiting(
+            final WaitingCreateRequest request,
+            final LoginMemberInToken loginMember
+    ) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
-        Theme theme = themeRepository.findById(waitingCreateRequest.themeId())
+        Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        Member member = memberRepository.findById(loginMemberInToken.id())
+        Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        final Waiting waiting = waitingCreateRequest.toWaiting(member, theme, reservationTime);
+        final Waiting waiting = request.toWaiting(member, theme, reservationTime);
         validateWaiting(waiting);
         return waiting;
     }
@@ -76,6 +83,20 @@ public class WaitingService {
                 waiting.getTheme().getId(), waiting.getDate(), waiting.getReservationTime().getStartAt())) {
             throw new IllegalArgumentException("이미 예약 대기 중 입니다.");
         }
+    }
+
+    public List<WaitingResponse> findAll(final LoginMemberInToken loginMember) {
+        if (!loginMember.role().isAdmin()) {
+            throw new IllegalArgumentException("관리자만 조회할 수 있습니다.");
+        }
+
+        List<WaitingResponse> waitingResponses = new ArrayList<>();
+
+        for (final Waiting waiting : waitingRepository.findAll()) {
+            waitingResponses.add(new WaitingResponse(waiting));
+        }
+
+        return waitingResponses;
     }
 
     public List<MyReservationResponse> findWaitingWithRanksByMemberId(Long memberId) {
