@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('/waitings') // 내 예약 목록 조회 API 호출
+    fetch('/admin/waitings') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -17,7 +17,7 @@ function render(data) {
 
         const id = item.id;
         const name = item.name;
-        const theme = item.date;
+        const theme = item.theme;
         const date = item.date;
         const startAt = item.time;
 
@@ -52,9 +52,9 @@ function deny(event) {
 
     const endpoint = '/admin/waitings/reject/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
+        if (response.status === 204) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
 }
