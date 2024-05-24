@@ -48,7 +48,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse addReservation(ReservationRequest request) {
+    public synchronized ReservationResponse addReservation(ReservationRequest request) {
         Reservation reservation = createReservation(
                 request.date(),
                 request.timeId(),
