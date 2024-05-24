@@ -8,7 +8,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.exception.AuthorizationException;
 import roomescape.model.member.LoginMember;
-import roomescape.service.dto.MemberInfo;
+import roomescape.model.member.MemberWithoutPassword;
 import roomescape.util.CookieManager;
 import roomescape.util.TokenManager;
 
@@ -25,7 +25,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         String token = CookieManager.extractAuthCookie(request)
                 .orElseThrow(AuthorizationException::new)
                 .getValue();
-        MemberInfo loginMemberInfo = TokenManager.parse(token);
-        return new LoginMember(loginMemberInfo.getId());
+        MemberWithoutPassword loginMember = TokenManager.parse(token);
+        return new LoginMember(loginMember.getId());
     }
 }

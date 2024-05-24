@@ -3,15 +3,14 @@ package roomescape.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import roomescape.model.member.Member;
 import roomescape.model.member.Role;
-import roomescape.service.dto.MemberInfo;
+import roomescape.model.member.MemberWithoutPassword;
 
 public class TokenManager {
 
     private static final String SECRET_KEY = "HoweverWhateverWheneverWhereverWhoever=";
 
-    public static String create(Member member) {
+    public static String create(MemberWithoutPassword member) {
         return Jwts.builder()
                 .subject(String.valueOf(member.getId()))
                 .claim("name", member.getName())
@@ -21,7 +20,7 @@ public class TokenManager {
                 .compact();
     }
 
-    public static MemberInfo parse(String token) {
+    public static MemberWithoutPassword parse(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .build()
@@ -31,6 +30,6 @@ public class TokenManager {
         String memberName = claims.get("name").toString();
         String memberEmail = claims.get("email").toString();
         Role memberRole = Role.asRole(claims.get("role").toString());
-        return new MemberInfo(memberId, memberName, memberEmail, memberRole);
+        return new MemberWithoutPassword(memberId, memberName, memberEmail, memberRole);
     }
 }

@@ -1,6 +1,6 @@
 package roomescape.controller.response;
 
-import roomescape.service.dto.MemberInfo;
+import roomescape.model.member.MemberWithoutPassword;
 
 public class LoginResponse {
 
@@ -10,8 +10,8 @@ public class LoginResponse {
         this.name = name;
     }
 
-    public static LoginResponse from(MemberInfo memberInfo) {
-        return new LoginResponse(memberInfo.getName());
+    public static LoginResponse from(MemberWithoutPassword loginMember) {
+        return new LoginResponse(loginMember.getName());
     }
 
     private LoginResponse() {

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.service.dto.AuthDto;
-import roomescape.service.dto.MemberInfo;
+import roomescape.model.member.MemberWithoutPassword;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -27,10 +27,10 @@ class AuthServiceTest {
 
         String accessToken = authService.tryLogin(authDto);
 
-        MemberInfo memberInfo = authService.extractLoginMemberInfo(accessToken);
+        MemberWithoutPassword loginMember = authService.extractLoginMember(accessToken);
         assertAll(
                 () -> assertThat(accessToken).isNotBlank(),
-                () -> assertThat(memberInfo.getId()).isEqualTo(1L));
+                () -> assertThat(loginMember.getId()).isEqualTo(1L));
     }
 
     @DisplayName("토큰을 통해 사용자 정보를 조회한다.")
@@ -38,7 +38,7 @@ class AuthServiceTest {
     void should_check_login_state() {
         String token = authService.tryLogin(userDto);
 
-        MemberInfo loginMember = authService.extractLoginMemberInfo(token);
+        MemberWithoutPassword loginMember = authService.extractLoginMember(token);
 
         assertThat(loginMember.getId()).isEqualTo(1L);
     }

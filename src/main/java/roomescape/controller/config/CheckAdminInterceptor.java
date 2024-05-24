@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.exception.AuthorizationException;
-import roomescape.service.dto.MemberInfo;
+import roomescape.model.member.MemberWithoutPassword;
 import roomescape.util.CookieManager;
 import roomescape.util.TokenManager;
 
@@ -15,8 +15,8 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
         String token = CookieManager.extractAuthCookie(request)
                 .orElseThrow(AuthorizationException::new)
                 .getValue();
-        MemberInfo loginMemberInfo = TokenManager.parse(token);
-        if (loginMemberInfo.isNotAdmin()) {
+        MemberWithoutPassword loginMember = TokenManager.parse(token);
+        if (loginMember.isNotAdmin()) {
             throw new AuthorizationException();
         }
         return true;

@@ -7,7 +7,7 @@ import roomescape.model.member.MemberEmail;
 import roomescape.model.member.MemberPassword;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.AuthDto;
-import roomescape.service.dto.MemberInfo;
+import roomescape.model.member.MemberWithoutPassword;
 import roomescape.util.TokenManager;
 
 @Service
@@ -24,10 +24,11 @@ public class AuthService {
         MemberPassword password = authDto.getPassword();
         Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new AuthorizationException("[ERROR] 해당 이메일과 비밀번호에 일치하는 계정이 없습니다."));
-        return TokenManager.create(member);
+        MemberWithoutPassword loginMember = MemberWithoutPassword.from(member);
+        return TokenManager.create(loginMember);
     }
 
-    public MemberInfo extractLoginMemberInfo(String token) {
+    public MemberWithoutPassword extractLoginMember(String token) {
         return TokenManager.parse(token);
     }
 }

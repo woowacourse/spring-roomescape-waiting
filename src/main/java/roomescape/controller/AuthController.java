@@ -14,7 +14,7 @@ import roomescape.controller.response.LoginResponse;
 import roomescape.exception.AuthorizationException;
 import roomescape.service.AuthService;
 import roomescape.service.dto.AuthDto;
-import roomescape.service.dto.MemberInfo;
+import roomescape.model.member.MemberWithoutPassword;
 import roomescape.util.CookieManager;
 
 @Controller
@@ -41,8 +41,8 @@ public class AuthController {
         String token = CookieManager.extractAuthCookie(request)
                 .orElseThrow(AuthorizationException::new)
                 .getValue();
-        MemberInfo loginMemberInfo = authService.extractLoginMemberInfo(token);
-        LoginResponse response = LoginResponse.from(loginMemberInfo);
+        MemberWithoutPassword loginMember = authService.extractLoginMember(token);
+        LoginResponse response = LoginResponse.from(loginMember);
         return ResponseEntity.ok(response);
     }
 
