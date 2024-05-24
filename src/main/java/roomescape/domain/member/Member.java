@@ -53,6 +53,10 @@ public class Member {
         }
     }
 
+    public boolean isNotAdmin() {
+        return !role.isAdmin();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -87,9 +91,5 @@ public class Member {
 
     public Role getRole() {
         return role;
-    }
-
-    public boolean isNotAdmin() {
-        return !role.isAdmin();
     }
 }
