@@ -1,14 +1,20 @@
 package roomescape.acceptance.guest;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
+import roomescape.dto.request.MemberReservationRequest;
+
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.acceptance.PreInsertedData.THEME_1;
+import static roomescape.acceptance.PreInsertedData.TIME_10_O0;
 
 class AuthAcceptanceTest extends BaseAcceptanceTest {
 
@@ -30,7 +36,15 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("로그인하지 않은 사용자가 예약을 시도한다.")
     @Test
     void notLogin_tryReservation_fail() {
+        MemberReservationRequest request = new MemberReservationRequest(
+                LocalDate.parse("2099-12-31"),
+                TIME_10_O0.getId(),
+                THEME_1.getId()
+        );
+
         CustomExceptionResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(request)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
