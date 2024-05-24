@@ -19,14 +19,20 @@ import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
+import roomescape.service.WaitingService;
 import roomescape.service.dto.input.MemberCreateInput;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationTimeInput;
+import roomescape.service.dto.input.WaitingInput;
+import roomescape.service.dto.output.WaitingOutput;
 import roomescape.util.DatabaseCleaner;
 import roomescape.util.TokenProvider;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class WaitingApiControllerTest {
+
+    @Autowired
+    WaitingService waitingService;
 
     @Autowired
     ReservationTimeService reservationTimeService;
@@ -85,5 +91,28 @@ class WaitingApiControllerTest {
                 .post("/waitings")
                 .then()
                 .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제에 성공하면, 204를 반환한다")
+    void return_204_when_waiting_delete_success() {
+        long timeId = reservationTimeService.createReservationTime(new ReservationTimeInput("14:00"))
+                .id();
+        long themeId = themeService.createTheme(ThemeFixture.getInput())
+                .id();
+        long memberId1 = memberService.createMember(MemberFixture.getUserCreateInput("new123@gmail.com"))
+                .id();
+        long memberId2 = tokenProvider.decodeToken(token).getId();
+        String date = LocalDate.now().plusDays(1).toString();
+        reservationService.createReservation(new ReservationInput(date, timeId, themeId, memberId1));
+        WaitingOutput output = waitingService.createWaiting(new WaitingInput(date, timeId, themeId, memberId2));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when()
+                .delete("/waitings/" + output.id())
+                .then()
+                .statusCode(204);
     }
 }
