@@ -16,7 +16,7 @@ import roomescape.member.domain.Role;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
-    private static final String MEMBER_ID_CLAIM = "memberId";
+    private static final String MEMBER_NAME_CLAIM = "memberName";
     private static final String MEMBER_ROLE_CLAIM = "memberRole";
 
     private final TokenProperties tokenProperties;
@@ -32,7 +32,7 @@ public class JwtTokenProvider implements TokenProvider {
                 .setSubject(member.getId().toString())
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .claim(MEMBER_ID_CLAIM, member.getName())
+                .claim(MEMBER_NAME_CLAIM, member.getName())
                 .claim(MEMBER_ROLE_CLAIM, member.getRole())
                 .signWith(SignatureAlgorithm.HS256, tokenProperties.getSecretKey())
                 .compact();
@@ -42,7 +42,7 @@ public class JwtTokenProvider implements TokenProvider {
         Claims claims = getClaims(token);
         return new AuthInfo(
                 Long.parseLong(claims.getSubject()),
-                claims.get(MEMBER_ID_CLAIM, String.class),
+                claims.get(MEMBER_NAME_CLAIM, String.class),
                 Role.valueOf(claims.get(MEMBER_ROLE_CLAIM, String.class)));
     }
 
