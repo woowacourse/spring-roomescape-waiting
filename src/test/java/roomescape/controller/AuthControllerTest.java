@@ -4,27 +4,13 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.auth.dto.SignUpRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql("/truncate-with-guests.sql")
-class AuthControllerTest {
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void init() {
-        RestAssured.port = port;
-    }
-
+class AuthControllerTest extends DataInitializedControllerTest {
     @DisplayName("로그인 성공 테스트")
     @Test
     void login() {

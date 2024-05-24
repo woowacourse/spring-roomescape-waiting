@@ -9,27 +9,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlMergeMode;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql("/truncate-with-guests.sql")
-class ReservationTimeControllerTest {
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void initPort() {
-        RestAssured.port = port;
-    }
-
+class ReservationTimeControllerTest extends DataInitializedControllerTest {
     @DisplayName("시간 정보를 추가한다.")
     @Test
     void createReservationTime() {
@@ -62,7 +47,8 @@ class ReservationTimeControllerTest {
     @Test
     void findAllReservationTime() {
         //given
-        RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
+        RestAssured.given().contentType(ContentType.JSON)
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times");
 
         //when&then

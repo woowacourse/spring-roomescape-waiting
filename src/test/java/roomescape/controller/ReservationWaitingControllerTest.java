@@ -11,22 +11,13 @@ import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Sql("/truncate-with-guests.sql")
-class ReservationWaitingControllerTest {
-    @LocalServerPort
-    private int port;
-
+class ReservationWaitingControllerTest extends DataInitializedControllerTest {
     private LocalDate date;
     private long timeId;
     private long themeId;
@@ -34,8 +25,6 @@ class ReservationWaitingControllerTest {
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = port;
-
         date = LocalDate.now().plusDays(1);
         timeId = RestAssured.given()
                 .contentType(ContentType.JSON)

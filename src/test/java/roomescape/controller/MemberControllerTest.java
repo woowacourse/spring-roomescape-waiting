@@ -7,23 +7,14 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql("/truncate-with-admin-and-guest.sql")
-class MemberControllerTest {
-    @LocalServerPort
-    private int port;
+class MemberControllerTest extends DataInitializedControllerTest {
     private String adminToken;
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = port;
-
         adminToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("admin@email.com", "admin123"))
