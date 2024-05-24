@@ -14,7 +14,7 @@ class WaitingTest {
     @Test
     @DisplayName("예약 대기를 건 회원은 예약 대기를 삭제할 권한이 있다.")
     void MemberWhoWaitsHasDeleteAuth() {
-        boolean hasDeleteAuth = WAITING_1.doesNotHaveDeleteAuth(MEMBER_2);
+        boolean hasDeleteAuth = WAITING_1.hasNoAuthToDeleteThis(MEMBER_2);
 
         assertThat(hasDeleteAuth).isFalse();
     }
@@ -22,7 +22,7 @@ class WaitingTest {
     @Test
     @DisplayName("관리자는 모든 예약 대기를 삭제할 권한이 있다.")
     void AdminHasDeleteAuth() {
-        boolean hasDeleteAuth = WAITING_1.doesNotHaveDeleteAuth(ADMIN);
+        boolean hasDeleteAuth = WAITING_1.hasNoAuthToDeleteThis(ADMIN);
 
         assertThat(hasDeleteAuth).isFalse();
     }
@@ -30,7 +30,7 @@ class WaitingTest {
     @Test
     @DisplayName("관련 없는 회원은 예약 대기를 삭제할 권한이 없다.")
     void NotRelatedMemberCanNotDeleteWaiting() {
-        boolean hasDeleteAuth = WAITING_1.doesNotHaveDeleteAuth(MEMBER_1);
+        boolean hasDeleteAuth = WAITING_1.hasNoAuthToDeleteThis(MEMBER_1);
 
         assertThat(hasDeleteAuth).isTrue();
     }

@@ -117,7 +117,7 @@ public class WaitingService {
     }
 
     private void validateDeleteAuth(Member member, Waiting waiting) {
-        if (waiting.doesNotHaveDeleteAuth(member)) {
+        if (waiting.hasNoAuthToDeleteThis(member)) {
             throw new AuthException("예약 대기를 삭제할 권한이 없습니다.");
         }
     }
