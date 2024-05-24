@@ -23,7 +23,9 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     List<Waiting> findByThemeIdAndStartAt(Long themeId, LocalDate startDate, LocalTime startTime);
 
+    boolean existsByReservationIdAndMemberEmail(long reservationId, String email);
+
     // TODO: 이걸 붙이면 왜 되고 안붙이면 왜 안될까
     @Transactional
-    void deleteByReservationIdAndMemberEmail(Long reservationId, String email);
+    void deleteByReservationIdAndMemberEmail(long reservationId, String email);
 }

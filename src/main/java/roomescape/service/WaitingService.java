@@ -6,7 +6,9 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Waiting;
 import roomescape.exception.member.MemberNotFoundException;
+import roomescape.exception.reservation.CannotWaitingForMineException;
 import roomescape.exception.reservation.ReservationNotFoundException;
+import roomescape.exception.reservation.WaitingConflictException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
@@ -35,9 +37,24 @@ public class WaitingService {
         ).orElseThrow(ReservationNotFoundException::new);
         Member member = memberRepository.findByEmail(reservationInfo.getEmail())
                 .orElseThrow(MemberNotFoundException::new);
+        validateMineReservation(reservation, member);
+        validateDuplicatedWaiting(reservation, member);
+
         Waiting waiting = waitingRepository.save(new Waiting(reservation, member, LocalDateTime.now()));
 
         return new WaitingResponse(waiting);
+    }
+
+    private void validateMineReservation(Reservation reservation, Member member) {
+        if (reservation.getMember().getId().equals(member.getId())) {
+            throw new CannotWaitingForMineException();
+        }
+    }
+
+    private void validateDuplicatedWaiting(Reservation reservation, Member member) {
+        if (waitingRepository.existsByReservationIdAndMemberEmail(reservation.getId(), member.getEmail())) {
+            throw new WaitingConflictException();
+        }
     }
 
     public void deleteWaiting(String email, long reservationId) {
