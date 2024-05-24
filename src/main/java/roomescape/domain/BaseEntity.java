@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 public abstract class BaseEntity {
-    @Column(updatable = false)
+    @Column(updatable = false, nullable = false)
     private LocalDateTime createAt;
 
     @PrePersist
