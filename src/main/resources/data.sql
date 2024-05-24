@@ -50,8 +50,8 @@ VALUES (TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 1),
        (TIMESTAMPADD(DAY, 1, CURRENT_DATE), 1, 1, 3),
        (TIMESTAMPADD(DAY, 3, CURRENT_DATE), 1, 1, 1);
 
-INSERT INTO reservation_waiting(date, time_id, theme_id, member_id, is_denied)
-VALUES (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 3, FALSE),
-       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 1, FALSE),
-       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 4, FALSE),
-       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 2, FALSE);
+INSERT INTO reservation_waiting(date, time_id, theme_id, member_id, status)
+VALUES (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 3, 'ALLOWED'),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 1, 'ALLOWED'),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 4, 'ALLOWED'),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 2, 'ALLOWED');

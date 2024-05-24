@@ -10,7 +10,7 @@ public record ReservationWaitingWebResponse(
         LocalDate date,
         ReservationTimeWebResponse time,
         ThemeWebResponse theme,
-        boolean isDenied) {
+        String status) {
 
     public ReservationWaitingWebResponse(ReservationWaitingAppResponse response) {
         this(
@@ -19,7 +19,7 @@ public record ReservationWaitingWebResponse(
                 response.date().getDate(),
                 ReservationTimeWebResponse.from(response.reservationTimeAppResponse()),
                 ThemeWebResponse.from(response.themeAppResponse()),
-                response.isDenied()
+                response.status()
         );
     }
 }

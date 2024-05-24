@@ -11,7 +11,7 @@ public record ReservationWaitingWithRankWebResponse(
         ReservationTimeWebResponse time,
         ThemeWebResponse theme,
         Long order,
-        boolean isDenied) {
+        String status) {
 
     public ReservationWaitingWithRankWebResponse(ReservationWaitingWithRankAppResponse response) {
         this(
@@ -21,7 +21,7 @@ public record ReservationWaitingWithRankWebResponse(
                 ReservationTimeWebResponse.from(response.reservationTimeAppResponse()),
                 ThemeWebResponse.from(response.themeAppResponse()),
                 response.rank(),
-                response.isDenied()
+                response.status()
         );
     }
 }

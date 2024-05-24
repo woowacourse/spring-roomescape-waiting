@@ -166,7 +166,7 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(savedMembers.get(0), new ReservationDate(date), time, theme));
-        reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(3), new ReservationDate(date), time, theme, true));
+        reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(3), new ReservationDate(date), time, theme, ReservationWaitingStatus.DENIED));
         reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(1), new ReservationDate(date), time, theme));
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(2), new ReservationDate(date), time, theme));
 

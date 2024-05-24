@@ -29,27 +29,28 @@ public class ReservationWaiting {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    private boolean isDenied;
+    @Enumerated(EnumType.STRING)
+    private ReservationWaitingStatus status;
 
     public ReservationWaiting() {
     }
 
     public ReservationWaiting(LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme) {
-        this(null, now, member, date, time, theme, DEFAULT_DENIED);
+        this(null, now, member, date, time, theme, ReservationWaitingStatus.ALLOWED);
     }
 
-    public ReservationWaiting(LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme, boolean isDenied) {
-        this(null, now, member, date, time, theme, isDenied);
+    public ReservationWaiting(LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme, ReservationWaitingStatus status) {
+        this(null, now, member, date, time, theme, status);
     }
 
-    public ReservationWaiting(Long id, LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme, boolean isDenied) {
+    public ReservationWaiting(Long id, LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme, ReservationWaitingStatus status) {
         validateDateTime(now, date, time);
         this.member = member;
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.isDenied = isDenied;
+        this.status = status;
     }
 
     private static void validateDateTime(final LocalDateTime now, final ReservationDate date, final ReservationTime time) {
@@ -69,7 +70,7 @@ public class ReservationWaiting {
     }
 
     public boolean isAllowed() {
-        return !isDenied;
+        return ReservationWaitingStatus.ALLOWED == status;
     }
 
     public Long getId() {
@@ -92,11 +93,11 @@ public class ReservationWaiting {
         return theme;
     }
 
-    public boolean isDenied() {
-        return isDenied;
+    public ReservationWaitingStatus getStatus() {
+        return status;
     }
 
-    public void setDenied(final boolean denied) {
-        isDenied = denied;
+    public void setStatus(final ReservationWaitingStatus status) {
+        this.status = status;
     }
 }

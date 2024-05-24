@@ -9,7 +9,7 @@ public record ReservationWaitingAppResponse(
         ReservationDate date,
         ReservationTimeAppResponse reservationTimeAppResponse,
         ThemeAppResponse themeAppResponse,
-        boolean isDenied) {
+        String status) {
 
     public ReservationWaitingAppResponse(ReservationWaiting waiting) {
         this(
@@ -23,7 +23,7 @@ public record ReservationWaitingAppResponse(
                         waiting.getTheme().getName(),
                         waiting.getTheme().getDescription(),
                         waiting.getTheme().getThumbnail()),
-                waiting.isDenied()
+                waiting.getStatus().name()
         );
     }
 }

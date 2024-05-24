@@ -111,14 +111,10 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    public ReservationWaitingAppResponse updateWaitingStatus(Long waitingId, boolean isDenied) {
+    public ReservationWaitingAppResponse updateWaitingStatus(Long waitingId, ReservationWaitingStatus status) {
         ReservationWaiting waiting = reservationWaitingRepository.findById(waitingId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 상태 변경 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
-        if (waiting.isDenied() == isDenied) {
-            throw new IllegalArgumentException(String.format(
-                    "예약 대기 상태 변경 실패: 이미 해당 상태로 설정되어 있습니다. {id: %d, isDenied: %b}", waitingId, isDenied));
-        }
-        waiting.setDenied(isDenied);
+        waiting.setStatus(status);
         ReservationWaiting updatedWaiting = reservationWaitingRepository.save(waiting);
         return new ReservationWaitingAppResponse(updatedWaiting);
     }

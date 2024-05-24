@@ -32,7 +32,7 @@ public class AdminReservationWaitingController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<ReservationWaitingWebResponse> updateWaitingStatus(@PathVariable Long id, @Valid @RequestBody ReservationWaitingStatusWebRequest request) {
-        ReservationWaitingAppResponse waitingAppResponse = reservationWaitingService.updateWaitingStatus(id, request.isDenied());
+        ReservationWaitingAppResponse waitingAppResponse = reservationWaitingService.updateWaitingStatus(id, request.status());
         ReservationWaitingWebResponse waitingWebResponse = new ReservationWaitingWebResponse(waitingAppResponse);
 
         return ResponseEntity.ok(waitingWebResponse);

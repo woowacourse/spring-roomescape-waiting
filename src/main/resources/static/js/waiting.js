@@ -74,7 +74,7 @@ function deny(event) {
     return fetch(endpoint, {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({isDenied: true})
+        body: JSON.stringify({status: 'DENIED'})
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Patch failed');
