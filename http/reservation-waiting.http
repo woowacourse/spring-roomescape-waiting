@@ -3,7 +3,9 @@ POST {{base-url}}/waitings
 Content-Type: application/json
 
 {
-  "reservationId": 1
+  "date": "2024-08-06",
+  "themeId": 1,
+  "timeId": 1
 }
 
 ### 예약 대기 취소 API

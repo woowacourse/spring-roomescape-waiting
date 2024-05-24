@@ -17,6 +17,10 @@
 
 - [x] 예약 대기 도메인을 추가한다
 - [x] `예약 대기` 추가 API를 구현한다
+    - 본인이 예약한 예약에 대해선 예약 대기를 추가할 수 없음
+    - 같은 예약에 대해선 여러 번 예약 대기를 추가할 수 없음
+    - 존재하지 않는 예약에 대해선 예약 대기를 추가할 수 없음
+    - 지난 예약에 대해선 예약 대기를 추가할 수 없음
 - [x] `예약 대기` 취소 API를 구현한다
     - 본인의 예약 대기만 취소할 수 있음
 - [ ] `내 예약 목록` 조회 API 응답에 `예약 대기 목록`도 포함한다
@@ -233,7 +237,7 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-  "date": "2023-08-05",
+  "date": "2024-08-06",
   "themeId": 1,
   "timeId": 1
 }
@@ -272,7 +276,7 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-  "date": "2023-08-05", 
+  "date": "2024-08-07",
   "themeId": 1,
   "timeId": 1,
   "memberId": 1
@@ -329,7 +333,9 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-  "reservationId": 1
+  "date": "2023-08-05",
+  "themeId": 1,
+  "timeId": 1
 }
 ```
 

@@ -1,24 +1,43 @@
 package roomescape.service.reservationwaiting.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import roomescape.exception.common.InvalidRequestBodyException;
 
 public class ReservationWaitingRequest {
-    private final Long reservationId;
+    private final LocalDate date;
+    private final Long timeId;
+    private final Long themeId;
 
-    @JsonCreator
-    public ReservationWaitingRequest(Long reservationId) {
-        validate(reservationId);
-        this.reservationId = reservationId;
+    public ReservationWaitingRequest(String date, String timeId, String themeId) {
+        validate(date, timeId, themeId);
+        this.date = LocalDate.parse(date);
+        this.timeId = Long.parseLong(timeId);
+        this.themeId = Long.parseLong(themeId);
     }
 
-    private void validate(Long reservationId) {
-        if (reservationId == null) {
+    public void validate(String date, String timeId, String themeId) {
+        if (date == null || date.isBlank() ||
+                timeId == null || timeId.isBlank() ||
+                themeId == null || themeId.isBlank()) {
+            throw new InvalidRequestBodyException();
+        }
+        try {
+            LocalDate.parse(date);
+        } catch (DateTimeException e) {
             throw new InvalidRequestBodyException();
         }
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public Long getTimeId() {
+        return timeId;
+    }
+
+    public Long getThemeId() {
+        return themeId;
     }
 }

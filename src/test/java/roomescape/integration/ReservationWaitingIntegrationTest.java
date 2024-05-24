@@ -5,6 +5,7 @@ import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,13 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         @BeforeEach
         void setUp() {
             params = new HashMap<>();
+            params.put("themeId", "1");
+            params.put("timeId", "1");
         }
 
         @Test
         void 예약_대기를_추가할_수_있다() {
-            params.put("reservationId", "1");
+            params.put("date", "2000-04-01");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
@@ -49,7 +52,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 같은_사용자가_같은_예약에_대해선_예약_대기를_두_번_이상_추가할_수_없다() {
-            params.put("reservationId", "1");
+            params.put("date", "2000-04-01");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -58,6 +61,24 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
                     .when().post("/waitings")
                     .then().log().all()
                     .statusCode(409);
+        }
+
+        @Test
+        void 존재하지_않는_예약에_대해선_예약_대기를_추가할_수_없다() {
+            params.put("date", "2000-04-02");
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waitings")
+                    .then().log().all()
+                    .statusCode(404);
+        }
+
+        @Test
+        @Disabled
+        void 지난_예약에_대해선_예약_대기를_추가할_수_없다() {
         }
     }
 

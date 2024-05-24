@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -34,6 +35,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             LIMIT 10
             """)
     List<Theme> findThemeByMostPopularReservation(LocalDate startDate, LocalDate endDate);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     interface Specs {
         static Specification<Reservation> hasMemberId(Long memberId) {

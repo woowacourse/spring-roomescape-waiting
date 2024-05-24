@@ -1,5 +1,6 @@
 package roomescape.service.reservationwaiting;
 
+import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -26,7 +27,8 @@ public class ReservationWaitingService {
     }
 
     public Long saveReservationWaiting(ReservationWaitingRequest request, Member member) {
-        Reservation reservation = findReservationById(request.getReservationId());
+        Reservation reservation = findReservationByDateAndTimeIdAndThemeId(
+                request.getDate(), request.getTimeId(), request.getThemeId());
         if (reservationWaitingRepository.existsByReservationAndMember(reservation, member)) {
             throw new DuplicatedReservationWaitingException();
         }
@@ -48,8 +50,8 @@ public class ReservationWaitingService {
                 .orElseThrow(NotFoundReservationWaitingException::new);
     }
 
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
+    private Reservation findReservationByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
                 .orElseThrow(NotFoundReservationException::new);
     }
 }
