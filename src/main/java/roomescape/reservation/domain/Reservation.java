@@ -38,6 +38,10 @@ public class Reservation {
         this.reservationTime = reservationTime;
     }
 
+    public Reservation(final Waiting waiting) {
+        this(null, waiting.getMember(), waiting.getDate(), waiting.getTheme(), waiting.getReservationTime());
+    }
+
     private void validateLastDate(LocalDate date) {
         if (date.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("지난 날짜는 예약할 수 없습니다.");

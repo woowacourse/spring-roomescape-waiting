@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
@@ -15,6 +16,7 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -23,17 +25,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public Reservation save(
@@ -97,15 +102,25 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void delete(final Long id, final LoginMemberInToken loginMember) {
         final Reservation target = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 입니다."));
 
-        final Long MemberIdOfTarget = target.getMember().getId();
-        if (!loginMember.role().isAdmin() && !MemberIdOfTarget.equals(loginMember.id())) {
+        final Long memberIdOfTarget = target.getMember().getId();
+        if (!loginMember.role().isAdmin() && !memberIdOfTarget.equals(loginMember.id())) {
             throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
         }
 
-        reservationRepository.deleteById(id);
+        waitingRepository.findFirstByThemeIdAndDateAndReservationTimeStartAt(
+                target.getTheme().getId(),
+                target.getDate(),
+                target.getTime().getStartAt()
+        ).ifPresent(firstWaiting -> {
+            reservationRepository.save(new Reservation(firstWaiting));
+            waitingRepository.delete(firstWaiting);
+        });
+
+        reservationRepository.delete(target);
     }
 }
