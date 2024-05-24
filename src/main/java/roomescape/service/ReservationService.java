@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -101,8 +100,7 @@ public class ReservationService {
     @Transactional
     public void deleteWaitReservation(final long reservationId, final long memberId) {
         final Reservation fetchReservation = reservationRepository.fetchById(reservationId);
-
-        if (!Objects.equals(memberId, fetchReservation.getMember().getId())) {
+        if (!fetchReservation.isOwn(memberId)) {
             throw new DeletingException("다른 회원의 예약 대기는 취소 불가합니다.");
         }
 

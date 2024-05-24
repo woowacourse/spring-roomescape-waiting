@@ -43,6 +43,13 @@ public class Reservation {
         this.theme = theme;
     }
 
+    public boolean isOwn(final long memberId) {
+        if (member == null) {
+            return false;
+        }
+        return Objects.equals(member.getId(), memberId);
+    }
+
     public Long getId() {
         return id;
     }
