@@ -9,12 +9,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import roomescape.domain.AuditingEntity;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"reservation_id", "member_id"}))
-public class ReservationWaiting {
+public class ReservationWaiting extends AuditingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +45,8 @@ public class ReservationWaiting {
     public boolean isSameMember(Member member) {
         return this.member.equals(member);
     }
+
+    // todo 시간 검증
 
     public Long getId() {
         return id;
