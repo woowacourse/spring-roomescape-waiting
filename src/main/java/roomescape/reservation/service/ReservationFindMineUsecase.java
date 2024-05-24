@@ -20,7 +20,7 @@ public class ReservationFindMineUsecase {
         this.waitingService = waitingService;
     }
 
-    public List<MyReservationResponse> findMyReservations(Long memberId) {
+    public List<MyReservationResponse> execute(Long memberId) {
         List<MyReservationResponse> reservations = reservationFindService.findReservationsByMemberId(memberId);
         List<MyReservationResponse> waitings = waitingService.findWaitingsByMemberId(memberId);
 

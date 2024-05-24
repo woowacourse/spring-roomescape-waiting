@@ -31,12 +31,12 @@ class ReservationFindMineUsecaseTest {
 
     @DisplayName("내 예약 및 예약 대기를 시간 순서로 조회할 수 있다.")
     @Test
-    void findMyReservationsTest() {
+    void executeTest() {
         given(reservationFindService.findReservationsByMemberId(1L)).willReturn(List.of(RESERVATION));
         given(waitingService.findWaitingsByMemberId(1L)).willReturn(List.of(WAITING));
         List<MyReservationResponse> expected = List.of(RESERVATION, WAITING);
 
-        List<MyReservationResponse> actual = reservationFindMineUsecase.findMyReservations(1L);
+        List<MyReservationResponse> actual = reservationFindMineUsecase.execute(1L);
 
         assertThat(actual).isEqualTo(expected);
     }

@@ -24,7 +24,7 @@ public class ReservationDeleteUsecase {
         this.waitingService = waitingService;
     }
 
-    public void deleteReservation(Long reservationId) {
+    public void execute(Long reservationId) {
         ReservationResponse reservation = reservationFindService.findReservation(reservationId);
         validateIsAfterFromNow(reservation);
 

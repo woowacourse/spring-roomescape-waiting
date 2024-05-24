@@ -32,10 +32,10 @@ class ReservationDeleteUsecaseTest {
 
     @DisplayName("현재보다 이전 예약을 취소할 경우, 예외를 던진다.")
     @Test
-    void deleteReservationTest_whenReservationIsBeforeFromNow() {
+    void executeTest_whenReservationIsBeforeFromNow() {
         given(reservationFindService.findReservation(1L)).willReturn(BEFORE_RESERVATION);
 
-        assertThatThrownBy(() -> reservationDeleteUsecase.deleteReservation(1L))
+        assertThatThrownBy(() -> reservationDeleteUsecase.execute(1L))
                 .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("예약은 현재 날짜 이후여야 합니다.");
     }

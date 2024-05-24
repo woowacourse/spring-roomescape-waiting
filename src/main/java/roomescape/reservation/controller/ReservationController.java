@@ -46,7 +46,7 @@ public class ReservationController {
 
     @GetMapping("/accounts")
     public List<MyReservationResponse> findMyReservations(LoggedInMember member) {
-        return findMineUsecase.findMyReservations(member.id());
+        return findMineUsecase.execute(member.id());
     }
 
     @PostMapping
@@ -63,6 +63,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable Long id) {
-        deleteUsecase.deleteReservation(id);
+        deleteUsecase.execute(id);
     }
 }
