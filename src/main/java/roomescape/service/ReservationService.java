@@ -154,9 +154,6 @@ public class ReservationService {
     }
 
     private void validateDateRange(final ReservationSearchCondition request) {
-        if (request.dateFrom() == null || request.dateTo() == null) {
-            return;
-        }
         if (request.dateFrom().isAfter(request.dateTo())) {
             throw new InvalidSearchDateException("from은 to보다 이전 날짜여야 합니다.");
         }

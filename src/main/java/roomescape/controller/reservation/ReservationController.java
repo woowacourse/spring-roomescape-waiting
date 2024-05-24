@@ -54,7 +54,7 @@ public class ReservationController {
 
     @GetMapping(value = "/search", params = {"themeId", "memberId", "dateFrom", "dateTo"})
     public List<ReservationResponse> searchReservations(
-            final ReservationSearchCondition request) {
+            @Valid final ReservationSearchCondition request) {
         return reservationService.searchReservations(request);
     }
 
