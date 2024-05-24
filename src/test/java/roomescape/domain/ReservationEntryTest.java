@@ -9,9 +9,9 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ReservationWithWaitingTest {
+class ReservationEntryTest {
 
-    @DisplayName("예약과 예약 대기 목록을 통해 통합된 목록을 생성한다.")
+    @DisplayName("예약과 예약 대기 목록을 통해 통합 예약 항목을 생성한다.")
     @Test
     void of() {
         Member member = new Member("learner", "learnerDeok@email.com", "learnerDeok", Role.USER);
@@ -21,10 +21,10 @@ class ReservationWithWaitingTest {
 
         List<Reservation> reservations = List.of(new Reservation(member, date, time, theme));
         List<WaitingWithRank> waitingWithRanks = List.of(new WaitingWithRank(new Waiting(member, date, time, theme), 1L));
-        List<ReservationWithWaiting> reservationWithWaitings = ReservationWithWaiting.of(reservations, waitingWithRanks);
+        List<ReservationEntry> reservationEntries = ReservationEntry.of(reservations, waitingWithRanks);
 
-        ReservationWithWaiting reservation = reservationWithWaitings.get(0);
-        ReservationWithWaiting waiting = reservationWithWaitings.get(1);
+        ReservationEntry reservation = reservationEntries.get(0);
+        ReservationEntry waiting = reservationEntries.get(1);
 
         assertAll(
                 () -> assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVATION),

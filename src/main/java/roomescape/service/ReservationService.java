@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWithWaiting;
+import roomescape.domain.ReservationEntry;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingWithRank;
 import roomescape.handler.exception.CustomException;
@@ -87,10 +87,9 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         List<WaitingWithRank> waitingWithRanks = waitingService.findAllWithRankByMember(member);
 
-        List<ReservationWithWaiting> reservationWithWaitings = ReservationWithWaiting.of(reservations,
-                waitingWithRanks);
+        List<ReservationEntry> reservationEntries = ReservationEntry.of(reservations, waitingWithRanks);
 
-        return reservationWithWaitings.stream()
+        return reservationEntries.stream()
                 .map(MyReservationResponse::from)
                 .toList();
     }

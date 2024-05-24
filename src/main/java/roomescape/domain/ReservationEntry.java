@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReservationWithWaiting {
+public class ReservationEntry {
 
     private final Long id;
     private final Member member;
@@ -14,8 +14,8 @@ public class ReservationWithWaiting {
     private final ReservationStatus status;
     private final Long rank;
 
-    public ReservationWithWaiting(final Long id, final Member member, final LocalDate date, final ReservationTime time,
-                                  final Theme theme, final ReservationStatus status, Long rank) {
+    public ReservationEntry(final Long id, final Member member, final LocalDate date, final ReservationTime time,
+                            final Theme theme, final ReservationStatus status, Long rank) {
         this.id = id;
         this.member = member;
         this.date = date;
@@ -25,12 +25,12 @@ public class ReservationWithWaiting {
         this.rank = rank;
     }
 
-    public static List<ReservationWithWaiting> of(final List<Reservation> reservations,
-                                                  final List<WaitingWithRank> waitingWithRanks) {
-        List<ReservationWithWaiting> reservationWithWaitings = new ArrayList<>();
+    public static List<ReservationEntry> of(final List<Reservation> reservations,
+                                            final List<WaitingWithRank> waitingWithRanks) {
+        List<ReservationEntry> reservationEntries = new ArrayList<>();
 
         for (Reservation reservation : reservations) {
-            ReservationWithWaiting reservationWithWaiting = new ReservationWithWaiting(
+            ReservationEntry reservationEntry = new ReservationEntry(
                     reservation.getId(),
                     reservation.getMember(),
                     reservation.getDate(),
@@ -38,11 +38,11 @@ public class ReservationWithWaiting {
                     reservation.getTheme(),
                     ReservationStatus.RESERVATION,
                     0L);
-            reservationWithWaitings.add(reservationWithWaiting);
+            reservationEntries.add(reservationEntry);
         }
 
         for (WaitingWithRank waitingWithRank : waitingWithRanks) {
-            ReservationWithWaiting reservationWithWaiting = new ReservationWithWaiting(
+            ReservationEntry reservationEntry = new ReservationEntry(
                     waitingWithRank.getWaiting().getId(),
                     waitingWithRank.getWaiting().getMember(),
                     waitingWithRank.getWaiting().getDate(),
@@ -51,10 +51,10 @@ public class ReservationWithWaiting {
                     ReservationStatus.WAITING,
                     waitingWithRank.getRank()
             );
-            reservationWithWaitings.add(reservationWithWaiting);
+            reservationEntries.add(reservationEntry);
         }
 
-        return reservationWithWaitings;
+        return reservationEntries;
     }
 
     public Long getId() {

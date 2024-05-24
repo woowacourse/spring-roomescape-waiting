@@ -3,7 +3,7 @@ package roomescape.service.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationWithWaiting;
+import roomescape.domain.ReservationEntry;
 
 public record MyReservationResponse(Long id,
                                     LocalDate date,
@@ -11,20 +11,20 @@ public record MyReservationResponse(Long id,
                                     String theme,
                                     String status) {
 
-    public static MyReservationResponse from(final ReservationWithWaiting reservationWithWaiting) {
+    public static MyReservationResponse from(final ReservationEntry reservationEntry) {
         String status = "";
-        if (reservationWithWaiting.getStatus() == ReservationStatus.RESERVATION) {
+        if (reservationEntry.getStatus() == ReservationStatus.RESERVATION) {
             status = "예약";
         }
-        if (reservationWithWaiting.getStatus() == ReservationStatus.WAITING) {
-            status = reservationWithWaiting.getRank() + "번째 예약대기";
+        if (reservationEntry.getStatus() == ReservationStatus.WAITING) {
+            status = reservationEntry.getRank() + "번째 예약대기";
         }
 
         return new MyReservationResponse(
-                reservationWithWaiting.getId(),
-                reservationWithWaiting.getDate(),
-                reservationWithWaiting.getTime().getStartAt(),
-                reservationWithWaiting.getTheme().getName(),
+                reservationEntry.getId(),
+                reservationEntry.getDate(),
+                reservationEntry.getTime().getStartAt(),
+                reservationEntry.getTheme().getName(),
                 status
         );
     }
