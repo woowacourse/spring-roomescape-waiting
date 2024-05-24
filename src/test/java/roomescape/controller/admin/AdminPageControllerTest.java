@@ -1,7 +1,10 @@
-package roomescape.controller;
+package roomescape.controller.admin;
+
+import static roomescape.TestFixture.ADMIN;
+import static roomescape.TestFixture.ADMIN_LOGIN_REQUEST;
+import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
 
 import io.restassured.RestAssured;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import roomescape.TestFixture;
-import roomescape.domain.Member;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,16 +32,14 @@ class AdminPageControllerTest {
 
     @AfterEach
     void tearDown() {
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
+        memberRepository.deleteAllInBatch();
     }
 
     @DisplayName("Admin Page 홈화면 접근 성공 테스트")
     @Test
     void responseAdminPage() {
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        memberRepository.save(ADMIN);
+        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
@@ -50,7 +50,8 @@ class AdminPageControllerTest {
     @DisplayName("Admin Reservation Page 접근 성공 테스트")
     @Test
     void responseAdminReservationPage() {
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        memberRepository.save(ADMIN);
+        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
@@ -61,7 +62,8 @@ class AdminPageControllerTest {
     @DisplayName("Admin Time Page 접근 성공 테스트")
     @Test
     void responseAdminTimePage() {
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        memberRepository.save(ADMIN);
+        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
@@ -72,7 +74,8 @@ class AdminPageControllerTest {
     @DisplayName("Admin Theme Page 접근 성공 테스트")
     @Test
     void responseAdminThemePage() {
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        memberRepository.save(ADMIN);
+        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
@@ -83,7 +86,8 @@ class AdminPageControllerTest {
     @DisplayName("관리자가 아닌 회원은 접속할 수 없다.")
     @Test
     void responseAdminPageWithoutAdmin() {
-        String accessToken = TestFixture.getMemberToken(memberRepository);
+        memberRepository.save(TestFixture.MEMBER1);
+        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
 
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
