@@ -39,4 +39,8 @@ public class WaitingService {
 
         return new WaitingResponse(waiting);
     }
+
+    public void deleteWaiting(String email, long reservationId) {
+        waitingRepository.deleteByReservationIdAndMemberEmail(reservationId, email);
+    }
 }

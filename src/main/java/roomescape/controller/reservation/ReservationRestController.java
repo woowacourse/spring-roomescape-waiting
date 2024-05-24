@@ -37,17 +37,6 @@ public class ReservationRestController {
         this.waitingService = waitingService;
     }
 
-    @GetMapping("/admin/reservations")
-    public List<ReservationResponse> findReservations(
-            @RequestParam(name = "member", required = false) String email,
-            @RequestParam(name = "theme", required = false) Long themeId,
-            @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
-            @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
-
-        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo);
-        return reservationService.findAllReservations(request);
-    }
-
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations")
     public ReservationResponse createReservationMember(@AuthenticationPrincipal LoginMember loginMember,
@@ -68,6 +57,23 @@ public class ReservationRestController {
                 .build(response.reservationId());
 
         return ResponseEntity.created(uri).body(response);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/reservations/waitings/{id}")
+    public void deleteWaiting(@AuthenticationPrincipal LoginMember loginMember, @PathVariable long id) {
+        waitingService.deleteWaiting(loginMember.getEmail(), id);
+    }
+
+    @GetMapping("/admin/reservations")
+    public List<ReservationResponse> findReservations(
+            @RequestParam(name = "member", required = false) String email,
+            @RequestParam(name = "theme", required = false) Long themeId,
+            @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
+            @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
+
+        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo);
+        return reservationService.findAllReservations(request);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
