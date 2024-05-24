@@ -25,7 +25,10 @@ class WaitingController {
     }
 
     @PostMapping("/waitings")
-    public ResponseEntity<Void> addWaiting(@RequestBody UserWaitingRequest userWaitingRequest, LoginMember loginMember) {
+    public ResponseEntity<Void> addWaiting(
+            @RequestBody UserWaitingRequest userWaitingRequest,
+            LoginMember loginMember
+    ) {
         Long savedId = waitingService.addWaiting(WaitingRequest.from(userWaitingRequest, loginMember.id()));
         return ResponseEntity.created(URI.create("/waitings/" + savedId)).build();
     }
