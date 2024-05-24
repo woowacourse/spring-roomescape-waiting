@@ -98,8 +98,9 @@ public class ReservationService {
     }
 
     private void approveFirstWaitingReservation(Reservation deletedReservation) {
-        Optional<Reservation> firstWaitingReservation = reservationRepository.findFirstByDateAndTimeAndTheme(
-                deletedReservation.getDate(), deletedReservation.getTime(), deletedReservation.getTheme());
+        Optional<Reservation> firstWaitingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatus(
+                deletedReservation.getDate(), deletedReservation.getTime(),
+                deletedReservation.getTheme(), ReservationStatus.WAITING);
         firstWaitingReservation.ifPresent(Reservation::changeToBooking);
     }
 }

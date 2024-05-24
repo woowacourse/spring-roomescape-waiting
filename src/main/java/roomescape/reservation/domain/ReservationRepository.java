@@ -66,7 +66,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findAllByStatusWithDetails(@Param(value = "status") ReservationStatus status);
 
-    Optional<Reservation> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Optional<Reservation> findFirstByDateAndTimeAndThemeAndStatus(LocalDate date, ReservationTime time,
+                                                                  Theme theme, ReservationStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);

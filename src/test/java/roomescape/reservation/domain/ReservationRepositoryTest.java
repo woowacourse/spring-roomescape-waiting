@@ -187,17 +187,17 @@ class ReservationRepositoryTest extends RepositoryTest {
     }
 
     @Test
-    @DisplayName("동일한 날짜, 시간, 테마의 첫 번째 예약을 조회한다.")
+    @DisplayName("동일한 날짜, 시간, 테마의 첫 번째 대기 예약을 조회한다.")
     void findFirstByDateAndTimeAndTheme() {
         // given
         Reservation firstReservation = reservationRepository.save(
-                new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING));
+                new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING));
         Reservation secondReservation = reservationRepository.save(
                 new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING));
 
         // when
-        Optional<Reservation> foundReservation = reservationRepository.findFirstByDateAndTimeAndTheme(
-                MIA_RESERVATION_DATE, reservationTime, wootecoTheme);
+        Optional<Reservation> foundReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatus(
+                MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING);
 
         // then
         Long expectedReservationId = firstReservation.getId();
