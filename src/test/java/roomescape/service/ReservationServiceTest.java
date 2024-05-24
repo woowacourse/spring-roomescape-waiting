@@ -108,8 +108,8 @@ class ReservationServiceTest {
         when(memberRepository.findById(memberId))
                 .thenReturn(Optional.of(VALID_MEMBER));
 
-        when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(new ReservationDate(rawDate), timeId,
-                themeId, memberId))
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(new ReservationDate(rawDate), timeId,
+                themeId))
                 .thenReturn(true);
 
         assertThatThrownBy(

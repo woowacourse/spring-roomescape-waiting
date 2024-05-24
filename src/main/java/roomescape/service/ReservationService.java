@@ -52,7 +52,7 @@ public class ReservationService {
         ReservationDate date = new ReservationDate(request.date());
         ReservationTime time = findTime(request.timeId());
         Theme theme = findTheme(request.themeId());
-        validateDuplication(date, request.timeId(), request.themeId(), request.memberId());
+        validateDuplication(date, request.timeId(), request.themeId());
         Reservation reservation = Reservation.create(member, date, time, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -74,8 +74,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("예약에 대한 사용자가 존재하지 않습니다."));
     }
 
-    private void validateDuplication(ReservationDate date, Long timeId, Long themeId, Long memberId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
+    private void validateDuplication(ReservationDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new IllegalStateException("이미 존재하는 예약 정보 입니다.");
         }
     }

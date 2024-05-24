@@ -12,8 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(ReservationDate date, Long timeId, Long themeId,
-                                                       final Long memberId);
+    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
     @Query("""
                       SELECT r, r.time, r.theme, r.member
