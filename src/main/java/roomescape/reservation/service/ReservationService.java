@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.model.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.ReservationDto;
@@ -97,6 +98,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(final Long reservationId) {
         final Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 정보입니다."));
