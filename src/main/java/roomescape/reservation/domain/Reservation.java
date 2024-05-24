@@ -32,27 +32,6 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
-        validateLastDate(date);
-        this.member = member;
-        this.date = date;
-        this.theme = theme;
-        this.reservationTime = reservationTime;
-        this.createdAt = LocalDateTime.now();
-        this.status = status;
-    }
-
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime,
-                       Status status) {
-        this.id = id;
-        this.member = member;
-        this.date = date;
-        this.theme = theme;
-        this.reservationTime = reservationTime;
-        this.createdAt = LocalDateTime.now();
-        this.status = status;
-    }
-
     public Reservation(Long id, LocalDate date, Status status, Member member, Theme theme,
                        ReservationTime reservationTime, LocalDateTime createdAt) {
         this.id = id;
@@ -62,6 +41,16 @@ public class Reservation {
         this.theme = theme;
         this.reservationTime = reservationTime;
         this.createdAt = createdAt;
+    }
+
+    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
+        this(null, date, status, member, theme, reservationTime, LocalDateTime.now());
+        validateLastDate(date);
+    }
+
+    public Reservation(Long id, LocalDate date, Status status, Member member, Theme theme,
+                       ReservationTime reservationTime) {
+        this(id, date, status, member, theme, reservationTime, LocalDateTime.now());
     }
 
     private void validateLastDate(LocalDate date) {
