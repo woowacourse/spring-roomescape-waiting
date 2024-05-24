@@ -33,6 +33,11 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.findAllReservation());
     }
 
+    @GetMapping("/reservations/{id}")
+    public ResponseEntity<MemberReservationStatusResponse> getReservationById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(reservationService.findByIdWithStatus(id));
+    }
+
     @GetMapping(path = "/reservations", params = {"memberId", "themeId", "dateFrom", "dateTo"})
     public ResponseEntity<List<ReservationResponse>> findAllByMemberAndThemeAndPeriod(
             @RequestParam(name = "memberId") Long memberId,

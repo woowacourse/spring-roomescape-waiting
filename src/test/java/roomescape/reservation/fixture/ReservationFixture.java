@@ -47,4 +47,12 @@ public class ReservationFixture {
             RESERVATION_TIME_11_00_ID_2,
             THEME_1,
             Status.RESERVED);
+
+    public static final Reservation SAVED_WAITING_RESERVATION_1 = new Reservation(
+            4L,
+            MemberFixture.MEMBER_ID_2,
+            TOMORROW,
+            RESERVATION_TIME_10_00_ID_1,
+            THEME_1,
+            Status.WAITING);
 }

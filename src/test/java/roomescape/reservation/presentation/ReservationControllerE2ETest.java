@@ -1,5 +1,6 @@
 package roomescape.reservation.presentation;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -296,12 +298,69 @@ class ReservationControllerE2ETest {
         );
     }
 
+    @Sql("/test_data.sql")
+    @DisplayName("확정 예약 삭제 시 대기번호 1번인 예약이 자동으로 승인된다")
+    @TestFactory
+    Stream<DynamicTest> checkUpdateStatusWhenDeleteReservedStatusReservation() {
+        Map<String, String> loginParams = Map.of("email", "admin@test.com", "password", "123");
+
+        token = RestAssured.given().log().all()
+                .when().body(loginParams)
+                .contentType(ContentType.JSON).post("/login")
+                .then().log().all()
+                .extract().cookie("token");
+
+        return Stream.of(
+                dynamicTest("현재 예약 개수를 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations")
+                            .then().log().all()
+                            .statusCode(200).body("size()", is(4));
+                }),
+
+                dynamicTest("예약이 확정된 예약의 상태를 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations/1")
+                            .then().log().all()
+                            .statusCode(200).body("status", equalTo("예약"));
+                }),
+
+                dynamicTest("대기번호 1번인 예약의 상태를 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations/4")
+                            .then().log().all()
+                            .statusCode(200).body("status", equalTo("예약대기"));
+                }),
+
+                dynamicTest("예약이 확정된 예약을 삭제한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).delete("/reservations/1")
+                            .then().log().all()
+                            .statusCode(204);
+                }),
+
+                dynamicTest("현재 예약 개수를 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations")
+                            .then().log().all()
+                            .statusCode(200).body("size()", is(3));
+                }),
+
+                dynamicTest("대기번호 1번이었던 예약의 상태를 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations/4")
+                            .then().log().all()
+                            .statusCode(200).body("status", equalTo("예약"));
+                })
+        );
+    }
+
     @DisplayName("존재하지 않는 예약의 삭제가 불가능한지 확인한다")
     @Test
     void checkNotExistReservationDelete() {
         RestAssured.given().log().all()
                 .when().delete("reservations/100")
                 .then().log().all()
-                .statusCode(204);
+                .statusCode(400);
     }
 }

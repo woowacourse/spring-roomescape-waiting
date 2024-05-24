@@ -66,6 +66,14 @@ public class Reservation {
         );
     }
 
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
+    public boolean isReserved() {
+        return this.status == Status.RESERVED;
+    }
+
     public boolean isWaiting() {
         return this.status == Status.WAITING;
     }

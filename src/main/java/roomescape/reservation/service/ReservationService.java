@@ -5,7 +5,9 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.DuplicateSaveException;
 import roomescape.global.exception.IllegalReservationDateException;
 import roomescape.global.exception.NoSuchRecordException;
@@ -44,6 +46,12 @@ public class ReservationService {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::new)
                 .toList();
+    }
+
+    public MemberReservationStatusResponse findByIdWithStatus(Long id) {
+        Reservation foundReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchRecordException("해당하는 예약이 존재하지 않습니다 ID: " + id));
+        return new MemberReservationStatusResponse(foundReservation);
     }
 
     public List<ReservationResponse> findAllWaitingReservation() {
@@ -133,7 +141,23 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchRecordException("해당하는 테마가 존재하지 않습니다 ID: " + themeId));
     }
 
+    @Transactional
     public void removeReservation(long id) {
+        Reservation reservationForDelete = reservationRepository.findById(id)
+                        .orElseThrow(() -> new NoSuchRecordException("해당하는 예약이 존재하지 않습니다 ID: " + id));
+        if (reservationForDelete.isReserved()) {
+            updateWaitingReservationStatus(reservationForDelete);
+        }
         reservationRepository.deleteById(id);
+    }
+
+    private void updateWaitingReservationStatus(Reservation reservationForDelete) {
+        Optional<Reservation> reservation = reservationRepository.findFirstByDateValueAndTimeIdAndThemeIdAndStatus(
+                reservationForDelete.getDate(),
+                reservationForDelete.getTime().getId(),
+                reservationForDelete.getTheme().getId(),
+                Status.WAITING
+        );
+        reservation.ifPresent(value -> value.updateStatus(Status.RESERVED));
     }
 }
