@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
-public record CreateReservationRequest(
+public record CreateReservationByAdminRequest(
         @FutureOrPresent(message = "예약 날짜는 현재보다 과거일 수 없습니다.")
         @NotNull(message = "예약 등록 시 예약 날짜는 필수입니다.")
         LocalDate date,

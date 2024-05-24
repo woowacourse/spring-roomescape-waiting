@@ -2,7 +2,7 @@ package roomescape.member.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.request.CreateReservationRequest;
+import roomescape.member.dto.request.CreateReservationByAdminRequest;
 import roomescape.member.dto.response.CreateReservationResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.model.Reservation;
@@ -11,7 +11,6 @@ import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class AdminService {
@@ -30,13 +29,13 @@ public class AdminService {
         this.reservationRepository = reservationRepository;
     }
 
-    public CreateReservationResponse createReservation(final CreateReservationRequest createReservationRequest) {
-        Member member = memberRepository.getById(createReservationRequest.memberId());
-        Theme theme = themeRepository.getById(createReservationRequest.themeId());
-        ReservationTime reservationTime = reservationTimeRepository.getById(createReservationRequest.timeId());
+    public CreateReservationResponse createReservation(final CreateReservationByAdminRequest createReservationByAdminRequest) {
+        Member member = memberRepository.getById(createReservationByAdminRequest.memberId());
+        Theme theme = themeRepository.getById(createReservationByAdminRequest.themeId());
+        ReservationTime reservationTime = reservationTimeRepository.getById(createReservationByAdminRequest.timeId());
 
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, createReservationRequest.date(), reservationTime, theme));
+                new Reservation(member, createReservationByAdminRequest.date(), reservationTime, theme));
         return CreateReservationResponse.from(reservation);
     }
 }

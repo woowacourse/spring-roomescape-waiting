@@ -11,7 +11,7 @@ public class MemberFixture {
     }
 
     public static Member getAdmin() {
-        return new Member("name", Role.ADMIN, "email@naver.com", "password");
+        return new Member("name", Role.ADMIN, "admin@naver.com", "password");
     }
 
     public static Member getOneWithId(final Long id) {
