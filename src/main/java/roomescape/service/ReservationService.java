@@ -97,7 +97,7 @@ public class ReservationService {
             .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않아 삭제할 수 없습니다."));
 
         reservationRepository.deleteById(reservation.getId());
-        approveFirstWaiting(reservation);
+        approveNextWaiting(reservation);
     }
 
     public void deleteStandby(Long id, Member member) {
@@ -109,10 +109,10 @@ public class ReservationService {
         }
 
         reservationRepository.deleteById(reservation.getId());
-        approveFirstWaiting(reservation);
+        approveNextWaiting(reservation);
     }
 
-    private void approveFirstWaiting(Reservation reservation) {
+    private void approveNextWaiting(Reservation reservation) {
         reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(
             reservation.getDate(),
             reservation.getTime().getId(),
