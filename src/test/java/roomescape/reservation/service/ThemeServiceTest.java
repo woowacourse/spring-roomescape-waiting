@@ -17,7 +17,7 @@ import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
@@ -33,7 +33,7 @@ class ThemeServiceTest extends ServiceTest {
     @Autowired
     ReservationTimeRepository timeRepository;
     @Autowired
-    MemberReservationRepository memberReservationRepository;
+    ReservationRepository reservationRepository;
     @Autowired
     ThemeService themeService;
 

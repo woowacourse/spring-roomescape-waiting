@@ -21,11 +21,11 @@ import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
-import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
@@ -42,7 +42,7 @@ class ReservationSlotTimeServiceTest extends ServiceTest {
     @Autowired
     MemberRepository memberRepository;
     @Autowired
-    MemberReservationRepository memberReservationRepository;
+    ReservationRepository reservationRepository;
     @Autowired
     ReservationTimeService reservationTimeService;
 
@@ -121,7 +121,7 @@ class ReservationSlotTimeServiceTest extends ServiceTest {
         Theme theme = themeRepository.save(getTheme1());
         ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
         Member member = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(member, reservationSlot));
+        reservationRepository.save(new Reservation(member, reservationSlot));
 
         //when
         List<AvailableTimeResponse> availableTimes

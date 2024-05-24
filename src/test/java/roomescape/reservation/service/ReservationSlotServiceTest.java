@@ -25,7 +25,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.domain.*;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
@@ -45,7 +45,7 @@ class ReservationSlotServiceTest extends ServiceTest {
     @Autowired
     MemberRepository memberRepository;
     @Autowired
-    MemberReservationRepository memberReservationRepository;
+    ReservationRepository reservationRepository;
     @Autowired
     ReservationService reservationService;
 
@@ -80,10 +80,10 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationSlot reservationSlot2 = reservationSlotRepository.save(getNextDayReservation(time, theme2));
 
         Member memberChoco = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservationSlot1));
+        reservationRepository.save(new Reservation(memberChoco, reservationSlot1));
 
         Member memberClover = memberRepository.save(getMemberClover());
-        memberReservationRepository.save(new MemberReservation(memberClover, reservationSlot2));
+        reservationRepository.save(new Reservation(memberClover, reservationSlot2));
 
         //when
         List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
@@ -106,10 +106,10 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
 
         Member memberChoco = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservationSlot));
+        reservationRepository.save(new Reservation(memberChoco, reservationSlot));
 
         Member memberClover = memberRepository.save(getMemberClover());
-        memberReservationRepository.save(new MemberReservation(memberClover, reservationSlot));
+        reservationRepository.save(new Reservation(memberClover, reservationSlot));
 
         //when
         List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
@@ -133,8 +133,8 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationSlot reservationSlot2 = reservationSlotRepository.save(getNextDayReservation(time, theme2));
 
         Member memberChoco = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservationSlot1));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservationSlot2));
+        reservationRepository.save(new Reservation(memberChoco, reservationSlot1));
+        reservationRepository.save(new Reservation(memberChoco, reservationSlot2));
 
         //when
         List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
@@ -158,8 +158,8 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationSlot reservationSlot2 = reservationSlotRepository.save(getNextDayReservation(time, theme2));
 
         Member memberChoco = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservationSlot1));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservationSlot2));
+        reservationRepository.save(new Reservation(memberChoco, reservationSlot1));
+        reservationRepository.save(new Reservation(memberChoco, reservationSlot2));
 
         //when
         List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
@@ -181,16 +181,16 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationSlot reservationSlot = getNextDayReservation(time, theme);
         reservationSlotRepository.save(reservationSlot);
         Member member = memberRepository.save(getMemberChoco());
-        MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservationSlot));
+        Reservation memberReservation = reservationRepository.save(
+                new Reservation(member, reservationSlot));
 
         //when
         memberReservationService.deleteMemberReservation(AuthInfo.of(member), memberReservation.getId());
-        Specification<MemberReservation> spec = Specification.where(MemberReservationSpecification.greaterThanOrEqualToStartDate(LocalDate.now()))
+        Specification<Reservation> spec = Specification.where(MemberReservationSpecification.greaterThanOrEqualToStartDate(LocalDate.now()))
                 .and(MemberReservationSpecification.lessThanOrEqualToEndDate(LocalDate.now().plusDays(1)));
 
         //then
-        assertThat(memberReservationRepository.findAll(spec)).hasSize(0);
+        assertThat(reservationRepository.findAll(spec)).hasSize(0);
     }
 
     @DisplayName("일자와 시간 중복 시 예외가 발생한다.")
@@ -201,7 +201,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
         ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
-        memberReservationRepository.save(new MemberReservation(member, reservationSlot));
+        reservationRepository.save(new Reservation(member, reservationSlot));
 
         ReservationRequest reservationRequest = new ReservationRequest(reservationSlot.getDate().toString(), time.getId(),
                 theme.getId());
@@ -219,7 +219,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
         ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
-        memberReservationRepository.save(new MemberReservation(member, reservationSlot));
+        reservationRepository.save(new Reservation(member, reservationSlot));
 
         //when
         reservationService.delete(reservationSlot.getId());
@@ -241,8 +241,8 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationSlot reservationSlot1 = reservationSlotRepository.save(getNextDayReservation(time, theme1));
         ReservationSlot reservationSlot2 = reservationSlotRepository.save(getNextDayReservation(time, theme2));
 
-        memberReservationRepository.save(new MemberReservation(member, reservationSlot1));
-        memberReservationRepository.save(new MemberReservation(member, reservationSlot2));
+        reservationRepository.save(new Reservation(member, reservationSlot1));
+        reservationRepository.save(new Reservation(member, reservationSlot2));
 
         //when
         List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(AuthInfo.of(member));
@@ -263,7 +263,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         Member tacan = getMemberTacan();
 
         ReservationSlot reservationSlot1 = reservationSlotRepository.save(reservationSlot);
-        MemberReservation save = memberReservationRepository.save(new MemberReservation(choco, reservationSlot));
+        Reservation save = reservationRepository.save(new Reservation(choco, reservationSlot));
 
         //when
         ReservationResponse memberReservation1 = memberReservationService.createMemberReservation(new MemberReservationRequest(
@@ -272,8 +272,8 @@ class ReservationSlotServiceTest extends ServiceTest {
                 reservationSlot.getTime().getId(),
                 reservationSlot.getTheme().getId(
                 )));
-        List<MemberReservation> allByMember = memberReservationRepository.findAllByMember(tacan);
-        MemberReservation addedMemberReservation = allByMember
+        List<Reservation> allByMember = reservationRepository.findAllByMember(tacan);
+        Reservation addedMemberReservation = allByMember
                 .stream()
                 .filter(memberReservation -> Objects.equals(memberReservation.getReservationSlot().getId(), reservationSlot.getId()))
                 .findAny()

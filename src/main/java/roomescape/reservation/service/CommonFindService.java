@@ -4,11 +4,11 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
@@ -22,18 +22,18 @@ public class CommonFindService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final ReservationSlotRepository reservationSlotRepository;
-    private final MemberReservationRepository memberReservationRepository;
+    private final ReservationRepository reservationRepository;
 
     public CommonFindService(ReservationTimeRepository reservationTimeRepository,
                              ThemeRepository themeRepository,
                              MemberRepository memberRepository,
                              ReservationSlotRepository reservationSlotRepository,
-                             MemberReservationRepository memberReservationRepository) {
+                             ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.reservationSlotRepository = reservationSlotRepository;
-        this.memberReservationRepository = memberReservationRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationTime getReservationSlotTime(long timeId) {
@@ -56,8 +56,8 @@ public class CommonFindService {
                 .orElseGet(() -> reservationSlotRepository.save(new ReservationSlot(date, time, theme)));
     }
 
-    public MemberReservation getMemberReservation(long memberReservationId) {
-        return memberReservationRepository.findById(memberReservationId)
+    public Reservation getMemberReservation(long memberReservationId) {
+        return reservationRepository.findById(memberReservationId)
                 .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 사용자 예약이 없습니다."));
     }
 }

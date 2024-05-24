@@ -7,7 +7,7 @@ import java.util.Objects;
 import roomescape.member.domain.Member;
 
 @Entity
-public class MemberReservation {
+public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,26 +24,26 @@ public class MemberReservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public MemberReservation() {
+    public Reservation() {
     }
 
-    public MemberReservation(Member member,
-                             ReservationSlot reservationSlot,
-                             LocalDateTime createdTime,
-                             ReservationStatus status) {
+    public Reservation(Member member,
+                       ReservationSlot reservationSlot,
+                       LocalDateTime createdTime,
+                       ReservationStatus status) {
         this.member = member;
         this.reservationSlot = reservationSlot;
         this.createdTime = createdTime;
         this.status = status;
     }
 
-    public MemberReservation(Long id, Member member, ReservationSlot reservationSlot) {
+    public Reservation(Long id, Member member, ReservationSlot reservationSlot) {
         this.id = id;
         this.member = member;
         this.reservationSlot = reservationSlot;
     }
 
-    public MemberReservation(Member member, ReservationSlot reservationSlot) {
+    public Reservation(Member member, ReservationSlot reservationSlot) {
         this.member = member;
         this.reservationSlot = reservationSlot;
         this.createdTime = LocalDateTime.now();
@@ -82,7 +82,7 @@ public class MemberReservation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        MemberReservation that = (MemberReservation) o;
+        Reservation that = (Reservation) o;
         return Objects.equals(getId(), that.getId());
     }
 

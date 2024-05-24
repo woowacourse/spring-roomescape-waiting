@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 
 public record ReservationResponse(
@@ -24,7 +24,7 @@ public record ReservationResponse(
         );
     }
 
-    public static ReservationResponse from(MemberReservation memberReservation) {
+    public static ReservationResponse from(Reservation memberReservation) {
         ReservationSlot reservationSlot = memberReservation.getReservationSlot();
         return new ReservationResponse(
                 memberReservation.getId(),

@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.service.TokenProvider;
 import roomescape.fixture.MemberReservationFixture;
 import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.util.ControllerTest;
 
 import java.time.format.DateTimeFormatter;
@@ -25,7 +25,7 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
     TokenProvider tokenProvider;
 
     @Autowired
-    MemberReservationRepository memberReservationRepository;
+    ReservationRepository reservationRepository;
 
     String token;
 
@@ -38,7 +38,7 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
     @DisplayName("예약이 존재하는 경우에도 사용자가 다르면 예약이 된다")
     void waiting() {
         //given
-        MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
+        Reservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
         ReservationSlot alreadBookedReservationSlot = bookedMemberReservation.getReservationSlot();
         ReservationRequest reservationRequest = new ReservationRequest(
                 alreadBookedReservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),
@@ -60,7 +60,7 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
     @Test
     void delete() {
         //given
-        MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
+        Reservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
         ReservationSlot bookedReservationSlot = bookedMemberReservation.getReservationSlot();
         ReservationRequest reservationRequest = new ReservationRequest(
                 bookedReservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),
@@ -77,7 +77,7 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(201);
 
-        List<MemberReservation> all = memberReservationRepository.findAll();
+        List<Reservation> all = reservationRepository.findAll();
         Long addedId = all.get(all.size() - 1).getId();
         RestAssured.given().log().all()
                 .cookie("token", token)

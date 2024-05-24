@@ -12,7 +12,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
 @DisplayName("사용자 예약 내역 도메인")
-class MemberReservationSlotTest {
+class ReservationTest {
     @DisplayName("동일한 id는 같은 사용자 예약이다.")
     @Test
     void equals() {
@@ -25,8 +25,8 @@ class MemberReservationSlotTest {
         ReservationSlot nextMonthReservationSlot = getNextMonthReservation(noon, theme);
 
         //when
-        MemberReservation memberReservation1 = new MemberReservation(id, member, nextDayReservationSlot);
-        MemberReservation memberReservation2 = new MemberReservation(id, member, nextMonthReservationSlot);
+        Reservation memberReservation1 = new Reservation(id, member, nextDayReservationSlot);
+        Reservation memberReservation2 = new Reservation(id, member, nextMonthReservationSlot);
 
         //then
         assertThat(memberReservation1).isEqualTo(memberReservation2);

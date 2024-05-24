@@ -9,9 +9,9 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.MyReservationWithStatus;
 import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
 
 import java.util.List;
 
@@ -20,12 +20,12 @@ public class WaitingReservationService {
 
     @Autowired
     private final CommonFindService commonFindService;
-    private final MemberReservationRepository memberReservationRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingReservationService(CommonFindService commonFindService,
-                                     MemberReservationRepository memberReservationRepository) {
+                                     ReservationRepository reservationRepository) {
         this.commonFindService = commonFindService;
-        this.memberReservationRepository = memberReservationRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<MyReservationResponse> handleWaitingOrder(List<MyReservationWithStatus> myReservationWithStatuses) {
@@ -37,8 +37,8 @@ public class WaitingReservationService {
 
     private MyReservationResponse handler(MyReservationWithStatus myReservationWithStatus) {
         if (myReservationWithStatus.status().isWaiting()) {
-            int waitingCount = memberReservationRepository
-                    .countWaitingMemberReservation(myReservationWithStatus.memberReservationId());
+            int waitingCount = reservationRepository
+                    .countWaitingReservation(myReservationWithStatus.memberReservationId());
             return MyReservationResponse.from(myReservationWithStatus, waitingCount);
         }
         return MyReservationResponse.from(myReservationWithStatus);
@@ -46,7 +46,7 @@ public class WaitingReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByWaitingReservation() {
-        List<MemberReservation> memberReservations = memberReservationRepository
+        List<Reservation> memberReservations = reservationRepository
                 .findAllByStatus(ReservationStatus.WAITING);
         return memberReservations.stream()
                 .map(ReservationResponse::from)
@@ -55,13 +55,13 @@ public class WaitingReservationService {
 
     @Transactional
     public void deleteMemberReservation(AuthInfo authInfo, Long memberReservationId) {
-        MemberReservation memberReservation = commonFindService.getMemberReservation(memberReservationId);
+        Reservation memberReservation = commonFindService.getMemberReservation(memberReservationId);
         Member member = commonFindService.getMember(authInfo.getId());
         if (!member.isAdmin() && !memberReservation.isMember(member)) {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
-        memberReservationRepository.deleteById(memberReservationId);
-        memberReservationRepository.findFirstByReservationSlotOrderByCreatedTime(memberReservation.getReservationSlot())
-                        .ifPresent(MemberReservation::confirmReservation);
+        reservationRepository.deleteById(memberReservationId);
+        reservationRepository.findFirstByReservationSlotOrderByCreatedTime(memberReservation.getReservationSlot())
+                        .ifPresent(Reservation::confirmReservation);
     }
 }

@@ -4,32 +4,32 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long>,
-        JpaSpecificationExecutor<MemberReservation> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>,
+        JpaSpecificationExecutor<Reservation> {
 
-    List<MemberReservation> findAllByMember(Member member);
+    List<Reservation> findAllByMember(Member member);
 
-    List<MemberReservation> findAllByStatus(ReservationStatus status);
+    List<Reservation> findAllByStatus(ReservationStatus status);
 
-    Optional<MemberReservation> findFirstByReservationSlotOrderByCreatedTime(ReservationSlot reservationSlot);
+    Optional<Reservation> findFirstByReservationSlotOrderByCreatedTime(ReservationSlot reservationSlot);
 
     @Query("""
     SELECT count(*)
-    FROM MemberReservation  mr
-    WHERE mr.reservationSlot = 
-    (SELECT mr.reservationSlot
-    FROM MemberReservation mr
-    WHERE mr.id = :memberReservationId)
-    AND mr.id < :memberReservationId
+    FROM Reservation  r
+    WHERE r.reservationSlot = 
+    (SELECT r.reservationSlot
+    FROM Reservation r
+    WHERE r.id = :reservationId)
+    AND r.id < :reservationId
     """)
-    int countWaitingMemberReservation(Long memberReservationId);
+    int countWaitingReservation(Long reservationId);
 
     boolean existsByReservationSlot(ReservationSlot reservationSlot);
 

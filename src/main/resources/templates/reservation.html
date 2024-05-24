@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="stylesheet" href="/css/reservationSlot.css">
+  <link rel="stylesheet" href="/css/reservation.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -25,7 +25,7 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a class="nav-link" href="/reservationSlot">Reservation</a>
+        <a class="nav-link" href="/reservation">Reservation</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/theme">Theme</a>
@@ -43,7 +43,7 @@
                 <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/reservationSlot-mine">My Reservation</a>
+                <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
               </div>
@@ -55,7 +55,7 @@
 <!-- Content -->
 <div id="content-container" class="col-md-10 offset-md-1 p-5">
   <h2 class="content-container-title">예약 페이지</h2>
-  <div class="d-flex" id="reservationSlot-container" >
+  <div class="d-flex" id="reservation-container" >
     <!-- Date Section -->
     <div class="section border rounded col-md-4 p-3" id="date-section">
       <h3 class="fs-5 text-center mb-3">날짜 선택</h3>
@@ -92,6 +92,6 @@
 <script src="/js/user-scripts.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="/js/user-reservationSlot.js"></script>
+<script src="/js/user-reservation.js"></script>
 </body>
 </html>

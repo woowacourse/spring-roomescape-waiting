@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS reservation_slot
     FOREIGN KEY (theme_id) REFERENCES theme (id) -- 외래키 추가
     );
 
-CREATE TABLE IF NOT EXISTS member_reservation
+CREATE TABLE IF NOT EXISTS reservation
 (
     id             BIGINT NOT NULL AUTO_INCREMENT,
     member_id      BIGINT NOT NULL,
