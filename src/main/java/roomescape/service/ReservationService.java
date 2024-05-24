@@ -1,7 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -12,7 +10,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.util.DateUtil;
 
 @Service
 public class ReservationService {
@@ -36,7 +33,7 @@ public class ReservationService {
 
     public Long addReservation(ReservationRequest request) {
         Reservation reservation = convertReservation(request);
-        validateAddable(reservation);
+        validateReservationNotDuplicate(reservation);
         return reservationRepository.save(reservation).getId();
     }
 
@@ -71,11 +68,6 @@ public class ReservationService {
                 ));
     }
 
-    private void validateAddable(Reservation reservation) {
-        validateReservationNotDuplicate(reservation);
-        validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
-    }
-
     private void validateReservationNotDuplicate(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
@@ -85,15 +77,6 @@ public class ReservationService {
             throw new IllegalArgumentException(
                     "[ERROR] 해당 시간에 동일한 테마가 예약되어있어 예약이 불가능합니다.",
                     new Throwable("생성 예약 정보 : " + reservation)
-            );
-        }
-    }
-
-    private void validateUnPassedDate(LocalDate date, LocalTime time) {
-        if (DateUtil.isPastDateTime(date, time)) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
-                    new Throwable("생성 예약 시간 : " + date + " " + time)
             );
         }
     }

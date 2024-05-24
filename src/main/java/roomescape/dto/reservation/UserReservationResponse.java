@@ -21,7 +21,7 @@ public record UserReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getState().getDescription()
+                "예약"
         );
     }
 

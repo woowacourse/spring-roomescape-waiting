@@ -19,7 +19,7 @@ class ReservationTest {
     void 주어진_사용자의_예약인지_확인() {
         // given
         Member member = new Member(1L, "name", "email@test.com", "password123", Role.ADMIN);
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
         Theme theme = new Theme(2L, "테마", "주어진 사용자의 예약인지 확인합니다.", "썸네일");
         ReservationTime reservationTime = new ReservationTime(LocalTime.now());
         Reservation reservation = new Reservation(date, reservationTime, theme, member);
