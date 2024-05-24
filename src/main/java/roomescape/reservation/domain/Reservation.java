@@ -80,8 +80,8 @@ public class Reservation {
         return ownerId.equals(memberId);
     }
 
-    public void updateStatus(ReservationStatus status) {
-        this.status = status;
+    public void changeToBooking() {
+        this.status = ReservationStatus.BOOKING;
     }
 
     public boolean hasSameOwner(Member member) {
