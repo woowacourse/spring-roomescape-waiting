@@ -61,9 +61,9 @@ class MemberControllerTest extends BaseControllerTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-            softly.assertThat(memberResponses).hasSize(1);
-            softly.assertThat(memberResponses.get(0))
-                    .isEqualTo(new MemberResponse(1L, "new", Role.USER));
+            softly.assertThat(memberResponses).hasSize(3);
+            softly.assertThat(memberResponses.get(2))
+                    .isEqualTo(new MemberResponse(3L, "new", Role.USER));
         });
     }
 }
