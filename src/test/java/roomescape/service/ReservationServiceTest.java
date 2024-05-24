@@ -6,11 +6,11 @@ import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
 import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 import java.time.LocalDate;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -18,11 +18,11 @@ import roomescape.dto.ReservationRequest;
 import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @SpringBootTest
-@Transactional
 class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
@@ -35,6 +35,17 @@ class ReservationServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @AfterEach
+    void cleanUp() {
+        reservationRepository.deleteAll();
+        reservationTimeRepository.deleteAll();
+        themeRepository.deleteAll();
+        memberRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("없는 시간에 예약 시도시 실패하는지 확인")

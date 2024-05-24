@@ -7,11 +7,11 @@ import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -23,7 +23,6 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @SpringBootTest
-@Transactional
 class AvailableTimeServiceTest {
 
     @Autowired
@@ -40,6 +39,14 @@ class AvailableTimeServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @AfterEach
+    void cleanUp() {
+        reservationRepository.deleteAll();
+        reservationTimeRepository.deleteAll();
+        themeRepository.deleteAll();
+        memberRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("날짜와 테마, 시간에 대한 예약 내역을 확인할 수 있다.")

@@ -10,11 +10,11 @@ import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
 import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 import java.time.LocalDate;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -26,7 +26,6 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @SpringBootTest
-@Transactional
 class ReservationTimeServiceTest {
     @Autowired
     private ReservationTimeService reservationTimeService;
@@ -42,6 +41,14 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
+    @AfterEach
+    void cleanUp() {
+        reservationRepository.deleteAll();
+        reservationTimeRepository.deleteAll();
+        themeRepository.deleteAll();
+        memberRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("중복된 예약 시간을 생성할 수 없는지 확인")
