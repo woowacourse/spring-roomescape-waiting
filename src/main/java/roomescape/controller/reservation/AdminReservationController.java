@@ -10,7 +10,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.controller.reservation.dto.AdminCreateReservationRequest;
 import roomescape.controller.reservation.dto.CreateReservationDto;
 import roomescape.controller.reservation.dto.ReservationResponse;
-import roomescape.domain.Reservation;
 import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 
@@ -29,12 +28,11 @@ public class AdminReservationController {
         final CreateReservationDto request = new CreateReservationDto(
                 adminRequest.memberId(), adminRequest.themeId(), adminRequest.date(),
                 adminRequest.timeId(), Status.RESERVED);
-        final Reservation reservation = reservationService.addReservation(request);
+        final ReservationResponse reservation = reservationService.addReservation(request);
 
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
-                .buildAndExpand(reservation.getId())
+                .buildAndExpand(reservation.id())
                 .toUri();
-        return ResponseEntity.created(uri)
-                .body(ReservationResponse.from(reservation));
+        return ResponseEntity.created(uri).body(reservation);
     }
 }

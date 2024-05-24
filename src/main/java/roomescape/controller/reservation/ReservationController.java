@@ -18,7 +18,6 @@ import roomescape.controller.reservation.dto.MyReservationResponse;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.controller.reservation.dto.UserCreateReservationRequest;
-import roomescape.domain.Reservation;
 import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 
@@ -34,10 +33,7 @@ public class ReservationController {
 
     @GetMapping
     public List<ReservationResponse> getReservations() {
-        return reservationService.getReservedReservations()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return reservationService.getReservedReservations();
     }
 
     @GetMapping("/mine")
@@ -52,21 +48,18 @@ public class ReservationController {
         final CreateReservationDto reservationDto = new CreateReservationDto(
                 loginMember.id(), userRequest.themeId(), userRequest.date(),
                 userRequest.timeId(), Status.RESERVED);
-        final Reservation reservation = reservationService.addReservation(reservationDto);
+        final ReservationResponse reservation = reservationService.addReservation(reservationDto);
+
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
-                .buildAndExpand(reservation.getId())
+                .buildAndExpand(reservation.id())
                 .toUri();
-        return ResponseEntity.created(uri)
-                .body(ReservationResponse.from(reservation));
+        return ResponseEntity.created(uri).body(reservation);
     }
 
     @GetMapping(value = "/search", params = {"themeId", "memberId", "dateFrom", "dateTo"})
     public List<ReservationResponse> searchReservations(
             final ReservationSearchCondition request) {
-        final List<Reservation> filter = reservationService.searchReservations(request);
-        return filter.stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return reservationService.searchReservations(request);
     }
 
     @DeleteMapping("/{id}")

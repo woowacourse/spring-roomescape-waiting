@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationDto;
 import roomescape.controller.reservation.dto.MyReservationResponse;
+import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -41,12 +42,18 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<Reservation> getReservedReservations() {
-        return reservationRepository.findAllByStatus(Status.RESERVED);
+    public List<ReservationResponse> getReservedReservations() {
+        return reservationRepository.findAllByStatus(Status.RESERVED)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
-    public List<Reservation> getWaitingReservations() {
-        return reservationRepository.findAllByStatus(Status.WAITING);
+    public List<ReservationResponse> getWaitingReservations() {
+        return reservationRepository.findAllByStatus(Status.WAITING)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public List<MyReservationResponse> getReservationsByMember(final LoginMember member) {
@@ -73,14 +80,19 @@ public class ReservationService {
         return rank + "번째";
     }
 
-    public List<Reservation> searchReservations(final ReservationSearchCondition condition) {
+    public List<ReservationResponse> searchReservations(
+            final ReservationSearchCondition condition) {
         validateDateRange(condition);
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+        List<Reservation> reservations
+                = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
                 condition.themeId(), condition.memberId(),
                 condition.dateFrom(), condition.dateTo());
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
-    public Reservation addReservation(final CreateReservationDto reservationDto) {
+    public ReservationResponse addReservation(final CreateReservationDto reservationDto) {
         validateDuplicate(reservationDto);
         validateDuplicateWaiting(reservationDto);
         final LocalDate date = reservationDto.date();
@@ -92,7 +104,8 @@ public class ReservationService {
         final Member member = memberRepository.findByIdOrThrow(reservationDto.memberId());
         final Reservation reservation = new Reservation(null, member, date, time, theme,
                 reservationDto.status());
-        return reservationRepository.save(reservation);
+        reservationRepository.save(reservation);
+        return ReservationResponse.from(reservation);
     }
 
     @Transactional
@@ -100,19 +113,23 @@ public class ReservationService {
         final Reservation deleteReservation = reservationRepository.findByIdOrThrow(id);
         reservationRepository.deleteById(deleteReservation.getId());
         if (deleteReservation.isReserved()) {
-            Optional<Reservation> firstWaitingReservation = reservationRepository
-                    .findFirstByTimeIdAndThemeIdAndDateAndStatus(
-                            deleteReservation.getTime().getId(),
-                            deleteReservation.getTheme().getId(),
-                            deleteReservation.getDate(),
-                            Status.WAITING);
-            firstWaitingReservation
-                    .ifPresent(reservation -> reserveWaitingReservation(reservation.getId()));
+            reserveFirstWaitingIfPresent(deleteReservation);
         }
     }
 
+    private void reserveFirstWaitingIfPresent(Reservation deleteReservation) {
+        Optional<Reservation> firstWaitingReservation = reservationRepository
+                .findFirstByTimeIdAndThemeIdAndDateAndStatus(
+                        deleteReservation.getTime().getId(),
+                        deleteReservation.getTheme().getId(),
+                        deleteReservation.getDate(),
+                        Status.WAITING);
+        firstWaitingReservation
+                .ifPresent(Reservation::reserveWaiting);
+    }
+
     @Transactional
-    public Reservation reserveWaitingReservation(final long id) {
+    public ReservationResponse reserveWaitingReservation(final long id) {
         final Reservation waitingReservation = reservationRepository.findByIdOrThrow(id);
         final boolean reservationExists = reservationRepository
                 .existsByThemeIdAndTimeIdAndDateAndStatus(
@@ -124,7 +141,7 @@ public class ReservationService {
             throw new DuplicateReservationException("예약이 존재하여 승인할 수 없습니다.");
         }
         waitingReservation.reserveWaiting();
-        return waitingReservation;
+        return ReservationResponse.from(waitingReservation);
     }
 
     private void validateDateRange(final ReservationSearchCondition request) {

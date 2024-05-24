@@ -17,7 +17,6 @@ import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationDto;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.UserCreateReservationRequest;
-import roomescape.domain.Reservation;
 import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 
@@ -33,10 +32,7 @@ public class WaitingReservationController {
 
     @GetMapping
     public List<ReservationResponse> getWaitingReservations() {
-        return reservationService.getWaitingReservations()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return reservationService.getWaitingReservations();
     }
 
     @PostMapping
@@ -46,19 +42,18 @@ public class WaitingReservationController {
         final CreateReservationDto reservationDto = new CreateReservationDto(
                 loginMember.id(), userRequest.themeId(), userRequest.date(),
                 userRequest.timeId(), Status.WAITING);
-        final Reservation reservation = reservationService.addReservation(reservationDto);
+        final ReservationResponse reservation = reservationService.addReservation(reservationDto);
+
         final URI uri = UriComponentsBuilder.fromPath("/reservations/waiting/{id}")
-                .buildAndExpand(reservation.getId())
+                .buildAndExpand(reservation.id())
                 .toUri();
-        return ResponseEntity.created(uri)
-                .body(ReservationResponse.from(reservation));
+        return ResponseEntity.created(uri).body(reservation);
     }
 
     @PatchMapping("/{id}")
     public ReservationResponse changeWaitingReservationToReserved(
             @PathVariable("id") final Long id) {
-        Reservation reservation = reservationService.reserveWaitingReservation(id);
-        return ReservationResponse.from(reservation);
+        return reservationService.reserveWaitingReservation(id);
     }
 
     @DeleteMapping("/{id}")
