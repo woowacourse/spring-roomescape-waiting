@@ -7,8 +7,6 @@ import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class ReservationResponse {
 
@@ -30,30 +28,12 @@ public class ReservationResponse {
         ReservationTime time = reservation.getTime();
         Theme theme = reservation.getTheme();
         Member member = reservation.getMember();
-        return new ReservationResponse(reservation.getId(), reservation.getDate(),
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getDate(),
                 ReservationTimeResponse.from(time),
                 ThemeResponse.from(theme),
                 MemberResponse.from(member));
-    }
-
-    private static ReservationResponse from(Waiting waiting) {
-        ReservationTime time = waiting.getTime();
-        Theme theme = waiting.getTheme();
-        Member member = waiting.getMember();
-        return new ReservationResponse(waiting.getId(), waiting.getDate(),
-                ReservationTimeResponse.from(time),
-                ThemeResponse.from(theme),
-                MemberResponse.from(member));
-    }
-
-    public static List<ReservationResponse> from(List<Reservation> reservations, List<Waiting> waiting) {
-        List<ReservationResponse> reservationResponses = reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
-        List<ReservationResponse> waitingResponses = waiting.stream()
-                .map(ReservationResponse::from)
-                .toList();
-        return Stream.concat(reservationResponses.stream(), waitingResponses.stream()).toList();
     }
 
     public long getId() {
