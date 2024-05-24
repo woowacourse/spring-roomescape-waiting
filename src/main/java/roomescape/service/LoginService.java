@@ -30,7 +30,7 @@ public class LoginService {
     }
 
     public AuthenticationInfoResponse loginCheck(HttpServletRequest request) {
-        String authenticationInfo = tokenProvider.parseAuthenticationInfoFromCookies(request.getCookies());
+        String authenticationInfo = tokenProvider.extractAuthInfo(request.getCookies());
         return AuthenticationInfoResponse.from(authenticationInfo);
     }
 }

@@ -35,12 +35,12 @@ public class TokenProvider {
                 .compact();
     }
 
-    public String parseAuthenticationInfoFromCookies(Cookie[] cookies) {
+    public String extractAuthInfo(Cookie[] cookies) {
         String token = extractTokenFromCookie(cookies);
-        return parseAuthenticationInfo(token);
+        return extractAuthInfoFromToken(token);
     }
 
-    private String parseAuthenticationInfo(String token) {
+    private String extractAuthInfoFromToken(String token) {
         String authenticationInfo = parsePayload(token).get(AUTHENTICATION_PAYLOAD, String.class);
         if (authenticationInfo == null) {
             throw new CustomException(ExceptionCode.NO_AUTHENTICATION_INFO);
@@ -66,7 +66,7 @@ public class TokenProvider {
         return parseMemberId(token);
     }
 
-    public long parseMemberId(String token) {
+    private long parseMemberId(String token) {
         String authenticationInfo = parsePayload(token).getSubject();
         if (authenticationInfo == null) {
             throw new CustomException(ExceptionCode.NO_AUTHENTICATION_INFO);
@@ -74,7 +74,7 @@ public class TokenProvider {
         return Long.parseLong(authenticationInfo);
     }
 
-    public String extractTokenFromCookie(Cookie[] cookies) {
+    private String extractTokenFromCookie(Cookie[] cookies) {
         if (cookies == null) {
             throw new CustomException(ExceptionCode.NO_AUTHENTICATION_ACCESS);
         }
