@@ -9,7 +9,7 @@ import java.util.Objects;
 import roomescape.exception.custom.BadRequestException;
 
 @Entity
-public class Reservation {
+public class ReservationSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,10 +25,10 @@ public class Reservation {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Reservation() {
+    public ReservationSlot() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationSlot(Long id, LocalDate date, ReservationTime time, Theme theme) {
         validate(date, time);
         this.id = id;
         this.date = date;
@@ -36,7 +36,7 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {
         this(null, date, time, theme);
     }
 
@@ -74,7 +74,7 @@ public class Reservation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Reservation that = (Reservation) o;
+        ReservationSlot that = (ReservationSlot) o;
         return Objects.equals(getId(), that.getId());
     }
 

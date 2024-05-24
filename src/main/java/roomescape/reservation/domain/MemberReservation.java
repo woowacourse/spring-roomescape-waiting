@@ -17,7 +17,7 @@ public class MemberReservation {
     private Member member;
 
     @ManyToOne
-    private Reservation reservation;
+    private ReservationSlot reservationSlot;
 
     private LocalDateTime createdTime;
 
@@ -28,24 +28,24 @@ public class MemberReservation {
     }
 
     public MemberReservation(Member member,
-                             Reservation reservation,
+                             ReservationSlot reservationSlot,
                              LocalDateTime createdTime,
                              ReservationStatus status) {
         this.member = member;
-        this.reservation = reservation;
+        this.reservationSlot = reservationSlot;
         this.createdTime = createdTime;
         this.status = status;
     }
 
-    public MemberReservation(Long id, Member member, Reservation reservation) {
+    public MemberReservation(Long id, Member member, ReservationSlot reservationSlot) {
         this.id = id;
         this.member = member;
-        this.reservation = reservation;
+        this.reservationSlot = reservationSlot;
     }
 
-    public MemberReservation(Member member, Reservation reservation) {
+    public MemberReservation(Member member, ReservationSlot reservationSlot) {
         this.member = member;
-        this.reservation = reservation;
+        this.reservationSlot = reservationSlot;
         this.createdTime = LocalDateTime.now();
         this.status = ReservationStatus.BOOKED;
     }
@@ -66,8 +66,8 @@ public class MemberReservation {
         return member;
     }
 
-    public Reservation getReservation() {
-        return reservation;
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
     }
 
     public ReservationStatus getStatus() {
@@ -96,7 +96,7 @@ public class MemberReservation {
         return "MemberReservation{" +
                 "id=" + id +
                 ", member=" + member +
-                ", reservation=" + reservation +
+                ", reservationSlot=" + reservationSlot +
                 '}';
     }
 }

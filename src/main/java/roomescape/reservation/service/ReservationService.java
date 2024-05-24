@@ -3,16 +3,11 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.custom.BadRequestException;
-import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
-import roomescape.reservation.controller.dto.*;
-import roomescape.reservation.domain.*;
+import roomescape.reservation.controller.dto.MyReservationWithStatus;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSlotRepository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,14 +15,14 @@ import java.util.List;
 public class ReservationService {
 
     private final CommonFindService commonFindService;
-    private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
     private final MemberReservationRepository memberReservationRepository;
 
     public ReservationService(CommonFindService commonFindService,
-                              ReservationRepository reservationRepository,
+                              ReservationSlotRepository reservationSlotRepository,
                               MemberReservationRepository memberReservationRepository) {
         this.commonFindService = commonFindService;
-        this.reservationRepository = reservationRepository;
+        this.reservationSlotRepository = reservationSlotRepository;
         this.memberReservationRepository = memberReservationRepository;
     }
 
@@ -41,7 +36,7 @@ public class ReservationService {
     }
 
     public void delete(long reservationId) {
-        memberReservationRepository.deleteByReservation_Id(reservationId);
-        reservationRepository.deleteById(reservationId);
+        memberReservationRepository.deleteByReservationSlot_Id(reservationId);
+        reservationSlotRepository.deleteById(reservationId);
     }
 }

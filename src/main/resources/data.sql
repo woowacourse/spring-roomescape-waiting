@@ -29,21 +29,21 @@ VALUES ('20:00');
 
 
 -- 예약 추가
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', -2, CURRENT_DATE()), 1, 1);
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 16, CURRENT_DATE()), 1, 2);
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('YEAR', 1, CURRENT_DATE()), 2, 1);
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 1, CURRENT_DATE()), 2, 2);
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 3, 3);
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 4, CURRENT_DATE()), 3, 4);
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('MONTH', 1, CURRENT_DATE()), 3, 4);
-INSERT INTO reservation(date, reservation_time_id, theme_id)
+INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 4, CURRENT_DATE()), 3, 4);
 
 
@@ -61,25 +61,25 @@ VALUES ('타칸', 'dev.tacan@gmail.com', '$2a$10$xFQbps5IJ6r9h69yhgYFe.hrbU59NA6
 
 
 -- 예약 목록 추가
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (1, 1, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (1, 3, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (1, 7, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (2, 2, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (2, 4, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (2, 8, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (3, 3, DATEADD(HOUR, 1, CURRENT_TIME()), 'WAITING');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (3, 5, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (3, 6, CURRENT_TIME(), 'BOOKED');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (2, 7, DATEADD(HOUR, 1, CURRENT_TIME()), 'WAITING');
-INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+INSERT INTO member_reservation(member_id, reservation_slot_id, created_time, status)
 VALUES (3, 7, DATEADD(HOUR, 2, CURRENT_TIME()), 'WAITING');

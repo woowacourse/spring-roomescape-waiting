@@ -61,7 +61,7 @@ public class WaitingReservationService {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
         memberReservationRepository.deleteById(memberReservationId);
-        memberReservationRepository.findFirstByReservationOrderByCreatedTime(memberReservation.getReservation())
+        memberReservationRepository.findFirstByReservationSlotOrderByCreatedTime(memberReservation.getReservationSlot())
                         .ifPresent(MemberReservation::confirmReservation);
     }
 }

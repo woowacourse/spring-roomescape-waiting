@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static roomescape.fixture.MemberFixture.getMemberAdmin;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
 
-class AdminReservationControllerTest extends ControllerTest {
+class AdminReservationSlotControllerTest extends ControllerTest {
 
     @Autowired
     ReservationService reservationService;
@@ -50,7 +50,7 @@ class AdminReservationControllerTest extends ControllerTest {
 
     @DisplayName("예약 목록 조회에 성공한다.")
     @Test
-    void getReservations() {
+    void getReservationSlots() {
         //given & when & then
         RestAssured.given().log().all()
                 .cookie("token", token)

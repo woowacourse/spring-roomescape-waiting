@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("예약 도메인 테스트")
-class ReservationTest {
+class ReservationSlotTest {
     @DisplayName("동일한 id는 같은 예약이다.")
     @Test
     void equals() {
@@ -24,10 +24,10 @@ class ReservationTest {
         LocalTime time2 = LocalTime.of(11, 23, 0);
 
         //when
-        Reservation reservation1 = new Reservation(id, date1, time1, getTheme1());
-        Reservation reservation2 = new Reservation(id, date2, time1, getTheme1());
+        ReservationSlot reservationSlot1 = new ReservationSlot(id, date1, time1, getTheme1());
+        ReservationSlot reservationSlot2 = new ReservationSlot(id, date2, time1, getTheme1());
 
         //then
-        assertThat(reservation1).isEqualTo(reservation2);
+        assertThat(reservationSlot1).isEqualTo(reservationSlot2);
     }
 }

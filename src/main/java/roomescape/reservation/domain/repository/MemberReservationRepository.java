@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 
 import java.util.List;
@@ -18,22 +18,22 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     List<MemberReservation> findAllByStatus(ReservationStatus status);
 
-    Optional<MemberReservation> findFirstByReservationOrderByCreatedTime(Reservation reservation);
+    Optional<MemberReservation> findFirstByReservationSlotOrderByCreatedTime(ReservationSlot reservationSlot);
 
     @Query("""
     SELECT count(*)
     FROM MemberReservation  mr
-    WHERE mr.reservation = 
-    (SELECT mr.reservation
+    WHERE mr.reservationSlot = 
+    (SELECT mr.reservationSlot
     FROM MemberReservation mr
     WHERE mr.id = :memberReservationId)
     AND mr.id < :memberReservationId
     """)
     int countWaitingMemberReservation(Long memberReservationId);
 
-    boolean existsByReservation(Reservation reservation);
+    boolean existsByReservationSlot(ReservationSlot reservationSlot);
 
-    void deleteByReservation_Id(long reservationId);
+    void deleteByReservationSlot_Id(long reservationSlotId);
 
-    boolean existsByReservationAndMember(Reservation reservation, Member member);
+    boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member);
 }

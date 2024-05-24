@@ -3,17 +3,17 @@ package roomescape.reservation.controller.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 
 public record MyReservationResponse(long reservationId, String themeName, LocalDate date, LocalTime time,
                                     String status) {
     public static MyReservationResponse from(MemberReservation memberReservation) {
-        Reservation reservation = memberReservation.getReservation();
+        ReservationSlot reservationSlot = memberReservation.getReservationSlot();
         return new MyReservationResponse(
                 memberReservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
+                reservationSlot.getTheme().getName(),
+                reservationSlot.getDate(),
+                reservationSlot.getTime().getStartAt(),
                 memberReservation.getStatus().getStatus());
     }
 

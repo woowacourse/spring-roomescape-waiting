@@ -10,7 +10,7 @@ public record MyReservationWithStatus(long memberReservationId, String themeName
                                       ReservationStatus status) {
     public static MyReservationWithStatus from(MemberReservation memberReservation) {
         return new MyReservationWithStatus(memberReservation.getId(),
-                memberReservation.getReservation().getTheme().getName(), memberReservation.getReservation().getDate(),
-                memberReservation.getReservation().getTime().getStartAt(), memberReservation.getStatus());
+                memberReservation.getReservationSlot().getTheme().getName(), memberReservation.getReservationSlot().getDate(),
+                memberReservation.getReservationSlot().getTime().getStartAt(), memberReservation.getStatus());
     }
 }

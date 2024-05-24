@@ -35,7 +35,7 @@ import roomescape.reservation.service.ThemeService;
 import roomescape.util.ControllerTest;
 
 @DisplayName("예약 API 통합 테스트")
-class ReservationControllerTest extends ControllerTest {
+class ReservationSlotControllerTest extends ControllerTest {
     @Autowired
     ReservationService reservationService;
 

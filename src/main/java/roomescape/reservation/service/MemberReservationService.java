@@ -66,28 +66,28 @@ public class MemberReservationService {
     }
 
     private ReservationResponse createMemberReservation(long memberId, long timeId, long themeId, LocalDate date) {
-        ReservationTime reservationTime = commonFindService.getReservationTime(timeId);
+        ReservationTime reservationTime = commonFindService.getReservationSlotTime(timeId);
         Theme theme = commonFindService.getTheme(themeId);
         Member member = commonFindService.getMember(memberId);
-        Reservation reservation = commonFindService.getReservation(date, reservationTime, theme);
+        ReservationSlot reservationSlot = commonFindService.getReservationSlot(date, reservationTime, theme);
         ReservationStatus reservationStatus = ReservationStatus.BOOKED;
 
-        validateMemberReservation(reservation, member);
+        validateMemberReservation(reservationSlot, member);
 
-        if (memberReservationRepository.existsByReservation(reservation)) {
+        if (memberReservationRepository.existsByReservationSlot(reservationSlot)) {
             reservationStatus = ReservationStatus.WAITING;
         }
 
         MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation, LocalDateTime.now(), reservationStatus));
-        return ReservationResponse.from(memberReservation.getId(), reservation, member);
+                new MemberReservation(member, reservationSlot, LocalDateTime.now(), reservationStatus));
+        return ReservationResponse.from(memberReservation.getId(), reservationSlot, member);
     }
 
-    private void validateMemberReservation(Reservation reservation, Member member) {
-        if (reservation.isPast()) {
+    private void validateMemberReservation(ReservationSlot reservationSlot, Member member) {
+        if (reservationSlot.isPast()) {
             throw new BadRequestException("올바르지 않는 데이터 요청입니다.");
         }
-        if (memberReservationRepository.existsByReservationAndMember(reservation, member)) {
+        if (memberReservationRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
             throw new ForbiddenException("중복된 예약입니다.");
         }
     }

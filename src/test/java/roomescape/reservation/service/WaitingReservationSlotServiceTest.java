@@ -8,7 +8,7 @@ import roomescape.fixture.MemberFixture;
 import roomescape.fixture.MemberReservationFixture;
 import roomescape.reservation.controller.dto.MyReservationWithStatus;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.util.ServiceTest;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WaitingReservationServiceTest extends ServiceTest {
+class WaitingReservationSlotServiceTest extends ServiceTest {
 
     @Autowired
     ReservationService reservationService;
@@ -28,13 +28,13 @@ class WaitingReservationServiceTest extends ServiceTest {
     void waitingReservationConfirm() {
         MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
         waitingReservationService.deleteMemberReservation(AuthInfo.of(bookedMemberReservation.getMember()), bookedMemberReservation.getId());
-        Reservation reservation = bookedMemberReservation.getReservation();
+        ReservationSlot reservationSlot = bookedMemberReservation.getReservationSlot();
 
         List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(AuthInfo.of(MemberFixture.getMemberAdmin()));
         MyReservationWithStatus nextReservationWithStatus = myReservations.stream()
-                .filter(myReservationWithStatus -> myReservationWithStatus.themeName().equals(reservation.getTheme().getName()))
-                .filter(myReservationWithStatus -> myReservationWithStatus.time().equals(reservation.getTime().getStartAt()))
-                .filter(myReservationWithStatus -> myReservationWithStatus.date().equals(reservation.getDate()))
+                .filter(myReservationWithStatus -> myReservationWithStatus.themeName().equals(reservationSlot.getTheme().getName()))
+                .filter(myReservationWithStatus -> myReservationWithStatus.time().equals(reservationSlot.getTime().getStartAt()))
+                .filter(myReservationWithStatus -> myReservationWithStatus.date().equals(reservationSlot.getDate()))
                 .findAny()
                 .get();
 

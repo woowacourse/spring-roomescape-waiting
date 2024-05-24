@@ -22,19 +22,19 @@ import roomescape.reservation.controller.dto.AvailableTimeResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.util.ServiceTest;
 
 @DisplayName("예약 시간 로직 테스트")
-class ReservationTimeServiceTest extends ServiceTest {
+class ReservationSlotTimeServiceTest extends ServiceTest {
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationSlotRepository reservationSlotRepository;
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -92,7 +92,7 @@ class ReservationTimeServiceTest extends ServiceTest {
         //given
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
-        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
         //when & then
         assertThatThrownBy(() -> reservationTimeService.delete(getNoon().getId()))
                 .isInstanceOf(BadRequestException.class);
@@ -119,19 +119,19 @@ class ReservationTimeServiceTest extends ServiceTest {
         reservationTimeRepository.save(get1PM());
         reservationTimeRepository.save(get2PM());
         Theme theme = themeRepository.save(getTheme1());
-        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
         Member member = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(member, reservation));
+        memberReservationRepository.save(new MemberReservation(member, reservationSlot));
 
         //when
         List<AvailableTimeResponse> availableTimes
-                = reservationTimeService.findAvailableTimes(reservation.getDate(), theme.getId());
+                = reservationTimeService.findAvailableTimes(reservationSlot.getDate(), theme.getId());
 
         //then
         long count = availableTimes.stream()
                 .filter(availableTimeResponse -> !availableTimeResponse.alreadyBooked()).count();
         long expectedCount = reservationTimeService.findAll().size() -
-                reservationTimeRepository.findReservedTime(reservation.getDate(), theme.getId()).size();
+                reservationTimeRepository.findReservedTime(reservationSlot.getDate(), theme.getId()).size();
 
         assertThat(count)
                 .isEqualTo(expectedCount);

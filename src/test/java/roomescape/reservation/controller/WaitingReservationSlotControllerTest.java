@@ -10,7 +10,7 @@ import roomescape.auth.service.TokenProvider;
 import roomescape.fixture.MemberReservationFixture;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.util.ControllerTest;
 
@@ -19,7 +19,7 @@ import java.util.List;
 
 import static roomescape.fixture.MemberFixture.getMemberTacan;
 
-class WaitingReservationControllerTest extends ControllerTest {
+class WaitingReservationSlotControllerTest extends ControllerTest {
 
     @Autowired
     TokenProvider tokenProvider;
@@ -39,11 +39,11 @@ class WaitingReservationControllerTest extends ControllerTest {
     void waiting() {
         //given
         MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
-        Reservation alreadBookedReservation = bookedMemberReservation.getReservation();
+        ReservationSlot alreadBookedReservationSlot = bookedMemberReservation.getReservationSlot();
         ReservationRequest reservationRequest = new ReservationRequest(
-                alreadBookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),
-                alreadBookedReservation.getTime().getId(),
-                alreadBookedReservation.getTheme().getId()
+                alreadBookedReservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),
+                alreadBookedReservationSlot.getTime().getId(),
+                alreadBookedReservationSlot.getTheme().getId()
         );
 
         //when & then
@@ -61,11 +61,11 @@ class WaitingReservationControllerTest extends ControllerTest {
     void delete() {
         //given
         MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
-        Reservation bookedReservation = bookedMemberReservation.getReservation();
+        ReservationSlot bookedReservationSlot = bookedMemberReservation.getReservationSlot();
         ReservationRequest reservationRequest = new ReservationRequest(
-                bookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),
-                bookedReservation.getTime().getId(),
-                bookedReservation.getTheme().getId()
+                bookedReservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),
+                bookedReservationSlot.getTime().getId(),
+                bookedReservationSlot.getTheme().getId()
         );
 
 //        when & then

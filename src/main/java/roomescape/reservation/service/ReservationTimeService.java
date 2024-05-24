@@ -12,21 +12,21 @@ import roomescape.reservation.controller.dto.AvailableTimeResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.AvailableTimes;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 
 @Service
 @Transactional
 public class ReservationTimeService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationTimeService(ReservationRepository reservationRepository,
+    public ReservationTimeService(ReservationSlotRepository reservationSlotRepository,
                                   ReservationTimeRepository reservationTimeRepository) {
-        this.reservationRepository = reservationRepository;
+        this.reservationSlotRepository = reservationSlotRepository;
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
@@ -49,11 +49,11 @@ public class ReservationTimeService {
     }
 
     public void delete(long timeId) {
-        List<ReservationTime> list = reservationRepository.findAll()
+        List<ReservationTime> list = reservationSlotRepository.findAll()
                 .stream()
-                .map(Reservation::getTime)
+                .map(ReservationSlot::getTime)
                 .toList();
-        if (reservationRepository.existsByTimeId(timeId)) {
+        if (reservationSlotRepository.existsByTimeId(timeId)) {
             throw new BadRequestException("예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(timeId);

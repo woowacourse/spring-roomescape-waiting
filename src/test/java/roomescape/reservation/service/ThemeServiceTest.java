@@ -18,7 +18,7 @@ import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.util.ServiceTest;
@@ -27,7 +27,7 @@ import roomescape.util.ServiceTest;
 @DisplayName("테마 로직 테스트")
 class ThemeServiceTest extends ServiceTest {
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationSlotRepository reservationSlotRepository;
     @Autowired
     ThemeRepository themeRepository;
     @Autowired
@@ -91,7 +91,7 @@ class ThemeServiceTest extends ServiceTest {
         //given
         ReservationTime time = timeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
-        reservationRepository.save(getNextDayReservation(time, theme));
+        reservationSlotRepository.save(getNextDayReservation(time, theme));
 
         //when & then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))

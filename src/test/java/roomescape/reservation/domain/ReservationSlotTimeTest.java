@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.exception.custom.BadRequestException;
 
 @DisplayName("예약 시간 도메인 테스트")
-class ReservationTimeTest {
+class ReservationSlotTimeTest {
     @DisplayName("동일한 id는 같은 예약 시간이다.")
     @Test
     void equals() {

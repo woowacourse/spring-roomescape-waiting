@@ -7,17 +7,17 @@ import roomescape.exception.custom.BadRequestException;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository, ReservationSlotRepository reservationSlotRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
+        this.reservationSlotRepository = reservationSlotRepository;
     }
 
     public List<ThemeResponse> findAllThemes() {
@@ -33,7 +33,7 @@ public class ThemeService {
     }
 
     public void delete(long themeId) {
-        if (reservationRepository.existsByThemeId(themeId)) {
+        if (reservationSlotRepository.existsByThemeId(themeId)) {
             throw new BadRequestException("예약이 존재하여 삭제할 수 없습니다.");
         }
 

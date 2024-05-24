@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS member
     PRIMARY KEY (id)
     );
 
-CREATE TABLE IF NOT EXISTS reservation
+CREATE TABLE IF NOT EXISTS reservation_slot
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     date     DATE   NOT NULL,
@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS member_reservation
 (
     id             BIGINT NOT NULL AUTO_INCREMENT,
     member_id      BIGINT NOT NULL,
-    reservation_id BIGINT NOT NULL,
+    reservation_slot_id BIGINT NOT NULL,
     created_time DATETIME NOT NULL,
     status VARCHAR(255),
     FOREIGN KEY (member_id) REFERENCES member (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id),
     PRIMARY KEY (id)
     );
