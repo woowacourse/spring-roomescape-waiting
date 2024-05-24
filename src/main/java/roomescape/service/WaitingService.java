@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.waiting.Waiting;
@@ -47,7 +46,6 @@ public class WaitingService {
         return waiting.getId();
     }
 
-    @Transactional
     public void deleteWaiting(Long id, LoginMember loginMember) {
         Waiting waiting = findWaiting(id);
         Member member = findMember(loginMember.id());
