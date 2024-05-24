@@ -213,4 +213,28 @@ class ReservationRestControllerTest {
                 .statusCode(200)
                 .body("size()", Matchers.is(1));
     }
+
+    @Test
+    @DisplayName("예약 대기를 생성하면 200 과 예약 대기 응답을 반환한다.")
+    void createWaiting() {
+        // given
+        MemberReservationRequest reservationCreate = new MemberReservationRequest(1L,
+                "2100-08-05", 1L);
+
+        RestAssured.given().log().all()
+                .cookie("token", adminToken)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .cookie("token", memberToken)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations/waitings")
+                .then().log().all()
+                .statusCode(201);
+    }
 }
