@@ -1,14 +1,18 @@
 package roomescape.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Status;
+import roomescape.domain.reservationwaiting.WaitingWithRank;
 
 public record PersonalReservationResponse(
         Long id,
         LocalDate date,
-        MemberResponse member,
-        ReservationTimeResponse time,
-        ThemeResponse theme,
+        @JsonFormat(pattern = "HH:mm")
+        LocalTime time,
+        String theme,
         String status
 ) {
 
@@ -16,10 +20,19 @@ public record PersonalReservationResponse(
         return new PersonalReservationResponse(
                 reservation.getId(),
                 reservation.getDate(),
-                MemberResponse.from(reservation.getMember()),
-                ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme()),
-                reservation.getStatus().getName()
+                reservation.getTime().getStartAt(),
+                reservation.getTheme().getRawName(),
+                Status.RESERVED.getName()
+        );
+    }
+
+    public static PersonalReservationResponse from(WaitingWithRank waitingWithRank) {
+        return new PersonalReservationResponse(
+                waitingWithRank.id(),
+                waitingWithRank.date(),
+                waitingWithRank.time(),
+                waitingWithRank.themeName(),
+                String.format("%d번째 %s", waitingWithRank.rank(), Status.WAITING.getName())
         );
     }
 }

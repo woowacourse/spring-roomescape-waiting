@@ -3,8 +3,10 @@ package roomescape.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -13,6 +15,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
+import roomescape.domain.reservationwaiting.WaitingWithRank;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.response.PersonalReservationResponse;
@@ -23,6 +27,7 @@ import roomescape.dto.response.ReservationResponse;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
@@ -30,12 +35,14 @@ public class ReservationService {
 
     public ReservationService(
             ReservationRepository reservationRepository,
+            ReservationWaitingRepository reservationWaitingRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             MemberRepository memberRepository,
             Clock clock
     ) {
         this.reservationRepository = reservationRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
@@ -112,11 +119,16 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<PersonalReservationResponse> getReservationsByMemberId(long id) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
+    public List<PersonalReservationResponse> getReservationsByMemberId(long memberId) {
+        Member member = getMember(memberId);
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        List<WaitingWithRank> waitingWithRanks = reservationWaitingRepository.findAllWithRankByMember(member);
 
-        return reservations.stream()
-                .map(PersonalReservationResponse::from)
+        return Stream.concat(
+                        reservations.stream().map(PersonalReservationResponse::from),
+                        waitingWithRanks.stream().map(PersonalReservationResponse::from))
+                .sorted(Comparator.comparing(PersonalReservationResponse::date)
+                        .thenComparing(PersonalReservationResponse::time))
                 .toList();
     }
 }

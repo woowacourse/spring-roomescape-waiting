@@ -9,6 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.domain.AuditingEntity;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -51,6 +53,19 @@ public class ReservationWaiting extends AuditingEntity {
     public Long getId() {
         return id;
     }
+
+    public LocalDate getDate() {
+        return reservation.getDate();
+    }
+
+    public String getThemeName() {
+        return reservation.getTheme().getRawName();
+    }
+
+    public LocalTime getTime() {
+        return reservation.getTime().getStartAt();
+    }
+
 
     public Reservation getReservation() {
         return reservation;
