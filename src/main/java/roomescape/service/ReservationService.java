@@ -44,14 +44,14 @@ public class ReservationService {
         ReservationTime reservationTime = findValidatedReservationTime(request.timeId());
         Theme theme = findValidatedTheme(request.themeId());
         validateNotPast(request.date(), reservationTime.getStartAt());
-        validateNotDuplicatedReservation(request.date(), request.timeId(), request.themeId());
+        ReservationStatus reservationStatus = determineReservationStatus(request.date(), request.timeId(), request.themeId());
 
         Reservation reservation = Reservation.builder()
                 .member(member)
                 .date(request.date())
                 .reservationTime(reservationTime)
                 .theme(theme)
-                .reservationStatus(ReservationStatus.RESERVED)
+                .reservationStatus(reservationStatus)
                 .build();
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -62,7 +62,7 @@ public class ReservationService {
         ReservationTime reservationTime = findValidatedReservationTime(request.timeId());
         Theme theme = findValidatedTheme(request.themeId());
         validateNotPast(request.date(), reservationTime.getStartAt());
-        validateNotDuplicatedReservation(request.date(), request.timeId(), request.themeId());
+        ReservationStatus reservationStatus = determineReservationStatus(request.date(), request.timeId(), request.themeId());
 
         Member customer = findValidatedMember(request.memberId());
         Reservation reservation = Reservation.builder()
@@ -70,7 +70,7 @@ public class ReservationService {
                 .date(request.date())
                 .reservationTime(reservationTime)
                 .theme(theme)
-                .reservationStatus(ReservationStatus.RESERVED)
+                .reservationStatus(reservationStatus)
                 .build();
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -102,10 +102,12 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 회원을 찾을 수 없습니다."));
     }
 
-    private void validateNotDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
+    private ReservationStatus determineReservationStatus(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new OperationNotAllowedCustomException("예약이 이미 존재합니다.");
+            return ReservationStatus.WAITING;
         }
+
+        return ReservationStatus.RESERVED;
     }
 
     private void validateNotPast(LocalDate date, LocalTime time) {

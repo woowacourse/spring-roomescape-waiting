@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
 import roomescape.domain.ReservationStatus;
+import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 
@@ -39,8 +40,33 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
                     .extract().as(ReservationResponse.class);
 
             assertAll(
-                    () -> assertThat(response.id()).isEqualTo(CUSTOMER_1.getId()),
+                    () -> assertThat(response.member().id()).isEqualTo(CUSTOMER_1.getId()),
                     () -> assertThat(response.reservationStatus().isReserved()).isTrue()
+            );
+        }
+
+        @DisplayName("정상 작동 - 이미 있는 예약이 있다면, 예약 대기를 추가한다.")
+        @TestFactory
+        Stream<DynamicTest> givenSameReservationAlreadyExist_whenAddReservation_ThenAddReservationWaiting() {
+            MemberReservationRequest request = new MemberReservationRequest(
+                    LocalDate.parse("2099-12-31"),
+                    1L,
+                    1L
+            );
+
+            return Stream.of(
+                    DynamicTest.dynamicTest("예약을 추가한다", () -> sendPostRequest(request)),
+
+                    DynamicTest.dynamicTest("동일한 예약을 추가한다", () -> {
+                                ReservationResponse response = sendPostRequest(request)
+                                        .statusCode(HttpStatus.CREATED.value())
+                                        .extract().as(ReservationResponse.class);
+                                assertAll(
+                                        () -> assertThat(response.member().id()).isEqualTo(CUSTOMER_1.getId()),
+                                        () -> assertThat(response.reservationStatus().isWaiting()).isTrue()
+                                );
+                            }
+                    )
             );
         }
 
@@ -58,25 +84,6 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
             assertAll(
                     () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
                     () -> assertThat(response.detail()).contains("지나간 시간에 대한 예약은 할 수 없습니다.")
-            );
-        }
-
-        @DisplayName("이미 예약이 존재한다면, 예약 대기를 걸어둔다.")
-        @Test
-        void addReservationWaiting_success() {
-            MemberReservationRequest requestBody = new MemberReservationRequest(
-                    RESERVATION_CUSTOMER1_THEME2_240501_1100.getDate(),
-                    RESERVATION_CUSTOMER1_THEME2_240501_1100.getReservationTime().getId(),
-                    RESERVATION_CUSTOMER1_THEME2_240501_1100.getTheme().getId()
-            );
-
-            ReservationResponse response = sendPostRequest(requestBody)
-                    .statusCode(HttpStatus.OK.value())
-                    .extract().as(ReservationResponse.class);
-
-            assertAll(
-                    () -> assertThat(response.id()).isEqualTo(CUSTOMER_1.getId()),
-                    () -> assertThat(response.reservationStatus().isWaiting()).isTrue()
             );
         }
     }
