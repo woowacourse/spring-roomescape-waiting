@@ -21,31 +21,18 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final MemberReservationRepository memberReservationRepository;
-    private final ReservationCreateService reservationCreateService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            MemberReservationRepository memberReservationRepository,
-            ReservationCreateService reservationCreateService) {
+            MemberReservationRepository memberReservationRepository
+    ) {
         this.reservationRepository = reservationRepository;
         this.memberReservationRepository = memberReservationRepository;
-        this.reservationCreateService = reservationCreateService;
     }
 
     private MemberReservation findMemberReservationById(Long id) {
         return memberReservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public MemberReservationResponse createReservation(MemberReservationCreateRequest request, LoginMember loginMember) {
-        ReservationCreateRequest createRequest = ReservationCreateRequest.of(request, loginMember);
-        return reservationCreateService.createReservation(createRequest);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public MemberReservationResponse createReservation(ReservationCreateRequest request) {
-        return reservationCreateService.createReservation(request);
     }
 
     @Transactional(readOnly = true)
