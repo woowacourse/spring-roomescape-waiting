@@ -79,6 +79,147 @@ Content-Type: application/json
 ```
 
 </details>
+<br>
+
+<details>
+<summary> 내 예약 대기 조회 API </summary>
+
+### 내 예약 대기 조회 API
+
+#### Request
+
+```http request
+GET /members/waitings HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 200
+[
+    {
+        "id": 1,
+        "name": "브라운",
+        "date": "2023-01-01",
+        "timeId": 1,
+        "themeId": 1
+    }
+]
+```
+</details>
+
+## 관리자 
+
+<details>
+<summary> 예약 목록 조회 API - 관리자 </summary>
+
+### 예약 목록 조회 - 관리자
+
+#### Request
+
+```http request
+GET /admin/reservations HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "name": "브라운",
+        "date": "2023-01-01",
+        "startAt": "10:00"
+        "theme": "레벨2 탈출"
+    }
+]
+```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 추가 - 관리자 API </summary>
+
+### 예약 추가 - 관리자
+
+#### Request
+
+```http request
+POST /admin/reservations HTTP/1.1
+content-type: application/json
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+host: localhost:8080
+
+{
+    "date": "2024-03-01",
+    "themeId": 1,
+    "timeId": 1,
+    "memberId": 1
+}
+```
+
+#### Response
+
+```
+HTTP/1.1 201
+Location: /reservation/{id}
+```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 대기 목록 조회 API - 관리자 </summary>
+
+### 예약 대기 목록 조회 API
+
+#### Request
+
+```http request
+GET /admin/waitings HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 200
+[
+    {
+        "id": 1,
+        "name": "브라운",
+        "date": "2023-01-01",
+        "timeId": 1,
+        "themeId": 1
+    }
+]
+```
+</details>
+<br>
+
+
+<details>
+<summary> 예약 대기 거절 API </summary>
+
+### 예약 대기 거절 API
+
+#### Request
+
+```http request
+DELETE /admin/waitings/reject/{waitingId HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 204
+```
+</details>
+<br>
+
 
 ## 예약
 
@@ -97,45 +238,6 @@ GET /admin/reservation HTTP/1.1
 
 ```
 HTTP/1.1 200 
-```
-</details>
-
-<br>
-
-<details>
-<summary> 예약 목록 조회 API </summary>
-
-### 예약 목록 조회
-
-#### Request
-
-```http request
-GET /reservations HTTP/1.1
-```
-
-#### Response
-
-```
-HTTP/1.1 200 
-Content-Type: application/json
-
-[
-    {
-        "id": 1,
-        "name": "브라운",
-        "date": "2023-01-01",
-        "time": {
-            "id": 1,
-            "startAt": "10:00"
-        },
-        "theme": {
-            "id": 1,
-            "name": "레벨2 탈출",
-            "description": "우테코 레벨2를 탈출하는 내용입니다.",
-            "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-        }
-    }
-]
 ```
 </details>
 
@@ -248,37 +350,6 @@ Location: /reservation/{id}
 <br>
 
 <details>
-<summary> 예약 추가 - 관리자 API </summary>
-
-### 예약 추가 - 관리자
-
-#### Request
-
-```http request
-POST /admin/reservations HTTP/1.1
-content-type: application/json
-cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
-host: localhost:8080
-
-{
-    "date": "2024-03-01",
-    "themeId": 1,
-    "timeId": 1,
-    "memberId": 1
-}
-```
-
-#### Response
-
-```
-HTTP/1.1 201
-Location: /reservation/{id}
-```
-</details>
-
-<br>
-
-<details>
 <summary> 예약 취소 API </summary>
 
 ### 예약 취소
@@ -331,34 +402,6 @@ Location: /waitings/1
     "timeId": 1,
     "themeId": 1
 }
-```
-</details>
-<br>
-
-<details>
-<summary> 예약 대기 목록 조회 API </summary>
-
-### 예약 대기 목록 조회 API
-
-#### Request
-
-```http request
-GET /waitings HTTP/1.1
-```
-
-#### Response
-
-```
-HTTP/1.1 200
-[
-    {
-        "id": 1,
-        "name": "브라운",
-        "date": "2023-01-01",
-        "timeId": 1,
-        "themeId": 1
-    }
-]
 ```
 </details>
 <br>
