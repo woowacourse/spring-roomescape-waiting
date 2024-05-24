@@ -59,16 +59,16 @@ public class WaitingService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public boolean existsWaiting(Theme theme, LocalDate date, ReservationTime time) {
-        return waitingRepository.existsWaitingByThemeAndDateAndTime(theme, date, time);
-    }
-
     private void validateDuplicatedWaiting(Theme theme, LocalDate date, ReservationTime time, Member member) {
         boolean duplicated = waitingRepository.existsWaitingByThemeAndDateAndTimeAndMember(theme, date, time, member);
         if (duplicated) {
             throw new BadRequestException("현재 이름(%s)으로 예약된 예약 대기 내역이 이미 존재합니다.".formatted(member.getName()));
         }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsWaiting(Theme theme, LocalDate date, ReservationTime time) {
+        return waitingRepository.existsWaitingByThemeAndDateAndTime(theme, date, time);
     }
 
     @Transactional
