@@ -9,6 +9,6 @@ public class TestThemeFactory {
     }
 
     public static Theme createTheme(Long id) {
-        return createTheme(id, "name", "description", "thumbnail");
+        return createTheme(id, "name" + id, "description" + id, "thumbnail" + id);
     }
 }

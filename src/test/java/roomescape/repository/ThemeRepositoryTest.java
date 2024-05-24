@@ -5,6 +5,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import static roomescape.model.Member.createMember;
 import static roomescape.model.Reservation.createAcceptReservation;
+import static roomescape.service.fixture.TestThemeFactory.createTheme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -36,40 +37,40 @@ class ThemeRepositoryTest {
     @DisplayName("테마를 조회한다.")
     @Test
     void should_find_all_themes() {
-        entityManager.persist(new Theme("무빈", "공포", "공포.jpg"));
-        entityManager.persist(new Theme("배키", "미스터리", "미스터리.jpg"));
+        Theme theme1 = saveTheme(createTheme(1L));
+        Theme theme2 = saveTheme(createTheme(2L));
 
         List<Theme> themes = themeRepository.findAll();
 
-        assertThat(themes).extracting(Theme::getName).containsOnly("무빈", "배키");
+        assertThat(themes).extracting(Theme::getName).containsOnly(theme1.getName(), theme2.getName());
     }
 
     @DisplayName("테마를 조회한다.")
     @Test
     void should_save_theme() {
-        themeRepository.save(new Theme("무빈", "공포", "공포.jpg"));
+        Theme theme = saveTheme(createTheme(1L));
 
         List<Theme> themes = themeRepository.findAll();
 
-        assertThat(themes).extracting(Theme::getName).containsOnly("무빈");
+        assertThat(themes).extracting(Theme::getName).containsOnly(theme.getName());
     }
 
     @DisplayName("아이디로 테마를 조회한다.")
     @Test
     void should_find_theme_when_give_theme_id() {
-        entityManager.persist(new Theme("무빈", "공포", "공포.jpg"));
-        entityManager.persist(new Theme("배키", "미스터리", "미스터리.jpg"));
+        Theme theme1 = saveTheme(createTheme(1L));
+        Theme theme2 = saveTheme(createTheme(2L));
 
         Theme theme = themeRepository.findById(1L).get();
 
-        assertThat(theme).extracting(Theme::getName).isEqualTo("무빈");
+        assertThat(theme).extracting(Theme::getName).isEqualTo(theme1.getName());
     }
 
     @DisplayName("테마를 삭제한다.")
     @Test
     void should_delete_theme() {
-        entityManager.persist(new Theme("무빈", "공포", "공포.jpg"));
-        entityManager.persist(new Theme("배키", "미스터리", "미스터리.jpg"));
+        saveTheme(createTheme(1L));
+        saveTheme(createTheme(2L));
 
         themeRepository.deleteById(1L);
 
@@ -119,5 +120,10 @@ class ThemeRepositoryTest {
                     new Theme(8L, "name8", "description8", "thumbnail8")
             );
         });
+    }
+
+    public Theme saveTheme(Theme theme) {
+        entityManager.merge(theme);
+        return theme;
     }
 }

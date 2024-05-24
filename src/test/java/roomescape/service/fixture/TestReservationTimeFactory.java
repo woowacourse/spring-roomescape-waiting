@@ -10,6 +10,10 @@ public class TestReservationTimeFactory {
         return new ReservationTime(id, LocalTime.parse(time));
     }
 
+    public static ReservationTime createReservationTime(String time) {
+        return new ReservationTime(LocalTime.parse(time));
+    }
+
     public static ReservationTime createReservationTime(Long id, LocalTime time) {
         return new ReservationTime(id, time);
     }

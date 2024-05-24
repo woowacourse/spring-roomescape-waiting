@@ -1,9 +1,12 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import static roomescape.model.Member.createMember;
-import static roomescape.model.Reservation.createAcceptReservation;
+import static roomescape.service.fixture.TestMemberFactory.createMember;
+import static roomescape.service.fixture.TestReservationFactory.createAcceptReservationAtNow;
+import static roomescape.service.fixture.TestReservationTimeFactory.createReservationTime;
+import static roomescape.service.fixture.TestThemeFactory.createTheme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +15,6 @@ import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,22 +40,14 @@ class ReservationRepositoryTest {
     @DisplayName("모든 예약을 조회한다.")
     @Test
     void should_get_all_reservations() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
+        System.out.println(entityManager);
 
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).hasSize(2);
@@ -62,24 +56,14 @@ class ReservationRepositoryTest {
     @DisplayName("특정 날짜와 테마에 해당하는 시간을 조회한다.")
     @Test
     void should_search_reservation_by_condition() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
-
-        List<Reservation> reservations = reservationRepository.findAllByDateAndTheme(day, theme);
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTheme(LocalDate.now(), theme);
 
         assertThat(reservations).hasSize(2);
     }
@@ -87,22 +71,12 @@ class ReservationRepositoryTest {
     @DisplayName("조회한 예약에 예약 시간이 존재한다.")
     @Test
     void should_get_reservation_times() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
-
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations.get(0).getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
@@ -111,18 +85,12 @@ class ReservationRepositoryTest {
     @DisplayName("예약을 추가한다")
     @Test
     void should_add_reservation() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
+        saveReservationTime(createReservationTime(1L, "12:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
 
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        reservationRepository.save(createAcceptReservation(day, time2, theme, member));
+        reservationRepository.save(createAcceptReservationAtNow(1L, time2, theme, member));
 
         assertThat(reservationRepository.count()).isEqualTo(1);
     }
@@ -130,22 +98,12 @@ class ReservationRepositoryTest {
     @DisplayName("예약을 삭제한다")
     @Test
     void should_delete_reservation() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
-
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
         reservationRepository.deleteById(1L);
 
@@ -155,22 +113,12 @@ class ReservationRepositoryTest {
     @DisplayName("아이디에 해당하는 예약 개수를 반환한다.")
     @Test
     void should_return_true_when_id_exist() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
-
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
         long count = reservationRepository.countById(1L);
         assertThat(count).isEqualTo(1);
@@ -179,22 +127,12 @@ class ReservationRepositoryTest {
     @DisplayName("예약시간에 해당하는 예약 개수를 반환한다.")
     @Test
     void should_return_reservation_count_when_give_time() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
-
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
         long count = reservationRepository.countByTime(time1);
         assertThat(count).isEqualTo(1);
@@ -203,46 +141,26 @@ class ReservationRepositoryTest {
     @DisplayName("날짜, 시간, 테마에 해당하는 예약 개수를 반환한다.")
     @Test
     void should_return_reservation_count_when_give_date_and_time_and_theme() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
-
-        long count = reservationRepository.countByDateAndTimeAndTheme(day, time1, theme);
+        long count = reservationRepository.countByDateAndTimeAndTheme(LocalDate.now(), time1, theme);
         assertThat(count).isEqualTo(1);
     }
 
     @DisplayName("사용자 아이디에 해당하는 예약을 반환한다.")
     @Test
     void should_return_member_reservations() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
-        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
-        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
-        Member member = createMember("무빈", "movin@email.com", "password");
-
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-        entityManager.persist(theme);
-        entityManager.persist(member);
-
-        Reservation reservation1 = createAcceptReservation(day, time1, theme, member);
-        Reservation reservation2 = createAcceptReservation(day, time2, theme, member);
-
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
+        ReservationTime time1 = saveReservationTime(createReservationTime(1L, "10:00"));
+        ReservationTime time2 = saveReservationTime(createReservationTime(2L, "12:00"));
+        Theme theme = saveTheme(createTheme(1L));
+        Member member = saveMember(createMember(1L));
+        saveReservation(createAcceptReservationAtNow(1L, time1, theme, member));
+        saveReservation(createAcceptReservationAtNow(2L, time2, theme, member));
 
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         assertThat(reservations).hasSize(2);
@@ -254,10 +172,30 @@ class ReservationRepositoryTest {
     void should_return_member_reservation_when_give_member() {
         List<MemberReservation> memberReservation = reservationRepository.findMemberReservation(2L);
 
-        SoftAssertions.assertSoftly(assertions -> {
+        assertSoftly(assertions -> {
             assertions.assertThat(memberReservation).hasSize(3);
             assertions.assertThat(memberReservation).extracting("order")
                     .containsExactlyInAnyOrder(0L, 2L, 4L);
         });
+    }
+
+    public Theme saveTheme(Theme theme) {
+        entityManager.merge(theme);
+        return theme;
+    }
+
+    public ReservationTime saveReservationTime(ReservationTime time) {
+        entityManager.merge(time);
+        return time;
+    }
+
+    public Reservation saveReservation(Reservation reservation) {
+        entityManager.merge(reservation);
+        return reservation;
+    }
+
+    public Member saveMember(Member member) {
+        entityManager.merge(member);
+        return member;
     }
 }
