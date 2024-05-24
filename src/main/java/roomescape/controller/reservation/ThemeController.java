@@ -27,8 +27,11 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> postTheme(@RequestBody @Valid ThemeRequest themeRequest) {
+    public ResponseEntity<ThemeResponse> postTheme(
+            @RequestBody @Valid ThemeRequest themeRequest
+    ) {
         ThemeResponse themeResponse = themeService.createTheme(themeRequest);
+
         URI location = UriComponentsBuilder.newInstance()
                 .path("/themes/{id}")
                 .buildAndExpand(themeResponse.id())

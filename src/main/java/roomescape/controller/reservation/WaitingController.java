@@ -31,6 +31,7 @@ public class WaitingController {
             @MemberId Long memberId
     ) {
         WaitingResponse waitingResponse = waitingService.createWaiting(waitingRequest, memberId);
+
         URI location = UriComponentsBuilder.newInstance()
                 .path("/waitings/{id}")
                 .buildAndExpand(waitingResponse.id())

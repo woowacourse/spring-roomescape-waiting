@@ -29,6 +29,7 @@ public class MemberController {
             @RequestBody @Valid MemberRequest memberRequest
     ) {
         MemberResponse member = memberService.createMember(memberRequest);
+
         URI location = UriComponentsBuilder.newInstance()
                 .path("/members/{id}")
                 .buildAndExpand(member.id())

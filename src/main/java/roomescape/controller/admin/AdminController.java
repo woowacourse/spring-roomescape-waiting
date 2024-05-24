@@ -35,6 +35,7 @@ public class AdminController {
             @RequestBody @Valid ReservationRequest reservationRequest
     ) {
         ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest);
+
         URI location = UriComponentsBuilder.newInstance()
                 .path("/reservations/{id}")
                 .buildAndExpand(reservationResponse.id())

@@ -39,6 +39,7 @@ public class ReservationController {
     ) {
         ReservationRequest reservationRequest = userReservationRequest.toReservationRequest(memberId);
         ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest);
+
         URI location = UriComponentsBuilder.newInstance()
                 .path("/reservations/{id}")
                 .buildAndExpand(reservationResponse.id())
@@ -61,8 +62,8 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservation(@MemberId Long id) {
-        return ResponseEntity.ok(reservationService.findAllByMemberId(id));
+    public ResponseEntity<List<MyReservationResponse>> getMyReservation(@MemberId Long memberId) {
+        return ResponseEntity.ok(reservationService.findAllByMemberId(memberId));
     }
 
     @DeleteMapping("/{id}")

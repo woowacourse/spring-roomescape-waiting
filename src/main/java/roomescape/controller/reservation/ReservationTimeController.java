@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.service.reservation.ReservationTimeService;
 import roomescape.service.reservation.dto.AvailableTimeRequest;
-import roomescape.service.reservation.dto.ReservationTimeRequest;
 import roomescape.service.reservation.dto.AvailableTimeResponse;
+import roomescape.service.reservation.dto.ReservationTimeRequest;
 import roomescape.service.reservation.dto.ReservationTimeResponse;
 
 @RestController
@@ -31,8 +31,10 @@ public class ReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> postReservationTime(
-            @RequestBody @Valid ReservationTimeRequest reservationTimeRequest) {
+            @RequestBody @Valid ReservationTimeRequest reservationTimeRequest
+    ) {
         ReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(reservationTimeRequest);
+
         URI location = UriComponentsBuilder.newInstance()
                 .path("/times/{id}")
                 .buildAndExpand(reservationTime.id())
@@ -50,7 +52,8 @@ public class ReservationTimeController {
 
     @GetMapping("/availability")
     public ResponseEntity<List<AvailableTimeResponse>> getAvailableTimes(
-            @ModelAttribute AvailableTimeRequest availableTimeRequest) {
+            @ModelAttribute AvailableTimeRequest availableTimeRequest
+    ) {
         List<AvailableTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(availableTimeRequest);
         return ResponseEntity.ok(availableTimes);
     }
