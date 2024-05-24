@@ -50,12 +50,13 @@ public class WaitingService {
         ReservationTime reservationTime = findReservationTime(createWaitingRequest.timeId());
         Theme theme = findTheme(createWaitingRequest.themeId());
         Slot slot = new Slot(date, reservationTime, theme);
+        Waiting waiting = Waiting.create(member, slot);
 
         checkBothWaitingAndReservationNotExist(slot);
         checkMemberAlreadyHasReservation(member, slot);
         checkMemberAlreadyHasWaiting(member, slot);
 
-        return CreateWaitingResponse.from(waitingRepository.save(new Waiting(member, slot)));
+        return CreateWaitingResponse.from(waitingRepository.save(waiting));
     }
 
     private void checkBothWaitingAndReservationNotExist(Slot slot) {

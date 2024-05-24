@@ -56,11 +56,12 @@ public class ReservationService {
         ReservationTime reservationTime = findReservationTime(createReservationRequest.timeId());
         Theme theme = findTheme(createReservationRequest.themeId());
         Slot slot = new Slot(createReservationRequest.date(), reservationTime, theme);
+        Reservation reservation = Reservation.create(member, slot);
 
         checkAlreadyExistReservation(slot);
         checkWaitingExists(slot);
 
-        return CreateReservationResponse.from(reservationRepository.save(new Reservation(member, slot)));
+        return CreateReservationResponse.from(reservationRepository.save(reservation));
     }
 
     private void checkAlreadyExistReservation(final Slot slot) {
