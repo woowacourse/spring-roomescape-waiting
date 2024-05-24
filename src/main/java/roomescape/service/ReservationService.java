@@ -52,9 +52,9 @@ public class ReservationService {
 
     @Transactional
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
-        return reservationRepository.findByMemberId(authInfo.id())
+        return reservationRepository.findMyReservations(authInfo.id())
                 .stream()
-                .map(reservation -> MyReservationResponse.from(reservation, "예약"))
+                .map(MyReservationResponse::from)
                 .toList();
     }
 

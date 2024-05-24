@@ -93,7 +93,7 @@ class ReservationServiceTest {
                 () -> assertThat(myReservationResponse.theme()).isEqualTo(ROOM_THEME1.getName()),
                 () -> assertThat(myReservationResponse.date()).isEqualTo(VALID_STRING_DATE),
                 () -> assertThat(myReservationResponse.time()).isEqualTo(VALID_STRING_TIME),
-                () -> assertThat(myReservationResponse.status()).isEqualTo("예약")
+                () -> assertThat(myReservationResponse.status()).isEqualTo(Status.CREATED)
         );
     }
 

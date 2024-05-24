@@ -109,6 +109,14 @@ public class Reservation {
         return theme;
     }
 
+    public boolean isWaiting() {
+        return status.equals(Status.WAITING);
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

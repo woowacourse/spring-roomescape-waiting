@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.reservation.dto.request.ReservationCreateMemberRequest;
+import roomescape.controller.reservation.dto.response.MyReservationWebResponse;
 import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateRequest;
-import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 @RestController
@@ -26,8 +26,13 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MyReservationResponse>> findMyReservations(AuthInfo authInfo) {
-        return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
+    public ResponseEntity<List<MyReservationWebResponse>> findMyReservations(AuthInfo authInfo) {
+        List<MyReservationWebResponse> responses = reservationService.findMyReservations(authInfo)
+                .stream()
+                .map(MyReservationWebResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/reservations")

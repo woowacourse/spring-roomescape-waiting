@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWithRank;
+import roomescape.domain.Status;
 
 public record MyReservationResponse(
         @NotNull
@@ -19,14 +20,17 @@ public record MyReservationResponse(
         @JsonFormat(pattern = "HH:mm")
         LocalTime time,
         @NotBlank
-        String status)
+        Status status,
+        @NotNull
+        Long rank)
 {
-    public static MyReservationResponse from(Reservation reservation, String status) {
+    public static MyReservationResponse from(ReservationWithRank reservationWithRank) {
         return new MyReservationResponse(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                status);
+                reservationWithRank.getReservation().getId(),
+                reservationWithRank.getReservation().getTheme().getName(),
+                reservationWithRank.getReservation().getDate(),
+                reservationWithRank.getReservation().getTime().getStartAt(),
+                reservationWithRank.getReservation().getStatus(),
+                reservationWithRank.getRank());
     }
 }
