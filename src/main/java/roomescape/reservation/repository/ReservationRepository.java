@@ -33,20 +33,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     List<Reservation> findByStatus(Status status);
 
     @Query("""
-            SELECT COUNT(r) FROM Reservation r
-            WHERE r.date = :date
-                AND r.time.id = :timeId
-                AND r.theme.id = :themeId
-                AND r.status = :status
-                AND r.id < :id
-            """)
-    int countAlreadyRegisteredWaitings(
-            @Param("id") long id, @Param("date") LocalDate date,
-            @Param("timeId") long timeId, @Param("themeId") long themeId,
-            @Param("status") Status status
-    );
-
-    @Query("""
             SELECT r FROM Reservation r
             WHERE r.date = :date
                 AND r.time.id = :timeId

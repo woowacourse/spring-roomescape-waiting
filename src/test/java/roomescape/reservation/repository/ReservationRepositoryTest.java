@@ -23,24 +23,6 @@ class ReservationRepositoryTest {
     EntityManager entityManager;
 
     @Test
-    void countAlreadyRegisteredWaitingsIsZero() {
-        int count = reservationRepository.countAlreadyRegisteredWaitings(
-                4, LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
-        );
-
-        assertThat(count).isEqualTo(0);
-    }
-
-    @Test
-    void countAlreadyRegisteredWaitingsIsOne() {
-        int count = reservationRepository.countAlreadyRegisteredWaitings(
-                5, LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
-        );
-
-        assertThat(count).isEqualTo(1);
-    }
-
-    @Test
     void earliestRegisteredWaiting() {
         Optional<Reservation> waiting = reservationRepository.findEarliestRegisteredWaiting(
                 LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING

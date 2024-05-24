@@ -167,7 +167,7 @@ class ReservationServiceTest {
         // then
         Optional<Reservation> reservation = reservationRepository.findById(reservationResponse.id());
         assertTrue(reservation.isPresent());
-        Assertions.assertThat(reservation.get().getStatus()).isEqualTo(Status.PENDING);
+        assertThat(reservation.get().getStatus()).isEqualTo(Status.PENDING);
     }
 
     @DisplayName("이미 예약 대기 등록을 한 사용자이기 때문에 예약 대기 등록에 실패한다.")
@@ -204,5 +204,28 @@ class ReservationServiceTest {
         Optional<Reservation> reservation = reservationRepository.findById(4L);
         assertTrue(reservation.isPresent());
         assertThat(reservation.get().getStatus()).isEqualTo(Status.RESERVED);
+    }
+
+    @DisplayName("내 예약 조회 시 예약 대기의 경우 에약 대기자 수를 함께 반환한다.")
+    @Test
+    void countRankOfWaiting() {
+        // given
+        Member member1 = memberRepository.findById(3L).get();
+        Member member2 = memberRepository.findById(1L).get();
+        ReservationSaveRequest saveRequest = new ReservationSaveRequest(2L, LocalDate.parse("2024-12-25"), 3L);
+
+        reservationService.registerWaiting(saveRequest, member1);
+        reservationService.registerWaiting(saveRequest, member2);
+
+        // when
+        List<MemberReservationResponse> memberReservationResponsesForMember1 = reservationService.findAllByMemberId(3L);
+        List<MemberReservationResponse> memberReservationResponsesForMember2 = reservationService.findAllByMemberId(1L);
+
+        // then
+        assertThat(memberReservationResponsesForMember1).hasSize(2);
+        assertThat(memberReservationResponsesForMember1.get(1).status()).contains("1");
+
+        assertThat(memberReservationResponsesForMember2).hasSize(3);
+        assertThat(memberReservationResponsesForMember2.get(2).status()).contains("2");
     }
 }

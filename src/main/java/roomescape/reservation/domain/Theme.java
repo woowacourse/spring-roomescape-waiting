@@ -51,7 +51,7 @@ public class Theme {
         this(null, new ThemeName(themeName), description, thumbnail);
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

@@ -123,24 +123,30 @@ public class ReservationService {
 
     public List<MemberReservationResponse> findAllByMemberId(final long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
+        List<Reservation> allReservations = getAllReservations();
         return reservations.stream()
-                .map(this::createReservationResponse)
+                .map(reservation -> createReservationResponse(reservation, allReservations))
                 .toList();
     }
 
-    private MemberReservationResponse createReservationResponse(final Reservation reservation) {
+    private MemberReservationResponse createReservationResponse(
+            final Reservation reservation,
+            final List<Reservation> allReservations
+    ) {
         if (reservation.getStatus() == Status.PENDING) {
-            return MemberReservationResponse.of(reservation, countRank(reservation));
+            return MemberReservationResponse.of(reservation, countRank(reservation, allReservations));
         }
         return MemberReservationResponse.from(reservation);
     }
 
-    private int countRank(final Reservation reservation) {
-        return reservationRepository.countAlreadyRegisteredWaitings(
-                reservation.getId(),
-                reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId(), reservation.getStatus()
-        ) + INCREMENT_FOR_COUNTING_RANK;
+    private int countRank(final Reservation reservation, final List<Reservation> allReservations) {
+        return (int) allReservations.stream()
+                .filter(other -> other.getId() < reservation.getId()
+                        && other.getDate().equals(reservation.getDate())
+                        && other.getTime().getId() == reservation.getTime().getId()
+                        && other.getTheme().getId() == reservation.getTheme().getId()
+                        && other.getStatus() == reservation.getStatus())
+                .count() + INCREMENT_FOR_COUNTING_RANK;
     }
 
     public ReservationDeleteResponse delete(final long id) {
