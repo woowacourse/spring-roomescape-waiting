@@ -80,10 +80,6 @@ public class Reservation {
         return date.isEqual(LocalDate.now(kst));
     }
 
-    public boolean isEqualCreateAt(final Reservation reservation) {
-        return this.getCreateAt().equals(reservation.getCreateAt());
-    }
-
     public void approve() {
         this.status = Status.BOOKED;
     }
