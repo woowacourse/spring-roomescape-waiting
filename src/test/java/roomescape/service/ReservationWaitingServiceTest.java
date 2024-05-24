@@ -58,8 +58,8 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     @BeforeEach
     void setUp() {
         Member member = memberRepository.save(MemberFixture.user());
-        theme = themeRepository.save(ThemeFixture.create());
-        time = reservationTimeRepository.save(ReservationTimeFixture.create());
+        theme = themeRepository.save(ThemeFixture.theme());
+        time = reservationTimeRepository.save(ReservationTimeFixture.ten());
         notSavedReservation = ReservationFixture.create("2024-05-24", member, time, theme);
         prin = memberRepository.save(MemberFixture.prin());
     }

@@ -4,7 +4,7 @@ import roomescape.domain.theme.Theme;
 
 public class ThemeFixture {
 
-    public static Theme create() {
+    public static Theme theme() {
         return create("테마명");
     }
 

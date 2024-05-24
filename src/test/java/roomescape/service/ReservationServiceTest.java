@@ -50,8 +50,8 @@ class ReservationServiceTest extends BaseServiceTest {
     @BeforeEach
     void setUp() {
         member = memberRepository.save(MemberFixture.user());
-        theme = themeRepository.save(ThemeFixture.create());
-        time = reservationTimeRepository.save(ReservationTimeFixture.create());
+        theme = themeRepository.save(ThemeFixture.theme());
+        time = reservationTimeRepository.save(ReservationTimeFixture.ten());
     }
 
     @Test

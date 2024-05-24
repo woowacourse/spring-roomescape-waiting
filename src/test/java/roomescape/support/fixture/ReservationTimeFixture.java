@@ -5,7 +5,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 
 public class ReservationTimeFixture {
 
-    public static ReservationTime create() {
+    public static ReservationTime ten() {
         return create("10:00");
     }
 

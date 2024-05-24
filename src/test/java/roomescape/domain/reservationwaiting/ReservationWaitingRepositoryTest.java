@@ -31,8 +31,8 @@ class ReservationWaitingRepositoryTest extends BaseRepositoryTest {
     @BeforeEach
     void setUp() {
         Member member = save(MemberFixture.user());
-        ReservationTime reservationTime = save(ReservationTimeFixture.create());
-        Theme theme = save(ThemeFixture.create());
+        ReservationTime reservationTime = save(ReservationTimeFixture.ten());
+        Theme theme = save(ThemeFixture.theme());
         reservation = save(ReservationFixture.create(member, reservationTime, theme));
     }
 

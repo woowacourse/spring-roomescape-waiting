@@ -71,7 +71,7 @@ class ThemeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("id로 테마를 삭제한다.")
     void deleteThemeById() {
-        Theme theme = themeRepository.save(ThemeFixture.create());
+        Theme theme = themeRepository.save(ThemeFixture.theme());
         long id = theme.getId();
 
         themeService.deleteThemeById(id);
@@ -83,7 +83,7 @@ class ThemeServiceTest extends BaseServiceTest {
     @DisplayName("인기있는 테마를 내림차순으로 3개 조회한다.")
     void getPopularThemes() {
         Member member = memberRepository.save(MemberFixture.user());
-        ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.create());
+        ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.ten());
         Theme theme1 = themeRepository.save(ThemeFixture.create("우주 탐험"));
         Theme theme2 = themeRepository.save(ThemeFixture.create("시간여행"));
         Theme theme3 = themeRepository.save(ThemeFixture.create("마법의 숲"));

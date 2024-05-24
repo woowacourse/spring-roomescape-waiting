@@ -68,7 +68,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("id로 예약 시간을 삭제한다.")
     void deleteReservationTimeById() {
-        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.create());
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.ten());
         long id = reservationTime.getId();
 
         reservationTimeService.deleteReservationTimeById(id);
@@ -80,7 +80,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     @DisplayName("날짜와 테마 id로 예약 가능한 시간들을 조회한다.")
     void getAvailableReservationTimes() {
         Member member = memberRepository.save(MemberFixture.user());
-        Theme theme = themeRepository.save(ThemeFixture.create());
+        Theme theme = themeRepository.save(ThemeFixture.theme());
         ReservationTime nine = reservationTimeRepository.save(ReservationTimeFixture.create("09:00"));
         ReservationTime ten = reservationTimeRepository.save(ReservationTimeFixture.create("10:00"));
         ReservationTime eleven = reservationTimeRepository.save(ReservationTimeFixture.create("11:00"));
