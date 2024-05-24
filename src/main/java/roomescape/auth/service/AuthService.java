@@ -6,7 +6,6 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.dto.response.GetAuthInfoResponse;
 import roomescape.auth.dto.response.LoginResponse;
-import roomescape.common.exception.UnAuthorizationException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;

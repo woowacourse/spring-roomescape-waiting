@@ -1,9 +1,7 @@
 package roomescape.member.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.response.FindMembersResponse;
 

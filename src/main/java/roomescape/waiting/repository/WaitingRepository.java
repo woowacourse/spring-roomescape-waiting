@@ -38,8 +38,5 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByMemberIdAndReservationId(Long memberId, Long reservationId);
 
-    // TODO: 대처하기
-    boolean existsByMemberAndReservation(Member member, Reservation reservation);
-
     boolean existsByReservation(Reservation reservation);
 }
