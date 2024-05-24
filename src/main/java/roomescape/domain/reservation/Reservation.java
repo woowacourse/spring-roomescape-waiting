@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.slot.ReservationSlot;
 import roomescape.exception.RoomEscapeBusinessException;
 
 @Entity
-@Where(clause = "is_deleted = false")
+@SQLRestriction("is_deleted = false")
 @SQLDelete(sql = "UPDATE reservation SET is_deleted = true where id = ?")
 public class Reservation {
 
