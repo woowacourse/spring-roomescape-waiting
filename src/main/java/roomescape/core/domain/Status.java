@@ -11,11 +11,7 @@ public enum Status {
     Status(String value) {
         this.value = value;
     }
-
-    public String waitingRankStatus(final Integer rank) {
-        return rank + "번째 " + this.getValue();
-    }
-
+    
     public static Status findStatus(final String value) {
         return Arrays.stream(values()).filter(v -> v.getValue().equals(value)).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
