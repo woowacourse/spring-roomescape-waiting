@@ -19,32 +19,30 @@ function render(data) {
   data.forEach(item => {
     const row = tableBody.insertRow();
 
-    /*
-    TODO: [2단계] 내 예약 목록 조회 기능
-          response 명세에 맞춰 값 설정
-     */
     const theme = item.theme;
     const date = item.date;
     const time = item.time;
     const status = item.status;
+    const id = item.id;
 
-    row.insertCell(0).textContent = theme;
-    row.insertCell(1).textContent = date;
-    row.insertCell(2).textContent = time;
-    row.insertCell(3).textContent = status;
+    row.insertCell(0).textContent = id;
+    row.insertCell(1).textContent = theme;
+    row.insertCell(2).textContent = date;
+    row.insertCell(3).textContent = time;
+    row.insertCell(4).textContent = status;
 
-    const cancelCell = row.insertCell(4);
+    const cancelCell = row.insertCell(5);
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-danger';
     if (status !== '예약') {
       cancelButton.textContent = '대기 취소';
       cancelButton.onclick = function () {
-        requestDeleteWaiting(item.id).then(() => window.location.reload());
+        requestDeleteWaiting(id).then(() => window.location.reload());
       };
     } else {
       cancelButton.textContent = '삭제';
       cancelButton.onclick = function () {
-        requestDeleteReservation(item.id).then(() => window.location.reload());
+        requestDeleteReservation(id).then(() => window.location.reload());
       };
     }
     cancelCell.appendChild(cancelButton);
