@@ -75,7 +75,16 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(date, 3L, 1L, 2L);
         //when, then
         assertThatThrownBy(() -> service.create(request)).isInstanceOf(ReservationFailException.class);
+    }
 
+    @Test
+    @DisplayName("해당 날짜, 시간에 예약한 내용이 있으면 예약대기할 수 없다.")
+    void given_sameDateAndTimeReservationExist_when_create_then_throwException() {
+        //given
+        LocalDate date = LocalDate.now().plusDays(1);
+        WaitingRequest request = new WaitingRequest(date, 1L, 1L, 1L);
+        //when, then
+        assertThatThrownBy(() -> service.create(request)).isInstanceOf(ReservationFailException.class);
     }
 
     @Test
