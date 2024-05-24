@@ -29,6 +29,15 @@ public class ReservationEntry {
                                             final List<WaitingWithRank> waitingWithRanks) {
         List<ReservationEntry> reservationEntries = new ArrayList<>();
 
+        reservationEntries.addAll(fromReservations(reservations));
+        reservationEntries.addAll(fromWaitings(waitingWithRanks));
+
+        return reservationEntries;
+    }
+
+    private static List<ReservationEntry> fromReservations(final List<Reservation> reservations) {
+        List<ReservationEntry> reservationEntries = new ArrayList<>();
+
         for (Reservation reservation : reservations) {
             ReservationEntry reservationEntry = new ReservationEntry(
                     reservation.getId(),
@@ -37,9 +46,16 @@ public class ReservationEntry {
                     reservation.getTime(),
                     reservation.getTheme(),
                     ReservationStatus.RESERVATION,
-                    0L);
+                    0L
+            );
             reservationEntries.add(reservationEntry);
         }
+
+        return reservationEntries;
+    }
+
+    private static List<ReservationEntry> fromWaitings(final List<WaitingWithRank> waitingWithRanks) {
+        List<ReservationEntry> reservationEntries = new ArrayList<>();
 
         for (WaitingWithRank waitingWithRank : waitingWithRanks) {
             ReservationEntry reservationEntry = new ReservationEntry(
