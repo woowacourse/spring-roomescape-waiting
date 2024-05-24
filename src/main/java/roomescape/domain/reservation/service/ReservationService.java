@@ -152,6 +152,11 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 id를 가진 예약이 존재하지 않습니다."));
 
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId(), Status.RESERVATION)) {
+            throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약 승인을 할 수 없습니다.");
+        }
+
         Reservation changedReservation = updateStatus(reservation, status);
         reservationRepository.save(changedReservation);
 
