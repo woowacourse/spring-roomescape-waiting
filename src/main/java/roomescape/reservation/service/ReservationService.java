@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +67,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getAll() {
-        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
+        return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
