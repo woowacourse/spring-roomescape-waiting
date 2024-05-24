@@ -24,17 +24,8 @@ public class CancelReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = findReservationById(id);
-        List<WaitingWithSequence> waitings = waitingRepository.findWaitingsWithSequenceByReservation(reservation);
-
-        Optional<WaitingWithSequence> priorityWaiting = waitings.stream()
-                .filter(WaitingWithSequence::isPriority)
-                .findFirst();
-
-        priorityWaiting.ifPresentOrElse(it -> {
-            Waiting waiting = it.getWaiting();
-            waiting.approve();
-            waitingRepository.delete(waiting);
-        }, () -> reservationRepository.deleteById(reservation.getId()));
+        Optional<WaitingWithSequence> priorityWaiting = findPriorityWaiting(reservation);
+        priorityWaiting.ifPresentOrElse(this::approve, () -> delete(reservation));
     }
 
     private Reservation findReservationById(Long id) {
@@ -43,5 +34,23 @@ public class CancelReservationService {
                         "[ERROR] 잘못된 예약 정보 입니다.",
                         new Throwable("reservation_id : " + id)
                 ));
+    }
+
+    private Optional<WaitingWithSequence> findPriorityWaiting(Reservation reservation) {
+        List<WaitingWithSequence> waitings = waitingRepository.findWaitingsWithSequenceByReservation(reservation);
+
+        return waitings.stream()
+                .filter(WaitingWithSequence::isPriority)
+                .findFirst();
+    }
+
+    private void approve(WaitingWithSequence waitingWithSequence) {
+        Waiting waiting = waitingWithSequence.getWaiting();
+        waiting.approve();
+        waitingRepository.delete(waiting);
+    }
+
+    private void delete(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
     }
 }
