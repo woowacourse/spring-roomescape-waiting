@@ -19,6 +19,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.MyReservationWaitingResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -69,6 +70,32 @@ class ReservationServiceTest {
                         new ThemeResponse(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
 
         List<ReservationResponse> actual = reservationService.findReservations();
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("나의 예약을 조회할 수 있다.")
+    @Test
+    void findMyReservationsTest() {
+        Member member = new Member(1L, "브라운", "brown@abc.com");
+        Reservation reservation1 = new Reservation(
+                1L,
+                new Member(1L, "브라운", "brown@abc.com"),
+                LocalDate.of(2100, 1, 1),
+                new ReservationTime(1L, LocalTime.of(19, 0)),
+                new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg"));
+        Reservation reservation2 = new Reservation(
+                2L, new Member(1L, "브라운", "bri@abc.com"),
+                LocalDate.of(2100, 3, 1),
+                new ReservationTime(1L, LocalTime.of(19, 0)),
+                new Theme(1L, "레벨1 탈출", "레벨1 탈출하기", "https://img.jpg"));
+        given(reservationRepository.findByMember_id(member.getId()))
+                .willReturn(List.of(reservation1, reservation2));
+
+        List<MyReservationWaitingResponse> actual = reservationService.findMyReservations(member.getId());
+        List<MyReservationWaitingResponse> expected = List.of(
+                MyReservationWaitingResponse.from(reservation1),
+                MyReservationWaitingResponse.from(reservation2));
 
         assertThat(actual).isEqualTo(expected);
     }

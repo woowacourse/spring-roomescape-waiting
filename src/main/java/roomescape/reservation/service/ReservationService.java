@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.MyReservationWaitingResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -23,7 +23,7 @@ public class ReservationService {
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
-
+    // TODO: CRD별로 분리해서 다른 서비스에서 재사용 하도록 구현해보기
     public ReservationService(ReservationRepository reservationRepository,
                               MemberRepository memberRepository,
                               TimeRepository timeRepository,
@@ -48,10 +48,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findReservations(Long memberId) {
+    public List<MyReservationWaitingResponse> findMyReservations(Long memberId) {
         return reservationRepository.findByMember_id(memberId)
                 .stream()
-                .map(MyReservationResponse::from)
+                .map(MyReservationWaitingResponse::from)
                 .toList();
     }
 
