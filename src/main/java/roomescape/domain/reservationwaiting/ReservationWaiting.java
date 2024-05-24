@@ -37,6 +37,10 @@ public class ReservationWaiting {
         this.member = member;
     }
 
+    public boolean isNotPublishedBy(Member otherMember) {
+        return !member.equals(otherMember);
+    }
+
     public Long getId() {
         return id;
     }
