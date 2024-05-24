@@ -38,7 +38,7 @@ public class ReservationApiControllerTest {
     @DisplayName("유저 예약 목록 조회를 정상적으로 수행한다.")
     void selectUserReservationListRequest_Success() {
         RestAssured.given().log().all()
-                .cookie("token", TokenGenerator.makeUserToken())
+                .cookie("token", TokenGenerator.makeMemberToken())
                 .when().get("/api/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
@@ -56,7 +56,7 @@ public class ReservationApiControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", TokenGenerator.makeUserToken())
+                .cookie("token", TokenGenerator.makeMemberToken())
                 .body(reservation)
                 .when().post("/api/reservations")
                 .then().log().all()

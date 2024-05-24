@@ -23,7 +23,7 @@ public class ReservationDeleteService {
     public void deleteReservation(long id, Member member) {
         Reservation deleteReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 아이디 입니다."));
-        if (member.getRole() == Role.USER) {
+        if (member.getRole() == Role.MEMBER) {
             validateIsOwnReservation(member, deleteReservation);
         }
         reservationRepository.deleteById(id);

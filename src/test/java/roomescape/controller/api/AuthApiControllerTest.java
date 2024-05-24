@@ -39,7 +39,7 @@ class AuthApiControllerTest {
     @DisplayName("로그인한 사용자의 인증 정보 조회 시, 성공한다.")
     void authenticatedMemberLoginCheck_Success() {
         MemberIdAndNameResponse response = RestAssured.given().log().all()
-                .cookie("token", TokenGenerator.makeUserToken())
+                .cookie("token", TokenGenerator.makeMemberToken())
                 .when().get("/api/login/check")
                 .then().log().all()
                 .statusCode(200).extract().as(MemberIdAndNameResponse.class);

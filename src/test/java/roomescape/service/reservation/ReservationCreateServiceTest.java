@@ -25,7 +25,7 @@ class ReservationCreateServiceTest {
     void checkDuplicateReservationTime_Success() {
         ReservationSaveRequest request = new ReservationSaveRequest(
                 LocalDate.now().plusDays(1L), 2L, 2L);
-        Member member = new Member(1L, "capy", "test@naver.com", "1234", Role.USER);
+        Member member = new Member(1L, "capy", "test@naver.com", "1234", Role.MEMBER);
 
         assertThatCode(() -> reservationCreateService.createReservation(
                         request,
@@ -41,7 +41,7 @@ class ReservationCreateServiceTest {
     void checkDuplicateReservationTime_Failure() {
         ReservationSaveRequest request = new ReservationSaveRequest(
                 LocalDate.now().plusDays(1L), 1L, 1L);
-        Member member = new Member("capy", "abc@gmail.com", "1234", Role.USER);
+        Member member = new Member("capy", "abc@gmail.com", "1234", Role.MEMBER);
 
         assertThatThrownBy(() -> reservationCreateService.createReservation(
                         request,
@@ -58,7 +58,7 @@ class ReservationCreateServiceTest {
     void checkReservationDateTimeIsFuture_Failure() {
         ReservationSaveRequest request = new ReservationSaveRequest(
                 LocalDate.now().minusDays(1L), 2L, 2L);
-        Member member = new Member("capy", "abc@gmail.com", "1234", Role.USER);
+        Member member = new Member("capy", "abc@gmail.com", "1234", Role.MEMBER);
 
         assertThatThrownBy(() -> reservationCreateService.createReservation(
                         request,

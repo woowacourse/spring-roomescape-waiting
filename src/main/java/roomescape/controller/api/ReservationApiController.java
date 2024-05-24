@@ -13,8 +13,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationWaitingWithRank;
 import roomescape.service.dto.request.ReservationSaveRequest;
+import roomescape.service.dto.response.MemberReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.reservation.ReservationCreateService;
 import roomescape.service.reservation.ReservationFindService;
 
@@ -45,20 +45,20 @@ public class ReservationApiController {
     }
 
     @GetMapping("/api/reservations-mine")
-    public ResponseEntity<List<UserReservationResponse>> getUserReservations(@AuthenticatedMember Member member) {
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@AuthenticatedMember Member member) {
         List<ReservationWaitingWithRank> reservationWaitingWithRanks =
                 reservationFindService.findMemberReservations(member.getId());
         return ResponseEntity.ok(
                 reservationWaitingWithRanks.stream()
-                        .map(UserReservationResponse::new)
+                        .map(MemberReservationResponse::new)
                         .toList()
         );
     }
 
     @PostMapping("/api/reservations")
-    public ResponseEntity<ReservationResponse> addReservationByUser(@RequestBody @Valid
-                                                                    ReservationSaveRequest request,
-                                                                    @AuthenticatedMember Member member) {
+    public ResponseEntity<ReservationResponse> addReservationByMember(@RequestBody @Valid
+                                                                      ReservationSaveRequest request,
+                                                                      @AuthenticatedMember Member member) {
         Reservation newReservation = reservationCreateService.createReservation(
                 request,
                 member,

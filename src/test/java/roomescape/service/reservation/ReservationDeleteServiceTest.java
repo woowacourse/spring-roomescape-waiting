@@ -1,6 +1,5 @@
 package roomescape.service.reservation;
 
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ class ReservationDeleteServiceTest {
         Reservation beforeUpdatedReservation = reservationRepository.findById(2L).get();
         assertThat(beforeUpdatedReservation.isReserved()).isFalse();
 
-        Member member = new Member(1L, "testUser", "user@naver.com", "1234", Role.USER);
+        Member member = new Member(1L, "testUser", "user@naver.com", "1234", Role.MEMBER);
         reservationDeleteService.deleteReservation(1L, member);
         Reservation updatedReservation = reservationRepository.findById(2L).get();
         assertThat(updatedReservation.isReserved()).isTrue();
@@ -41,7 +40,7 @@ class ReservationDeleteServiceTest {
     @DisplayName("본인의 예약이 아닌 경우 삭제할 수 없다.")
     void deleteOtherReservation_Failure() {
         Reservation reservation = reservationRepository.findById(1L).get();
-        Member member = new Member(3L, "testUser2", "user2@naver.com", "1234", Role.USER);
+        Member member = new Member(3L, "testUser2", "user2@naver.com", "1234", Role.MEMBER);
 
         assertThatThrownBy(() -> reservationDeleteService.deleteReservation(1L, member))
                 .isInstanceOf(AuthenticationException.class)

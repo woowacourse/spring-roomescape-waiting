@@ -7,13 +7,13 @@ import roomescape.domain.ReservationWaitingWithRank;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record UserReservationResponse(Long reservationId,
-                                      String theme,
-                                      @JsonFormat(pattern = "YYYY-MM-dd") LocalDate date,
-                                      @JsonFormat(pattern = "HH:mm") LocalTime time,
-                                      String status) {
+public record MemberReservationResponse(Long reservationId,
+                                        String theme,
+                                        @JsonFormat(pattern = "YYYY-MM-dd") LocalDate date,
+                                        @JsonFormat(pattern = "HH:mm") LocalTime time,
+                                        String status) {
 
-    public UserReservationResponse(ReservationWaitingWithRank reservationWaitingWithRank) {
+    public MemberReservationResponse(ReservationWaitingWithRank reservationWaitingWithRank) {
         this(
                 reservationWaitingWithRank.getReservation().getId(),
                 reservationWaitingWithRank.getReservation().getTheme().getName(),

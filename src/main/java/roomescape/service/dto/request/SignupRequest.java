@@ -16,7 +16,7 @@ public record SignupRequest(@Email(message = "잘못된 이메일 형식입니�
                 request.name(),
                 request.email(),
                 request.password(),
-                Role.USER
+                Role.MEMBER
         );
     }
 }
