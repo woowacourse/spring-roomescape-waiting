@@ -1,5 +1,6 @@
 package roomescape.member;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 
@@ -18,6 +19,8 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.response.FindReservationResponse;
+import roomescape.reservation.model.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -77,18 +80,26 @@ class MemberIntegrationTest {
         Member member2 = memberRepository.save(new Member("로키", Role.USER, "qwer@naver.com", "hihi"));
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
         List<Theme> themes = ThemeFixture.get(3).stream().map(themeRepository::save).toList();
-        reservationRepository.save(ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(0)));
-        reservationRepository.save(ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(1)));
-        reservationRepository.save(ReservationFixture.getOneWithMemberTimeTheme(member2, reservationTime, themes.get(2)));
+        Reservation reservation1 = reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(0)));
+        Reservation reservation2 = reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(1)));
+        Reservation reservation3 = reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member2, reservationTime, themes.get(2)));
 
-        RestAssured.given().log().all()
+        List<FindReservationResponse> findReservationResponses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .when().get("/members/reservations")
                 .then().log().all()
 
                 .statusCode(200)
-                .body("reservationId", hasItems(1, 2))
-                .body("size()", equalTo(2));
+                .extract().jsonPath()
+                .getList(".", FindReservationResponse.class);
+
+        assertThat(findReservationResponses.containsAll(List.of(
+                FindReservationResponse.from(reservation1),
+                FindReservationResponse.from(reservation2))
+        ));
     }
 }

@@ -1,9 +1,7 @@
 package roomescape.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -23,7 +21,7 @@ import roomescape.auth.dto.request.LoginRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.dto.response.FindReservationResponse;
+import roomescape.reservation.dto.response.FindAdminReservationResponse;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.model.ReservationTime;
@@ -341,7 +339,7 @@ class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 예약 목록 조회.")
+    @DisplayName("관리자 방탈출 예약 목록 조회.")
     void getReservations() {
         // given
         saveTimeThemeMemberForReservation();
@@ -353,7 +351,7 @@ class AdminIntegrationTest {
                         reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         // when
-        List<FindReservationResponse> findReservationResponses = RestAssured.given().log().all()
+        List<FindAdminReservationResponse> findReservationResponses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .when().get("/admin/reservations")
@@ -361,12 +359,12 @@ class AdminIntegrationTest {
 
                 .statusCode(200)
                 .extract().jsonPath()
-                .getList(".", FindReservationResponse.class);
+                .getList(".", FindAdminReservationResponse.class);
 
         // then
         assertThat(findReservationResponses).containsExactly(
-                FindReservationResponse.from(reservation1),
-                FindReservationResponse.from(reservation2)
+                FindAdminReservationResponse.from(reservation1),
+                FindAdminReservationResponse.from(reservation2)
         );
     }
 
