@@ -15,35 +15,35 @@ VALUES ('09:00'),
        ('21:00');
 
 INSERT INTO member (email, password, name, role)
-VALUES ('admin@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u1JkIT.gm', '어드민',
-        'ADMIN'), -- password: abc123
-       ('user@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u1JkIT.gm', '유저',
-        'USER'),  -- password: abc123
+VALUES ('admin@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u1JkIT.gm', '어드민', 'ADMIN'),
+       -- password: abc123
+       ('user@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u1JkIT.gm', '유저', 'USER'),
+       -- password: abc123
        ('example1@gmail.com', '1234', '구름a', 'USER'),
        ('example2@gmail.com', '1234', '구름b', 'USER'),
        ('example3@gmail.com', '1234', '구름c', 'USER'),
        ('example4@gmail.com', '1234', '구름d', 'USER');
 
-INSERT INTO reservation (date, member_id, time_id, theme_id, status)
-VALUES ('2024-04-28', 1, 1, 5, 'RESERVED'),
-       ('2024-04-28', 2, 2, 5, 'RESERVED'),
-       ('2024-04-28', 3, 3, 5, 'RESERVED'),
-       ('2024-04-29', 4, 1, 5, 'WAITING'),
-       ('2024-04-29', 1, 2, 5, 'RESERVED'),
-       ('2024-04-29', 2, 1, 4, 'RESERVED'),
-       ('2024-04-29', 3, 2, 4, 'RESERVED'),
-       ('2024-04-29', 4, 3, 4, 'WAITING'),
-       ('2024-04-29', 1, 4, 4, 'RESERVED'),
-       ('2024-05-01', 2, 1, 3, 'RESERVED'),
-       ('2024-05-01', 3, 2, 3, 'RESERVED'),
-       ('2024-05-01', 4, 3, 3, 'WAITING'),
-       ('2024-05-02', 1, 1, 2, 'RESERVED'),
-       ('2024-05-02', 2, 2, 2, 'RESERVED'),
-       ('2024-05-02', 3, 1, 1, 'RESERVED'),
-       ('2024-05-03', 4, 2, 1, 'WAITING'),
-       ('2024-05-03', 1, 3, 1, 'RESERVED'),
-       ('2024-05-03', 2, 4, 1, 'RESERVED'),
-       ('2024-05-04', 3, 1, 5, 'RESERVED'),
-       ('2024-05-04', 4, 2, 4, 'RESERVED'),
-       ('2024-05-04', 1, 3, 3, 'RESERVED'),
-       ('2024-05-04', 2, 4, 2, 'WAITING');
+INSERT INTO reservation (date, member_id, time_id, theme_id)
+VALUES ('2024-04-28', 1, 1, 5),
+       ('2024-04-28', 2, 2, 5),
+       ('2024-04-28', 3, 3, 5),
+       ('2024-04-29', 4, 1, 5),
+       ('2024-04-29', 1, 2, 5),
+       ('2024-04-29', 2, 1, 4),
+       ('2024-04-29', 3, 2, 4),
+       ('2024-04-29', 4, 3, 4),
+       ('2024-04-29', 1, 4, 4),
+       ('2024-05-01', 2, 1, 3),
+       ('2024-05-01', 3, 2, 3),
+       ('2024-05-01', 4, 3, 3),
+       ('2024-05-02', 1, 1, 2),
+       ('2024-05-02', 2, 2, 2),
+       ('2024-05-02', 3, 1, 1),
+       ('2024-05-03', 4, 2, 1),
+       ('2024-05-03', 1, 3, 1),
+       ('2024-05-03', 2, 4, 1),
+       ('2024-05-04', 3, 1, 5),
+       ('2024-05-04', 4, 2, 4),
+       ('2024-05-04', 1, 3, 3),
+       ('2024-05-04', 2, 4, 2);
