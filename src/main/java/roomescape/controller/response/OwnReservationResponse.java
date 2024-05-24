@@ -10,7 +10,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MemberReservationResponse {
+public class OwnReservationResponse {
 
     private final long id;
     private final String theme;
@@ -18,7 +18,7 @@ public class MemberReservationResponse {
     private final LocalTime time;
     private final String status;
 
-    private MemberReservationResponse(long id, String theme, LocalDate date, LocalTime time, String status) {
+    private OwnReservationResponse(long id, String theme, LocalDate date, LocalTime time, String status) {
         this.id = id;
         this.theme = theme;
         this.date = date;
@@ -26,8 +26,8 @@ public class MemberReservationResponse {
         this.status = status;
     }
 
-    private static MemberReservationResponse from(Reservation reservation) {
-        return new MemberReservationResponse(
+    private static OwnReservationResponse from(Reservation reservation) {
+        return new OwnReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
@@ -35,10 +35,10 @@ public class MemberReservationResponse {
                 "예약");
     }
 
-    private static MemberReservationResponse from(WaitingWithRank waitingWithRank) {
+    private static OwnReservationResponse from(WaitingWithRank waitingWithRank) {
         Waiting waiting = waitingWithRank.getWaiting();
         Long rank = waitingWithRank.getRank();
-        return new MemberReservationResponse(
+        return new OwnReservationResponse(
                 waiting.getId(),
                 waiting.getTheme().getName(),
                 waiting.getDate(),
@@ -46,21 +46,21 @@ public class MemberReservationResponse {
                 rank + "번째 예약대기");
     }
 
-    public static List<MemberReservationResponse> from(List<Reservation> reservations, List<WaitingWithRank> waitingWithRank) {
-        List<MemberReservationResponse> reservationResponses = mapFromReservations(reservations);
-        List<MemberReservationResponse> waitingResponses = mapFromWaiting(waitingWithRank);
+    public static List<OwnReservationResponse> from(List<Reservation> reservations, List<WaitingWithRank> waitingWithRank) {
+        List<OwnReservationResponse> reservationResponses = mapFromReservations(reservations);
+        List<OwnReservationResponse> waitingResponses = mapFromWaiting(waitingWithRank);
         return Stream.concat(reservationResponses.stream(), waitingResponses.stream()).toList();
     }
 
-    private static List<MemberReservationResponse> mapFromReservations(List<Reservation> reservations) {
+    private static List<OwnReservationResponse> mapFromReservations(List<Reservation> reservations) {
         return reservations.stream()
-                .map(MemberReservationResponse::from)
+                .map(OwnReservationResponse::from)
                 .toList();
     }
 
-    private static List<MemberReservationResponse> mapFromWaiting(List<WaitingWithRank> waitingWithRank) {
+    private static List<OwnReservationResponse> mapFromWaiting(List<WaitingWithRank> waitingWithRank) {
         return waitingWithRank.stream()
-                .map(MemberReservationResponse::from)
+                .map(OwnReservationResponse::from)
                 .toList();
     }
 

@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.ReservationRequest;
-import roomescape.controller.response.MemberReservationResponse;
+import roomescape.controller.response.OwnReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.model.Reservation;
@@ -81,10 +81,10 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MemberReservationResponse>> getReservationsOfMember(LoginMember member) {
+    public ResponseEntity<List<OwnReservationResponse>> getReservationsOfMember(LoginMember member) {
         List<WaitingWithRank> waitingWithRank = waitingService.findWaitingByMember(member);
         List<Reservation> reservations = reservationService.findReservationsByMember(member);
-        List<MemberReservationResponse> response = MemberReservationResponse.from(reservations, waitingWithRank);
+        List<OwnReservationResponse> response = OwnReservationResponse.from(reservations, waitingWithRank);
         return ResponseEntity.ok(response);
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.controller.request.ReservationRequest;
-import roomescape.controller.response.MemberReservationResponse;
+import roomescape.controller.response.OwnReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.service.AuthService;
@@ -275,13 +275,13 @@ class ReservationControllerTest {
     void should_find_reservations_of_member() {
         String token = authService.tryLogin(userDto);
 
-        List<MemberReservationResponse> responses = RestAssured.given().log().all()
+        List<OwnReservationResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .extract().jsonPath().getList(".", MemberReservationResponse.class);
+                .extract().jsonPath().getList(".", OwnReservationResponse.class);
 
         assertThat(responses).hasSize(15);
     }
