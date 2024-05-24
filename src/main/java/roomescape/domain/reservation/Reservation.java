@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,6 +41,9 @@ public class Reservation {
     @Column(name = "status")
     private ReservationStatus status;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time, ReservationStatus status) {
         validateDateTimeHasPassed(date, time);
         this.member = member;
@@ -56,6 +60,11 @@ public class Reservation {
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new DateTimePassedException();
         }
+    }
+
+    @PrePersist
+    private void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
     public void updateStatus(ReservationStatus reservationStatus) {

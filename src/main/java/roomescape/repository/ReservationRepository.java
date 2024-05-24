@@ -42,7 +42,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             SELECT new roomescape.repository.dto.ReservationRankResponse
             (r.id, r.theme.name, r.date, r.time.startAt, r.status, (SELECT count(r2) AS waiting_rank
             FROM Reservation r2
-            WHERE r.id >= r2.id AND r.time = r2.time AND r.date = r2.date AND r.theme = r2.theme)
+            WHERE r.createdAt >= r2.createdAt AND r.time = r2.time AND r.date = r2.date AND r.theme = r2.theme)
             )
             FROM Reservation r
             WHERE r.member = :member

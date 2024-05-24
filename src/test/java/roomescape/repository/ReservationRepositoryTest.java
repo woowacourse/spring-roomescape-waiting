@@ -54,7 +54,7 @@ class ReservationRepositoryTest {
 
     @DisplayName("회원이 예약한 예약들의 정보와 대기 순위를 조회한다.")
     @Test
-    void find_reservation_rank_response() {
+    void find_reservation_rank_response() throws InterruptedException {
         timeRepository.save(time);
         themeRepository.save(theme);
         memberRepository.save(member1);
@@ -64,7 +64,8 @@ class ReservationRepositoryTest {
         reservationRepository.save(reservation3);
         ReservationRankResponse response1 = new ReservationRankResponse(1L, "공포", date1, time.getStartAt(), CONFIRMED,
                 1);
-        ReservationRankResponse response2 = new ReservationRankResponse(3L, "공포", date2, time.getStartAt(), WAITING, 2);
+        ReservationRankResponse response2 = new ReservationRankResponse(3L, "공포", date2, time.getStartAt(), WAITING,
+                2);
 
         List<ReservationRankResponse> actual = reservationRepository.findReservationRankByMember(member1);
 
