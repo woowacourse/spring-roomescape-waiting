@@ -6,8 +6,8 @@ import roomescape.domain.MemberEmail;
 import roomescape.domain.MemberName;
 import roomescape.domain.MemberPassword;
 import roomescape.infrastructure.MemberRepository;
-import roomescape.service.request.MemberSignUpAppRequest;
-import roomescape.service.response.MemberAppResponse;
+import roomescape.service.request.MemberSignUpDto;
+import roomescape.service.response.MemberDto;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,7 +20,7 @@ public class MemberAuthService {
         this.memberRepository = memberRepository;
     }
 
-    public MemberAppResponse signUp(MemberSignUpAppRequest request) {
+    public MemberDto signUp(MemberSignUpDto request) {
         if (memberRepository.existsByEmail(new MemberEmail(request.email()))) {
             throw new IllegalStateException("해당 이메일의 회원이 이미 존재합니다.");
         }
@@ -31,20 +31,20 @@ public class MemberAuthService {
                 new MemberPassword(request.password()));
 
         Member savedMember = memberRepository.save(newMember);
-        return new MemberAppResponse(savedMember.getId(), savedMember.getName().getName(),
+        return new MemberDto(savedMember.getId(), savedMember.getName().getName(),
                 savedMember.getRole().name());
     }
 
-    public MemberAppResponse findMemberByEmail(String email) {
+    public MemberDto findMemberByEmail(String email) {
         return memberRepository.findByEmail(new MemberEmail(email))
-                .map(member -> new MemberAppResponse(member.getId(), member.getName().getName(),
+                .map(member -> new MemberDto(member.getId(), member.getName().getName(),
                         member.getRole().name()))
                 .orElseThrow(() -> new NoSuchElementException("회원 정보를 찾지 못했습니다. 다시 로그인 해주세요."));
     }
 
-    public List<MemberAppResponse> findAll() {
+    public List<MemberDto> findAll() {
         return memberRepository.findAll().stream()
-                .map(member -> new MemberAppResponse(member.getId(), member.getName().getName(),
+                .map(member -> new MemberDto(member.getId(), member.getName().getName(),
                         member.getRole().name()))
                 .toList();
     }

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.ThemeService;
-import roomescape.service.request.ThemeAppRequest;
-import roomescape.service.response.ThemeAppResponse;
+import roomescape.service.request.ThemeSaveDto;
+import roomescape.service.response.ThemeDto;
 import roomescape.web.controller.request.ThemeRequest;
 import roomescape.web.controller.response.ThemeResponse;
 
@@ -31,8 +31,8 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@Valid @RequestBody ThemeRequest request) {
-        ThemeAppResponse appResponse = themeService.save(
-                new ThemeAppRequest(request.name(), request.description(), request.thumbnail()));
+        ThemeDto appResponse = themeService.save(
+                new ThemeSaveDto(request.name(), request.description(), request.thumbnail()));
 
         Long id = appResponse.id();
         ThemeResponse webResponse = ThemeResponse.from(appResponse);

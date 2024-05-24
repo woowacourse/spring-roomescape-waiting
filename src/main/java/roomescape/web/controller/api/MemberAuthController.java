@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.MemberAuthService;
-import roomescape.service.request.MemberSignUpAppRequest;
-import roomescape.service.response.MemberAppResponse;
+import roomescape.service.request.MemberSignUpDto;
+import roomescape.service.response.MemberDto;
 import roomescape.web.auth.CookieHandler;
 import roomescape.web.auth.JwtProvider;
 import roomescape.web.controller.request.MemberSignUpRequest;
@@ -49,7 +49,7 @@ public class MemberAuthController {
         }
         String token = CookieHandler.extractTokenFromCookies(request.getCookies());
         String email = jwtProvider.getPayload(token);
-        MemberAppResponse appResponse = memberAuthService.findMemberByEmail(email);
+        MemberDto appResponse = memberAuthService.findMemberByEmail(email);
         MemberResponse response = new MemberResponse(appResponse.id(), appResponse.name(), appResponse.role());
 
         return ResponseEntity.ok().body(response);
@@ -57,8 +57,8 @@ public class MemberAuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<MemberResponse> signUp(@Valid @RequestBody MemberSignUpRequest request) {
-        MemberAppResponse appResponse = memberAuthService.signUp(
-                new MemberSignUpAppRequest(request.name(), request.email(), request.password()));
+        MemberDto appResponse = memberAuthService.signUp(
+                new MemberSignUpDto(request.name(), request.email(), request.password()));
 
         MemberResponse response = new MemberResponse(appResponse.id(), appResponse.name(), appResponse.role());
         return ResponseEntity.created(URI.create("/member" + appResponse.id())).body(response);
@@ -74,7 +74,7 @@ public class MemberAuthController {
 
     @GetMapping("/members")
     public ResponseEntity<List<MemberResponse>> getMembers() {
-        List<MemberAppResponse> appResponses = memberAuthService.findAll();
+        List<MemberDto> appResponses = memberAuthService.findAll();
 
         List<MemberResponse> responses = appResponses.stream()
                 .map(memberAppResponse -> new MemberResponse(

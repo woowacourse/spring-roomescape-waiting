@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ReservationService;
-import roomescape.service.request.ReservationAppRequest;
-import roomescape.service.response.ReservationAppResponse;
+import roomescape.service.request.ReservationSaveDto;
+import roomescape.service.response.ReservationDto;
 import roomescape.web.auth.Auth;
 import roomescape.web.controller.request.LoginMember;
 import roomescape.web.controller.request.MemberReservationRequest;
@@ -29,8 +29,8 @@ public class MemberReservationController {
     public ResponseEntity<MemberReservationResponse> reserve(@Valid @RequestBody MemberReservationRequest request,
                                                              @Valid @Auth
                                                              LoginMember loginMember) {
-        ReservationAppResponse appResponse = reservationService.save(
-                new ReservationAppRequest(request.date(), request.timeId(),
+        ReservationDto appResponse = reservationService.save(
+                new ReservationSaveDto(request.date(), request.timeId(),
                         request.themeId(), loginMember.id()));
 
         Long id = appResponse.id();
@@ -49,7 +49,7 @@ public class MemberReservationController {
 
     @GetMapping
     public ResponseEntity<List<MemberReservationResponse>> getReservations() {
-        List<ReservationAppResponse> appResponses = reservationService.findAll();
+        List<ReservationDto> appResponses = reservationService.findAll();
         List<MemberReservationResponse> memberReservationResponse = appResponses.stream()
                 .map(MemberReservationResponse::from)
                 .toList();

@@ -1,6 +1,6 @@
 package roomescape.web.controller.response;
 
-import roomescape.service.response.ReservationWaitingWithRankAppResponse;
+import roomescape.service.response.ReservationWaitingWithRankDto;
 
 import java.time.LocalDate;
 
@@ -13,13 +13,13 @@ public record ReservationWaitingWithRankResponse(
         Long order,
         String status) {
 
-    public ReservationWaitingWithRankResponse(ReservationWaitingWithRankAppResponse response) {
+    public ReservationWaitingWithRankResponse(ReservationWaitingWithRankDto response) {
         this(
                 response.id(),
                 response.name(),
                 response.date().getDate(),
-                ReservationTimeResponse.from(response.reservationTimeAppResponse()),
-                ThemeResponse.from(response.themeAppResponse()),
+                ReservationTimeResponse.from(response.reservationTimeDto()),
+                ThemeResponse.from(response.themeDto()),
                 response.rank(),
                 response.status()
         );

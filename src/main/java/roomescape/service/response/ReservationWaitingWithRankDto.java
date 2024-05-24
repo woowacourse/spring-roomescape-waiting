@@ -3,24 +3,24 @@ package roomescape.service.response;
 import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationWaitingWithRank;
 
-public record ReservationWaitingWithRankAppResponse(
+public record ReservationWaitingWithRankDto(
         Long id,
         String name,
         ReservationDate date,
-        ReservationTimeAppResponse reservationTimeAppResponse,
-        ThemeAppResponse themeAppResponse,
+        ReservationTimeDto reservationTimeDto,
+        ThemeDto themeDto,
         Long rank,
         String status) {
 
-    public ReservationWaitingWithRankAppResponse(ReservationWaitingWithRank waitingWithRank) {
+    public ReservationWaitingWithRankDto(ReservationWaitingWithRank waitingWithRank) {
         this(
                 waitingWithRank.getWaiting().getId(),
                 waitingWithRank.getWaiting().getMember().getName().getName(),
                 waitingWithRank.getWaiting().getDate(),
-                new ReservationTimeAppResponse(
+                new ReservationTimeDto(
                         waitingWithRank.getWaiting().getTime().getId(),
                         waitingWithRank.getWaiting().getTime().getStartAt()),
-                new ThemeAppResponse(waitingWithRank.getWaiting().getTheme().getId(),
+                new ThemeDto(waitingWithRank.getWaiting().getTheme().getId(),
                         waitingWithRank.getWaiting().getTheme().getName(),
                         waitingWithRank.getWaiting().getTheme().getDescription(),
                         waitingWithRank.getWaiting().getTheme().getThumbnail()),

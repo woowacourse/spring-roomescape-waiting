@@ -2,7 +2,7 @@ package roomescape.web.controller.response;
 
 import java.time.LocalDate;
 
-import roomescape.service.response.ReservationAppResponse;
+import roomescape.service.response.ReservationDto;
 
 public record MemberReservationResponse(
         Long id,
@@ -11,13 +11,13 @@ public record MemberReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme) {
 
-    public static MemberReservationResponse from(ReservationAppResponse appResponse) {
+    public static MemberReservationResponse from(ReservationDto appResponse) {
         return new MemberReservationResponse(
                 appResponse.id(),
                 appResponse.name(),
                 appResponse.date().getDate(),
-                ReservationTimeResponse.from(appResponse.reservationTimeAppResponse()),
-                ThemeResponse.from(appResponse.themeAppResponse())
+                ReservationTimeResponse.from(appResponse.reservationTimeDto()),
+                ThemeResponse.from(appResponse.themeDto())
         );
     }
 }

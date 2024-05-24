@@ -8,7 +8,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.service.MemberAuthService;
-import roomescape.service.response.MemberAppResponse;
+import roomescape.service.response.MemberDto;
 import roomescape.web.controller.request.LoginMember;
 
 @Component
@@ -40,7 +40,7 @@ public class MemberHandlerMethodArgumentResolver implements HandlerMethodArgumen
         }
         String token = CookieHandler.extractTokenFromCookies(request.getCookies());
         String email = jwtProvider.getPayload(token);
-        MemberAppResponse appResponse = memberAuthService.findMemberByEmail(email);
+        MemberDto appResponse = memberAuthService.findMemberByEmail(email);
 
         return new LoginMember(appResponse.id(), appResponse.name(), appResponse.role());
     }

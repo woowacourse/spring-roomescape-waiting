@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ReservationWaitingService;
-import roomescape.service.response.ReservationWaitingAppResponse;
+import roomescape.service.response.ReservationWaitingDto;
 import roomescape.web.controller.request.ReservationWaitingStatusRequest;
 import roomescape.web.controller.response.ReservationWaitingResponse;
 
@@ -32,7 +32,7 @@ public class AdminReservationWaitingController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<ReservationWaitingResponse> updateWaitingStatus(@PathVariable Long id, @Valid @RequestBody ReservationWaitingStatusRequest request) {
-        ReservationWaitingAppResponse waitingAppResponse = reservationWaitingService.updateWaitingStatus(id, request.status());
+        ReservationWaitingDto waitingAppResponse = reservationWaitingService.updateWaitingStatus(id, request.status());
         ReservationWaitingResponse waitingWebResponse = new ReservationWaitingResponse(waitingAppResponse);
 
         return ResponseEntity.ok(waitingWebResponse);

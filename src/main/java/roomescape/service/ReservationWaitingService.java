@@ -3,9 +3,9 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.domain.*;
 import roomescape.infrastructure.*;
-import roomescape.service.request.ReservationWaitingAppRequest;
-import roomescape.service.response.ReservationWaitingAppResponse;
-import roomescape.service.response.ReservationWaitingWithRankAppResponse;
+import roomescape.service.request.ReservationWaitingSaveDto;
+import roomescape.service.response.ReservationWaitingDto;
+import roomescape.service.response.ReservationWaitingWithRankDto;
 import roomescape.web.exception.AuthorizationException;
 
 import java.time.LocalDateTime;
@@ -33,14 +33,14 @@ public class ReservationWaitingService {
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
-    public ReservationWaitingAppResponse save(ReservationWaitingAppRequest request) {
+    public ReservationWaitingDto save(ReservationWaitingSaveDto request) {
         ReservationWaiting waiting = createWaiting(request);
         validateWaiting(waiting);
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(waiting);
-        return new ReservationWaitingAppResponse(savedWaiting);
+        return new ReservationWaitingDto(savedWaiting);
     }
 
-    private ReservationWaiting createWaiting(ReservationWaitingAppRequest request) {
+    private ReservationWaiting createWaiting(ReservationWaitingSaveDto request) {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 생성 실패: 사용자를 찾을 수 없습니다 (id: %d)", request.memberId())));
         ReservationDate date = new ReservationDate(request.date());
@@ -87,10 +87,10 @@ public class ReservationWaitingService {
         }
     }
 
-    public List<ReservationWaitingWithRankAppResponse> findWaitingWithRankByMemberId(Long memberId) {
+    public List<ReservationWaitingWithRankDto> findWaitingWithRankByMemberId(Long memberId) {
         return reservationWaitingRepository.findAllWaitingWithRankByMemberId(memberId)
                 .stream()
-                .map(ReservationWaitingWithRankAppResponse::new)
+                .map(ReservationWaitingWithRankDto::new)
                 .toList();
     }
 
@@ -103,19 +103,19 @@ public class ReservationWaitingService {
         reservationWaitingRepository.deleteById(waitingId);
     }
 
-    public List<ReservationWaitingAppResponse> findAllAllowed() {
+    public List<ReservationWaitingDto> findAllAllowed() {
         return reservationWaitingRepository.findAll()
                 .stream()
                 .filter(ReservationWaiting::isAllowed)
-                .map(ReservationWaitingAppResponse::new)
+                .map(ReservationWaitingDto::new)
                 .toList();
     }
 
-    public ReservationWaitingAppResponse updateWaitingStatus(Long waitingId, ReservationWaitingStatus status) {
+    public ReservationWaitingDto updateWaitingStatus(Long waitingId, ReservationWaitingStatus status) {
         ReservationWaiting waiting = reservationWaitingRepository.findById(waitingId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 상태 변경 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
         waiting.setStatus(status);
         ReservationWaiting updatedWaiting = reservationWaitingRepository.save(waiting);
-        return new ReservationWaitingAppResponse(updatedWaiting);
+        return new ReservationWaitingDto(updatedWaiting);
     }
 }
