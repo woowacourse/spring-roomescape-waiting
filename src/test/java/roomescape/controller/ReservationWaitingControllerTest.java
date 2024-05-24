@@ -127,6 +127,6 @@ public class ReservationWaitingControllerTest extends ControllerTest {
                 .body("size()", is(1))
                 .body("[0].name", equalTo("감자"))
                 .body("[0].id", equalTo(1))
-                .body("[0].date", equalTo("2024-06-21"));
+                .body("[0].date", equalTo(date.toString()));
     }
 }
