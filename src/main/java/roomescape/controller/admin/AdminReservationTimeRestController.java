@@ -1,4 +1,4 @@
-package roomescape.controller.reservation;
+package roomescape.controller.admin;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

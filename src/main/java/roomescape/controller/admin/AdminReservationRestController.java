@@ -1,4 +1,4 @@
-package roomescape.controller.reservation;
+package roomescape.controller.admin;
 
 import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
 
