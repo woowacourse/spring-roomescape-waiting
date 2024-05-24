@@ -10,8 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.controller.request.AdminReservationRequest;
+import roomescape.model.member.MemberWithoutPassword;
+import roomescape.model.member.Role;
 import roomescape.service.AuthService;
-import roomescape.service.dto.AuthDto;
+import roomescape.util.TokenManager;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,11 +27,12 @@ public class AdminControllerTest {
 
     private static final int INITIAL_WAITING_COUNT = 2;
 
-    private static final AuthDto userDto = new AuthDto("treeboss@gmail.com", "treeboss123!");
-    private static final AuthDto adminDto = new AuthDto("admin@gmail.com", "admin123!");
+    private static final String LOGIN_USER_TOKEN = TokenManager.create(
+            new MemberWithoutPassword(1L, "에버", "treeboss@gmail.com", Role.USER));
+    private static final String LOGIN_ADMIN_TOKEN = TokenManager.create(
+            new MemberWithoutPassword(2L, "관리자", "admin@gmail.com", Role.ADMIN));
 
     private final JdbcTemplate jdbcTemplate;
-    private final AuthService authService;
     private final SimpleJdbcInsert memberInsertActor;
     private final SimpleJdbcInsert timeInsertActor;
     private final SimpleJdbcInsert themeInsertActor;
@@ -39,7 +42,6 @@ public class AdminControllerTest {
     @Autowired
     public AdminControllerTest(JdbcTemplate jdbcTemplate, AuthService authService) {
         this.jdbcTemplate = jdbcTemplate;
-        this.authService = authService;
         this.memberInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("member")
                 .usingGeneratedKeyColumns("id");
@@ -123,14 +125,11 @@ public class AdminControllerTest {
     @DisplayName("관리자가 어드민 API 접근에 시도할 경우 예외를 반환하지 않는다.")
     @Test
     void should_throw_exception_when_admin_contact() {
-        String token = authService.tryLogin(adminDto);
-        AdminReservationRequest request = new AdminReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 1L);
-
         RestAssured
                 .given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
-                .body(request)
+                .cookie("token", LOGIN_ADMIN_TOKEN)
+                .body(new AdminReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 1L))
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201);
@@ -139,14 +138,11 @@ public class AdminControllerTest {
     @DisplayName("일반 유저가 어드민 API 접근에 시도할 경우 예외를 반환한다.")
     @Test
     void should_not_throw_exception_when_user_contact() {
-        String token = authService.tryLogin(userDto);
-        AdminReservationRequest request = new AdminReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 1L);
-
         RestAssured
                 .given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
-                .body(request)
+                .cookie("token", LOGIN_USER_TOKEN)
+                .body(new AdminReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 1L))
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(401);
@@ -157,10 +153,8 @@ public class AdminControllerTest {
     @DisplayName("존재하는 예약 대기라면 예약 대기를 삭제할 수 있다.")
     @Test
     void should_delete_reservation_waiting_when_reservation_waiting_exist() {
-        String token = authService.tryLogin(adminDto);
-
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", LOGIN_ADMIN_TOKEN)
                 .when().delete("/admin/reservations/waiting/1")
                 .then().log().all()
                 .statusCode(204);

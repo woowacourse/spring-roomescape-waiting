@@ -29,6 +29,6 @@ class MemberControllerTest {
 
         assertThat(allMembers).hasSize(INITIAL_MEMBER_COUNT);
         assertThatList(allMembers).map(MemberResponse::getId).containsExactly(1L, 2L);
-        assertThatList(allMembers).map(MemberResponse::getName).containsExactly("에버", "우테코");
+        assertThatList(allMembers).map(MemberResponse::getName).containsExactly("에버", "관리자");
     }
 }

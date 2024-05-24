@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.model.member.Role;
 import roomescape.service.dto.AuthDto;
 import roomescape.model.member.MemberWithoutPassword;
+import roomescape.util.TokenManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -15,31 +17,33 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @SpringBootTest
 class AuthServiceTest {
 
-    private static final AuthDto userDto = new AuthDto("treeboss@gmail.com", "treeboss123!");
-
     @Autowired
     private AuthService authService;
 
-    @DisplayName("사용자 정보를 통해 JWT 토큰을 생성한다.")
+    @DisplayName("사용자 정보가 유효할 경우 JWT 토큰을 생성하여 반환한다.")
     @Test
-    void should_create_token() {
-        AuthDto authDto = new AuthDto(userDto.getEmail().getEmail(), userDto.getPassword().getPassword());
+    void should_return_token_when_valid_member() {
+        String email = "treeboss@gmail.com";
+        String password = "treeboss123!";
+        String expected = TokenManager.create(new MemberWithoutPassword(1L, "에버", email, Role.USER));
 
-        String accessToken = authService.tryLogin(authDto);
+        String actual = authService.tryLogin(new AuthDto(email, password));
 
-        MemberWithoutPassword loginMember = authService.extractLoginMember(accessToken);
         assertAll(
-                () -> assertThat(accessToken).isNotBlank(),
-                () -> assertThat(loginMember.getId()).isEqualTo(1L));
+                () -> assertThat(actual).isNotBlank(),
+                () -> assertThat(actual).isEqualTo(expected));
     }
 
     @DisplayName("토큰을 통해 사용자 정보를 조회한다.")
     @Test
     void should_check_login_state() {
-        String token = authService.tryLogin(userDto);
+        MemberWithoutPassword member = new MemberWithoutPassword(1L, "에버", "treeboss@gmail.com", Role.USER);
+        String token = TokenManager.create(member);
 
         MemberWithoutPassword loginMember = authService.extractLoginMember(token);
 
-        assertThat(loginMember.getId()).isEqualTo(1L);
+        assertAll(
+                () -> assertThat(token).isNotBlank(),
+                () -> assertThat(loginMember.getId()).isEqualTo(1L));
     }
 }

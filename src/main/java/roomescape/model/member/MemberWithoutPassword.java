@@ -4,12 +4,12 @@ import java.util.Objects;
 
 public class MemberWithoutPassword {
 
-    private final long id;
+    private final Long id;
     private final MemberName name;
     private final MemberEmail email;
     private final Role role;
 
-    public MemberWithoutPassword(long id, String name, String email, Role role) {
+    public MemberWithoutPassword(Long id, String name, String email, Role role) {
         this.id = id;
         this.name = new MemberName(name);
         this.email = new MemberEmail(email);
@@ -24,7 +24,7 @@ public class MemberWithoutPassword {
         return role.isNotAdmin();
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
