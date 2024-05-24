@@ -22,16 +22,10 @@ import roomescape.repository.ThemeRepository;
 class ThemeServiceTest {
 
     @Autowired
-    ThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    ThemeService themeService;
-
-    @Autowired
-    public ThemeServiceTest(ThemeRepository themeRepository, ThemeService themeService) {
-        this.themeRepository = themeRepository;
-        this.themeService = themeService;
-    }
+    private ThemeService themeService;
 
     @DisplayName("테마를 조회한다.")
     @Test

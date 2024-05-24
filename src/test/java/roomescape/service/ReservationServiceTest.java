@@ -48,26 +48,15 @@ import roomescape.service.dto.MemberReservation;
 class ReservationServiceTest {
 
     @Autowired
-    private final ThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
     @Autowired
-    private final ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private final ReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
     @Autowired
-    private final MemberRepository memberRepository;
+    private MemberRepository memberRepository;
     @Autowired
-    private final ReservationService reservationService;
-
-    @Autowired
-    public ReservationServiceTest(ThemeRepository themeRepository, ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository, MemberRepository memberRepository,
-                                  ReservationService reservationService) {
-        this.themeRepository = themeRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
-        this.memberRepository = memberRepository;
-        this.reservationService = reservationService;
-    }
+    private ReservationService reservationService;
 
     @DisplayName("모든 예약 시간을 반환한다")
     @Test

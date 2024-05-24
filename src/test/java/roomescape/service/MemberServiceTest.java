@@ -24,15 +24,10 @@ import roomescape.repository.MemberRepository;
 class MemberServiceTest {
 
     @Autowired
-    private final MemberRepository memberRepository;
+    private MemberRepository memberRepository;
     @Autowired
-    private final MemberService memberService;
+    private MemberService memberService;
 
-    @Autowired
-    MemberServiceTest(MemberRepository memberRepository, MemberService memberService) {
-        this.memberRepository = memberRepository;
-        this.memberService = memberService;
-    }
 
     @DisplayName("아이디와 비밀번호가 같은 유저가 존재하면 해당 유저를 반환한다.")
     @Test

@@ -26,8 +26,7 @@ public class MemberService {
     }
 
     public String findMemberNameById(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다.".formatted(id)));
+        Member member = findMemberById(id);
         return member.getName();
     }
 
