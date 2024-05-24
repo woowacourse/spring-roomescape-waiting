@@ -17,7 +17,7 @@ public class MemberLoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {
-        if (tokenProvider.doesNotRequestHasCookie(request) || tokenProvider.doesNotRequestHasToken(request)) {
+        if (tokenProvider.doesNotHasCookie(request.getCookies()) || tokenProvider.doesNotHasToken(request.getCookies())) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }

@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,12 +93,12 @@ public class TokenProvider {
                 .getPayload();
     }
 
-    public boolean doesNotRequestHasCookie(final HttpServletRequest request) {
-        return request.getCookies() == null;
+    public boolean doesNotHasCookie(final Cookie[] cookies) {
+        return cookies.length == 0;
     }
 
-    public boolean doesNotRequestHasToken(final HttpServletRequest request) {
-        return Arrays.stream(request.getCookies())
+    public boolean doesNotHasToken(final Cookie[] cookies) {
+        return Arrays.stream(cookies)
                 .noneMatch(cookie -> TOKEN_COOKIE_NAME.equals(cookie.getName()));
     }
 }
