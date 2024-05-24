@@ -12,7 +12,7 @@ public enum ReservationStatus {
     }
 
     public boolean isReserved() {
-        return RESERVED.equals(this);
+        return this == RESERVED;
     }
 
     public String getStatus() {
