@@ -17,7 +17,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByMember_IdOrderByDetailDateAsc(Long memberId);
 
-    int countReservationsByDetailTime_Id(Long timeId);
-
     Optional<Reservation> findByDetail_Id(Long detailId);
 }

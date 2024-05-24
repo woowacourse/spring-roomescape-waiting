@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.exception.ConflictException;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationDetailRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
@@ -15,11 +15,11 @@ import roomescape.time.repository.TimeRepository;
 @Service
 public class TimeService {
     private final TimeRepository timeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationDetailRepository detailRepository;
 
-    public TimeService(TimeRepository timeRepository, ReservationRepository reservationRepository) {
+    public TimeService(TimeRepository timeRepository, ReservationDetailRepository detailRepository) {
         this.timeRepository = timeRepository;
-        this.reservationRepository = reservationRepository;
+        this.detailRepository = detailRepository;
     }
 
     public List<TimeResponse> findReservationTimes() {
@@ -51,7 +51,7 @@ public class TimeService {
     }
 
     private void validateReservationExistence(long timeId) {
-        int reservationCount = reservationRepository.countReservationsByDetailTime_Id(timeId);
+        int reservationCount = detailRepository.countReservationsByTime_Id(timeId);
         if (reservationCount > 0) {
             throw new ConflictException("삭제를 요청한 시간에 예약이 존재합니다.");
         }

@@ -125,13 +125,4 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.findById(expectedReservation.getId()))
                 .isEmpty();
     }
-
-    @Test
-    @DisplayName("존재하는 예약시간인지 확인한다.")
-    void countReservationTime() {
-        Reservation expectedReservation = entityManager.merge(RESERVATION);
-
-        assertThat(reservationRepository.countReservationsByDetailTime_Id(expectedReservation.getTimeId()))
-                .isEqualTo(1);
-    }
 }

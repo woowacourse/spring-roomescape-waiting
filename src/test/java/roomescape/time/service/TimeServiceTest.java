@@ -17,7 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import roomescape.exception.ConflictException;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationDetailRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
@@ -31,7 +31,7 @@ class TimeServiceTest {
     private TimeService timeService;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private ReservationDetailRepository detailRepository;
     @Mock
     private TimeRepository timeRepository;
 
@@ -86,7 +86,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
-        Mockito.when(reservationRepository.countReservationsByDetailTime_Id(1L))
+        Mockito.when(detailRepository.countReservationsByTime_Id(1L))
                 .thenReturn(1);
 
         assertThatThrownBy(() -> timeService.removeReservationTime(1L))
