@@ -9,30 +9,32 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberPassword;
-import roomescape.domain.member.MemberRole;
+import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
-import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.dto.ReservationListResponse;
 import roomescape.service.reservation.dto.ReservationMineListResponse;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
-import roomescape.service.reservationwaiting.ReservationWaitingService;
 
 class ReservationServiceTest extends ServiceTest {
     @Autowired
     private ReservationService reservationService;
+    
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private MemberService memberService;
+    private MemberRepository memberRepository;
 
     @Autowired
-    private ReservationWaitingService reservationWaitingService;
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @Nested
     @DisplayName("예약 목록 조회")
@@ -81,7 +83,7 @@ class ReservationServiceTest extends ServiceTest {
     class FindMyReservation {
         @Test
         void 내_예약_목록을_조회할_수_있다() {
-            Member member = memberService.findById(1L);
+            Member member = memberRepository.findById(1L).orElseThrow();
 
             ReservationMineListResponse response = reservationService.findMyReservation(member);
 
@@ -96,7 +98,7 @@ class ReservationServiceTest extends ServiceTest {
         @Test
         void 예약을_추가할_수_있다() {
             ReservationRequest request = new ReservationRequest("2000-04-07", "1", "1");
-            Member member = memberService.findById(1L);
+            Member member = memberRepository.findById(1L).orElseThrow();
 
             ReservationResponse response = reservationService.saveReservation(request, member);
 
@@ -107,7 +109,7 @@ class ReservationServiceTest extends ServiceTest {
         @Test
         void 시간대와_테마가_똑같은_중복된_예약_추가시_예외가_발생한다() {
             ReservationRequest request = new ReservationRequest("2000-04-01", "1", "1");
-            Member member = memberService.findById(1L);
+            Member member = memberRepository.findById(1L).orElseThrow();
 
             assertThatThrownBy(() -> reservationService.saveReservation(request, member))
                     .isInstanceOf(DuplicatedReservationException.class);
@@ -116,7 +118,7 @@ class ReservationServiceTest extends ServiceTest {
         @Test
         void 지나간_날짜와_시간에_대한_예약_추가시_예외가_발생한다() {
             ReservationRequest request = new ReservationRequest("2000-04-06", "1", "1");
-            Member member = memberService.findById(1L);
+            Member member = memberRepository.findById(1L).orElseThrow();
 
             assertThatThrownBy(() -> reservationService.saveReservation(request, member))
                     .isInstanceOf(InvalidDateTimeReservationException.class);
@@ -128,15 +130,10 @@ class ReservationServiceTest extends ServiceTest {
     class DeleteReservation {
         @Test
         void 예약을_삭제할_수_있다() {
-            Member member = new Member(
-                    1L,
-                    new MemberName("사용자"),
-                    new MemberEmail("user@gmail.com"),
-                    new MemberPassword("1234567890"),
-                    MemberRole.USER
-            );
-            reservationWaitingService.deleteReservationWaiting(1L, member);
-            reservationService.deleteReservation(1L);
+            ReservationWaiting waiting = reservationWaitingRepository.findById(1L).orElseThrow();
+            Reservation reservation = reservationRepository.findById(1L).orElseThrow();
+            reservationWaitingRepository.delete(waiting);
+            reservationRepository.delete(reservation);
 
             ReservationListResponse response = reservationService.findAllReservation(null, null, null, null);
             assertThat(response.getReservations().size())

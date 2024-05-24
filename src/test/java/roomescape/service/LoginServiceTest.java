@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.MemberRole;
 import roomescape.exception.login.UnauthorizedEmailException;
 import roomescape.exception.login.UnauthorizedPasswordException;
@@ -21,17 +22,16 @@ import roomescape.service.login.dto.LoginCheckResponse;
 import roomescape.service.login.dto.LoginRequest;
 import roomescape.service.login.dto.SignupRequest;
 import roomescape.service.login.dto.SignupResponse;
-import roomescape.service.member.MemberService;
 
 class LoginServiceTest extends ServiceTest {
     @Autowired
     private LoginService loginService;
 
     @Autowired
-    private MemberService memberService;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private MemberRepository memberRepository;
 
     @Nested
     @DisplayName("로그인")
@@ -77,7 +77,7 @@ class LoginServiceTest extends ServiceTest {
     class LoginCheck {
         @Test
         void 로그인한_사용자_정보를_조회할_수_있다() {
-            Member member = memberService.findById(1L);
+            Member member = memberRepository.findById(1L).orElseThrow();
 
             LoginCheckResponse response = loginService.loginCheck(member);
 
@@ -101,7 +101,7 @@ class LoginServiceTest extends ServiceTest {
 
         @Test
         void 토큰으로_사용자_정보를_조회할_수_있다() {
-            Member member = memberService.findById(1L);
+            Member member = memberRepository.findById(1L).orElseThrow();
 
             assertThat(loginService.findMemberByToken(token))
                     .isEqualTo(member);

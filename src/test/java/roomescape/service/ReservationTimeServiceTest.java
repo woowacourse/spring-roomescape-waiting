@@ -5,35 +5,38 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberPassword;
-import roomescape.domain.member.MemberRole;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.exception.time.DuplicatedTimeException;
 import roomescape.exception.time.NotFoundTimeException;
 import roomescape.exception.time.ReservationReferencedTimeException;
-import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.reservationtime.dto.ReservationTimeAvailableListResponse;
 import roomescape.service.reservationtime.dto.ReservationTimeListResponse;
 import roomescape.service.reservationtime.dto.ReservationTimeRequest;
 import roomescape.service.reservationtime.dto.ReservationTimeResponse;
-import roomescape.service.reservationwaiting.ReservationWaitingService;
 
 class ReservationTimeServiceTest extends ServiceTest {
     @Autowired
     private ReservationTimeService reservationTimeService;
 
     @Autowired
-    private ReservationService reservationService;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ReservationWaitingService reservationWaitingService;
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @Nested
     @DisplayName("시간 목록 조회")
@@ -102,20 +105,15 @@ class ReservationTimeServiceTest extends ServiceTest {
     class DeleteReservationTime {
         @Test
         void 시간을_삭제할_수_있다() {
-            Member member = new Member(
-                    1L,
-                    new MemberName("사용자"),
-                    new MemberEmail("user@gmail.com"),
-                    new MemberPassword("1234567890"),
-                    MemberRole.USER
-            );
-            reservationWaitingService.deleteReservationWaiting(1L, member);
-            reservationService.deleteReservation(1L);
+            ReservationWaiting waiting = reservationWaitingRepository.findById(1L).orElseThrow();
+            Reservation reservation = reservationRepository.findById(1L).orElseThrow();
+            reservationWaitingRepository.delete(waiting);
+            reservationRepository.delete(reservation);
 
             reservationTimeService.deleteReservationTime(1L);
 
-            ReservationTimeListResponse response = reservationTimeService.findAllReservationTime();
-            assertThat(response.getTimes().size())
+            List<ReservationTime> times = reservationTimeRepository.findAll();
+            assertThat(times.size())
                     .isEqualTo(0);
         }
 
