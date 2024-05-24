@@ -27,9 +27,9 @@ public class ReservationWaitingService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public ReservationResponse addReservationWaiting(CreateReservationRequest request) {
-        Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        Member member = getMember(request.memberId());
         //- 확정된 예약이 존재 → date, theme, time으로 예약 조회
         Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
                         request.themeId())
@@ -54,4 +54,19 @@ public class ReservationWaitingService {
         return ReservationResponse.from(reservationWaiting);
     }
 
+    private Member getMember(long request) {
+        return memberRepository.findById(request)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    }
+
+    @Transactional
+    public void deleteReservationWaiting(long waitingId, long memberId) {
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 대기입니다."));
+        Member member = getMember(memberId);
+        if (member.isNotAdmin()) {
+            reservationWaiting.validateOwner(member);
+        }
+        reservationWaitingRepository.delete(reservationWaiting);
+    }
 }

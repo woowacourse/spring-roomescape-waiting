@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
@@ -118,5 +120,53 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("이미 예약 대기 중입니다.");
+    }
+
+    @Test
+    @DisplayName("예약 대기를 삭제한다.")
+    void deleteReservationWaiting() {
+        Reservation reservation = reservationRepository.save(notSavedReservation);
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(
+                ReservationWaitingFixture.create(reservation, waitingMember));
+
+        reservationWaitingService.deleteReservationWaiting(savedWaiting.getId(), waitingMember.getId());
+
+        assertThat(reservationWaitingRepository.findById(savedWaiting.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("존재하지 않은 예약 대기는 삭제할 수 없다.")
+    void deleteReservationWaitingFailWhenNotFound() {
+        assertThatThrownBy(
+                () -> reservationWaitingService.deleteReservationWaiting(1L, waitingMember.getId()))
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("존재하지 않는 예약 대기입니다.");
+    }
+
+    @Test
+    @DisplayName("관리자가 아닌 멤버는 다른 멤버의 예약 대기를 삭제할 수 없다.")
+    void deleteReservationWaitingFailWhenNotAdmin() {
+        Reservation reservation = reservationRepository.save(notSavedReservation);
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(
+                ReservationWaitingFixture.create(reservation, waitingMember));
+
+        Member notAdmin = memberRepository.save(MemberFixture.USER);
+        assertThatThrownBy(
+                () -> reservationWaitingService.deleteReservationWaiting(savedWaiting.getId(), notAdmin.getId()))
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("예약 대기한 회원이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName("관리자는 다른 멤버의 예약 대기를 삭제할 수 있다.")
+    void deleteReservationWaitingSuccessWhenAdmin() {
+        Reservation reservation = reservationRepository.save(notSavedReservation);
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(
+                ReservationWaitingFixture.create(reservation, waitingMember));
+
+        Member admin = memberRepository.save(MemberFixture.ADMIN);
+        reservationWaitingService.deleteReservationWaiting(savedWaiting.getId(), admin.getId());
+
+        assertThat(reservationWaitingRepository.findById(savedWaiting.getId())).isEmpty();
     }
 }
