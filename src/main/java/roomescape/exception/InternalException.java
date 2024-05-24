@@ -3,6 +3,7 @@ package roomescape.exception;
 public class InternalException extends RuntimeException {
 
     private final String errorCode;
+
     private final ExceptionResponse exceptionResponse;
 
     public InternalException(ErrorType errorType) {

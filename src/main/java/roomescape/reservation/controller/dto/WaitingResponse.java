@@ -3,7 +3,9 @@ package roomescape.reservation.controller.dto;
 import roomescape.reservation.domain.ReservationStatus;
 
 public class WaitingResponse {
+
     private final ReservationStatus status;
+
     private final int waitingNumber;
 
     public WaitingResponse(ReservationStatus status, int waitingNumber) {

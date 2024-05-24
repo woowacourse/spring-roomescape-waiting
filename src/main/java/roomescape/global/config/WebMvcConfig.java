@@ -11,8 +11,11 @@ import roomescape.auth.resolver.LoginUserArgumentResolver;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
     private final LoginUserArgumentResolver loginUserArgumentResolver;
+
     private final AdminInterceptor adminInterceptor;
+
     private final MemberInterceptor memberInterceptor;
 
     public WebMvcConfig(LoginUserArgumentResolver loginUserArgumentResolver,

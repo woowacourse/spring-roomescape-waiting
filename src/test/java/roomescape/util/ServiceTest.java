@@ -18,16 +18,22 @@ import roomescape.reservation.domain.repository.ThemeRepository;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = TestConfig.class)
 public class ServiceTest {
+
     @Autowired
     protected ReservationRepository reservationRepository;
+
     @Autowired
     protected ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     protected ThemeRepository themeRepository;
+
     @Autowired
     protected MemberReservationRepository memberReservationRepository;
+
     @LocalServerPort
     int port;
+
     @Autowired
     private DatabaseCleaner databaseCleaner;
 

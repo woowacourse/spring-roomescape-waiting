@@ -3,6 +3,7 @@ package roomescape.exception;
 public class NotFoundException extends RuntimeException {
 
     private final String errorCode;
+
     private final ExceptionResponse exceptionResponse;
 
     public NotFoundException(ErrorType errorType) {

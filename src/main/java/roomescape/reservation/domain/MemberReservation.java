@@ -19,12 +19,15 @@ public class MemberReservation extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "RESERVATION_ID")
     private Reservation reservation;
+
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 

@@ -3,8 +3,11 @@ package roomescape.reservation.domain;
 import java.time.LocalTime;
 
 public class AvailableTime {
+
     private final Long timeId;
+
     private final LocalTime startAt;
+
     private final boolean alreadyBooked;
 
     public AvailableTime(final Long timeId, final LocalTime startAt, final boolean alreadyBooked) {

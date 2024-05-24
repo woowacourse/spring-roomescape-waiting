@@ -29,7 +29,9 @@ import roomescape.reservation.service.dto.WaitingCreate;
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
+
     private final MemberReservationService memberReservationService;
+
     private final WaitingReservationService waitingReservationService;
 
     public ReservationController(MemberReservationService memberReservationService,

@@ -6,8 +6,11 @@ import roomescape.member.domain.Role;
 
 public class AuthInfo {
     private final Long id;
+
     private final String name;
+
     private final String email;
+
     private final Role role;
 
     public AuthInfo(Long id, String name, String email, Role role) {

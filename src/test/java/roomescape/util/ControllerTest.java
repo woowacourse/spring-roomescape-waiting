@@ -48,6 +48,7 @@ import roomescape.reservation.service.WaitingReservationService;
 })
 @ExtendWith(MockitoExtension.class)
 public class ControllerTest {
+
     @MockBean
     protected TokenProvider tokenProvider;
 

@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "security.jwt.token")
 public class JwtProperties {
+
     private final String secretKey;
 
     private final long expireLength;

@@ -25,10 +25,15 @@ import roomescape.reservation.domain.repository.ThemeRepository;
 public class DataLoader implements ApplicationRunner {
 
     private final ThemeRepository themeRepository;
+
     private final ReservationTimeRepository timeRepository;
+
     private final ReservationRepository reservationRepository;
+
     private final MemberRepository memberRepository;
+
     private final MemberReservationRepository memberReservationRepository;
+
 
     @Value("${dataloader.enable}")
     private boolean enableDataloader;

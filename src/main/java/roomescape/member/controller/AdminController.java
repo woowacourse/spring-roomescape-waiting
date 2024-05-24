@@ -25,8 +25,11 @@ import roomescape.reservation.service.dto.MemberReservationCreate;
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
+
     private final MemberReservationService memberReservationService;
+
     private final WaitingReservationService waitingReservationService;
+
     private final MemberService memberService;
 
     public AdminController(MemberReservationService memberReservationService,

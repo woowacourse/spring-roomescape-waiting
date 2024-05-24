@@ -21,10 +21,15 @@ import roomescape.reservation.domain.repository.ThemeRepository;
 @Service
 @Transactional(readOnly = true)
 public class ReservationCommonService {
+
     private final ReservationRepository reservationRepository;
+
     private final ReservationTimeRepository reservationTimeRepository;
+
     private final ThemeRepository themeRepository;
+
     private final MemberRepository memberRepository;
+
     private final MemberReservationRepository memberReservationRepository;
 
     public ReservationCommonService(ReservationRepository reservationRepository,

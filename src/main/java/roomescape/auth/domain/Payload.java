@@ -6,6 +6,7 @@ import roomescape.exception.ErrorType;
 
 public class Payload<T> {
     private final T body;
+
     private final Supplier<Boolean> validator;
 
     public Payload(T body, Supplier<Boolean> validator) {

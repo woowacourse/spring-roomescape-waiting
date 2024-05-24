@@ -16,7 +16,9 @@ import roomescape.reservation.service.dto.ThemeCreate;
 @Service
 @Transactional(readOnly = true)
 public class ThemeService {
+
     private final ThemeRepository themeRepository;
+
     private final ReservationRepository reservationRepository;
 
     public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {

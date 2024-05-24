@@ -20,8 +20,11 @@ import roomescape.reservation.service.dto.MyReservationInfo;
 @Service
 @Transactional(readOnly = true)
 public class MemberReservationService {
+
     private final ReservationRepository reservationRepository;
+
     private final MemberReservationRepository memberReservationRepository;
+
     private final ReservationCommonService reservationCommonService;
 
     public MemberReservationService(ReservationRepository reservationRepository,

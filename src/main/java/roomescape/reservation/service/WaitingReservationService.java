@@ -22,6 +22,7 @@ import roomescape.reservation.service.dto.WaitingCreate;
 public class WaitingReservationService {
 
     private final MemberReservationRepository memberReservationRepository;
+
     private final ReservationCommonService reservationCommonService;
 
     public WaitingReservationService(MemberReservationRepository memberReservationRepository,
