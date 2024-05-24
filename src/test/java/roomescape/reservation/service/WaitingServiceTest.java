@@ -21,9 +21,9 @@ import roomescape.exceptions.AuthException;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.dto.ReservationOrWaitingResponse;
-import roomescape.reservation.dto.WaitingRequest;
-import roomescape.reservation.dto.WaitingResponse;
+import roomescape.reservation.dto.request.WaitingRequest;
+import roomescape.reservation.dto.response.ReservationOrWaitingResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)

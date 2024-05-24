@@ -18,8 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.login.dto.LoginRequest;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.WaitingRequest;
+import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.request.WaitingRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)

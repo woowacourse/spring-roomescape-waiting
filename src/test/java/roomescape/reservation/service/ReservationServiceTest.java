@@ -25,8 +25,8 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
