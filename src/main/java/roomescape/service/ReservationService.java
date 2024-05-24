@@ -58,6 +58,7 @@ public class ReservationService {
                 request.themeId());
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(request.themeId())));
+
         Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
@@ -65,10 +66,12 @@ public class ReservationService {
     @Transactional
     public Reservation addReservation(AdminReservationRequest request) {
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId(), request.themeId());
+
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(request.themeId())));
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(request.memberId())));
+
         Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
@@ -76,9 +79,11 @@ public class ReservationService {
     private ReservationTime findReservationTime(LocalDate date, long timeId, long themeId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
+
         if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && reservationTime.isBefore(LocalTime.now()))) {
             throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(LocalDateTime.now()));
         }
+
         validateDuplicatedReservation(date, themeId, timeId);
         return reservationTime;
     }
@@ -88,6 +93,7 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId)));
+
         boolean exists = reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
         if (exists) {
             throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");

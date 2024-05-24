@@ -28,9 +28,11 @@ public class ReservationWaitingService {
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> getAllMemberReservationsAndWaiting(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() ->
-                new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(memberId)));;
+                new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(memberId)));
+
         List<Reservation> memberReservations = reservationRepository.findAllByMember(member);
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
+
         List<MemberReservationResponse> allMemberReservations =
                 new java.util.ArrayList<>(memberReservations.stream()
                         .map(MemberReservationResponse::new)
@@ -38,6 +40,7 @@ public class ReservationWaitingService {
         List<MemberReservationResponse> waiting = waitingWithRanks.stream()
                 .map(MemberReservationResponse::new)
                 .toList();
+
         allMemberReservations.addAll(waiting);
         return allMemberReservations;
     }
@@ -47,6 +50,7 @@ public class ReservationWaitingService {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id)));
         reservationRepository.deleteById(id);
+
         Theme theme = reservation.getTheme();
         LocalDate date = reservation.getDate();
         ReservationTime time = reservation.getTime();
@@ -58,9 +62,9 @@ public class ReservationWaitingService {
     private void convertWaitingToReservation(Theme theme, LocalDate date, ReservationTime time) {
         Waiting waiting = waitingRepository.findFirstByThemeAndDateAndTime(theme, date, time).orElseThrow(() ->
                 new NotFoundException("해당 테마:[%s], 날짜:[%s], 시간:[%s] 값으로 예약된 예약 대기 내역이 존재하지 않습니다.".formatted(theme.getName(), date, time.getStartAt())));
-        ;
-        reservationRepository.save(new Reservation(date, time, theme, waiting.getMember())
-        );
+
+        reservationRepository.save(new Reservation(date, time, theme, waiting.getMember()));
+
         waitingRepository.deleteById(waiting.getId());
     }
 }

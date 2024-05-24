@@ -37,8 +37,10 @@ public class WaitingService {
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(request.themeId())));
+
         validateWaitingInExistingReservation(theme, request.date(), reservationTime, member);
         validateDuplicatedWaiting(theme, request.date(), reservationTime, member);
+
         Waiting waiting = new Waiting(request.date(), reservationTime, theme, member);
         return waitingRepository.save(waiting);
     }
