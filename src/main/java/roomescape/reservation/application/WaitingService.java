@@ -18,7 +18,7 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
-    public Long findLankByReservation(Reservation reservation) {
+    public Long findRankByReservation(Reservation reservation) {
         if (reservation.isBooked()) {
             return 0L;
         }
@@ -26,12 +26,12 @@ public class WaitingService {
         return waitingWithRank.getRank() + 1;
     }
 
-    @Transactional
-    public void deleteById(Long id) {
-        waitingRepository.deleteById(id);
-    }
-
     public List<Waiting> findAll() {
         return waitingRepository.findAll();
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        waitingRepository.deleteById(id);
     }
 }

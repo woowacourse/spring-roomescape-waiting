@@ -81,7 +81,7 @@ public class ReservationController {
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(Member loginMember) {
         List<Reservation> reservations = reservationService.findAllByMember(loginMember);
         return ResponseEntity.ok(reservations.stream()
-                .map(reservation -> MyReservationResponse.of(reservation, waitingService.findLankByReservation(reservation)))
+                .map(reservation -> MyReservationResponse.of(reservation, waitingService.findRankByReservation(reservation)))
                 .toList());
     }
 

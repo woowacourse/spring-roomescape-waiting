@@ -57,4 +57,10 @@ public class AdminReservationController {
                 .map(WaitingResponse::from)
                 .toList());
     }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") Long id) {
+        waitingService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
