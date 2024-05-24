@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,5 +59,23 @@ class ReservationWaitingRepositoryTest extends BaseRepositoryTest {
         ReservationWaiting duplicatedWaiting = ReservationWaitingFixture.create(reservation, waitingMember);
         assertThatThrownBy(() -> reservationWaitingRepository.save(duplicatedWaiting))
                 .isExactlyInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @DisplayName("예약 대기의 랭크를 조회한다")
+    void findRankByReservationWaiting() {
+        for (int cnt = 0; cnt < 5; cnt++) {
+            Member waitedMember = save(MemberFixture.create("waited" + cnt + "@email.com"));
+            save(ReservationWaitingFixture.create(reservation, waitedMember));
+        }
+        Member prin = save(MemberFixture.create("prin@email.com"));
+        save(ReservationWaitingFixture.create(reservation, prin));
+
+        List<WaitingWithRank> waitingWithRanks = reservationWaitingRepository.findAllWithRankByMember(prin);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(waitingWithRanks).hasSize(1);
+            softly.assertThat(waitingWithRanks.get(0).rank()).isEqualTo(6);
+        });
     }
 }
