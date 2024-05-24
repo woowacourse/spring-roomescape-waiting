@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -118,12 +117,6 @@ class ReservationServiceTest {
                 () -> assertEquals(adminWaitingResponse.time(), reservationResponse.startAt()),
                 () -> assertEquals(adminWaitingResponse.themeName(), reservationResponse.themeName())
         );
-    }
-
-    @Test
-    @DisplayName("예약을 지운다.")
-    void removeReservations() {
-        assertDoesNotThrow(() -> reservationService.removeReservations(reservation.getId()));
     }
 
     @Test

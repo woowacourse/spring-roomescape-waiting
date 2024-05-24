@@ -39,32 +39,32 @@ public class AdminAcceptanceTest {
         List<ReservationResponse> reservations = reservationService.findReservations();
         long reservationId = reservations.size();
 
-        LocalDate today = LocalDate.now().plusDays(1);
+        LocalDate date = LocalDate.now().plusDays(3);
 
         return Stream.of(
                 dynamicTest("예약을 진행한다.", () -> {
                     ReservationRequest reservationRequest = new ReservationRequest(
-                            LocalDate.now().plusDays(1), 1, 5);
+                            date, 1, 5);
 
                     ReservationResponse reservationResponse = reservationService.addReservation(
                             reservationRequest, 3);
 
                     assertAll(
-                            () -> assertEquals(reservationResponse.date(), today),
+                            () -> assertEquals(reservationResponse.date(), date),
                             () -> assertEquals(reservationResponse.memberName(), "일반 멤버 아서"),
                             () -> assertEquals(reservationResponse.id(), reservationId + 1)
                     );
                 }),
                 dynamicTest("대기를 추가한다.", () -> {
                     ReservationRequest reservationRequest = new ReservationRequest(
-                            LocalDate.now().plusDays(1), 1, 5);
+                            date, 1, 5);
 
                     ReservationResponse reservationResponse = reservationService.addWaitingReservation(
-                            reservationRequest, 2);
+                            reservationRequest, 7);
 
                     assertAll(
-                            () -> assertEquals(reservationResponse.date(), today),
-                            () -> assertEquals(reservationResponse.memberName(), "일반 멤버 폴라"),
+                            () -> assertEquals(reservationResponse.date(), date),
+                            () -> assertEquals(reservationResponse.memberName(), "일반 멤버 리브"),
                             () -> assertEquals(reservationResponse.id(), reservationId + 2)
                     );
                 }),

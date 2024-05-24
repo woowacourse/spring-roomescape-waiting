@@ -22,7 +22,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(16));
     }
 
     @Test
@@ -62,7 +62,7 @@ class ReservationIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("예약 대기를 정상적으로 저장한다.")
     void reservationWaitingSave() {
-        Token token = tokenProvider.getAccessToken(1);
+        Token token = tokenProvider.getAccessToken(7);
         ResponseCookie cookie = CookieProvider.setCookieFrom(token);
 
         ReservationRequest reservationRequest = new ReservationRequest(TODAY.plusDays(1), 1L, 1L);
@@ -80,7 +80,7 @@ class ReservationIntegrationTest extends IntegrationTest {
     @DisplayName("예약을 정상적으로 삭제한다.")
     void reservationDelete() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when().delete("/reservations/7")
                 .then().log().all()
                 .statusCode(204);
     }
