@@ -4,6 +4,7 @@ import static roomescape.TestFixture.MEMBER1;
 import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
 
 import io.restassured.RestAssured;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,11 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import roomescape.TestFixture;
+import roomescape.domain.Role;
 import roomescape.repository.MemberRepository;
+import roomescape.service.dto.AuthInfo;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class MemberPageControllerTest {
+class AuthControllerTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -34,29 +38,35 @@ class MemberPageControllerTest {
         memberRepository.deleteAllInBatch();
     }
 
-    @DisplayName("멤버 예약 페이지로 이동한다.")
+    @DisplayName("로그인에 성공한다.")
     @Test
-    void responseReservationPage() {
+    void login() {
+        // given
         memberRepository.save(MEMBER1);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
 
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .when().get("/reservation")
-                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(MEMBER1_LOGIN_REQUEST)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value());
     }
 
-    @DisplayName("홈 화면은 로그인하지 않아도 접속할 수 있다.")
+    @DisplayName("로그인 정보가 존재하지 않으면 로그인 페이지로 리다이렉트된다.")
     @Test
-    void responseMainPage() {
+    void checkLogin() {
         RestAssured.given().log().all()
-                .when().get("")
-                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(new AuthInfo(1L, "test", Role.MEMBER))
+                .when().get("/login/check")
+                .then().log().all()
+                .body(Matchers.containsString("<title>Login</title>"));
     }
 
-    @DisplayName("현재 로그인된 멤버의 예약 내역 조회 페이지로 이동한다.")
+    @DisplayName("로그아웃에 성공한다.")
     @Test
-    void responseUserReservation() {
+    void logout() {
         // given
         memberRepository.save(MEMBER1);
         String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
@@ -64,7 +74,9 @@ class MemberPageControllerTest {
         // when & then
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
-                .when().get("/reservation-mine")
-                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+                .when().post("/logout")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .cookie("token", "");
     }
 }

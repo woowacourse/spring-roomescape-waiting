@@ -1,10 +1,10 @@
 package roomescape.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.ADMIN_NAME;
+import static org.hamcrest.Matchers.is;
+import static roomescape.TestFixture.MEMBER1;
+import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
 
 import io.restassured.RestAssured;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,9 +15,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import roomescape.TestFixture;
-import roomescape.domain.Member;
 import roomescape.repository.MemberRepository;
-import roomescape.service.dto.response.MemberResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MemberControllerTest {
@@ -35,25 +33,23 @@ class MemberControllerTest {
 
     @AfterEach
     void tearDown() {
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
+        memberRepository.deleteAllInBatch();
     }
 
-    @DisplayName("로그인시 토큰을 반환한다.")
+    @DisplayName("모든 멤버를 조회한다.")
     @Test
-    void tokenLogin() {
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+    void findAll() {
+        // given
+        memberRepository.save(MEMBER1);
+        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
 
-        MemberResponse member = RestAssured
-                .given().log().all()
+        // when & then
+        RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().get("/login/check")
+                .when().get("/members")
                 .then().log().all()
-                .statusCode(HttpStatus.OK.value()).extract().as(MemberResponse.class);
-
-        assertThat(member.name()).isEqualTo(ADMIN_NAME);
+                .statusCode(HttpStatus.OK.value())
+                .body("count", is(1));
     }
 }
