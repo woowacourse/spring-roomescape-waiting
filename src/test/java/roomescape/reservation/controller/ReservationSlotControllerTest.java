@@ -109,7 +109,7 @@ class ReservationSlotControllerTest extends ControllerTest {
 
                     RestAssured.given().log().all()
                             .cookie("token", cloverToken)
-                            .when().delete("/reservations/" + reservationResponse.memberReservationId())
+                            .when().delete("/reservations/" + reservationResponse.reservationId())
                             .then().log().all()
                             .statusCode(403);
                 }),
@@ -117,7 +117,7 @@ class ReservationSlotControllerTest extends ControllerTest {
                     //given
                     RestAssured.given().log().all()
                             .cookie("token", token)
-                            .when().delete("/reservations/" + reservationResponse.memberReservationId())
+                            .when().delete("/reservations/" + reservationResponse.reservationId())
                             .then().log().all()
                             .statusCode(204);
                 })

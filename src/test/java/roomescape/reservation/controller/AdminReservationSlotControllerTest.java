@@ -98,7 +98,7 @@ class AdminReservationSlotControllerTest extends ControllerTest {
                     //when &then
                     RestAssured.given().log().all()
                             .cookie("token", token)
-                            .when().delete("/admin/reservations/" + reservationResponse.memberReservationId())
+                            .when().delete("/admin/reservations/" + reservationResponse.reservationId())
                             .then().log().all()
                             .statusCode(204);
                 })

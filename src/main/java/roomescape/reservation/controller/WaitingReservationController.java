@@ -10,7 +10,6 @@ import roomescape.global.annotation.LoginUser;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.MemberReservationService;
-import roomescape.reservation.service.ReservationService;
 
 import java.net.URI;
 
@@ -28,7 +27,7 @@ public class WaitingReservationController {
     public ResponseEntity<ReservationResponse> create(@LoginUser AuthInfo authInfo,
                                                       @RequestBody @Valid ReservationRequest reservationRequest) {
         ReservationResponse response = memberReservationService.createMemberReservation(authInfo, reservationRequest);
-        return ResponseEntity.created(URI.create("/reservations/" + response.memberReservationId())).body(response);
+        return ResponseEntity.created(URI.create("/reservations/" + response.reservationId())).body(response);
     }
 
     @DeleteMapping("/{id}")

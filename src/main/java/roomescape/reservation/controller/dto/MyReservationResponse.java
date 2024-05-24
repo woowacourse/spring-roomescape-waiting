@@ -7,14 +7,14 @@ import roomescape.reservation.domain.ReservationSlot;
 
 public record MyReservationResponse(long reservationId, String themeName, LocalDate date, LocalTime time,
                                     String status) {
-    public static MyReservationResponse from(Reservation memberReservation) {
-        ReservationSlot reservationSlot = memberReservation.getReservationSlot();
+    public static MyReservationResponse from(Reservation reservation) {
+        ReservationSlot reservationSlot = reservation.getReservationSlot();
         return new MyReservationResponse(
-                memberReservation.getId(),
+                reservation.getId(),
                 reservationSlot.getTheme().getName(),
                 reservationSlot.getDate(),
                 reservationSlot.getTime().getStartAt(),
-                memberReservation.getStatus().getStatus());
+                reservation.getStatus().getStatus());
     }
 
     public static MyReservationResponse from(MyReservationWithStatus myReservationWithStatus) {

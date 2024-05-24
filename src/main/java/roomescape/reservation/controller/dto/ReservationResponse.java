@@ -9,14 +9,14 @@ import roomescape.reservation.domain.ReservationSlot;
 
 public record ReservationResponse(
         @JsonProperty("id")
-        long memberReservationId,
+        long reservationId,
         MemberResponse member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme) {
-    public static ReservationResponse from(long memberReservationId, ReservationSlot reservationSlot, Member member) {
+    public static ReservationResponse from(long reservationId, ReservationSlot reservationSlot, Member member) {
         return new ReservationResponse(
-                memberReservationId,
+                reservationId,
                 MemberResponse.from(member),
                 reservationSlot.getDate(),
                 ReservationTimeResponse.from(reservationSlot.getTime()),
@@ -24,11 +24,11 @@ public record ReservationResponse(
         );
     }
 
-    public static ReservationResponse from(Reservation memberReservation) {
-        ReservationSlot reservationSlot = memberReservation.getReservationSlot();
+    public static ReservationResponse from(Reservation reservation) {
+        ReservationSlot reservationSlot = reservation.getReservationSlot();
         return new ReservationResponse(
-                memberReservation.getId(),
-                MemberResponse.from(memberReservation.getMember()),
+                reservation.getId(),
+                MemberResponse.from(reservation.getMember()),
                 reservationSlot.getDate(),
                 ReservationTimeResponse.from(reservationSlot.getTime()),
                 ThemeResponse.from(reservationSlot.getTheme())

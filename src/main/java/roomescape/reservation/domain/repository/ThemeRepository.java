@@ -11,9 +11,9 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query(value = """
             SELECT theme.id, theme.name, theme.description, theme.thumbnail, COUNT(*) AS reservation_count 
             FROM theme 
-            INNER JOIN reservationSlot AS re ON re.theme_id = theme.id 
-            INNER JOIN member_reservation AS mr ON mr.reservation_id = re.id 
-            WHERE re.date BETWEEN ? AND ? 
+            INNER JOIN reservation_slot AS rs ON rs.theme_id = theme.id 
+            INNER JOIN reservation AS r ON r.reservation_slot_id = rs.id 
+            WHERE rs.date BETWEEN ? AND ? 
             GROUP BY theme.id, theme.name 
             ORDER BY reservation_count DESC 
             LIMIT ?;

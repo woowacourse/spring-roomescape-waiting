@@ -36,7 +36,7 @@ public class AdminReservationController {
             @RequestBody @Valid MemberReservationRequest memberReservationRequest) {
         ReservationResponse reservationResponse = memberReservationService
                 .createMemberReservation(memberReservationRequest);
-        return ResponseEntity.created(URI.create("/admin/reservations/" + reservationResponse.memberReservationId()))
+        return ResponseEntity.created(URI.create("/admin/reservations/" + reservationResponse.reservationId()))
                 .body(reservationResponse);
     }
 
