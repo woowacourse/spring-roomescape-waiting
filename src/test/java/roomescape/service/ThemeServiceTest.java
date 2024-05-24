@@ -31,7 +31,7 @@ class ThemeServiceTest {
     CancelReservationService cancelReservationService;
 
     @Autowired
-    ReservationService reservationService;
+    CreateReservationService createReservationService;
 
     @Test
     void 동일한_이름의_테마를_추가할_경우_예외_발생() {

@@ -20,7 +20,7 @@ import roomescape.dto.reservation.ReservationResponse;
 class ReservationQueryServiceTest {
 
     @Autowired
-    private ReservationQueryService reservationQueryService;
+    ReservationQueryService reservationQueryService;
 
     @Sql("/reservation-filter-api-test-data.sql")
     @Test

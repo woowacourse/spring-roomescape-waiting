@@ -21,10 +21,10 @@ import roomescape.dto.waiting.WaitingRequest;
 class WaitingServiceTest {
 
     @Autowired
-    private WaitingService waitingService;
+    WaitingService waitingService;
 
     @Autowired
-    ReservationService reservationService;
+    CreateReservationService createReservationService;
 
     @Autowired
     MemberService memberService;

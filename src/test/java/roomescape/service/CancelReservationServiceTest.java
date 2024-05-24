@@ -18,10 +18,10 @@ import roomescape.dto.reservation.ReservationResponse;
 class CancelReservationServiceTest {
 
     @Autowired
-    private ReservationQueryService reservationQueryService;
+    ReservationQueryService reservationQueryService;
 
     @Autowired
-    private CancelReservationService cancelReservationService;
+    CancelReservationService cancelReservationService;
 
     @Test
     void 존재하지_않는_id로_삭제할_경우_예외_발생() {

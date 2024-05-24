@@ -12,14 +12,14 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
-public class ReservationService {
+public class CreateReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(
+    public CreateReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository timeRepository,
             ThemeRepository themeRepository,

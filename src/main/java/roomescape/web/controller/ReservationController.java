@@ -16,22 +16,22 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.UserReservationRequest;
 import roomescape.dto.reservation.UserReservationResponse;
 import roomescape.service.CancelReservationService;
+import roomescape.service.CreateReservationService;
 import roomescape.service.ReservationQueryService;
-import roomescape.service.ReservationService;
 
 @RestController
 class ReservationController {
 
-    private final ReservationService reservationService;
+    private final CreateReservationService createReservationService;
     private final ReservationQueryService reservationQueryService;
     private final CancelReservationService cancelReservationService;
 
     public ReservationController(
-            ReservationService reservationService,
+            CreateReservationService createReservationService,
             ReservationQueryService reservationQueryService,
             CancelReservationService cancelReservationService
     ) {
-        this.reservationService = reservationService;
+        this.createReservationService = createReservationService;
         this.reservationQueryService = reservationQueryService;
         this.cancelReservationService = cancelReservationService;
     }
@@ -40,7 +40,7 @@ class ReservationController {
     public ResponseEntity<ReservationResponse> addReservationByAdmin(
             @RequestBody ReservationRequest reservationRequest
     ) {
-        Long savedId = reservationService.addReservation(reservationRequest);
+        Long savedId = createReservationService.addReservation(reservationRequest);
         ReservationResponse reservationResponse = reservationQueryService.getReservation(savedId);
         return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
     }
@@ -51,7 +51,7 @@ class ReservationController {
             LoginMember loginMember
     ) {
         ReservationRequest reservationRequest = ReservationRequest.from(userReservationRequest, loginMember.id());
-        Long savedId = reservationService.addReservation(reservationRequest);
+        Long savedId = createReservationService.addReservation(reservationRequest);
         ReservationResponse reservationResponse = reservationQueryService.getReservation(savedId);
         return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
     }

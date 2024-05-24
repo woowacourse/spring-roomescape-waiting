@@ -19,10 +19,10 @@ import roomescape.dto.theme.ThemeResponse;
 @Sql("/reservation-service-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class ReservationServiceTest {
+class CreateReservationServiceTest {
 
     @Autowired
-    ReservationService reservationService;
+    CreateReservationService createReservationService;
 
     @Autowired
     ReservationQueryService reservationQueryService;
@@ -46,7 +46,7 @@ class ReservationServiceTest {
                 LocalDate.now(), notExistTimeId, 1L, 1L);
 
         //when, then
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest))
+        assertThatThrownBy(() -> createReservationService.addReservation(reservationRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -60,7 +60,7 @@ class ReservationServiceTest {
                 LocalDate.now(), 1L, notExistIdToFind, 1L);
 
         //when, then
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest))
+        assertThatThrownBy(() -> createReservationService.addReservation(reservationRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -69,12 +69,12 @@ class ReservationServiceTest {
         //given
         ReservationRequest reservationRequest1 = new ReservationRequest(
                 LocalDate.now().plusDays(1), 1L, 1L, 1L);
-        reservationService.addReservation(reservationRequest1);
+        createReservationService.addReservation(reservationRequest1);
 
         //when, then
         ReservationRequest reservationRequest2 = new ReservationRequest(
                 LocalDate.now().plusDays(1), 1L, 1L, 2L);
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest2))
+        assertThatThrownBy(() -> createReservationService.addReservation(reservationRequest2))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -85,7 +85,7 @@ class ReservationServiceTest {
                 LocalDate.now().minusDays(1), 1L, 1L, 1L);
 
         //when, then
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest))
+        assertThatThrownBy(() -> createReservationService.addReservation(reservationRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
