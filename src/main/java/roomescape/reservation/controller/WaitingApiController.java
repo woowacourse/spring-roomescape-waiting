@@ -26,7 +26,7 @@ public class WaitingApiController {
         this.waitingService = waitingService;
     }
 
-    @PostMapping("/waiting")
+    @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> createWaiting(
             @Valid @RequestBody WaitingCreateRequest request,
             @Login LoginMemberInToken loginMember
@@ -34,7 +34,7 @@ public class WaitingApiController {
         Waiting waiting = waitingService.save(request, loginMember);
         WaitingResponse waitingResponse = new WaitingResponse(waiting);
 
-        return ResponseEntity.created(URI.create("/waiting/" + waiting.getId())).body(waitingResponse);
+        return ResponseEntity.created(URI.create("/waitings/" + waiting.getId())).body(waitingResponse);
     }
 
     @GetMapping("/waitings")
@@ -44,7 +44,7 @@ public class WaitingApiController {
         return ResponseEntity.ok(waitingResponses);
     }
 
-    @DeleteMapping("/waiting/{id}")
+    @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> deleteWaiting(
             @PathVariable Long id,
             @Login LoginMemberInToken loginMemberInToken

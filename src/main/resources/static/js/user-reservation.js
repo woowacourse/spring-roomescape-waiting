@@ -1,5 +1,5 @@
 const THEME_API_ENDPOINT = '/themes';
-const WAITING_API_ENDPOINT = '/waiting';
+const WAITING_API_ENDPOINT = '/waitings';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
