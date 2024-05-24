@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.ReservationRequest;
+import roomescape.controller.request.WaitingRequest;
 import roomescape.controller.response.WaitingResponse;
 import roomescape.model.Waiting;
 import roomescape.model.member.LoginMember;
@@ -35,10 +36,10 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody ReservationRequest request, LoginMember member) {
+    public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody WaitingRequest request, LoginMember member) {
         ReservationDto reservationDto = request.toDto(member.getId());
         Waiting waiting = waitingService.saveWaiting(reservationDto);
-        WaitingResponse response = WaitingResponse.from(waiting); // TODO: essential?
+        WaitingResponse response = WaitingResponse.from(waiting);
         return ResponseEntity
                 .created(URI.create("/reservations/waiting/" + waiting.getId()))
                 .body(response);
