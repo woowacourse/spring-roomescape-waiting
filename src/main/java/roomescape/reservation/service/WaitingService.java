@@ -21,6 +21,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -40,7 +41,6 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
-    @Transactional
     public WaitingResponse addWaiting(WaitingRequest waitingRequest, MemberRequest memberRequest) {
         Reservation reservation = getReservationByWaiting(waitingRequest);
         Member member = memberRequest.toMember();
@@ -99,6 +99,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> findAll() {
         return waitingRepository.findAll()
                 .stream()
@@ -106,7 +107,6 @@ public class WaitingService {
                 .toList();
     }
 
-    @Transactional
     public void deleteWaiting(Long id, MemberRequest memberRequest) {
         waitingRepository.findById(id)
                 .ifPresent(waiting -> {

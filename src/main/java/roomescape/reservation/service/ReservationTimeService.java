@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
@@ -13,6 +14,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -37,10 +39,12 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(reservationTime);
     }
 
+    @Transactional(readOnly = true)
     public ReservationTimeResponse getReservationTimeById(Long id) {
         return new ReservationTimeResponse(reservationTimeRepository.getById(id));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findReservationTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -48,6 +52,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findTimesWithAlreadyBooked(LocalDate date, Long themeId) {
         Theme theme = themeRepository.getById(themeId);
         List<Long> alreadyBookedTimeIds = reservationRepository.findByDateAndTheme(date, theme)
