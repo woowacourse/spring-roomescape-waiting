@@ -26,15 +26,6 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
-    @GetMapping // TODO: 얘도 관리자 권한이 필요하지 않을까?
-    public ResponseEntity<List<WaitingResponse>> getAllWaiting() {
-        List<Waiting> allWaiting = waitingService.findAllWaiting();
-        List<WaitingResponse> response = allWaiting.stream()
-                .map(WaitingResponse::from)
-                .toList();
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody WaitingRequest request, LoginMember member) {
         ReservationDto reservationDto = request.toDto(member.getId());

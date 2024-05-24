@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.controller.request.AdminReservationRequest;
+import roomescape.controller.response.WaitingResponse;
 import roomescape.model.member.MemberWithoutPassword;
 import roomescape.model.member.Role;
 import roomescape.service.AuthService;
@@ -18,6 +19,7 @@ import roomescape.util.TokenManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -160,6 +162,19 @@ public class AdminControllerTest {
                 .statusCode(204);
 
         assertThat(countAll()).isEqualTo(INITIAL_WAITING_COUNT - 1);
+    }
+
+    @DisplayName("전체 예약 대기를 조회한다.")
+    @Test
+    void should_get_all_reservation_waiting() {
+        List<WaitingResponse> reservations = RestAssured.given().log().all()
+                .cookie("token", LOGIN_ADMIN_TOKEN)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath().getList(".", WaitingResponse.class);
+
+        assertThat(reservations).hasSize(INITIAL_WAITING_COUNT);
     }
 
     private Integer countAll() {

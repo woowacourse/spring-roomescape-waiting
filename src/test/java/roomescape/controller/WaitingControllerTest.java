@@ -134,18 +134,6 @@ class WaitingControllerTest {
         waitingInsertActor.execute(parameters);
     }
 
-    @DisplayName("전체 예약 대기를 조회한다.")
-    @Test
-    void should_get_all_reservation_waiting() {
-        List<WaitingResponse> reservations = RestAssured.given().log().all()
-                .when().get("/reservations/waiting")
-                .then().log().all()
-                .statusCode(200)
-                .extract().jsonPath().getList(".", WaitingResponse.class);
-
-        assertThat(reservations).hasSize(INITIAL_WAITING_COUNT);
-    }
-
     @DisplayName("예약 대기를 추가할 수 있다.")
     @Test
     void should_insert_reservation_waiting() {
