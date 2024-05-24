@@ -32,7 +32,7 @@ class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(adminAuthorizationInterceptor).addPathPatterns("/admin/**");
         registry.addInterceptor(userAuthorizationInterceptor).addPathPatterns("/reservation-mine");
-        registry.addInterceptor(userAuthorizationInterceptor).addPathPatterns("/reservation/**");
+        registry.addInterceptor(userAuthorizationInterceptor).addPathPatterns("/reservation");
     }
 
     @Override
