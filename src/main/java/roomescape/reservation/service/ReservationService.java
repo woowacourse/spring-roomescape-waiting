@@ -110,7 +110,9 @@ public class ReservationService {
         return saveMemberReservation(memberId, request, Status.WAITING);
     }
 
-    private ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request, Status status) {
+    private ReservationResponse saveMemberReservation(Long memberId,
+                                                      MemberReservationAddRequest request,
+                                                      Status status) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
         ReservationTime reservationTime = getReservationTime(request.timeId());
@@ -144,7 +146,7 @@ public class ReservationService {
     @Transactional
     public void removeReservation(long id) {
         Reservation reservationForDelete = reservationRepository.findById(id)
-                        .orElseThrow(() -> new NoSuchRecordException("해당하는 예약이 존재하지 않습니다 ID: " + id));
+                .orElseThrow(() -> new NoSuchRecordException("해당하는 예약이 존재하지 않습니다 ID: " + id));
         if (reservationForDelete.isReserved()) {
             updateWaitingReservationStatus(reservationForDelete);
         }

@@ -20,9 +20,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByStatus(Status status);
 
     Optional<Reservation> findFirstByDateValueAndTimeIdAndThemeIdAndStatus(LocalDate date,
-                                                                          Long timeId,
-                                                                          Long themeId,
-                                                                          Status status);
+                                                                           Long timeId,
+                                                                           Long themeId,
+                                                                           Status status);
 
     @Query("""
             SELECT count (r.id) FROM Reservation AS r

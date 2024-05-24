@@ -221,7 +221,7 @@ class ReservationControllerE2ETest {
                             .statusCode(200).body("size()", is(5));
                 }),
 
-                dynamicTest("예약 대기를 추가한다", () ->{
+                dynamicTest("예약 대기를 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams)
                             .when().cookie("token", token).post("/reservations/waiting")
@@ -272,7 +272,7 @@ class ReservationControllerE2ETest {
                 .extract().cookie("token");
 
         return Stream.of(
-                dynamicTest("예약 대기를 추가한다", () ->{
+                dynamicTest("예약 대기를 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams)
                             .when().cookie("token", token).post("/reservations/waiting")
@@ -288,7 +288,7 @@ class ReservationControllerE2ETest {
                             .statusCode(200).body("size()", is(6));
                 }),
 
-                dynamicTest("중복된 날짜, 시각, 테마에 예약 대기를 추가한다", () ->{
+                dynamicTest("중복된 날짜, 시각, 테마에 예약 대기를 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams)
                             .when().cookie("token", token).post("/reservations/waiting")
