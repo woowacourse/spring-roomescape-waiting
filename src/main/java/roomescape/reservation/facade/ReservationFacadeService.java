@@ -2,15 +2,11 @@ package roomescape.reservation.facade;
 
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
-import roomescape.reservation.dto.MemberReservationCreateRequest;
-import roomescape.reservation.dto.MemberReservationResponse;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationCreateRequest;
+import roomescape.reservation.dto.*;
 import roomescape.reservation.service.ReservationCreateService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingReservationService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -46,12 +42,8 @@ public class ReservationFacadeService {
         return reservationService.readMemberReservations(loginMember);
     }
 
-    public List<MemberReservationResponse> searchReservations(LocalDate dateFrom,
-                                                              LocalDate dateTo,
-                                                              Long memberId,
-                                                              Long themeId
-    ) {
-        return reservationService.searchReservations(dateFrom, dateTo, memberId, themeId);
+    public List<MemberReservationResponse> searchReservations(ReservationSearchRequestParameter searchCondition) {
+        return reservationService.searchReservations(searchCondition);
     }
 
     public List<MemberReservationResponse> readWaitingReservations() {

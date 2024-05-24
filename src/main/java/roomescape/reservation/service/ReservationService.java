@@ -8,14 +8,10 @@ import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.WaitingReservationRanking;
-import roomescape.reservation.dto.MemberReservationCreateRequest;
-import roomescape.reservation.dto.MemberReservationResponse;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationCreateRequest;
+import roomescape.reservation.dto.*;
 import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -75,10 +71,15 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemberReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {
-        List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeId(start, end, themeId);
+    public List<MemberReservationResponse> searchReservations(ReservationSearchRequestParameter searchCondition) {
 
-        return memberReservationRepository.findByMemberIdAndReservationIn(memberId, reservations).stream()
+        List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeId(
+                searchCondition.dateFrom(),
+                searchCondition.dateTo(),
+                searchCondition.themeId()
+        );
+
+        return memberReservationRepository.findByMemberIdAndReservationIn(searchCondition.memberId(), reservations).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }
