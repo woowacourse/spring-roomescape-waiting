@@ -31,6 +31,20 @@ class ReservationServiceTest {
     @Test
     @DisplayName("자신의 예약 목록을 조회한다.")
     void getReservationsByMember() {
+        final LoginMember member = new LoginMember(1L);
+
+        final List<MyReservationResponse> reservationsByMember = reservationService
+                .getReservationsByMember(member);
+
+        assertAll(
+                () -> assertThat(reservationsByMember).hasSize(3),
+                () -> assertThat(reservationsByMember.get(2).rank()).isEqualTo(1L)
+        );
+    }
+
+    @Test
+    @DisplayName("자신의 예약 목록을 조회한다2.")
+    void getReservationsByMember2() {
         final LoginMember member = new LoginMember(2L);
 
         final List<MyReservationResponse> reservationsByMember = reservationService
@@ -38,7 +52,7 @@ class ReservationServiceTest {
 
         assertAll(
                 () -> assertThat(reservationsByMember).hasSize(3),
-                () -> assertThat(reservationsByMember.get(2).status()).isEqualTo("2번째 예약대기")
+                () -> assertThat(reservationsByMember.get(2).rank()).isEqualTo(2L)
         );
     }
 

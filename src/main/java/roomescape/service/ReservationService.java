@@ -27,6 +27,7 @@ import roomescape.service.exception.PreviousTimeException;
 
 @Service
 public class ReservationService {
+    private static final Long RESERVED_RANK = 0L;
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -66,19 +67,18 @@ public class ReservationService {
 
     private MyReservationResponse findStatus(Reservation reservation) {
         if (reservation.isReserved()) {
-            return MyReservationResponse.from(reservation);
+            return MyReservationResponse.from(reservation, RESERVED_RANK);
         }
         return MyReservationResponse.from(reservation, findRank(reservation));
     }
 
-    private String findRank(Reservation reservation) {
-        Long rank = reservationRepository.findAllByTimeIdAndThemeIdAndDateAndStatus(
+    private Long findRank(Reservation reservation) {
+        return reservationRepository.findAllByTimeIdAndThemeIdAndDateAndStatus(
                         reservation.getTime().getId(), reservation.getTheme().getId(),
                         reservation.getDate(), Status.WAITING)
                 .stream()
                 .filter(r -> r.getId() < reservation.getId())
                 .count() + 1;
-        return rank + "번째";
     }
 
     @Transactional

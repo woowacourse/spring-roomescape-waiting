@@ -9,25 +9,15 @@ public record MyReservationResponse(
         String themeName,
         LocalDate date,
         LocalTime time,
-        String status) {
-
-    public static MyReservationResponse from(final Reservation reservation) {
+        Long rank) {
+    
+    public static MyReservationResponse from(final Reservation reservation, final Long rank) {
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getValue()
-        );
-    }
-
-    public static MyReservationResponse from(final Reservation reservation, final String rank) {
-        return new MyReservationResponse(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                rank + " " + reservation.getStatus().getValue()
+                rank
         );
     }
 }
