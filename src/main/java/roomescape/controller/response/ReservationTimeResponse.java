@@ -14,8 +14,8 @@ public class ReservationTimeResponse {
         this.startAt = startAt;
     }
 
-    public static ReservationTimeResponse from(ReservationTime time) {
-        return new ReservationTimeResponse(time.getId(), time.getStartAt());
+    public ReservationTimeResponse(ReservationTime time) {
+        this(time.getId(), time.getStartAt());
     }
 
     public long getId() {

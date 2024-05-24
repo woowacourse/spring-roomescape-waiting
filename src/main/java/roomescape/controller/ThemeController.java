@@ -33,7 +33,7 @@ public class ThemeController {
     public ResponseEntity<List<ThemeResponse>> getThemes() {
         List<Theme> themes = themeService.findAllThemes();
         List<ThemeResponse> response = themes.stream()
-                .map(ThemeResponse::from)
+                .map(ThemeResponse::new)
                 .toList();
         return ResponseEntity.ok(response);
     }
@@ -42,7 +42,7 @@ public class ThemeController {
     public ResponseEntity<ThemeResponse> addTheme(@Valid @RequestBody ThemeRequest request) {
         ThemeDto themeDto = ThemeDto.from(request);
         Theme theme = themeService.saveTheme(themeDto);
-        ThemeResponse response = ThemeResponse.from(theme);
+        ThemeResponse response = new ThemeResponse(theme);
         return ResponseEntity
                 .created(URI.create("/themes/" + response.getId()))
                 .body(response);
@@ -58,7 +58,7 @@ public class ThemeController {
     public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
         List<Theme> themes = themeService.findPopularThemes();
         List<ThemeResponse> response = themes.stream()
-                .map(ThemeResponse::from)
+                .map(ThemeResponse::new)
                 .toList();
         return ResponseEntity.ok(response);
     }
