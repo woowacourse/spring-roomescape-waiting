@@ -20,7 +20,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                     @Param("dateFrom") LocalDate dateFrom,
                                                     @Param("dateTo") LocalDate dateTo);
 
-
     List<Reservation> findByMemberId(Long memberId);
 
     @Query("""
@@ -35,7 +34,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                       @Param("timeId") Long timeId,
                                       @Param("themeId") Long themeId,
                                       @Param("date") LocalDate date);
-
 
     @Query("""
             SELECT r

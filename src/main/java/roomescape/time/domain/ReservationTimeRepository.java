@@ -13,7 +13,7 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
             SELECT r.time
             FROM Reservation AS r
             WHERE r.date.value = :date
-            AND r.theme.id = :themeId
+                AND r.theme.id = :themeId
             """)
     List<ReservationTime> findReservedTime(@Param("date") LocalDate date, @Param("themeId") Long themeId);
 
