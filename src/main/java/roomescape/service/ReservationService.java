@@ -113,9 +113,11 @@ public class ReservationService {
     }
 
     private void approveFirstWaiting(Reservation reservation) {
-        List<Reservation> firstWaiting = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(
-            reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
-        firstWaiting.forEach(Reservation::reserve);
+        reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId()
+        ).ifPresent(Reservation::reserve);
     }
 
     @Transactional(readOnly = true)
