@@ -15,4 +15,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long>, JpaSpecific
             + "GROUP BY t.id "
             + "ORDER BY COUNT(t.id) DESC LIMIT :count ")
     List<Theme> findMostReservedThemeInPeriodByCount(LocalDate dateFrom, LocalDate dateTo, int count);
+
+    boolean existsByName(String name);
 }
