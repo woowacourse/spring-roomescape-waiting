@@ -32,7 +32,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인 성공 시, Set-Cookie 헤더에 쿠키 값을 전달한다.")
+    @DisplayName("로그인 성공: Set-Cookie 헤더에 쿠키 값 전달")
     void login() {
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
@@ -51,7 +51,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인을 시도한 이메일이 존재하지 않을 경우, 예외를 반환한다.")
+    @DisplayName("로그인 실패: 로그인 계정 없음")
     void login_WhenMemberNotExist() {
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -62,12 +62,12 @@ class AuthIntegrationTest {
                 .body(params)
                 .when().post("/login")
                 .then().log().all()
-                .statusCode(400)
+                .statusCode(404)
                 .body("detail", equalTo("로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요."));
     }
 
     @Test
-    @DisplayName("로그인을 시도한 이메일이 올바르지 않을 경우, 예외를 반환한다.")
+    @DisplayName("로그인 실패: 이메일에 null")
     void login_WhenEmailIsNull() {
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
@@ -85,7 +85,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인을 시도한 이메일이 형식에 맞지 않는 경우, 예외를 반환한다.")
+    @DisplayName("로그인 실패: 이메일 형식")
     void login_WhenEmailIsInvalidType() {
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
@@ -103,7 +103,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인을 시도한 비밀번호가 올바르지 않을 경우, 예외를 반환한다.")
+    @DisplayName("로그인 실패: 비밀번호 오류")
     void login_WhenPasswordNotCorrect() {
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
@@ -121,7 +121,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인을 시도한 비밀번호가 올바르지 않을 경우, 예외를 반환한다.")
+    @DisplayName("로그인 실패: 비밀번호 null")
     void login_WhenPasswordIsNull() {
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
@@ -139,7 +139,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인한 회원의 정보 조회 시, 토큰으로부터 회원 정보를 확인 후 결과를 반환한다.")
+    @DisplayName("로그인한 회원의 정보 조회 성공")
     void loginCheck() {
         // give
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
@@ -166,7 +166,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인한 회원의 정보 조회 시, 쿠키가 존재하지 않는다면 예외를 반환한다.")
+    @DisplayName("로그인한 회원의 정보 조회 실패: 쿠키 없음")
     void loginCheck_WhenCookieNotExist() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -177,7 +177,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인한 회원의 정보 조회 시, 토큰에 대한 쿠키가 존재하지 않는다면 예외를 반환한다.")
+    @DisplayName("로그인한 회원의 정보 조회 실패: 토큰 쿠키 없음")
     void loginCheck_WhenTokenNotExist() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -186,6 +186,31 @@ class AuthIntegrationTest {
                 .then().log().all()
                 .statusCode(401)
                 .body("detail", equalTo("토큰에 대한 쿠키가 없어서 회원 정보를 찾을 수 없습니다. 다시 로그인해주세요."));
+    }
+
+    @Test
+    @DisplayName("로그아웃 성공")
+    void logout() {
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("email", "login@naver.com");
+        params.put("password", "hihi");
+
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract().cookie("token");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().post("/logout")
+                .then().log().all()
+                .statusCode(204);
     }
 }
 
