@@ -26,13 +26,13 @@ public class MemberReservationResponse {
         this.status = status;
     }
 
-    public static MemberReservationResponse from(Reservation reservation) {
+    private static MemberReservationResponse from(Reservation reservation) {
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                "예약"); // TODO: 프론트에서?
+                "예약");
     }
 
     private static MemberReservationResponse from(WaitingWithRank waitingWithRank) {
@@ -47,13 +47,21 @@ public class MemberReservationResponse {
     }
 
     public static List<MemberReservationResponse> from(List<Reservation> reservations, List<WaitingWithRank> waitingWithRank) {
-        List<MemberReservationResponse> reservationResponses = reservations.stream()
-                .map(MemberReservationResponse::from)
-                .toList();
-        List<MemberReservationResponse> waitingResponses = waitingWithRank.stream()
-                .map(MemberReservationResponse::from)
-                .toList();
+        List<MemberReservationResponse> reservationResponses = mapFromReservations(reservations);
+        List<MemberReservationResponse> waitingResponses = mapFromWaiting(waitingWithRank);
         return Stream.concat(reservationResponses.stream(), waitingResponses.stream()).toList();
+    }
+
+    private static List<MemberReservationResponse> mapFromReservations(List<Reservation> reservations) {
+        return reservations.stream()
+                .map(MemberReservationResponse::from)
+                .toList();
+    }
+
+    private static List<MemberReservationResponse> mapFromWaiting(List<WaitingWithRank> waitingWithRank) {
+        return waitingWithRank.stream()
+                .map(MemberReservationResponse::from)
+                .toList();
     }
 
     public long getId() {
