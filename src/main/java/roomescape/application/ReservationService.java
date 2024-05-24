@@ -59,16 +59,17 @@ public class ReservationService {
 
     private void updateReservation(Reservation reservation) {
         if (isWaitingUpdatableToReservation(reservation)) {
-            reservationRepository.findFirstByDateAndTimeIdAndThemeId(
-                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+            reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), Status.WAITING
             ).ifPresent(nextReservation -> nextReservation.setStatus(Status.RESERVATION));
         }
     }
 
     private boolean isWaitingUpdatableToReservation(Reservation reservation) {
         return reservation.getStatus() == Status.RESERVATION &&
-                reservationRepository.existsByDateAndTimeIdAndThemeId(
-                        reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+                reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                        reservation.getDate(), reservation.getTime().getId(),
+                        reservation.getTheme().getId(), Status.WAITING
                 );
     }
 
