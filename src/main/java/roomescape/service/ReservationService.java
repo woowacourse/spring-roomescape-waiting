@@ -105,7 +105,7 @@ public class ReservationService {
     }
 
     private void updateWaitingToReservation(Reservation reservation) {
-        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeId(
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderById(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         if (waiting.isPresent()) {
             Reservation createdReservation = new Reservation(reservation.getMember(), reservation.getDate(),

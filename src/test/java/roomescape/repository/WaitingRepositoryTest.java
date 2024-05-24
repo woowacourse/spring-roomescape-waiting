@@ -57,8 +57,8 @@ class WaitingRepositoryTest {
         LocalDate date = LocalDate.now().plusDays(1);
 
         //when
-        Waiting waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeId(date,
-                1L, 1L).orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기가 없습니다."));
+        Waiting waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderById(date, 1L, 1L)
+                .orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기가 없습니다."));
         //then
         assertThat(waiting.getMember().getId()).isEqualTo(2L);
     }
