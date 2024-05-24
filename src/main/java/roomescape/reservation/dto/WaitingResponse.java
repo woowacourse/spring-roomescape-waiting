@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
 public record WaitingResponse(
-
         Long id,
         String memberName,
         String themeName,
