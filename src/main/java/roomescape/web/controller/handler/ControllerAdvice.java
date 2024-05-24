@@ -1,5 +1,7 @@
 package roomescape.web.controller.handler;
 
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,12 +9,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.service.exception.PastReservationException;
+import roomescape.domain.exception.PastReservationException;
 import roomescape.service.exception.ReservationExistsException;
 import roomescape.web.exception.AuthorizationException;
-
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ControllerAdvice {

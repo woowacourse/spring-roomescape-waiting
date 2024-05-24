@@ -32,7 +32,7 @@ import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.ReservationWaitingRepository;
-import roomescape.service.exception.PastReservationException;
+import roomescape.domain.exception.PastReservationException;
 import roomescape.service.request.ReservationWaitingAppRequest;
 import roomescape.service.response.ReservationWaitingAppResponse;
 import roomescape.service.response.ReservationWaitingAppResponseWithRank;

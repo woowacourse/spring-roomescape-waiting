@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import roomescape.service.exception.PastReservationException;
+import roomescape.domain.exception.PastReservationException;
 
 @Entity
 public class ReservationWaiting {
