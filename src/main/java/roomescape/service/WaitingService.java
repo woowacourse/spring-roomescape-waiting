@@ -59,7 +59,6 @@ public class WaitingService {
         final Theme theme = getTheme(waitingRequest);
         final Member member = getMember(waitingRequest);
         final Waiting waiting = new Waiting(member, waitingRequest.date(), reservationTime, theme);
-        waiting.validateDateTime();
         final Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(savedWaiting);
     }

@@ -49,6 +49,7 @@ public class Waiting {
 
     private Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
                     ReservationStatus status) {
+        validateDateTime(date, time);
         this.id = id;
         this.member = member;
         this.date = date;
@@ -57,13 +58,13 @@ public class Waiting {
         this.status = status;
     }
 
-    public void validateDateTime() {
+    private void validateDateTime(LocalDate date, ReservationTime time) {
         if (date.isBefore(LIMIT_DATE)) {
-            throw new IllegalStateException("예약 날짜는 예약 가능한 기간보다 이전일 수 없습니다.");
+            throw new IllegalArgumentException("예약 날짜는 예약 가능한 기간보다 이전일 수 없습니다.");
         }
 
         if (date.isEqual(LIMIT_DATE) && time.isBeforeOrSame(LIMIT_TIME)) {
-            throw new IllegalStateException("예약 시간은 예약 가능한 시간 이전이거나 같을 수 없습니다.");
+            throw new IllegalArgumentException("예약 시간은 예약 가능한 시간 이전이거나 같을 수 없습니다.");
         }
     }
 
