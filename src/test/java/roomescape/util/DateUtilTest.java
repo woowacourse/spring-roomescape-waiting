@@ -22,7 +22,7 @@ class DateUtilTest {
         Date afterTenMinutes = DateUtil.getAfterTenMinutes();
 
         //then
-        long difference = Math.abs(afterTenMinutes.getTime() - expected.getTime());
+        Long difference = Math.abs(afterTenMinutes.getTime() - expected.getTime());
         assertThat(difference).isLessThan(1000); // 1초(1000밀리초) 이내 차이 허용
     }
 
