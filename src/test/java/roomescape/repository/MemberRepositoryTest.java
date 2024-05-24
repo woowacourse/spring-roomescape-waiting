@@ -17,7 +17,7 @@ class MemberRepositoryTest {
 
     @DisplayName("이메일을 기준으로 유저를 조회한다.")
     @ParameterizedTest
-    @CsvSource({"testDB@email.com,admin", "test2DB@email.com,user"})
+    @CsvSource({"testDB@email.com,어드민", "test2DB@email.com,사용자"})
     void findByEmail(String email, String name) {
         //when
         Member member = memberRepository.findByEmail(email)
@@ -29,7 +29,7 @@ class MemberRepositoryTest {
 
     @DisplayName("이메일과 비밀번호를 기준으로 유저를 조회한다.")
     @ParameterizedTest
-    @CsvSource({"testDB@email.com,1234,admin", "test2DB@email.com,1234,user"})
+    @CsvSource({"testDB@email.com,1234,어드민", "test2DB@email.com,1234,사용자"})
     void findByEmailAndPassword(String email, String password, String name) {
         //when
         Member member = memberRepository.findByEmailAndPassword(email, password)

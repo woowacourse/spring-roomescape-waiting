@@ -9,6 +9,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class fixture {
+
+    public static final String TOKEN = "token";
+
+    public static final int RESERVATION_COUNT = 7;
+    public static final int WAITING_COUNT = 7;
+
     public static final Member ADMIN_MEMBER = new Member(
             1L, "어드민", "testDB@email.com", "1234", Role.ADMIN);
     public static final Member USER_MEMBER = new Member(

@@ -15,6 +15,8 @@ import roomescape.dto.request.TokenRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+import static roomescape.fixture.fixture.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
@@ -22,7 +24,6 @@ class WaitingControllerTest {
 
     private static final String EMAIL = "testDB@email.com";
     private static final String PASSWORD = "1234";
-    private static final String TOKEN = "token";
 
     @LocalServerPort
     private int port;

@@ -6,6 +6,7 @@ import roomescape.domain.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
@@ -23,6 +24,8 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             ORDER BY w.date, w.time.startAt
             """)
     List<WaitingWithRank> findWaitingsWithRankByMemberIdByDateAsc(Member member);
+
+    Optional<Waiting> findFirstByDateAndTimeAndTheme(LocalDate date, TimeSlot timeSlot, Theme theme);
 
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, TimeSlot timeSlot, Theme theme, Member member);
 

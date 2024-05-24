@@ -2,21 +2,16 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.*;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
+import roomescape.repository.*;
 
 @Service
 public class ReservationService {
@@ -24,13 +19,15 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final ThemeRepository themeRepository;
 
     public ReservationService(MemberRepository memberRepository, TimeSlotRepository timeSlotRepository,
-                              ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+                              ReservationRepository reservationRepository, WaitingRepository waitingRepository, ThemeRepository themeRepository) {
         this.memberRepository = memberRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.themeRepository = themeRepository;
     }
 
@@ -74,7 +71,26 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
+        Reservation currentReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 예약 내역이 존재하지 않습니다."));
+
         reservationRepository.deleteById(id);
+
+        updateWaitingToReservation(currentReservation);
+    }
+
+    private void updateWaitingToReservation(final Reservation reservation) {
+
+        Optional<Waiting> firstWaiting = waitingRepository
+                .findFirstByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+
+        if (firstWaiting.isPresent()) {
+            Reservation newReservation =
+                    new Reservation(firstWaiting.get().getMember(), reservation.getDate(),
+                            reservation.getTime(), reservation.getTheme());
+            waitingRepository.delete(firstWaiting.get());
+            reservationRepository.save(newReservation);
+        }
     }
 
     private void validate(LocalDate date, TimeSlot timeSlot, Theme theme, Member member) {

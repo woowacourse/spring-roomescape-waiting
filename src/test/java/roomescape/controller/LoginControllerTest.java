@@ -16,6 +16,8 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.dto.request.TokenRequest;
 import roomescape.dto.response.MemberResponse;
 
+import static roomescape.fixture.fixture.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
@@ -23,7 +25,6 @@ class LoginControllerTest {
 
     private static final String EMAIL = "testDB@email.com";
     private static final String PASSWORD = "1234";
-    private static final String TOKEN = "token";
 
     @LocalServerPort
     private int port;
@@ -65,7 +66,7 @@ class LoginControllerTest {
                 .then().log().all()
                 .statusCode(200).extract().as(MemberResponse.class);
 
-        assertThat(client.name()).isEqualTo("admin");
+        assertThat(client.name()).isEqualTo("어드민");
     }
 
     @DisplayName("로그아웃을 수행한다.")

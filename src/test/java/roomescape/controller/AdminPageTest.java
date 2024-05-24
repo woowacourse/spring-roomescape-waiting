@@ -13,12 +13,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.dto.request.TokenRequest;
 
+import static roomescape.fixture.fixture.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class AdminPageTest {
 
-    private static final String TOKEN = "token";
     private static final String EMAIL = "testDB@email.com";
     private static final String PASSWORD = "1234";
 
