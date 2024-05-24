@@ -25,9 +25,9 @@ class AuthServiceTest {
     void should_create_token() {
         AuthDto authDto = new AuthDto(userDto.getEmail().getEmail(), userDto.getPassword().getPassword());
 
-        String accessToken = authService.createToken(authDto);
+        String accessToken = authService.tryLogin(authDto);
 
-        MemberInfo memberInfo = authService.checkToken(accessToken);
+        MemberInfo memberInfo = authService.extractLoginMemberInfo(accessToken);
         assertAll(
                 () -> assertThat(accessToken).isNotBlank(),
                 () -> assertThat(memberInfo.getId()).isEqualTo(1L));
@@ -36,9 +36,9 @@ class AuthServiceTest {
     @DisplayName("토큰을 통해 사용자 정보를 조회한다.")
     @Test
     void should_check_login_state() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
-        MemberInfo loginMember = authService.checkToken(token);
+        MemberInfo loginMember = authService.extractLoginMemberInfo(token);
 
         assertThat(loginMember.getId()).isEqualTo(1L);
     }

@@ -37,6 +37,10 @@ public class Waiting {
     protected Waiting() {
     }
 
+    public Reservation toReservation() { // TODO: 도메인 간 변환 로직 괜찮을까?
+        return new Reservation(this.member, this.reservationInfo);
+    }
+
     public Long getId() {
         return id;
     }
@@ -55,6 +59,10 @@ public class Waiting {
 
     public Member getMember() {
         return member;
+    }
+
+    public ReservationInfo getReservationInfo() {
+        return reservationInfo;
     }
 
     @Override

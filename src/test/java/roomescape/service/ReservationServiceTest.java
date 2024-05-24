@@ -158,7 +158,7 @@ class ReservationServiceTest {
     @DisplayName("특정 멤버, 테마, 날짜 조건에 따라 예약을 조회한다.")
     @Test
     void should_find_reservations_by_memberId_and_themeId_and_date() {
-        List<Reservation> reservations = reservationService.findReservationsByConditions(1L, 1L, LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
+        List<Reservation> reservations = reservationService.searchReservationsByConditions(1L, 1L, LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
         assertAll(
                 () -> assertThat(reservations).hasSize(1),
                 () -> assertThat(reservations.get(0).getId()).isEqualTo(1L));

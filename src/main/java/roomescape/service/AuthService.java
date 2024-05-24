@@ -1,13 +1,14 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.exception.AuthorizationException;
 import roomescape.model.member.Member;
+import roomescape.model.member.MemberEmail;
+import roomescape.model.member.MemberPassword;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.AuthDto;
 import roomescape.service.dto.MemberInfo;
 import roomescape.util.TokenManager;
-
-import java.util.NoSuchElementException;
 
 @Service
 public class AuthService {
@@ -18,13 +19,15 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
-    public String createToken(AuthDto authDto) {
-        Member member = memberRepository.findByEmailAndPassword(authDto.getEmail(), authDto.getPassword())
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당하는 계정이 없습니다."));
+    public String tryLogin(AuthDto authDto) {
+        MemberEmail email = authDto.getEmail();
+        MemberPassword password = authDto.getPassword();
+        Member member = memberRepository.findByEmailAndPassword(email, password)
+                .orElseThrow(() -> new AuthorizationException("[ERROR] 해당 이메일과 비밀번호에 일치하는 계정이 없습니다."));
         return TokenManager.create(member);
     }
 
-    public MemberInfo checkToken(String token) {
+    public MemberInfo extractLoginMemberInfo(String token) {
         return TokenManager.parse(token);
     }
 }

@@ -4,7 +4,7 @@ import roomescape.model.member.Role;
 
 import java.util.Objects;
 
-public class MemberInfo {
+public class MemberInfo { // TODO: 꼭 필요한 클래스인가 고민해보기
 
     private final long id;
     private final String name;

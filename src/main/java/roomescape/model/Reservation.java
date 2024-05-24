@@ -33,6 +33,10 @@ public class Reservation {
         this(0L, member, new ReservationInfo(date, time, theme));
     }
 
+    public Reservation(Member member, ReservationInfo reservationInfo) {
+        this(0L, member, reservationInfo);
+    }
+
     protected Reservation() {
     }
 
@@ -54,6 +58,10 @@ public class Reservation {
 
     public Member getMember() {
         return member;
+    }
+
+    public ReservationInfo getReservationInfo() {
+        return reservationInfo;
     }
 
     @Override

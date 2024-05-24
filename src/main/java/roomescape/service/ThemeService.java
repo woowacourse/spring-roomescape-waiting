@@ -32,7 +32,7 @@ public class ThemeService {
     }
 
     public Theme saveTheme(ThemeDto themeDto) {
-        validateDuplication(themeDto.getName());
+        validateDuplication(themeDto);
         Theme theme = themeDto.toTheme();
         return themeRepository.save(theme);
     }
@@ -44,12 +44,14 @@ public class ThemeService {
     }
 
     public List<Theme> findPopularThemes() {
-        LocalDate startDate = LocalDate.now().minusDays(1 + COUNT_OF_DAY);
-        LocalDate endDate = LocalDate.now().minusDays(1);
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = now.minusDays(1 + COUNT_OF_DAY);
+        LocalDate endDate = now.minusDays(1);
         return themeRepository.findRankingByDate(startDate, endDate, COUNT_OF_RANKING);
     }
 
-    private void validateDuplication(Name name) {
+    private void validateDuplication(ThemeDto themeDto) {
+        Name name = themeDto.getName();
         boolean isExistName = themeRepository.existsByName(name);
         if (isExistName) {
             throw new DuplicatedException("[ERROR] 테마의 이름은 중복될 수 없습니다.");

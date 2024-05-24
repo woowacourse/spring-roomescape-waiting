@@ -73,7 +73,7 @@ public class ReservationController {
                                                                         @NotNull @Min(1) Long themeId,
                                                                         @NotNull LocalDate from,
                                                                         @NotNull LocalDate to) {
-        List<Reservation> responses = reservationService.findReservationsByConditions(memberId, themeId, from, to);
+        List<Reservation> responses = reservationService.searchReservationsByConditions(memberId, themeId, from, to);
         List<ReservationResponse> response = responses.stream()
                 .map(ReservationResponse::from)
                 .toList();

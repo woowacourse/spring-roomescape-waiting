@@ -29,15 +29,14 @@ public class ReservationTimeService {
     }
 
     public ReservationTime saveReservationTime(ReservationTimeDto timeDto) {
-        validateDuplication(timeDto.getStartAt());
+        validateDuplication(timeDto);
         ReservationTime time = timeDto.toReservationTime();
         return reservationTimeRepository.save(time);
     }
 
     public ReservationTime findReservationTime(long id) {
-        validateExistence(id);
         Optional<ReservationTime> time = reservationTimeRepository.findById(id);
-        return time.orElseThrow(() -> new NotFoundException("[ERROR] 존재하지 않는 데이터입니다."));
+        return time.orElseThrow(() -> new NotFoundException("[ERROR] 존재하지 않는 시간입니다."));
     }
 
     public void deleteReservationTime(long id) {
@@ -46,7 +45,8 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
-    private void validateDuplication(LocalTime startAt) {
+    private void validateDuplication(ReservationTimeDto timeDto) {
+        LocalTime startAt = timeDto.getStartAt();
         boolean isExist = reservationTimeRepository.existsByStartAt(startAt);
         if (isExist) {
             throw new DuplicatedException("[ERROR] 중복된 시간은 추가할 수 없습니다.");

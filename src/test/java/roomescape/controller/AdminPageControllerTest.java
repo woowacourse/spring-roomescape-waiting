@@ -57,7 +57,7 @@ public class AdminPageControllerTest {
     @DisplayName("관리자가 어드민 페이지에 접속할 경우 예외를 반환하지 않는다.")
     @Test
     void should_throw_exception_when_admin_contact() {
-        String token = authService.createToken(adminDto);
+        String token = authService.tryLogin(adminDto);
         RestAssured
                 .given().log().all()
                 .cookie("token", token)
@@ -69,7 +69,7 @@ public class AdminPageControllerTest {
     @DisplayName("일반 유저가 어드민 페이지에 접속할 경우 예외를 반환한다.")
     @Test
     void should_not_throw_exception_when_user_contact() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
         RestAssured
                 .given().log().all()
                 .cookie("token", token)

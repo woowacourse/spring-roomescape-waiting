@@ -61,7 +61,7 @@ public class AuthControllerTest {
     @DisplayName("로그인을 성공할 경우 사용자 정보를 바탕으로 토큰을 생성하여 쿠키에 담아 반환한다.")
     @Test
     void should_return_token_through_cookie_when_login_success() {
-        String expected = authService.createToken(userDto);
+        String expected = authService.tryLogin(userDto);
         String actual = RestAssured
                 .given().log().all()
                 .body(new LoginRequest(userDto.getEmail().getEmail(), userDto.getPassword().getPassword()))
@@ -76,7 +76,7 @@ public class AuthControllerTest {
     @DisplayName("로그인 된 계정의 사용자 정보를 반환한다.")
     @Test
     void should_return_name_of_login_member() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
         LoginResponse body = RestAssured
                 .given().log().all()
                 .cookie("token", token)
@@ -89,7 +89,7 @@ public class AuthControllerTest {
     @DisplayName("로그아웃을 성공할 경우 토큰 쿠키를 삭제한다.")
     @Test
     void should_logout() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
         String tokenAfterLogout = RestAssured
                 .given().log().all()
                 .cookie("token", token)

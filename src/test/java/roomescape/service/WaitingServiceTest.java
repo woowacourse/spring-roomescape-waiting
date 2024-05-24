@@ -151,7 +151,7 @@ class WaitingServiceTest {
     @Test
     void should_throw_exception_when_not_owned_reservation_waiting() {
         LoginMember otherMember = new LoginMember(2L);
-        assertThatThrownBy(() -> waitingService.deleteWaitingOfMember(1L, otherMember))
+        assertThatThrownBy(() -> waitingService.deleteOwnWaiting(1L, otherMember))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("[ERROR] 해당 예약 대기의 소유자가 아닙니다.");
     }

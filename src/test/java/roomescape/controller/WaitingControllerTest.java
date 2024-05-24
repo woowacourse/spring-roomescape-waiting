@@ -146,7 +146,7 @@ class WaitingControllerTest {
     @Test
     void should_insert_reservation_waiting() {
         AuthDto userDto = new AuthDto("whoever@gmail.com", "whoever123!");
-        String token = authService.createToken(userDto); // TODO: can change to TokenManager.create()
+        String token = authService.tryLogin(userDto); // TODO: can change to TokenManager.create()
         WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), 1L, 1L);
 
         RestAssured.given().log().all()
@@ -164,7 +164,7 @@ class WaitingControllerTest {
     @DisplayName("예약 대기 삭제 - 성공")
     @Test
     void should_delete_reservation_waiting_when_reservation_waiting_exist() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         RestAssured.given().log().all()
                 .cookie("token", token)
@@ -179,7 +179,7 @@ class WaitingControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"0", "-1", "-999"})
     void should_throw_exception_when_delete_by_invalid_id(String id) {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         RestAssured.given().log().all()
                 .cookie("token", token)
@@ -191,7 +191,7 @@ class WaitingControllerTest {
     @DisplayName("예약 대기 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
     @Test
     void should_throw_exception_when_delete_by_id_null() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         RestAssured.given().log().all()
                 .cookie("token", token)

@@ -29,7 +29,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request) {
         AuthDto authDto = request.toDto();
-        String token = authService.createToken(authDto);
+        String token = authService.tryLogin(authDto);
         ResponseCookie cookie = CookieManager.createAuthCookie(token, 3600);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -41,8 +41,8 @@ public class AuthController {
         String token = CookieManager.extractAuthCookie(request)
                 .orElseThrow(AuthorizationException::new)
                 .getValue();
-        MemberInfo loginMember = authService.checkToken(token);
-        LoginResponse response = LoginResponse.from(loginMember);
+        MemberInfo loginMemberInfo = authService.extractLoginMemberInfo(token);
+        LoginResponse response = LoginResponse.from(loginMemberInfo);
         return ResponseEntity.ok(response);
     }
 

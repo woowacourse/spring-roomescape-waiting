@@ -18,7 +18,6 @@ import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.service.AuthService;
 import roomescape.service.dto.AuthDto;
-import roomescape.util.TokenManager;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -148,7 +147,7 @@ class ReservationControllerTest {
     @DisplayName("예약을 추가할 수 있다.")
     @Test
     void should_insert_reservation() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
         ReservationRequest request = new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
 
         RestAssured.given().log().all()
@@ -166,7 +165,7 @@ class ReservationControllerTest {
     @DisplayName("존재하는 예약이라면 예약을 삭제할 수 있다.")
     @Test
     void should_delete_reservation_when_reservation_exist() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         RestAssured.given().log().all()
                 .cookie("token", token)
@@ -186,7 +185,7 @@ class ReservationControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"0", "-1", "-999"})
     void should_throw_exception_when_delete_by_invalid_id(String id) {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         RestAssured.given().log().all()
                 .cookie("token", token)
@@ -198,7 +197,7 @@ class ReservationControllerTest {
     @DisplayName("예약 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
     @Test
     void should_throw_exception_when_delete_by_id_null() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         RestAssured.given().log().all()
                 .cookie("token", token)
@@ -274,7 +273,7 @@ class ReservationControllerTest {
     @DisplayName("자신의 예약을 조회한다.") // TODO: add waiting test case
     @Test
     void should_find_reservations_of_member() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         List<MemberReservationResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -290,7 +289,7 @@ class ReservationControllerTest {
     @DisplayName("예약이 삭제될 경우 해당 방탈출의 가장 높은 우선순위의 예약 대기를 자동으로 승인한다.")
     @Test
     void should_reserve_first_waiting_when_delete_reservation() {
-        String token = authService.createToken(userDto);
+        String token = authService.tryLogin(userDto);
 
         RestAssured.given().log().all()
                 .cookie("token", token)

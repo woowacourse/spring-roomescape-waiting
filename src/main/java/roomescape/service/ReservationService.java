@@ -41,22 +41,21 @@ public class ReservationService {
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
-    }
+    } // TODO: 추가된 의존성이 너무 많은가?
 
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
     }
 
     public Reservation saveReservation(ReservationDto reservationDto) {
+        LocalDate date = reservationDto.getDate();
         ReservationTime time = findReservationTime(reservationDto);
         Theme theme = findTheme(reservationDto);
         Member member = findMember(reservationDto);
 
-        LocalDate date = reservationDto.getDate();
-        validateIsFuture(date, time);
+        validateIsFuture(date, time); // TODO: unique 조건?
         validateDuplication(date, time, theme);
 
-        // TODO: 이렇게 모든 객체를 다 찾아서 Reservation 객체를 만드는 게 맞을까?
         Reservation reservation = reservationDto.toReservation(time, theme, member);
         return reservationRepository.save(reservation);
     }
@@ -64,50 +63,40 @@ public class ReservationService {
     private ReservationTime findReservationTime(ReservationDto reservationDto) {
         long timeId = reservationDto.getTimeId();
         Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
-        return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+        return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 시간에 대한 예약입니다."));
     }
 
     private Theme findTheme(ReservationDto reservationDto) {
         long themeId = reservationDto.getThemeId();
         Optional<Theme> theme = themeRepository.findById(themeId);
-        return theme.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+        return theme.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 테마에 대한 예약입니다."));
     }
 
     private Member findMember(ReservationDto reservationDto) {
         long memberId = reservationDto.getMemberId();
         Optional<Member> member = memberRepository.findById(memberId);
-        return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+        return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 사용자에 대한 예약입니다."));
     }
 
     public void deleteReservation(long id, LoginMember member) {
         validateExistence(id);
         validateIsOwner(id, member);
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
-        LocalDate reservationDate = reservation.getDate();
-        ReservationTime reservationTime = reservation.getTime();
-        Theme reservationTheme = reservation.getTheme();
-        ReservationInfo reservationInfo = new ReservationInfo(reservationDate, reservationTime, reservationTheme);
-        waitingRepository.findFirstByReservationInfo(reservationInfo)
-                .ifPresent(this::approveReservation);
+
+        findWaiting(id).ifPresent(this::approveWaiting);
         reservationRepository.deleteById(id);
     }
 
-    private void validateIsOwner(long reservationId, LoginMember member) {
-        boolean isNotOwner = !reservationRepository.existsByIdAndMemberId(reservationId, member.getId());
-        if (isNotOwner) {
-            throw new BadRequestException("[ERROR] 해당 예약의 소유자가 아닙니다.");
-        }
+    private Optional<Waiting> findWaiting(long id) {
+        ReservationInfo reservationInfo = reservationRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 예약입니다."))
+                .getReservationInfo();
+        return waitingRepository.findFirstByReservationInfo(reservationInfo);
     }
 
-    private void approveReservation(Waiting waiting) {
-        waitingRepository.delete(waiting);
-        LocalDate date = waiting.getDate();
-        ReservationTime time = waiting.getTime();
-        Theme theme = waiting.getTheme();
-        Member member = waiting.getMember();
-        Reservation reservation = new Reservation(date, time, theme, member);
+    private void approveWaiting(Waiting waiting) {
+        Reservation reservation = waiting.toReservation();
         reservationRepository.save(reservation);
+        waitingRepository.delete(waiting);
     }
 
     public ReservationTimeInfoDto findReservationTimesInformation(LocalDate date, long themeId) {
@@ -116,7 +105,7 @@ public class ReservationService {
         return new ReservationTimeInfoDto(bookedTimes, allTimes);
     }
 
-    public List<Reservation> findReservationsByConditions(long memberId, long themeId, LocalDate from, LocalDate to) {
+    public List<Reservation> searchReservationsByConditions(long memberId, long themeId, LocalDate from, LocalDate to) {
         return reservationRepository.findByMemberIdAndThemeIdAndDate(memberId, themeId, from, to);
     }
 
@@ -145,6 +134,13 @@ public class ReservationService {
         boolean isNotExist = !reservationRepository.existsById(id);
         if (isNotExist) {
             throw new NotFoundException("[ERROR] 존재하지 않는 예약입니다.");
+        }
+    }
+
+    private void validateIsOwner(long id, LoginMember member) {
+        boolean isNotOwner = !reservationRepository.existsByIdAndMemberId(id, member.getId());
+        if (isNotOwner) {
+            throw new BadRequestException("[ERROR] 해당 예약의 소유자가 아닙니다.");
         }
     }
 }
