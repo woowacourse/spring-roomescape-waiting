@@ -31,6 +31,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     Optional<Reservation> findByIdAndMemberAndStatus(long id, Member member, ReservationStatus reservationStatus);
 
+    Optional<Reservation> findByIdAndStatus(long id, ReservationStatus status);
+
     Optional<Reservation> findFirstByThemeAndDateAndTimeAndStatus(Theme theme,
                                                                   LocalDate date,
                                                                   ReservationTime reservationTime,

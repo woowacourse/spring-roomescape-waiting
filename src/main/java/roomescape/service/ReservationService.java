@@ -96,7 +96,8 @@ public class ReservationService {
 
     @Transactional
     public void rejectConfirmedReservation(long id) {
-        Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, CONFIRMED)
+                .orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(REJECTED);
         Optional<Reservation> first = reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
                 reservation.getTheme(),
