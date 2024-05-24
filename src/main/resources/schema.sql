@@ -42,5 +42,8 @@ CREATE TABLE waiting
     id             BIGINT NOT NULL AUTO_INCREMENT,
     reservation_id BIGINT,
     member_id      BIGINT,
-    create_at      DATETIME
+    created_at     DATETIME,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    FOREIGN KEY (member_id) REFERENCES member (id)
 );
