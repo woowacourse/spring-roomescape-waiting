@@ -11,9 +11,9 @@ public record MemberReservationsResponse(List<MemberReservationResponse> data) {
     public static MemberReservationsResponse toResponse(final List<ReservationOutput> reservationOutputs, final List<WaitingOutput> waitingOutputs) {
         return new MemberReservationsResponse(Stream.concat(
                         reservationOutputs.stream()
-                                .map(MemberReservationResponse::toResponse),
+                                .map(MemberReservationResponse::from),
                         waitingOutputs.stream()
-                                .map(MemberReservationResponse::toResponse)
+                                .map(MemberReservationResponse::from)
                 )
                 .sorted(Comparator.comparing(MemberReservationResponse::date)
                         .thenComparing(MemberReservationResponse::time))

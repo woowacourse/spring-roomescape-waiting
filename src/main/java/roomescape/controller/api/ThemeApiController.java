@@ -26,21 +26,21 @@ public class ThemeApiController {
     public ResponseEntity<ThemeResponse> createTheme(@RequestBody final ThemeCreateRequest request) {
         final ThemeOutput output = themeService.createTheme(request.toInput());
         return ResponseEntity.created(URI.create("/times/" + output.id()))
-                .body(ThemeResponse.toResponse(output));
+                .body(ThemeResponse.from(output));
     }
 
     @GetMapping
     public ResponseEntity<ThemesResponse> getAllThemes() {
         final List<ThemeOutput> outputs = themeService.getAllThemes();
         return ResponseEntity.ok()
-                .body(ThemesResponse.toResponse(outputs));
+                .body(ThemesResponse.from(outputs));
     }
 
     @GetMapping("/popular")
     public ResponseEntity<ThemesResponse> getPopularThemes(@RequestParam final LocalDate date) {
         final List<ThemeOutput> outputs = themeService.getPopularThemes(date);
         return ResponseEntity.ok()
-                .body(ThemesResponse.toResponse(outputs));
+                .body(ThemesResponse.from(outputs));
     }
 
     @DeleteMapping("/{id}")

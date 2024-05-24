@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.api.dto.request.AdminReservationRequest;
 import roomescape.controller.api.dto.response.ReservationResponse;
-import roomescape.controller.api.dto.response.ReservationsResponse;
+import roomescape.controller.api.dto.response.WaitingsResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.WaitingService;
 import roomescape.service.dto.output.ReservationOutput;
@@ -28,7 +28,7 @@ public class AdminApiController {
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody final AdminReservationRequest request) {
         final ReservationOutput output = reservationService.createReservation(request.toInput());
         return ResponseEntity.created(URI.create("/reservations/" + output.id()))
-                .body(ReservationResponse.toResponse(output));
+                .body(ReservationResponse.from(output));
     }
 
     @DeleteMapping("/reservations/{id}")
@@ -39,9 +39,9 @@ public class AdminApiController {
     }
 
     @GetMapping("/waitings")
-    public ResponseEntity<ReservationsResponse> getAllWaiting() {
+    public ResponseEntity<WaitingsResponse> getAllWaiting() {
         final List<WaitingOutput> outputs = waitingService.getAllWaiting();
-        return ResponseEntity.ok(ReservationsResponse.toResponseWithWaiting(outputs));
+        return ResponseEntity.ok(WaitingsResponse.from(outputs));
     }
 
     @DeleteMapping("/waiting/{id}")

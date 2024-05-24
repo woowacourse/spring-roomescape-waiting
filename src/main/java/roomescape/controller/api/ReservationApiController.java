@@ -34,13 +34,13 @@ public class ReservationApiController {
                                                                  final LoginMemberRequest loginMemberRequest) {
         final ReservationOutput output = reservationService.createReservation(reservationRequest.toInput(loginMemberRequest.id()));
         return ResponseEntity.created(URI.create("/reservations/" + output.id()))
-                .body(ReservationResponse.toResponse(output));
+                .body(ReservationResponse.from(output));
     }
 
     @GetMapping
     public ResponseEntity<ReservationsResponse> getAllReservations() {
         final List<ReservationOutput> outputs = reservationService.getAllReservations();
-        return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
+        return ResponseEntity.ok(ReservationsResponse.from(outputs));
     }
 
     @GetMapping("/search")
@@ -50,7 +50,7 @@ public class ReservationApiController {
             @RequestParam final LocalDate fromDate,
             @RequestParam final LocalDate toDate) {
         final List<ReservationOutput> outputs = reservationService.searchReservation(new ReservationSearchInput(themeId, memberId, fromDate, toDate));
-        return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
+        return ResponseEntity.ok(ReservationsResponse.from(outputs));
     }
 
     @GetMapping("/mine")

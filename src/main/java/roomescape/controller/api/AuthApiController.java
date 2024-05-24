@@ -31,7 +31,7 @@ public class AuthApiController {
     public ResponseEntity<MemberCreateResponse> createMember(@RequestBody final MemberCreateRequest request) {
         final MemberCreateOutput output = memberService.createMember(request.toInput());
         return ResponseEntity.created(URI.create("/reservations/" + output.id()))
-                .body(MemberCreateResponse.toResponse(output));
+                .body(MemberCreateResponse.from(output));
     }
 
     @PostMapping("/login")
