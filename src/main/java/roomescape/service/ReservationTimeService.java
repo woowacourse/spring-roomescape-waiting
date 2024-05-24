@@ -13,7 +13,6 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.FindTimeAndAvailabilityDto;
 
 @Service
-@Transactional
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -25,6 +24,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationTime save(String startAt) {
         ReservationTime reservationTime = new ReservationTime(startAt);
         validateDuplication(startAt);
@@ -37,6 +37,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new RoomescapeException("해당 시간을 사용하는 예약이 존재하여 삭제할 수 없습니다.");

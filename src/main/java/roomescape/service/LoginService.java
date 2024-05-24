@@ -8,7 +8,6 @@ import roomescape.global.exception.AuthorizationException;
 import roomescape.repository.MemberRepository;
 
 @Service
-@Transactional
 public class LoginService {
 
     private final MemberRepository memberRepository;

@@ -22,7 +22,6 @@ import roomescape.repository.dto.ReservationWithRank;
 import roomescape.service.dto.FindReservationWithRankDto;
 
 @Service
-@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -41,11 +40,13 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public Reservation reserve(Long memberId, LocalDate date, Long timeId, Long themeId) {
         validateDuplication(date, timeId, themeId);
         return save(memberId, date, timeId, themeId, RESERVED);
     }
 
+    @Transactional
     public Reservation standby(Long memberId, LocalDate date, Long timeId, Long themeId) {
         validateAlreadyBookedByMember(memberId, date, timeId, themeId);
         return save(memberId, date, timeId, themeId, STANDBY);
@@ -92,6 +93,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteById(Long id) {
         Reservation reservation = reservationRepository.findByIdAndStatus(id, RESERVED)
             .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않아 삭제할 수 없습니다."));
@@ -100,6 +102,7 @@ public class ReservationService {
         approveNextWaiting(reservation);
     }
 
+    @Transactional
     public void deleteStandby(Long id, Member member) {
         Reservation reservation = reservationRepository.findByIdAndStatus(id, STANDBY)
             .orElseThrow(() -> new RoomescapeException("예약대기가 존재하지 않아 삭제할 수 없습니다."));

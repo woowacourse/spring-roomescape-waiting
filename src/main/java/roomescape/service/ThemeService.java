@@ -10,7 +10,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
-@Transactional
 public class ThemeService {
 
     private static final int POPULAR_START_DATE = 8;
@@ -25,6 +24,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public Theme save(String name, String description, String thumbnail) {
         Theme theme = new Theme(name, description, thumbnail);
         validateDuplication(name);
@@ -37,6 +37,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new RoomescapeException("해당 테마를 사용하는 예약이 존재하여 삭제할 수 없습니다.");
