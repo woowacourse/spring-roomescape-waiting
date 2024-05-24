@@ -12,8 +12,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT r
             FROM Reservation AS r
             WHERE r.member.id = :memberId
-            AND r.theme.id = :themeId
-            AND r.date.value BETWEEN :dateFrom AND :dateTo
+                AND r.theme.id = :themeId
+                AND r.date.value BETWEEN :dateFrom AND :dateTo
             """)
     List<Reservation> findByMemberAndThemeAndPeriod(@Param("memberId") Long memberId,
                                                     @Param("themeId") Long themeId,
@@ -27,9 +27,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT COUNT(r)
             FROM Reservation AS r
             WHERE r.date = :date
-            AND r.theme = :themeId
-            AND r.time = :timeId
-            AND r.id < :id
+                AND r.theme = :themeId
+                AND r.time = :timeId
+                AND r.id < :id
             """)
     int countEarlierReservationOnSlot(@Param("id") Long id,
                                       @Param("timeId") Long timeId,
@@ -44,8 +44,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.theme
             JOIN FETCH r.member
             WHERE r.date.value =:date
-            AND r.time.id =:timeId
-            AND r.theme.id =:themeId
+                AND r.time.id =:timeId
+                AND r.theme.id =:themeId
             """)
     List<Reservation> findByDateAndTimeAndTheme(@Param("date") LocalDate date,
                                                 @Param("timeId") Long timeId,
@@ -54,12 +54,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT r1
             FROM Reservation AS r1
-            WHERE(SELECT COUNT(r2)
-            FROM Reservation AS r2
-            WHERE r2.date=r1.date
-            AND r2.theme = r1.theme
-            AND r2.time = r1.time
-            AND r1.id>r2.id) > 0
+            INNER JOIN Reservation AS r2
+                ON r1.time = r2.time
+                AND r1.date = r2.date
+                AND r1.theme = r2.theme
+            JOIN FETCH r1.member
+            JOIN FETCH r1.theme
+            JOIN FETCH r1.time
+            WHERE r1.id > r2.id
             """)
     List<Reservation> findReservationOnWaiting();
 }
