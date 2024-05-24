@@ -1,14 +1,13 @@
 package roomescape.reservation.domain;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class PopularThemes {
 
+    private static final int POPULAR_THEME_SIZE = 10;
     private final List<Theme> populars;
 
     public PopularThemes(List<Theme> themes) {
@@ -16,21 +15,16 @@ public class PopularThemes {
     }
 
     private List<Theme> makePopularThemes(List<Theme> themes) {
-        Map<Theme, Integer> countTheme = new HashMap<>();
-        for (Theme theme : themes) {
-            countTheme.put(theme, countTheme.getOrDefault(theme, 0) + 1);
-        }
-        return sortThemes(countTheme).stream()
-                .limit(10)
-                .toList();
-    }
+        Map<String, Long> countTheme = themes.stream()
+                .collect(Collectors.groupingBy(Theme::getName, Collectors.counting()));
 
-    private List<Theme> sortThemes(Map<Theme, Integer> countTheme) {
-        List<Entry<Theme, Integer>> list = new ArrayList<>(countTheme.entrySet());
-        list.sort(Entry.comparingByValue(Comparator.reverseOrder()));
-
-        return list.stream()
-                .map(Entry::getKey)
+        return countTheme.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue(Comparator.reverseOrder()))
+                .limit(POPULAR_THEME_SIZE)
+                .flatMap(entry -> themes.stream()
+                        .filter(theme -> theme.getName().equals(entry.getKey()))
+                        .findFirst()
+                        .stream())
                 .toList();
     }
 
