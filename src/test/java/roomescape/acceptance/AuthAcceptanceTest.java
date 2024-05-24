@@ -14,6 +14,7 @@ import roomescape.member.domain.Member;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.TEST_PASSWORD;
 
 public class AuthAcceptanceTest extends AcceptanceTest {
@@ -21,7 +22,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     @DisplayName("사용자가 로그인한다.")
     void login() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         LoginRequest request = new LoginRequest(member.getEmail().getValue(), member.getPassword());
 
         // when
@@ -66,7 +67,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     @DisplayName("틀린 비밀번호로 사용자가 로그인한다.")
     void loginWithInvalidPassword() {
         // given
-        createTestMember(MIA_EMAIL);
+        createTestMember(MIA_EMAIL, MIA_NAME);
         LoginRequest request = new LoginRequest(MIA_EMAIL, "invalid-password");
 
         // when
@@ -90,7 +91,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     @DisplayName("사용자 인증 정보를 조회한다.")
     void checkAuthInformation() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 

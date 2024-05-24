@@ -22,10 +22,12 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.TestFixture.ADMIN_EMAIL;
 import static roomescape.TestFixture.MIA_EMAIL;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.TOMMY_EMAIL;
+import static roomescape.TestFixture.TOMMY_NAME;
 import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
@@ -36,7 +38,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약을 추가한다.")
     void createOneReservation() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -66,8 +68,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약 대기를 추가한다.")
     void createWaitingReservation() {
         // given
-        Member mia = createTestMember(MIA_EMAIL);
-        Member tommy = createTestMember(TOMMY_EMAIL);
+        Member mia = createTestMember(MIA_EMAIL, MIA_NAME);
+        Member tommy = createTestMember(TOMMY_EMAIL, TOMMY_NAME);
         String miaToken = createTestToken(mia.getEmail().getValue());
         String tommyToken = createTestToken(tommy.getEmail().getValue());
         Long themeId = createTestTheme();
@@ -100,7 +102,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("동일한 시간대에 예약을 추가한다.")
     void createDuplicatedReservation() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -131,7 +133,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("동시 요청으로 동일한 시간대에 예약을 추가한다.")
     void createDuplicatedReservationInMultiThread() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -143,7 +145,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         // when
         for (int i = 0; i < 5; i++) {
-            new Thread(() -> RestAssured.given().log().all()
+            new Thread(() -> RestAssured.given()
                     .contentType(ContentType.JSON)
                     .cookie(cookie)
                     .body(request)
@@ -152,19 +154,73 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         }
 
         // then
-        List<ReservationResponse> reservationResponses = findAllReservations();
-        assertThat(reservationResponses).hasSize(1);
-    }
-
-    private List<ReservationResponse> findAllReservations() {
         Member admin = createTestAdmin();
         String adminToken = createTestToken(admin.getEmail().getValue());
         Cookie adminCookie = new Cookie.Builder("token", adminToken).build();
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
+
+        List<ReservationResponse> reservationResponses = findAllReservations(adminCookie);
+        assertThat(reservationResponses).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("동시 요청으로 예약을 삭제할 때 대기 예약을 생성한다.")
+    void createWaitingReservationWhenReservationIsBeingDeleted() throws InterruptedException {
+        // given
+        createTestMember(TOMMY_EMAIL, TOMMY_NAME);
+        String tommyToken = createTestToken(TOMMY_EMAIL);
+        Long themeId = createTestTheme();
+        Long timeId = createTestReservationTime();
+        Long reservationId = createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, tommyToken, BOOKING);
+
+        createTestMember(MIA_EMAIL, MIA_NAME);
+        String miaToken = createTestToken(MIA_EMAIL);
+        createTestAdmin();
+        String adminToken = createTestToken(ADMIN_EMAIL);
+
+        Cookie miaCookie = new Cookie.Builder("token", miaToken).build();
+        ReservationSaveRequest waitingReservationSaveRequest = new ReservationSaveRequest(
+                MIA_RESERVATION_DATE, timeId, themeId, WAITING.getIdentifier());
+        Cookie adminCookie = new Cookie.Builder("token", adminToken).build();
+
+        // when
+        new Thread(() -> RestAssured.given().log().all()
+                .cookie(adminCookie)
+                .when().delete("/admin/reservations/" + reservationId)
+                .then().log().all()
+        ).start();
+
+        new Thread(() -> RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(miaCookie)
+                .body(waitingReservationSaveRequest)
+                .when().post("/reservations")
+                .then().log().all()
+        ).start();
+
+        // then
+        Thread.sleep(1000);
+        List<ReservationResponse> waitings = findAllWaitingReservations(adminCookie);
+        List<ReservationResponse> bookings = findAllReservations(adminCookie);
+        assertThat(waitings).hasSize(0);
+        assertThat(bookings).hasSize(1)
+                .extracting(ReservationResponse::memberName)
+                .contains(MIA_NAME);
+    }
+
+    private List<ReservationResponse> findAllReservations(Cookie adminCookie) {
+        ExtractableResponse<Response> response = RestAssured.given()
                 .cookie(adminCookie)
                 .when().get("/admin/reservations")
-                .then().log().all()
-                .extract();
+                .then().extract();
+        return Arrays.stream(response.as(ReservationResponse[].class))
+                .toList();
+    }
+
+    private  List<ReservationResponse> findAllWaitingReservations(Cookie adminCookie) {
+        ExtractableResponse<Response> response = RestAssured.given()
+                .cookie(adminCookie)
+                .when().get("/admin/reservations/waiting")
+                .then().extract();
         return Arrays.stream(response.as(ReservationResponse[].class))
                 .toList();
     }
@@ -173,7 +229,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("동일한 시간에 예약이 없을 때 예약 대기를 추가한다.")
     void createInvalidWaitingReservation() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -203,7 +259,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약 날짜가 없는 예약을 추가한다.")
     void createInvalidReservation() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -232,7 +288,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("존재하지 않는 예약 시간에 예약을 추가한다.")
     void createReservationWithNotExistingTime() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Long notExistingTimeId = 1L;
         Long themeId = createTestTheme();
@@ -265,9 +321,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        Member mia = createTestMember(MIA_EMAIL);
+        Member mia = createTestMember(MIA_EMAIL, MIA_NAME);
         String miaToken = createTestToken(mia.getEmail().getValue());
-        Member tommy = createTestMember(TOMMY_EMAIL);
+        Member tommy = createTestMember(TOMMY_EMAIL, TOMMY_NAME);
         String tommyToken = createTestToken(tommy.getEmail().getValue());
 
         createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, miaToken, BOOKING);

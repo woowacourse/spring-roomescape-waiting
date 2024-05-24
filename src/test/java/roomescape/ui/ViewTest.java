@@ -8,6 +8,7 @@ import roomescape.acceptance.AcceptanceTest;
 import roomescape.member.domain.Member;
 
 import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.MIA_NAME;
 
 class ViewTest extends AcceptanceTest {
 
@@ -46,7 +47,7 @@ class ViewTest extends AcceptanceTest {
     @Test
     @DisplayName("일반 사용자 권한으로 어드민 예약 페이지를 조회한다.")
     void getAdminReservationPageWithoutAuthority() {
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 

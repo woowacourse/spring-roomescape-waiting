@@ -52,7 +52,7 @@ public class MemberAcceptanceTest extends AcceptanceTest {
     @DisplayName("사용자 권한으로 사용자 목록을 조회한다.")
     void findAllMembersWithoutAuthority() {
         // given
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 

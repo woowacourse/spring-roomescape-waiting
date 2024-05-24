@@ -39,7 +39,7 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
         String token = createTestToken(admin.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
-        Long memberID = createTestMember(MIA_EMAIL).getId();
+        Long memberID = createTestMember(MIA_EMAIL, MIA_NAME).getId();
 
         AdminReservationSaveRequest request = new AdminReservationSaveRequest(
                 MIA_RESERVATION_DATE, timeId, themeId, memberID);
@@ -69,7 +69,7 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
         // given
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
-        Member member = createTestMember(MIA_EMAIL);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         String token = createTestToken(member.getEmail().getValue());
 
         AdminReservationSaveRequest request = new AdminReservationSaveRequest(
@@ -182,7 +182,7 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
 
         createTestAdmin();
         String adminToken = createTestToken(ADMIN_EMAIL);
-        createTestMember(MIA_EMAIL);
+        createTestMember(MIA_EMAIL, MIA_NAME);
         String miaToken = createTestToken(MIA_EMAIL);
 
         createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, adminToken, BOOKING);
@@ -230,7 +230,7 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
 
                     createTestAdmin();
                     String adminToken = createTestToken(ADMIN_EMAIL);
-                    createTestMember(MIA_EMAIL);
+                    createTestMember(MIA_EMAIL, MIA_NAME);
                     String miaToken = createTestToken(MIA_EMAIL);
 
                     createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, adminToken, BOOKING);

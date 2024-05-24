@@ -72,8 +72,8 @@ public abstract class AcceptanceTest {
                 .id();
     }
 
-    protected Member createTestMember(String email) {
-        MemberJoinRequest request = new MemberJoinRequest(email, TEST_PASSWORD, MIA_NAME);
+    protected Member createTestMember(String email, String name) {
+        MemberJoinRequest request = new MemberJoinRequest(email, TEST_PASSWORD, name);
         MemberResponse response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
@@ -86,13 +86,13 @@ public abstract class AcceptanceTest {
     protected Long createTestReservation(LocalDate date, Long timeId, Long themeId, String token, ReservationStatus status) {
         ReservationSaveRequest request = new ReservationSaveRequest(date, timeId, themeId, status.name());
         Cookie cookie = new Cookie.Builder("token", token).build();
+        System.out.println("createTestReservation: ");
         return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .cookie(cookie)
                 .body(request)
                 .when().post("/reservations")
-                .then().log().all()
-                .extract().as(ReservationResponse.class)
+                .then().extract().as(ReservationResponse.class)
                 .id();
     }
 
