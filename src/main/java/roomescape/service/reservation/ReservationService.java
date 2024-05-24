@@ -43,8 +43,8 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
-    public ReservationResponse createReservation(ReservationRequest reservationRequest, Long memberId) {
-        Member member = getMember(memberId);
+    public ReservationResponse createReservation(ReservationRequest reservationRequest) {
+        Member member = getMember(reservationRequest.memberId());
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 

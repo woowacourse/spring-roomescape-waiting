@@ -38,7 +38,7 @@ public class ReservationController {
             @MemberId Long memberId
     ) {
         ReservationRequest reservationRequest = userReservationRequest.toReservationRequest(memberId);
-        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest, memberId);
+        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest);
         URI location = UriComponentsBuilder.newInstance()
                 .path("/reservations/{id}")
                 .buildAndExpand(reservationResponse.id())

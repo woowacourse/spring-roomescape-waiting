@@ -25,7 +25,9 @@ public class MemberController {
     }
 
     @PostMapping
-    public ResponseEntity<MemberResponse> postMember(@RequestBody @Valid MemberRequest memberRequest) {
+    public ResponseEntity<MemberResponse> postMember(
+            @RequestBody @Valid MemberRequest memberRequest
+    ) {
         MemberResponse member = memberService.createMember(memberRequest);
         URI location = UriComponentsBuilder.newInstance()
                 .path("/members/{id}")

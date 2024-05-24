@@ -69,8 +69,7 @@ class ReservationServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12),
                 reservationTime.getId(), theme.getId(), member.getId());
 
-        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest,
-                reservationRequest.memberId());
+        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest);
 
         assertAll(
                 () -> assertThat(reservationResponse.name()).isEqualTo(member.getName()),
@@ -88,7 +87,7 @@ class ReservationServiceTest {
                 1L);
 
         assertThatThrownBy(
-                () -> reservationService.createReservation(reservationRequest, reservationRequest.memberId()))
+                () -> reservationService.createReservation(reservationRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ExceptionCode.NOT_FOUND_RESERVATION_TIME.getErrorMessage());
     }
@@ -103,7 +102,7 @@ class ReservationServiceTest {
                 theme.getId(), member.getId());
 
         assertThatThrownBy(
-                () -> reservationService.createReservation(reservationRequest, reservationRequest.memberId()))
+                () -> reservationService.createReservation(reservationRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ExceptionCode.PAST_TIME_SLOT_RESERVATION.getErrorMessage());
     }

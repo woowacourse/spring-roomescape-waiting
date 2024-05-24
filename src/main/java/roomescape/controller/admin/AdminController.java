@@ -32,9 +32,9 @@ public class AdminController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> postReservation(
-            @RequestBody @Valid ReservationRequest reservationRequest) {
-        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest,
-                reservationRequest.memberId());
+            @RequestBody @Valid ReservationRequest reservationRequest
+    ) {
+        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest);
         URI location = UriComponentsBuilder.newInstance()
                 .path("/reservations/{id}")
                 .buildAndExpand(reservationResponse.id())
