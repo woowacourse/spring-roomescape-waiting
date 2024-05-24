@@ -1,16 +1,32 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const data = [
+        ...await getReservations(),
+        ...await getWaitings()
+    ];
+    render(data);
+});
+
+function getReservations() {
     /*
     TODO: [2단계] 내 예약 목록 조회 기능
           endpoint 설정
      */
-    fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
+    return fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
         })
-        .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
-});
+}
+
+function getWaitings() {
+    return fetch('/waitings/mine') // 내 예약 목록 조회 API 호출
+        .then(response => {
+            if (response.status === 200) return response.json();
+            throw new Error('Read failed');
+        })
+        .catch(error => console.error('Error fetching reservations:', error));
+}
 
 function render(data) {
     const tableBody = document.getElementById('table-body');

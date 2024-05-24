@@ -2,12 +2,15 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.request.ReservationRequest;
+import roomescape.controller.response.MemberWaitingResponse;
 import roomescape.controller.response.WaitingResponse;
 import roomescape.model.Waiting;
 import roomescape.model.member.LoginMember;
@@ -33,5 +36,14 @@ public class WaitingController {
         return ResponseEntity
                 .created(URI.create("/waitings/" + response.getId()))
                 .body(response);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MemberWaitingResponse>> getReservationsOfMember(LoginMember member) {
+        List<Waiting> waitings = waitingService.findWaitingsByMember(member);
+        List<MemberWaitingResponse> response = waitings.stream()
+                .map((MemberWaitingResponse::new))
+                .toList();
+        return ResponseEntity.ok(response);
     }
 }

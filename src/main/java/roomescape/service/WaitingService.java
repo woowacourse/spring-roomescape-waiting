@@ -12,6 +12,7 @@ import roomescape.exception.DuplicatedException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
+import roomescape.model.member.LoginMember;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.WaitingRepository;
@@ -42,6 +43,10 @@ public class WaitingService {
 
         Waiting waiting = new Waiting(reservationDto);
         return waitingRepository.save(waiting);
+    }
+
+    public List<Waiting> findWaitingsByMember(LoginMember member) {
+        return waitingRepository.findByMemberId(member.getId());
     }
 
     private ReservationTime findReservationTime(ReservationDto reservationDto) {
