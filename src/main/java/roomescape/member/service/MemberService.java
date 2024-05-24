@@ -1,7 +1,6 @@
 package roomescape.member.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.dto.MemberDto;
 import roomescape.member.dto.SaveMemberRequest;
 import roomescape.member.encoder.PasswordEncoder;
@@ -12,7 +11,6 @@ import roomescape.member.repository.MemberRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Transactional
 @Service
 public class MemberService {
 
@@ -24,7 +22,6 @@ public class MemberService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional(readOnly = true)
     public List<MemberDto> getMembers() {
         return memberRepository.findAll()
                 .stream()

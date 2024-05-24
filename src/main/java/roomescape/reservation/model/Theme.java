@@ -12,10 +12,13 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     private ThemeName name;
+
     @Embedded
     private ThemeDescription description;
+
     @Embedded
     private ThemeThumbnail thumbnail;
 

@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.ReservationTimeDto;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Transactional
 @Service
 public class ReservationTimeService {
 
@@ -30,7 +28,6 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationTimeDto> getReservationTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -67,7 +64,6 @@ public class ReservationTimeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public ReservationTimeAvailabilities getAvailableReservationTimes(final LocalDate date, final Long themeId) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         final List<Reservation> reservations = reservationRepository.findAllByDateAndTheme_Id(new ReservationDate(date), themeId);

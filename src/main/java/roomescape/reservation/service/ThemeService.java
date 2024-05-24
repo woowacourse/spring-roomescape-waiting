@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.ThemeDto;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.Theme;
@@ -14,7 +13,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Transactional
 @Service
 public class ThemeService {
 
@@ -32,7 +30,6 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeDto> getThemes() {
         return themeRepository.findAll()
                 .stream()
@@ -61,7 +58,6 @@ public class ThemeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeDto> getPopularThemes() {
         final ReservationDate startAt = new ReservationDate(LocalDate.now().minusDays(7));
         final ReservationDate endAt = new ReservationDate(LocalDate.now().minusDays(1));
