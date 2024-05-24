@@ -29,8 +29,11 @@ public class ReservationWaitingQueue implements AtomicQueue<ReservationSlot, Mem
 
         AtomicBoolean lock = getLock(slot);
         if (isFirst(member, slot)) {
-            callback.accept(member, slot);
-            lock.set(false);
+            try {
+                callback.accept(member, slot);
+            } finally {
+                lock.set(false);
+            }
             return true;
         }
 
