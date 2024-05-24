@@ -27,6 +27,7 @@ INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'hih
 INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'bibap@naver.com', 'hihi');
 INSERT INTO member (name, role, email, password) values ( '포비', 'ADMIN', 'test@naver.com', 'hihi');
 INSERT INTO member (name, role, email, password) values ( '로키', 'ADMIN', 'loki@naver.com', 'hihi');
+INSERT INTO member (name, role, email, password) values ( '호돌', 'ADMIN', 'hodol@naver.com', 'hihi');
 
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-04-23', 1, 1);
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-04-24', 2, 1);
