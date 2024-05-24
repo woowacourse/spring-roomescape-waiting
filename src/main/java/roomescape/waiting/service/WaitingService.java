@@ -1,10 +1,12 @@
 package roomescape.waiting.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.MyReservationWaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingCreateRequest;
@@ -21,6 +23,18 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
+    }
+
+    public List<MyReservationWaitingResponse> findMyWaitings(Long memberId) {
+        return waitingRepository.findByMember_idWithRank(memberId).stream()
+                .map(MyReservationWaitingResponse::from)
+                .toList();
+    }
+
+    private boolean isDuplicateWaiting(Waiting waiting) {
+        return waitingRepository.existsByReservation_idAndMember_id(
+                waiting.getReservation().getId(),
+                waiting.getMember().getId());
     }
 
     public WaitingResponse createWaiting(WaitingCreateRequest request, Long waitingMemberId) {
@@ -53,11 +67,5 @@ public class WaitingService {
         if (isDuplicateWaiting(waiting)) {
             throw new IllegalArgumentException("중복으로 예약 대기를 할 수 없습니다.");
         }
-    }
-
-    private boolean isDuplicateWaiting(Waiting waiting) {
-        return waitingRepository.existsByReservation_idAndMember_id(
-                waiting.getReservation().getId(),
-                waiting.getMember().getId());
     }
 }

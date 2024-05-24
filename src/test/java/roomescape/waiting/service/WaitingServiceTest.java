@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,13 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.MyReservationWaitingResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingWithOrder;
 import roomescape.waiting.dto.WaitingCreateRequest;
 import roomescape.waiting.dto.WaitingResponse;
 import roomescape.waiting.repository.WaitingRepository;
@@ -37,6 +40,30 @@ class WaitingServiceTest {
     private MemberRepository memberRepository;
     @InjectMocks
     private WaitingService waitingService;
+
+    @DisplayName("나의 예약 대기 목록을 조회할 수 있다.")
+    @Test
+    void findMyWaitingTest() {
+        LocalDate date = LocalDate.now().plusDays(7);
+        WaitingCreateRequest request = new WaitingCreateRequest(date, 1L, 1L);
+        Reservation reservation = new Reservation(
+                1L,
+                new Member(1L, "브라운", "brown@abc.com"),
+                LocalDate.of(2024, 8, 15),
+                new ReservationTime(1L, LocalTime.of(19, 0)),
+                new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg"));
+        Member waitingMember = new Member(2L, "낙낙", "naknak@abc.com");
+        WaitingWithOrder waitingWithOrder = new WaitingWithOrder(new Waiting(reservation, waitingMember), 1L);
+
+        given(waitingRepository.findByMember_idWithRank(2L))
+                .willReturn(List.of(waitingWithOrder));
+
+        List<MyReservationWaitingResponse> expected = List.of(MyReservationWaitingResponse.from(waitingWithOrder));
+
+        List<MyReservationWaitingResponse> actual = waitingService.findMyWaitings(2L);
+
+        assertThat(actual).isEqualTo(expected);
+    }
 
     @DisplayName("예약 대기를 생성할 수 있다.")
     @Test
