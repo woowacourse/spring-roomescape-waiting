@@ -147,4 +147,19 @@ public class ReservationService {
 
         reservationRepository.deleteById(id);
     }
+
+    public Reservation updateReservationStatus(Long id, Status status) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("해당 id를 가진 예약이 존재하지 않습니다."));
+
+        Reservation changedReservation = updateStatus(reservation, status);
+        reservationRepository.save(changedReservation);
+
+        return changedReservation;
+    }
+
+    private Reservation updateStatus(Reservation reservation, Status status) {
+        return new Reservation(reservation.getId(), reservation.getDate(), status,
+                reservation.getTime(), reservation.getTheme(), reservation.getMember());
+    }
 }

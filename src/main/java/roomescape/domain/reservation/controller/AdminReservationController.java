@@ -51,4 +51,11 @@ public class AdminReservationController {
         List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
         return ResponseEntity.ok(reservationResponses);
     }
+
+    @PatchMapping("/admin/reservations/wait/{id}")
+    public ResponseEntity<ReservationResponse> approveReservation(@PathVariable("id") Long id) {
+        Reservation reservation = reservationService.updateReservationStatus(id, Status.RESERVATION);
+        ReservationResponse reservationResponse = ReservationResponse.from(reservation);
+        return ResponseEntity.ok(reservationResponse);
+    }
 }
