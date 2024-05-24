@@ -28,6 +28,9 @@ class ThemeServiceTest {
     ReservationQueryService reservationQueryService;
 
     @Autowired
+    CancelReservationService cancelReservationService;
+
+    @Autowired
     ReservationService reservationService;
 
     @Test
@@ -91,6 +94,6 @@ class ThemeServiceTest {
 
     void deleteAllReservation() {
         List<ReservationResponse> reservationResponses = reservationQueryService.getAllReservations();
-        reservationResponses.forEach(reservation -> reservationService.deleteReservation(reservation.id()));
+        reservationResponses.forEach(reservation -> cancelReservationService.deleteReservation(reservation.id()));
     }
 }

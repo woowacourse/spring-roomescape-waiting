@@ -2,22 +2,16 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
-import roomescape.domain.waiting.Waiting;
-import roomescape.domain.waiting.WaitingWithSequence;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
 import roomescape.util.DateUtil;
 
 @Service
@@ -27,20 +21,17 @@ public class ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository timeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository,
-            WaitingRepository waitingRepository
+            MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.waitingRepository = waitingRepository;
     }
 
     public Long addReservation(ReservationRequest request) {
@@ -49,35 +40,11 @@ public class ReservationService {
         return reservationRepository.save(reservation).getId();
     }
 
-    @Transactional
-    public void deleteReservation(Long id) {
-        Reservation reservation = findReservationById(id);
-        List<WaitingWithSequence> waitings = waitingRepository.findWaitingsWithSequenceByReservation(reservation);
-
-        Optional<WaitingWithSequence> priorityWaiting = waitings.stream()
-                .filter(WaitingWithSequence::isPriority)
-                .findFirst();
-
-        priorityWaiting.ifPresentOrElse(it -> {
-            Waiting waiting = it.getWaiting();
-            waiting.approve();
-            waitingRepository.delete(waiting);
-        }, () -> reservationRepository.deleteById(reservation.getId()));
-    }
-
     private Reservation convertReservation(ReservationRequest request) {
         ReservationTime reservationTime = findReservationTime(request.timeId());
         Theme theme = findTheme(request.themeId());
         Member member = findMember(request.memberId());
         return request.toEntity(reservationTime, theme, member);
-    }
-
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 예약 정보 입니다.",
-                        new Throwable("reservation_id : " + id)
-                ));
     }
 
     private ReservationTime findReservationTime(Long timeId) {

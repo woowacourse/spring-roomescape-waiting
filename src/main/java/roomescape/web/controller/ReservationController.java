@@ -15,6 +15,7 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.UserReservationRequest;
 import roomescape.dto.reservation.UserReservationResponse;
+import roomescape.service.CancelReservationService;
 import roomescape.service.ReservationQueryService;
 import roomescape.service.ReservationService;
 
@@ -23,18 +24,22 @@ class ReservationController {
 
     private final ReservationService reservationService;
     private final ReservationQueryService reservationQueryService;
+    private final CancelReservationService cancelReservationService;
 
     public ReservationController(
             ReservationService reservationService,
-            ReservationQueryService reservationQueryService
+            ReservationQueryService reservationQueryService,
+            CancelReservationService cancelReservationService
     ) {
         this.reservationService = reservationService;
         this.reservationQueryService = reservationQueryService;
+        this.cancelReservationService = cancelReservationService;
     }
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> addReservationByAdmin(
-            @RequestBody ReservationRequest reservationRequest) {
+            @RequestBody ReservationRequest reservationRequest
+    ) {
         Long savedId = reservationService.addReservation(reservationRequest);
         ReservationResponse reservationResponse = reservationQueryService.getReservation(savedId);
         return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
@@ -43,7 +48,8 @@ class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservationByUser(
             @RequestBody UserReservationRequest userReservationRequest,
-            LoginMember loginMember) {
+            LoginMember loginMember
+    ) {
         ReservationRequest reservationRequest = ReservationRequest.from(userReservationRequest, loginMember.id());
         Long savedId = reservationService.addReservation(reservationRequest);
         ReservationResponse reservationResponse = reservationQueryService.getReservation(savedId);
@@ -52,7 +58,7 @@ class ReservationController {
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
+        cancelReservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 

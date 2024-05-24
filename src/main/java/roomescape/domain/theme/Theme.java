@@ -51,4 +51,8 @@ public class Theme {
     public String getThumbnail() {
         return thumbnail.getThumbnail();
     }
+
+    public void setName(String dsaad) {
+        this.name = new ThemeName(dsaad);
+    }
 }
