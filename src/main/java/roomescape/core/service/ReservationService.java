@@ -21,6 +21,8 @@ import roomescape.core.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
+    private static final Integer rankOfBooked = 0;
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -105,6 +107,9 @@ public class ReservationService {
     }
 
     private Integer findRankByCreateAt(final Reservation reservation) {
+        if (reservation.getStatus().equals(Status.BOOKED)) {
+            return rankOfBooked;
+        }
         return reservationRepository.countByCreateAtRank(reservation.getDate(), reservation.getReservationTime(),
                 reservation.getTheme(), reservation.getCreateAt());
     }
