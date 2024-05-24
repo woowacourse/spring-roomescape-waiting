@@ -82,8 +82,10 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new InvalidMemberException("존재하지 않는 회원입니다."));
     }
 
-    private void validate(ReservationDate date, ReservationTime reservationTime, Theme theme, Member member, Schedule schedule) {
-        if (!reservationRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(), theme.getId())) {
+    private void validate(ReservationDate date, ReservationTime reservationTime, Theme theme, Member member,
+                          Schedule schedule) {
+        if (!reservationRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(),
+                theme.getId())) {
             throw new InvalidReservationException("현재 해당 테마가 예약 가능하므로 예약 대기는 등록할 수 없습니다.");
         }
         if (reservationWaitingRepository.existsByMemberAndThemeAndSchedule(member, theme, schedule)) {
