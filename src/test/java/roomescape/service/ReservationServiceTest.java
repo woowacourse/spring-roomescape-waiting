@@ -99,6 +99,6 @@ class ReservationServiceTest {
     @DisplayName("예약대기가 있는 예약을 삭제하는 경우, 예약대기가 예약으로 바뀐다.")
     void deleteExistWaitingReservation() {
         reservationService.deleteReservation(6L);
-        assertThat(reservationService.getWaitingReservations()).hasSize(1);
+        assertThat(reservationService.getWaitings()).hasSize(1);
     }
 }

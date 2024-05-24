@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('/reservations/waiting') // 내 예약 목록 조회 API 호출
+    fetch('/waiting') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -29,29 +29,15 @@ function render(data) {
 
         const actionCell = row.insertCell(row.cells.length);
 
-        // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
         actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
-}
-
-function approve(event) {
-    const row = event.target.closest('tr');
-    const id = row.cells[0].textContent;
-
-    const endpoint = '/reservation/waiting/' + id;
-    return fetch(endpoint, {
-        method: 'POST'
-    }).then(response => {
-        if (response.status === 200) return;
-        throw new Error('Delete failed');
-    }).then(() => location.reload());
 }
 
 function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = '/reservations/waiting/' + id;
+    const endpoint = '/waiting/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

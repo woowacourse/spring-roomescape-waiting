@@ -19,10 +19,10 @@ import roomescape.controller.reservation.dto.CreateReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(value = "/data.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
-public class WaitingReservationControllerTest {
+public class WaitingControllerTest {
 
     @Autowired
-    WaitingReservationController waitingReservationController;
+    WaitingController waitingController;
 
     @LocalServerPort
     int port;
@@ -53,11 +53,11 @@ public class WaitingReservationControllerTest {
 
     @Test
     @DisplayName("모든 예약 대기를 반환한다.")
-    void getWaitingReservations() {
+    void getWaitings() {
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
-                .when().get("/reservations/waiting")
+                .when().get("/waiting")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
@@ -65,7 +65,7 @@ public class WaitingReservationControllerTest {
 
     @Test
     @DisplayName("예약 대기를 추가한다.")
-    void addWaitingReservation() {
+    void addWaiting() {
         CreateReservationRequest request = new CreateReservationRequest(
                 LocalDate.now().plusDays(1), 1L, 1L);
         RestAssured.given().log().all()
@@ -80,28 +80,18 @@ public class WaitingReservationControllerTest {
                 .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/reservations/waiting")
+                .when().post("/waiting")
                 .then().log().all()
                 .statusCode(201);
     }
 
     @Test
-    @DisplayName("해당 시간대에 예약이 존재하면 전환되지 않는다.")
-    void changeReservedWaitingReservationToReserved() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .when().patch("/reservations/waiting/7")
-                .then().log().all().statusCode(400);
-    }
-
-    @Test
     @DisplayName("예약대기를 삭제한다.")
-    void deleteWaitingReservation() {
+    void deleteWaiting() {
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
-                .when().delete("/reservations/waiting/7")
+                .when().delete("/waiting/7")
                 .then().log().all().statusCode(204);
     }
 }

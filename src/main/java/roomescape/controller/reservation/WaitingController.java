@@ -18,22 +18,22 @@ import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.service.ReservationService;
 
 @RestController
-@RequestMapping("/reservations/waiting")
-public class WaitingReservationController {
+@RequestMapping("/waiting")
+public class WaitingController {
 
     private final ReservationService reservationService;
 
-    public WaitingReservationController(ReservationService reservationService) {
+    public WaitingController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
     @GetMapping
-    public List<ReservationResponse> getWaitingReservations() {
-        return reservationService.getWaitingReservations();
+    public List<ReservationResponse> getWaitings() {
+        return reservationService.getWaitings();
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addWaitingReservation(
+    public ResponseEntity<ReservationResponse> addWaiting(
             @RequestBody @Valid final CreateReservationRequest reservationRequest,
             @Valid final LoginMember loginMember) {
         final ReservationResponse reservation
@@ -46,7 +46,7 @@ public class WaitingReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable("id") final Long id) {
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") final Long id) {
         reservationService.deleteWaiting(id);
         return ResponseEntity.noContent()
                 .build();

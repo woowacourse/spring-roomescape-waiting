@@ -50,7 +50,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> getWaitingReservations() {
+    public List<ReservationResponse> getWaitings() {
         return reservationRepository.findAllByStatus(Status.WAITING)
                 .stream()
                 .map(ReservationResponse::from)
@@ -127,11 +127,11 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(final Long id) {
         final Reservation deleteReservation = reservationRepository.findByIdOrThrow(id);
-        if (deleteReservation.isReserved()) {
-            reservationRepository.deleteById(deleteReservation.getId());
-            reserveFirstWaitingIfPresent(deleteReservation);
+        if (deleteReservation.isWaiting()) {
+            throw new InvalidRequestException("이 예약은 현재 대기 상태입니다.");
         }
-        throw new InvalidRequestException("이 예약은 현재 대기 상태입니다.");
+        reservationRepository.deleteById(id);
+        reserveFirstWaitingIfPresent(deleteReservation);
     }
 
     public void deleteWaiting(final Long id) {

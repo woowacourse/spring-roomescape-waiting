@@ -45,6 +45,10 @@ public class Reservation {
         return Status.RESERVED == status;
     }
 
+    public boolean isWaiting() {
+        return Status.WAITING == status;
+    }
+
     public void reserveWaiting() {
         if (status == Status.RESERVED) {
             throw new ReservationNotFoundException("해당 예약대기는 이미 예약으로 변경되었습니다.");
