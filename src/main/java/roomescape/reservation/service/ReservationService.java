@@ -134,9 +134,7 @@ public class ReservationService {
                             validateDeleteAuth(memberRequest.toMember(), reservation);
                             reservationRepository.deleteById(id);
                             reorderWaitings(reservation);
-
                         }
-
                 );
     }
 
