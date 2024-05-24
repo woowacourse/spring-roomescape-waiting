@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
 
@@ -14,9 +15,9 @@ public record WaitingRequest(
         Long themeId,
         @NotNull(message = "시간 ID를 입력해주세요.")
         Long timeId
-        ) {
+) {
 
     public Waiting toEntity(Member member, ReservationTime reservationTime, Theme theme) {
-        return new Waiting(member, date, reservationTime, theme);
+        return new Waiting(member, new Schedule(date, reservationTime, theme));
     }
 }

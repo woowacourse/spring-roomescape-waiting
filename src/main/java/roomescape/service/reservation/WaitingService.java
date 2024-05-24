@@ -55,14 +55,14 @@ public class WaitingService {
     }
 
     private void validateMemberWaitingAlreadyExist(LocalDate date, Theme theme, Member member) {
-        if (waitingRepository.existsByDateAndThemeAndMember(date, theme, member)) {
+        if (waitingRepository.existsBySchedule_DateAndSchedule_ThemeAndMember(date, theme, member)) {
             throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
         }
     }
 
     private void validateMemberReservationAlreadyExist(LocalDate date, Theme theme,
                                                        Member member) {
-        if (reservationRepository.existsByDateAndThemeAndMember(date, theme, member)) {
+        if (reservationRepository.existsBySchedule_DateAndSchedule_ThemeAndMember(date, theme, member)) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
     }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
 
 public record ReservationRequest(
@@ -18,6 +19,6 @@ public record ReservationRequest(
         Long memberId) {
 
     public Reservation toEntity(Member member, ReservationTime reservationTime, Theme theme) {
-        return new Reservation(member, date, reservationTime, theme);
+        return new Reservation(member, new Schedule(date, reservationTime, theme));
     }
 }

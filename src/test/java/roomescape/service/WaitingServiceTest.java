@@ -16,6 +16,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
 import roomescape.global.handler.exception.CustomException;
@@ -84,7 +85,7 @@ class WaitingServiceTest {
     @DisplayName("회원은 동일 날짜, 테마에 예약 존재시 예약 대기 불가능")
     @Test
     void validateMemberAlreadyReservedThemeOnDate() {
-        reservationRepository.save(new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
+        reservationRepository.save(new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
 
         WaitingRequest waitingRequest = new WaitingRequest(LocalDate.of(2999, 12, 12), theme.getId(), reservationTime.getId());
         assertThatThrownBy(() -> waitingService.createWaiting(waitingRequest, member.getId()))
@@ -96,7 +97,7 @@ class WaitingServiceTest {
     @DisplayName("회원은 동일 날짜, 시간, 테마에 중복 예약 대기를 할 수 없다.")
     @Test
     void validateMemberWaitingAlreadyExist() {
-        Waiting waiting = new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme);
+        Waiting waiting = new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme));
         waitingRepository.save(waiting);
 
         WaitingRequest waitingRequest = new WaitingRequest(LocalDate.of(2999, 12, 12), theme.getId(), reservationTime.getId());
@@ -110,8 +111,8 @@ class WaitingServiceTest {
     @Test
     void findAllWaitings() {
         ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Waiting waiting = new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme);
-        Waiting waiting2 = new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime2, theme);
+        Waiting waiting = new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme));
+        Waiting waiting2 = new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime2, theme));
 
         waitingRepository.save(waiting);
         waitingRepository.save(waiting2);
@@ -122,7 +123,7 @@ class WaitingServiceTest {
     @DisplayName("예약 삭제 테스트")
     @Test
     void deleteWaiting() {
-        Waiting waiting = new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme);
+        Waiting waiting = new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme));
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         waitingService.deleteWaiting(savedWaiting.getId());

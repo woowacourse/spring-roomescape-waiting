@@ -17,6 +17,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
 import roomescape.global.handler.exception.CustomException;
 import roomescape.global.handler.exception.ExceptionCode;
@@ -112,8 +113,8 @@ class ReservationServiceTest {
     @Test
     void findAllReservations() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,12), reservationTime, theme)),
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,13), reservationTime, theme)));
 
         reservationRepository.saveAll(reservations);
 
@@ -126,8 +127,8 @@ class ReservationServiceTest {
     @Test
     void deleteReservation() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,12), reservationTime, theme)),
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,13), reservationTime, theme)));
 
         reservationRepository.saveAll(reservations);
 
@@ -151,8 +152,8 @@ class ReservationServiceTest {
         Member member2 = memberRepository.save(
                 new Member("rush", "rush@email.com", "password", Role.ADMIN));
 
-        reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12),reservationTime1, theme));
-        reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12),reservationTime2, theme));
+        reservationRepository.save(new Reservation(member1, new Schedule(LocalDate.of(2030, 12, 12),reservationTime1, theme)));
+        reservationRepository.save(new Reservation(member2, new Schedule(LocalDate.of(2030, 12, 12),reservationTime2, theme)));
 
 
         List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.getId());

@@ -18,16 +18,16 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                  w,
                  (SELECT COUNT(w2)
                   FROM Waiting w2
-                  WHERE w2.theme = w.theme
-                  AND w2.date = w.date
-                  AND w2.time = w.time
+                  WHERE w2.schedule.theme = w.schedule.theme
+                  AND w2.schedule.date = w.schedule.date
+                  AND w2.schedule.time = w.schedule.time
                   AND w2.id < w.id))
              FROM Waiting w
              WHERE w.member.id = :memberId
             """)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
-    Optional<Waiting> findFirstByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
+    Optional<Waiting> findFirstBySchedule_DateAndSchedule_ThemeAndSchedule_Time(LocalDate date, Theme theme, ReservationTime time);
 
-    boolean existsByDateAndThemeAndMember(LocalDate date, Theme theme, Member member);
+    boolean existsBySchedule_DateAndSchedule_ThemeAndMember(LocalDate date, Theme theme, Member member);
 }

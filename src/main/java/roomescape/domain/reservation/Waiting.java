@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,31 +19,24 @@ public class Waiting {
     @ManyToOne
     private Member member;
 
-    private LocalDate date;
-
-    @ManyToOne
-    private ReservationTime time;
-
-    @ManyToOne
-    private Theme theme;
+    @Embedded
+    Schedule schedule;
 
     protected Waiting() {
     }
 
-    public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Waiting(Long id, Member member, Schedule schedule) {
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.schedule = schedule;
     }
 
-    public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public Waiting(Member member, Schedule schedule) {
+        this(null, member, schedule);
     }
 
     public Reservation toReservation() {
-        return new Reservation(member, date, time, theme);
+        return new Reservation(member, schedule);
     }
 
     public Long getId() {
@@ -54,14 +48,14 @@ public class Waiting {
     }
 
     public LocalDate getDate() {
-        return date;
+        return schedule.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return schedule.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return schedule.getTheme();
     }
 }

@@ -59,13 +59,13 @@ public class ReservationService {
     }
 
     private void validateMemberAlreadyReservedThemeOnDate(LocalDate date, Theme theme, Member member) {
-        if (reservationRepository.existsByDateAndThemeAndMember(date, theme, member)) {
+        if (reservationRepository.existsBySchedule_DateAndSchedule_ThemeAndMember(date, theme, member)) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
     }
 
     private void validateIsTimeSlotAlreadyReserved(LocalDate date, ReservationTime reservationTime, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
+        if (reservationRepository.existsBySchedule_DateAndSchedule_TimeAndSchedule_Theme(date, reservationTime, theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
     }
@@ -78,7 +78,7 @@ public class ReservationService {
     }
 
     private void validateMemberWaitingAlreadyExist(LocalDate date, Theme theme, Member member) {
-        if (waitingRepository.existsByDateAndThemeAndMember(date, theme, member)) {
+        if (waitingRepository.existsBySchedule_DateAndSchedule_ThemeAndMember(date, theme, member)) {
             throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
         }
     }
@@ -93,7 +93,7 @@ public class ReservationService {
     public List<ReservationResponse> findAllReservationsByCondition(ReservationConditionRequest condition) {
         Theme findTheme = getTheme(condition.themeId());
         Member findMember = getMember(condition.memberId());
-        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllBySchedule_ThemeAndMemberAndSchedule_DateBetween(
                 findTheme, findMember, condition.dateFrom(), condition.dateTo());
 
         return reservations.stream()
@@ -122,7 +122,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
 
-        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndThemeAndTime(
+        Optional<Waiting> waiting = waitingRepository.findFirstBySchedule_DateAndSchedule_ThemeAndSchedule_Time(
                 reservation.getDate(), reservation.getTheme(),
                 reservation.getTime());
         convertFirstWaitingToReservation(waiting);

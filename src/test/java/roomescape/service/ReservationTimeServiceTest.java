@@ -11,18 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.reservation.ReservationTimeService;
 import roomescape.service.reservation.dto.request.AvailableTimeRequest;
 import roomescape.service.reservation.dto.request.ReservationTimeRequest;
 import roomescape.service.reservation.dto.response.AvailableTimeResponse;
 import roomescape.service.reservation.dto.response.ReservationTimeResponse;
-import roomescape.service.reservation.ReservationTimeService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -81,9 +82,7 @@ class ReservationTimeServiceTest {
 
         reservationRepository.save(new Reservation(
                 new Member(1L, "asd", "asd@email.com", "password", Role.USER),
-                searchDate,
-                reservedTime,
-                savedTheme
+                new Schedule(searchDate, reservedTime, savedTheme)
         ));
 
         List<AvailableTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(
