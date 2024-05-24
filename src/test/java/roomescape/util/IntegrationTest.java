@@ -14,6 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 @Target(ElementType.TYPE)
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DatabaseIsolation
 public @interface IntegrationTest {
 }
