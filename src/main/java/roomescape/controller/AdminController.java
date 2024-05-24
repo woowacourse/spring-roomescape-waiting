@@ -28,7 +28,7 @@ public class AdminController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody AdminReservationRequest request) {
-        ReservationDto reservationDto = ReservationDto.from(request);
+        ReservationDto reservationDto = request.toDto();
         Reservation reservation = reservationService.saveReservation(reservationDto);
         ReservationResponse response = ReservationResponse.from(reservation);
         return ResponseEntity

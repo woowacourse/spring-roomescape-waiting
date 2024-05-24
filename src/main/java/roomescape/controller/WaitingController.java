@@ -36,7 +36,7 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody ReservationRequest request, LoginMember member) {
-        ReservationDto reservationDto = ReservationDto.of(request, member); // TODO: DTO 분리?
+        ReservationDto reservationDto = request.toDto(member.getId());
         Waiting waiting = waitingService.saveWaiting(reservationDto);
         WaitingResponse response = WaitingResponse.from(waiting); // TODO: essential?
         return ResponseEntity

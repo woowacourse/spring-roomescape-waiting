@@ -3,6 +3,7 @@ package roomescape.controller.request;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import roomescape.service.dto.ReservationDto;
 
 import java.time.LocalDate;
 
@@ -26,6 +27,10 @@ public class AdminReservationRequest {
         this.timeId = timeId;
         this.themeId = themeId;
         this.memberId = memberId;
+    }
+
+    public ReservationDto toDto() {
+        return new ReservationDto(this.date, this.timeId, this.themeId, this.memberId);
     }
 
     public LocalDate getDate() {

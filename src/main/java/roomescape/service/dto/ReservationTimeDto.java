@@ -19,10 +19,6 @@ public class ReservationTimeDto {
         this(null, startAt);
     }
 
-    public static ReservationTimeDto from(ReservationTimeRequest request) {
-        return new ReservationTimeDto(null, request.getStartAt());
-    }
-
     public static ReservationTimeDto from(ReservationTime reservationTime) {
         return new ReservationTimeDto(reservationTime.getId(), reservationTime.getStartAt());
     }

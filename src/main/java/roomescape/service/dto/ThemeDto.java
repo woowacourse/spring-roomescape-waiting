@@ -17,10 +17,6 @@ public class ThemeDto {
         this.thumbnail = new Thumbnail(thumbnail);
     }
 
-    public static ThemeDto from(ThemeRequest themeRequest) {
-        return new ThemeDto(themeRequest.getName(), themeRequest.getDescription(), themeRequest.getThumbnail());
-    }
-
     public Name getName() {
         return name;
     }

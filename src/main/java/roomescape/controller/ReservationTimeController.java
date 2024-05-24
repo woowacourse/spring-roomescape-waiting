@@ -37,7 +37,7 @@ public class ReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> addReservationTime(@Valid @RequestBody ReservationTimeRequest request) {
-        ReservationTimeDto timeDto = ReservationTimeDto.from(request);
+        ReservationTimeDto timeDto = request.toDto();
         ReservationTime time = reservationTimeService.saveReservationTime(timeDto);
         ReservationTimeResponse response = ReservationTimeResponse.from(time);
         return ResponseEntity

@@ -14,10 +14,6 @@ public class AuthDto {
         this.password = new MemberPassword(password);
     }
 
-    public static AuthDto from(LoginRequest loginRequest) {
-        return new AuthDto(loginRequest.getEmail(), loginRequest.getPassword());
-    }
-
     public MemberEmail getEmail() {
         return email;
     }

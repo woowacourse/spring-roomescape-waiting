@@ -20,22 +20,6 @@ public class ReservationDto {
         this.memberId = memberId;
     }
 
-    public static ReservationDto of(ReservationRequest request, LoginMember member) {
-        LocalDate date = request.getDate();
-        long timeId = request.getTimeId();
-        long themeId = request.getThemeId();
-        long memberId = member.getId();
-        return new ReservationDto(date, timeId, themeId, memberId);
-    }
-
-    public static ReservationDto from(AdminReservationRequest request) {
-        LocalDate date = request.getDate();
-        long timeId = request.getTimeId();
-        long themeId = request.getThemeId();
-        long memberId = request.getMemberId();
-        return new ReservationDto(date, timeId, themeId, memberId);
-    }
-
     public LocalDate getDate() {
         return date;
     }
