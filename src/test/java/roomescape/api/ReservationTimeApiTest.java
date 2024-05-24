@@ -80,7 +80,7 @@ class ReservationTimeApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(5))
-                .body("alreadyBooked", contains(false, false, true, true, true));
+                .body("alreadyBooked", contains(true, true, false, true, false));
     }
 
     @Test

@@ -76,6 +76,6 @@ class ReservationTimeServiceTest {
         assertThat(availableTimes)
                 .hasSize(5)
                 .extracting(AvailableTimeResponse::alreadyBooked)
-                .containsExactly(false, false, true, true, true);
+                .containsExactly(true, true, false, true, false);
     }
 }

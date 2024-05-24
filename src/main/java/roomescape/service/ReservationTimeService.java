@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
@@ -89,6 +90,7 @@ public class ReservationTimeService {
         List<AvailableTimeResponse> responses = new ArrayList<>();
         responses.addAll(availableTimeResponses);
         responses.addAll(alreadyBookedTimeResponses);
+        responses.sort(Comparator.comparingLong(AvailableTimeResponse::id));
 
         return responses;
     }
