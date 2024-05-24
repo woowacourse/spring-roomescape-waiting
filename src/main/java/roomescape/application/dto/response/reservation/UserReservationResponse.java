@@ -25,7 +25,7 @@ public record UserReservationResponse(
                     reservation.getDetail().getTime().getStartAt(), "예약");
         }
         return new UserReservationResponse(
-                reservation.getDetail().getId(),
+                reservation.getId(),
                 reservation.getDetail().getTheme().getName(),
                 reservation.getDetail().getDate(),
                 reservation.getDetail().getTime().getStartAt(), rank + "번째 예약");
