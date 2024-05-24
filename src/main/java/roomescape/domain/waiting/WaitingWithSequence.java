@@ -4,11 +4,8 @@ public class WaitingWithSequence {
 
     private static final int FIRST_WAITING_SEQUENCE = 1;
 
-    private Waiting waiting;
-    private Long sequence;
-
-    protected WaitingWithSequence() {
-    }
+    private final Waiting waiting;
+    private final Long sequence;
 
     public WaitingWithSequence(Waiting waiting, Long sequence) {
         this.waiting = waiting;
