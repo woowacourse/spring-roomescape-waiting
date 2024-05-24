@@ -15,7 +15,7 @@ class AuthServiceTest extends BasicAcceptanceTest {
 
     @DisplayName("존재하지 않는 회원일 때 예외를 발생시킨다.")
     @Test
-    void name() {
+    void invalidNotExistMember() {
         TokenRequest tokenRequest = new TokenRequest("gomding@wooteco.com", "dffd@efg32");
 
         assertThatThrownBy(() -> authService.createToken(tokenRequest))
