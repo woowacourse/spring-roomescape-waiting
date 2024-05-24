@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.time.ReservationTime;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
+import roomescape.dto.reservationtime.TimeWithAvailableResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
@@ -41,20 +41,11 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTime);
     }
 
-    public List<ReservationTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
-        List<Long> bookedTimeIds = findTimeIdForDateAndTheme(date, themeId);
-        List<ReservationTime> times = findAvailableTimes(bookedTimeIds);
-        return times.stream()
-                .map(ReservationTimeResponse::from)
+    public List<TimeWithAvailableResponse> getAvailableTimes(LocalDate date, Long themeId) {
+        List<ReservationTime> allTimes = reservationTimeRepository.findAll();
+        return allTimes.stream()
+                .map(reservationTime -> createTimeWithAvailableResponses(date, themeId, reservationTime))
                 .toList();
-    }
-
-    private List<ReservationTime> findAvailableTimes(List<Long> bookedTimeIds) {
-        if (bookedTimeIds.isEmpty()) {
-            return reservationTimeRepository.findAll();
-        }
-
-        return reservationTimeRepository.findByIdNotIn(bookedTimeIds);
     }
 
     public void deleteReservationTime(Long id) {
@@ -71,11 +62,12 @@ public class ReservationTimeService {
                 ));
     }
 
-    private List<Long> findTimeIdForDateAndTheme(LocalDate date, Long themeId) {
-        List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
-        return reservations.stream()
-                .map(reservation -> reservation.getTime().getId())
-                .toList();
+    private TimeWithAvailableResponse createTimeWithAvailableResponses(
+            LocalDate date, Long themeId, ReservationTime reservationTime) {
+        boolean isBooked = reservationRepository.existsByDateAndTimeIdAndThemeId(
+                date, reservationTime.getId(), themeId);
+
+        return TimeWithAvailableResponse.from(reservationTime, isBooked);
     }
 
     private void validateTimeDuplicate(LocalTime time) {

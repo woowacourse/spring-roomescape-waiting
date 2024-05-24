@@ -2,10 +2,12 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservationtime.TimeWithAvailableResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 
@@ -64,14 +67,25 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void 특정_날짜와_테마에_예약이_없는_시간대를_조회() {
+    void 특정_날짜와_테마에_예약가능_여부가_포함된_시간대를_조회() {
         //given, when
-        List<ReservationTimeResponse> availableTimes = reservationTimeService.getAvailableTimes(
+        List<TimeWithAvailableResponse> timesWithAvailable = reservationTimeService.getAvailableTimes(
                 LocalDate.now().plusDays(1),
                 1L
         );
 
         //then
-        assertThat(availableTimes).extracting(ReservationTimeResponse::id).containsOnly(3L);
+        List<ReservationTimeResponse> allReservationTimes = reservationTimeService.getAllReservationTimes();
+
+        assertAll(
+                () -> assertThat(timesWithAvailable).hasSize(allReservationTimes.size()),
+                () -> Objects.requireNonNull(timesWithAvailable).forEach(time -> {
+                        if (time.id() == 1L || time.id() == 2L) {
+                            assertThat(time.alreadyBooked()).isTrue();
+                        } else {
+                            assertThat(time.alreadyBooked()).isFalse();
+                        }
+                })
+        );
     }
 }
