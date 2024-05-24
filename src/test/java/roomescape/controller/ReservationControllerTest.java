@@ -18,6 +18,7 @@ import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.service.AuthService;
 import roomescape.service.dto.AuthDto;
+import roomescape.util.TokenManager;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -165,7 +166,10 @@ class ReservationControllerTest {
     @DisplayName("존재하는 예약이라면 예약을 삭제할 수 있다.")
     @Test
     void should_delete_reservation_when_reservation_exist() {
+        String token = authService.createToken(userDto);
+
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
@@ -182,7 +186,10 @@ class ReservationControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"0", "-1", "-999"})
     void should_throw_exception_when_delete_by_invalid_id(String id) {
+        String token = authService.createToken(userDto);
+
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().delete("/reservations/" + id)
                 .then().log().all()
                 .statusCode(400);
@@ -191,10 +198,22 @@ class ReservationControllerTest {
     @DisplayName("예약 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
     @Test
     void should_throw_exception_when_delete_by_id_null() {
+        String token = authService.createToken(userDto);
+
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().delete("/reservations/")
                 .then().log().all()
                 .statusCode(404);
+    }
+
+    @DisplayName("예약 삭제 - 로그인이 되지 않은 경우 401 예외를 반환한다.")
+    @Test
+    void should_throw_exception_when_not_login() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(401);
     }
 
     @DisplayName("특정 날짜와 테마에 따른 모든 시간의 예약 가능 여부를 확인 - 테마 id가 null 또는 1 미만일 경우 예외를 반환한다.")

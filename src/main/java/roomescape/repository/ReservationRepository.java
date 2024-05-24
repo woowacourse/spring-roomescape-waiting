@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.model.member.LoginMember;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,4 +32,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeId(long themeId);
+
+    boolean existsByIdAndMemberId(long id, long memberId);
 }

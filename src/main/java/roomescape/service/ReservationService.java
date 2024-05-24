@@ -78,9 +78,9 @@ public class ReservationService {
         return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
-    public void deleteReservation(long id) {
-        // TODO: 본인의 예약인지 검증
+    public void deleteReservation(long id, LoginMember member) {
         validateExistence(id);
+        validateIsOwner(id, member);
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
         LocalDate reservationDate = reservation.getDate();
@@ -89,6 +89,13 @@ public class ReservationService {
         waitingRepository.findFirstByDateAndTimeAndTheme(reservationDate, reservationTime, reservationTheme)
                 .ifPresent(this::approveReservation);
         reservationRepository.deleteById(id);
+    }
+
+    private void validateIsOwner(long reservationId, LoginMember member) {
+        boolean isNotOwner = !reservationRepository.existsByIdAndMemberId(reservationId, member.getId());
+        if (isNotOwner) {
+            throw new BadRequestException("[ERROR] 해당 예약의 예약자가 아닙니다.");
+        }
     }
 
     private void approveReservation(Waiting waiting) {

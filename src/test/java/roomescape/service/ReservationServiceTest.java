@@ -34,6 +34,7 @@ class ReservationServiceTest {
 
     private static final int INITIAL_RESERVATION_COUNT = 3;
     private static final int INITIAL_TIME_COUNT = 2;
+    private static final LoginMember loginMember = new LoginMember(1L);
 
     @Autowired
     private ReservationService reservationService;
@@ -115,23 +116,32 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제한다.")
     @Test
     void should_delete_reservation() {
-        reservationService.deleteReservation(1L);
+        reservationService.deleteReservation(1L, loginMember);
         assertThat(reservationService.findAllReservations()).hasSize(INITIAL_RESERVATION_COUNT - 1);
     }
 
     @DisplayName("존재하는 예약을 삭제하려 하면 예외가 발생하지 않는다.")
     @Test
-    void should_not_throw_exception_when_exist_reservation_time() {
-        assertThatCode(() -> reservationService.deleteReservation(1L))
+    void should_not_throw_exception_when_exist_reservation() {
+        assertThatCode(() -> reservationService.deleteReservation(1L, loginMember))
                 .doesNotThrowAnyException();
     }
 
     @DisplayName("존재하지 않는 예약을 삭제하려 하면 예외가 발생한다.")
     @Test
-    void should_throw_exception_when_not_exist_reservation_time() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(999L))
+    void should_throw_exception_when_not_exist_reservation() {
+        assertThatThrownBy(() -> reservationService.deleteReservation(999L, loginMember))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[ERROR] 존재하지 않는 예약입니다.");
+    }
+
+    @DisplayName("본인의 소유가 아닌 예약을 삭제하려 하면 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_not_owned_reservation() {
+        LoginMember otherMember = new LoginMember(2L);
+        assertThatThrownBy(() -> reservationService.deleteReservation(1L, otherMember))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("[ERROR] 해당 예약의 예약자가 아닙니다.");
     }
 
     @DisplayName("예약 가능 상태를 담은 시간 정보를 반환한다.")
@@ -157,8 +167,7 @@ class ReservationServiceTest {
     @DisplayName("특정 멤버의 예약을 조회한다.")
     @Test
     void should_find_reservations_by_member() {
-        LoginMember member = new LoginMember(1L);
-        List<Reservation> reservations = reservationService.findReservationsByMember(member);
+        List<Reservation> reservations = reservationService.findReservationsByMember(loginMember);
         assertAll(
                 () -> assertThat(reservations).hasSize(1),
                 () -> assertThat(reservations.get(0).getId()).isEqualTo(1L));
