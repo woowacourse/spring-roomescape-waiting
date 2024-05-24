@@ -30,6 +30,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
+import roomescape.reservation.dto.TimeSaveRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -58,6 +59,15 @@ class ReservationTimeServiceTest {
     @AfterEach
     void init() {
         databaseCleaner.cleanUp();
+    }
+
+    @DisplayName("중복된 예약 시간을 추가할 경우 예외가 발생한다.")
+    @Test
+    void saveExceptionTest() {
+        reservationTimeService.save(new TimeSaveRequest(HOUR_10));
+
+        assertThatThrownBy(() -> reservationTimeService.save(new TimeSaveRequest(HOUR_10)))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("예약 시간 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")

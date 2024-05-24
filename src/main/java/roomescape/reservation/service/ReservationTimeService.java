@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +26,10 @@ public class ReservationTimeService {
     }
 
     public TimeResponse save(TimeSaveRequest timeSaveRequest) {
+        reservationTimeRepository.findByStartAt(timeSaveRequest.startAt()).ifPresent(empty -> {
+            throw new IllegalArgumentException("이미 존재하는 예약 시간 입니다.");
+        });
+
         ReservationTime reservationTime = timeSaveRequest.toReservationTime();
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
@@ -45,8 +48,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
 
-        return reservationTimeRepository.findAll().stream()
-                .sorted(Comparator.comparing(ReservationTime::getStartAt))
+        return reservationTimeRepository.findAllOrderByStartAt().stream()
                 .map(reservationTime -> AvailableReservationTimeResponse.toResponse(
                                 reservationTime,
                                 bookedTimeIds.contains(reservationTime.getId())
@@ -56,8 +58,7 @@ public class ReservationTimeService {
 
     @Transactional(readOnly = true)
     public List<TimeResponse> findAll() {
-        return reservationTimeRepository.findAll().stream()
-                .sorted(Comparator.comparing(ReservationTime::getStartAt))
+        return reservationTimeRepository.findAllOrderByStartAt().stream()
                 .map(TimeResponse::toResponse)
                 .toList();
     }

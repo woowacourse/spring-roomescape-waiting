@@ -49,6 +49,15 @@ class ReservationTimeRepositoryTest {
         assertThat(findReservationTime.getStartAt()).isEqualTo(HOUR_10);
     }
 
+    @DisplayName("시간으로 예약 시간을 조회한다.")
+    @Test
+    void findByStartAt() {
+        ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
+        ReservationTime findReservationTime = reservationTimeRepository.findByStartAt(HOUR_10).get();
+
+        assertThat(findReservationTime.getStartAt()).isEqualTo(savedReservationTime.getStartAt());
+    }
+
     @DisplayName("전체 엔티티를 조회한다.")
     @Test
     void findAllTest() {
