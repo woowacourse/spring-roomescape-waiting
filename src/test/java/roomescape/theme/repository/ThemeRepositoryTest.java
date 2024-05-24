@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
@@ -75,12 +76,14 @@ class ThemeRepositoryTest {
         Time time = new Time(LocalTime.of(12, 0));
         Theme theme = new Theme("테마1", "설명1", "image.png");
         Member member = new Member("켬미", "kyum@naver.com", "1111");
+        ReservationDetail detail = new ReservationDetail(theme, time, reservationStartDate);
 
         //When
         entityManager.persist(theme);
         entityManager.persist(time);
         entityManager.persist(member);
-        entityManager.persist(new Reservation(member, theme, time, reservationStartDate));
+        entityManager.persist(detail);
+        entityManager.persist(new Reservation(member, detail));
 
         // Then
         List<Theme> themes = themeRepository.findThemesByReservationDateOrderByReservationCountDesc(

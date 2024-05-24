@@ -19,6 +19,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
@@ -28,7 +29,8 @@ class ReservationRepositoryTest {
     private static final Member MEMBER = new Member(1L, "범블비", "aa@email.com", "1111");
     private static final Theme THEME = new Theme(1L, "Harry Potter", "해리포터와 도비", "thumbnail.jpg");
     private static final Time TIME = new Time(1L, LocalTime.of(12, 0));
-    public static final Reservation RESERVATION = new Reservation(MEMBER, THEME, TIME, LocalDate.MAX);
+    public static final ReservationDetail RESERVATION_DETAIL = new ReservationDetail(1L, THEME, TIME, LocalDate.MAX);
+    public static final Reservation RESERVATION = new Reservation(MEMBER, RESERVATION_DETAIL);
 
     @PersistenceContext
     EntityManager entityManager;
@@ -41,6 +43,7 @@ class ReservationRepositoryTest {
         entityManager.merge(MEMBER);
         entityManager.merge(TIME);
         entityManager.merge(THEME);
+        entityManager.merge(RESERVATION_DETAIL);
     }
 
     @Test
@@ -60,7 +63,7 @@ class ReservationRepositoryTest {
         entityManager.merge(RESERVATION);
 
         // When
-        List<Reservation> reservations = reservationRepository.findAllByOrderByDateAsc();
+        List<Reservation> reservations = reservationRepository.findAllByOrderByDetailDateAsc();
 
         // Then
         assertThat(reservations)
@@ -75,7 +78,7 @@ class ReservationRepositoryTest {
 
         // When
         List<Reservation> reservations = reservationRepository
-                .findAllByTheme_IdAndDate(THEME.getId(), LocalDate.MAX);
+                .findAllByDetailTheme_IdAndDetailDate(THEME.getId(), LocalDate.MAX);
 
         // Then
         assertThat(reservations)
@@ -105,7 +108,7 @@ class ReservationRepositoryTest {
 
         // When
         List<Reservation> reservations = reservationRepository
-                .findAllByMember_IdOrderByDateAsc(MEMBER.getId());
+                .findAllByMember_IdOrderByDetailDateAsc(MEMBER.getId());
 
         // Then
         assertThat(reservations)
@@ -128,7 +131,7 @@ class ReservationRepositoryTest {
     void countReservationTime() {
         Reservation expectedReservation = entityManager.merge(RESERVATION);
 
-        assertThat(reservationRepository.countReservationsByTime_Id(expectedReservation.getTimeId()))
+        assertThat(reservationRepository.countReservationsByDetailTime_Id(expectedReservation.getTimeId()))
                 .isEqualTo(1);
     }
 }

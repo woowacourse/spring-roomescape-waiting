@@ -20,7 +20,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -116,7 +116,7 @@ class ReservationIntegrationTest {
             @Test
             @DisplayName("예약을 DB에 추가할 수 있다.")
             void createReservation() {
-                ReservationRequest params = new ReservationRequest(1L, 1L, 1L, LocalDate.now().plusDays(1));
+                ReservationCreateRequest params = new ReservationCreateRequest(1L, 1L, 1L, LocalDate.now().plusDays(1));
 
                 RestAssured.given()
                         .contentType(ContentType.JSON)

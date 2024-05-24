@@ -36,9 +36,11 @@ import roomescape.member.security.service.MemberAuthService;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationBuilder;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
+import roomescape.reservation.service.ReservationDetailService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
@@ -65,6 +67,8 @@ class ReservationControllerTest {
     @MockBean
     private ReservationService reservationService;
     @MockBean
+    private ReservationDetailService detailService;
+    @MockBean
     private MemberAuthService memberAuthService;
     @MockBean
     private MemberService memberService;
@@ -79,8 +83,10 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 정보를 정상적으로 저장하는지 확인한다.")
     void createReservation() throws Exception {
+        Mockito.when(detailService.addReservation(any(ReservationCreateRequest.class)))
+                .thenReturn(new ReservationRequest(reservation.getMemberId(), reservation.getDetailId()));
         Mockito.when(reservationService.addReservation(any(ReservationRequest.class)))
-                .thenReturn(ReservationResponse.fromReservation(reservation));
+                .thenReturn(ReservationResponse.from(reservation));
         Mockito.when(memberAuthService.isLoginMember(any()))
                 .thenReturn(true);
         Mockito.when(memberAuthService.extractPayload(any()))
@@ -89,7 +95,7 @@ class ReservationControllerTest {
         Member member = new Member(1L, "valid", "testUser@email.com", "pass");
         String token = jwtTokenProvider.createToken(member, new Date());
         String content = new ObjectMapper().registerModule(new JavaTimeModule())
-                .writeValueAsString(new ReservationRequest(1L, 1L, 1L, reservation.getDate()));
+                .writeValueAsString(new ReservationCreateRequest(1L, 1L, 1L, reservation.getDate()));
 
         mockMvc.perform(post("/reservations")
                         .cookie(new Cookie("token", token))
@@ -104,7 +110,7 @@ class ReservationControllerTest {
     @DisplayName("예약 정보를 정상적으로 불러오는지 확인한다.")
     void findAllReservations() throws Exception {
         Mockito.when(reservationService.findReservations())
-                .thenReturn(List.of(ReservationResponse.fromReservation(reservation)));
+                .thenReturn(List.of(ReservationResponse.from(reservation)));
 
         mockMvc.perform(get("/reservations"))
                 .andDo(print())

@@ -13,17 +13,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.reservation.dto.ReservationConditionSearchRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.service.ReservationDetailService;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationService reservationService;
+    private final ReservationDetailService reservationDetailService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService, ReservationDetailService reservationDetailService) {
         this.reservationService = reservationService;
+        this.reservationDetailService = reservationDetailService;
     }
 
     @GetMapping("/search")
@@ -40,8 +44,9 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest request) {
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(request);
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationCreateRequest request) {
+        ReservationRequest reservationRequest = reservationDetailService.addReservation(request);
+        ReservationResponse reservationCreateResponse = reservationService.addReservation(reservationRequest);
         URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
                 .body(reservationCreateResponse);

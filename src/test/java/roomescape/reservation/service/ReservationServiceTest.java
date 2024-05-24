@@ -18,26 +18,26 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.repository.ReservationDetailRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.Time;
-import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
     private final Time time = new Time(1L, LocalTime.of(12, 0));
     private final Theme theme = new Theme(1L, "그켬미", "켬미 방탈출", "thumbnail");
     private final Member member = new Member(1L, "켬미", "kyummi@email.com", "pass");
-    private final Reservation reservation = new Reservation(1L, member, theme, time, LocalDate.MAX);
+    private final ReservationDetail detail = new ReservationDetail(1L, theme, time, LocalDate.MAX);
+    private final Reservation reservation = new Reservation(1L, member, detail);
 
     private final MemberProfileInfo memberProfileInfo = new MemberProfileInfo(1L, "Dobby", "kimdobby@wotaeco.com");
     @InjectMocks
@@ -45,60 +45,34 @@ class ReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
-    private ThemeRepository themeRepository;
+    private ReservationDetailRepository detailRepository;
     @Mock
     private MemberRepository memberRepository;
-    @Mock
-    private TimeRepository timeRepository;
 
     @Test
     @DisplayName("예약을 추가한다.")
     void addReservation() {
         Mockito.when(reservationRepository.save(any()))
                 .thenReturn(reservation);
-
-        Mockito.when(timeRepository.findById(any(Long.class)))
-                .thenReturn(Optional.ofNullable(reservation.getTime()));
-        Mockito.when(themeRepository.findById(any(Long.class)))
-                .thenReturn(Optional.ofNullable(reservation.getTheme()));
         Mockito.when(memberRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getMember()));
+        Mockito.when(detailRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getDetail()));
+        Mockito.when(reservationRepository.findByDetail_Id(any(Long.class)))
+                .thenReturn(Optional.empty());
 
         ReservationRequest reservationRequest = new ReservationRequest(
                 reservation.getMemberId(),
-                reservation.getThemeId(),
-                reservation.getTimeId(),
-                reservation.getDate());
+                reservation.getDetailId());
         ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest);
 
         assertThat(reservationResponse.id()).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("과거의 날짜를 예약하려고 시도하는 경우 에외를 던진다.")
-    void validation_ShouldThrowException_WhenReservationDateIsPast() {
-
-        Mockito.when(timeRepository.findById(any(Long.class)))
-                .thenReturn(Optional.ofNullable(reservation.getTime()));
-
-        Mockito.when(themeRepository.findById(any(Long.class)))
-                .thenReturn(Optional.ofNullable(reservation.getTheme()));
-
-        ReservationRequest reservationRequest = new ReservationRequest(
-                reservation.getMemberId(),
-                reservation.getThemeId(),
-                reservation.getTimeId(),
-                LocalDate.MIN);
-
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
-                BadRequestException.class);
-
-    }
-
-    @Test
     @DisplayName("예약을 찾는다.")
     void findReservations() {
-        Mockito.when(reservationRepository.findAllByOrderByDateAsc())
+        Mockito.when(reservationRepository.findAllByOrderByDetailDateAsc())
                 .thenReturn(List.of(reservation));
 
         List<ReservationResponse> reservationResponses = reservationService.findReservations();
@@ -120,22 +94,18 @@ class ReservationServiceTest {
     @Test
     @DisplayName("특정 테마의 예약이 존재하는 시간에 예약을 요청할 때 예외를 던진다.")
     void addReservation_ShouldThrowException_WhenDuplicatedReservationRequestOccurs() {
-        Mockito.when(reservationRepository.findAllByTheme_IdAndDate(any(Long.class), any(LocalDate.class)))
-                .thenReturn(List.of(reservation));
-        Mockito.when(timeRepository.findById(any(Long.class)))
-                .thenReturn(Optional.ofNullable(reservation.getTime()));
-        Mockito.when(themeRepository.findById(any(Long.class)))
-                .thenReturn(Optional.ofNullable(reservation.getTheme()));
+          Mockito.when(detailRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getDetail()));
         Mockito.when(memberRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getMember()));
+        Mockito.when(reservationRepository.findByDetail_Id(any(Long.class)))
+                .thenReturn(Optional.of(reservation));
 
         ReservationRequest reservationRequest = new ReservationRequest(
                 reservation.getMemberId(),
-                reservation.getThemeId(),
-                reservation.getTimeId(),
-                reservation.getDate());
+                reservation.getDetailId());
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
-                ConflictException.class);
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest))
+                .isInstanceOf(ConflictException.class);
     }
 }

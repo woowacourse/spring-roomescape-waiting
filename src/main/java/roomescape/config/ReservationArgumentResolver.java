@@ -22,7 +22,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import roomescape.exception.AuthorizationExpiredException;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 
 public class ReservationArgumentResolver implements HandlerMethodArgumentResolver {
     private final MemberAuthService memberAuthService;
@@ -34,19 +34,19 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType()
-                .equals(ReservationRequest.class);
+                .equals(ReservationCreateRequest.class);
     }
 
     @Override
-    public ReservationRequest resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                              NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public ReservationCreateRequest resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                                    NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         Cookie[] cookies = Objects.requireNonNull(request).getCookies();
 
         if (memberAuthService.isLoginMember(cookies)) {
             MemberProfileInfo payload = memberAuthService.extractPayload(cookies);
-            ReservationRequest reservationRequest = convertToRequestBody(request);
-            return new ReservationRequest(
+            ReservationCreateRequest reservationRequest = convertToRequestBody(request);
+            return new ReservationCreateRequest(
                     reservationRequest.themeId(),
                     payload.id(),
                     reservationRequest.timeId(),
@@ -56,12 +56,12 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
         throw new AuthorizationExpiredException();
     }
 
-    private ReservationRequest convertToRequestBody(HttpServletRequest request) {
+    private ReservationCreateRequest convertToRequestBody(HttpServletRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8))) {
-            return objectMapper.readValue(reader, ReservationRequest.class);
+            return objectMapper.readValue(reader, ReservationCreateRequest.class);
         } catch (IOException e) {
             throw new AuthorizationExpiredException();
         }

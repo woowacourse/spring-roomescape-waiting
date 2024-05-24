@@ -9,6 +9,7 @@ import roomescape.time.domain.Time;
 public class ReservationBuilder {
     private Long id;
     private Member member;
+    private ReservationDetail reservationDetail;
     private Time time;
     private Theme theme;
     private LocalDate date;
@@ -23,6 +24,11 @@ public class ReservationBuilder {
 
     public ReservationBuilder member(Member member) {
         this.member = member;
+        return this;
+    }
+
+    public ReservationBuilder reservationDetail(ReservationDetail reservationDetail) {
+        this.reservationDetail = reservationDetail;
         return this;
     }
 
@@ -42,6 +48,9 @@ public class ReservationBuilder {
     }
 
     public Reservation build() {
-        return new Reservation(id, member, theme, time, date);
+        if (reservationDetail == null) {
+            return new Reservation(id, member, new ReservationDetail(theme, time, date));
+        }
+        return new Reservation(id, member, reservationDetail);
     }
 }

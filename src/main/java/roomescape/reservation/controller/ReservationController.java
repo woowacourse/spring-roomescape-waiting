@@ -15,18 +15,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
+import roomescape.reservation.service.ReservationDetailService;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationService reservationService;
+    private final ReservationDetailService reservationDetailService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, ReservationDetailService reservationDetailService) {
         this.reservationService = reservationService;
+        this.reservationDetailService = reservationDetailService;
     }
 
     @GetMapping
@@ -51,8 +55,9 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(ReservationRequest request) {
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(request);
+    public ResponseEntity<ReservationResponse> createReservation(ReservationCreateRequest request) {
+        ReservationRequest reservationRequest = reservationDetailService.addReservation(request);
+        ReservationResponse reservationCreateResponse = reservationService.addReservation(reservationRequest);
         URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
                 .body(reservationCreateResponse);

@@ -15,44 +15,44 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import roomescape.exception.BadRequestException;
-import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"member_id", "detail_id"})
+        @UniqueConstraint(columnNames = {"theme_id", "time_id", "date"})
 })
-public class Reservation {
-    private static final String status = "예약";
-
+public class ReservationDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "detail_id")
-    private ReservationDetail detail;
+    @JoinColumn(name = "time_id")
+    private Time time;
+    @Column(nullable = false, name = "date")
+    private LocalDate date;
 
-    public Reservation() {
+    public ReservationDetail() {
     }
 
-    public Reservation(Member member, ReservationDetail detail) {
-        this(null, member, detail);
+    public ReservationDetail(Theme theme, Time time, LocalDate date) {
+        this(null, theme, time, date);
     }
 
-    public Reservation(Long id, Member member, ReservationDetail detail) {
-        validate(member, detail);
+    public ReservationDetail(Long id, Theme theme, Time time, LocalDate date) {
+        validate(date, time, theme);
         this.id = id;
-        this.member = member;
-        this.detail = detail;
+        this.theme = theme;
+        this.time = time;
+        this.date = date;
     }
 
-    private void validate(Member member, ReservationDetail detail) {
-        if (member == null || detail == null) {
+    private void validate(LocalDate date, Time time, Theme theme) {
+        if (date == null || time == null || theme == null) {
             throw new BadRequestException("예약 정보가 부족합니다.");
         }
     }
@@ -61,68 +61,45 @@ public class Reservation {
         return id;
     }
 
-    public Member getMember() {
-        return member;
-    }
-
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public String getMemberName() {
-        return member.getName();
-    }
-
-    public ReservationDetail getDetail() {
-        return detail;
-    }
-
-    public Long getDetailId() {
-        return detail.getId();
-    }
-
     public LocalDate getDate() {
-        return detail.getDate();
+        return date;
     }
 
     public Time getTime() {
-        return detail.getTime();
+        return time;
     }
 
     public Long getTimeId() {
-        return detail.getTimeId();
+        return time.getId();
     }
 
     public Theme getTheme() {
-        return detail.getTheme();
+        return theme;
     }
 
     public Long getThemeId() {
-        return detail.getThemeId();
-    }
-
-    public String getStatus() {
-        return status;
+        return theme.getId();
     }
 
     public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
-        return detail.isReservedAtPeriod(start, end);
+        return date.isAfter(start) && date.isBefore(end);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Reservation that)) return false;
+        if (!(o instanceof ReservationDetail that)) return false;
 
         if (id == null || that.id == null) {
-            return Objects.equals(member, that.member) && Objects.equals(detail, that.detail);
+            return Objects.equals(date, that.date) && Objects.equals(time, that.time)
+                   && Objects.equals(theme, that.theme);
         }
         return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        if (id == null) return Objects.hash(detail);
+        if (id == null) return Objects.hash(date, time, theme);
         return Objects.hash(id);
     }
 
@@ -130,8 +107,9 @@ public class Reservation {
     public String toString() {
         return "Reservation{" +
                "id=" + id +
-               ", member=" + member +
-               ", " + detail +
+               ", theme=" + theme +
+               ", time=" + time +
+               ", date=" + date +
                '}';
     }
 }
