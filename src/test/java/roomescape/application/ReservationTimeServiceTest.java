@@ -1,14 +1,18 @@
 package roomescape.application;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import roomescape.BasicAcceptanceTest;
+import roomescape.TestFixtures;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.exception.RoomescapeException;
 
@@ -21,32 +25,40 @@ class ReservationTimeServiceTest extends BasicAcceptanceTest {
 
     @DisplayName("이미 존재하는 예약 시간을 생성 요청하면 예외가 발생한다.")
     @Test
-    void shouldThrowsIllegalStateExceptionWhenCreateExistStartAtTime() {
+    void duplicateTime() {
         ReservationTime reservationTime = reservationTimeRepository.findAll().get(0);
-        ReservationTimeRequest request = new ReservationTimeRequest(reservationTime.getStartAt());
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(reservationTime.getStartAt());
 
-        assertThatCode(() -> reservationTimeService.save(request))
+        assertThatThrownBy(() -> reservationTimeService.save(reservationTimeRequest))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("httpStatus")
-                .isEqualTo(HttpStatus.CONFLICT);
+                .hasMessage(String.format("중복된 예약 시간입니다. 요청 예약 시간:%s", reservationTimeRequest.startAt()));
     }
 
     @DisplayName("예약에 사용된 예약 시간을 삭제 요청하면, 예외가 발생한다.")
     @Test
-    void shouldThrowsExceptionReservationWhenReservedInTime() {
+    void invalidReservationWhenReservedInTime() {
         ReservationTime reservationTime = reservationTimeRepository.findAll().get(0);
 
-        assertThatCode(() -> reservationTimeService.deleteById(reservationTime.getId()))
+        assertThatThrownBy(() -> reservationTimeService.deleteById(reservationTime.getId()))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("httpStatus")
-                .isEqualTo(HttpStatus.CONFLICT);
+                .hasMessage(String.format("해당 예약 시간에 연관된 예약이 존재하여 삭제할 수 없습니다. 삭제 요청한 시간:%s", reservationTime.getStartAt()));
     }
 
-    @DisplayName("존재하지 않는 예약 시간을 삭제 요청하면, IllegalArgumentException 예외가 발생한다.")
+    @DisplayName("존재하지 않는 예약 시간을 삭제 요청하면, 예외가 발생한다.")
     @Test
-    void shouldThrowsIllegalArgumentExceptionWhenReservationTimeDoesNotExist() {
-        assertThatCode(() -> reservationTimeService.deleteById(99L))
+    void invalidNotExistTime() {
+        assertThatThrownBy(() -> reservationTimeService.deleteById(99L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage("존재하지 않는 예약 시간입니다.");
+    }
+
+    @DisplayName("예약이 있는 시간과 없는 시간을 구분한다.")
+    @Test
+    void findAvailableTimes() {
+        List<AvailableTimeResponse> availableTimeResponses = reservationTimeService.findAvailableTimes(
+                LocalDate.of(2099, 4, 29), 1L
+        );
+
+        assertThat(availableTimeResponses).isEqualTo(TestFixtures.AVAILABLE_TIME_RESPONSES);
     }
 }

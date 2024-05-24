@@ -41,7 +41,6 @@ public class ThemeService {
         themeRepository.deleteById(theme.getId());
     }
 
-
     public List<ThemeResponse> findPopularThemes() {
         return popularThemeFinder.findThemes().stream()
                 .map(ThemeResponse::from)

@@ -84,6 +84,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findByCriteria(ReservationCriteriaRequest reservationCriteriaRequest) {
         Long themeId = reservationCriteriaRequest.themeId();
         Long memberId = reservationCriteriaRequest.memberId();

@@ -57,7 +57,7 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
     }
 
     @TestFactory
-    @Sql("/init-for-top-theme.sql")
+    @Sql("/setting-big-reservation.sql")
     @DisplayName("예약 횟수 상위 10개의 테마를 조회한다")
     Stream<DynamicTest> top10Theme() {
         LocalDate today = LocalDate.now();
