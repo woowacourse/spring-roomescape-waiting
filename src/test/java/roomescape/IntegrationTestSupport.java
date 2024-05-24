@@ -5,9 +5,11 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.controller.member.dto.MemberLoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public abstract class IntegrationTestSupport {
 
     protected static final String ADMIN_EMAIL = "redddy@gmail.com";
