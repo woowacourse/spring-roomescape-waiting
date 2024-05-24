@@ -1,8 +1,8 @@
 package roomescape.domain;
 
 public class WaitingWithRank {
-    private Waiting waiting;
-    private Long rank;
+    private final Waiting waiting;
+    private final Long rank;
 
     public WaitingWithRank(Waiting waiting, Long rank) {
         this.waiting = waiting;

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
-import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
 
 public record ReservationMineResponse(long id,
