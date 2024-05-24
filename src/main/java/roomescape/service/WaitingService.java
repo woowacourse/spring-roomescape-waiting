@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class WaitingService { // TODO: 본인이 대기한 예약은 대기할 수 없도록
+public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -53,41 +53,12 @@ public class WaitingService { // TODO: 본인이 대기한 예약은 대기할 �
         Reservation reservation = findReservation(waitingDto);
 
         LocalDate date = waitingDto.getDate();
-        validateIsReservationOwner(waitingDto.getMemberId(), reservation.getMember().getId());
         validateIsFuture(date, time.getStartAt());
         validateDuplication(date, time.getId(), waitingDto.getThemeId(), waitingDto.getMemberId());
+        validateIsReservationOwner(waitingDto.getMemberId(), reservation.getMember().getId());
 
         Waiting waiting = Waiting.of(waitingDto, time, theme, member);
         return waitingRepository.save(waiting);
-    }
-
-    private Reservation findReservation(ReservationDto waitingDto) {
-        LocalDate date = waitingDto.getDate();
-        long timeId = waitingDto.getTimeId();
-        long themeId = waitingDto.getThemeId();
-        Optional<Reservation> reservation = reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
-        return reservation.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
-    }
-
-    private void validateDuplication(LocalDate date, long timeId, long themeId, long memberId) {
-        boolean isExist = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
-        if (isExist) {
-            throw new DuplicatedException("[ERROR] 중복된 예약 대기는 추가할 수 없습니다.");
-        }
-    }
-
-    private void validateIsReservationOwner(long waitingMemberId, long reservationMemberId) {
-        if (waitingMemberId == reservationMemberId) {
-            throw new BadRequestException("[ERROR] 본인의 예약에는 대기할 수 없습니다.");
-        }
-    }
-
-    private void validateIsFuture(LocalDate date, LocalTime time) {
-        LocalDateTime timeToBook = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
-        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        if (timeToBook.isBefore(now)) {
-            throw new BadRequestException("[ERROR] 현재 이전 예약은 대기할 수 없습니다.");
-        }
     }
 
     private ReservationTime findReservationTime(ReservationDto reservationDto) {
@@ -108,14 +79,50 @@ public class WaitingService { // TODO: 본인이 대기한 예약은 대기할 �
         return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
+    private Reservation findReservation(ReservationDto waitingDto) {
+        LocalDate date = waitingDto.getDate();
+        long timeId = waitingDto.getTimeId();
+        long themeId = waitingDto.getThemeId();
+        Optional<Reservation> reservation = reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return reservation.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+    }
+
+    private void validateIsFuture(LocalDate date, LocalTime time) {
+        LocalDateTime timeToBook = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        if (timeToBook.isBefore(now)) {
+            throw new BadRequestException("[ERROR] 현재 이전 예약은 대기할 수 없습니다.");
+        }
+    }
+
+    private void validateDuplication(LocalDate date, long timeId, long themeId, long memberId) {
+        boolean isExist = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
+        if (isExist) {
+            throw new DuplicatedException("[ERROR] 중복된 예약 대기는 추가할 수 없습니다.");
+        }
+    }
+
+    private void validateIsReservationOwner(long waitingMemberId, long reservationMemberId) {
+        if (waitingMemberId == reservationMemberId) {
+            throw new BadRequestException("[ERROR] 본인의 예약에는 대기할 수 없습니다.");
+        }
+    }
+
     public List<WaitingWithRank> findWaitingByMember(LoginMember member) {
         return waitingRepository.findWaitingWithRankByMemberId(member.getId());
     }
 
-    public void deleteWaitingOfMember(long id) {
-        // TODO: 본인의 예약 대기가 맞는지 검증 or deleteByIdAndMemberId
+    public void deleteWaitingOfMember(long id, LoginMember member) {
+        validateIsOwner(id, member);
         validateExistence(id);
         waitingRepository.deleteById(id);
+    }
+
+    private void validateIsOwner(long waitingId, LoginMember member) {
+        boolean isNotOwner = !waitingRepository.existsByIdAndMemberId(waitingId, member.getId());
+        if (isNotOwner) {
+            throw new BadRequestException("[ERROR] 해당 예약 대기의 소유자가 아닙니다.");
+        }
     }
 
     public void deleteWaiting(long id) {

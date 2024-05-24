@@ -94,7 +94,7 @@ public class ReservationService {
     private void validateIsOwner(long reservationId, LoginMember member) {
         boolean isNotOwner = !reservationRepository.existsByIdAndMemberId(reservationId, member.getId());
         if (isNotOwner) {
-            throw new BadRequestException("[ERROR] 해당 예약의 예약자가 아닙니다.");
+            throw new BadRequestException("[ERROR] 해당 예약의 소유자가 아닙니다.");
         }
     }
 

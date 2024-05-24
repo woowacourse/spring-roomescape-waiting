@@ -141,7 +141,7 @@ class ReservationServiceTest {
         LoginMember otherMember = new LoginMember(2L);
         assertThatThrownBy(() -> reservationService.deleteReservation(1L, otherMember))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("[ERROR] 해당 예약의 예약자가 아닙니다.");
+                .hasMessage("[ERROR] 해당 예약의 소유자가 아닙니다.");
     }
 
     @DisplayName("예약 가능 상태를 담은 시간 정보를 반환한다.")

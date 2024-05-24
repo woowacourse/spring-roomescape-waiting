@@ -45,8 +45,8 @@ public class WaitingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWaiting(@NotNull @Min(1) @PathVariable("id") Long id) {
-        waitingService.deleteWaitingOfMember(id);
+    public ResponseEntity<Void> deleteWaiting(@NotNull @Min(1) @PathVariable("id") Long id, LoginMember member) {
+        waitingService.deleteWaitingOfMember(id, member);
         return ResponseEntity.noContent().build();
     }
 }
