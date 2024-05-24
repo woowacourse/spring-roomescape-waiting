@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.member.dto.request.CreateReservationRequest;
+import roomescape.member.dto.request.CreateReservationByAdminRequest;
 import roomescape.member.dto.response.CreateReservationResponse;
 import roomescape.member.service.AdminService;
-import roomescape.reservation.dto.response.FindReservationResponse;
+import roomescape.reservation.dto.response.FindAdminReservationResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.waiting.dto.response.FindWaitingResponse;
 import roomescape.waiting.service.WaitingService;
@@ -36,14 +36,14 @@ public class AdminController {
 
     @PostMapping("/reservations")
     public ResponseEntity<CreateReservationResponse> createReservationByAdmin(
-            @Valid @RequestBody CreateReservationRequest createReservationRequest) {
-        CreateReservationResponse reservation = adminService.createReservation(createReservationRequest);
+            @Valid @RequestBody CreateReservationByAdminRequest createReservationByAdminRequest) {
+        CreateReservationResponse reservation = adminService.createReservation(createReservationByAdminRequest);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.id())).body(reservation);
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<FindReservationResponse>> getReservations() {
-        return ResponseEntity.ok(reservationService.getReservations());
+    public ResponseEntity<List<FindAdminReservationResponse>> getReservations() {
+        return ResponseEntity.ok(reservationService.getReservationsByAdmin());
     }
 
     @GetMapping("/waitings")
@@ -53,7 +53,7 @@ public class AdminController {
 
     @DeleteMapping("/waitings/reject/{waitingId}")
     public ResponseEntity<Void> rejectWaiting(@PathVariable Long waitingId) {
-        waitingService.rejectWaiting(waitingId);  // TODO: admin??
+        waitingService.rejectWaiting(waitingId);
         return ResponseEntity.noContent().build();
     }
 }
