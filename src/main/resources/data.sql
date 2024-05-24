@@ -45,4 +45,6 @@ INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES
 (CURRENT_DATE() - INTERVAL '8' DAY, 3, 12, 4),
 (CURRENT_DATE() - INTERVAL '8' DAY, 3, 12, 4),
 (CURRENT_DATE() - INTERVAL '8' DAY, 3, 12, 4),
-(CURRENT_DATE() - INTERVAL '8' DAY, 3, 12, 4);
+(CURRENT_DATE() - INTERVAL '8' DAY, 3, 12, 4),
+(CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 1),
+(CURRENT_DATE() + INTERVAL '1' DAY, 2, 1, 1);
