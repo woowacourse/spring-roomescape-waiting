@@ -3,6 +3,7 @@ package roomescape.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.ThemeRequest;
+import roomescape.controller.response.ReservationThemeResponse;
 import roomescape.model.Theme;
 import roomescape.service.ThemeService;
 
@@ -24,11 +25,10 @@ public class ThemeController {
     }
 
     @PostMapping("/themes")
-    public ResponseEntity<Theme> addTheme(@RequestBody ThemeRequest themeRequest) {
+    public ResponseEntity<ReservationThemeResponse> addTheme(@RequestBody ThemeRequest themeRequest) {
         Theme theme = themeService.addTheme(themeRequest);
-        return ResponseEntity
-                .created(URI.create("/themes/" + theme.getId()))
-                .body(theme);
+        ReservationThemeResponse response = ReservationThemeResponse.of(theme);
+        return ResponseEntity.created(URI.create("/themes/" + theme.getId())).body(response);
     }
 
     @DeleteMapping("/themes/{id}")
@@ -38,7 +38,11 @@ public class ThemeController {
     }
 
     @GetMapping("/themes/top10")
-    public ResponseEntity<List<Theme>> getPopularThemes() {
-        return ResponseEntity.ok(themeService.findPopularThemes());
+    public ResponseEntity<List<ReservationThemeResponse>> getPopularThemes() {
+        List<Theme> popularThemes = themeService.findPopularThemes();
+        List<ReservationThemeResponse> responses = popularThemes.stream()
+                .map(ReservationThemeResponse::of)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 }

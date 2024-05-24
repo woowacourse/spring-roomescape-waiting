@@ -12,6 +12,7 @@ import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.controller.request.MemberLoginRequest;
 import roomescape.controller.request.RegisterRequest;
 import roomescape.controller.response.MemberNameResponse;
+import roomescape.controller.response.MemberResponse;
 import roomescape.model.Member;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
@@ -44,9 +45,12 @@ public class MemberController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<Member>> getAllMembers() {
+    public ResponseEntity<List<MemberResponse>> getAllMembers() {
         List<Member> members = memberService.findAllMembers();
-        return ResponseEntity.ok(members);
+        List<MemberResponse> responses = members.stream()
+                .map(MemberResponse::new)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/logout")
@@ -56,8 +60,9 @@ public class MemberController {
     }
 
     @PostMapping("/members")
-    public ResponseEntity<Member> registerMember(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<MemberResponse> registerMember(@RequestBody RegisterRequest registerRequest) {
         Member member = memberService.register(registerRequest);
-        return ResponseEntity.created(URI.create("/members/" + member.getId())).body(member);
+        MemberResponse response = new MemberResponse(member);
+        return ResponseEntity.created(URI.create("/members/" + member.getId())).body(response);
     }
 }

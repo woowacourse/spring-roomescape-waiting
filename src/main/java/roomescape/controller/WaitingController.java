@@ -22,10 +22,11 @@ public class WaitingController {
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<Waiting> createWaiting(@RequestBody WaitingRequest request,
+    public ResponseEntity<WaitingResponse> createWaiting(@RequestBody WaitingRequest request,
                                                  @AuthenticationPrincipal Member member) {
         Waiting waiting = waitingService.addWaiting(request, member);
-        return ResponseEntity.created(URI.create("/waiting/" + waiting.getId())).body(waiting);
+        WaitingResponse response = new WaitingResponse(waiting);
+        return ResponseEntity.created(URI.create("/waiting/" + waiting.getId())).body(response);
     }
 
     @DeleteMapping("/waiting/{id}")
