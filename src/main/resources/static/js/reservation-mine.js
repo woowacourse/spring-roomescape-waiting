@@ -33,7 +33,6 @@ function render(data) {
     row.insertCell(2).textContent = time;
     row.insertCell(3).textContent = status;
 
-    //todo 에약 상태도 취소가 가능하도록 변경
     const cancelCell = row.insertCell(4);
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-danger';
