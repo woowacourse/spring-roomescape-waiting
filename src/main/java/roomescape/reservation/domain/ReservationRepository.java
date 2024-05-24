@@ -53,7 +53,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             FROM Reservation r
             JOIN FETCH r.time
             JOIN FETCH r.theme
-            WHERE r.member = :member AND r.status = 'WAITING'
+            WHERE r.member = :member AND r.status = roomescape.reservation.domain.ReservationStatus.WAITING
             """)
     List<WaitingReservation> findWaitingReservationsByMemberWithDetails(@Param(value = "member") Member member);
 
