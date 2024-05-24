@@ -34,33 +34,36 @@ import roomescape.util.DatabaseIsolation;
 import roomescape.util.JpaRepositoryTest;
 import roomescape.waiting.model.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.WaitingService;
 
 @JpaRepositoryTest
 @DatabaseIsolation
-@Import(ReservationService.class)
+@Import({ReservationService.class, WaitingService.class})
 class ReservationServiceTest {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    @Autowired
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
     @Autowired
     ReservationServiceTest(final ReservationService reservationService,
+                           final WaitingService waitingService,
                            final ReservationRepository reservationRepository,
                            final ReservationTimeRepository reservationTimeRepository,
                            final ThemeRepository themeRepository,
                            final MemberRepository memberRepository,
                            final WaitingRepository waitingRepository) {
+        this.reservationService = reservationService;
+        this.waitingService = waitingService;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.waitingRepository = waitingRepository;
-        this.reservationService = reservationService;
     }
 
     @Test

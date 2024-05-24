@@ -62,6 +62,11 @@ public class WaitingService {
                 .toList();
     }
 
+    public void deleteWaiting(final Long waitingId) {
+        Waiting waiting = waitingRepository.getById(waitingId);
+        waitingRepository.delete(waiting);
+    }
+
     public void deleteWaiting(final AuthInfo authInfo, final Long waitingId) {
         Waiting waiting = waitingRepository.getById(waitingId);
 

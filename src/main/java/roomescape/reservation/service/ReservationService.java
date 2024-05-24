@@ -21,20 +21,25 @@ import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.model.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.WaitingService;
 
 @Service
 public class ReservationService {
 
+    private final WaitingService waitingService;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
+    public ReservationService(final WaitingService waitingService,
+                              final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository, final WaitingRepository waitingRepository) {
+                              final MemberRepository memberRepository,
+                              final WaitingRepository waitingRepository) {
+        this.waitingService = waitingService;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -126,6 +131,6 @@ public class ReservationService {
     private void updateReservationByMember(Reservation reservation) {
         Waiting waiting = waitingRepository.getFirstByReservation(reservation);
         reservation.updateMember(waiting.getMember());
-        waitingRepository.delete(waiting);
+        waitingService.deleteWaiting(waiting.getId());
     }
 }
