@@ -22,14 +22,14 @@ import roomescape.repository.dto.ReservationWithRank;
 import roomescape.service.dto.FindReservationWithRankDto;
 
 @Service
-public class ReservationService {
+public class UserReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(
+    public UserReservationService(
         ReservationRepository reservationRepository,
         ReservationTimeRepository reservationTimeRepository,
         ThemeRepository themeRepository, MemberRepository memberRepository) {
@@ -94,15 +94,6 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        Reservation reservation = reservationRepository.findByIdAndStatus(id, RESERVED)
-            .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않아 삭제할 수 없습니다."));
-
-        reservationRepository.deleteById(reservation.getId());
-        approveNextWaiting(reservation);
-    }
-
-    @Transactional
     public void deleteStandby(Long id, Member member) {
         Reservation reservation = reservationRepository.findByIdAndStatus(id, STANDBY)
             .orElseThrow(() -> new RoomescapeException("예약대기가 존재하지 않아 삭제할 수 없습니다."));
@@ -121,25 +112,6 @@ public class ReservationService {
             reservation.getTime().getId(),
             reservation.getTheme().getId()
         ).ifPresent(Reservation::reserve);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllReserved() {
-        return reservationRepository.findAllByStatusOrderByDateAscTimeStartAtAsc(RESERVED);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllStandby() {
-        return reservationRepository.findAllByStatusOrderByDateAscTimeStartAtAsc(STANDBY);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllByFilter(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
-        if (dateFrom.isAfter(dateTo)) {
-            throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
-        }
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetweenOrderByDateAscTimeStartAtAsc(
-            themeId, memberId, dateFrom, dateTo);
     }
 
     @Transactional(readOnly = true)

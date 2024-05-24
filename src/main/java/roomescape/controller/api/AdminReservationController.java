@@ -19,21 +19,21 @@ import roomescape.controller.dto.SearchReservationFilterRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.global.argumentresolver.AuthenticationPrincipal;
-import roomescape.service.ReservationService;
+import roomescape.service.AdminReservationService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final ReservationService reservationService;
+    private final AdminReservationService adminReservationService;
 
-    public AdminReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(AdminReservationService adminReservationService) {
+        this.adminReservationService = adminReservationService;
     }
 
     @PostMapping
     public ResponseEntity<CreateReservationResponse> save(@Valid @RequestBody CreateReservationRequest request) {
-        Reservation reservation = reservationService.reserve(
+        Reservation reservation = adminReservationService.reserve(
             request.memberId(),
             request.date(),
             request.timeId(),
@@ -46,13 +46,13 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationService.deleteById(id);
+        adminReservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<FindReservationResponse>> findAll() {
-        List<Reservation> reservations = reservationService.findAllReserved();
+        List<Reservation> reservations = adminReservationService.findAllReserved();
         List<FindReservationResponse> createReservationResponse = reservations.stream()
             .map(FindReservationResponse::from)
             .toList();
@@ -62,7 +62,7 @@ public class AdminReservationController {
 
     @GetMapping("/standby")
     public ResponseEntity<List<FindReservationStandbyResponse>> findAllStandby() {
-        List<Reservation> reservations = reservationService.findAllStandby();
+        List<Reservation> reservations = adminReservationService.findAllStandby();
         List<FindReservationStandbyResponse> response = reservations.stream()
             .map(FindReservationStandbyResponse::from)
             .toList();
@@ -71,13 +71,13 @@ public class AdminReservationController {
 
     @DeleteMapping("/standby/{id}")
     public ResponseEntity<Void> deleteStandby(@PathVariable Long id, @AuthenticationPrincipal Member member) {
-        reservationService.deleteStandby(id, member);
+        adminReservationService.deleteStandby(id, member);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<FindReservationResponse>> find(SearchReservationFilterRequest request) {
-        List<Reservation> reservations = reservationService.findAllByFilter(
+        List<Reservation> reservations = adminReservationService.findAllByFilter(
             request.themeId(), request.memberId(), request.dateFrom(), request.dateTo());
         List<FindReservationResponse> response = reservations.stream()
             .map(FindReservationResponse::from)

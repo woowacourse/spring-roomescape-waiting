@@ -18,17 +18,17 @@ import roomescape.controller.dto.FindMyReservationResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.global.argumentresolver.AuthenticationPrincipal;
-import roomescape.service.ReservationService;
+import roomescape.service.UserReservationService;
 import roomescape.service.dto.FindReservationWithRankDto;
 
 @RestController
 @RequestMapping("/reservations")
 public class UserReservationController {
 
-    private final ReservationService reservationService;
+    private final UserReservationService userReservationService;
 
-    public UserReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public UserReservationController(UserReservationService userReservationService) {
+        this.userReservationService = userReservationService;
     }
 
     @PostMapping
@@ -36,7 +36,7 @@ public class UserReservationController {
         @Valid @RequestBody CreateUserReservationRequest request,
         @AuthenticationPrincipal Member member) {
 
-        Reservation reservation = reservationService.reserve(
+        Reservation reservation = userReservationService.reserve(
             member.getId(),
             request.date(),
             request.timeId(),
@@ -52,7 +52,7 @@ public class UserReservationController {
         @Valid @RequestBody CreateUserReservationStandbyRequest request,
         @AuthenticationPrincipal Member member) {
 
-        Reservation reservation = reservationService.standby(
+        Reservation reservation = userReservationService.standby(
             member.getId(),
             request.date(),
             request.timeId(),
@@ -65,13 +65,13 @@ public class UserReservationController {
 
     @DeleteMapping("/standby/{id}")
     public ResponseEntity<Void> deleteStandby(@PathVariable Long id, @AuthenticationPrincipal Member member) {
-        reservationService.deleteStandby(id, member);
+        userReservationService.deleteStandby(id, member);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/mine")
     public ResponseEntity<List<FindMyReservationResponse>> findMyReservations(@AuthenticationPrincipal Member member) {
-        List<FindReservationWithRankDto> reservations = reservationService.findMyReservationsWithRank(member.getId());
+        List<FindReservationWithRankDto> reservations = userReservationService.findMyReservationsWithRank(member.getId());
         List<FindMyReservationResponse> response = reservations.stream()
             .map(data -> FindMyReservationResponse.from(data.reservation(), data.rank()))
             .toList();
