@@ -6,10 +6,7 @@ import roomescape.domain.time.ReservationTime;
 
 public record AvailableTimeResponse(
         Long id,
-
-        @JsonFormat(pattern = "HH:mm")
-        LocalTime startAt,
-
+        @JsonFormat(pattern = "HH:mm") LocalTime startAt,
         boolean alreadyBooked
 ) {
 
