@@ -21,8 +21,8 @@ public class ReservationTimeFindService {
         return reservationTimeRepository.findAll();
     }
 
-    public BookingStatus findIsBooked(LocalDate date,
-                                      long themeId) {
+    public BookingStatus findTimeSlotsBookingStatus(LocalDate date,
+                                                    long themeId) {
         List<ReservationTime> reservedTimes =
                 reservationTimeRepository.findReservationByThemeIdAndDate(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();

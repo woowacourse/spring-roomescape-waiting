@@ -25,7 +25,7 @@ class ReservationTimeFindServiceTest {
     @DisplayName("날짜와 테마가 주어지면 각 시간의 예약 여부를 구한다.")
     void findAvailabilityByDateAndTheme() {
         LocalDate date = LocalDate.now().plusDays(1L);
-        BookingStatus bookingStatus = reservationTimeFindService.findIsBooked(date, 1L);
+        BookingStatus bookingStatus = reservationTimeFindService.findTimeSlotsBookingStatus(date, 1L);
         assertThat(bookingStatus.getReservationStatus())
                 .isEqualTo(Map.of(
                         new ReservationTime(1L, LocalTime.of(10, 0)), true,
