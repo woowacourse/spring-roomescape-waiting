@@ -23,7 +23,9 @@ public class AdminReservationController {
     private final MemberReservationService memberReservationService;
     private final WaitingReservationService waitingReservationService;
 
-    public AdminReservationController(ReservationService reservationService, MemberReservationService memberReservationService, WaitingReservationService waitingReservationService) {
+    public AdminReservationController(ReservationService reservationService,
+                                      MemberReservationService memberReservationService,
+                                      WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
         this.memberReservationService = memberReservationService;
         this.waitingReservationService = waitingReservationService;
@@ -32,7 +34,8 @@ public class AdminReservationController {
     @PostMapping()
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid MemberReservationRequest memberReservationRequest) {
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(memberReservationRequest);
+        ReservationResponse reservationResponse = memberReservationService
+                .createMemberReservation(memberReservationRequest);
         return ResponseEntity.created(URI.create("/admin/reservations/" + reservationResponse.memberReservationId()))
                 .body(reservationResponse);
     }

@@ -23,7 +23,9 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final MemberReservationRepository memberReservationRepository;
 
-    public ReservationService(CommonFindService commonFindService, ReservationRepository reservationRepository, MemberReservationRepository memberReservationRepository) {
+    public ReservationService(CommonFindService commonFindService,
+                              ReservationRepository reservationRepository,
+                              MemberReservationRepository memberReservationRepository) {
         this.commonFindService = commonFindService;
         this.reservationRepository = reservationRepository;
         this.memberReservationRepository = memberReservationRepository;

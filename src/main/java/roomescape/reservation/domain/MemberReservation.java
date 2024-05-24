@@ -27,7 +27,10 @@ public class MemberReservation {
     public MemberReservation() {
     }
 
-    public MemberReservation(Member member, Reservation reservation, LocalDateTime createdTime, ReservationStatus status) {
+    public MemberReservation(Member member,
+                             Reservation reservation,
+                             LocalDateTime createdTime,
+                             ReservationStatus status) {
         this.member = member;
         this.reservation = reservation;
         this.createdTime = createdTime;

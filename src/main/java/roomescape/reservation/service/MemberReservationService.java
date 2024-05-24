@@ -26,14 +26,16 @@ public class MemberReservationService {
     private final CommonFindService commonFindService;
     private final MemberReservationRepository memberReservationRepository;
 
-    public MemberReservationService(CommonFindService commonFindService, MemberReservationRepository memberReservationRepository) {
+    public MemberReservationService(CommonFindService commonFindService,
+                                    MemberReservationRepository memberReservationRepository) {
         this.commonFindService = commonFindService;
         this.memberReservationRepository = memberReservationRepository;
     }
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findMemberReservations(ReservationQueryRequest request) {
-        Specification<MemberReservation> spec = Specification.where(MemberReservationSpecification.greaterThanOrEqualToStartDate(request.getStartDate()))
+        Specification<MemberReservation> spec = Specification
+                .where(MemberReservationSpecification.greaterThanOrEqualToStartDate(request.getStartDate()))
                 .and(MemberReservationSpecification.lessThanOrEqualToEndDate(request.getEndDate()))
                 .and(MemberReservationSpecification.equalMemberId(request.getMemberId()))
                 .and(MemberReservationSpecification.equalThemeId(request.getThemeId()));

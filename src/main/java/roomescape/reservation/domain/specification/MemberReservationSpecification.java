@@ -8,24 +8,28 @@ import java.time.LocalDate;
 public class MemberReservationSpecification {
 
     public static Specification<MemberReservation> greaterThanOrEqualToStartDate(LocalDate startDate) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("reservation").get("date"), startDate);
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.greaterThanOrEqualTo(root.get("reservation").get("date"), startDate);
     }
 
     public static Specification<MemberReservation> lessThanOrEqualToEndDate(LocalDate endDate) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("reservation").get("date"), endDate);
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.lessThanOrEqualTo(root.get("reservation").get("date"), endDate);
     }
 
     public static Specification<MemberReservation> equalMemberId(Long memberId) {
         if (memberId == null) {
             return null;
         }
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("member").get("id"), memberId);
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("member").get("id"), memberId);
     }
 
     public static Specification<MemberReservation> equalThemeId(Long themeId) {
         if (themeId == null) {
             return null;
         }
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("reservation").get("theme").get("id"), themeId);
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("reservation").get("theme").get("id"), themeId);
     }
 }

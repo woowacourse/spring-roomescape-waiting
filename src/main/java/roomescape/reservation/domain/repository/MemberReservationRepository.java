@@ -8,11 +8,11 @@ import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long>, JpaSpecificationExecutor<MemberReservation> {
+public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long>,
+        JpaSpecificationExecutor<MemberReservation> {
 
     List<MemberReservation> findAllByMember(Member member);
 

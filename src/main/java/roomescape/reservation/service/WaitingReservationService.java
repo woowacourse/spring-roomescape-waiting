@@ -22,7 +22,8 @@ public class WaitingReservationService {
     private final CommonFindService commonFindService;
     private final MemberReservationRepository memberReservationRepository;
 
-    public WaitingReservationService(CommonFindService commonFindService, MemberReservationRepository memberReservationRepository) {
+    public WaitingReservationService(CommonFindService commonFindService,
+                                     MemberReservationRepository memberReservationRepository) {
         this.commonFindService = commonFindService;
         this.memberReservationRepository = memberReservationRepository;
     }
@@ -36,15 +37,17 @@ public class WaitingReservationService {
 
     private MyReservationResponse handler(MyReservationWithStatus myReservationWithStatus) {
         if (myReservationWithStatus.status().isWaiting()) {
-            int waitingCount = memberReservationRepository.countWaitingMemberReservation(myReservationWithStatus.memberReservationId());
+            int waitingCount = memberReservationRepository
+                    .countWaitingMemberReservation(myReservationWithStatus.memberReservationId());
             return MyReservationResponse.from(myReservationWithStatus, waitingCount);
         }
         return MyReservationResponse.from(myReservationWithStatus);
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAllByWaitingReservation() { // TODO 어드민만 호출할 수 있는 메서드를 분리하지 않아도 될까??
-        List<MemberReservation> memberReservations = memberReservationRepository.findAllByStatus(ReservationStatus.WAITING);
+    public List<ReservationResponse> findAllByWaitingReservation() {
+        List<MemberReservation> memberReservations = memberReservationRepository
+                .findAllByStatus(ReservationStatus.WAITING);
         return memberReservations.stream()
                 .map(ReservationResponse::from)
                 .toList();

@@ -24,7 +24,11 @@ public class CommonFindService {
     private final ReservationRepository reservationRepository;
     private final MemberReservationRepository memberReservationRepository;
 
-    public CommonFindService(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, MemberRepository memberRepository, ReservationRepository reservationRepository, MemberReservationRepository memberReservationRepository) {
+    public CommonFindService(ReservationTimeRepository reservationTimeRepository,
+                             ThemeRepository themeRepository,
+                             MemberRepository memberRepository,
+                             ReservationRepository reservationRepository,
+                             MemberReservationRepository memberReservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;

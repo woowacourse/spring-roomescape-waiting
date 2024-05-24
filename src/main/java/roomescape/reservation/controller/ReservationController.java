@@ -23,7 +23,9 @@ public class ReservationController {
     private final MemberReservationService memberReservationService;
     private final WaitingReservationService waitingReservationService;
 
-    public ReservationController(ReservationService reservationService, MemberReservationService memberReservationService, WaitingReservationService waitingReservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 MemberReservationService memberReservationService,
+                                 WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
         this.memberReservationService = memberReservationService;
         this.waitingReservationService = waitingReservationService;

@@ -30,7 +30,8 @@ public class MemberService {
 
     public MemberResponse create(SignUpRequest signUpRequest) {
         String encodedPassword = passwordEncoder.encode(signUpRequest.password());
-        Member member = memberRepository.save(new Member(signUpRequest.name(), signUpRequest.email(), encodedPassword, Role.USER));
+        Member member = memberRepository.save(
+                new Member(signUpRequest.name(), signUpRequest.email(), encodedPassword, Role.USER));
         return new MemberResponse(member.getId(), member.getName());
     }
 
