@@ -129,7 +129,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation = reservationService.createReservation(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
 
         // when & then
-        assertThatCode(() -> reservationService.delete(reservation.getId()))
+        assertThatCode(() -> reservationService.deleteReservation(reservation.getId()))
                 .doesNotThrowAnyException();
     }
 

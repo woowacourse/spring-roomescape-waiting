@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
@@ -22,4 +23,11 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     WaitingWithRank findByMember(@Param(value = "member") Member member);
 
     void deleteByMemberAndDateAndTimeAndTheme(Member member, LocalDate date, ReservationTime time, Theme theme);
+
+    @Query("SELECT w " +
+            "FROM Waiting w " +
+            "WHERE w.date = :date AND w.time = :time AND w.theme = :theme " +
+            "ORDER BY w.id " +
+            "LIMIT 1")
+    Optional<Waiting> findFistByDateAndTimeAndThemeOrderByIdAsc(LocalDate date, ReservationTime time, Theme theme);
 }

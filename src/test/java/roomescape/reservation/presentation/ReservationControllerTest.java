@@ -242,7 +242,7 @@ class ReservationControllerTest extends ControllerTest {
         // given
         BDDMockito.willDoNothing()
                 .given(reservationService)
-                .delete(anyLong());
+                .deleteReservation(anyLong());
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}", anyLong())
