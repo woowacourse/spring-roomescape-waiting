@@ -102,7 +102,7 @@ public class ReservationService {
 
     public void delete(final long id) {
         Reservation reservation = getById(id);
-        reservationRepository.delete(reservation);
+        reservationRepository.deleteById(id);
 
         Optional<Reservation> reservationWithStatusWaiting = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()

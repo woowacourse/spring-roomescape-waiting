@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.controller.dto.request.ThemeSaveRequest;
-import roomescape.reservation.controller.dto.response.ThemeDeleteResponse;
 import roomescape.reservation.controller.dto.response.ThemeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
@@ -66,10 +65,10 @@ public class ThemeService {
                 .toList();
     }
 
-    public ThemeDeleteResponse delete(final long id) {
+    public void delete(final long id) {
         validateNotExitsThemeById(id);
         validateAlreadyHasReservationByThemeId(id);
-        return new ThemeDeleteResponse(themeRepository.deleteById(id));
+        themeRepository.deleteById(id);
     }
 
     private void validateNotExitsThemeById(final long id) {

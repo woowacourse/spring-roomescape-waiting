@@ -1,18 +1,17 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.reservation.repository.fixture.ThemeFixture.THEME1;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.repository.fixture.ThemeFixture;
 
 @DataJpaTest
 class ThemeRepositoryTest {
-
-    private static final int DEFAULT_THEME_COUNT = 4;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -22,7 +21,7 @@ class ThemeRepositoryTest {
     void findAll() {
         final var result = themeRepository.findAll();
 
-        assertThat(result).hasSize(DEFAULT_THEME_COUNT);
+        assertThat(result).hasSize(ThemeFixture.count());
     }
 
     @DisplayName("id로 테마를 조회한다.")
@@ -30,7 +29,7 @@ class ThemeRepositoryTest {
     void findById() {
         final var result = themeRepository.findById(1L);
 
-        assertThat(result.get().getId()).isEqualTo(1L);
+        assertThat(result.get()).isEqualTo(THEME1.create());
     }
 
     @DisplayName("테마를 생성한다.")
@@ -40,19 +39,14 @@ class ThemeRepositoryTest {
 
         themeRepository.save(theme);
 
-        assertThat(themeRepository.findAll()).hasSize(DEFAULT_THEME_COUNT + 1);
+        assertThat(themeRepository.findAll()).hasSize(ThemeFixture.count() + 1);
     }
 
     @DisplayName("id로 테마를 삭제한다.")
     @Test
     void deleteById() {
-        final var result = themeRepository.deleteById(4);
+        themeRepository.deleteById(4L);
 
-        assertAll(
-                () -> assertThat(result).isEqualTo(1),
-                () -> assertThat(themeRepository.findAll())
-                        .extracting(Theme::getId)
-                        .doesNotContain(4L)
-        );
+        assertThat(themeRepository.findById(4L)).isEmpty();
     }
 }

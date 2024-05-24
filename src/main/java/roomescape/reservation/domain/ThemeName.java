@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Embeddable;
+import java.util.Objects;
 
 @Embeddable
 public class ThemeName {
@@ -14,7 +15,7 @@ public class ThemeName {
     }
 
     protected ThemeName() {
-        
+
     }
 
     private void validateName(final String value) {
@@ -28,5 +29,22 @@ public class ThemeName {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ThemeName themeName = (ThemeName) o;
+        return Objects.equals(value, themeName.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

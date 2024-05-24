@@ -8,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.reservation.repository.fixture.MemberFixture;
 
 @DataJpaTest
 class MemberRepositoryTest {
-
-    private static final int DEFAULT_MEMBER_COUNT = 2;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -22,7 +21,7 @@ class MemberRepositoryTest {
     void findAll() {
         final var result = memberRepository.findAll();
 
-        assertThat(result).hasSize(DEFAULT_MEMBER_COUNT);
+        assertThat(result).hasSize(MemberFixture.count());
     }
 
     @DisplayName("id로 멤버를 조회한다.")
@@ -40,7 +39,7 @@ class MemberRepositoryTest {
 
         memberRepository.save(member);
 
-        assertThat(memberRepository.findAll()).hasSize(DEFAULT_MEMBER_COUNT + 1);
+        assertThat(memberRepository.findAll()).hasSize(MemberFixture.count() + 1);
     }
 
     @DisplayName("이메일로 멤버를 조회한다.")

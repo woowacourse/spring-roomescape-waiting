@@ -1,6 +1,9 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION1;
+import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION2;
+import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION4;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -16,11 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.fixture.ReservationFixture;
 
 @DataJpaTest
 class ReservationRepositoryTest {
-
-    private static final int DEFAULT_RESERVATION_COUNT = 5;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -30,7 +32,7 @@ class ReservationRepositoryTest {
     void findAll() {
         final var result = reservationRepository.findAll();
 
-        assertThat(result).hasSize(DEFAULT_RESERVATION_COUNT);
+        assertThat(result).hasSize(ReservationFixture.count());
     }
 
     @DisplayName("id로 예약을 조회한다.")
@@ -38,30 +40,25 @@ class ReservationRepositoryTest {
     void findById() {
         final var result = reservationRepository.findById(1L);
 
-        assertThat(result.get().getId()).isEqualTo(1L);
+        assertThat(result.get()).isEqualTo(RESERVATION1.create());
     }
 
     @DisplayName("예약을 생성한다.")
     @Test
     void save() {
-        final var reservation = Reservation.of(
-                Fixture.MEMBER1, Fixture.DATE, Fixture.RESERVATION_TIME1, Fixture.THEME1, Status.RESERVATION
-        );
+        final var reservation = RESERVATION1.create();
 
         reservationRepository.save(reservation);
 
-        assertThat(reservationRepository.findAll()).hasSize(DEFAULT_RESERVATION_COUNT + 1);
+        assertThat(reservationRepository.findAll()).hasSize(ReservationFixture.count() + 1);
     }
 
     @DisplayName("예약을 삭제한다.")
     @Test
     void delete() {
-        Reservation reservation = reservationRepository.findById(3L).get();
-        reservationRepository.delete(reservation);
+        reservationRepository.deleteById(1L);
 
-        assertThat(reservationRepository.findAll())
-                .extracting(Reservation::getId)
-                .doesNotContain(3L);
+        assertThat(reservationRepository.findById(1L)).isEmpty();
     }
 
     @DisplayName("예약 시간 id로 예약을 조회한다.")
@@ -97,8 +94,8 @@ class ReservationRepositoryTest {
     @DisplayName("날짜 사이로 예약을 조회한다.")
     @Test
     void findByDateBetween() {
-        LocalDate startDate = LocalDate.parse("2024-12-23");
-        LocalDate endDate = LocalDate.parse("2024-12-25");
+        LocalDate startDate = RESERVATION1.create().getDate();
+        LocalDate endDate = RESERVATION2.create().getDate();
         final var result = reservationRepository.findByDateBetween(startDate, endDate);
 
         assertThat(result).extracting(Reservation::getDate)
@@ -110,24 +107,28 @@ class ReservationRepositoryTest {
     @DisplayName("날짜, 예약 시간 id, 테마 id로 예약을 조회한다.")
     @Test
     void findByDateAndTimeIdAndThemeId() {
-        final var result = reservationRepository.findByDateAndTimeIdAndThemeId(
-                LocalDate.parse("2024-12-12"), 1L, 1L
+        Reservation reservation = RESERVATION4.create();
+        final var results = reservationRepository.findByDateAndTimeIdAndThemeId(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
         );
 
-        assertThat(result).extracting(Reservation::getId).containsExactly(1L);
+        assertThat(results)
+                .allMatch(result -> result.getDate() == reservation.getDate()
+                        && result.getTime().getId() == reservation.getTime().getId()
+                        && result.getTheme().getId() == reservation.getTheme().getId()
+                );
     }
 
     @DisplayName("날짜, 테마 id를 기준으로 예약의 시간 id를 조회한다.")
     @Test
     void findByDateAndThemeId() {
-        final var result = reservationRepository.findByDateAndThemeId(
-                LocalDate.parse("2024-12-12"), 1L
-        );
+        LocalDate date = LocalDate.parse("2024-06-30");
+        long themeId = 2L;
 
-        assertThat(result)
-                .hasSize(1)
-                .extracting(reservation -> reservation.getTime().getId())
-                .containsExactly(1L);
+        final var results = reservationRepository.findByDateAndThemeId(date, themeId);
+
+        assertThat(results)
+                .allMatch(result -> result.getDate() == date && result.getTheme().getId() == themeId);
     }
 
     @DisplayName("테마 id, 멤버 id, 상태, 날짜 사이로 예약을 조회한다.")
@@ -142,17 +143,7 @@ class ReservationRepositoryTest {
                 themeId, memberId, status, dateFrom, dateTo
         );
 
-        assertThat(result)
-                .allMatch(matchCondition(themeId, memberId, dateFrom, dateTo));
-    }
-
-    @Test
-    void findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt() {
-        Reservation result = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
-                LocalDate.parse("2024-06-30"), 1, 2
-        ).get();
-
-        assertThat(result).extracting(reservation -> reservation.getMember().getId()).isEqualTo(1L);
+        assertThat(result).allMatch(matchCondition(themeId, memberId, dateFrom, dateTo));
     }
 
     private static Stream<Arguments> getThemeIdAndMemberIdAndStatusDateBetween() {
@@ -177,5 +168,15 @@ class ReservationRepositoryTest {
                 && (dateFrom == null || reservation.getDate().isEqual(dateFrom) || reservation.getDate()
                 .isAfter(dateFrom))
                 && (dateTo == null || reservation.getDate().isEqual(dateTo) || reservation.getDate().isBefore(dateTo));
+    }
+
+    @DisplayName("날짜, 시간 id, 테마 id로 예약을 조회하고 created_at을 기준으로 정렬하여 첫 번째 예약을 조회한다.")
+    @Test
+    void findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt() {
+        Reservation result = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+                LocalDate.parse("2024-06-30"), 1L, 2L
+        ).get();
+
+        assertThat(result).isEqualTo(RESERVATION4.create());
     }
 }

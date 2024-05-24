@@ -6,7 +6,6 @@ import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.controller.dto.request.ReservationTimeSaveRequest;
-import roomescape.reservation.controller.dto.response.ReservationTimeDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 import roomescape.reservation.domain.Reservation;
@@ -62,10 +61,10 @@ public class ReservationTimeService {
                 .anyMatch(reservation -> reservation.getTime().getId() == reservationTime.getId());
     }
 
-    public ReservationTimeDeleteResponse delete(final long id) {
+    public void delete(final long id) {
         validateDoesNotExists(id);
         validateAlreadyHasReservationByTimeId(id);
-        return new ReservationTimeDeleteResponse(reservationTimeRepository.deleteById(id));
+        reservationTimeRepository.deleteById(id);
     }
 
     private void validateAlreadyHasReservationByTimeId(final long id) {
