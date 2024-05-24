@@ -11,7 +11,7 @@ import roomescape.web.controller.response.ReservationWaitingWebResponse;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/waitings")
+@RequestMapping("/admin/reservation-waitings")
 public class AdminReservationWaitingController {
 
     private final ReservationWaitingService reservationWaitingService;

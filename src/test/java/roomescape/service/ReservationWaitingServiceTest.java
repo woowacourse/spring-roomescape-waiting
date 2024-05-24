@@ -8,7 +8,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.infrastructure.*;
-import roomescape.service.request.WaitingAppRequest;
+import roomescape.service.request.ReservationWaitingAppRequest;
 import roomescape.service.response.ReservationWaitingAppResponse;
 import roomescape.service.response.ReservationWaitingWithRankAppResponse;
 import roomescape.web.exception.AuthorizationException;
@@ -82,7 +82,7 @@ class ReservationWaitingServiceTest {
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(otherMember, new ReservationDate(date), time, theme));
 
-        WaitingAppRequest request = new WaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
+        ReservationWaitingAppRequest request = new ReservationWaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
         ReservationWaitingAppResponse response = reservationWaitingService.save(request);
         ReservationWaiting expectedWaiting = reservationWaitingRepository.findById(response.id()).get();
 
@@ -98,7 +98,7 @@ class ReservationWaitingServiceTest {
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(member, new ReservationDate(date), time, theme));
 
-        WaitingAppRequest request = new WaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
+        ReservationWaitingAppRequest request = new ReservationWaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.save(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -113,7 +113,7 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
 
-        WaitingAppRequest request = new WaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
+        ReservationWaitingAppRequest request = new ReservationWaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.save(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -131,7 +131,7 @@ class ReservationWaitingServiceTest {
         reservationRepository.save(new Reservation(otherMember, new ReservationDate(date), time, theme));
         reservationWaitingRepository.save(new ReservationWaiting(LocalDateTime.now(), member, new ReservationDate(date), time, theme));
 
-        WaitingAppRequest request = new WaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
+        ReservationWaitingAppRequest request = new ReservationWaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.save(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -148,7 +148,7 @@ class ReservationWaitingServiceTest {
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(otherMember, new ReservationDate(date), time, theme));
 
-        WaitingAppRequest request = new WaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
+        ReservationWaitingAppRequest request = new ReservationWaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.save(request))
                 .isInstanceOf(IllegalArgumentException.class)

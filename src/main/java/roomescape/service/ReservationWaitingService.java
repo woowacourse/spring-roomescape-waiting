@@ -3,7 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.domain.*;
 import roomescape.infrastructure.*;
-import roomescape.service.request.WaitingAppRequest;
+import roomescape.service.request.ReservationWaitingAppRequest;
 import roomescape.service.response.ReservationWaitingAppResponse;
 import roomescape.service.response.ReservationWaitingWithRankAppResponse;
 import roomescape.web.exception.AuthorizationException;
@@ -33,14 +33,14 @@ public class ReservationWaitingService {
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
-    public ReservationWaitingAppResponse save(WaitingAppRequest request) {
+    public ReservationWaitingAppResponse save(ReservationWaitingAppRequest request) {
         ReservationWaiting waiting = createWaiting(request);
         validateWaiting(waiting);
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(waiting);
         return new ReservationWaitingAppResponse(savedWaiting);
     }
 
-    private ReservationWaiting createWaiting(WaitingAppRequest request) {
+    private ReservationWaiting createWaiting(ReservationWaitingAppRequest request) {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 생성 실패: 사용자를 찾을 수 없습니다 (id: %d)", request.memberId())));
         ReservationDate date = new ReservationDate(request.date());

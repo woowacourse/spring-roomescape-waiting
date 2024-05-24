@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to fetch reservations');
             return response.json();
         }),
-        fetch('/waitings/mine').then(response => {
+        fetch('/reservation-waitings/mine').then(response => {
             if (!response.ok) throw new Error('Failed to fetch waitings');
             return response.json();
         })
@@ -71,7 +71,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = `/waitings/${id}`;
+    const endpoint = `/reservation-waitings/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

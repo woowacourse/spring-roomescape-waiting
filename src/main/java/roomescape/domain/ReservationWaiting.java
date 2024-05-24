@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 @Entity
 public class ReservationWaiting {
 
-    private static final boolean DEFAULT_DENIED = false;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

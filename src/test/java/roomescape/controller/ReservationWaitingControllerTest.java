@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.*;
 import roomescape.infrastructure.*;
 import roomescape.web.auth.JwtProvider;
-import roomescape.web.controller.request.MemberWaitingWebRequest;
+import roomescape.web.controller.request.ReservationWaitingWebRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,12 +47,12 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         Member reservedMember = memberRepository.save(new Member(new MemberName("감자"), new MemberEmail("111@aaa.com"), new MemberPassword("asd"), MemberRole.USER));
         reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
 
-        MemberWaitingWebRequest request = new MemberWaitingWebRequest(date, time.getId(), theme.getId());
+        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date, time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/waitings")
+                .when().post("/reservation-waitings")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -68,13 +68,13 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
-        MemberWaitingWebRequest request = new MemberWaitingWebRequest(date, time.getId(), theme.getId());
+        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date, time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .body(request)
-                .when().post("/waitings")
+                .when().post("/reservation-waitings")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -90,13 +90,13 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, waitingMember, new ReservationDate(date), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
-        MemberWaitingWebRequest request = new MemberWaitingWebRequest(date, time.getId(), theme.getId());
+        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date, time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .body(request)
-                .when().delete("/waitings/" + waiting.getId())
+                .when().delete("/reservation-waitings/" + waiting.getId())
                 .then().log().all()
                 .statusCode(204);
     }
@@ -115,13 +115,13 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, otherMember, new ReservationDate(date.plusMonths(2)), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
-        MemberWaitingWebRequest request = new MemberWaitingWebRequest(date.toString(), time.getId(), theme.getId());
+        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date.toString(), time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .body(request)
-                .when().get("/waitings/mine")
+                .when().get("/reservation-waitings/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
