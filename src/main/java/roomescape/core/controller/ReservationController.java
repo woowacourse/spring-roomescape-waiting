@@ -45,7 +45,7 @@ public class ReservationController {
 
     @GetMapping("/waiting")
     public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
-        return ResponseEntity.ok(reservationService.findAllByStatusStandby());
+        return ResponseEntity.ok(reservationService.findAllWaiting());
     }
 
     @GetMapping(params = {"memberId", "themeId", "dateFrom", "dateTo"})

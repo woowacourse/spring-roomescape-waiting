@@ -145,7 +145,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAllByStatusStandby() {
+    public List<ReservationResponse> findAllWaiting() {
         List<Reservation> reservations = reservationRepository.findAllByStatus(Status.STANDBY);
         return reservations.stream()
                 .map(ReservationResponse::new)
