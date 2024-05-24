@@ -48,12 +48,12 @@ public class ReservationController {
         List<ReservationOfMemberResponse> myReservations = reservationService.findReservationsByMember(memberRequest);
         return ResponseEntity.ok(myReservations);
     }
-
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> cancelWaiting(@PathVariable("id") Long id) {
-        waitingService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+//
+//    @DeleteMapping("/waiting/{id}")
+//    public ResponseEntity<Void> cancelWaiting(@PathVariable("id") Long id) {
+//        waitingService.deleteById(id);
+//        return ResponseEntity.noContent().build();
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
