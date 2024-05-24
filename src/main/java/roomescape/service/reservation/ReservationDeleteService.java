@@ -5,6 +5,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
 import roomescape.exception.AuthenticationException;
 import roomescape.repository.ReservationRepository;
@@ -30,7 +31,7 @@ public class ReservationDeleteService {
         if (deleteReservation.isReserved()) {
             reservationRepository.findNextWaiting(deleteReservation.getTheme(),
                             deleteReservation.getReservationTime(), deleteReservation.getDate(), Limit.of(1))
-                    .ifPresent(Reservation::changeWaitingToReserved);
+                    .ifPresent(reservation -> reservation.changeReservationStatus(ReservationStatus.RESERVED));
         }
     }
 

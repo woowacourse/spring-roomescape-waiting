@@ -89,8 +89,8 @@ public class Reservation extends BaseTime {
         return !this.member.equals(member);
     }
 
-    public void changeWaitingToReserved() {
-        this.reservationStatus = ReservationStatus.RESERVED;
+    public void changeReservationStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
     }
 
     public Long getId() {
