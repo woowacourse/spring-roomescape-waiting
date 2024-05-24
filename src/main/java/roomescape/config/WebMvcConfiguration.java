@@ -1,5 +1,6 @@
 package roomescape.config;
 
+import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -9,15 +10,14 @@ import roomescape.controller.api.dto.request.TokenContextRequest;
 import roomescape.service.MemberService;
 import roomescape.util.TokenProvider;
 
-import java.util.List;
-
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
     private final MemberService memberService;
     private final TokenProvider tokenProvider;
     private final TokenContextRequest tokenContextRequest;
 
-    public WebMvcConfiguration(final MemberService memberService, final TokenProvider tokenProvider, final TokenContextRequest tokenContextRequest) {
+    public WebMvcConfiguration(final MemberService memberService, final TokenProvider tokenProvider,
+                               final TokenContextRequest tokenContextRequest) {
         this.memberService = memberService;
         this.tokenProvider = tokenProvider;
         this.tokenContextRequest = tokenContextRequest;
@@ -30,7 +30,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/admin/**");
         registry.addInterceptor(new CheckLoginInterceptor(memberService, tokenProvider, tokenContextRequest))
                 .addPathPatterns("/login/check")
-                .addPathPatterns("/reservations/**");
+                .addPathPatterns("/reservations/**")
+                .addPathPatterns("/waitings/**");
     }
 
     @Override

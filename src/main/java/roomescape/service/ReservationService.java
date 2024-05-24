@@ -14,16 +14,16 @@ import roomescape.service.dto.output.ReservationOutput;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationCreateValidator reservationCreateValidator;
+    private final CreateValidator createValidator;
 
     public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationCreateValidator reservationCreateValidator) {
+                              final CreateValidator createValidator) {
         this.reservationRepository = reservationRepository;
-        this.reservationCreateValidator = reservationCreateValidator;
+        this.createValidator = createValidator;
     }
 
     public ReservationOutput createReservation(final ReservationInput input) {
-        final Reservation reservation = reservationCreateValidator.validateReservationInput(input);
+        final Reservation reservation = createValidator.validateReservationInput(input);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationOutput.toOutput(savedReservation);
     }

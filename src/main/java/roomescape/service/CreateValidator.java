@@ -1,10 +1,18 @@
 package roomescape.service;
 
+import static roomescape.exception.ExceptionDomainType.MEMBER;
+import static roomescape.exception.ExceptionDomainType.RESERVATION;
+import static roomescape.exception.ExceptionDomainType.RESERVATION_TIME;
+import static roomescape.exception.ExceptionDomainType.THEME;
+import static roomescape.exception.ExceptionDomainType.WAITING;
+
+import java.time.LocalTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.Waiting;
 import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotExistException;
@@ -13,22 +21,28 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.input.ReservationInput;
+import roomescape.service.dto.input.WaitingInput;
 import roomescape.util.DateTimeFormatter;
 
-import static roomescape.exception.ExceptionDomainType.*;
-
 @Component
-public class ReservationCreateValidator {
+public class CreateValidator {
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final DateTimeFormatter nowDateTimeFormatter;
 
 
-    public ReservationCreateValidator(final ReservationRepository reservationRepository, final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
+    public CreateValidator(final ReservationRepository reservationRepository,
+                           final WaitingRepository waitingRepository,
+                           final ReservationTimeRepository reservationTimeRepository,
+                           final ThemeRepository themeRepository, final MemberRepository memberDao,
+                           final DateTimeFormatter nowDateTimeFormatter) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberDao;
@@ -48,6 +62,30 @@ public class ReservationCreateValidator {
             throw new PastTimeReservationException(reservation.getLocalDateTimeFormat());
         }
         return reservation;
+    }
+
+    public Waiting validateWaitingInput(final WaitingInput input) {
+        final ReservationTime reservationTime = validateExistReservationTime(input.timeId());
+        final Theme theme = validateExistTheme(input.themeId());
+        final Member member = validateExistMember(input.memberId());
+
+        final Waiting waiting = input.toWaiting(reservationTime, theme, member, LocalTime.now());
+        if (!reservationRepository.existsByDateAndTimeId(ReservationDate.from(input.date()), input.timeId())) {
+            // TODO: 커스텀 예약
+            throw new IllegalArgumentException("대기를 요청할 예약이 존재하지 않습니다.");
+        }
+        if (waitingRepository.existsByDateAndTimeIdAndMemberId(ReservationDate.from(input.date()), input.timeId(),
+                input.memberId())) {
+            throw new AlreadyExistsException(WAITING, waiting.getLocalDateTimeFormat());
+        }
+        if (reservationRepository.existsByDateAndTimeIdAndMemberId(ReservationDate.from(input.date()), input.timeId(),
+                input.memberId())) {
+            throw new AlreadyExistsException(RESERVATION, waiting.getLocalDateTimeFormat());
+        }
+        if (waiting.isBefore(nowDateTimeFormatter.getDate(), nowDateTimeFormatter.getTime())) {
+            throw new PastTimeReservationException(waiting.getLocalDateTimeFormat());
+        }
+        return waiting;
     }
 
     private ReservationTime validateExistReservationTime(final long timeId) {

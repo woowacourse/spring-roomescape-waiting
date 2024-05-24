@@ -8,29 +8,9 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @ControllerAdvice
 public class RoomescapeExceptionHandler {
-    private static class ErrorResponse {
-        private static final boolean ERROR_STATUS = false;
-        private final String message;
-
-        public ErrorResponse(final Exception e) {
-            this.message = e.getMessage();
-        }
-
-        public ErrorResponse(final String message) {
-            this.message = message;
-        }
-
-        public boolean isStatus() {
-            return ERROR_STATUS;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-    }
-
     @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e) {
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(String.format("%s 의 입력 형식이 올바르지 않습니다.", e.getName())));
     }
@@ -42,7 +22,8 @@ public class RoomescapeExceptionHandler {
     }
 
     @ExceptionHandler(value = PastTimeReservationException.class)
-    public ResponseEntity<ErrorResponse> handlePastTimeReservationException(final PastTimeReservationException exception) {
+    public ResponseEntity<ErrorResponse> handlePastTimeReservationException(
+            final PastTimeReservationException exception) {
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(exception));
     }
@@ -52,6 +33,8 @@ public class RoomescapeExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(exception));
     }
+
+    // TODO: 커스텀 에러 정의하기(존재하지 않는 예약에 대기)
 
     @ExceptionHandler(value = AlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleAlreadyExistsException(final AlreadyExistsException exception) {
@@ -82,6 +65,27 @@ public class RoomescapeExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(final Exception exception) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(exception));
+    }
+
+    private static class ErrorResponse {
+        private static final boolean ERROR_STATUS = false;
+        private final String message;
+
+        public ErrorResponse(final Exception e) {
+            this.message = e.getMessage();
+        }
+
+        public ErrorResponse(final String message) {
+            this.message = message;
+        }
+
+        public boolean isStatus() {
+            return ERROR_STATUS;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 
 }

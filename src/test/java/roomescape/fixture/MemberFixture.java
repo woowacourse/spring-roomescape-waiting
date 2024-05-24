@@ -12,6 +12,13 @@ public class MemberFixture {
                 Role.USER);
     }
 
+    public static MemberCreateInput getUserCreateInput(String email) {
+        return new MemberCreateInput("조이썬",
+                email,
+                "password1234",
+                Role.USER);
+    }
+
     public static MemberCreateInput getAdminCreateInput() {
         return new MemberCreateInput("조이썬",
                 "joyson5582@gmail.com",
