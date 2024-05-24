@@ -105,14 +105,14 @@ public class ReservationService {
     }
 
     private void updateWaitingToReservation(Reservation reservation) {
-        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderById(
+        Optional<Waiting> foundWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderById(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
-        if (waiting.isPresent()) {
+        foundWaiting.ifPresent(waiting -> {
             Reservation createdReservation = new Reservation(reservation.getMember(), reservation.getDate(),
                     reservation.getTime(), reservation.getTheme());
-            waitingRepository.delete(waiting.get());
+            waitingRepository.delete(waiting);
             reservationRepository.save(createdReservation);
-        }
+        });
     }
 
     @Transactional(readOnly = true)
