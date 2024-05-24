@@ -16,6 +16,8 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateReservationRequest;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.fixture.LoginRequestFixture;
+import roomescape.fixture.ReservationRequestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -29,7 +31,7 @@ class UserReservationControllerTest {
 
     @BeforeEach
     void login() {
-        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+        LoginRequest user = LoginRequestFixture.createUserRequest();
 
         userToken = RestAssured.given()
             .contentType(ContentType.JSON)
@@ -41,8 +43,7 @@ class UserReservationControllerTest {
     @DisplayName("성공: 예약 저장 -> 201")
     @Test
     void save() {
-        CreateReservationRequest request = new CreateReservationRequest(
-            2L, "2060-01-01", 1L, 1L);
+        CreateReservationRequest request = ReservationRequestFixture.create();
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -58,12 +59,10 @@ class UserReservationControllerTest {
             .body("themeName", is("theme1"));
     }
 
-
     @DisplayName("실패: 존재하지 않는 time id 예약 -> 400")
     @Test
     void save_TimeIdNotFound() {
-        CreateReservationRequest request = new CreateReservationRequest(
-            2L, "2060-01-01", 3L, 1L);
+        CreateReservationRequest request = ReservationRequestFixture.createWithInvalidTimeId();
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -78,8 +77,7 @@ class UserReservationControllerTest {
     @DisplayName("실패: 존재하지 않는 theme id 예약 -> 400")
     @Test
     void save_ThemeIdNotFound() {
-        CreateReservationRequest request = new CreateReservationRequest(
-            2L, "2060-01-01", 1L, 4L);
+        CreateReservationRequest request = ReservationRequestFixture.createWithInvalidThemeId();
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -99,8 +97,7 @@ class UserReservationControllerTest {
             VALUES (1, '2060-01-01', 1, 1)
             """);
 
-        CreateReservationRequest request = new CreateReservationRequest(
-            2L, "2060-01-01", 1L, 1L);
+        CreateReservationRequest request = ReservationRequestFixture.create();
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -114,8 +111,7 @@ class UserReservationControllerTest {
     @DisplayName("실패: 과거 시간 예약 -> 400")
     @Test
     void save_PastTime() {
-        CreateReservationRequest request = new CreateReservationRequest(1L, "2000-01-01", 1L, 1L);
-
+        CreateReservationRequest request = ReservationRequestFixture.createWithPastTime();
         RestAssured.given().log().all()
             .cookie("token", userToken)
             .contentType(ContentType.JSON)
