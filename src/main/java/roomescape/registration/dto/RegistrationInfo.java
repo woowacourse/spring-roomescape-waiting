@@ -17,6 +17,7 @@ import roomescape.registration.waiting.WaitingWithRank;
  * 이 dto는  예약, 예약 대기 모두가 쓸 수 있는 dto로 사용.
  **/
 public record RegistrationInfo(long id, String themeName, LocalDate date, LocalTime time, String status) {
+
     public static RegistrationInfo from(WaitingWithRank waitingWithRank) {
         Waiting waiting = waitingWithRank.waiting();
         long rank = waitingWithRank.rank();
