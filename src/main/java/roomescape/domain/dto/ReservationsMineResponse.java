@@ -23,7 +23,6 @@ public record ReservationsMineResponse(Long id, String theme, LocalDate date, Lo
                 waiting.getWaiting().getTheme().getName(),
                 waiting.getWaiting().getDate(),
                 waiting.getWaiting().getTime().getStartAt(),
-                waiting.getWaiting().getStatus().getMessage(waiting.getRank())
-        );
+                String.format("%s번째 %s", waiting.getRank(), waiting.getWaiting().getStatus().getMessage()));
     }
 }
