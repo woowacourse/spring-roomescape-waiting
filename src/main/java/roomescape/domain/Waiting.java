@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,6 +22,7 @@ public class Waiting {
     private ReservationTime time;
     @ManyToOne
     private Theme theme;
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     protected Waiting() {

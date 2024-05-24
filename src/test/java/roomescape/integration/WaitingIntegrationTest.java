@@ -14,6 +14,16 @@ import org.junit.jupiter.api.Test;
 
 class WaitingIntegrationTest extends IntegrationTest {
 
+    @Test
+    void 예약_대기_목록을_조회할_수_있다() {
+        RestAssured.given().log().all()
+                .cookies(cookieProvider.createCookies())
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
+
     @Nested
     @DisplayName("사용자 예약 대기 추가 API")
     class SaveReservation {

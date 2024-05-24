@@ -2,9 +2,11 @@ package roomescape.service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
@@ -27,13 +29,22 @@ public class WaitingService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(WaitingRepository waitingRepository, ReservationTimeRepository reservationTimeRepository,
-                          ThemeRepository themeRepository, Clock clock) {
+                          ThemeRepository themeRepository, Clock clock, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
+        this.reservationRepository = reservationRepository;
+    }
+
+    public List<WaitingResponse> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(WaitingResponse::new)
+                .toList();
     }
 
     @Transactional

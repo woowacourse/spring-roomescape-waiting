@@ -7,15 +7,15 @@ public class WaitingResponse {
 
     private final Long id;
     private final LocalDate date;
-    private final MemberResponse member;
+    private final String name;
     private final ReservationTimeResponse time;
     private final ThemeResponse theme;
 
-    public WaitingResponse(Long id, LocalDate date, MemberResponse member, ReservationTimeResponse time,
+    public WaitingResponse(Long id, LocalDate date, String name, ReservationTimeResponse time,
                            ThemeResponse theme) {
         this.id = id;
         this.date = date;
-        this.member = member;
+        this.name = name;
         this.time = time;
         this.theme = theme;
     }
@@ -23,7 +23,7 @@ public class WaitingResponse {
     public WaitingResponse(Waiting waiting) {
         this(waiting.getId(),
                 waiting.getDate(),
-                new MemberResponse(waiting.getMember()),
+                waiting.getMember().getName(),
                 new ReservationTimeResponse(waiting.getTime()),
                 new ThemeResponse(waiting.getTheme()));
     }
@@ -36,8 +36,8 @@ public class WaitingResponse {
         return date;
     }
 
-    public MemberResponse getMember() {
-        return member;
+    public String getName() {
+        return name;
     }
 
     public ReservationTimeResponse getTime() {

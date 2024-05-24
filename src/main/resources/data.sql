@@ -1,5 +1,7 @@
+INSERT INTO member (role, name, email, password) VALUES ('USER', '유저1', 'user1@email.com', 'password');
+INSERT INTO member (role, name, email, password) VALUES ('USER', '유저2', 'user2@email.com', 'password');
+INSERT INTO member (role, name, email, password) VALUES ('USER', '유저3', 'user3@email.com', 'password');
 INSERT INTO member (role, name, email, password) VALUES ('ADMIN', '관리자', 'admin@email.com', 'password');
-INSERT INTO member (role, name, email, password) VALUES ('USER', '유저', 'user@email.com', 'password');
 
 
 INSERT INTO theme (name, description, thumbnail) VALUES ('테마명01', '테마 설명01', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
@@ -28,6 +30,16 @@ INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DAT
 INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '1', '2', '1', 'BOOKED');
 INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '1', '3', '1', 'BOOKED');
 INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '1', '4', '1', 'BOOKED');
+
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '1', '1', 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '2', '1', 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '3', '1', 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '4', '1', 'WAITING');
+
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '3', '1', '1', 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '3', '2', '1', 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '3', '3', '1', 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '3', '4', '1', 'WAITING');
 
 INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '1', '3', '7', 'BOOKED');
 INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '1', '3', '8', 'BOOKED');
