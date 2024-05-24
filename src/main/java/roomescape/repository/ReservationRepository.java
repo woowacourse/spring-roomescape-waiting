@@ -15,15 +15,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     Optional<Reservation> findByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 
-    boolean existsByTimeId(long timeId);
-
-    boolean existsByThemeId(long themeId);
-
-    boolean existsByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
-
     @Query("""
             SELECT r, r.member, r.theme, r.time FROM Reservation r
             WHERE r.member.email = :email
             """)
     List<Reservation> findAllByMemberEmail(String email);
+
+    boolean existsByTimeId(long timeId);
+
+    boolean existsByThemeId(long themeId);
+
+    boolean existsByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 }

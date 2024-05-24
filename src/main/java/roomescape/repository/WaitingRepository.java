@@ -11,7 +11,7 @@ import roomescape.domain.reservation.Waiting;
 @Repository
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    List<Waiting> findByMemberId(Long memberId);
+    List<Waiting> findByMemberEmail(String email);
 
     @Query("""
             SELECT w from Waiting w
