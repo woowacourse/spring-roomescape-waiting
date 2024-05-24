@@ -51,7 +51,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public synchronized WaitingResponse addWaiting(WaitingRequest request) {
+    public WaitingResponse addWaiting(WaitingRequest request) {
         Waiting waiting = createWaiting(request.date(), request.memberId(), request.timeId(), request.themeId());
 
         validateReservationNotExists(waiting);
