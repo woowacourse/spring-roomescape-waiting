@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import roomescape.service.exception.PastReservationException;
 
 @Entity
 public class Reservation {
@@ -40,6 +41,18 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    public static Reservation create(Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        Reservation newInstance = new Reservation(member, date, time, theme);
+        validatePastReservation(newInstance);
+        return newInstance;
+    }
+
+    private static void validatePastReservation(Reservation reservation) {
+        if (reservation.isPast()) {
+            throw new PastReservationException();
+        }
     }
 
     private void validateMember(Member member) {

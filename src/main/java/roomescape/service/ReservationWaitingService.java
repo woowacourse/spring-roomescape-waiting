@@ -12,7 +12,6 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.infrastructure.MemberRepository;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationWaitingRepository;
-import roomescape.service.exception.PastReservationException;
 import roomescape.service.request.ReservationWaitingAppRequest;
 import roomescape.service.response.ReservationWaitingAppResponse;
 import roomescape.service.response.ReservationWaitingAppResponseWithRank;
@@ -50,14 +49,12 @@ public class ReservationWaitingService {
     public ReservationWaitingAppResponse save(ReservationWaitingAppRequest request) {
         Member member = findMember(request.memberId());
         Reservation reservation = findReservation(request.date(), request.timeId(), request.themeId());
-        ReservationWaiting newReservationWaiting = new ReservationWaiting(
+        validateDuplication(reservation.getId(), member.getId());
+        ReservationWaiting newReservationWaiting = ReservationWaiting.create(
                 member,
                 reservation,
                 getPriority(reservation.getId())
         );
-        validateDuplication(newReservationWaiting.getReservation().getId(), newReservationWaiting.getMember().getId());
-        validatePast(newReservationWaiting);
-
         ReservationWaiting savedreservationWaiting = reservationWaitingRepository.save(newReservationWaiting);
 
         return ReservationWaitingAppResponse.from(savedreservationWaiting);
@@ -70,12 +67,6 @@ public class ReservationWaitingService {
     private void validateDuplication(Long reservationId, Long memberId) {
         if (reservationWaitingRepository.existsByReservationIdAndMemberId(reservationId, memberId)) {
             throw new IllegalStateException("중복 예약 대기는 불가능합니다.");
-        }
-    }
-
-    private void validatePast(ReservationWaiting reservationWaiting) {
-        if (reservationWaiting.isPast()) {
-            throw new PastReservationException();
         }
     }
 

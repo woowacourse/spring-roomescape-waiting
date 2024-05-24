@@ -19,7 +19,6 @@ import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
 import roomescape.infrastructure.ReservationWaitingRepository;
 import roomescape.infrastructure.ThemeRepository;
-import roomescape.service.exception.PastReservationException;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
@@ -54,9 +53,7 @@ public class ReservationService {
         ReservationTime time = findTime(request.timeId());
         Theme theme = findTheme(request.themeId());
         validateDuplication(date, request.timeId(), request.themeId(), request.memberId());
-        Reservation reservation = new Reservation(member, date, time, theme);
-        validatePastReservation(reservation);
-
+        Reservation reservation = Reservation.create(member, date, time, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationAppResponse.from(savedReservation);
@@ -77,12 +74,6 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("예약에 대한 사용자가 존재하지 않습니다."));
     }
 
-    private void validatePastReservation(Reservation reservation) {
-        if (reservation.isPast()) {
-            throw new PastReservationException();
-        }
-    }
-
     private void validateDuplication(ReservationDate date, Long timeId, Long themeId, Long memberId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
             throw new IllegalStateException("이미 존재하는 예약 정보 입니다.");
@@ -94,7 +85,8 @@ public class ReservationService {
         Pageable pageable = PageRequest.of(0, 1);
         Page<ReservationWaiting> page = reservationWaitingRepository.findAllByReservationIdOrderByPriorityAsc(
                 pageable, id);
-        Optional<ReservationWaiting> nextWaiting = page.getContent().stream().findFirst();
+        Optional<ReservationWaiting> nextWaiting = page.getContent().stream()
+                .findFirst();
         nextWaiting.ifPresentOrElse(reservationWaiting -> {
                     reservationWaiting.approve();
                     reservationWaitingRepository.delete(reservationWaiting);
