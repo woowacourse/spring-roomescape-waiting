@@ -7,7 +7,7 @@ import roomescape.domain.ReservationRepository;
 import roomescape.dto.request.LogInRequest;
 import roomescape.dto.response.MemberPreviewResponse;
 import roomescape.dto.response.MemberReservationResponse;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.service.exception.ResourceNotFoundCustomException;
 import roomescape.util.JwtProvider;
 
 import java.util.List;
@@ -36,12 +36,12 @@ public class MemberService {
 
     private Member findMemberByEmailAndPassword(String email, String password) {
         return memberRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new ResourceNotFoundException("일치하는 이메일과 비밀번호가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("일치하는 이메일과 비밀번호가 없습니다."));
     }
 
     public Member findValidatedSiteUserById(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(
-                () -> new ResourceNotFoundException("아이디에 해당하는 사용자가 없습니다."));
+                () -> new ResourceNotFoundCustomException("아이디에 해당하는 사용자가 없습니다."));
     }
 
     public List<MemberPreviewResponse> getAllMemberPreview() {

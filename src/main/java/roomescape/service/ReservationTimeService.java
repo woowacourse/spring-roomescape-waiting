@@ -8,8 +8,8 @@ import roomescape.domain.ReservationTimeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.service.exception.OperationNotAllowedCustomException;
+import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,7 +44,7 @@ public class ReservationTimeService {
         findValidatedReservationTime(id);
         boolean exist = reservationRepository.existsByReservationTimeId(id);
         if (exist) {
-            throw new OperationNotAllowedException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
+            throw new OperationNotAllowedCustomException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
         }
 
         reservationTimeRepository.deleteById(id);
@@ -66,6 +66,6 @@ public class ReservationTimeService {
 
     private ReservationTime findValidatedReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
     }
 }

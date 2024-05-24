@@ -5,8 +5,8 @@ import roomescape.domain.*;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.service.exception.OperationNotAllowedCustomException;
+import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -82,34 +82,34 @@ public class ReservationService {
 
     private Reservation findValidatedReservation(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약을 찾을 수 없습니다."));
     }
 
     private ReservationTime findValidatedReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
     }
 
     private Theme findValidatedTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 테마를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 테마를 찾을 수 없습니다."));
     }
 
     private Member findValidatedMember(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 회원을 찾을 수 없습니다."));
     }
 
     private void validateNotDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new OperationNotAllowedException("예약이 이미 존재합니다.");
+            throw new OperationNotAllowedCustomException("예약이 이미 존재합니다.");
         }
     }
 
     private void validateNotPast(LocalDate date, LocalTime time) {
         LocalDateTime reservationDateTime = date.atTime(time);
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            throw new OperationNotAllowedException("지나간 시간에 대한 예약은 할 수 없습니다.");
+            throw new OperationNotAllowedCustomException("지나간 시간에 대한 예약은 할 수 없습니다.");
         }
     }
 
