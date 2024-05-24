@@ -2,11 +2,15 @@ package roomescape.admin.controller;
 
 import java.net.URI;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
@@ -46,5 +50,11 @@ public class AdminController {
     @GetMapping("/admin/waitings")
     public List<WaitingResponse> waitingList() {
         return waitingService.findWaitings();
+    }
+
+    @DeleteMapping("/admin/waitings/{waitingId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void waitingReject(@PathVariable long waitingId) {
+        waitingService.removeWaiting(waitingId);
     }
 }
