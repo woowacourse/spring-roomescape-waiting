@@ -13,14 +13,21 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        highlight_sql: true
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
 
 logging:
   level:
-    org.springframework:
-      jdbc: DEBUG
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: TRACE
+      springframework:
+        transaction:
+          interceptor: TRACE
 
 security:
   jwt:

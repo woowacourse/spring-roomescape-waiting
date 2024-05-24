@@ -19,8 +19,14 @@ spring:
 
 logging:
   level:
-    org.springframework:
-      jdbc: DEBUG
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: TRACE
+      springframework:
+        transaction:
+          interceptor: TRACE
 
 security:
   jwt:
