@@ -13,7 +13,11 @@ VALUES ('15:40'),
 INSERT INTO member (name, email, password, role)
 VALUES ('어드민 폴라', 'polla@gmail.com', 'pollari99', 'ADMIN'),
        ('일반 멤버 폴라', 'polla@naver.com', 'pollari999', 'MEMBER'),
-       ('일반 멤버 아서', 'pollarii@gmail.com', 'pollari9', 'MEMBER');
+       ('일반 멤버 아서', 'dktj@gmail.com', 'pollari9', 'MEMBER'),
+       ('일반 멤버 범블비', 'qjaqmfql@gmail.com', 'pollari9', 'MEMBER'),
+       ('일반 멤버 폴라포', 'vhffkvh@gmail.com', 'pollari9', 'MEMBER'),
+       ('일반 멤버 미르', 'alfm@gmail.com', 'pollari9', 'MEMBER'),
+       ('일반 멤버 리브', 'flqm@gmail.com', 'pollari9', 'MEMBER');
 
 
 INSERT INTO theme (name, description, thumbnail)
@@ -28,6 +32,18 @@ VALUES ('그림자 없는 상자', '미안해 누나. 근데 내가 맞았어. �
        ('뱃사람의 별', '나는 내 한 몸 들어가는 쪽배를 타고 밤바다를 부유하곤 합니다.', 'https://cdn.imweb.me/thumbnail/20240425/d8a954954a4fb.jpeg');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, reservation_status)
-VALUES ('2024-04-30', 1, 1, 1, 'RESERVED'),
-       ('2024-04-30', 1, 1, 2, 'WAITING'),
-       ('2025-05-01', 2, 2, 2, 'RESERVED');
+VALUES (CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 1, 'RESERVED'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 2, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 3, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 4, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 5, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 6, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 3, 2, 'RESERVED'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 4, 3, 'RESERVED'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 3, 3, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 5, 2, 'RESERVED'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 5, 3, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 2, 2, 'RESERVED'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 3, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 1, 3, 3, 'WAITING'),
+       (CURRENT_DATE + INTERVAL '1' DAY , 2, 2, 2, 'RESERVED');
