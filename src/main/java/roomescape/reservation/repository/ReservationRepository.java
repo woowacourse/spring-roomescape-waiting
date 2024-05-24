@@ -27,11 +27,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Long> findTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
-    @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
-    List<Reservation> findAllByMemberId(Long memberId);
+    @Query("""
+           select r from Reservation r
+           join fetch ReservationTime rt on rt.id = r.reservationTime.id
+           join fetch Theme t on t.id = r.theme.id
+           join fetch Member m on m.id = r.member.id
+           where m.id = :memberId and r.date >= :date
+           order by r.date, rt.startAt, r.createdAt
+            """)
+    List<Reservation> findAllByMemberIdFromDateOrderByDateAscTimeAscCreatedAtAsc(Long memberId, LocalDate date);
 
     @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscReservationTimeAscCreatedAtAsc(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,
@@ -47,8 +54,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                """)
     List<Reservation> findReservationsOfLastWeek(LocalDate dateFrom);
 
-    @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
-    List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
+    @Query("""
+           select r from Reservation r
+           join fetch ReservationTime rt on rt.id = r.reservationTime.id
+           join fetch Theme t on t.id = r.theme.id
+           join fetch Member m on m.id = r.member.id
+           where r.reservationStatus = :reservationStatus and r.date >= :date
+           order by r.date, rt.startAt, r.createdAt
+            """)
+    List<Reservation> findAllByReservationStatusFromDate(ReservationStatus reservationStatus, LocalDate date);
 
     @EntityGraph(attributePaths = {"reservationTime"})
     boolean existsByDateAndReservationTimeStartAtAndReservationStatus(LocalDate date, LocalTime startAt, ReservationStatus reservationStatus);

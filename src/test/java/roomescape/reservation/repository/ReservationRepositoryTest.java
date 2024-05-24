@@ -89,7 +89,7 @@ public class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
         reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(kaki.getId());
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeAscCreatedAtAsc(kaki.getId(), TODAY);
 
         assertThat(reservations.size()).isEqualTo(1);
     }
@@ -250,7 +250,7 @@ public class ReservationRepositoryTest {
                 tomorrow
         );
 
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscReservationTimeAscCreatedAtAsc(
                 request.themeId(),
                 request.memberId(),
                 request.dateFrom(),

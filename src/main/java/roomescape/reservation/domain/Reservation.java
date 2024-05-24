@@ -79,10 +79,6 @@ public class Reservation extends AuditedEntity {
         return reservationTime.sameTimeId(otherTimeId);
     }
 
-    public boolean isAfterToday() {
-        return date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now());
-    }
-
     public void updateStatus(ReservationStatus reservationStatus) {
         this.reservationStatus = reservationStatus;
     }

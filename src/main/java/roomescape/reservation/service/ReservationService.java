@@ -1,9 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
@@ -117,24 +115,19 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByStatus(ReservationStatus reservationStatus) {
-        return reservationRepository.findAllByReservationStatus(reservationStatus).stream()
-                .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(Reservation::getStartAt))
+        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(reservationStatus, LocalDate.now());
+
+        return waitingReservations.stream()
                 .map(ReservationResponse::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatus(ReservationStatus.WAIT);
+        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
+        Waitings waitings = new Waitings(waitingReservations);
 
-        Waitings waitings = waitingReservations.stream()
-                .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(Reservation::getStartAt)
-                        .thenComparing(Reservation::getCreatedAt))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), Waitings::new));
-
-        return reservationRepository.findAllByMemberId(loginMember.id()).stream()
+        return reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeAscCreatedAtAsc(loginMember.id(), LocalDate.now()).stream()
                 .map(reservation -> MemberReservationResponse.toResponse(
                         reservation,
                         waitings.findMemberRank(reservation, loginMember.id())
@@ -143,27 +136,21 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationWaitingResponse> findWaitingReservations() {
-        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatus(ReservationStatus.WAIT);
+        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
 
         return waitingReservations.stream()
-                .filter(Reservation::isAfterToday)
-                .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(Reservation::getStartAt)
-                        .thenComparing(Reservation::getCreatedAt))
                 .map(ReservationWaitingResponse::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscReservationTimeAscCreatedAtAsc(
                         request.themeId(),
                         request.memberId(),
                         request.dateFrom(),
                         request.dateTo()
                 ).stream()
-                .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(Reservation::getStartAt))
                 .map(ReservationResponse::toResponse)
                 .toList();
     }
@@ -190,11 +177,8 @@ public class ReservationService {
     }
 
     private void updateFirstWaitingReservation(Reservation canceledReservation) {
-        Waitings waitings = reservationRepository.findAllByReservationStatus(ReservationStatus.WAIT).stream()
-                .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(Reservation::getStartAt)
-                        .thenComparing(Reservation::getCreatedAt))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), Waitings::new));
+        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
+        Waitings waitings = new Waitings(waitingReservations);
 
         waitings.findFirstWaitingReservationByCanceledReservation(canceledReservation)
                 .ifPresent(reservation -> reservation.updateStatus(ReservationStatus.SUCCESS));
