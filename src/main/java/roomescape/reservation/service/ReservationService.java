@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -25,6 +24,8 @@ import roomescape.reservation.repository.ThemeRepository;
 @Service
 @Transactional
 public class ReservationService {
+
+    private static final int INCREMENT_FOR_COUNTING_RANK = 1;
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -122,23 +123,24 @@ public class ReservationService {
 
     public List<MemberReservationResponse> findAllByMemberId(final long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
-        List<MemberReservationResponse> responses = new ArrayList<>();
-        for (Reservation reservation : reservations) {
-            int rank = countWaitingRank(reservation);
-            responses.add(MemberReservationResponse.of(reservation, rank));
-        }
-        return responses;
+        return reservations.stream()
+                .map(this::createReservationResponse)
+                .toList();
     }
 
-    private int countWaitingRank(final Reservation reservation) {
-        if (reservation.getStatus().equals(Status.PENDING)) {
-            return reservationRepository.countAlreadyRegisteredWaitings(
-                    reservation.getId(),
-                    reservation.getDate(), reservation.getTime().getId(),
-                    reservation.getTheme().getId(), reservation.getStatus()
-            ) + 1;
+    private MemberReservationResponse createReservationResponse(final Reservation reservation) {
+        if (reservation.getStatus() == Status.PENDING) {
+            return MemberReservationResponse.of(reservation, countRank(reservation));
         }
-        return 0;
+        return MemberReservationResponse.from(reservation);
+    }
+
+    private int countRank(final Reservation reservation) {
+        return reservationRepository.countAlreadyRegisteredWaitings(
+                reservation.getId(),
+                reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId(), reservation.getStatus()
+        ) + INCREMENT_FOR_COUNTING_RANK;
     }
 
     public ReservationDeleteResponse delete(final long id) {
