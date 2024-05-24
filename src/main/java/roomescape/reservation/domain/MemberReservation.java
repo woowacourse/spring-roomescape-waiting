@@ -1,7 +1,6 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,6 +14,7 @@ import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 
+// TODO: Reservation 으로 변경 고려
 @Entity
 public class MemberReservation {
     @Id
@@ -29,10 +29,6 @@ public class MemberReservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Embedded
-    @Column(name = "reservation_order", nullable = false)
-    private ReservationOrder order;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
@@ -40,12 +36,10 @@ public class MemberReservation {
     public MemberReservation() {
     }
 
-    public MemberReservation(final Reservation reservation, final Member member, final ReservationStatus status, final Long order) {
+    public MemberReservation(final Reservation reservation, final Member member, final ReservationStatus status) {
         this.reservation = reservation;
         this.member = member;
         this.status = status;
-        this.order = new ReservationOrder(order);
-
         validateNotNull();
     }
 
@@ -53,17 +47,6 @@ public class MemberReservation {
         if (reservation == null || member == null || status == null) {
             throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약 대기(MemberReservation) 생성에 null이 입력되었습니다.");
         }
-    }
-
-    public void increaseOrder() {
-        this.order = order.increase();
-        if (isPossibleReserve()) {
-            changeStatusToReserve();
-        }
-    }
-
-    public boolean isPossibleReserve() {
-        return order.isReservationPossibleOrder();
     }
 
     public boolean isReserved() {
@@ -84,10 +67,6 @@ public class MemberReservation {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    public Long getOrder() {
-        return order.reservationOrder();
     }
 
     public void changeStatusToReserve() {

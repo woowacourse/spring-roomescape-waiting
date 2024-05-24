@@ -55,21 +55,23 @@ public class ReservationController {
             @NotNull(message = "themeId는 null 일 수 없습니다.") @PathVariable final Long themeId,
             @NotNull(message = "날짜는 null일 수 없습니다.") @RequestParam final LocalDate date) {
         return ApiResponse.success(reservationService.findReservationsByDateAndThemeId(date, themeId));
+
     }
 
-    @Admin
-    @GetMapping("/reservations/search")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<ReservationsResponse> getReservationBySearching(
-            @RequestParam(required = false) final Long themeId,
-            @RequestParam(required = false) final Long memberId,
-            @RequestParam(required = false) final LocalDate dateFrom,
-            @RequestParam(required = false) final LocalDate dateTo
-    ) {
-        return ApiResponse.success(
-                reservationService.searchWith(themeId, memberId, dateFrom, dateTo));
-    }
+//    @Admin
+//    @GetMapping("/reservations/search")
+//    @ResponseStatus(HttpStatus.OK)
+//    public ApiResponse<ReservationsResponse> getReservationBySearching(
+//            @RequestParam(required = false) final Long themeId,
+//            @RequestParam(required = false) final Long memberId,
+//            @RequestParam(required = false) final LocalDate dateFrom,
+//            @RequestParam(required = false) final LocalDate dateTo
+//    ) {
+//        return ApiResponse.success(
+//                reservationService.searchWith(themeId, memberId, dateFrom, dateTo));
+//    }
 
+    // TODO: @Auth, @Admin 애노테이션 대신 @RequiredRole(value = ), @RequiredRole(values = {}) 애노테이션으로 변경
     @Auth
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
@@ -78,20 +80,21 @@ public class ReservationController {
             @MemberId final Long memberId,
             final HttpServletResponse response
     ) {
-        ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest, memberId);
+        ReservationResponse reservationResponse = reservationService.addMemberReservation(
+                reservationRequest, memberId, ReservationStatus.RESERVED);
 
         response.setHeader(HttpHeaders.LOCATION, "/reservations/" + reservationResponse.id());
         return ApiResponse.success(reservationResponse);
     }
 
     @Auth
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/reservations/{memberReservationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeReservation(
             @MemberId final Long memberId,
-            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("id") final Long reservationId
+            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
     ) {
-        reservationService.removeReservationById(reservationId, memberId);
+        reservationService.removeMemberReservationById(memberReservationId, memberId);
 
         return ApiResponse.success();
     }
@@ -104,32 +107,32 @@ public class ReservationController {
             @MemberId final Long memberId,
             final HttpServletResponse response
     ) {
-        ReservationResponse reservationResponse = reservationService.addReservationWaiting(
-                reservationRequest, memberId);
+        ReservationResponse reservationResponse = reservationService.addMemberReservation(
+                reservationRequest, memberId, ReservationStatus.WAITING);
 
         response.setHeader(HttpHeaders.LOCATION, "/reservations/waitings/" + reservationResponse.id());
         return ApiResponse.success(reservationResponse);
     }
 
     @Auth
-    @DeleteMapping("/reservations/waitings/{reservationId}")
+    @DeleteMapping("/reservations/waitings/{memberReservationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeWaitingReservation(
             @MemberId final Long memberId,
-            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("reservationId") final Long reservationId
+            @NotNull(message = "memberReservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
     ) {
-        reservationService.removeWaitingReservationById(reservationId, memberId);
+        reservationService.removeWaitingReservationById(memberReservationId, memberId);
 
         return ApiResponse.success();
     }
 
     @Admin
-    @PatchMapping("/reservations/waitings/{reservationId}")
+    @PatchMapping("/reservations/waitings/{memberReservationId}")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<Void> approveWaitingReservation(
-            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("reservationId") final Long reservationId
+            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
     ) {
-        reservationService.approveWaitingReservation(reservationId);
+        reservationService.approveWaitingReservation(memberReservationId);
 
         return ApiResponse.success();
     }

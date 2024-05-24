@@ -53,6 +53,6 @@ INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES 
 INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1, 2);
 INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1, 3);
 
-INSERT INTO member_reservation (reservation_id, member_id, reservation_order, status) VALUES (1, 1, 0, 'RESERVED');
-INSERT INTO member_reservation (reservation_id, member_id, reservation_order, status) VALUES (2, 2, 1, 'WAITING');
-INSERT INTO member_reservation (reservation_id, member_id, reservation_order, status) VALUES (3, 3, 2, 'WAITING');
+INSERT INTO member_reservation (reservation_id, member_id, status) VALUES (1, 1, 'RESERVED');
+INSERT INTO member_reservation (reservation_id, member_id, status) VALUES (2, 2, 'WAITING');
+INSERT INTO member_reservation (reservation_id, member_id, status) VALUES (3, 3, 'WAITING');

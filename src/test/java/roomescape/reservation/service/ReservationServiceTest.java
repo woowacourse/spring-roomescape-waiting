@@ -32,7 +32,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -64,11 +63,11 @@ class ReservationServiceTest {
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when & then
-        reservationService.addReservation(
-                new ReservationRequest(LocalDate.now().plusDays(1L), reservationTime.getId(), theme.getId()), member.getId());
+        reservationService.addMemberReservation(
+                new ReservationRequest(LocalDate.now().plusDays(1L), reservationTime.getId(), theme.getId()), member.getId(), ReservationStatus.RESERVED);
 
-        assertThatThrownBy(() -> reservationService.addReservation(
-                new ReservationRequest(LocalDate.now().plusDays(1L), reservationTime.getId(), theme.getId()), member.getId()))
+        assertThatThrownBy(() -> reservationService.addMemberReservation(
+                new ReservationRequest(LocalDate.now().plusDays(1L), reservationTime.getId(), theme.getId()), member.getId(), ReservationStatus.RESERVED))
                 .isInstanceOf(DataDuplicateException.class);
     }
 
@@ -82,8 +81,8 @@ class ReservationServiceTest {
         LocalDate beforeDate = LocalDate.now().minusDays(1L);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.addReservation(
-                new ReservationRequest(beforeDate, reservationTime.getId(), theme.getId()), member.getId()))
+        assertThatThrownBy(() -> reservationService.addMemberReservation(
+                new ReservationRequest(beforeDate, reservationTime.getId(), theme.getId()), member.getId(), ReservationStatus.RESERVED))
                 .isInstanceOf(ValidateException.class);
     }
 
@@ -97,8 +96,8 @@ class ReservationServiceTest {
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.addReservation(
-                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()), member.getId()))
+        assertThatThrownBy(() -> reservationService.addMemberReservation(
+                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()), member.getId(), ReservationStatus.RESERVED))
                 .isInstanceOf(ValidateException.class);
     }
 
@@ -112,8 +111,8 @@ class ReservationServiceTest {
         Long NotExistMemberId = 1L;
 
         // when & then
-        assertThatThrownBy(() -> reservationService.addReservation(
-                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()), NotExistMemberId))
+        assertThatThrownBy(() -> reservationService.addMemberReservation(
+                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()), NotExistMemberId, ReservationStatus.RESERVED))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -130,10 +129,9 @@ class ReservationServiceTest {
 
         Reservation reservation1 = reservationRepository.save(new Reservation(tomorrow.toLocalDate(), reservationTime, theme1, member));
         Reservation reservation2 = reservationRepository.save(new Reservation(tomorrow.toLocalDate(), reservationTime, theme2, member));
-        Reservation reservation3 = reservationRepository.save(new Reservation(tomorrow.toLocalDate(), reservationTime, theme3, member));
-        memberReservationRepository.save(new MemberReservation(reservation1, member, ReservationStatus.RESERVED, 0L));
-        memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.RESERVED, 0L));
-        memberReservationRepository.save(new MemberReservation(reservation3, member, ReservationStatus.WAITING, 1L));
+        memberReservationRepository.save(new MemberReservation(reservation1, member, ReservationStatus.RESERVED));
+        memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.RESERVED));
+        memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.WAITING));
 
         // when
         List<MemberReservation> reservedReservations = memberReservationRepository.findByStatus(ReservationStatus.RESERVED);
@@ -156,10 +154,10 @@ class ReservationServiceTest {
         Member member2 = memberRepository.save(new Member("name2", "email2@email.com", "password", Role.MEMBER));
         Member member3 = memberRepository.save(new Member("name3", "email3@email.com", "password", Role.MEMBER));
 
-        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member1.getId());
-        reservationService.addReservationWaiting(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member2.getId());
-        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId()), member2.getId());
-        reservationService.addReservationWaiting(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId()), member3.getId());
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member1.getId(), ReservationStatus.RESERVED);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member2.getId(), ReservationStatus.WAITING);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId()), member2.getId(), ReservationStatus.RESERVED);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId()), member3.getId(), ReservationStatus.WAITING);
 
         // when
         List<ReservationResponse> firstOrderWaitingReservations = reservationService.findFirstOrderWaitingReservations().reservations();
@@ -180,8 +178,8 @@ class ReservationServiceTest {
         Member member1 = memberRepository.save(new Member("name1", "email1@email.com", "password", Role.MEMBER));
         Member member2 = memberRepository.save(new Member("name2", "email2@email.com", "password", Role.MEMBER));
 
-        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member1.getId());
-        ReservationResponse waitingReservation = reservationService.addReservationWaiting(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member2.getId());
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member1.getId(), ReservationStatus.RESERVED);
+        ReservationResponse waitingReservation = reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member2.getId(), ReservationStatus.WAITING);
 
         // when
         reservationService.approveWaitingReservation(waitingReservation.id());
@@ -190,33 +188,6 @@ class ReservationServiceTest {
         List<ReservationResponse> reservedReservations = reservationService.findReservationsByStatus(ReservationStatus.RESERVED).reservations();
         Assertions.assertThat(reservedReservations).hasSize(2);
         Assertions.assertThat(reservedReservations.contains(waitingReservation));
-    }
-
-    @Test
-    @DisplayName("예약 대기 요청을 삭제하면, 해당 날짜/시간/테마의 예약 대기 순서가 한 칸씩 앞당겨진다.")
-    void removeReservationWaiting() {
-        // given
-        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1L);
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(tomorrow.toLocalTime()));
-        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
-        Member member1 = memberRepository.save(new Member("name1", "email1@email.com", "password", Role.MEMBER));
-        Member member2 = memberRepository.save(new Member("name2", "email2@email.com", "password", Role.MEMBER));
-        Member member3 = memberRepository.save(new Member("name3", "email3@email.com", "password", Role.MEMBER));
-
-        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme.getId()), member1.getId());
-        ReservationResponse firstWaitingReservationByMember2 = reservationService.addReservationWaiting(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme.getId()), member2.getId());
-        ReservationResponse secondWaitingReservationByMember3 = reservationService.addReservationWaiting(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme.getId()), member3.getId());
-
-        // when
-        reservationService.removeWaitingReservationById(firstWaitingReservationByMember2.id(), firstWaitingReservationByMember2.member().id());
-
-        // then
-        Optional<MemberReservation> optionalMember3WaitingReservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(member3, time, tomorrow.toLocalDate(), theme);
-
-        Assertions.assertThat(optionalMember3WaitingReservation).isNotEmpty();
-        MemberReservation member3WaitingReservation = optionalMember3WaitingReservation.get();
-        Assertions.assertThat(member3WaitingReservation.getOrder()).isEqualTo(1L);
-        Assertions.assertThat(member3WaitingReservation.getReservation().getId()).isEqualTo(secondWaitingReservationByMember3.id());
     }
 
     @Test
@@ -229,12 +200,12 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId());
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId(), ReservationStatus.RESERVED);
 
         Member member2 = memberRepository.save(new Member("이름", "member2@admin.com", "12341234", Role.MEMBER));
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member2.getId()))
+        Assertions.assertThatThrownBy(() -> reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member2.getId(), ReservationStatus.RESERVED))
                 .isInstanceOf(DataDuplicateException.class);
     }
 }

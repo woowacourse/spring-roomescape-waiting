@@ -15,6 +15,7 @@ import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.CustomException;
 import roomescape.global.exception.model.DataDuplicateException;
 import roomescape.global.exception.model.ForbiddenException;
+import roomescape.global.exception.model.InternalServerException;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.global.exception.model.ValidateException;
@@ -81,7 +82,7 @@ public class ExceptionControllerAdvice {
         return ErrorResponse.of(e.getErrorType(), e.getMessage());
     }
 
-    @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(value = {Exception.class, InternalServerException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(final Exception e) {
         logger.error(e.getMessage(), e);
