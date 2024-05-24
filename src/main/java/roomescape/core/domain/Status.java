@@ -1,5 +1,7 @@
 package roomescape.core.domain;
 
+import java.util.Arrays;
+
 public enum Status {
     BOOKED("예약"),
     STANDBY("예약대기");
@@ -10,8 +12,13 @@ public enum Status {
         this.value = value;
     }
 
-    public String waitingRankStatus(Integer rank) {
+    public String waitingRankStatus(final Integer rank) {
         return rank + "번째 " + this.getValue();
+    }
+
+    public static Status findStatus(final String value) {
+        return Arrays.stream(values()).filter(v -> v.getValue().equals(value)).findFirst()
+                .orElseThrow(IllegalArgumentException::new);
     }
 
     public String getValue() {

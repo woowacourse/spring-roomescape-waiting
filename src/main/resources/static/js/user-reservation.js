@@ -167,6 +167,7 @@ function onReservationButtonClick() {
       date: selectedDate,
       themeId: selectedThemeId,
       timeId: selectedTimeId,
+      status: '예약'
     };
 
     fetch('/reservations', {
@@ -206,13 +207,14 @@ function onWaitButtonClick() {
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
-      timeId: selectedTimeId
+      timeId: selectedTimeId,
+      status: '예약대기'
     };
 
     /*
     TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('/reservations/waiting', {
+    fetch('/reservations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.core.domain.Status;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.utils.e2eTest;
@@ -79,15 +80,13 @@ class ThemeControllerTest {
 
     private void createReservations() {
         MemberReservationRequest firstThemeMemberReservationRequest = new MemberReservationRequest(
-                LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                4L, 2L);
+                LocalDate.now().format(DateTimeFormatter.ISO_DATE), 4L, 2L, Status.BOOKED.getValue());
 
         ValidatableResponse response1 = e2eTest.post(firstThemeMemberReservationRequest, "/reservations", accessToken);
         response1.statusCode(201);
 
         MemberReservationRequest firstThemeMemberReservationRequest2 = new MemberReservationRequest(
-                LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                5L, 2L);
+                LocalDate.now().format(DateTimeFormatter.ISO_DATE), 5L, 2L, Status.BOOKED.getValue());
 
         ValidatableResponse response2 = e2eTest.post(firstThemeMemberReservationRequest2, "/reservations", accessToken);
         response2.statusCode(201);

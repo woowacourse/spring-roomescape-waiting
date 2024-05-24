@@ -32,18 +32,8 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> create(
             @Valid @RequestBody final MemberReservationRequest memberRequest, final LoginMember member) {
         final ReservationRequest request = new ReservationRequest(member.getId(), memberRequest.getDate(),
-                memberRequest.getTimeId(), memberRequest.getThemeId());
+                memberRequest.getTimeId(), memberRequest.getThemeId(), memberRequest.getStatus());
         final ReservationResponse result = reservationService.create(request);
-        return ResponseEntity.created(URI.create("/reservations/" + result.getId()))
-                .body(result);
-    }
-
-    @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponse> createWaiting(
-            @Valid @RequestBody final MemberReservationRequest memberRequest, final LoginMember member) {
-        final ReservationRequest request = new ReservationRequest(member.getId(), memberRequest.getDate(),
-                memberRequest.getTimeId(), memberRequest.getThemeId());
-        final ReservationResponse result = reservationService.createWaiting(request);
         return ResponseEntity.created(URI.create("/reservations/" + result.getId()))
                 .body(result);
     }

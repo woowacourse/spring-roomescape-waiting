@@ -38,22 +38,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(final ReservationRequest request) {
-        return createReservation(request, Status.BOOKED);
-    }
-
-    @Transactional
-    public ReservationResponse createWaiting(final ReservationRequest request) {
-        return createReservation(request, Status.STANDBY);
-    }
-
-    private ReservationResponse createReservation(final ReservationRequest request, final Status status) {
         final Member member = getMember(request);
         final ReservationTime reservationTime = getReservationTime(request);
         final Theme theme = getTheme(request);
         final Reservation reservation = new Reservation(
-                member, request.getDate(), reservationTime, theme, status, LocalDateTime.now());
+                member, request.getDate(), reservationTime, theme, Status.findStatus(request.getStatus()),
+                LocalDateTime.now());
 
-        validateDuplicateReservation(status, reservation);
+        validateDuplicateReservation(Status.findStatus(request.getStatus()), reservation);
         reservation.validateDateAndTime();
 
         final Reservation savedReservation = reservationRepository.save(reservation);
