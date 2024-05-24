@@ -32,5 +32,6 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
             @Param("reservationId") Long reservationId,
             @Param("standard") Long priority);
 
+    @EntityGraph(attributePaths = {"reservation"})
     Page<ReservationWaiting> findAllByReservationIdOrderByPriorityAsc(Pageable pageable, Long reservationId);
 }
