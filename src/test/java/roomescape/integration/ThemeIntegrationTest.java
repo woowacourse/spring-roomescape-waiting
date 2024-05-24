@@ -87,6 +87,12 @@ class ThemeIntegrationTest extends IntegrationTest {
         @Test
         void 테마를_삭제할_수_있다() {
             RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .when().delete("/waitings/1")
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/reservations/1")
                     .then().log().all()

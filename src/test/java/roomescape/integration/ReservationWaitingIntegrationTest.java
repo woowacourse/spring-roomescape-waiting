@@ -60,4 +60,26 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
                     .statusCode(409);
         }
     }
+
+    @Nested
+    @DisplayName("예약 대기 삭제 API")
+    class DeleteReservationWaiting {
+        @Test
+        void 예약_대기를_삭제할_수_있다() {
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .when().delete("/waitings/1")
+                    .then().log().all()
+                    .statusCode(204);
+        }
+
+        @Test
+        void 존재하지_않는_예약_대기는_삭제할_수_없다() {
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .when().delete("/waitings/10")
+                    .then().log().all()
+                    .statusCode(404);
+        }
+    }
 }

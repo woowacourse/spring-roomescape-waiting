@@ -5,3 +5,7 @@ Content-Type: application/json
 {
   "reservationId": 1
 }
+
+### 예약 대기 취소 API
+
+DELETE /waitings/1

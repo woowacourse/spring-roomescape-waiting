@@ -7,9 +7,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberEmail;
+import roomescape.domain.member.MemberName;
+import roomescape.domain.member.MemberPassword;
+import roomescape.domain.member.MemberRole;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.theme.ReservationReferencedThemeException;
 import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservationwaiting.ReservationWaitingService;
 import roomescape.service.theme.ThemeService;
 import roomescape.service.theme.dto.ThemeListResponse;
 import roomescape.service.theme.dto.ThemeRequest;
@@ -21,6 +27,9 @@ class ThemeServiceTest extends ServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationWaitingService reservationWaitingService;
 
     @Nested
     @DisplayName("테마 목록 조회")
@@ -65,6 +74,14 @@ class ThemeServiceTest extends ServiceTest {
     class DeleteTheme {
         @Test
         void 테마를_삭제할_수_있다() {
+            Member member = new Member(
+                    1L,
+                    new MemberName("사용자"),
+                    new MemberEmail("user@gmail.com"),
+                    new MemberPassword("1234567890"),
+                    MemberRole.USER
+            );
+            reservationWaitingService.deleteReservationWaiting(1L, member);
             reservationService.deleteReservation(1L);
 
             themeService.deleteTheme(1L);

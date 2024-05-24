@@ -9,6 +9,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberEmail;
+import roomescape.domain.member.MemberName;
+import roomescape.domain.member.MemberPassword;
+import roomescape.domain.member.MemberRole;
 import roomescape.exception.time.DuplicatedTimeException;
 import roomescape.exception.time.NotFoundTimeException;
 import roomescape.exception.time.ReservationReferencedTimeException;
@@ -18,6 +23,7 @@ import roomescape.service.reservationtime.dto.ReservationTimeAvailableListRespon
 import roomescape.service.reservationtime.dto.ReservationTimeListResponse;
 import roomescape.service.reservationtime.dto.ReservationTimeRequest;
 import roomescape.service.reservationtime.dto.ReservationTimeResponse;
+import roomescape.service.reservationwaiting.ReservationWaitingService;
 
 class ReservationTimeServiceTest extends ServiceTest {
     @Autowired
@@ -25,6 +31,9 @@ class ReservationTimeServiceTest extends ServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationWaitingService reservationWaitingService;
 
     @Nested
     @DisplayName("시간 목록 조회")
@@ -93,6 +102,14 @@ class ReservationTimeServiceTest extends ServiceTest {
     class DeleteReservationTime {
         @Test
         void 시간을_삭제할_수_있다() {
+            Member member = new Member(
+                    1L,
+                    new MemberName("사용자"),
+                    new MemberEmail("user@gmail.com"),
+                    new MemberPassword("1234567890"),
+                    MemberRole.USER
+            );
+            reservationWaitingService.deleteReservationWaiting(1L, member);
             reservationService.deleteReservation(1L);
 
             reservationTimeService.deleteReservationTime(1L);
