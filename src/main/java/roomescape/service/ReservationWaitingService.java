@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
@@ -17,6 +18,7 @@ import roomescape.service.response.ReservationWaitingAppResponse;
 import roomescape.service.response.ReservationWaitingAppResponseWithRank;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
@@ -44,6 +46,7 @@ public class ReservationWaitingService {
                 .toList();
     }
 
+    @Transactional
     public ReservationWaitingAppResponse save(ReservationWaitingAppRequest request) {
         Member member = findMember(request.memberId());
         Reservation reservation = findReservation(request.date(), request.timeId(), request.themeId());
@@ -87,6 +90,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new NoSuchElementException("해당 예약이 없습니다. 예약해주세요."));
     }
 
+    @Transactional
     public void deleteBy(Long id) {
         reservationWaitingRepository.deleteById(id);
     }

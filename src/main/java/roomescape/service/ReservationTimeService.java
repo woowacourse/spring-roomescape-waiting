@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationTime;
@@ -15,6 +16,7 @@ import roomescape.service.response.BookableReservationTimeAppResponse;
 import roomescape.service.response.ReservationTimeAppResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -26,6 +28,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationTimeAppResponse save(ReservationTimeAppRequest request) {
         ReservationTime newReservationTime = new ReservationTime(request.startAt());
         validateDuplication(newReservationTime.getStartAt());
@@ -40,6 +43,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new ReservationExistsException();
