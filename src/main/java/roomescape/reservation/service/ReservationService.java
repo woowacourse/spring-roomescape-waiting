@@ -10,6 +10,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.CreateReservationRequest;
 import roomescape.reservation.dto.response.CreateReservationResponse;
+import roomescape.reservation.dto.response.FindAdminReservationResponse;
 import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.dto.response.FindReservationResponse;
 import roomescape.reservation.model.Reservation;
@@ -64,9 +65,9 @@ public class ReservationService {
         }
     }
 
-    public List<FindReservationResponse> getReservations() {
+    public List<FindAdminReservationResponse> getReservationsByAdmin() {
         return reservationRepository.findAll().stream()
-                .map(FindReservationResponse::from)
+                .map(FindAdminReservationResponse::from)
                 .toList();
     }
 
@@ -75,7 +76,7 @@ public class ReservationService {
         return FindReservationResponse.from(reservation);
     }
 
-    public List<FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
+    public List<FindReservationResponse> getReservations(final AuthInfo authInfo) {
         return reservationRepository.findAllByMemberId(authInfo.getMemberId()).stream()
                 .map(FindReservationResponse::from)
                 .toList();
@@ -117,7 +118,7 @@ public class ReservationService {
 
     private void checkCancelAuthorization(final Reservation reservation, final Long requesterId) {
         Member member = memberRepository.getById(requesterId);
-        if (reservation.isOwnedBy(member) || member.isNotAdmin()) {
+        if (member.isNotAdmin() && !reservation.isOwnedBy(member)) {
             throw new ForbiddenException("식별자 " + reservation.getId() + "인 예약에 대해 권한이 존재하지 않아, 삭제가 불가능합니다.");
         }
     }
