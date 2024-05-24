@@ -49,7 +49,6 @@ public class Reservation {
             ReservationDetail detail,
             Member member
     ) {
-        System.out.println(detail.isBefore(currentDateTime));
         if (detail.isBefore(currentDateTime)) {
             String message = String.format("지나간 날짜/시간에 대한 예약은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)",
                     detail.getDate(), detail.getTime().getStartAt());
@@ -68,10 +67,6 @@ public class Reservation {
         if (member == null) {
             throw new DomainValidationException("회원은 필수 값입니다.");
         }
-    }
-
-    public boolean isOwnedBy(Long memberId) {
-        return member.getId().equals(memberId);
     }
 
     @Override
