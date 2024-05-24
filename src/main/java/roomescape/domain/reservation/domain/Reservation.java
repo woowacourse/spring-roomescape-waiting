@@ -48,6 +48,10 @@ public class Reservation {
         this.member = member;
     }
 
+    public boolean isStatusReservation() {
+        return status.isReservation();
+    }
+
     public Long getId() {
         return id;
     }

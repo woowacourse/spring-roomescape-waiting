@@ -12,4 +12,8 @@ public enum Status {
     public String getValue() {
         return value;
     }
+
+    public boolean isReservation() {
+        return this == RESERVATION;
+    }
 }

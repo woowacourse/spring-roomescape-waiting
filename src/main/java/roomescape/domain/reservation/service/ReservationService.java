@@ -20,7 +20,6 @@ import roomescape.global.exception.DataConflictException;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -70,20 +69,16 @@ public class ReservationService {
                 .map(Reservation::getTime)
                 .toList();
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
+
         return allTimes.stream()
                 .map(time -> new BookableTimeResponse(time.getStartAt(), time.getId(), isBookedTime(bookedTimes, time)))
                 .toList();
     }
 
-    private boolean isBookedTime(List<ReservationTime> bookedTimes, ReservationTime time) {
-        return bookedTimes.contains(time);
-    }
-
     public void removeReservation(Long id) {
-        if (reservationRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException("해당 id를 가진 예약이 존재하지 않습니다.");
-        }
-        reservationRepository.deleteById(id);
+        Reservation reservation = findReservationById(id);
+
+        reservationRepository.delete(reservation);
     }
 
     public List<ReservationMineResponse> findReservationByMemberId(Long memberId) {
@@ -104,12 +99,9 @@ public class ReservationService {
     }
 
     public void removeReservationWait(Long id) {
-        Optional<Reservation> reservationOptional = reservationRepository.findById(id);
+        Reservation reservation = findReservationById(id);
 
-        if (reservationOptional.isEmpty()) {
-            throw new EntityNotFoundException("해당 id를 가진 예약대기가 존재하지 않습니다.");
-        }
-        if (reservationOptional.get().getStatus().equals(Status.RESERVATION)) {
+        if (reservation.isStatusReservation()) {
             throw new IllegalArgumentException("예약은 삭제할 수 없습니다.");
         }
 
@@ -117,18 +109,23 @@ public class ReservationService {
     }
 
     public Reservation updateReservationStatus(Long id, Status status) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("해당 id를 가진 예약이 존재하지 않습니다."));
+        Reservation reservation = findReservationById(id);
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservation.getDate(),
-                reservation.getTime().getId(), reservation.getTheme().getId(), Status.RESERVATION)) {
-            throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약 승인을 할 수 없습니다.");
-        }
+        validateUpdateReservation(reservation);
 
         Reservation changedReservation = updateStatus(reservation, status);
         reservationRepository.save(changedReservation);
 
         return changedReservation;
+    }
+
+    private boolean isBookedTime(List<ReservationTime> bookedTimes, ReservationTime time) {
+        return bookedTimes.contains(time);
+    }
+
+    private Reservation findReservationById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("해당 id를 가진 예약이 존재하지 않습니다."));
     }
 
     private Reservation updateStatus(Reservation reservation, Status status) {
@@ -157,6 +154,13 @@ public class ReservationService {
         if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(reservationWaitAddRequest.memberId(),
                 reservationWaitAddRequest.date(), reservationWaitAddRequest.timeId(), reservationWaitAddRequest.themeId())) {
             throw new DataConflictException("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약 또는 예약대기가 있으면 예약대기를 할 수 없습니다.");
+        }
+    }
+
+    private void validateUpdateReservation(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId(), Status.RESERVATION)) {
+            throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약 승인을 할 수 없습니다.");
         }
     }
 
