@@ -47,8 +47,8 @@ public class Waiting {
         this(null, member, date, time, theme, ReservationStatus.WAITING);
     }
 
-    public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                   ReservationStatus status) {
+    private Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
+                    ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
