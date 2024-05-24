@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.exception.AuthorizationException;
 import roomescape.exception.BadRequestException;
 
 @Entity
@@ -89,6 +90,12 @@ public class Reservation {
         }
     }
 
+    public void validateAuthorization(Member member) {
+        if (!this.member.equals(member) || this.member.getRole() != Role.ADMIN) {
+            throw new AuthorizationException("접근권한이 없습니다.");
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -109,12 +116,12 @@ public class Reservation {
         return theme;
     }
 
-    public boolean isWaiting() {
-        return status.equals(Status.WAITING);
-    }
-
     public Status getStatus() {
         return status;
+    }
+
+    public void updateStatus(Status status) {
+        this.status = status;
     }
 
     @Override

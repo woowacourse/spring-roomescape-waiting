@@ -10,7 +10,7 @@ import roomescape.domain.Status;
 
 public record MyReservationResponse(
         @NotNull
-        Long reservationId,
+        Long id,
         @NotBlank
         String theme,
         @NotNull

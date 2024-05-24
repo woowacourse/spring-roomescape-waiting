@@ -12,6 +12,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
@@ -86,6 +87,19 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
+    }
+
+    @Transactional
+    public void cancelWaiting(Long id, AuthInfo authInfo) {
+        Member member = memberRepository.findById(authInfo.id())
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.WAITING)
+                .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+
+        reservation.validateAuthorization(member);
+
+        reservation.updateStatus(Status.WAITING_CANCEL);
+        reservationRepository.save(reservation);
     }
 
     public void deleteById(Long id) {

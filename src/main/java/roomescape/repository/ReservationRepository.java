@@ -11,6 +11,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithRank;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
@@ -30,8 +31,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                      AND r2.time = r1.time
                      AND r2.createdAt < r1.createdAt) AS Long))
         FROM Reservation r1
-        WHERE r1.member.id = :memberId
+        WHERE r1.member.id = :memberId and (r1.status = 'WAITING' or r1.status = 'CREATED')
         order by r1.date
         """)
     List<ReservationWithRank> findMyReservations(Long memberId);
+
+    Optional<Reservation> findByIdAndStatus(Long id, Status status);
 }

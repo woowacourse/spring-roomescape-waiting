@@ -10,7 +10,7 @@ import roomescape.service.dto.response.MyReservationResponse;
 
 public record MyReservationWebResponse(
         @NotNull
-        Long reservationId,
+        Long id,
         @NotBlank
         String theme,
         @NotNull
@@ -24,7 +24,7 @@ public record MyReservationWebResponse(
 ) {
     public static MyReservationWebResponse from(MyReservationResponse response) {
         return new MyReservationWebResponse(
-                response.reservationId(),
+                response.id(),
                 response.theme(),
                 response.date(),
                 response.time(),

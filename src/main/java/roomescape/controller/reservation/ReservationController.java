@@ -5,7 +5,9 @@ import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.reservation.dto.request.ReservationCreateMemberRequest;
@@ -59,5 +61,11 @@ public class ReservationController {
                 Status.WAITING);
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
         return ResponseEntity.created(URI.create("/reservation")).body(reservationResponse);
+    }
+
+    @PutMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> cancelWaiting(@PathVariable Long id, AuthInfo authInfo) {
+        reservationService.cancelWaiting(id, authInfo);
+        return ResponseEntity.noContent().build();
     }
 }
