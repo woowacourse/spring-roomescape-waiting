@@ -1,11 +1,8 @@
-package roomescape.infrastructure;
+package roomescape.domain;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Member;
-import roomescape.domain.MemberEmail;
-import roomescape.domain.MemberPassword;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {

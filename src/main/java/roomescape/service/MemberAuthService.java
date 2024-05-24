@@ -8,7 +8,7 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberEmail;
 import roomescape.domain.MemberName;
 import roomescape.domain.MemberPassword;
-import roomescape.infrastructure.MemberRepository;
+import roomescape.domain.MemberRepository;
 import roomescape.service.request.MemberSignUpAppRequest;
 import roomescape.service.response.MemberAppResponse;
 import roomescape.service.response.SignupMemberAppResponse;

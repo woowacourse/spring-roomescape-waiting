@@ -12,11 +12,11 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
-import roomescape.infrastructure.MemberRepository;
-import roomescape.infrastructure.ReservationRepository;
-import roomescape.infrastructure.ReservationTimeRepository;
-import roomescape.infrastructure.ReservationWaitingRepository;
-import roomescape.infrastructure.ThemeRepository;
+import roomescape.domain.MemberRepository;
+import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.ReservationWaitingRepository;
+import roomescape.domain.ThemeRepository;
 import roomescape.web.auth.JwtProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
