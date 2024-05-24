@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.model.Reservation;
+import roomescape.model.ReservationInfo;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
 import roomescape.model.member.Role;
@@ -45,14 +46,20 @@ class ReservationRepositoryTest {
     @DisplayName("특정 날짜와 시간과 테마를 가진 예약이 존재하는 경우 참을 반환한다.")
     @Test
     void should_return_true_when_exist_reservation_by_date_and_timeId() {
-        boolean isExist = reservationRepository.existsByDateAndTimeIdAndThemeId(LocalDate.of(2000, 1, 1), 1L, 1L);
+        ReservationInfo reservationInfo = new ReservationInfo(LocalDate.of(2000, 1, 1),
+                new ReservationTime(1L, LocalTime.of(1, 0)),
+                new Theme(1L, "n1", "d1", "t1"));
+        boolean isExist = reservationRepository.existsByReservationInfo(reservationInfo);
         assertThat(isExist).isTrue();
     }
 
     @DisplayName("특정 날짜와 시간과 테마를 가진 예약이 존재하지 않는 경우 거짓을 반환한다.")
     @Test
     void should_return_false_when_not_exist_reservation_by_date_and_timeId() {
-        boolean isExist = reservationRepository.existsByDateAndTimeIdAndThemeId(LocalDate.of(9999, 1, 1), 1L, 1L);
+        ReservationInfo reservationInfo = new ReservationInfo(LocalDate.of(9999, 1, 1),
+                new ReservationTime(1L, LocalTime.of(1, 0)),
+                new Theme(1L, "n1", "d1", "t1"));
+        boolean isExist = reservationRepository.existsByReservationInfo(reservationInfo);
         assertThat(isExist).isFalse();
     }
 
@@ -85,28 +92,28 @@ class ReservationRepositoryTest {
     @DisplayName("특정 시간 아이디의 예약이 존재하면 참을 반환한다.")
     @Test
     void should_return_true_when_exist_timeId() {
-        boolean isExist = reservationRepository.existsByTimeId(1L);
+        boolean isExist = reservationRepository.existsByReservationInfo_TimeId(1L);
         assertThat(isExist).isTrue();
     }
 
     @DisplayName("특정 시간 아이디의 예약이 존재하지 않으면 거짓을 반환한다.")
     @Test
     void should_return_false_when_not_exist_timeId() {
-        boolean isExist = reservationRepository.existsByTimeId(3L);
+        boolean isExist = reservationRepository.existsByReservationInfo_TimeId(3L);
         assertThat(isExist).isFalse();
     }
 
     @DisplayName("특정 테마 아이디의 예약이 존재하면 참을 반환한다.")
     @Test
     void should_return_true_when_exist_themeId() {
-        boolean isExist = reservationRepository.existsByThemeId(1L);
+        boolean isExist = reservationRepository.existsByReservationInfo_ThemeId(1L);
         assertThat(isExist).isTrue();
     }
 
     @DisplayName("특정 테마 아이디의 예약이 존재하지 않으면 거짓을 반환한다.")
     @Test
     void should_return_false_when_not_exist_themeId() {
-        boolean isExist = reservationRepository.existsByThemeId(3L);
+        boolean isExist = reservationRepository.existsByReservationInfo_ThemeId(3L);
         assertThat(isExist).isFalse();
     }
 }

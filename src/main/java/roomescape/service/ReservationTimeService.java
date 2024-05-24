@@ -61,7 +61,7 @@ public class ReservationTimeService {
     }
 
     private void validateDependence(Long id) {
-        boolean isExist = reservationRepository.existsByTimeId(id);
+        boolean isExist = reservationRepository.existsByReservationInfo_TimeId(id);
         if (isExist) {
             throw new BadRequestException("[ERROR] 해당 시간을 사용하고 있는 예약이 있습니다.");
         }

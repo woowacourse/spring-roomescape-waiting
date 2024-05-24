@@ -1,6 +1,7 @@
 package roomescape.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
@@ -16,32 +17,26 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
-    private LocalDate date;
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+    @Valid
+    @NotNull
+    @Embedded
+    private ReservationInfo reservationInfo;
 
-    private Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    private Waiting(Long id, Member member, ReservationInfo reservationInfo) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
         this.member = member;
+        this.reservationInfo = reservationInfo;
     }
 
-    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(0L, date, time, theme, member);
+    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) { // TODO: 파라미터 순서 변경
+        this(0L, member, new ReservationInfo(date, time, theme));
     }
 
     public static Waiting of(ReservationDto reservationDto, ReservationTime time, Theme theme, Member member) {
-        return new Waiting(0L, reservationDto.getDate(), time, theme, member);
-    }
+        return new Waiting(0L, member, new ReservationInfo(reservationDto.getDate(), time, theme));
+    } // TODO: to dto
 
     protected Waiting() {
     }
@@ -51,15 +46,15 @@ public class Waiting {
     }
 
     public LocalDate getDate() {
-        return date;
+        return reservationInfo.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return reservationInfo.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationInfo.getTheme();
     }
 
     public Member getMember() {
@@ -80,6 +75,6 @@ public class Waiting {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, time, theme, member);
+        return Objects.hash(id, reservationInfo, member);
     }
 }

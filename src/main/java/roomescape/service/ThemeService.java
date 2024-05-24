@@ -64,7 +64,7 @@ public class ThemeService {
     }
 
     private void validateDependence(Long id) {
-        boolean isExist = reservationRepository.existsByThemeId(id);
+        boolean isExist = reservationRepository.existsByReservationInfo_ThemeId(id);
         if (isExist) {
             throw new BadRequestException("[ERROR] 해당 테마를 사용하고 있는 예약이 있습니다.");
         }

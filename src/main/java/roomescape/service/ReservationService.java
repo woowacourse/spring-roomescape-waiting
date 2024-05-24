@@ -5,6 +5,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
+import roomescape.model.ReservationInfo;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
 import roomescape.model.member.LoginMember;
@@ -53,7 +54,7 @@ public class ReservationService {
 
         LocalDate date = reservationDto.getDate();
         validateIsFuture(date, time.getStartAt());
-        validateDuplication(date, time.getId(), reservationDto.getThemeId());
+        validateDuplication(date, time, theme);
 
         // TODO: 이렇게 모든 객체를 다 찾아서 Reservation 객체를 만드는 게 맞을까?
         Reservation reservation = Reservation.of(reservationDto, time, theme, member);
@@ -86,7 +87,8 @@ public class ReservationService {
         LocalDate reservationDate = reservation.getDate();
         ReservationTime reservationTime = reservation.getTime();
         Theme reservationTheme = reservation.getTheme();
-        waitingRepository.findFirstByDateAndTimeAndTheme(reservationDate, reservationTime, reservationTheme)
+        ReservationInfo reservationInfo = new ReservationInfo(reservationDate, reservationTime, reservationTheme);
+        waitingRepository.findFirstByReservationInfo(reservationInfo)
                 .ifPresent(this::approveReservation);
         reservationRepository.deleteById(id);
     }
@@ -130,8 +132,9 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplication(LocalDate date, long timeId, long themeId) {
-        boolean isExist = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    private void validateDuplication(LocalDate date, ReservationTime time, Theme theme) {
+        ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
+        boolean isExist = reservationRepository.existsByReservationInfo(reservationInfo);
         if (isExist) {
             throw new DuplicatedException("[ERROR] 중복되는 예약은 추가할 수 없습니다.");
         }

@@ -2,12 +2,11 @@ package roomescape.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.model.ReservationTime;
+import roomescape.model.ReservationInfo;
 import roomescape.model.Waiting;
 import roomescape.model.WaitingWithRank;
-import roomescape.model.theme.Theme;
+import roomescape.model.member.Member;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,9 +15,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     @Query("""
             SELECT new roomescape.model.WaitingWithRank(w, (SELECT COUNT(w2) + 1
                         FROM Waiting w2
-                        WHERE w2.theme = w.theme
-                            AND w2.date = w.date
-                            AND w2.time = w.time
+                        WHERE w2.reservationInfo = w.reservationInfo
                             AND w2.id < w.id))
             FROM Waiting w
             WHERE w.member.id = ?1
@@ -28,15 +25,13 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     @Query("""
             SELECT w
             FROM Waiting w
-            WHERE w.date = ?1
-                AND w.time = ?2
-                AND w.theme = ?3
+            WHERE w.reservationInfo = ?1
             ORDER BY w.id ASC
             LIMIT 1
             """)
-    Optional<Waiting> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Optional<Waiting> findFirstByReservationInfo(ReservationInfo reservationInfo);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, long timeId, long themeId, long memberId);
+    boolean existsByReservationInfoAndMember(ReservationInfo reservationInfo, Member member);
 
     boolean existsByIdAndMemberId(long id, long memberId);
 }

@@ -4,10 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
-import roomescape.model.Reservation;
-import roomescape.model.ReservationTime;
-import roomescape.model.Waiting;
-import roomescape.model.WaitingWithRank;
+import roomescape.model.*;
 import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
@@ -50,11 +47,11 @@ public class WaitingService {
         ReservationTime time = findReservationTime(waitingDto);
         Theme theme = findTheme(waitingDto);
         Member member = findMember(waitingDto);
-        Reservation reservation = findReservation(waitingDto);
+        Reservation reservation = findReservation(waitingDto.getDate(), time, theme);
 
         LocalDate date = waitingDto.getDate();
         validateIsFuture(date, time.getStartAt());
-        validateDuplication(date, time.getId(), waitingDto.getThemeId(), waitingDto.getMemberId());
+        validateDuplication(date, time, theme, member);
         validateIsReservationOwner(waitingDto.getMemberId(), reservation.getMember().getId());
 
         Waiting waiting = Waiting.of(waitingDto, time, theme, member);
@@ -79,11 +76,9 @@ public class WaitingService {
         return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
-    private Reservation findReservation(ReservationDto waitingDto) {
-        LocalDate date = waitingDto.getDate();
-        long timeId = waitingDto.getTimeId();
-        long themeId = waitingDto.getThemeId();
-        Optional<Reservation> reservation = reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    private Reservation findReservation(LocalDate date, ReservationTime time, Theme theme) {
+        ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
+        Optional<Reservation> reservation = reservationRepository.findByReservationInfo(reservationInfo);
         return reservation.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
@@ -95,8 +90,9 @@ public class WaitingService {
         }
     }
 
-    private void validateDuplication(LocalDate date, long timeId, long themeId, long memberId) {
-        boolean isExist = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
+    private void validateDuplication(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
+        boolean isExist = waitingRepository.existsByReservationInfoAndMember(reservationInfo, member);
         if (isExist) {
             throw new DuplicatedException("[ERROR] 중복된 예약 대기는 추가할 수 없습니다.");
         }

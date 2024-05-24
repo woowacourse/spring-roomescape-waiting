@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public class WaitingResponse {
 
-    private final long id;
+    private final long id; // TODO: id == 예약 대기 번호 ?
     private final LocalDate date;
     private final ReservationTimeResponse time;
     private final ThemeResponse theme;
