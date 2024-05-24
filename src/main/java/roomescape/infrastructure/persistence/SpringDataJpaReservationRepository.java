@@ -55,7 +55,17 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
     @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.theme.id = :id)")
     boolean existsByThemeId(Long id);
 
-    @Query("SELECT EXISTS " +
-           "(SELECT 1 from Reservation r WHERE r.date = :date AND r.time.id = :timeId AND r.theme.id = :themeId)")
+    @Query("""
+            SELECT EXISTS
+                (
+                 SELECT 1
+                 FROM Reservation r
+                 WHERE
+                     r.date = :date AND
+                     r.time.id = :timeId AND
+                     r.theme.id = :themeId
+                 )
+            """
+    )
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }
