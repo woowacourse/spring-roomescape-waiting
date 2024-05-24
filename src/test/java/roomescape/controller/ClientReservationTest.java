@@ -26,6 +26,7 @@ class ClientReservationTest {
     private static final String PASSWORD = "1234";
     private static final String TOKEN = "token";
     private static final int RESERVATION_COUNT = 3;
+    private static final int WAITING_COUNT = 3;
 
     @LocalServerPort
     private int port;
@@ -84,7 +85,17 @@ class ClientReservationTest {
                 .cookies(TOKEN, accessToken)
                 .when().get("/reservations/mine")
                 .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("로그인 된 유저의 예약 내역을 조회하면 예약 내역과 예약 대기 내역을 모두 응답한다.")
+    @Test
+    void given_when_find_my_reservations_then_responseWithReservationAndWaiting() {
+        RestAssured.given().log().all()
+                .cookies(TOKEN, accessToken)
+                .when().get("/reservations/mine")
+                .then().log().all()
                 .statusCode(200)
-                .body("size()", is(RESERVATION_COUNT));
+                .body("size()", is(RESERVATION_COUNT + WAITING_COUNT));
     }
 }

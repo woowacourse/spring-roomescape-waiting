@@ -15,10 +15,18 @@ VALUES ('레벨1 탈출', '우테코 레벨2를 탈출하는 내용입니다.', 
 
 INSERT INTO reservation(member_id, date, time_id, theme_id, status)
 VALUES (1, '2024-05-01', 1, 1, 'BOOKING'),
-       (1, '2024-05-02', 1, 1, 'BOOKING'),
        (1, '2024-05-18', 1, 1, 'BOOKING'),
+       (1, '2024-05-02', 1, 1, 'BOOKING'),
        (2, '2024-05-19', 3, 3, 'BOOKING'),
        (2, '2024-05-18', 3, 3, 'BOOKING'),
        (2, '2024-05-17', 3, 3, 'BOOKING'),
        (2, '2099-04-30', 1, 1, 'BOOKING');
+
+INSERT INTO waiting(member_id, date, time_id, theme_id, status)
+VALUES (2, '2024-05-01', 1, 1, 'WAITING'),
+       (2, '2024-05-02', 1, 1, 'WAITING'),
+       (2, '2024-05-18', 1, 1, 'WAITING'),
+       (1, '2024-05-19', 3, 3, 'WAITING'),
+       (1, '2024-05-18', 3, 3, 'WAITING'),
+       (1, '2024-05-17', 3, 3, 'WAITING');
 
