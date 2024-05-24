@@ -8,9 +8,9 @@ import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
 import roomescape.web.auth.Auth;
 import roomescape.web.controller.request.LoginMember;
-import roomescape.web.controller.request.MemberReservationWebRequest;
-import roomescape.web.controller.response.MemberReservationWebResponse;
-import roomescape.web.controller.response.ReservationMineWebResponse;
+import roomescape.web.controller.request.MemberReservationRequest;
+import roomescape.web.controller.response.MemberReservationResponse;
+import roomescape.web.controller.response.ReservationMineResponse;
 
 import java.net.URI;
 import java.util.List;
@@ -26,18 +26,18 @@ public class MemberReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<MemberReservationWebResponse> reserve(@Valid @RequestBody MemberReservationWebRequest request,
-                                                                @Valid @Auth
-                                                                LoginMember loginMember) {
+    public ResponseEntity<MemberReservationResponse> reserve(@Valid @RequestBody MemberReservationRequest request,
+                                                             @Valid @Auth
+                                                             LoginMember loginMember) {
         ReservationAppResponse appResponse = reservationService.save(
                 new ReservationAppRequest(request.date(), request.timeId(),
                         request.themeId(), loginMember.id()));
 
         Long id = appResponse.id();
-        MemberReservationWebResponse memberReservationWebResponse = MemberReservationWebResponse.from(appResponse);
+        MemberReservationResponse memberReservationResponse = MemberReservationResponse.from(appResponse);
 
         return ResponseEntity.created(URI.create("/reservations/" + id))
-                .body(memberReservationWebResponse);
+                .body(memberReservationResponse);
     }
 
     @DeleteMapping("/{id}")
@@ -48,23 +48,23 @@ public class MemberReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MemberReservationWebResponse>> getReservations() {
+    public ResponseEntity<List<MemberReservationResponse>> getReservations() {
         List<ReservationAppResponse> appResponses = reservationService.findAll();
-        List<MemberReservationWebResponse> memberReservationWebResponse = appResponses.stream()
-                .map(MemberReservationWebResponse::from)
+        List<MemberReservationResponse> memberReservationResponse = appResponses.stream()
+                .map(MemberReservationResponse::from)
                 .toList();
 
-        return ResponseEntity.ok(memberReservationWebResponse);
+        return ResponseEntity.ok(memberReservationResponse);
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationMineWebResponse>> getMyReservations(@Auth LoginMember loginMember) {
-        List<ReservationMineWebResponse> reservationMineWebResponses = reservationService.findByMemberId(loginMember.id())
+    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(@Auth LoginMember loginMember) {
+        List<ReservationMineResponse> reservationMineRespons = reservationService.findByMemberId(loginMember.id())
                 .stream()
-                .map(ReservationMineWebResponse::new)
+                .map(ReservationMineResponse::new)
                 .toList();
 
-        return ResponseEntity.ok(reservationMineWebResponses);
+        return ResponseEntity.ok(reservationMineRespons);
     }
 
 }

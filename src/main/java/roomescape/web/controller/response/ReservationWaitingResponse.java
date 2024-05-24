@@ -4,21 +4,21 @@ import roomescape.service.response.ReservationWaitingAppResponse;
 
 import java.time.LocalDate;
 
-public record ReservationWaitingWebResponse(
+public record ReservationWaitingResponse(
         Long id,
         String name,
         LocalDate date,
-        ReservationTimeWebResponse time,
-        ThemeWebResponse theme,
+        ReservationTimeResponse time,
+        ThemeResponse theme,
         String status) {
 
-    public ReservationWaitingWebResponse(ReservationWaitingAppResponse response) {
+    public ReservationWaitingResponse(ReservationWaitingAppResponse response) {
         this(
                 response.id(),
                 response.name(),
                 response.date().getDate(),
-                ReservationTimeWebResponse.from(response.reservationTimeAppResponse()),
-                ThemeWebResponse.from(response.themeAppResponse()),
+                ReservationTimeResponse.from(response.reservationTimeAppResponse()),
+                ThemeResponse.from(response.themeAppResponse()),
                 response.status()
         );
     }

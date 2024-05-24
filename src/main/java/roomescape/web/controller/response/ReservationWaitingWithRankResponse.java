@@ -4,22 +4,22 @@ import roomescape.service.response.ReservationWaitingWithRankAppResponse;
 
 import java.time.LocalDate;
 
-public record ReservationWaitingWithRankWebResponse(
+public record ReservationWaitingWithRankResponse(
         Long id,
         String name,
         LocalDate date,
-        ReservationTimeWebResponse time,
-        ThemeWebResponse theme,
+        ReservationTimeResponse time,
+        ThemeResponse theme,
         Long order,
         String status) {
 
-    public ReservationWaitingWithRankWebResponse(ReservationWaitingWithRankAppResponse response) {
+    public ReservationWaitingWithRankResponse(ReservationWaitingWithRankAppResponse response) {
         this(
                 response.id(),
                 response.name(),
                 response.date().getDate(),
-                ReservationTimeWebResponse.from(response.reservationTimeAppResponse()),
-                ThemeWebResponse.from(response.themeAppResponse()),
+                ReservationTimeResponse.from(response.reservationTimeAppResponse()),
+                ThemeResponse.from(response.themeAppResponse()),
                 response.rank(),
                 response.status()
         );

@@ -5,7 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.web.controller.request.ReservationTimeWebRequest;
+import roomescape.web.controller.request.ReservationTimeRequest;
 
 import static org.hamcrest.Matchers.is;
 
@@ -21,7 +21,7 @@ class ReservationTimeController extends ControllerTest {
     @DisplayName("예약 시간을 저장한다 -> 201")
     @Test
     void create() {
-        ReservationTimeWebRequest request = new ReservationTimeWebRequest("12:00");
+        ReservationTimeRequest request = new ReservationTimeRequest("12:00");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -57,7 +57,7 @@ class ReservationTimeController extends ControllerTest {
     @DisplayName("예약 시간 포맷이 잘못되거나, 중복 될 경우 -> 400")
     @Test
     void create_IllegalTimeFormat() {
-        ReservationTimeWebRequest request = new ReservationTimeWebRequest("24:00");
+        ReservationTimeRequest request = new ReservationTimeRequest("24:00");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -88,7 +88,7 @@ class ReservationTimeController extends ControllerTest {
     @DisplayName("요청 포맷이 잘못될 경우 -> 400")
     @Test
     void create_MethodArgNotValid() {
-        ReservationTimeWebRequest request = new ReservationTimeWebRequest(null);
+        ReservationTimeRequest request = new ReservationTimeRequest(null);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

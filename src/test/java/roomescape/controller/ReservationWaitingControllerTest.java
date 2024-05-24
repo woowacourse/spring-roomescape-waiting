@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.*;
 import roomescape.infrastructure.*;
 import roomescape.web.auth.JwtProvider;
-import roomescape.web.controller.request.ReservationWaitingWebRequest;
+import roomescape.web.controller.request.ReservationWaitingRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,7 +47,7 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         Member reservedMember = memberRepository.save(new Member(new MemberName("감자"), new MemberEmail("111@aaa.com"), new MemberPassword("asd"), MemberRole.USER));
         reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
 
-        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date, time.getId(), theme.getId());
+        ReservationWaitingRequest request = new ReservationWaitingRequest(date, time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -68,7 +68,7 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
-        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date, time.getId(), theme.getId());
+        ReservationWaitingRequest request = new ReservationWaitingRequest(date, time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -90,7 +90,7 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, waitingMember, new ReservationDate(date), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
-        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date, time.getId(), theme.getId());
+        ReservationWaitingRequest request = new ReservationWaitingRequest(date, time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -115,7 +115,7 @@ public class ReservationWaitingControllerTest extends ControllerTest {
         reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, otherMember, new ReservationDate(date.plusMonths(2)), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
-        ReservationWaitingWebRequest request = new ReservationWaitingWebRequest(date.toString(), time.getId(), theme.getId());
+        ReservationWaitingRequest request = new ReservationWaitingRequest(date.toString(), time.getId(), theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

@@ -1,8 +1,10 @@
 package roomescape.web.controller.api;
 
 import jakarta.validation.Valid;
+
 import java.net.URI;
 import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.ThemeService;
 import roomescape.service.request.ThemeAppRequest;
 import roomescape.service.response.ThemeAppResponse;
-import roomescape.web.controller.request.ThemeWebRequest;
-import roomescape.web.controller.response.ThemeWebResponse;
+import roomescape.web.controller.request.ThemeRequest;
+import roomescape.web.controller.response.ThemeResponse;
 
 @RestController
 @RequestMapping("/themes")
@@ -28,31 +30,31 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeWebResponse> create(@Valid @RequestBody ThemeWebRequest request) {
+    public ResponseEntity<ThemeResponse> create(@Valid @RequestBody ThemeRequest request) {
         ThemeAppResponse appResponse = themeService.save(
-            new ThemeAppRequest(request.name(), request.description(), request.thumbnail()));
+                new ThemeAppRequest(request.name(), request.description(), request.thumbnail()));
 
         Long id = appResponse.id();
-        ThemeWebResponse webResponse = ThemeWebResponse.from(appResponse);
+        ThemeResponse webResponse = ThemeResponse.from(appResponse);
 
         return ResponseEntity.created(URI.create("/themes/" + id)).body(webResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeWebResponse>> findAll() {
-        List<ThemeWebResponse> response = themeService.findAll()
-            .stream()
-            .map(ThemeWebResponse::from).toList();
+    public ResponseEntity<List<ThemeResponse>> findAll() {
+        List<ThemeResponse> response = themeService.findAll()
+                .stream()
+                .map(ThemeResponse::from).toList();
 
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<ThemeWebResponse>> findPopular() {
-        List<ThemeWebResponse> response = themeService.findPopular()
-            .stream()
-            .map(ThemeWebResponse::from)
-            .toList();
+    public ResponseEntity<List<ThemeResponse>> findPopular() {
+        List<ThemeResponse> response = themeService.findPopular()
+                .stream()
+                .map(ThemeResponse::from)
+                .toList();
 
         return ResponseEntity.ok().body(response);
     }

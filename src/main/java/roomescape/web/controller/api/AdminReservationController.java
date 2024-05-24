@@ -9,9 +9,9 @@ import roomescape.service.ReservationService;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
-import roomescape.web.controller.request.AdminReservationWebRequest;
-import roomescape.web.controller.response.AdminReservationWebResponse;
-import roomescape.web.controller.response.MemberReservationWebResponse;
+import roomescape.web.controller.request.AdminReservationRequest;
+import roomescape.web.controller.response.AdminReservationResponse;
+import roomescape.web.controller.response.MemberReservationResponse;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -30,22 +30,22 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<AdminReservationWebResponse> reserve(
-            @Valid @RequestBody AdminReservationWebRequest request) {
+    public ResponseEntity<AdminReservationResponse> reserve(
+            @Valid @RequestBody AdminReservationRequest request) {
         ReservationAppRequest appRequest = new ReservationAppRequest(request.date(), request.timeId(),
                 request.themeId(), request.memberId());
 
         ReservationAppResponse appResponse = reservationService.save(appRequest);
-        AdminReservationWebResponse adminReservationWebResponse = new AdminReservationWebResponse(
+        AdminReservationResponse adminReservationResponse = new AdminReservationResponse(
                 appResponse.date().getDate(),
                 appRequest.timeId(), appRequest.themeId(), appRequest.memberId());
 
         return ResponseEntity.created(URI.create("/reservations/" + appResponse.id()))
-                .body(adminReservationWebResponse);
+                .body(adminReservationResponse);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<MemberReservationWebResponse>> getSearchedReservations(
+    public ResponseEntity<List<MemberReservationResponse>> getSearchedReservations(
             @RequestParam(required = false) @Positive Long memberId,
             @RequestParam(required = false) @Positive Long themeId,
             @RequestParam(required = false) LocalDate dateFrom,
@@ -56,8 +56,8 @@ public class AdminReservationController {
 
         List<ReservationAppResponse> appResponses = reservationService.findAllSearched(appRequest);
 
-        List<MemberReservationWebResponse> webResponse = appResponses.stream()
-                .map(MemberReservationWebResponse::from)
+        List<MemberReservationResponse> webResponse = appResponses.stream()
+                .map(MemberReservationResponse::from)
                 .toList();
 
         return ResponseEntity.ok().body(webResponse);

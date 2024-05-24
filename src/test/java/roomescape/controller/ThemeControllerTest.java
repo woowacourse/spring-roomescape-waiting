@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.web.controller.request.ThemeWebRequest;
+import roomescape.web.controller.request.ThemeRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -25,7 +25,7 @@ class ThemeControllerTest extends ControllerTest {
     @DisplayName("테마를 생성한다 -> 201")
     @Test
     void create() {
-        ThemeWebRequest request = new ThemeWebRequest("방탈출", "대충 설명", "https://url.jpg");
+        ThemeRequest request = new ThemeRequest("방탈출", "대충 설명", "https://url.jpg");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -63,7 +63,7 @@ class ThemeControllerTest extends ControllerTest {
     @DisplayName("테마 정보 포맷이 잘못될 경우 -> 400")
     @Test
     void create_IllegalTheme() {
-        ThemeWebRequest request = new ThemeWebRequest("방탈출3", "설명3", "ftp://url3");
+        ThemeRequest request = new ThemeRequest("방탈출3", "설명3", "ftp://url3");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -76,7 +76,7 @@ class ThemeControllerTest extends ControllerTest {
     @DisplayName("중복된 데이터를 추가한다 -> 400")
     @Test
     void create_Duplicate() {
-        ThemeWebRequest request = new ThemeWebRequest("방탈출1", "설명1", "https://url1");
+        ThemeRequest request = new ThemeRequest("방탈출1", "설명1", "https://url1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -89,7 +89,7 @@ class ThemeControllerTest extends ControllerTest {
     @DisplayName("요청이 잘못된 형식일 경우 -> 400")
     @Test
     void create_MethodArgNotValid() {
-        ThemeWebRequest request = new ThemeWebRequest("", null, "https://url1");
+        ThemeRequest request = new ThemeRequest("", null, "https://url1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

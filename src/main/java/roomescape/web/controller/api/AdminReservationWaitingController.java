@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ReservationWaitingService;
 import roomescape.service.response.ReservationWaitingAppResponse;
-import roomescape.web.controller.request.ReservationWaitingStatusWebRequest;
-import roomescape.web.controller.response.ReservationWaitingWebResponse;
+import roomescape.web.controller.request.ReservationWaitingStatusRequest;
+import roomescape.web.controller.response.ReservationWaitingResponse;
 
 import java.util.List;
 
@@ -21,19 +21,19 @@ public class AdminReservationWaitingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationWaitingWebResponse>> getAvailableWaitings() {
-        List<ReservationWaitingWebResponse> waitingWebResponses = reservationWaitingService.findAllAllowed()
+    public ResponseEntity<List<ReservationWaitingResponse>> getAvailableWaitings() {
+        List<ReservationWaitingResponse> waitingWebResponses = reservationWaitingService.findAllAllowed()
                 .stream()
-                .map(ReservationWaitingWebResponse::new)
+                .map(ReservationWaitingResponse::new)
                 .toList();
 
         return ResponseEntity.ok().body(waitingWebResponses);
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<ReservationWaitingWebResponse> updateWaitingStatus(@PathVariable Long id, @Valid @RequestBody ReservationWaitingStatusWebRequest request) {
+    public ResponseEntity<ReservationWaitingResponse> updateWaitingStatus(@PathVariable Long id, @Valid @RequestBody ReservationWaitingStatusRequest request) {
         ReservationWaitingAppResponse waitingAppResponse = reservationWaitingService.updateWaitingStatus(id, request.status());
-        ReservationWaitingWebResponse waitingWebResponse = new ReservationWaitingWebResponse(waitingAppResponse);
+        ReservationWaitingResponse waitingWebResponse = new ReservationWaitingResponse(waitingAppResponse);
 
         return ResponseEntity.ok(waitingWebResponse);
     }

@@ -9,9 +9,9 @@ import roomescape.service.request.ReservationWaitingAppRequest;
 import roomescape.service.response.ReservationWaitingAppResponse;
 import roomescape.web.auth.Auth;
 import roomescape.web.controller.request.LoginMember;
-import roomescape.web.controller.request.ReservationWaitingWebRequest;
-import roomescape.web.controller.response.ReservationWaitingWebResponse;
-import roomescape.web.controller.response.ReservationWaitingWithRankWebResponse;
+import roomescape.web.controller.request.ReservationWaitingRequest;
+import roomescape.web.controller.response.ReservationWaitingResponse;
+import roomescape.web.controller.response.ReservationWaitingWithRankResponse;
 
 import java.net.URI;
 import java.util.List;
@@ -27,23 +27,23 @@ public class ReservationWaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationWaitingWebResponse> save(@Valid @RequestBody ReservationWaitingWebRequest request, @Valid @Auth LoginMember loginMember) {
+    public ResponseEntity<ReservationWaitingResponse> save(@Valid @RequestBody ReservationWaitingRequest request, @Valid @Auth LoginMember loginMember) {
 
         ReservationWaitingAppResponse waitingAppResponse = reservationWaitingService.save(
                 new ReservationWaitingAppRequest(request.date(), request.timeId(),
                         request.themeId(), loginMember.id()));
-        ReservationWaitingWebResponse waitingWebResponse = new ReservationWaitingWebResponse(waitingAppResponse);
+        ReservationWaitingResponse waitingWebResponse = new ReservationWaitingResponse(waitingAppResponse);
 
         return ResponseEntity.created(URI.create("/reservation-waitings/" + waitingWebResponse.id()))
                 .body(waitingWebResponse);
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationWaitingWithRankWebResponse>> findMyWaitingWithRank(@Valid @Auth LoginMember loginMember) {
+    public ResponseEntity<List<ReservationWaitingWithRankResponse>> findMyWaitingWithRank(@Valid @Auth LoginMember loginMember) {
         Long memberId = loginMember.id();
-        List<ReservationWaitingWithRankWebResponse> waitingWithRankWebResponses = reservationWaitingService.findWaitingWithRankByMemberId(memberId)
+        List<ReservationWaitingWithRankResponse> waitingWithRankWebResponses = reservationWaitingService.findWaitingWithRankByMemberId(memberId)
                 .stream()
-                .map(ReservationWaitingWithRankWebResponse::new)
+                .map(ReservationWaitingWithRankResponse::new)
                 .toList();
 
         return ResponseEntity.ok(waitingWithRankWebResponses);
