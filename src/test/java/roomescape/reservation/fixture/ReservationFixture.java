@@ -44,6 +44,20 @@ public class ReservationFixture {
             RESERVATION_TIME_11_00_ID_2,
             THEME_1);
 
+    public static final Reservation SECOND_ORDER_RESERVATION = new Reservation(
+            4L,
+            MemberFixture.MEMBER_ID_2,
+            TOMORROW,
+            RESERVATION_TIME_10_00_ID_1,
+            THEME_1);
+
+    public static final Reservation THIRD_ORDER_RESERVATION = new Reservation(
+            5L,
+            MemberFixture.MEMBER_ID_3,
+            TOMORROW,
+            RESERVATION_TIME_10_00_ID_1,
+            THEME_1);
+
     public static final Reservation MEMBER_ID_1_RESERVATION = new Reservation(
             1L,
             MemberFixture.MEMBER_ID_1,

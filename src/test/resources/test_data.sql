@@ -36,4 +36,6 @@ VALUES ('잠실 캠퍼스 탈출',
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (1, TIMESTAMPADD(DAY,1, NOW()), 1, 1),
        (2, TIMESTAMPADD(DAY,1, NOW()), 2, 1),
-       (3, TIMESTAMPADD(DAY,1, NOW()), 1, 2);
+       (3, TIMESTAMPADD(DAY,1, NOW()), 1, 2),
+       (2, TIMESTAMPADD(DAY,1, NOW()), 1, 1),
+       (3, TIMESTAMPADD(DAY,1, NOW()), 1, 1);

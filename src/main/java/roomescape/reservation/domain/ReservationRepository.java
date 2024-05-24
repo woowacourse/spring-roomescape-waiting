@@ -25,9 +25,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT COUNT(r)
             FROM Reservation AS r
-            WHERE r.date = :date
-                AND r.theme = :themeId
-                AND r.time = :timeId
+            WHERE r.date.value = :date
+                AND r.theme.id = :themeId
+                AND r.time.id = :timeId
                 AND r.id < :id
             """)
     int countEarlierReservationOnSlot(@Param("id") Long id,
