@@ -3,13 +3,14 @@ package roomescape.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 
 public record LoginMemberReservationResponse(
         long reservationId,
         String theme,
         LocalDate date,
         LocalTime time,
-        String status
+        ReservationStatus status
 ) {
     public static LoginMemberReservationResponse from(Reservation reservation) {
         return new LoginMemberReservationResponse(
@@ -17,7 +18,7 @@ public record LoginMemberReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                "예약"
+                reservation.getStatus()
         );
     }
 }

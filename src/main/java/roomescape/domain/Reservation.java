@@ -1,16 +1,17 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import roomescape.exception.ExceptionType;
-import roomescape.exception.RoomescapeException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import roomescape.exception.ExceptionType;
+import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Reservation implements Comparable<Reservation> {
@@ -28,6 +29,9 @@ public class Reservation implements Comparable<Reservation> {
 
     @ManyToOne
     private Theme theme;
+
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
 
     protected Reservation() {
     }
@@ -91,16 +95,8 @@ public class Reservation implements Comparable<Reservation> {
         return time.getStartAt();
     }
 
-    public boolean hasSameId(long id) {
-        return this.id == id;
-    }
-
     public long getId() {
         return id;
-    }
-
-    public Member getReservationMember() {
-        return reservationMember;
     }
 
     public String getName() {
@@ -117,5 +113,9 @@ public class Reservation implements Comparable<Reservation> {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }
