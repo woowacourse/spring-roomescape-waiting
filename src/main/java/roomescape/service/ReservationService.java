@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION;
 import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
@@ -15,9 +16,9 @@ import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.service.finder.MemberFinder;
 import roomescape.service.finder.ReservationFinder;
 import roomescape.service.mapper.LoginMemberReservationResponseMapper;
 import roomescape.service.mapper.ReservationResponseMapper;
@@ -28,15 +29,15 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository waitingRepository;
     private final ReservationFinder reservationFinder;
-    private final MemberFinder memberFinder;
+    private final MemberRepository memberRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationWaitingRepository waitingRepository,
-                              ReservationFinder reservationFinder, MemberFinder memberFinder) {
+                              ReservationFinder reservationFinder, MemberRepository memberFinder) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
         this.reservationFinder = reservationFinder;
-        this.memberFinder = memberFinder;
+        this.memberRepository = memberFinder;
     }
 
     public ReservationResponse save(ReservationRequest reservationRequest) {
@@ -83,7 +84,9 @@ public class ReservationService {
     }
 
     private boolean canCancel(long requestMemberId, long reservationId) {
-        Member requestMember = memberFinder.findById(requestMemberId);
+        Member requestMember = memberRepository.findById(requestMemberId)
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
+
         if (requestMember.isAdmin()) {
             return true;
         }

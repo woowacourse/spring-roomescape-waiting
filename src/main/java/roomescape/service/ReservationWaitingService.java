@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static roomescape.exception.ExceptionType.DUPLICATE_WAITING;
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
@@ -17,8 +18,8 @@ import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.exception.RoomescapeException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.service.finder.MemberFinder;
 import roomescape.service.finder.ReservationFinder;
 import roomescape.service.mapper.LoginMemberReservationResponseMapper;
 import roomescape.service.mapper.ReservationWaitingResponseMapper;
@@ -28,21 +29,21 @@ import roomescape.service.mapper.ReservationWaitingResponseMapper;
 public class ReservationWaitingService {
     private final ReservationWaitingRepository waitingRepository;
     private final ReservationFinder reservationFinder;
-    private final MemberFinder memberFinder;
+    private final MemberRepository memberRepository;
 
     public ReservationWaitingService(ReservationWaitingRepository waitingRepository,
                                      ReservationFinder reservationFinder,
-                                     MemberFinder memberFinder) {
+                                     MemberRepository memberRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationFinder = reservationFinder;
-        this.memberFinder = memberFinder;
+        this.memberRepository = memberRepository;
     }
 
     public ReservationWaitingResponse save(ReservationRequest reservationRequest) {
         Reservation reservation = reservationFinder.findByReservationRequest(reservationRequest,
                 () -> new RoomescapeException(WAITING_WITHOUT_RESERVATION));
-        Member waitingMember = memberFinder.findById(reservationRequest.memberId());
-
+        Member waitingMember = memberRepository.findById(reservationRequest.memberId())
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
         validatePastTimeReservation(reservation);
         validateDuplicateWaiting(reservation, waitingMember);
 
@@ -91,7 +92,9 @@ public class ReservationWaitingService {
     }
 
     private boolean canDelete(long memberId, long waitingId) {
-        Role role = memberFinder.findById(memberId).getRole();
+        Role role = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER))
+                .getRole();
         return Role.ADMIN.equals(role) || isMembersWaiting(memberId, waitingId);
     }
 

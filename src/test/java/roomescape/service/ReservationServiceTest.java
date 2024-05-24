@@ -25,7 +25,6 @@ import roomescape.repository.CollectionReservationWaitingRepository;
 import roomescape.repository.CollectionThemeRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.service.finder.MemberFinder;
 import roomescape.service.finder.ReservationFinder;
 
 class ReservationServiceTest {
@@ -45,9 +44,8 @@ class ReservationServiceTest {
         reservationRepository = new CollectionReservationRepository();
         ReservationFinder reservationFinder = new ReservationFinder(reservationRepository, reservationTimeRepository,
                 memberRepository, themeRepository);
-        MemberFinder memberFinder = new MemberFinder(memberRepository);
         reservationService = new ReservationService(reservationRepository, waitingRepository, reservationFinder,
-                memberFinder);
+                memberRepository);
     }
 
     @Test
@@ -99,9 +97,8 @@ class ReservationServiceTest {
         reservationRepository = new CollectionReservationRepository();
         ReservationFinder reservationFinder = new ReservationFinder(reservationRepository, reservationTimeRepository,
                 memberRepository, themeRepository);
-        MemberFinder memberFinder = new MemberFinder(memberRepository);
         reservationService = new ReservationService(reservationRepository, waitingRepository, reservationFinder,
-                memberFinder);
+                memberRepository);
     }
 
     @Test
