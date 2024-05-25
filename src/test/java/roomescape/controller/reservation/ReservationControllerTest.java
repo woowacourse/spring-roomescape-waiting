@@ -30,6 +30,7 @@ class ReservationControllerTest {
     int port;
 
     String accessToken;
+    String memberToken;
 
     @BeforeEach
     void setUp() {
@@ -38,6 +39,14 @@ class ReservationControllerTest {
         accessToken = RestAssured
                 .given().log().all()
                 .body(new MemberLoginRequest("redddy@gmail.com", "0000"))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().cookies().extract().cookie("token");
+
+        memberToken = RestAssured
+                .given().log().all()
+                .body(new MemberLoginRequest("jinwuo0925@gmail.com", "1111"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")

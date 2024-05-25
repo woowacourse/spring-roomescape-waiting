@@ -64,6 +64,17 @@ public class WaitingControllerTest {
     }
 
     @Test
+    @DisplayName("어드민이 아니면 예약 대기 목록을 조회할 수 없다.")
+    void getWaitingsFailIfNotAdmin() {
+        RestAssured.given().log().all()
+                .cookie("token", memberToken)
+                .contentType(ContentType.JSON)
+                .when().get("/waiting")
+                .then().log().all()
+                .statusCode(401);
+    }
+
+    @Test
     @DisplayName("예약 대기를 추가한다.")
     void addWaiting() {
         CreateReservationRequest request = new CreateReservationRequest(
