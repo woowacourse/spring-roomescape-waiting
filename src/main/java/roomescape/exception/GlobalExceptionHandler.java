@@ -20,18 +20,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException exception) {
-        ErrorResponse data = new ErrorResponse(exception.getMessage());
+        String message = exception.getMessage();
+        logger.info(message);
+        ErrorResponse data = new ErrorResponse(message);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(data);
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException exception) {
-        ErrorResponse data = new ErrorResponse(exception.getMessage());
+        String message = exception.getMessage();
+        logger.error(message);
+        ErrorResponse data = new ErrorResponse(message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(data);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        logger.error(exception.getMessage());
+
         if (exception.getRootCause() instanceof DateTimeException) {
             return handleDateTimeParseException();
         }
@@ -50,24 +56,32 @@ public class GlobalExceptionHandler {
         String message = exception.getBindingResult()
                 .getFieldError()
                 .getDefaultMessage();
+        logger.error(message);
         ErrorResponse data = new ErrorResponse(message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(data);
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException exception) {
-        ErrorResponse data = new ErrorResponse(exception.getMessage());
+        String message = exception.getMessage();
+        logger.info(message);
+        ErrorResponse data = new ErrorResponse(message);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(data);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException exception) {
-        ErrorResponse data = new ErrorResponse(exception.getMessage());
+        String message = exception.getMessage();
+        logger.info(message);
+        ErrorResponse data = new ErrorResponse(message);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponse> handleMissingRequestParameterException() {
+    public ResponseEntity<ErrorResponse> handleMissingRequestParameterException(
+            MissingServletRequestParameterException exception
+    ) {
+        logger.error(exception.getMessage());
         ErrorResponse data = new ErrorResponse("모든 파라미터를 입력해야 합니다.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(data);
     }
