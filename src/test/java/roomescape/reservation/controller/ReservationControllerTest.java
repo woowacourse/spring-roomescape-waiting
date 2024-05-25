@@ -83,8 +83,8 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 정보를 정상적으로 저장하는지 확인한다.")
     void createReservation() throws Exception {
-        Mockito.when(detailService.addReservation(any(ReservationCreateRequest.class)))
-                .thenReturn(new ReservationRequest(reservation.getMemberId(), reservation.getDetailId()));
+        Mockito.when(detailService.findReservationDetailId(any(ReservationCreateRequest.class)))
+                .thenReturn(reservation.getDetailId());
         Mockito.when(reservationService.addReservation(any(ReservationRequest.class)))
                 .thenReturn(ReservationResponse.from(reservation));
         Mockito.when(memberAuthService.isLoginMember(any()))
