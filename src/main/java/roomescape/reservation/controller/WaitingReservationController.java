@@ -46,8 +46,8 @@ public class WaitingReservationController {
     }
 
     @PatchMapping("/reservations/wait/{id}")
-    public ResponseEntity<Void> updateSuccessStatus(@PathVariable("id") Long id) {
-        waitingReservationService.updateSuccessStatus(id);
+    public ResponseEntity<Void> approveReservation(@PathVariable("id") Long id) {
+        waitingReservationService.approveReservation(id);
 
         return ResponseEntity.noContent().build();
     }

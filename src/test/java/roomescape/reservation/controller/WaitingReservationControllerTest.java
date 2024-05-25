@@ -87,7 +87,7 @@ class WaitingReservationControllerTest extends IntegrationTest {
 
     @DisplayName("예약 대기을 성공적으로 승인하면 204 응답을 받는다.")
     @Test
-    void updateSuccessStatus() {
+    void approveReservation() {
         saveMember(MEMBER_KAKI);
         saveThemeAsHorror();
         saveReservationTimeAsTen();

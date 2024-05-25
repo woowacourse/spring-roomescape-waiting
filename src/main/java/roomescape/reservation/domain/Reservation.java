@@ -80,6 +80,13 @@ public class Reservation {
         }
     }
 
+    public void updateSuccessStatus() {
+        if (status.isSuccess()) {
+            throw new IllegalArgumentException("이미 확정된 예약입니다.");
+        }
+        status = Status.SUCCESS;
+    }
+
     public boolean isSameMember(Member member) {
         return this.member.equals(member);
     }
@@ -114,10 +121,6 @@ public class Reservation {
 
     public Status getStatus() {
         return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public String getStatusDisplayName() {

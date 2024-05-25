@@ -100,11 +100,11 @@ public class WaitingReservationService {
     }
 
     @Transactional
-    public void updateSuccessStatus(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+    public void approveReservation(Long id) {
+        Reservation waitingReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("예약 대기 내역이 없습니다."));
-        validateUniqueReservation(reservation);
-        reservation.setStatus(Status.SUCCESS);
+        validateUniqueReservation(waitingReservation);
+        waitingReservation.updateSuccessStatus();
     }
 
     private void validateUniqueReservation(Reservation reservation) {

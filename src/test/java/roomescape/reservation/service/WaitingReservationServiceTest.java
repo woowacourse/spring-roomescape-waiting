@@ -77,13 +77,13 @@ class WaitingReservationServiceTest {
 
     @DisplayName("예약 대기 승인 시, 확정된 예약이 없으면 예약 상태로 변경된다.")
     @Test
-    void updateSuccessStatus() {
+    void approveReservation() {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
         Theme theme = themeRepository.save(HORROR_THEME);
         Member jojo = memberRepository.save(MEMBER_JOJO);
 
         Reservation waiting = reservationRepository.save(new Reservation(jojo, TOMORROW, theme, reservationTime, WAIT));
-        waitingReservationService.updateSuccessStatus(waiting.getId());
+        waitingReservationService.approveReservation(waiting.getId());
 
         Reservation afterUpdate = reservationRepository.findById(waiting.getId()).get();
 
@@ -92,7 +92,7 @@ class WaitingReservationServiceTest {
 
     @DisplayName("예약 대기 승인 시, 확정된 예약이 있으면 예외가 발생한다.")
     @Test
-    void updateSuccessStatusWithDuplicatedReservation() {
+    void approveReservationWithDuplicatedReservation() {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
         Theme theme = themeRepository.save(HORROR_THEME);
         Member jojo = memberRepository.save(MEMBER_JOJO);
@@ -101,7 +101,7 @@ class WaitingReservationServiceTest {
         reservationRepository.save(new Reservation(kaki, TOMORROW, theme, reservationTime, SUCCESS));
         Reservation waiting = reservationRepository.save(new Reservation(jojo, TOMORROW, theme, reservationTime, WAIT));
 
-        assertThatThrownBy(() -> waitingReservationService.updateSuccessStatus(waiting.getId()))
+        assertThatThrownBy(() -> waitingReservationService.approveReservation(waiting.getId()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
