@@ -20,13 +20,6 @@ public record ReservationCreateRequest(@NotNull(message = "예약자 정보가 �
                                        @NotNull(message = "날짜가 선택되지 않습니다.")
                                        LocalDate date
 ) {
-    public Reservation toReservation(Member member, ReservationDetail detail) {
-        return new ReservationBuilder()
-                .member(member)
-                .reservationDetail(detail)
-                .build();
-    }
-
     public ReservationDetail toReservationDetail(Theme theme, Time time) {
         return new ReservationDetail(theme, time, date);
     }
