@@ -2,6 +2,7 @@ package roomescape.domain.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.member.service.MemberService.NON_EXIST_MEMBER_ERROR_MESSAGE;
 import static roomescape.fixture.MemberFixture.ADMIN_EMAIL;
 import static roomescape.fixture.MemberFixture.ADMIN_MEMBER;
 import static roomescape.fixture.MemberFixture.ADMIN_PASSWORD;
@@ -46,7 +47,8 @@ class MemberServiceTest {
     @Test
     void should_throw_exception_when_find_by_non_exist_id() {
         assertThatThrownBy(() -> memberService.getMemberById(2L))
-                .isInstanceOf(NoMatchingDataException.class);
+                .isInstanceOf(NoMatchingDataException.class)
+                .hasMessage(NON_EXIST_MEMBER_ERROR_MESSAGE);
     }
 
     @DisplayName("email과 password로 member를 찾을 수 있습니다.")

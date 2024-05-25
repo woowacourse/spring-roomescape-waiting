@@ -10,6 +10,8 @@ import roomescape.global.exception.NoMatchingDataException;
 @Service
 public class MemberService {
 
+    protected static final String NON_EXIST_MEMBER_ERROR_MESSAGE = "없는 member를 조회 했습니다.";
+
     private final MemberRepository memberRepository;
 
     public MemberService(MemberRepository memberRepository) {
@@ -22,7 +24,7 @@ public class MemberService {
 
     public Member getMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new NoMatchingDataException("없는 member를 조회 했습니다."));
+                .orElseThrow(() -> new NoMatchingDataException(NON_EXIST_MEMBER_ERROR_MESSAGE));
     }
 
     public Member getMemberByEmailAndPassword(String email, String password) {

@@ -8,6 +8,8 @@ import roomescape.global.exception.ValueNullOrEmptyException;
 @Embeddable
 public class Email {
 
+    protected static final String EMAIL_EMPTY_ERROR_MESSAGE = "email은 비어있을 수 없습니다.";
+
     @Column(name = "email", nullable = false)
     private String value;
 
@@ -22,7 +24,7 @@ public class Email {
 
     private void validateNullAndBlank(String value) {
         if (value == null || value.isBlank()) {
-            throw new ValueNullOrEmptyException("email은 비어있을 수 없습니다.");
+            throw new ValueNullOrEmptyException(EMAIL_EMPTY_ERROR_MESSAGE);
         }
     }
 
