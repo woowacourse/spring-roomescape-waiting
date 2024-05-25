@@ -74,40 +74,67 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하면 true를 반환한다.")
-    void existsByDateAndTimeAndTheme() {
+    @DisplayName("날짜, 시간, 테마로 예약을 조회한다.")
+    void findByDateAndTimeAndTheme() {
         LocalDate date = LocalDate.parse("2024-04-09");
         save(ReservationFixture.create(date, member, time, theme));
 
-        assertThat(reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)).isTrue();
+        Reservation reservation = reservationRepository.findByDateAndTimeAndTheme(date, time, theme).orElseThrow();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservation.getDate()).isEqualTo("2024-04-09");
+            softly.assertThat(reservation.getMember()).isEqualTo(member);
+            softly.assertThat(reservation.getTime()).isEqualTo(time);
+            softly.assertThat(reservation.getTheme()).isEqualTo(theme);
+        });
     }
 
     @Test
-    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하지 않으면 false를 반환한다. [다른 날짜]")
-    void existsByOtherDate() {
+    @DisplayName("날짜와 시간, 테마가 다르면 조회된 예약이 없다. [다른 날짜]")
+    void findByOtherDate() {
         save(ReservationFixture.create("2024-04-09", member, time, theme));
 
         LocalDate otherDate = LocalDate.parse("2024-04-10");
-        assertThat(reservationRepository.existsByDateAndTimeAndTheme(otherDate, time, theme)).isFalse();
+        assertThat(reservationRepository.findByDateAndTimeAndTheme(otherDate, time, theme)).isEmpty();
     }
 
     @Test
-    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하지 않으면 false를 반환한다. [다른 시간]")
-    void existsByOtherTime() {
+    @DisplayName("날짜와 시간, 테마가 다르면 조회된 예약이 없다. [다른 시간]")
+    void findByOtherTime() {
         LocalDate date = LocalDate.parse("2024-04-09");
         save(ReservationFixture.create(date, member, time, theme));
 
         ReservationTime otherTime = save(ReservationTimeFixture.create("11:00"));
-        assertThat(reservationRepository.existsByDateAndTimeAndTheme(date, otherTime, theme)).isFalse();
+        assertThat(reservationRepository.findByDateAndTimeAndTheme(date, otherTime, theme)).isEmpty();
     }
 
     @Test
-    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하지 않으면 false를 반환한다. [다른 테마]")
-    void existsByOtherTheme() {
+    @DisplayName("날짜와 시간, 테마가 다르면 조회된 예약이 없다. [다른 테마]")
+    void findByOtherTheme() {
         LocalDate date = LocalDate.parse("2024-04-09");
         save(ReservationFixture.create(date, member, time, theme));
 
         Theme otherTheme = save(ThemeFixture.create("다른 테마"));
-        assertThat(reservationRepository.existsByDateAndTimeAndTheme(date, time, otherTheme)).isFalse();
+        assertThat(reservationRepository.findByDateAndTimeAndTheme(date, time, otherTheme)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("멤버의 모든 예약을 조회한다.")
+    void findAllByMember() {
+        save(ReservationFixture.create("2024-04-09", member, time, theme));
+        save(ReservationFixture.create("2024-04-10", member, time, theme));
+        save(ReservationFixture.create("2024-04-11", member, time, theme));
+
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservations).hasSize(3);
+            softly.assertThat(reservations.get(0).getMember()).isEqualTo(member);
+            softly.assertThat(reservations.get(0).getDate()).isEqualTo("2024-04-09");
+            softly.assertThat(reservations.get(1).getMember()).isEqualTo(member);
+            softly.assertThat(reservations.get(1).getDate()).isEqualTo("2024-04-10");
+            softly.assertThat(reservations.get(2).getMember()).isEqualTo(member);
+            softly.assertThat(reservations.get(2).getDate()).isEqualTo("2024-04-11");
+        });
     }
 }

@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,8 +9,12 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.dto.CreateReservationRequest;
 
@@ -16,47 +22,78 @@ import roomescape.service.dto.CreateReservationRequest;
 @Transactional(readOnly = true)
 public class ReservationWaitingService {
 
+    private static final int MAX_RESERVATION_WAITING_COUNT = 10;
+
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final Clock clock;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
-                                     ReservationRepository reservationRepository, MemberRepository memberRepository) {
+                                     ReservationRepository reservationRepository,
+                                     ReservationTimeRepository reservationTimeRepository,
+                                     ThemeRepository themeRepository,
+                                     MemberRepository memberRepository,
+                                     Clock clock) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.clock = clock;
     }
 
     @Transactional
     public ReservationResponse addReservationWaiting(CreateReservationRequest request) {
-        Member member = getMember(request.memberId());
-        //- 확정된 예약이 존재 → date, theme, time으로 예약 조회
-        Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
-                        request.themeId())
-                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+        Reservation reservation = getReservation(request);
+        reservation.validateFutureReservation(LocalDateTime.now(clock));
+        Member waitingMember = getMember(request.memberId());
+        reservation.validateOwnerNotSameAsWaitingMember(waitingMember);
         List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findAllByReservation(reservation);
-        //- 예약 대기 제한 개수 (대기 개수가 10개 등)
-        if (reservationWaitings.size() >= 10) {
-            throw new IllegalArgumentException("최대 예약 대기 10개");
-        }
+        validateWaitingCount(reservationWaitings);
+        validateAlreadyWaitingMember(reservationWaitings, waitingMember);
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
+                request.toReservationWaiting(reservation, waitingMember));
+        return ReservationResponse.from(reservationWaiting);
+    }
 
-        //- 한 멤버는 한 예약에 대한 하나의 예약 대기만 가능
+    private Reservation getReservation(CreateReservationRequest request) {
+        ReservationTime time = getTime(request.timeId());
+        Theme theme = getTheme(request.themeId());
+        return reservationRepository.findByDateAndTimeAndTheme(request.date(), time, theme)
+                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+    }
+
+    private ReservationTime getTime(long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
+    }
+
+    private Theme getTheme(long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+    }
+
+    private Member getMember(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    }
+
+    private void validateWaitingCount(List<ReservationWaiting> reservationWaitings) {
+        if (reservationWaitings.size() >= MAX_RESERVATION_WAITING_COUNT) {
+            throw new IllegalArgumentException("예약 대기열이 가득 찼습니다.");
+        }
+    }
+
+    private void validateAlreadyWaitingMember(List<ReservationWaiting> reservationWaitings, Member member) {
         reservationWaitings.stream()
                 .filter(reservationWaiting -> reservationWaiting.isSameMember(member))
                 .findAny()
                 .ifPresent(reservationWaiting -> {
-                    throw new IllegalArgumentException("이미 예약 대기 중입니다.");
+                    throw new IllegalArgumentException("현재 멤버는 이미 예약 대기 중입니다.");
                 });
-
-        ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
-                request.toReservationWaiting(reservation, member));
-
-        return ReservationResponse.from(reservationWaiting);
-    }
-
-    private Member getMember(long request) {
-        return memberRepository.findById(request)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
 
     @Transactional

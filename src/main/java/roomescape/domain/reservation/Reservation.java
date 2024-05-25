@@ -17,6 +17,8 @@ import roomescape.domain.theme.Theme;
 @Entity
 public class Reservation {
 
+    private static final int DAYS_IN_ADVANCE = 1;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -71,10 +73,17 @@ public class Reservation {
         }
     }
 
-    public boolean isBefore(LocalDateTime dateTime) {
+    public void validateFutureReservation(LocalDateTime now) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        if (reservationDateTime.isBefore(now.plusDays(DAYS_IN_ADVANCE))) {
+            throw new IllegalArgumentException(String.format("예약은 최소 %d일 전에 해야합니다.", DAYS_IN_ADVANCE));
+        }
+    }
 
-        return reservationDateTime.isBefore(dateTime);
+    public void validateOwnerNotSameAsWaitingMember(Member waitingMember) {
+        if (this.member.equals(waitingMember)) {
+            throw new IllegalArgumentException("예약자와 대기자가 동일합니다.");
+        }
     }
 
     @Override

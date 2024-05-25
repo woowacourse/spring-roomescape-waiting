@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,8 +66,8 @@ public class ReservationService {
     @Transactional
     public ReservationResponse addReservation(LocalDate date, long timeId, long themeId, long memberId) {
         Reservation reservation = createReservation(date, timeId, themeId, memberId);
+        reservation.validateFutureReservation(LocalDateTime.now(clock));
         validateDuplicatedReservation(reservation);
-        validateDateTimeNotPassed(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -93,19 +94,12 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
     }
 
-    private void validateDateTimeNotPassed(Reservation reservation) {
-        if (reservation.isBefore(LocalDateTime.now(clock))) {
-            throw new IllegalArgumentException("지나간 날짜/시간에 대한 예약은 불가능합니다.");
-        }
-    }
-
     private void validateDuplicatedReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme())) {
+        Optional<Reservation> optionalReservation = reservationRepository.findByDateAndTimeAndTheme(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        optionalReservation.ifPresent(r -> {
             throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
-        }
+        });
     }
 
     @Transactional
