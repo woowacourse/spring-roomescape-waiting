@@ -43,10 +43,4 @@ public class MemberService {
                 .map(MemberResponse::from)
                 .toList();
     }
-
-    public MemberResponse getById(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-        return MemberResponse.from(member);
-    }
 }
