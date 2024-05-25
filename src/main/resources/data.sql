@@ -17,9 +17,16 @@ VALUES ('안돌', 'andole@test.com', '123', 'MEMBER'),
 
 INSERT INTO reservation(member_id, date, time_id, theme_id)
 VALUES (1, TIMESTAMPADD(DAY, -1, NOW()), '1', '1'),
-       (2, TIMESTAMPADD(DAY, -1, NOW()), '1', '1'),
-       (3, TIMESTAMPADD(DAY, -1, NOW()), '1', '1'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '1', '2'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '1', '3'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '2', '1'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '2', '2'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '2', '3'),
        (1, TIMESTAMPADD(DAY, -1, NOW()), '3', '1'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '3', '2'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '3', '3'),
+       (2, TIMESTAMPADD(DAY, -1, NOW()), '3', '2'),
+       (3, TIMESTAMPADD(DAY, -1, NOW()), '3', '3'),
        (3, TIMESTAMPADD(DAY, -2, NOW()), '1', '2'),
        (2, TIMESTAMPADD(DAY, -1, NOW()), '2', '1'),
        (2, TIMESTAMPADD(DAY, -2, NOW()), '2', '2');

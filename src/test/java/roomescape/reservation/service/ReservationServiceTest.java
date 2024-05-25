@@ -66,7 +66,7 @@ class ReservationServiceTest {
                 any(LocalDate.class)))
                 .thenReturn(0);
 
-        assertThat(reservationService.findMemberReservationWithWaitingStatus(1L))
+        assertThat(reservationService.findMemberReservationWithTwoSimpleQuery(1L))
                 .containsExactly(new MemberReservationResponse(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 0)));
     }
 

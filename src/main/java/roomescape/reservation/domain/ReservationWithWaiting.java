@@ -13,6 +13,10 @@ public class ReservationWithWaiting {
         this.waitingNumber = waitingNumber;
     }
 
+    public ReservationWithWaiting(Reservation reservation, Long waitingNumber) {
+        this(reservation, waitingNumber.intValue());
+    }
+
     public Reservation getReservation() {
         return reservation;
     }
