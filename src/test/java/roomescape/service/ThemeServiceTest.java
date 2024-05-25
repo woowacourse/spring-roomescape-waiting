@@ -4,16 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservationwaiting.ReservationWaiting;
-import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.theme.ReservationReferencedThemeException;
 import roomescape.service.theme.ThemeService;
@@ -25,20 +23,13 @@ class ThemeServiceTest extends ServiceTest {
     @Autowired
     private ThemeService themeService;
 
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private ReservationWaitingRepository reservationWaitingRepository;
-
     @Nested
     @DisplayName("테마 목록 조회")
     class FindAllTheme {
         @Test
         void 테마_목록을_조회할_수_있다() {
+            themeFixture.createFirstTheme();
+
             ThemeListResponse response = themeService.findAllTheme();
 
             assertThat(response.getThemes().size())
@@ -51,6 +42,11 @@ class ThemeServiceTest extends ServiceTest {
     class FindAllPopularTheme {
         @Test
         void 최근_일주일동안_예약_건수_많은_순서대로_10개_테마를_인기_테마로_조회할_수_있다() {
+            ReservationTime time = timeFixture.createPastTime();
+            Theme theme = themeFixture.createFirstTheme();
+            Member member = memberFixture.createUserMember();
+            reservationFixture.createPastReservation(time, theme, member);
+
             ThemeListResponse response = themeService.findAllPopularTheme();
 
             assertThat(response.getThemes().get(0).getId())
@@ -68,25 +64,25 @@ class ThemeServiceTest extends ServiceTest {
             ThemeResponse response = themeService.saveTheme(request);
 
             assertThat(response.getId())
-                    .isEqualTo(2L);
+                    .isEqualTo(1L);
         }
     }
 
     @Nested
     @DisplayName("테마 삭제")
     class DeleteTheme {
+        Theme theme;
+
+        @BeforeEach
+        void setUp() {
+            theme = themeFixture.createFirstTheme();
+        }
+
         @Test
         void 테마를_삭제할_수_있다() {
-            ReservationWaiting waiting = reservationWaitingRepository.findById(1L).orElseThrow();
-            Reservation pastReservation = reservationRepository.findById(1L).orElseThrow();
-            Reservation futureReservation = reservationRepository.findById(2L).orElseThrow();
-            reservationWaitingRepository.delete(waiting);
-            reservationRepository.delete(pastReservation);
-            reservationRepository.delete(futureReservation);
+            themeService.deleteTheme(theme.getId());
 
-            themeService.deleteTheme(1L);
-
-            List<Theme> themes = themeRepository.findAll();
+            List<Theme> themes = themeFixture.findAllTheme();
             assertThat(themes.size())
                     .isEqualTo(0);
         }
@@ -99,7 +95,11 @@ class ThemeServiceTest extends ServiceTest {
 
         @Test
         void 예약이_존재하는_테마_삭제_시_예외가_발생한() {
-            assertThatThrownBy(() -> themeService.deleteTheme(1L))
+            ReservationTime time = timeFixture.createPastTime();
+            Member member = memberFixture.createUserMember();
+            reservationFixture.createFutureReservation(time, theme, member);
+
+            assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
                     .isInstanceOf(ReservationReferencedThemeException.class);
         }
     }

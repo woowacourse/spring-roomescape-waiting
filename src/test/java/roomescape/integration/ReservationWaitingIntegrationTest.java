@@ -8,45 +8,56 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.theme.Theme;
 
 public class ReservationWaitingIntegrationTest extends IntegrationTest {
     @Nested
     @DisplayName("예약 대기 추가 API")
     class SaveReservationWaiting {
-        private Map<String, String> params;
+        ReservationTime time;
+        Theme theme;
+        Member user;
+        Member admin;
+        Reservation reservation;
+        Map<String, String> params;
 
         @BeforeEach
         void setUp() {
+            time = timeFixture.createFutureTime();
+            theme = themeFixture.createFirstTheme();
+            admin = memberFixture.createAdminMember();
+            reservation = reservationFixture.createFutureReservation(time, theme, admin);
+            user = memberFixture.createUserMember();
             params = new HashMap<>();
-            params.put("themeId", "1");
-            params.put("timeId", "1");
+            params.put("themeId", theme.getId().toString());
+            params.put("timeId", time.getId().toString());
         }
 
         @Test
         void 예약_대기를_추가할_수_있다() {
-            RestAssured.given().log().all()
-                    .cookies(cookieProvider.createAdminCookies())
-                    .when().delete("/waitings/1")
-                    .then().log().all()
-                    .statusCode(204);
+            params.put("date", reservation.getDate().toString());
 
-            params.put("date", "2000-04-08");
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createAdminCookies())
+                    .cookies(cookieProvider.createUserCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/waitings")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/waitings/2");
+                    .header("Location", "/waitings/1");
         }
 
         @Test
         void 같은_사용자가_같은_예약에_대해선_예약_대기를_두_번_이상_추가할_수_없다() {
-            params.put("date", "2000-04-08");
+            waitingFixture.createWaiting(reservation, user);
+            params.put("date", reservation.getDate().toString());
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createAdminCookies())
+                    .cookies(cookieProvider.createUserCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/waitings")
@@ -55,11 +66,24 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         }
 
         @Test
+        void 본인이_예약한_건에_대해선_예약_대기를_추가할_수_없다() {
+            params.put("date", reservation.getDate().toString());
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waitings")
+                    .then().log().all()
+                    .statusCode(400);
+        }
+
+        @Test
         void 존재하지_않는_예약에_대해선_예약_대기를_추가할_수_없다() {
             params.put("date", "2000-04-09");
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createUserCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/waitings")
@@ -69,10 +93,11 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 지난_예약에_대해선_예약_대기를_추가할_수_없다() {
-            params.put("date", "2000-04-01");
+            Reservation pastReservation = reservationFixture.createPastReservation(time, theme, user);
+            params.put("date", pastReservation.getDate().toString());
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createUserCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/waitings")
@@ -84,11 +109,22 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
     @Nested
     @DisplayName("예약 대기 삭제 API")
     class DeleteReservationWaiting {
+        ReservationWaiting waiting;
+
+        @BeforeEach
+        void setUp() {
+            ReservationTime time = timeFixture.createFutureTime();
+            Theme theme = themeFixture.createFirstTheme();
+            Member member = memberFixture.createUserMember();
+            Reservation reservation = reservationFixture.createFutureReservation(time, theme, member);
+            waiting = waitingFixture.createWaiting(reservation, member);
+        }
+
         @Test
         void 예약_대기를_삭제할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createAdminCookies())
-                    .when().delete("/waitings/1")
+                    .cookies(cookieProvider.createUserCookies())
+                    .when().delete("/waitings/" + waiting.getId())
                     .then().log().all()
                     .statusCode(204);
         }
@@ -96,10 +132,21 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         @Test
         void 존재하지_않는_예약_대기는_삭제할_수_없다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createAdminCookies())
+                    .cookies(cookieProvider.createUserCookies())
                     .when().delete("/waitings/10")
                     .then().log().all()
                     .statusCode(404);
+        }
+
+        @Test
+        void 다른_사용자의_예약_대기_삭제_시_예외가_발생한다() {
+            memberFixture.createAdminMember();
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/waitings/" + waiting.getId())
+                    .then().log().all()
+                    .statusCode(403);
         }
     }
 }

@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.MemberRole;
 import roomescape.exception.login.UnauthorizedEmailException;
 import roomescape.exception.login.UnauthorizedPasswordException;
@@ -30,9 +28,6 @@ class LoginServiceTest extends ServiceTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    private MemberRepository memberRepository;
-
     @Nested
     @DisplayName("로그인")
     class Login {
@@ -41,8 +36,9 @@ class LoginServiceTest extends ServiceTest {
 
         @BeforeEach
         void setUp() {
-            email = "user@gmail.com";
-            password = "1234567890";
+            Member member = memberFixture.createUserMember();
+            email = member.getEmail().getAddress();
+            password = member.getPassword().getPassword();
         }
 
         @Test
@@ -77,7 +73,7 @@ class LoginServiceTest extends ServiceTest {
     class LoginCheck {
         @Test
         void 로그인한_사용자_정보를_조회할_수_있다() {
-            Member member = memberRepository.findById(1L).orElseThrow();
+            Member member = memberFixture.createUserMember();
 
             LoginCheckResponse response = loginService.loginCheck(member);
 
@@ -88,21 +84,17 @@ class LoginServiceTest extends ServiceTest {
     @Nested
     @DisplayName("토큰으로 사용자 정보 조회")
     class FindByToken {
-        private MemberEmail email;
-        private MemberRole role;
-        private String token;
+        Member member;
+        String token;
 
         @BeforeEach
         void setUp() {
-            email = new MemberEmail("user@gmail.com");
-            role = MemberRole.USER;
-            token = jwtTokenProvider.createToken(email, role);
+            member = memberFixture.createUserMember();
+            token = jwtTokenProvider.createToken(member.getEmail(), member.getRole());
         }
 
         @Test
         void 토큰으로_사용자_정보를_조회할_수_있다() {
-            Member member = memberRepository.findById(1L).orElseThrow();
-
             assertThat(loginService.findMemberByToken(token))
                     .isEqualTo(member);
         }
@@ -110,7 +102,7 @@ class LoginServiceTest extends ServiceTest {
         @Test
         void 토큰으로_사용자_역할을_조회할_수_있다() {
             assertThat(loginService.findMemberRoleByToken(token))
-                    .isEqualTo(role);
+                    .isEqualTo(member.getRole());
         }
     }
 
@@ -123,9 +115,9 @@ class LoginServiceTest extends ServiceTest {
 
         @BeforeEach
         void setUp() {
-            email = "user2@gmail.com";
+            email = "user@gmail.com";
             password = "1234567890";
-            name = "사용자2";
+            name = "사용자";
         }
 
         @Test
@@ -140,7 +132,8 @@ class LoginServiceTest extends ServiceTest {
 
         @Test
         void 이미_존재하는_이메일로_회원가입시_예외가_발생한다() {
-            String duplicatedEmail = "user@gmail.com";
+            Member member = memberFixture.createUserMember();
+            String duplicatedEmail = member.getEmail().getAddress();
             SignupRequest request = new SignupRequest(duplicatedEmail, password, name);
 
             assertThatThrownBy(() -> loginService.signup(request))
