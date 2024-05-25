@@ -1,7 +1,5 @@
 package roomescape.application.reservation;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,8 +12,6 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.role.RoleRepository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;

@@ -32,7 +32,7 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
         return findById(id).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약입니다."));
     }
 
-    default Reservation getByDateAndTimeIdAndThemeId (LocalDate date, long timeId, long themeId) {
+    default Reservation getByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         Reservation reservation = findByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (reservation == null) {
             throw new NoSuchElementException("존재하지 않는 예약입니다.");
