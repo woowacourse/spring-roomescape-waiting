@@ -91,7 +91,7 @@ public class Reservation {
     }
 
     public void validateAuthorization(Member member) {
-        if (!this.member.equals(member)) {
+        if (!this.member.equals(member) && !member.getRole().equals(Role.ADMIN)) {
             throw new AuthorizationException("접근권한이 없습니다.");
         }
     }

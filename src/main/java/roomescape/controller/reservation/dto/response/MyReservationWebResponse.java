@@ -42,8 +42,12 @@ public record MyReservationWebResponse(
             return String.format("%d번째 대기", rank);
         }
 
+        if (status == Status.WAITING_CANCEL) {
+            return "대기 취소";
+        }
+
         if (status == Status.DELETED) {
-            return "삭제된 예약입니다.";
+            return "예약 취소";
         }
 
         throw new NotFoundException("존재하지 않는 상태입니다.");

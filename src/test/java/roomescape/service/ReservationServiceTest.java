@@ -152,7 +152,7 @@ class ReservationServiceTest {
                 ROOM_THEME1, VALID_STRING_DATE);
         ReservationResponse response = reservationService.save(request);
         // when
-        reservationService.deleteById(response.id());
+        reservationService.deleteReservation(response.id());
         // then
         assertThat(reservationService.findAll()).isEmpty();
     }

@@ -64,6 +64,14 @@ public class ReservationService {
     }
 
     @Transactional
+    public List<ReservationWaitingResponse> findReservationsWaiting() {
+        return reservationRepository.findByStatusIn(List.of(Status.WAITING))
+                .stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
+    }
+
+    @Transactional
     public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
         Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
@@ -73,14 +81,6 @@ public class ReservationService {
 
         return reservationRepository.findAll(spec).stream()
                 .map(ReservationResponse::from)
-                .toList();
-    }
-
-    @Transactional
-    public List<ReservationWaitingResponse> findReservationsWaiting() {
-         return reservationRepository.findByStatusIn(List.of(Status.WAITING))
-                .stream()
-                .map(ReservationWaitingResponse::from)
                 .toList();
     }
 
@@ -119,7 +119,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteReservation(Long id) {
         Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.CREATED)
                 .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
         Reservation reservationWaiting = reservationRepository
