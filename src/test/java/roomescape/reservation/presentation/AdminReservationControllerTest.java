@@ -16,6 +16,7 @@ import roomescape.member.application.MemberService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
+import roomescape.reservation.application.WaitingService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -46,6 +47,9 @@ class AdminReservationControllerTest extends ControllerTest {
 
     @MockBean
     private ThemeService themeService;
+
+    @MockBean
+    private WaitingService waitingService;
 
     @Test
     @DisplayName("예약 POST 요청 시 상태코드 201을 반환한다.")

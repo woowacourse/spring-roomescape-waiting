@@ -22,6 +22,7 @@ import roomescape.member.application.MemberService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
+import roomescape.reservation.application.WaitingService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
@@ -59,6 +60,9 @@ class ReservationControllerTest extends ControllerTest {
 
     @MockBean
     private MemberService memberService;
+
+    @MockBean
+    private WaitingService waitingService;
 
     @Test
     @DisplayName("예약 목록 GET 요청 시 상태코드 200을 반환한다.")
@@ -268,6 +272,6 @@ class ReservationControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$[0].theme").value(WOOTECO_THEME_NAME))
                 .andExpect(jsonPath("$[0].date").value(MIA_RESERVATION_DATE.toString()))
                 .andExpect(jsonPath("$[0].time").value(MIA_RESERVATION_TIME.toString()))
-                .andExpect(jsonPath("$[0].status").value(ReservationStatus.BOOKING.name()));
+                .andExpect(jsonPath("$[0].status").value(ReservationStatus.BOOKING.getStatus()));
     }
 }

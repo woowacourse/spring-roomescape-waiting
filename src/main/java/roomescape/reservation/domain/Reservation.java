@@ -33,6 +33,10 @@ public class Reservation {
     protected Reservation() {
     }
 
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme, ReservationStatus.BOOKING);
+    }
+
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
         this(null, member, date, time, theme, status);
     }
