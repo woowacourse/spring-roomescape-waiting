@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.FindMemberResponse;
 import roomescape.domain.member.Member;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
@@ -17,8 +18,11 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<Member> findAll() {
-        return memberRepository.findAll();
+    public List<FindMemberResponse> findAll() {
+        List<Member> members = memberRepository.findAll();
+        return members.stream()
+            .map(FindMemberResponse::from)
+            .toList();
     }
 
     @Transactional(readOnly = true)

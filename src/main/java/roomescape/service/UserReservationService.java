@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.CreateReservationResponse;
+import roomescape.controller.dto.FindMyReservationResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
@@ -19,7 +21,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationWithRank;
-import roomescape.service.dto.FindReservationWithRankDto;
 
 @Service
 public class UserReservationService {
@@ -41,18 +42,19 @@ public class UserReservationService {
     }
 
     @Transactional
-    public Reservation reserve(Long memberId, LocalDate date, Long timeId, Long themeId) {
+    public CreateReservationResponse reserve(Long memberId, LocalDate date, Long timeId, Long themeId) {
         validateDuplication(date, timeId, themeId);
         return save(memberId, date, timeId, themeId, RESERVED);
     }
 
     @Transactional
-    public Reservation standby(Long memberId, LocalDate date, Long timeId, Long themeId) {
+    public CreateReservationResponse standby(Long memberId, LocalDate date, Long timeId, Long themeId) {
         validateAlreadyBookedByMember(memberId, date, timeId, themeId);
         return save(memberId, date, timeId, themeId, STANDBY);
     }
 
-    private Reservation save(Long memberId, LocalDate date, Long timeId, Long themeId, ReservationStatus status) {
+    private CreateReservationResponse save(Long memberId, LocalDate date, Long timeId, Long themeId,
+        ReservationStatus status) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RoomescapeException("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다."));
         ReservationTime time = reservationTimeRepository.findById(timeId)
@@ -63,7 +65,8 @@ public class UserReservationService {
 
         Reservation reservation = new Reservation(member, date, createdAt, time, theme, status);
         validatePastReservation(date, time);
-        return reservationRepository.save(reservation);
+
+        return CreateReservationResponse.from(reservationRepository.save(reservation));
     }
 
     private void validateDuplication(LocalDate date, Long timeId, Long themeId) {
@@ -115,12 +118,12 @@ public class UserReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindReservationWithRankDto> findMyReservationsWithRank(Long memberId) {
+    public List<FindMyReservationResponse> findMyReservationsWithRank(Long memberId) {
         List<ReservationWithRank> reservations =
             reservationRepository.findReservationsWithRankByMemberId(memberId);
 
         return reservations.stream()
-            .map(data -> new FindReservationWithRankDto(data.reservation(), data.rank()))
+            .map(data -> FindMyReservationResponse.from(data.reservation(), data.rank()))
             .toList();
     }
 }

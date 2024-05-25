@@ -12,7 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.theme.Theme;
+import roomescape.controller.dto.CreateThemeResponse;
+import roomescape.controller.dto.FindThemeResponse;
 import roomescape.global.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -32,8 +33,8 @@ class ThemeServiceTest {
     @DisplayName("성공: 테마 추가")
     @Test
     void save() {
-        Theme save = themeService.save(name, description, thumbnail);
-        assertThat(save.getId()).isEqualTo(1L);
+        CreateThemeResponse saved = themeService.save(name, description, thumbnail);
+        assertThat(saved.id()).isEqualTo(1L);
     }
 
     @DisplayName("성공: 테마 삭제")
@@ -47,7 +48,9 @@ class ThemeServiceTest {
             """);
 
         themeService.delete(2L);
-        assertThat(themeService.findAll()).extracting(Theme::getId).containsExactly(1L, 3L);
+        assertThat(themeService.findAll())
+            .extracting(FindThemeResponse::id)
+            .containsExactly(1L, 3L);
     }
 
     @DisplayName("성공: 전체 테마 조회")
@@ -60,7 +63,7 @@ class ThemeServiceTest {
                    ('테마3', 'd3', 'https://test.com/test3.jpg');
             """);
 
-        List<Theme> themes = themeService.findAll();
+        List<FindThemeResponse> themes = themeService.findAll();
         assertThat(themes).hasSize(3);
     }
 

@@ -16,10 +16,8 @@ import roomescape.controller.dto.CreateUserReservationRequest;
 import roomescape.controller.dto.CreateUserReservationStandbyRequest;
 import roomescape.controller.dto.FindMyReservationResponse;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
 import roomescape.global.argumentresolver.AuthenticationPrincipal;
 import roomescape.service.UserReservationService;
-import roomescape.service.dto.FindReservationWithRankDto;
 
 @RestController
 @RequestMapping("/reservations")
@@ -36,15 +34,15 @@ public class UserReservationController {
         @Valid @RequestBody CreateUserReservationRequest request,
         @AuthenticationPrincipal Member member) {
 
-        Reservation reservation = userReservationService.reserve(
+        CreateReservationResponse response = userReservationService.reserve(
             member.getId(),
             request.date(),
             request.timeId(),
             request.themeId()
         );
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
-            .body(CreateReservationResponse.from(reservation));
+        return ResponseEntity.created(URI.create("/reservations/" + response.id()))
+            .body(response);
     }
 
     @PostMapping("/standby")
@@ -52,15 +50,15 @@ public class UserReservationController {
         @Valid @RequestBody CreateUserReservationStandbyRequest request,
         @AuthenticationPrincipal Member member) {
 
-        Reservation reservation = userReservationService.standby(
+        CreateReservationResponse response = userReservationService.standby(
             member.getId(),
             request.date(),
             request.timeId(),
             request.themeId()
         );
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
-            .body(CreateReservationResponse.from(reservation));
+        return ResponseEntity.created(URI.create("/reservations/" + response.id()))
+            .body(response);
     }
 
     @DeleteMapping("/standby/{id}")
@@ -71,10 +69,7 @@ public class UserReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<FindMyReservationResponse>> findMyReservations(@AuthenticationPrincipal Member member) {
-        List<FindReservationWithRankDto> reservations = userReservationService.findMyReservationsWithRank(member.getId());
-        List<FindMyReservationResponse> response = reservations.stream()
-            .map(data -> FindMyReservationResponse.from(data.reservation(), data.rank()))
-            .toList();
+        List<FindMyReservationResponse> response = userReservationService.findMyReservationsWithRank(member.getId());
         return ResponseEntity.ok(response);
     }
 }

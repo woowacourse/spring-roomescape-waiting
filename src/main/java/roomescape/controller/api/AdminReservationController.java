@@ -17,7 +17,6 @@ import roomescape.controller.dto.FindReservationResponse;
 import roomescape.controller.dto.FindReservationStandbyResponse;
 import roomescape.controller.dto.SearchReservationFilterRequest;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
 import roomescape.global.argumentresolver.AuthenticationPrincipal;
 import roomescape.service.AdminReservationService;
 
@@ -33,15 +32,15 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<CreateReservationResponse> save(@Valid @RequestBody CreateReservationRequest request) {
-        Reservation reservation = adminReservationService.reserve(
+        CreateReservationResponse response = adminReservationService.reserve(
             request.memberId(),
             request.date(),
             request.timeId(),
             request.themeId()
         );
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
-            .body(CreateReservationResponse.from(reservation));
+        return ResponseEntity.created(URI.create("/reservations/" + response.id()))
+            .body(response);
     }
 
     @DeleteMapping("/{id}")
@@ -52,20 +51,13 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<List<FindReservationResponse>> findAll() {
-        List<Reservation> reservations = adminReservationService.findAllReserved();
-        List<FindReservationResponse> createReservationResponse = reservations.stream()
-            .map(FindReservationResponse::from)
-            .toList();
-
-        return ResponseEntity.ok(createReservationResponse);
+        List<FindReservationResponse> response = adminReservationService.findAllReserved();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/standby")
     public ResponseEntity<List<FindReservationStandbyResponse>> findAllStandby() {
-        List<Reservation> reservations = adminReservationService.findAllStandby();
-        List<FindReservationStandbyResponse> response = reservations.stream()
-            .map(FindReservationStandbyResponse::from)
-            .toList();
+        List<FindReservationStandbyResponse> response = adminReservationService.findAllStandby();
         return ResponseEntity.ok(response);
     }
 
@@ -77,12 +69,8 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public ResponseEntity<List<FindReservationResponse>> find(SearchReservationFilterRequest request) {
-        List<Reservation> reservations = adminReservationService.findAllByFilter(
+        List<FindReservationResponse> response = adminReservationService.findAllByFilter(
             request.themeId(), request.memberId(), request.dateFrom(), request.dateTo());
-        List<FindReservationResponse> response = reservations.stream()
-            .map(FindReservationResponse::from)
-            .toList();
-
         return ResponseEntity.ok(response);
     }
 }

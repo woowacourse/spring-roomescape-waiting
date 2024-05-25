@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.reservation.ReservationTime;
+import roomescape.controller.dto.CreateTimeResponse;
 import roomescape.global.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -30,8 +30,8 @@ class ReservationTimeServiceTest {
     @DisplayName("성공: 예약 시간을 저장하고, id 값과 함께 반환한다.")
     @Test
     void save() {
-        ReservationTime saved = reservationTimeService.save(rawTime);
-        assertThat(saved.getId()).isEqualTo(1L);
+        CreateTimeResponse saved = reservationTimeService.save(rawTime);
+        assertThat(saved.id()).isEqualTo(1L);
     }
 
     @DisplayName("실패: 이미 존재하는 시간을 추가할 수 없다.")

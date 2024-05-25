@@ -20,21 +20,13 @@ public class UserThemeController {
 
     @GetMapping
     public ResponseEntity<List<FindThemeResponse>> findAll() {
-        List<FindThemeResponse> response = themeService.findAll()
-            .stream()
-            .map(FindThemeResponse::from)
-            .toList();
-
+        List<FindThemeResponse> response = themeService.findAll();
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/trending")
     public ResponseEntity<List<FindThemeResponse>> findPopular() {
-        List<FindThemeResponse> response = themeService.findPopular()
-            .stream()
-            .map(FindThemeResponse::from)
-            .toList();
-
+        List<FindThemeResponse> response = themeService.findPopular();
         return ResponseEntity.ok().body(response);
     }
 }

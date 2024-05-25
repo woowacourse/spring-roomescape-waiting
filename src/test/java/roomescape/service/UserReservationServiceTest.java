@@ -16,13 +16,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.controller.dto.CreateReservationResponse;
+import roomescape.controller.dto.FindMyReservationResponse;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.service.dto.FindReservationWithRankDto;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
@@ -65,8 +65,8 @@ class UserReservationServiceTest {
     @DisplayName("성공: 예약을 저장하고, 해당 예약을 id값과 함께 반환한다.")
     @Test
     void save() {
-        Reservation saved = userReservationService.reserve(userId, rawDate, timeId, themeId);
-        assertThat(saved.getId()).isEqualTo(1L);
+        CreateReservationResponse saved = userReservationService.reserve(userId, rawDate, timeId, themeId);
+        assertThat(saved.id()).isEqualTo(1L);
     }
 
     @DisplayName("실패: 존재하지 않는 멤버 ID 입력 시 예외가 발생한다.")
@@ -126,8 +126,8 @@ class UserReservationServiceTest {
     @DisplayName("성공: 예약 대기")
     @Test
     void standby() {
-        Reservation reservation = userReservationService.standby(userId, rawDate, timeId, themeId);
-        assertThat(reservation.getId()).isEqualTo(1L);
+        CreateReservationResponse saved = userReservationService.standby(userId, rawDate, timeId, themeId);
+        assertThat(saved.id()).isEqualTo(1L);
     }
 
     @DisplayName("실패: 본인의 예약에 대기를 걸 수 없다.")
@@ -205,13 +205,12 @@ class UserReservationServiceTest {
         userReservationService.reserve(userId, LocalDate.parse("2060-01-02"), timeId, themeId);
         userReservationService.reserve(userId, LocalDate.parse("2060-01-03"), timeId, themeId);
 
-        List<FindReservationWithRankDto> reservations = userReservationService.findMyReservationsWithRank(userId);
+        List<FindMyReservationResponse> reservations = userReservationService.findMyReservationsWithRank(userId);
         assertThat(reservations)
-            .extracting(FindReservationWithRankDto::reservation)
-            .extracting(Reservation::getId)
+            .extracting(FindMyReservationResponse::id)
             .containsExactly(2L, 3L, 4L);
         assertThat(reservations)
-            .extracting(FindReservationWithRankDto::rank)
+            .extracting(FindMyReservationResponse::rank)
             .containsExactly(1L, 0L, 0L);
     }
 }

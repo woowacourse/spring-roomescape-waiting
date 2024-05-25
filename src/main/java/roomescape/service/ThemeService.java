@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.CreateThemeResponse;
+import roomescape.controller.dto.FindThemeResponse;
 import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
@@ -25,10 +27,10 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme save(String name, String description, String thumbnail) {
+    public CreateThemeResponse save(String name, String description, String thumbnail) {
         Theme theme = new Theme(name, description, thumbnail);
         validateDuplication(name);
-        return themeRepository.save(theme);
+        return CreateThemeResponse.from(themeRepository.save(theme));
     }
 
     private void validateDuplication(String name) {
@@ -46,14 +48,20 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public List<Theme> findAll() {
-        return themeRepository.findAll();
+    public List<FindThemeResponse> findAll() {
+        List<Theme> themes = themeRepository.findAll();
+        return themes.stream()
+            .map(FindThemeResponse::from)
+            .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Theme> findPopular() {
+    public List<FindThemeResponse> findPopular() {
         LocalDate start = LocalDate.now().minusDays(POPULAR_START_DATE);
         LocalDate end = LocalDate.now().minusDays(POPULAR_END_DATE);
-        return themeRepository.findPopular(start, end, POPULAR_THEME_COUNT);
+        List<Theme> themes = themeRepository.findPopular(start, end, POPULAR_THEME_COUNT);
+        return themes.stream()
+            .map(FindThemeResponse::from)
+            .toList();
     }
 }
