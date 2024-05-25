@@ -20,23 +20,32 @@ public class WaitingService {
     }
 
     public ReservationResponse createReservationWaiting(final Reservation waiting) {
+        validateExistReservation(waiting);
         validateAlreadyReserved(waiting);
         validateDuplicatedWaiting(waiting);
         return ReservationResponse.from(reservationRepository.save(waiting));
     }
 
+    private void validateExistReservation(final Reservation waiting) {
+        final boolean exists = reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED);
+        if (!exists) {
+            throw new IllegalStateException("예약이 없는 건에는 예약 대기를 할 수 없습니다.");
+        }
+    }
+
     private void validateAlreadyReserved(final Reservation waiting) {
-        final boolean isExisting = reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
+        final boolean exists = reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED, waiting.getMember());
-        if (isExisting) {
+        if (exists) {
             throw new IllegalStateException("이미 예약한 건에는 예약 대기를 할 수 없습니다.");
         }
     }
 
     private void validateDuplicatedWaiting(final Reservation waiting) {
-        final boolean isExisting = reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
+        final boolean exists = reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.WAITING, waiting.getMember());
-        if (isExisting) {
+        if (exists) {
             throw new IllegalStateException("중복해서 예약 대기를 할 수 없습니다.");
         }
     }
@@ -56,9 +65,9 @@ public class WaitingService {
     }
 
     private void validateIsApprovable(final Reservation waiting) {
-        final boolean isExisting = reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+        final boolean exists = reservationRepository.existsByThemeAndDateAndTimeAndStatus(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED);
-        if (isExisting) {
+        if (exists) {
             throw new IllegalStateException("이미 예약이 존재하여 승인이 불가능합니다.");
         }
     }

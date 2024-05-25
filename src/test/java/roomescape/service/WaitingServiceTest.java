@@ -41,6 +41,19 @@ class WaitingServiceTest {
 
         assertThat(actual.id()).isNotNull();
     }
+    
+    @Test
+    @DisplayName("사용자가 예약이 없는 건에 대해 예약 대기를 등록하려는 경우 예외가 발생한다.")
+    void throwExceptionWhenDoesNotExistReservation() {
+        final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED
+        )).willReturn(false);
+
+        assertThatThrownBy(() -> waitingService.createReservationWaiting(waiting))
+                .isInstanceOf(IllegalStateException.class);
+    }
 
     @Test
     @DisplayName("사용자가 이미 예약한 건에 대해 예약 대기를 등록하려는 경우 예외가 발생한다.")
