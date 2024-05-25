@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.waiting.WaitingWithSequence;
 import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.UserReservationResponse;
@@ -44,14 +43,11 @@ public class ReservationQueryService {
 
     public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
         Member member = findMember(memberId);
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        List<WaitingWithSequence> waitings = waitingRepository.findWaitingsWithSequenceByMember(member);
-
-        List<UserReservationResponse> userWaitings = waitings.stream()
+        List<UserReservationResponse> userWaitings = waitingRepository.findWaitingsWithSequenceByMember(member).stream()
                 .map(UserReservationResponse::from)
                 .toList();
 
-        List<UserReservationResponse> userReservations = reservations.stream()
+        List<UserReservationResponse> userReservations = reservationRepository.findAllByMember(member).stream()
                 .map(UserReservationResponse::from)
                 .toList();
 
@@ -69,6 +65,7 @@ public class ReservationQueryService {
                 filter.getDateFrom(),
                 filter.getDateTo()
         );
+
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
