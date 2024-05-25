@@ -167,7 +167,7 @@ public class ReservationServiceTest {
         Reservation reservation = reservationRepository.save(
                 new Reservation(member, LocalDate.parse("2024-11-23"), reservationTime, theme));
 
-        FindReservationResponse response = reservationService.getReservation(reservation.getId());
+        FindReservationResponse response = reservationService.getOneReservation(reservation.getId());
 
         assertAll(
                 () -> assertThat(response.id()).isEqualTo(reservation.getId()),
@@ -181,7 +181,7 @@ public class ReservationServiceTest {
     @Test
     @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
     void getReservation_WhenReservationNotExist() {
-        assertThatThrownBy(() -> reservationService.getReservation(999L))
+        assertThatThrownBy(() -> reservationService.getOneReservation(999L))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("식별자 999에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다.");
     }

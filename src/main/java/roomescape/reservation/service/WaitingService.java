@@ -44,10 +44,10 @@ public class WaitingService {
     }
 
     public CreateWaitingResponse createWaiting(AuthInfo authInfo, CreateWaitingRequest createWaitingRequest) {
-        Member member = findMember(authInfo.getMemberId());
+        Member member = getMember(authInfo.getMemberId());
         LocalDate date = createWaitingRequest.date();
-        ReservationTime reservationTime = findReservationTime(createWaitingRequest.timeId());
-        Theme theme = findTheme(createWaitingRequest.themeId());
+        ReservationTime reservationTime = getReservationTime(createWaitingRequest.timeId());
+        Theme theme = getTheme(createWaitingRequest.themeId());
         Slot slot = new Slot(date, reservationTime, theme);
         Waiting waiting = Waiting.create(member, slot);
 
@@ -82,17 +82,17 @@ public class WaitingService {
         }
     }
 
-    private ReservationTime findReservationTime(Long id) {
+    private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private Theme findTheme(Long id) {
+    private Theme getTheme(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private Member findMember(Long id) {
+    private Member getMember(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }

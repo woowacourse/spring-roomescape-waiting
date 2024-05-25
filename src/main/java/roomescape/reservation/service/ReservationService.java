@@ -52,9 +52,9 @@ public class ReservationService {
 
     public CreateReservationResponse createReservation(AuthInfo authInfo,
                                                        CreateReservationRequest createReservationRequest) {
-        Member member = findMember(authInfo.getMemberId());
-        ReservationTime reservationTime = findReservationTime(createReservationRequest.timeId());
-        Theme theme = findTheme(createReservationRequest.themeId());
+        Member member = getMember(authInfo.getMemberId());
+        ReservationTime reservationTime = getReservationTime(createReservationRequest.timeId());
+        Theme theme = getTheme(createReservationRequest.themeId());
         Slot slot = new Slot(createReservationRequest.date(), reservationTime, theme);
         Reservation reservation = Reservation.create(member, slot);
 
@@ -76,17 +76,17 @@ public class ReservationService {
         }
     }
 
-    private ReservationTime findReservationTime(Long id) {
+    private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private Theme findTheme(Long id) {
+    private Theme getTheme(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private Member findMember(Long id) {
+    private Member getMember(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
@@ -97,11 +97,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public FindReservationResponse getReservation(Long id) {
-        return FindReservationResponse.from(findReservation(id));
+    public FindReservationResponse getOneReservation(Long id) {
+        return FindReservationResponse.from(getReservation(id));
     }
 
-    private Reservation findReservation(Long id) {
+    private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
     }

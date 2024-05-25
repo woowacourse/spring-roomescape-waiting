@@ -65,7 +65,7 @@ public class AdminService {
     }
 
     public ConfirmReservationResponse confirmWaiting(Long id) {
-        Waiting waiting = findWaiting(id);
+        Waiting waiting = getWaiting(id);
         Slot slot = waiting.getSlot();
 
         checkReservationExists(slot);
@@ -89,7 +89,7 @@ public class AdminService {
         }
     }
 
-    private Waiting findWaiting(Long id) {
+    private Waiting getWaiting(Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 대기가 존재하지 않아 예약으로 변경할 수 없습니다."));
     }
