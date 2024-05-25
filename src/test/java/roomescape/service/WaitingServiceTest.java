@@ -1,18 +1,19 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.request.ReservationRequest;
 import roomescape.controller.request.WaitingRequest;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.*;
-import roomescape.repository.*;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,7 +24,6 @@ import static org.assertj.core.api.Assertions.*;
 import static roomescape.model.Role.MEMBER;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = "/test_data.sql")
 class WaitingServiceTest {
 
@@ -38,8 +38,6 @@ class WaitingServiceTest {
     @Autowired
     private final WaitingService waitingService;
     @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
     private ReservationService reservationService;
 
     @Autowired
@@ -53,17 +51,11 @@ class WaitingServiceTest {
         this.waitingService = waitingService;
     }
 
-    @BeforeEach
-    void setUp() {
-        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
-        themeRepository.save(new Theme(2L, "name2", "description2", "thumbnail2"));
-        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        reservationTimeRepository.save(new ReservationTime(2L, LocalTime.of(12, 0)));
-    }
-
     @DisplayName("사용자가 예약 대기를 추가한다")
     @Test
     void should_add_reservation_times_when_give_member_request() {
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -78,18 +70,25 @@ class WaitingServiceTest {
     @DisplayName("예약 대기를 삭제한다")
     @Test
     void should_remove_reservation_times() {
+        themeRepository.save(new Theme("name1", "description1", "thumbnail1"));
+        themeRepository.save(new Theme("name2", "description2", "thumbnail2"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
         ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
-        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        memberRepository.save(new Member("배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        waitingRepository.save(new Waiting(1L, now(), reservationTime, theme1, member));
-        waitingRepository.save(new Waiting(2L, now(), reservationTime, theme2, member));
+        waitingRepository.save(new Waiting(now(), reservationTime, theme1, member));
+        waitingRepository.save(new Waiting(now(), reservationTime, theme2, member));
+
+        waitingService.findAllWaiting().forEach(waiting -> {
+            System.out.println(waiting.getId());
+        });
 
         waitingService.deleteWaiting(1L);
 
-        Iterable<Waiting> waiting = waitingRepository.findAll();
+        Iterable<Waiting> waiting = waitingService.findAllWaiting();
         assertThat(waiting).hasSize(1);
     }
 
@@ -104,14 +103,17 @@ class WaitingServiceTest {
     @DisplayName("존재하는 예약 대기를 삭제하면 예외가 발생하지 않는다.")
     @Test
     void should_not_throw_exception_when_exist_reservation_time() {
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        themeRepository.save(new Theme(2L, "name2", "description2", "thumbnail2"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
         ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        waitingRepository.save(new Waiting(1L, now(), reservationTime, theme1, member));
-        waitingRepository.save(new Waiting(2L, now(), reservationTime, theme2, member));
+        waitingRepository.save(new Waiting(now(), reservationTime, theme1, member));
+        waitingRepository.save(new Waiting(now(), reservationTime, theme2, member));
 
         assertThatCode(() -> waitingService.deleteWaiting(1))
                 .doesNotThrowAnyException();
@@ -120,6 +122,9 @@ class WaitingServiceTest {
     @DisplayName("현재 이전으로 예약 대기를 추가하면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_previous_date() {
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+
         WaitingRequest request =
                 new WaitingRequest(LocalDate.now().minusDays(1), 1L, 1L);
         Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1111");
@@ -132,6 +137,9 @@ class WaitingServiceTest {
     @DisplayName("현재 이후로 예약 대기를 추가하면 예외가 발생하지 않는다.")
     @Test
     void should_not_throw_exception_when_current_date() {
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        reservationTimeRepository.save(new ReservationTime(2L, LocalTime.of(12, 0)));
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
         reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
@@ -145,13 +153,15 @@ class WaitingServiceTest {
     @DisplayName("사용자가 예약한 예약 대기를 반환한다.")
     @Test
     void should_return_member_reservations() {
-        Theme theme1 = themeRepository.findById(1L).get();
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        Theme theme = themeRepository.findById(1L).get();
         ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        waitingRepository.save(new Waiting(1L, now(), reservationTime, theme1, member));
-        waitingRepository.save(new Waiting(2L, now(), reservationTime, theme1, member));
+        waitingRepository.save(new Waiting(now(), reservationTime, theme, member));
+        waitingRepository.save(new Waiting(now(), reservationTime, theme, member));
 
         List<WaitingWithRank> waiting = waitingService
                 .findMemberWaiting(member.getId());
@@ -162,6 +172,8 @@ class WaitingServiceTest {
     @DisplayName("이미 사용자가 예약한 날짜, 테마, 시간에 예약 대기를 추가하는 경우 예외를 발생한다.")
     @Test
     void should_throw_exception_when_existing_reservation() {
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -178,6 +190,8 @@ class WaitingServiceTest {
     @DisplayName("이미 사용자가 예약 대기한 날짜, 테마, 시간에 예약 대기를 추가하는 경우 예외를 발생한다.")
     @Test
     void should_throw_exception_when_existing_waiting() {
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -192,6 +206,9 @@ class WaitingServiceTest {
     @DisplayName("모든 예약 대기를 반환한다")
     @Test
     void should_return_all_waiting() {
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        themeRepository.save(new Theme(2L, "name2", "description2", "thumbnail2"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
         ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
@@ -209,17 +226,19 @@ class WaitingServiceTest {
     @DisplayName("조건에 맞는 예약 대기를 반환한다.")
     @Test
     void should_return_waiting_when_condition_given() {
-        Theme theme1 = themeRepository.findById(1L).get();
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        Theme theme = themeRepository.findById(1L).get();
         ReservationTime time = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
         LocalDate date = LocalDate.now();
 
-        waitingRepository.save(new Waiting(1L, date, time, theme1, member));
-        waitingRepository.save(new Waiting(2L, date, time, theme1, member));
+        waitingRepository.save(new Waiting(1L, date, time, theme, member));
+        waitingRepository.save(new Waiting(2L, date, time, theme, member));
 
-        Waiting waiting = waitingService.findFirstWaitingByCondition(theme1, date, time);
+        Waiting waiting = waitingService.findFirstWaitingByCondition(theme, date, time);
 
         assertThat(waiting).isNotNull();
     }
@@ -227,16 +246,18 @@ class WaitingServiceTest {
     @DisplayName("조건에 맞는 예약 대기가 없는 경우 예외를 발생한다.")
     @Test
     void should_throw_exception_when_not_exist_condition_given() {
-        Theme theme1 = themeRepository.findById(1L).get();
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        Theme theme = themeRepository.findById(1L).get();
         ReservationTime time = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
         LocalDate date = LocalDate.now();
 
-        waitingRepository.save(new Waiting(1L, date, time, theme1, member));
+        waitingRepository.save(new Waiting(1L, date, time, theme, member));
 
-        assertThatThrownBy(() -> waitingService.findFirstWaitingByCondition(theme1, date.plusDays(1), time))
+        assertThatThrownBy(() -> waitingService.findFirstWaitingByCondition(theme, date.plusDays(1), time))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[ERROR] 해당 테마:[name1], 날짜:[" + date.plusDays(1) + "], 시간:[10:00] 값으로 예약된 예약 대기 내역이 존재하지 않습니다.");
     }
@@ -244,17 +265,19 @@ class WaitingServiceTest {
     @DisplayName("조건에 맞는 예약 대기가 존재하면 참을 반환한다.")
     @Test
     void should_return_true_when_condition_given_exist() {
-        Theme theme1 = themeRepository.findById(1L).get();
+        themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        Theme theme = themeRepository.findById(1L).get();
         ReservationTime time = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
         LocalDate date = LocalDate.now();
 
-        waitingRepository.save(new Waiting(1L, date, time, theme1, member));
-        waitingRepository.save(new Waiting(2L, date, time, theme1, member));
+        waitingRepository.save(new Waiting(1L, date, time, theme, member));
+        waitingRepository.save(new Waiting(2L, date, time, theme, member));
 
-        boolean exist = waitingService.existsWaiting(theme1, date, time);
+        boolean exist = waitingService.existsWaiting(theme, date, time);
 
         assertThat(exist).isTrue();
     }
