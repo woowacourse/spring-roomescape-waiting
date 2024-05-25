@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -21,16 +22,21 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.reservation.service.ReservationDetailService;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
-    private final ReservationService reservationService;
     private final ReservationDetailService reservationDetailService;
+    private final ReservationService reservationService;
+    private final ReservationWaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService, ReservationDetailService reservationDetailService) {
-        this.reservationService = reservationService;
+    public ReservationController(ReservationDetailService reservationDetailService,
+                                 ReservationService reservationService,
+                                 ReservationWaitingService waitingService) {
         this.reservationDetailService = reservationDetailService;
+        this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -41,7 +47,13 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findReservationsByMember(MemberProfileInfo memberProfileInfo) {
-        List<MyReservationResponse> response = reservationService.findReservationByMemberId(memberProfileInfo.id());
+        List<MyReservationResponse> reservationResponse = reservationService.findReservationByMemberId(memberProfileInfo.id());
+        List<MyReservationResponse> waitingResponse = waitingService.findReservationByMemberId(memberProfileInfo.id());
+
+        List<MyReservationResponse> response = new ArrayList<>();
+        response.addAll(reservationResponse);
+        response.addAll(waitingResponse);
+
         return ResponseEntity.ok(response);
     }
 
