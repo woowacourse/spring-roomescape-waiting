@@ -22,7 +22,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().get("/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("reservations.size()", is(2));
         }
 
         @Test
@@ -32,7 +32,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().get("/reservations?memberId=1")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("reservations.size()", is(2));
         }
 
         @Test
@@ -42,7 +42,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().get("/reservations?themeId=1")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("reservations.size()", is(2));
         }
 
         @Test
@@ -52,7 +52,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().get("/reservations?dateFrom=2000-04-01&dateTo=2000-04-07")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("reservations.size()", is(1));
         }
     }
 
@@ -66,7 +66,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().get("/reservations-mine")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("reservations.size()", is(2));
         }
     }
 
