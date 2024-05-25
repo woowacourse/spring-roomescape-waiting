@@ -74,12 +74,8 @@ class AdminReservationControllerTest {
         ReservationCreateRequest request = createReservationRequest(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1);
 
         // then
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/admin/reservations")
-                .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
+        RestAssured.given().log().all().header("cookie", accessToken).contentType(ContentType.JSON).body(request).when()
+                .post("/admin/reservations").then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
     }
 
     @DisplayName("예약을 삭제한다.")
@@ -92,27 +88,23 @@ class AdminReservationControllerTest {
         String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         // when & then
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .when().delete("/admin/reservations/" + saved.getId())
-                .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
+        RestAssured.given().log().all().header("cookie", accessToken).when()
+                .delete("/admin/reservations/" + saved.getId()).then().log().all().assertThat()
+                .statusCode(HttpStatus.NO_CONTENT.value());
     }
 
     @DisplayName("모든 대기 중인 예약을 조회한다.")
     @Test
     void findAllWaiting() {
         // given
-        Reservation waiting = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
+        reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
 
         memberRepository.save(ADMIN);
         String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         // when & then
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .when().get("/admin/reservations/waiting")
-                .then().log().all()
-                .body("count", is(1));
+        RestAssured.given().log().all().header("cookie", accessToken).when().get("/admin/reservations/waiting").then()
+                .log().all().body("count", is(1));
     }
 
     @DisplayName("대기 중인 예약을 승인한다.")
@@ -125,15 +117,13 @@ class AdminReservationControllerTest {
         String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         // when
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .when().post("/admin/reservations/waiting/{id}/approve", waiting.getId())
-                .then().log().all()
+        RestAssured.given().log().all().header("cookie", accessToken).when()
+                .post("/admin/reservations/waiting/{id}/approve", waiting.getId()).then().log().all()
                 .statusCode(HttpStatus.OK.value());
 
         // then
-        Reservation approved = reservationRepository.findById(waiting.getId()).get();
-        assertThat(approved.getStatus()).isEqualTo(Status.CONFIRMED);
+        reservationRepository.findById(waiting.getId())
+                .ifPresentOrElse(r -> assertThat(r.getStatus()).isEqualTo(Status.CONFIRMED), AssertionError::new);
     }
 
     @DisplayName("대기 중인 예약을 거절한다.")
@@ -145,10 +135,8 @@ class AdminReservationControllerTest {
         String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         // when
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .when().post("/admin/reservations/waiting/{id}/deny", waiting.getId())
-                .then().log().all()
+        RestAssured.given().log().all().header("cookie", accessToken).when()
+                .post("/admin/reservations/waiting/{id}/deny", waiting.getId()).then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
         // then
