@@ -36,7 +36,7 @@ class ThemeJpaRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Test
-    @DisplayName("주어진 날짜 사이에 예약된 갯수를 기준으로 인기 테마를 반환한다.")
+    @DisplayName("주어진 날짜 사이에 확정된 예약을 기준으로 인기 테마를 반환한다.")
     void shouldReturnPopularThemes() {
         List<Theme> themes = List.of(SPOOKY_THEME.create(), FANTASY_THEME.create(), SCHOOL_THEME.create());
         List<ReservationTime> times = List.of(TEN_AM.create(), ELEVEN_AM.create(), TWELVE_PM.create());
@@ -56,6 +56,9 @@ class ThemeJpaRepositoryTest {
                 new Reservation(member, date.plusDays(2), times.get(1), themes.get(2), createdAt, BookStatus.BOOKED),
                 new Reservation(member, date.plusDays(2), times.get(2), themes.get(2), createdAt, BookStatus.BOOKED),
 
+                new Reservation(member, date.plusDays(2), times.get(0), themes.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
+                new Reservation(member, date.plusDays(2), times.get(1), themes.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
+                new Reservation(member, date.plusDays(2), times.get(2), themes.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
                 new Reservation(member, date.plusDays(3), times.get(0), themes.get(0), createdAt, BookStatus.BOOKED),
                 new Reservation(member, date.plusDays(3), times.get(1), themes.get(0), createdAt, BookStatus.BOOKED),
                 new Reservation(member, date.plusDays(3), times.get(0), themes.get(0), createdAt, BookStatus.BOOKED)
