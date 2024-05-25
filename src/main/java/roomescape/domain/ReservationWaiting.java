@@ -12,7 +12,7 @@ import roomescape.domain.exception.PastReservationException;
 @Entity
 public class ReservationWaiting {
 
-    private static final long FIRST_PRIORITY = 0L;
+    private static final long FIRST_PRIORITY = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
