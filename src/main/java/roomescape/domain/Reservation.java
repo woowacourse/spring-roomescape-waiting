@@ -48,7 +48,7 @@ public class Reservation {
         }
     }
 
-    public void updateStatusBooked() {
+    public void book() {
         this.status = ReservationStatus.BOOKING;
     }
 
