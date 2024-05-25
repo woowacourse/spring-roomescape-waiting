@@ -8,6 +8,7 @@ import roomescape.global.exception.ValueNullOrEmptyException;
 @Embeddable
 public class Password {
 
+    protected static final String PASSWORD_EMPTY_ERROR_MESSAGE = "비밀번호는 비어있을 수 없습니다.";
     @Column(name = "password", nullable = false)
     private String value;
 
@@ -22,7 +23,7 @@ public class Password {
 
     private void validateNullAndBlank(String value) {
         if (value == null || value.isBlank()) {
-            throw new ValueNullOrEmptyException("비밀번호는 비어있을 수 없습니다.");
+            throw new ValueNullOrEmptyException(PASSWORD_EMPTY_ERROR_MESSAGE);
         }
     }
 
