@@ -12,8 +12,9 @@ import roomescape.domain.login.controller.MemberResolver;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.dto.command.ReservationAddCommand;
+import roomescape.domain.reservation.dto.query.ReservationSearchQuery;
 import roomescape.domain.reservation.dto.request.ReservationAddRequest;
-import roomescape.domain.reservation.dto.request.ReservationFindRequest;
+import roomescape.domain.reservation.dto.request.ReservationSearchRequest;
 import roomescape.domain.reservation.dto.response.ReservationResponse;
 import roomescape.domain.reservation.dto.response.WaitingReservationResponse;
 import roomescape.domain.reservation.service.ReservationService;
@@ -38,11 +39,12 @@ public class AdminReservationController {
 
     @GetMapping("/reservations/search")
     public ResponseEntity<List<ReservationResponse>> getConditionalReservationList(
-            @ModelAttribute ReservationFindRequest reservationFindRequest) {
-        List<Reservation> reservations = reservationService.findFilteredReservationList(
-                reservationFindRequest.themeId(), reservationFindRequest.memberId(), reservationFindRequest.dateFrom(),
-                reservationFindRequest.dateTo());
+            @ModelAttribute ReservationSearchRequest reservationSearchRequest) {
+        ReservationSearchQuery reservationSearchQuery = ReservationSearchQuery.from(reservationSearchRequest);
+
+        List<Reservation> reservations = reservationService.findFilteredReservationList(reservationSearchQuery);
         List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
+
         return ResponseEntity.ok(reservationResponses);
     }
 

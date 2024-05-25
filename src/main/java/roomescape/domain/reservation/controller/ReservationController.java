@@ -15,7 +15,7 @@ import roomescape.domain.login.controller.MemberResolver;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.dto.command.ReservationAddCommand;
-import roomescape.domain.reservation.dto.request.BookableTimesRequest;
+import roomescape.domain.reservation.dto.query.BookableTimesQuery;
 import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 import roomescape.domain.reservation.dto.response.BookableTimeResponse;
 import roomescape.domain.reservation.dto.response.ReservationMineResponse;
@@ -61,7 +61,8 @@ public class ReservationController {
     @GetMapping("/bookable-times")
     public ResponseEntity<List<BookableTimeResponse>> getTimesWithStatus(@RequestParam("date") LocalDate date,
                                                                          @RequestParam("themeId") Long themeId) {
-        return ResponseEntity.ok(reservationService.findBookableTimes(new BookableTimesRequest(date, themeId)));
+        BookableTimesQuery bookableTimesQuery = new BookableTimesQuery(date, themeId);
+        return ResponseEntity.ok(reservationService.findBookableTimes(bookableTimesQuery));
     }
 
     @GetMapping("/reservations-mine")

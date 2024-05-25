@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
-import roomescape.domain.reservation.dto.request.ReservationTimeAddRequest;
+import roomescape.domain.reservation.dto.command.ReservationTimeAddCommand;
 import roomescape.global.exception.EscapeApplicationException;
 import roomescape.global.exception.NoMatchingDataException;
 
@@ -41,9 +41,10 @@ class AdminReservationTimeServiceTest {
     @Test
     void should_add_reservation_time() {
         ReservationTime reservationTime = new ReservationTime(1L, TEN_HOUR);
+        ReservationTimeAddCommand reservationTimeAddCommand = new ReservationTimeAddCommand(TEN_HOUR);
 
-        ReservationTime actualReservationTime = adminReservationTimeService.addReservationTime(
-                new ReservationTimeAddRequest(TEN_HOUR));
+        ReservationTime actualReservationTime = adminReservationTimeService
+                .addReservationTime(reservationTimeAddCommand);
 
         assertThat(actualReservationTime).isEqualTo(reservationTime);
     }
@@ -53,9 +54,9 @@ class AdminReservationTimeServiceTest {
     void should_throw_ClientIllegalArgumentException_when_reservation_time_is_duplicated() {
         ReservationTime reservationTime = new ReservationTime(1L, TEN_HOUR);
         fakeReservationTimeRepository.save(reservationTime);
-        ReservationTimeAddRequest reservationTimeAddRequest = new ReservationTimeAddRequest(LocalTime.of(10, 0));
+        ReservationTimeAddCommand reservationTimeAddCommand = new ReservationTimeAddCommand(LocalTime.of(10, 0));
 
-        assertThatThrownBy(() -> adminReservationTimeService.addReservationTime(reservationTimeAddRequest))
+        assertThatThrownBy(() -> adminReservationTimeService.addReservationTime(reservationTimeAddCommand))
                 .isInstanceOf(EscapeApplicationException.class)
                 .hasMessage(DUPLICATED_RESERVATION_TIME_ERROR_MESSAGE);
     }

@@ -13,7 +13,8 @@ import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.command.ReservationAddCommand;
-import roomescape.domain.reservation.dto.request.BookableTimesRequest;
+import roomescape.domain.reservation.dto.query.BookableTimesQuery;
+import roomescape.domain.reservation.dto.query.ReservationSearchQuery;
 import roomescape.domain.reservation.dto.response.BookableTimeResponse;
 import roomescape.domain.reservation.dto.response.ReservationMineResponse;
 import roomescape.domain.reservation.repository.reservation.ReservationRepository;
@@ -52,9 +53,12 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> findFilteredReservationList(Long themeId, Long memberId,
-                                                         LocalDate dateFrom, LocalDate dateTo) {
-        return reservationRepository.findAllBy(themeId, memberId, dateFrom, dateTo);
+    public List<Reservation> findFilteredReservationList(ReservationSearchQuery reservationSearchQuery) {
+        return reservationRepository.findAllBy(
+                reservationSearchQuery.themeId(),
+                reservationSearchQuery.memberId(),
+                reservationSearchQuery.dateFrom(),
+                reservationSearchQuery.dateTo());
     }
 
     public Reservation addReservedReservation(ReservationAddCommand reservationAddCommand) {
@@ -120,9 +124,10 @@ public class ReservationService {
                 .orElseThrow(() -> new NoMatchingDataException(NON_EXIST_MEMBER_ERROR_MESSAGE));
     }
 
-    public List<BookableTimeResponse> findBookableTimes(BookableTimesRequest bookableTimesRequest) {
-        List<Reservation> bookedReservations = reservationRepository.findByDateAndThemeId(bookableTimesRequest.date(),
-                bookableTimesRequest.themeId());
+    public List<BookableTimeResponse> findBookableTimes(BookableTimesQuery bookableTimesQuery) {
+        List<Reservation> bookedReservations = reservationRepository.findByDateAndThemeId(
+                bookableTimesQuery.date(),
+                bookableTimesQuery.themeId());
         List<ReservationTime> bookedTimes = bookedReservations.stream()
                 .map(Reservation::getTime)
                 .toList();
