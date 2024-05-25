@@ -1,5 +1,6 @@
 package roomescape.domain.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
@@ -43,7 +44,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
              and r.reservationSlot.time.id = :timeId""")
     Optional<Reservation> findByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
 
-    List<Reservation> findByMember(Member member);
+    @Query("""
+            select r
+            from Reservation r
+            join fetch r.reservationSlot
+            where r.member = :member
+             and r.reservationSlot.date >=:date
+            order by r.reservationSlot.date asc, r.reservationSlot.time.startAt asc""")
+    List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date);
 
     boolean existsByReservationSlot(ReservationSlot slot);
 

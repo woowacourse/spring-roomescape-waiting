@@ -13,6 +13,7 @@ import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.dto.response.UserReservationResponses;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -113,14 +114,14 @@ public class ReservationService {
     }
 
     private List<UserReservationResponse> findUserReservations(Member user) {
-        return reservationRepository.findByMember(user)
+        return reservationRepository.findByMemberAndDateGreaterThanEqual(user, LocalDate.now())
                 .stream()
                 .map(UserReservationResponse::reserved)
                 .toList();
     }
 
     private List<UserReservationResponse> findUserWaitings(Member user) {
-        return waitingRepository.findByMember(user)
+        return waitingRepository.findByMemberAndDateGreaterThanEqual(user, LocalDate.now())
                 .stream()
                 .map(waiting -> UserReservationResponse.from(waiting, getWaitingRank(waiting)))
                 .toList();
