@@ -55,13 +55,13 @@ public class AdminReservationController {
         return ResponseEntity.ok().body(reservationService.findAllWaiting());
     }
 
-    @PostMapping("/waiting/approve/{id}")
+    @PostMapping("/waiting/{id}/approve")
     public ResponseEntity<Void> approveWaiting(@PathVariable Long id) {
         reservationService.approveWaiting(id);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/waiting/deny/{id}")
+    @PostMapping("/waiting/{id}/deny")
     public ResponseEntity<Void> denyWaiting(@PathVariable Long id) {
         reservationService.deleteById(id);
         return ResponseEntity.noContent().build();

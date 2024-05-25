@@ -127,7 +127,7 @@ class AdminReservationControllerTest {
         // when
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
-                .when().post("/admin/reservations/waiting/approve/" + waiting.getId())
+                .when().post("/admin/reservations/waiting/{id}/approve", waiting.getId())
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
 
@@ -147,7 +147,7 @@ class AdminReservationControllerTest {
         // when
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
-                .when().delete("/admin/reservations/waiting/deny/" + waiting.getId())
+                .when().post("/admin/reservations/waiting/{id}/deny", waiting.getId())
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
