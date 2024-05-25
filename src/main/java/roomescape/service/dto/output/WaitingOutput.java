@@ -1,5 +1,6 @@
 package roomescape.service.dto.output;
 
+import java.util.List;
 import roomescape.domain.reservation.Waiting;
 
 public record WaitingOutput(long id, ThemeOutput theme, String date, ReservationTimeOutput time,
@@ -12,5 +13,11 @@ public record WaitingOutput(long id, ThemeOutput theme, String date, Reservation
                 ReservationTimeOutput.toOutput(waiting.getTime()),
                 MemberOutput.toOutput(waiting.getMember())
         );
+    }
+
+    public static List<WaitingOutput> toOutputs(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(WaitingOutput::toOutput)
+                .toList();
     }
 }

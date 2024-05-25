@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,11 @@ public class WaitingService {
         final Waiting waiting = createValidator.validateWaitingInput(input);
         final Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingOutput.toOutput(savedWaiting);
+    }
+
+    public List<WaitingOutput> getAllWaitings() {
+        final List<Waiting> waitings = waitingRepository.findAll();
+        return WaitingOutput.toOutputs(waitings);
     }
 
     public void deleteWaiting(long id, LoginMemberRequest loginMemberRequest) {
