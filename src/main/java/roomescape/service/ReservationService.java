@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,11 +116,19 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(Long id) {
-        Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.WAITING)
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+
+        Optional<Reservation> reservationWaiting = reservationRepository.findTopByStatusInOrderByCreatedAt(
+                List.of(Status.WAITING));
 
         reservation.updateStatus(Status.DELETED);
         reservationRepository.save(reservation);
+
+        if (reservationWaiting.isPresent()) {
+            reservationWaiting.get().updateStatus(Status.CREATED);
+            reservationRepository.save(reservationWaiting.get());
+        }
     }
 
     private void validateDateCondition(LocalDate dateFrom, LocalDate dateTo) {

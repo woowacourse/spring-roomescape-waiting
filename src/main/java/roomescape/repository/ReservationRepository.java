@@ -41,4 +41,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     Optional<Reservation> findByIdAndStatus(Long id, Status status);
 
     List<Reservation> findByStatusIn(List<Status> statuses);
+
+    Optional<Reservation> findTopByStatusInOrderByCreatedAt(List<Status> waiting);
 }
