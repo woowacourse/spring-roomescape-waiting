@@ -34,8 +34,4 @@ public class CredentialContext {
         }
         return payload.memberId();
     }
-
-    public TokenPayload getPayload() {
-        return payload;
-    }
 }
