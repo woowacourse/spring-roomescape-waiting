@@ -43,13 +43,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByMember(Member member);
 
+    boolean existsByReservationSlot(ReservationSlot slot);
+
     boolean existsByMemberAndReservationSlot(Member member, ReservationSlot reservationSlot);
 
     @Query("select exists(select 1 from Reservation r where r.reservationSlot.time=:time)")
     boolean existsByTime(ReservationTime time);
-
-    @Query("select exists(select 1 from Reservation r where r.reservationSlot.theme=:theme and r.reservationSlot.date =:date and r.reservationSlot.time = :time)")
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     @Query("select exists(select 1 from Reservation r where r.reservationSlot.theme=:theme)")
     boolean existsByTheme(Theme theme);

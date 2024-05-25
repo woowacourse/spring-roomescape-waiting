@@ -56,11 +56,7 @@ public class ReservationDbService {
     }
 
     public boolean hasReservation(Reservation reservation) {
-        return reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
+        return reservationRepository.existsByReservationSlot(reservation.getReservationSlot());
     }
 
     public void delete(Reservation reservation) {
