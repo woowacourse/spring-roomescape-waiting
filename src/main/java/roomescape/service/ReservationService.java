@@ -17,6 +17,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -29,10 +30,12 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository,
+            MemberRepository memberRepository
+    ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -49,12 +52,9 @@ public class ReservationService {
     public ReservationResponse addMemberReservation(MemberReservationRequest request, Member member) {
         ReservationTime reservationTime = findValidatedReservationTime(request.timeId());
         Theme theme = findValidatedTheme(request.themeId());
-        validateNotPast(request.date(), reservationTime.getStartAt());
-        validateNotDuplicatedReservation(request.date(), request.timeId(), request.themeId());
-
+        validateRequest(request, reservationTime);
         Reservation reservation = new Reservation(member, request.date(), reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
-
         return ReservationResponse.from(savedReservation);
     }
 
@@ -62,22 +62,27 @@ public class ReservationService {
         ReservationTime reservationTime = findValidatedReservationTime(request.timeId());
         Theme theme = findValidatedTheme(request.themeId());
         Member customer = findValidatedMember(request.memberId());
-        validateNotPast(request.date(), reservationTime.getStartAt());
-        validateNotDuplicatedReservation(request.date(), request.timeId(), request.themeId());
-
+        validateRequest(request, reservationTime);
         Reservation reservation = new Reservation(customer, request.date(), reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
-
         return ReservationResponse.from(savedReservation);
+    }
+
+    public List<ReservationResponse> getFilteredReservations(
+            Long themeId,
+            Long memberId,
+            LocalDate from,
+            LocalDate to
+    ) {
+        List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId,
+                from, to);
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public void deleteById(Long id) {
         reservationRepository.delete(findValidatedReservation(id));
-    }
-
-    private Reservation findValidatedReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약을 찾을 수 없습니다."));
     }
 
     private ReservationTime findValidatedReservationTime(Long id) {
@@ -95,6 +100,16 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 회원을 찾을 수 없습니다."));
     }
 
+    private Reservation findValidatedReservation(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약을 찾을 수 없습니다."));
+    }
+
+    private void validateRequest(ReservationRequest request, ReservationTime reservationTime) {
+        validateNotPast(request.date(), reservationTime.getStartAt());
+        validateNotDuplicatedReservation(request.date(), request.timeId(), request.themeId());
+    }
+
     private void validateNotDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
             throw new OperationNotAllowedException("예약이 이미 존재합니다.");
@@ -106,15 +121,5 @@ public class ReservationService {
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedException("지나간 시간에 대한 예약은 할 수 없습니다.");
         }
-    }
-
-    public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate from,
-                                                             LocalDate to) {
-        List<Reservation> reservations = reservationRepository
-                .findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, from, to);
-
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 }
