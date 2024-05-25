@@ -18,6 +18,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
@@ -101,8 +102,8 @@ class WaitingServiceTest {
     @Test
     void findAllWaitings() {
         List<Waiting> waitings = List.of(
-                new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
-                new Waiting(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
+                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
+                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
 
         waitingRepository.saveAll(waitings);
 
@@ -115,7 +116,7 @@ class WaitingServiceTest {
     @Test
     void deleteWaiting() {
         Waiting waiting = waitingRepository.save(
-                new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
+                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
 
         waitingService.deleteWaiting(waiting.getId());
 
@@ -128,8 +129,9 @@ class WaitingServiceTest {
     void findAllWithRankByMember() {
         Member otherMember = memberRepository.save(new Member("runnerDuck", "runnerDuck@email.com", "runnerDuck", Role.USER));
         List<Waiting> waitings = List.of(
-                new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
-                new Waiting(otherMember, LocalDate.of(2999, 12, 12), reservationTime, theme));
+                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
+                new Waiting(otherMember, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme))
+                );
 
         waitingRepository.saveAll(waitings);
 
@@ -145,8 +147,8 @@ class WaitingServiceTest {
     @DisplayName("주어진 예약과 동일한 날짜, 시간, 테마의 예약 대기가 있다면 예약으로 전환한다.")
     @Test
     void convertFirstWaitingToReservation() {
-        waitingRepository.save(new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
+        waitingRepository.save(new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
+        Reservation reservation = reservationRepository.save(new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
 
         waitingService.convertFirstWaitingToReservation(reservation);
 

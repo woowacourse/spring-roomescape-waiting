@@ -13,11 +13,11 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findAllByMember(Member member);
 
-    Long countAllByDateAndTimeAndThemeAndIdLessThanEqual(LocalDate date, ReservationTime time, Theme theme, Long id);
+    Long countAllBySchedule_DateAndSchedule_TimeAndSchedule_ThemeAndIdLessThanEqual(LocalDate date, ReservationTime time, Theme theme, Long id);
 
-    boolean existsByMemberAndTimeAndDateAndTheme(Member member, ReservationTime time, LocalDate date, Theme theme);
+    boolean existsByMemberAndSchedule_DateAndSchedule_TimeAndSchedule_Theme(Member member, LocalDate date, ReservationTime time, Theme theme);
 
-    Optional<Waiting> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Optional<Waiting> findFirstBySchedule_DateAndSchedule_TimeAndSchedule_Theme(LocalDate date, ReservationTime time, Theme theme);
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    boolean existsBySchedule_DateAndSchedule_TimeAndSchedule_Theme(LocalDate date, ReservationTime time, Theme theme);
 }

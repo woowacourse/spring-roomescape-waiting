@@ -10,9 +10,9 @@ public record WaitingResponse(Long id, String name, LocalDate date, LocalTime ti
         return new WaitingResponse(
                 waiting.getId(),
                 waiting.getMember().getName(),
-                waiting.getDate(),
-                waiting.getTime().getStartAt(),
-                waiting.getTheme().getName()
+                waiting.getSchedule().getDate(),
+                waiting.getSchedule().getTime().getStartAt(),
+                waiting.getSchedule().getTheme().getName()
         );
     }
 }

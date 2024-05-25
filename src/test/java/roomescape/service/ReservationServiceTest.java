@@ -147,9 +147,9 @@ class ReservationServiceTest {
                 new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
 
         List<Waiting> waitings = List.of(
-                new Waiting(member, LocalDate.of(2999, 12, 11), reservationTime, theme),
-                new Waiting(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
-                new Waiting(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
+                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 11), reservationTime, theme)),
+                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
+                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
 
         reservationRepository.saveAll(reservations);
         waitingRepository.saveAll(waitings);
@@ -161,7 +161,7 @@ class ReservationServiceTest {
 
         assertAll(
                 () -> assertThat(allReservations.get(1).getDate()).isEqualTo(LocalDate.of(2999, 12, 12)),
-                () -> assertThat(allWaitings.get(1).getDate()).isNotEqualTo(LocalDate.of(2999, 12, 12))
+                () -> assertThat(allWaitings.get(1).getSchedule().getDate()).isNotEqualTo(LocalDate.of(2999, 12, 12))
         );
     }
 
