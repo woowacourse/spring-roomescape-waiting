@@ -28,8 +28,8 @@ public class ReservationRestController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationRankResponse> findReservations(@AuthenticationPrincipal LoginMember loginMember) {
-        return reservationService.findAllMyReservations(loginMember.getEmail());
+    public List<ReservationRankResponse> findAllReservations(@AuthenticationPrincipal LoginMember loginMember) {
+        return reservationService.findAllReservationsByEmail(loginMember.getEmail());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -60,8 +60,7 @@ public class ReservationRestController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/reservations/waiting/{id}")
-    public void deleteWaitingReservation(@AuthenticationPrincipal LoginMember loginMember,
-                                         @PathVariable long id) {
+    public void deleteWaitingReservation(@AuthenticationPrincipal LoginMember loginMember, @PathVariable long id) {
         reservationService.cancelWaitingReservation(loginMember.getEmail(), id);
     }
 }

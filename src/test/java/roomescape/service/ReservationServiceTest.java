@@ -83,7 +83,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date1, time1, CONFIRMED);
         reservationRepository.save(reservation);
 
-        assertThatThrownBy(() -> reservationService.findAllMyReservations("t1@t1.com"))
+        assertThatThrownBy(() -> reservationService.findAllReservationsByEmail("t1@t1.com"))
                 .isInstanceOf(MemberNotFoundException.class);
     }
 
@@ -111,7 +111,7 @@ class ReservationServiceTest {
                 new ReservationRankResponse(2L, theme.getName(), date2, time2.getStartAt(), CONFIRMED, 1)
         );
 
-        List<ReservationRankResponse> actual = reservationService.findAllMyReservations(member.getEmail());
+        List<ReservationRankResponse> actual = reservationService.findAllReservationsByEmail(member.getEmail());
 
         assertThat(actual).usingRecursiveComparison()
                 .isEqualTo(expected);
