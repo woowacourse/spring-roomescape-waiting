@@ -29,7 +29,6 @@ public class Reservation {
     private Theme theme;
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 

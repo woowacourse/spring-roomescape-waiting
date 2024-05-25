@@ -81,7 +81,7 @@ public class ReservationService {
     @Transactional
     public void deleteById(long memberId, long id) {
         Reservation reservation = reservationRepository.getById(id);
-        if (isAuthorization(memberId, reservation)) {
+        if (isAuthorized(memberId, reservation)) {
             reservationRepository.deleteById(reservation.getId());
             return;
         }
@@ -91,14 +91,14 @@ public class ReservationService {
     @Transactional
     public void updateMemberById(long id, long memberId, Member member) {
         Reservation reservation = reservationRepository.getById(id);
-        if (isAuthorization(memberId, reservation)) {
+        if (isAuthorized(memberId, reservation)) {
             reservation.updateMember(member, LocalDateTime.now(clock));
             return;
         }
         throw new UnAuthorizedException();
     }
 
-    private boolean isAuthorization(long memberId, Reservation reservation) {
+    private boolean isAuthorized(long memberId, Reservation reservation) {
         return roleRepository.isAdminByMemberId(memberId) || reservation.isOwnedBy(memberId);
     }
 }
