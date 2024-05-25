@@ -28,7 +28,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private RoomTheme theme;
     @Enumerated(EnumType.STRING)
-    private Status status; // TODO 조합으로 분리
+    private Status status;
     private LocalDateTime createdAt;
 
     protected Reservation() {
@@ -91,8 +91,14 @@ public class Reservation {
     }
 
     public void validateAuthorization(Member member) {
-        if (!this.member.equals(member) || this.member.getRole() != Role.ADMIN) {
+        if (!this.member.equals(member)) {
             throw new AuthorizationException("접근권한이 없습니다.");
+        }
+    }
+
+    public void validateStatus() {
+        if (this.status == Status.WAITING_CANCEL || this.status == Status.DELETED) {
+            throw new BadRequestException("조회 불가능한 예약입니다.");
         }
     }
 

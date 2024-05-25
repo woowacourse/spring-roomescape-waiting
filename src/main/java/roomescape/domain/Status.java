@@ -2,7 +2,7 @@ package roomescape.domain;
 
 public enum Status {
 
-    CREATED("생성"),
+    CREATED("예약"),
     WAITING("대기"),
     WAITING_CANCEL("대기 취소"),
     DELETED("삭제");

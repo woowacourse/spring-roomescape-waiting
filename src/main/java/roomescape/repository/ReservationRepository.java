@@ -15,7 +15,7 @@ import roomescape.domain.Status;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
-    Optional<List<Reservation>> findByThemeId(Long themeId);
+    Optional<List<Reservation>> findByThemeId(Long themeId); //TODO 상태 추가
 
     Optional<Reservation> findByDateAndTimeAndThemeAndMember(
             LocalDate date,
@@ -29,7 +29,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                      where r2.theme = r1.theme
                      AND r2.date = r1.date
                      AND r2.time = r1.time
-                     AND r2.createdAt < r1.createdAt) AS Long))
+                     AND r2.createdAt < r1.createdAt
+                     AND (r2.status = 'WAITING' or r2.status = 'CREATED')) AS Long))
         FROM Reservation r1
         WHERE r1.member.id = :memberId and (r1.status = 'WAITING' or r1.status = 'CREATED')
         order by r1.date
