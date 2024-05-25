@@ -1,18 +1,17 @@
 package roomescape.domain;
 
-import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import org.hibernate.proxy.HibernateProxy;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,8 +35,6 @@ public class Member {
     @Column(name = "role", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Role role;
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "member")
-    private List<ReservationWait> waits;
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
@@ -64,19 +61,30 @@ public class Member {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null) {
             return false;
         }
-        Member user = (Member) o;
-        return Objects.equals(id, user.id);
+        Class<?> oEffectiveClass = o instanceof HibernateProxy
+                ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) {
+            return false;
+        }
+        Member member = (Member) o;
+        return getId() != null && Objects.equals(getId(), member.getId());
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                .getPersistentClass()
+                .hashCode() : getClass().hashCode();
     }
 }
