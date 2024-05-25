@@ -32,3 +32,6 @@ security:
   jwt:
     secret-key: abcdefghijklmnopqrstuvwxyz0123456789
     expiration-time: 3600000 # 1 hour
+
+waiting:
+  approval-strategy: auto
