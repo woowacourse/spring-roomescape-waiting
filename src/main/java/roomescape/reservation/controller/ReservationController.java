@@ -96,4 +96,11 @@ public class ReservationController {
         return ResponseEntity.noContent()
                 .build();
     }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteReservationWaiting(@PathVariable long id) {
+        waitingService.removeReservations(id);
+        return ResponseEntity.noContent()
+                .build();
+    }
 }

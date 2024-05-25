@@ -60,4 +60,8 @@ public class ReservationWaitingService {
                                             reservation.getTime().getStartAt()));
                 });
     }
+
+    public void removeReservations(long id) {
+        waitingRepository.deleteById(id);
+    }
 }
