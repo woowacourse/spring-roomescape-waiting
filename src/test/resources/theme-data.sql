@@ -29,8 +29,8 @@ INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DAT
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 8, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 9, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 10, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 10, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 10, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 10, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 9, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 1, 1, 9, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 2, 1, 10, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 3, 1, 10, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 4, 1, 10, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 2, 1, 9, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE - 3, 1, 9, 1);

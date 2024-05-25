@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
 public class Reservation {
 
     @Id

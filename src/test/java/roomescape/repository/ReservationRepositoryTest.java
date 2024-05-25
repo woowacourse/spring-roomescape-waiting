@@ -246,7 +246,7 @@ class ReservationRepositoryTest {
     @Test
     void should_return_reservations_when_give_conditions() {
         LocalDate day1 = LocalDate.of(2024, 5, 15);
-        LocalDate day2 = LocalDate.of(2024, 5, 17);
+        LocalDate day2 = LocalDate.of(2024, 5, 19);
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         Theme theme1 = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
         Theme theme2 = new Theme("배키테마", "배키테마설명", "배키테마썸네일");
@@ -259,13 +259,13 @@ class ReservationRepositoryTest {
         entityManager.persist(member2);
 
         Reservation reservation1 = new Reservation(day1, time, theme1, member1);
-        Reservation reservation2 = new Reservation(day1, time, theme1, member2);
+        Reservation reservation2 = new Reservation(day1.plusDays(1), time, theme1, member2);
         Reservation reservation3 = new Reservation(day1, time, theme2, member1);
-        Reservation reservation4 = new Reservation(day1, time, theme2, member2);
+        Reservation reservation4 = new Reservation(day1.plusDays(1), time, theme2, member2);
         Reservation reservation5 = new Reservation(day2, time, theme1, member1);
-        Reservation reservation6 = new Reservation(day2, time, theme1, member2);
+        Reservation reservation6 = new Reservation(day2.minusDays(1), time, theme1, member2);
         Reservation reservation7 = new Reservation(day2, time, theme2, member1);
-        Reservation reservation8 = new Reservation(day2, time, theme2, member2);
+        Reservation reservation8 = new Reservation(day2.minusDays(1), time, theme2, member2);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
         entityManager.persist(reservation3);
@@ -275,7 +275,7 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation7);
         entityManager.persist(reservation8);
 
-        LocalDate middle = LocalDate.of(2024, 5, 15);
+        LocalDate middle = LocalDate.of(2024, 5, 17);
 
         List<Reservation> reservations = reservationRepository.findByConditions(theme1, member1, day1, middle);
         assertThat(reservations).hasSize(1);

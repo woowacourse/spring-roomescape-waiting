@@ -91,11 +91,11 @@ class ThemeRepositoryTest {
         }
         Theme theme10 = entityManager.find(Theme.class, 10);
         Theme theme9 = entityManager.find(Theme.class, 9);
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
+        entityManager.persist(new Reservation(LocalDate.now().minusDays(1), reservationTime, theme10, member));
+        entityManager.persist(new Reservation(LocalDate.now().minusDays(2), reservationTime, theme10, member));
+        entityManager.persist(new Reservation(LocalDate.now().minusDays(3), reservationTime, theme10, member));
+        entityManager.persist(new Reservation(LocalDate.now().minusDays(1), reservationTime, theme9, member));
+        entityManager.persist(new Reservation(LocalDate.now().minusDays(2), reservationTime, theme9, member));
 
         LocalDate before = LocalDate.now().minusDays(8);
         LocalDate after = LocalDate.now().plusDays(1);

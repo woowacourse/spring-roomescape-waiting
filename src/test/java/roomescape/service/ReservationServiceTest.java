@@ -85,7 +85,7 @@ class ReservationServiceTest {
         Member member = memberRepository.findById(1L).orElseThrow();
 
         reservationRepository.save(new Reservation(1L, now(), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme, member));
 
         List<Reservation> reservations = reservationService
                 .filterReservation(1L, 1L, now().minusDays(1), now().plusDays(3));
@@ -248,7 +248,7 @@ class ReservationServiceTest {
         Member member = memberRepository.findById(1L).orElseThrow();
 
         reservationRepository.save(new Reservation(1L, now(), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme, member));
 
         List<Reservation> reservations = reservationService
                 .findMemberReservations(member.getId());
@@ -267,7 +267,7 @@ class ReservationServiceTest {
         Member member = memberRepository.findById(1L).orElseThrow();
 
         reservationRepository.save(new Reservation(1L, now(), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme, member));
 
         Reservation reservation = reservationService.findById(1L);
         assertThat(reservation.getId()).isEqualTo(1);
