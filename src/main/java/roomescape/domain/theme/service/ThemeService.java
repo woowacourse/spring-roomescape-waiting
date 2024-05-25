@@ -10,6 +10,8 @@ import roomescape.global.exception.NoMatchingDataException;
 @Service
 public class ThemeService {
 
+    protected static final String NON_EXIST_THEME_ID_ERROR_MESSAGE = "해당 id를 가진 테마가 존재하지 않습니다.";
+
     private final ThemeRepository themeRepository;
 
     public ThemeService(ThemeRepository themeRepository) {
@@ -27,7 +29,7 @@ public class ThemeService {
 
     public void removeTheme(Long id) {
         if (themeRepository.findById(id).isEmpty()) {
-            throw new NoMatchingDataException("해당 id를 가진 테마가 존재하지 않습니다.");
+            throw new NoMatchingDataException(NON_EXIST_THEME_ID_ERROR_MESSAGE);
         }
         themeRepository.deleteById(id);
     }

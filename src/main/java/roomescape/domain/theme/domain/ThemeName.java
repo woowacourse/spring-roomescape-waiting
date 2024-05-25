@@ -8,6 +8,8 @@ import roomescape.global.exception.ValueNullOrEmptyException;
 @Embeddable
 public class ThemeName {
 
+    protected static final String THEME_NAME_EMPTY_ERROR_MESSAGE = "테마 이름은 비어있을 수 없습니다.";
+
     @Column(name = "name", nullable = false)
     private String value;
 
@@ -22,7 +24,7 @@ public class ThemeName {
 
     private void validateNullAndBlank(String value) {
         if (value == null || value.isBlank()) {
-            throw new ValueNullOrEmptyException("테마 이름은 비어있을 수 없습니다.");
+            throw new ValueNullOrEmptyException(THEME_NAME_EMPTY_ERROR_MESSAGE);
         }
     }
 
