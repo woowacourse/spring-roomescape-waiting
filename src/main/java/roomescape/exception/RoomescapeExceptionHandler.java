@@ -34,7 +34,11 @@ public class RoomescapeExceptionHandler {
                 .body(new ErrorResponse(exception));
     }
 
-    // TODO: 커스텀 에러 정의하기(존재하지 않는 예약에 대기)
+    @ExceptionHandler(value = InvalidWaitingException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidWaitingException(final InvalidWaitingException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(exception));
+    }
 
     @ExceptionHandler(value = AlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleAlreadyExistsException(final AlreadyExistsException exception) {

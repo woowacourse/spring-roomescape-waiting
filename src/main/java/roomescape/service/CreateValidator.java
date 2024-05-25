@@ -15,6 +15,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
+import roomescape.exception.InvalidWaitingException;
 import roomescape.exception.NotExistException;
 import roomescape.exception.PastTimeReservationException;
 import roomescape.repository.MemberRepository;
@@ -71,8 +72,7 @@ public class CreateValidator {
 
         final Waiting waiting = input.toWaiting(reservationTime, theme, member, LocalTime.now());
         if (!reservationRepository.existsByDateAndTimeId(ReservationDate.from(input.date()), input.timeId())) {
-            // TODO: 커스텀 예약
-            throw new IllegalArgumentException("대기를 요청할 예약이 존재하지 않습니다.");
+            throw new InvalidWaitingException();
         }
         if (waitingRepository.existsByDateAndTimeIdAndMemberId(ReservationDate.from(input.date()), input.timeId(),
                 input.memberId())) {
