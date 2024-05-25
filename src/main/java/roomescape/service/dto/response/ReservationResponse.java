@@ -11,10 +11,10 @@ public record ReservationResponse(Long id, String name,
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getMember().getName(),
-                reservation.getDate(),
+                reservation.getSchedule().getDate(),
                 MemberResponse.from(reservation.getMember()),
-                ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme())
+                ReservationTimeResponse.from(reservation.getSchedule().getTime()),
+                ThemeResponse.from(reservation.getSchedule().getTheme())
         );
     }
 }

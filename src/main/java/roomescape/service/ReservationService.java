@@ -47,7 +47,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (reservationRepository.existsByTimeAndDate(reservationTime, reservationRequest.date())) {
+        if (reservationRepository.existsBySchedule_DateAndSchedule_Time(reservationRequest.date(), reservationTime)) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);
@@ -74,8 +74,9 @@ public class ReservationService {
     public List<ReservationResponse> findAllReservationsByCondition(ReservationConditionRequest condition) {
         Theme findTheme = getTheme(condition.themeId());
         Member findMember = getMember(condition.memberId());
-        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDateBetween(findTheme,
-                findMember, condition.dateFrom(), condition.dateTo());
+        List<Reservation> reservations = reservationRepository.findAllByMemberAndSchedule_ThemeAndSchedule_DateBetween(
+                findMember, findTheme,
+                condition.dateFrom(), condition.dateTo());
 
         return reservations.stream()
                 .map(ReservationResponse::from)

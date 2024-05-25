@@ -18,6 +18,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.handler.exception.CustomException;
@@ -117,8 +118,8 @@ class ReservationServiceTest {
     @Test
     void findAllReservations() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
+                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
+                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
 
         reservationRepository.saveAll(reservations);
 
@@ -131,7 +132,7 @@ class ReservationServiceTest {
     @Test
     void deleteReservation() {
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
+                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
 
         reservationService.deleteReservation(reservation.getId());
 
@@ -143,8 +144,8 @@ class ReservationServiceTest {
     @Test
     void convertFirstWaitingToReservation() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
+                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
+                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
 
         List<Waiting> waitings = List.of(
                 new Waiting(member, new Schedule(LocalDate.of(2999, 12, 11), reservationTime, theme)),
@@ -160,7 +161,7 @@ class ReservationServiceTest {
         List<Waiting> allWaitings = waitingRepository.findAll();
 
         assertAll(
-                () -> assertThat(allReservations.get(1).getDate()).isEqualTo(LocalDate.of(2999, 12, 12)),
+                () -> assertThat(allReservations.get(1).getSchedule().getDate()).isEqualTo(LocalDate.of(2999, 12, 12)),
                 () -> assertThat(allWaitings.get(1).getSchedule().getDate()).isNotEqualTo(LocalDate.of(2999, 12, 12))
         );
     }
@@ -178,8 +179,8 @@ class ReservationServiceTest {
         Member member2 = memberRepository.save(
                 new Member("rush", "rush@email.com", "rush", Role.ADMIN));
 
-        reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12), reservationTime1, theme));
-        reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12), reservationTime2, theme));
+        reservationRepository.save(new Reservation(member1,new Schedule( LocalDate.of(2030, 12, 12), reservationTime1, theme)));
+        reservationRepository.save(new Reservation(member2,new Schedule( LocalDate.of(2030, 12, 12), reservationTime2, theme)));
 
         List<MyReservationEntryResponse> reservations = reservationService.findAllByMemberId(member1.getId());
 

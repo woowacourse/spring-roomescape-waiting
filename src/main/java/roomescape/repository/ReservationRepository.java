@@ -11,17 +11,17 @@ import roomescape.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @EntityGraph(attributePaths = {"member", "time", "theme"})
+    @EntityGraph(attributePaths = {"member", "schedule.time", "schedule.theme"})
     List<Reservation> findAll();
 
-    List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
+    List<Reservation> findAllBySchedule_DateAndSchedule_Theme(LocalDate date, Theme theme);
 
-    boolean existsByTimeAndDate(ReservationTime reservationTime, LocalDate date);
+    boolean existsBySchedule_DateAndSchedule_Time(LocalDate date, ReservationTime reservationTime);
 
-    List<Reservation> findAllByThemeAndMemberAndDateBetween(Theme theme, Member member, LocalDate from, LocalDate to);
+    List<Reservation> findAllByMemberAndSchedule_ThemeAndSchedule_DateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
 
-    @EntityGraph(attributePaths = {"time", "theme"})
+    @EntityGraph(attributePaths = {"schedule.time", "schedule.theme"})
     List<Reservation> findAllByMember(Member member);
 
-    boolean existsByMemberAndTimeAndDate(Member member, ReservationTime reservationTime, LocalDate date);
+    boolean existsByMemberAndSchedule_TimeAndSchedule_Date(Member member, ReservationTime reservationTime, LocalDate date);
 }

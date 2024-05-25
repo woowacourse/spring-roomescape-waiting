@@ -13,15 +13,15 @@ class ReservationEntryTest {
 
     @DisplayName("예약과 예약 대기 목록을 통해 통합 예약 항목을 생성한다.")
     @Test
-    void of() {
+    void createEntries() {
         Member member = new Member("learner", "learnerDeok@email.com", "learnerDeok", Role.USER);
         LocalDate date = LocalDate.of(2099, 12, 31);
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         Theme theme = new Theme("happy", "hi", "abcd.html");
 
-        List<Reservation> reservations = List.of(new Reservation(member, date, time, theme));
-        List<WaitingWithRank> waitingWithRanks = List.of(new WaitingWithRank(new Waiting(member, date, time, theme), 1L));
-        List<ReservationEntry> reservationEntries = ReservationEntry.of(reservations, waitingWithRanks);
+        List<Reservation> reservations = List.of(new Reservation(member, new Schedule(date, time, theme)));
+        List<WaitingWithRank> waitingWithRanks = List.of(new WaitingWithRank(new Waiting(member, new Schedule(date, time, theme)), 1L));
+        List<ReservationEntry> reservationEntries = ReservationEntry.createEntries(reservations, waitingWithRanks);
 
         ReservationEntry reservation = reservationEntries.get(0);
         ReservationEntry waiting = reservationEntries.get(1);

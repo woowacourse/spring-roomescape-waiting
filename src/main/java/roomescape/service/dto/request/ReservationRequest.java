@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 
@@ -19,10 +20,10 @@ public record ReservationRequest(
         Long memberId) {
 
     public Reservation toEntity(Member member, ReservationTime reservationTime, Theme theme) {
-        return new Reservation(member, date, reservationTime, theme);
+        return new Reservation(member, new Schedule(date, reservationTime, theme));
     }
 
     public Waiting toWaiting(Member member, ReservationTime reservationTime, Theme theme) {
-        return new Waiting(member, date, reservationTime, theme);
+        return new Waiting(member, new Schedule(date, reservationTime, theme));
     }
 }

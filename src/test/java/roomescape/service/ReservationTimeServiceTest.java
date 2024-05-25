@@ -15,6 +15,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -81,9 +82,7 @@ class ReservationTimeServiceTest {
 
         reservationRepository.save(new Reservation(
                 new Member(1L, "asd", "asd@email.com", "password", Role.USER),
-                searchDate,
-                reservedTime,
-                savedTheme
+                new Schedule(searchDate, reservedTime, savedTheme)
         ));
 
         List<AvailableTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(

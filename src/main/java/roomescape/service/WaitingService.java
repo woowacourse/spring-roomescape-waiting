@@ -53,7 +53,7 @@ public class WaitingService {
                 theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
         }
-        if (reservationRepository.existsByMemberAndTimeAndDate(member, reservationTime, reservationRequest.date())) {
+        if (reservationRepository.existsByMemberAndSchedule_TimeAndSchedule_Date(member, reservationTime, reservationRequest.date())) {
             throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);

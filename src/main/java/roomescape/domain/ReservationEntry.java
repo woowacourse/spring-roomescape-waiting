@@ -42,9 +42,9 @@ public class ReservationEntry {
             ReservationEntry reservationEntry = new ReservationEntry(
                     reservation.getId(),
                     reservation.getMember(),
-                    reservation.getDate(),
-                    reservation.getTime(),
-                    reservation.getTheme(),
+                    reservation.getSchedule().getDate(),
+                    reservation.getSchedule().getTime(),
+                    reservation.getSchedule().getTheme(),
                     ReservationStatus.RESERVATION,
                     0L
             );
