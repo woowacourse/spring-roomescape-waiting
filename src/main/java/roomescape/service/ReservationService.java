@@ -113,7 +113,8 @@ public class ReservationService {
 
     @Transactional
     public void rejectWaitingReservation(long id) {
-        Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, WAITING)
+                .orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(REJECTED);
     }
 
