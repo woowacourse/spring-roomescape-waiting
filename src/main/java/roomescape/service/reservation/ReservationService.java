@@ -9,7 +9,9 @@ import static roomescape.domain.reservation.ReservationRepository.Specs.hasTheme
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -17,6 +19,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
+import roomescape.domain.reservationwaiting.ReservationWaitingWithRank;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.reservation.DuplicatedReservationException;
@@ -34,15 +38,18 @@ import roomescape.service.reservation.dto.ReservationResponse;
 @Transactional
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository,
+                              ReservationWaitingRepository reservationWaitingRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
                               Clock clock) {
         this.reservationRepository = reservationRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
@@ -65,9 +72,16 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public ReservationMineListResponse findMyReservation(Member member) {
         List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
-        return new ReservationMineListResponse(reservations.stream()
-                .map(ReservationMineResponse::new)
-                .toList());
+        List<ReservationWaitingWithRank> reservationWaitingWithRanks
+                = reservationWaitingRepository.findAllWaitingWithRankByMemberId(member.getId());
+
+        List<ReservationMineResponse> myReservations = Stream.concat(
+                        reservations.stream().map(ReservationMineResponse::new),
+                        reservationWaitingWithRanks.stream().map(ReservationMineResponse::new)
+                )
+                .sorted(Comparator.comparing(ReservationMineResponse::getDateTime))
+                .toList();
+        return new ReservationMineListResponse(myReservations);
     }
 
     public ReservationResponse saveReservation(ReservationRequest request, Member member) {

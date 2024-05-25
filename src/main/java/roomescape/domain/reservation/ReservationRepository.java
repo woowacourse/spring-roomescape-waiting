@@ -11,13 +11,6 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
-    @Query("""
-            SELECT r.time.id
-            FROM Reservation r
-            WHERE r.date = :date AND r.theme.id = :themeId
-            """)
-    List<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
-
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     boolean existsByTimeId(long timeId);
@@ -25,6 +18,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     boolean existsByThemeId(long themeId);
 
     List<Reservation> findByMemberId(Long id);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    @Query("""
+            SELECT r.time.id
+            FROM Reservation r
+            WHERE r.date = :date AND r.theme.id = :themeId
+            """)
+    List<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 
     @Query("""
             SELECT t
@@ -36,8 +38,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             LIMIT 10
             """)
     List<Theme> findThemeByMostPopularReservation(LocalDate startDate, LocalDate endDate);
-
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     interface Specs {
         static Specification<Reservation> hasMemberId(Long memberId) {
