@@ -54,7 +54,7 @@ public class Member {
     }
 
     public boolean isNotAdmin() {
-        return !role.isAdmin();
+        return role.isNotAdmin();
     }
 
     @Override

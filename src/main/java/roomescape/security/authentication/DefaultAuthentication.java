@@ -30,6 +30,6 @@ public class DefaultAuthentication implements Authentication {
 
     @Override
     public boolean isNotAdmin() {
-        return !role.isAdmin();
+        return role.isNotAdmin();
     }
 }
