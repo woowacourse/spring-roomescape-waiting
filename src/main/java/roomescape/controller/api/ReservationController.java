@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.response.ApiResponses;
 import roomescape.controller.support.Auth;
-import roomescape.security.Accessor;
+import roomescape.security.authentication.Authentication;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.response.PersonalReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
@@ -44,16 +44,16 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ApiResponses<PersonalReservationResponse> getMyReservations(@Auth Accessor accessor) {
+    public ApiResponses<PersonalReservationResponse> getMyReservations(@Auth Authentication authentication) {
         List<PersonalReservationResponse> reservationResponses = reservationService
-                .getReservationsByMemberId(accessor.id());
+                .getReservationsByMemberId(authentication.getId());
         return new ApiResponses<>(reservationResponses);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid ReservationRequest request,
-                                                              @Auth Accessor accessor) {
-        long memberId = accessor.id();
+                                                              @Auth Authentication authentication) {
+        long memberId = authentication.getId();
         ReservationResponse response = reservationService.addReservation(request.toCreateReservationRequest(memberId));
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);

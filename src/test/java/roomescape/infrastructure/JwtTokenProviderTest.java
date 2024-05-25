@@ -16,7 +16,7 @@ class JwtTokenProviderTest {
     void createToken() {
         String token = jwtTokenProvider.createToken("1");
 
-        assertThatCode(() -> jwtTokenProvider.getMemberId(token))
+        assertThatCode(() -> jwtTokenProvider.extractSubject(token))
                 .doesNotThrowAnyException();
     }
 
@@ -25,8 +25,8 @@ class JwtTokenProviderTest {
     void getMemberId() {
         String token = jwtTokenProvider.createToken("1");
 
-        Long memberId = jwtTokenProvider.getMemberId(token);
+        String memberId = jwtTokenProvider.extractSubject(token);
 
-        assertThat(memberId).isEqualTo(1L);
+        assertThat(memberId).isEqualTo("1");
     }
 }
