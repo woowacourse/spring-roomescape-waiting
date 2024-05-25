@@ -57,15 +57,20 @@ class ReservationServiceTest {
         assertTrue(reservationRepository.findById(response.id()).isPresent());
     }
 
-    @DisplayName("중복된 예약을 저장하려고 할 때 예외를 던진다.")
+    @DisplayName("중복된 예약을 저장을 시도하면 예약 대기로 저장된다.")
     @Test
     void saveDuplicateReservationThrowsException() {
         // given
         Member member = memberRepository.save(Member.of("anna", "brown@gmail.com", "password", "MEMBER"));
         ReservationSaveRequest saveRequest = new ReservationSaveRequest(1L, LocalDate.parse("2024-12-12"), 1L);
 
-        // when & then
-        assertThrows(IllegalArgumentException.class, () -> reservationService.reserve(saveRequest, member));
+        // when
+        ReservationResponse response = reservationService.reserve(saveRequest, member);
+
+        // then
+        Optional<Reservation> reservation = reservationRepository.findById(6L);
+        assertTrue(reservation.isPresent());
+        assertThat(reservation.get().getStatus()).isEqualTo(Status.PENDING);
     }
 
     @DisplayName("모든 예약을 조회한다.")
