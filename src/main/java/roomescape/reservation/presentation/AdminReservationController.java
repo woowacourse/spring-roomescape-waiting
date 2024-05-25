@@ -61,7 +61,7 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
-        List<Reservation> reservations = bookingQueryService.findReservations();
+        List<Reservation> reservations = bookingQueryService.findAll();
         return ResponseEntity.ok(reservations.stream()
                 .map(ReservationResponse::from)
                 .toList());
@@ -71,7 +71,7 @@ public class AdminReservationController {
     public ResponseEntity<List<ReservationResponse>> findReservationsByMemberIdAndThemeIdAndDateBetween(
             @RequestParam Long memberId, @RequestParam Long themeId,
             @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate) {
-        List<Reservation> reservations = bookingQueryService.findReservationsByMemberIdAndThemeIdAndDateBetween(
+        List<Reservation> reservations = bookingQueryService.findAllByMemberIdAndThemeIdAndDateBetween(
                 memberId, themeId, fromDate, toDate);
         return ResponseEntity.ok(reservations.stream()
                 .map(ReservationResponse::from)

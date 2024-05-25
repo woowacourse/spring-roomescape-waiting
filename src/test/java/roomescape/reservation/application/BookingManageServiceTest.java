@@ -84,7 +84,7 @@ class BookingManageServiceTest extends ReservationServiceTest {
         bookingManageService.delete(reservationInBooking.getId(), admin);
 
         // then
-        List<Reservation> changedBookings = bookingQueryService.findReservationsInBookingByMember(admin);
+        List<Reservation> changedBookings = bookingQueryService.findAllByMember(admin);
         assertThat(changedBookings).hasSize(1)
                 .extracting(Reservation::getId)
                 .contains(reservationInWaiting.getId());

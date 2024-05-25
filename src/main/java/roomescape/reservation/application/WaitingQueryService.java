@@ -17,11 +17,11 @@ public class WaitingQueryService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<WaitingReservation> findWaitingReservationsWithPreviousCountByMember(Member member) {
+    public List<WaitingReservation> findAllWithPreviousCountByMember(Member member) {
         return reservationRepository.findWaitingReservationsByMemberWithDetails(member);
     }
 
-    public List<Reservation> findWaitingReservations() {
+    public List<Reservation> findAll() {
         return reservationRepository.findAllByStatusWithDetails(ReservationStatus.WAITING);
     }
 }

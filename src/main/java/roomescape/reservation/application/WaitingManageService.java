@@ -31,7 +31,7 @@ public class WaitingManageService extends ReservationManageService {
     }
 
     @Override
-    protected void validateOwnerShipForDeleting(Reservation reservation, Member agent) {
+    protected void validatePermissionForDeleting(Reservation reservation, Member agent) {
         if (!reservation.isModifiableBy(agent)) {
             throw new ViolationException("대기 예약을 삭제할 권한이 없습니다. 예약자 혹은 관리자만 삭제할 수 있습니다.");
         }

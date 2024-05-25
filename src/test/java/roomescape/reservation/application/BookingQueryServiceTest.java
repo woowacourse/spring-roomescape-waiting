@@ -38,7 +38,7 @@ class BookingQueryServiceTest extends ReservationServiceTest {
         bookingManageService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy, BOOKING));
 
         // when
-        List<Reservation> reservations = bookingQueryService.findReservations();
+        List<Reservation> reservations = bookingQueryService.findAll();
 
         // then
         assertSoftly(softly -> {
@@ -64,7 +64,7 @@ class BookingQueryServiceTest extends ReservationServiceTest {
                 TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy, BOOKING));
 
         // when
-        List<Reservation> reservations = bookingQueryService.findReservationsByMemberIdAndThemeIdAndDateBetween(
+        List<Reservation> reservations = bookingQueryService.findAllByMemberIdAndThemeIdAndDateBetween(
                 miaReservation.getMember().getId(), miaReservation.getTheme().getId(),
                 miaReservation.getDate(), tommyReservation.getDate());
 
@@ -76,13 +76,13 @@ class BookingQueryServiceTest extends ReservationServiceTest {
 
     @Test
     @DisplayName("사용자의 예약 목록을 조회한다.")
-    void findAllInBookingByMember() {
+    void findAllByMember() {
         // given
         bookingManageService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
         bookingManageService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy, BOOKING));
 
         // when
-        List<Reservation> reservations = bookingQueryService.findReservationsInBookingByMember(mia);
+        List<Reservation> reservations = bookingQueryService.findAllByMember(mia);
 
         // then
         assertThat(reservations).hasSize(1)

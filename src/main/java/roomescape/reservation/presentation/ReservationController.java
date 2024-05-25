@@ -73,11 +73,11 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(Member loginMember) {
-        List<MyReservationResponse> myBookingResponses = bookingQueryService.findReservationsInBookingByMember(loginMember)
+        List<MyReservationResponse> myBookingResponses = bookingQueryService.findAllByMember(loginMember)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
-        List<MyReservationResponse> myWaitingResponses = waitingQueryService.findWaitingReservationsWithPreviousCountByMember(loginMember)
+        List<MyReservationResponse> myWaitingResponses = waitingQueryService.findAllWithPreviousCountByMember(loginMember)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();

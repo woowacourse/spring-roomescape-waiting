@@ -18,7 +18,7 @@ public abstract class ReservationManageService {
     abstract protected void scheduleForCreating(boolean existInSameTime, Reservation reservation);
     abstract protected void scheduleForDeleting(Reservation deletedReservation);
     abstract protected void validateReservationStatus(Reservation reservation);
-    abstract protected void validateOwnerShipForDeleting(Reservation reservation, Member agent);
+    abstract protected void validatePermissionForDeleting(Reservation reservation, Member agent);
 
     @Transactional
     public Reservation create(Reservation reservation) {
@@ -49,7 +49,7 @@ public abstract class ReservationManageService {
     public void delete(Long id, Member agent) {
         reservationRepository.findById(id).ifPresent(reservation -> {
             validateReservationStatus(reservation);
-            validateOwnerShipForDeleting(reservation, agent);
+            validatePermissionForDeleting(reservation, agent);
             reservationRepository.delete(reservation);
             scheduleForDeleting(reservation);
         });

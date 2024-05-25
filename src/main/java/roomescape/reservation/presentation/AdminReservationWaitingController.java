@@ -29,7 +29,7 @@ public class AdminReservationWaitingController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findWaitingReservations() {
-        List<Reservation> waitingReservations = waitingQueryService.findWaitingReservations();
+        List<Reservation> waitingReservations = waitingQueryService.findAll();
         return ResponseEntity.ok(waitingReservations.stream()
                 .map(ReservationResponse::from)
                 .toList());

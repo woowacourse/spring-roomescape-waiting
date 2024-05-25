@@ -33,7 +33,7 @@ class WaitingQueryServiceTest extends ReservationServiceTest {
 
     @Test
     @DisplayName("대기 중인 모든 예약 목록을 조회한다.")
-    void findAllInWaitingWithDetails() {
+    void findAllWithDetails() {
         // given
         bookingManageService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
         waitingManageService.create(new Reservation(tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme, WAITING));
@@ -42,7 +42,7 @@ class WaitingQueryServiceTest extends ReservationServiceTest {
         waitingManageService.create(new Reservation(mia, TOMMY_RESERVATION_DATE, miaReservationTime, wootecoTheme, WAITING));
 
         // when
-        List<Reservation> reservations = waitingQueryService.findWaitingReservations();
+        List<Reservation> reservations = waitingQueryService.findAll();
 
         // then
         assertThat(reservations).hasSize(2)
@@ -52,13 +52,13 @@ class WaitingQueryServiceTest extends ReservationServiceTest {
 
     @Test
     @DisplayName("사용자의 대기 예약 목록을 이전 대기 갯수와 함께 조회한다.")
-    void findAllInWaitingWithPreviousCountByMember() {
+    void findAllWithPreviousCountByMember() {
         // given
         bookingManageService.create(new Reservation(tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme, BOOKING));
         waitingManageService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING));
 
         // when
-        List<WaitingReservation> waitingReservations = waitingQueryService.findWaitingReservationsWithPreviousCountByMember(mia);
+        List<WaitingReservation> waitingReservations = waitingQueryService.findAllWithPreviousCountByMember(mia);
 
         // then
         assertThat(waitingReservations).hasSize(1)

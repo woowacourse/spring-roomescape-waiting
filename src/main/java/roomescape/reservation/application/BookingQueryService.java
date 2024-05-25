@@ -27,12 +27,12 @@ public class BookingQueryService {
         this.themeRepository = themeRepository;
     }
 
-    public List<Reservation> findReservations() {
+    public List<Reservation> findAll() {
         return reservationRepository.findAllByStatusWithDetails(ReservationStatus.BOOKING);
     }
 
-    public List<Reservation> findReservationsByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId,
-                                                                                LocalDate fromDate, LocalDate toDate) {
+    public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId,
+                                                                       LocalDate fromDate, LocalDate toDate) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("해당 Id의 사용자가 없습니다."));
         Theme theme = themeRepository.findById(themeId)
@@ -40,7 +40,7 @@ public class BookingQueryService {
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, fromDate, toDate);
     }
 
-    public List<Reservation> findReservationsInBookingByMember(Member member) {
+    public List<Reservation> findAllByMember(Member member) {
         return reservationRepository.findAllByMemberAndStatusWithDetails(member, ReservationStatus.BOOKING);
     }
 }

@@ -106,7 +106,7 @@ class AdminReservationControllerTest extends ControllerTest {
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
-        BDDMockito.given(bookingQueryService.findReservations())
+        BDDMockito.given(bookingQueryService.findAll())
                 .willReturn(List.of(expectedReservation));
 
         // when & then
@@ -127,7 +127,7 @@ class AdminReservationControllerTest extends ControllerTest {
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
-        BDDMockito.given(bookingQueryService.findReservationsByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
+        BDDMockito.given(bookingQueryService.findAllByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
                 .willReturn(List.of(expectedReservation));
 
         // when & then

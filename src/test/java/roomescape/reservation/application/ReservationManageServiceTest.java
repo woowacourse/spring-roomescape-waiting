@@ -36,7 +36,7 @@ class ReservationManageServiceTest {
     @ParameterizedTest
     @MethodSource("invalidReservationDate")
     @DisplayName("예약 날짜는 현재 날짜 이후이다.")
-    void validateDate(LocalDate invalidDate) {
+    void validateReservationDate(LocalDate invalidDate) {
         // given
         Reservation reservation = new Reservation(
                 USER_MIA(), invalidDate, new ReservationTime(MIA_RESERVATION_TIME), WOOTECO_THEME(), BOOKING);
@@ -55,7 +55,7 @@ class ReservationManageServiceTest {
 
     @Test
     @DisplayName("사용자는 중복된 예약을 할 수 없다.")
-    void createDuplicatedReservation() {
+    void validateDuplicatedReservation() {
         // given
         BDDMockito.given(reservationRepository.existsByDateAndTimeAndThemeAndMember(any(), any(), any(), any()))
                 .willReturn(true);

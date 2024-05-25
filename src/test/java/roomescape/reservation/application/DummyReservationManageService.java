@@ -22,6 +22,6 @@ public class DummyReservationManageService extends ReservationManageService {
     }
 
     @Override
-    protected void validateOwnerShipForDeleting(Reservation reservation, Member agent) {
+    protected void validatePermissionForDeleting(Reservation reservation, Member agent) {
     }
 }
