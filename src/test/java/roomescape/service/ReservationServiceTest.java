@@ -8,6 +8,7 @@ import roomescape.IntegrationTestSupport;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.Role;
 import roomescape.repository.dto.ReservationRankResponse;
@@ -84,8 +85,9 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     @DisplayName("예약 대기 목록을 조회한다.")
     void findAllWaiting() {
-        final List<Reservation> allWaiting = reservationService.findAllWaiting();
-        final List<Reservation> expected = List.of(new Reservation(8L, null, null, null, null));
+        final List<WaitingReservationResponse> allWaiting = reservationService.findAllWaiting();
+        final List<WaitingReservationResponse> expected = List.of(new WaitingReservationResponse(8L, "제제", "가을",
+                LocalDate.now().plusDays(4), LocalTime.of(18, 0)));
 
         //then
         assertThat(allWaiting).isEqualTo(expected);
@@ -96,9 +98,9 @@ class ReservationServiceTest extends IntegrationTestSupport {
     void deleteWaitReservation() {
         final long waitReservationId = 8L;
         final long memberId = 3L;
-        final List<Reservation> beforeDeleting = reservationService.findAllWaiting();
+        final List<WaitingReservationResponse> beforeDeleting = reservationService.findAllWaiting();
         reservationService.deleteWaitReservation(waitReservationId, memberId);
-        final List<Reservation> afterDeleting = reservationService.findAllWaiting();
+        final List<WaitingReservationResponse> afterDeleting = reservationService.findAllWaiting();
 
         assertThat(afterDeleting).hasSize(beforeDeleting.size() - 1);
     }

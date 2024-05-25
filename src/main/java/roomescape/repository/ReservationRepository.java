@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -21,9 +22,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAll();
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
-
-    @EntityGraph(attributePaths = {"member", "theme", "time"})
-    List<Reservation> findAllByDateIsGreaterThanEqual(LocalDate date);
 
     default Reservation fetchById(long id) {
         return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
@@ -76,4 +74,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.member.id = :memberId
             """)
     List<ReservationRankResponse> findMyReservation(@Param("memberId") long memberId);
+
+    @Query("""
+            SELECT new roomescape.repository.dto.WaitingReservationResponse
+            (r.id, r.member.name, r.theme.name, r.date, r.time.startAt) from Reservation r
+            WHERE r.date >= :fromDate
+            """)
+    List<WaitingReservationResponse> findAllWaitFromDate(@Param("fromDate") LocalDate fromDate);
 }

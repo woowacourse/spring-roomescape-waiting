@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationResponse;
-import roomescape.controller.reservation.dto.WaitingReservationResponse;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 
@@ -42,10 +42,7 @@ public class AdminReservationController {
 
     @GetMapping("/admin/waitings")
     public List<WaitingReservationResponse> getWaitingReservations() {
-        final List<Reservation> reservations = reservationService.findAllWaiting();
-        return reservations.stream()
-                .map(WaitingReservationResponse::from)
-                .toList();
+        return reservationService.findAllWaiting();
     }
 
     @DeleteMapping("/admin/reservations/{id}")

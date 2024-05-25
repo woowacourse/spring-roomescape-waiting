@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.controller.time.dto.IsMineRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -114,9 +115,10 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllWaiting() {
+    public List<WaitingReservationResponse> findAllWaiting() {
         final LocalDate date = LocalDate.now();
-        final List<Reservation> reservations = reservationRepository.findAllByDateIsGreaterThanEqual(date);
+
+        final List<WaitingReservationResponse> reservations = reservationRepository.findAllWaitFromDate(date);
         final Set<ReservationInfo> preReservations = new HashSet<>();
 
         return reservations.stream()
