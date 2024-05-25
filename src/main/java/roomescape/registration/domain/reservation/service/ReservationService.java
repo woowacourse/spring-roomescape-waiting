@@ -1,25 +1,27 @@
-package roomescape.registration.reservation.service;
+package roomescape.registration.domain.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
 import roomescape.exception.RoomEscapeException;
-import roomescape.member.domain.Member;
 import roomescape.exception.model.MemberExceptionCode;
-import roomescape.member.repository.MemberRepository;
-import roomescape.registration.reservation.domain.Reservation;
-import roomescape.registration.reservation.dto.ReservationRequest;
-import roomescape.registration.reservation.dto.ReservationResponse;
-import roomescape.registration.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.registration.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.exception.model.ReservationExceptionCode;
 import roomescape.exception.model.ReservationTimeExceptionCode;
+import roomescape.exception.model.ThemeExceptionCode;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.registration.domain.reservation.domain.Reservation;
+import roomescape.registration.domain.reservation.dto.ReservationRequest;
+import roomescape.registration.domain.reservation.dto.ReservationResponse;
+import roomescape.registration.domain.reservation.dto.ReservationTimeAvailabilityResponse;
+import roomescape.registration.domain.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.exception.model.ThemeExceptionCode;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
@@ -33,8 +35,7 @@ public class ReservationService {
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
-                              MemberRepository memberRepository)
-    {
+                              MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -49,6 +50,7 @@ public class ReservationService {
         Member member = memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_MEMBER_IS_NULL_EXCEPTION));
 
+        validateDateAndTimeWhenSave(reservationRequest.date(), time);
         Reservation saveReservation = new Reservation(reservationRequest.date(), time, theme, member);
 
         return ReservationResponse.from(reservationRepository.save(saveReservation));
@@ -62,10 +64,10 @@ public class ReservationService {
         Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
+        validateDateAndTimeWhenSave(adminReservationRequest.date(), time);
         Reservation saveReservation = new Reservation(adminReservationRequest.date(), time, theme, member);
         ReservationResponse.from(reservationRepository.save(saveReservation));
     }
-
 
     public List<ReservationResponse> findReservations() {
         List<Reservation> reservations = reservationRepository.findAllByOrderByDateAscReservationTimeAsc();
@@ -102,7 +104,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public void removeReservations(long reservationId) {
+    public void removeReservation(long reservationId) {
         reservationRepository.deleteById(reservationId);
     }
 
@@ -114,5 +116,21 @@ public class ReservationService {
 
     private boolean isTimeBooked(ReservationTime time, List<ReservationTime> bookedTimes) {
         return bookedTimes.contains(time);
+    }
+
+    private void validateDateAndTimeWhenSave(LocalDate date, ReservationTime time) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION);
+        }
+
+        if (date.equals(LocalDate.now())) {
+            validateTime(time);
+        }
+    }
+
+    private void validateTime(ReservationTime time) {
+        if (time.isBeforeTime(LocalTime.now())) {
+            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_TIME_IS_PAST_EXCEPTION);
+        }
     }
 }

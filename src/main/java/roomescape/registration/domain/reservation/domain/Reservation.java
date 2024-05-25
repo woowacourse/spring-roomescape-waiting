@@ -1,4 +1,4 @@
-package roomescape.registration.reservation.domain;
+package roomescape.registration.domain.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,13 +8,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.model.ReservationExceptionCode;
-import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.theme.domain.Theme;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Entity
 public class Reservation {
@@ -41,9 +38,6 @@ public class Reservation {
     }
 
     public Reservation(long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
-        validateAtSave(date);
-        validateAtSaveDateAndTime(date, reservationTime);
-
         this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;
@@ -53,24 +47,6 @@ public class Reservation {
 
     public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         this(NULL_ID, date, reservationTime, theme, member);
-    }
-
-    private void validateAtSave(LocalDate date) {
-        if (date.isBefore(LocalDate.now())) {
-            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION);
-        }
-    }
-
-    private void validateAtSaveDateAndTime(LocalDate date, ReservationTime time) {
-        if (date.equals(LocalDate.now())) {
-            validateTime(time);
-        }
-    }
-
-    private void validateTime(ReservationTime time) {
-        if (time.isBeforeTime(LocalTime.now())) {
-            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_TIME_IS_PAST_EXCEPTION);
-        }
     }
 
     public long getId() {
