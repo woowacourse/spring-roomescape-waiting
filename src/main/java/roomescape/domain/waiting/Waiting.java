@@ -20,13 +20,10 @@ public class Waiting {
     private Long id;
     @ManyToOne
     private Reservation reservation;
-
     @ManyToOne(optional = false)
     private Member member;
-
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
     @Enumerated(EnumType.STRING)
     private WaitingStatus waitingStatus;
 

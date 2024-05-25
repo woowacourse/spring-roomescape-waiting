@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface MemberRepository extends ListCrudRepository<Member, Long> {
-
     boolean existsByEmail(Email email);
 
     Optional<Member> findByEmail(Email email);

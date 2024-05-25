@@ -20,7 +20,6 @@ import roomescape.presentation.auth.PermissionRequired;
 @RestController
 @RequestMapping("/waiting")
 public class WaitingController {
-
     private final WaitingService waitingService;
 
     public WaitingController(WaitingService waitingService) {

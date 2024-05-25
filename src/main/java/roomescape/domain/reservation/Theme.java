@@ -51,10 +51,6 @@ public class Theme {
         }
     }
 
-    public Theme withId(long id) {
-        return new Theme(id, name, description, thumbnailUrl);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

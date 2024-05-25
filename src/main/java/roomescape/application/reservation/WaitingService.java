@@ -50,7 +50,6 @@ public class WaitingService {
         Waiting waiting = new Waiting(reservation, member, LocalDateTime.now(clock));
         waitingRepository.save(waiting);
         return ReservationResponse.from(waiting);
-
     }
 
     public List<ReservationResponse> findAll() {
@@ -65,7 +64,6 @@ public class WaitingService {
         return waitings.stream()
                 .map(this::makeReservationStatus)
                 .collect(Collectors.toList());
-
     }
 
     @Transactional

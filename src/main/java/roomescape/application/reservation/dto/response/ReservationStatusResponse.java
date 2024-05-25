@@ -16,7 +16,6 @@ public record ReservationStatusResponse(
         LocalTime time,
         String status
 ) {
-
     public static final String COUNT_WAITING = "번째 ";
 
     public static ReservationStatusResponse from(Reservation reservation) {

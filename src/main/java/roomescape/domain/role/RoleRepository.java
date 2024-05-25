@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface RoleRepository extends ListCrudRepository<MemberRole, Long> {
-
     @Query("""
             select case when exists (
                 select 1 from MemberRole as mr

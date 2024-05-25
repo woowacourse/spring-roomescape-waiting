@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
-
     List<Reservation> findAllByMemberId(Long id);
 
     boolean existsByTimeId(long timeId);

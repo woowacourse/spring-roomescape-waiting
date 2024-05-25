@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface ReservationTimeRepository extends ListCrudRepository<ReservationTime, Long> {
-
     boolean existsByStartAt(LocalTime time);
 
     @Query("""
