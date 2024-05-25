@@ -87,18 +87,18 @@ class ThemeRepositoryTest {
 
         for (int i = 1; i <= 10; i++) {
             Theme theme = entityManager.find(Theme.class, i);
-            entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme, member));
+            entityManager.persist(new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member));
         }
         Theme theme10 = entityManager.find(Theme.class, 10);
         Theme theme9 = entityManager.find(Theme.class, 9);
-        entityManager.persist(new Reservation(LocalDate.now().minusDays(1), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now().minusDays(2), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now().minusDays(3), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now().minusDays(1), reservationTime, theme9, member));
-        entityManager.persist(new Reservation(LocalDate.now().minusDays(2), reservationTime, theme9, member));
+        entityManager.persist(new Reservation(LocalDate.now().plusDays(2), reservationTime, theme10, member));
+        entityManager.persist(new Reservation(LocalDate.now().plusDays(3), reservationTime, theme10, member));
+        entityManager.persist(new Reservation(LocalDate.now().plusDays(4), reservationTime, theme10, member));
+        entityManager.persist(new Reservation(LocalDate.now().plusDays(2), reservationTime, theme9, member));
+        entityManager.persist(new Reservation(LocalDate.now().plusDays(3), reservationTime, theme9, member));
 
-        LocalDate before = LocalDate.now().minusDays(8);
-        LocalDate after = LocalDate.now().plusDays(1);
+        LocalDate before = LocalDate.now();
+        LocalDate after = LocalDate.now().plusDays(8);
         List<Theme> themes = themeRepository.findFirst10ByDateBetweenOrderByTheme(before, after);
 
         assertSoftly(softly -> {

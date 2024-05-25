@@ -79,11 +79,6 @@ public class ReservationService {
     private ReservationTime findReservationTime(LocalDate date, long timeId, long themeId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
-
-        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && reservationTime.isBefore(LocalTime.now()))) {
-            throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(LocalDateTime.now()));
-        }
-
         validateDuplicatedReservation(date, themeId, timeId);
         return reservationTime;
     }

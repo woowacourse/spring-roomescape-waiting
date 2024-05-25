@@ -1,8 +1,11 @@
 package roomescape.model;
 
 import jakarta.persistence.*;
+import roomescape.exception.BadRequestException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
@@ -24,6 +27,7 @@ public class Reservation {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validatePast(date, time);
         this.id = id;
         this.date = date;
         this.time = time;
@@ -33,6 +37,12 @@ public class Reservation {
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(null, date, time, theme, member);
+    }
+
+    private void validatePast(LocalDate date, ReservationTime time) {
+        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now()))) {
+            throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(LocalDateTime.now()));
+        }
     }
 
     public long getId() {

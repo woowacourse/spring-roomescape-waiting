@@ -66,8 +66,8 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme1, member));
-        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme2, member));
+        reservationRepository.save(new Reservation(1L, now().plusDays(1), reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme2, member));
 
         List<Reservation> reservations = reservationService.findAllReservations();
 
@@ -84,8 +84,8 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(1L, now().plusDays(1), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(2), reservationTime, theme, member));
 
         List<Reservation> reservations = reservationService
                 .filterReservation(1L, 1L, now().minusDays(1), now().plusDays(3));
@@ -148,8 +148,8 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme1, member));
-        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme2, member));
+        reservationRepository.save(new Reservation(1L, now().plusDays(1), reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme2, member));
 
         reservationService.deleteReservation(1L);
 
@@ -177,8 +177,8 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme1, member));
-        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme2, member));
+        reservationRepository.save(new Reservation(1L, now().plusDays(1), reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme2, member));
 
         assertThatCode(() -> reservationService.deleteReservation(1))
                 .doesNotThrowAnyException();
@@ -229,7 +229,7 @@ class ReservationServiceTest {
         Member member = memberRepository.findById(1L).orElseThrow();
 
         reservationRepository.save(new Reservation(1L, date, reservationTime, theme1, member));
-        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme2, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme2, member));
 
         ReservationRequest request = new ReservationRequest(date, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addReservation(request, member))
@@ -247,8 +247,8 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(1L, now().plusDays(1), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(2), reservationTime, theme, member));
 
         List<Reservation> reservations = reservationService
                 .findMemberReservations(member.getId());
@@ -266,8 +266,8 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(2L, now().plusDays(1), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(1L, now().plusDays(1), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(2L, now().plusDays(2), reservationTime, theme, member));
 
         Reservation reservation = reservationService.findById(1L);
         assertThat(reservation.getId()).isEqualTo(1);
