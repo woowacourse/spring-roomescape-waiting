@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Status;
+import roomescape.exception.NotFoundException;
 import roomescape.service.dto.response.MyReservationResponse;
 
 public record MyReservationWebResponse(
@@ -45,6 +46,6 @@ public record MyReservationWebResponse(
             return "삭제된 예약입니다.";
         }
 
-        return "";
+        throw new NotFoundException("존재하지 않는 상태입니다.");
     }
 }

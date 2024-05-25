@@ -106,7 +106,7 @@ public class ReservationService {
         Member member = memberRepository.findById(authInfo.id())
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
         Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.WAITING)
-                .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
 
         reservation.validateAuthorization(member);
 
@@ -121,7 +121,7 @@ public class ReservationService {
     @Transactional
     public void deleteById(Long id) {
         Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.CREATED)
-                .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
         Reservation reservationWaiting = reservationRepository
                 .findTopByStatusInOrderByCreatedAt(List.of(Status.WAITING))
                 .orElse(null);
