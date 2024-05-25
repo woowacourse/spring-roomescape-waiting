@@ -26,7 +26,7 @@ public class ThemeService {
     public List<ThemeResponse> findThemes() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
-                .map(ThemeResponse::fromTheme)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
@@ -38,14 +38,14 @@ public class ThemeService {
                 .findThemesByReservationDateOrderByReservationCountDesc(beforeOneWeek, yesterday);
         return rankedThemes.stream()
                 .limit(TOP_THEMES_LIMIT)
-                .map(ThemeRankResponse::fromTheme)
+                .map(ThemeRankResponse::from)
                 .toList();
     }
 
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
-        Theme theme = themeRequest.toTheme();
+        Theme theme = themeRequest.createTheme();
         Theme savedTheme = themeRepository.save(theme);
-        return ThemeResponse.fromTheme(savedTheme);
+        return ThemeResponse.from(savedTheme);
     }
 
     public void removeTheme(long id) {

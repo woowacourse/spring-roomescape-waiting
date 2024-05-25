@@ -63,7 +63,7 @@ public class ThemeControllerTest {
     @DisplayName("테마 정보를 정상적으로 저장하는지 확인한다.")
     void saveTheme() throws Exception {
         Mockito.when(themeService.addTheme(any()))
-                .thenReturn(ThemeResponse.fromTheme(theme));
+                .thenReturn(ThemeResponse.from(theme));
 
         String content = new ObjectMapper().writeValueAsString(
                 new ThemeRequest(theme.getName(), theme.getDescription(), theme.getThumbnail()));
@@ -79,7 +79,7 @@ public class ThemeControllerTest {
     @DisplayName("예약 정보를 정상적으로 불러오는지 롹인한다.")
     void findAllThemes() throws Exception {
         Mockito.when(themeService.findThemes())
-                .thenReturn(List.of(ThemeResponse.fromTheme(theme)));
+                .thenReturn(List.of(ThemeResponse.from(theme)));
 
         mockMvc.perform(get("/themes"))
                 .andDo(print())
@@ -90,7 +90,7 @@ public class ThemeControllerTest {
     @DisplayName("인기많은 테마 정보를 정상적으로 가져오는지 확인한다.")
     void findTopRankThemes() throws Exception {
         Mockito.when(themeService.findRankedThemes())
-                .thenReturn(List.of(ThemeRankResponse.fromTheme(theme)));
+                .thenReturn(List.of(ThemeRankResponse.from(theme)));
 
         mockMvc.perform(get("/themes/rank"))
                 .andDo(print())

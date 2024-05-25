@@ -15,7 +15,7 @@ public record ReservationDetailResponse(
         return new ReservationDetailResponse(
                 detail.getId(),
                 detail.getDate(),
-                TimeResponse.toResponse(detail.getTime()),
-                ThemeResponse.fromTheme(detail.getTheme()));
+                TimeResponse.from(detail.getTime()),
+                ThemeResponse.from(detail.getTheme()));
     }
 }

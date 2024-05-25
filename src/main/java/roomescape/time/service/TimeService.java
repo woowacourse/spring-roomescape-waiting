@@ -26,7 +26,7 @@ public class TimeService {
         List<Time> reservationTimes = timeRepository.findAllByOrderByStartAtAsc();
 
         return reservationTimes.stream()
-                .map(TimeResponse::toResponse)
+                .map(TimeResponse::from)
                 .toList();
     }
 
@@ -35,7 +35,7 @@ public class TimeService {
         Time reservationTime = new Time(timeRequest.startAt());
         Time savedReservationTime = timeRepository.save(reservationTime);
 
-        return TimeResponse.toResponse(savedReservationTime);
+        return TimeResponse.from(savedReservationTime);
     }
 
     private void validateDuplicateTime(LocalTime startAt) {

@@ -4,9 +4,6 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
 
-import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationBuilder;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
@@ -20,7 +17,7 @@ public record ReservationCreateRequest(@NotNull(message = "예약자 정보가 �
                                        @NotNull(message = "날짜가 선택되지 않습니다.")
                                        LocalDate date
 ) {
-    public ReservationDetail toReservationDetail(Theme theme, Time time) {
+    public ReservationDetail createReservationDetail(Theme theme, Time time) {
         return new ReservationDetail(theme, time, date);
     }
 

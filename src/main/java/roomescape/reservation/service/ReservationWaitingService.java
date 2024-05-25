@@ -8,7 +8,6 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.dto.MyReservationResponse;
@@ -56,7 +55,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
         validateReservationDetail(detail);
 
-        ReservationWaiting reservation = reservationRequest.toReservationWaiting(member, detail);
+        ReservationWaiting reservation = reservationRequest.createReservationWaiting(member, detail);
         ReservationWaiting savedReservation = waitingRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }

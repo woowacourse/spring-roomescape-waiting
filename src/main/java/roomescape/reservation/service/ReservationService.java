@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -81,7 +80,7 @@ public class ReservationService {
                 .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
         validateReservationDetail(detail);
 
-        Reservation reservation = reservationRequest.toReservation(member, detail);
+        Reservation reservation = reservationRequest.createReservation(member, detail);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -102,7 +101,7 @@ public class ReservationService {
         List<Time> bookedTimes = getBookedTimesOfThemeAtDate(themeId, date);
 
         return allTimes.stream()
-                .map(time -> ReservationTimeAvailabilityResponse.fromTime(time, bookedTimes.contains(time)))
+                .map(time -> ReservationTimeAvailabilityResponse.from(time, bookedTimes.contains(time)))
                 .toList();
     }
 

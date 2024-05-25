@@ -51,6 +51,6 @@ public class ReservationDetailService {
             throw new BadRequestException("지난 날짜의 예약을 시도하였습니다.");
         }
 
-        return reservationRequest.toReservationDetail(theme, time);
+        return reservationRequest.createReservationDetail(theme, time);
     }
 }

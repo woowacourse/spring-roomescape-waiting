@@ -122,7 +122,7 @@ class ReservationControllerTest {
     void findAvailableTimeList() throws Exception {
         Mockito.when(reservationService.findTimeAvailability(1, LocalDate.now()))
                 .thenReturn(
-                        List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getTime(), true)));
+                        List.of(ReservationTimeAvailabilityResponse.from(reservation.getTime(), true)));
 
         mockMvc.perform(get("/reservations/times/1?date=" + LocalDate.now()))
                 .andDo(print())

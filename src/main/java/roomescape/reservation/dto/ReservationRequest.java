@@ -16,14 +16,14 @@ public record ReservationRequest(
         Long detailId
 ) {
 
-    public Reservation toReservation(Member member, ReservationDetail detail) {
+    public Reservation createReservation(Member member, ReservationDetail detail) {
         return new ReservationBuilder()
                 .member(member)
                 .reservationDetail(detail)
                 .build();
     }
 
-    public ReservationWaiting toReservationWaiting(Member member, ReservationDetail detail) {
+    public ReservationWaiting createReservationWaiting(Member member, ReservationDetail detail) {
         return new ReservationWaitingBuilder()
                 .member(member)
                 .reservationDetail(detail)

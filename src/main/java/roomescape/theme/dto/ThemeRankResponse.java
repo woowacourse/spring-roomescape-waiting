@@ -7,7 +7,7 @@ public record ThemeRankResponse(
         String thumbnail,
         String description
 ) {
-    public static ThemeRankResponse fromTheme(Theme theme) {
+    public static ThemeRankResponse from(Theme theme) {
         return new ThemeRankResponse(theme.getName(), theme.getThumbnail(), theme.getDescription());
     }
 }
