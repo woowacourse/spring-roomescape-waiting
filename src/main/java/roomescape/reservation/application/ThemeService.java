@@ -2,7 +2,6 @@ package roomescape.reservation.application;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeRepository;
@@ -11,7 +10,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class ThemeService {
     private static final int NUMBER_OF_POPULAR = 10;
     private static final int DAYS_TO_SUBTRACT_AT_START_POPULAR = 7;
@@ -23,7 +21,6 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    @Transactional
     public Theme create(Theme theme) {
         return themeRepository.save(theme);
     }
@@ -37,7 +34,6 @@ public class ThemeService {
                 .orElseThrow(() -> new NotFoundException("id 에 해당하는 테마가 없습니다."));
     }
 
-    @Transactional
     public void deleteById(Long id) {
         themeRepository.deleteById(id);
     }
@@ -46,6 +42,7 @@ public class ThemeService {
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusDays(DAYS_TO_SUBTRACT_AT_START_POPULAR);
         LocalDate endDate = today.minusDays(DAYS_TO_SUBTRACT_AT_END_POPULAR);
-        return themeRepository.findAllByDateBetweenOrderByReservationCount(startDate, endDate, PageRequest.of(0, NUMBER_OF_POPULAR));
+        return themeRepository.findAllByDateBetweenOrderByReservationCount(startDate, endDate,
+                PageRequest.of(0, NUMBER_OF_POPULAR));
     }
 }

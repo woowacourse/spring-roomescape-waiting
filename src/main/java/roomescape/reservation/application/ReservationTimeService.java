@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -28,7 +27,6 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    @Transactional
     public ReservationTime create(ReservationTime reservationTime) {
         return reservationTimeRepository.save(reservationTime);
     }
@@ -44,9 +42,10 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(Long id) {
-        reservationTimeRepository.findById(id)
-                .ifPresent(this::validateHasReservation);
-        reservationTimeRepository.deleteById(id);
+        reservationTimeRepository.findById(id).ifPresent(time -> {
+            validateHasReservation(time);
+            reservationTimeRepository.delete(time);
+        });
     }
 
     private void validateHasReservation(ReservationTime reservationTime) {

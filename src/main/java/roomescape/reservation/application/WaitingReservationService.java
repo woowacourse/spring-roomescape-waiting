@@ -12,7 +12,6 @@ import roomescape.reservation.domain.WaitingReservation;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class WaitingReservationService {
     private final ReservationRepository reservationRepository;
 
