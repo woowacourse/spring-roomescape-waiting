@@ -143,4 +143,10 @@ public class ReservationService {
     private boolean isNotWaiting(Reservation requestedReservation) {
         return reservationRepository.calculateIndexOf(requestedReservation) == NOT_WAITING_INDEX;
     }
+
+    public List<ReservationResponse> findAllRemainedWaiting() {
+        return reservationRepository.findAllRemainedWaiting(LocalDateTime.now()).stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
 }

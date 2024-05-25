@@ -48,6 +48,12 @@ public class ReservationController {
         return reservationService.findAll();
     }
 
+    @GetMapping("/reservations/waiting")
+    @AdminOnly
+    public List<ReservationResponse> findAllRemainedWaiting() {
+        return reservationService.findAllRemainedWaiting();
+    }
+
     @GetMapping("/reservations/mine")
     public List<ReservationDetailResponse> findMemberReservations(
             @Authenticated LoginMemberRequest loginMemberRequest) {

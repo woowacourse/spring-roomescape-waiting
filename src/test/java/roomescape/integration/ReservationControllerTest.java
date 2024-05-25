@@ -8,6 +8,7 @@ import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -377,7 +378,7 @@ public class ReservationControllerTest {
         Reservation reservation7;
         Reservation reservation8;
         Reservation reservation9;
-        //Reservation reservation10_waiting1;
+        Reservation reservation10_waiting1;
         Reservation reservation10;
         List<Reservation> allReservation;
 
@@ -428,31 +429,31 @@ public class ReservationControllerTest {
             reservation9 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme2,
                             defaultMember));
-            /*reservation10_waiting1 = reservationRepository.save(new Reservation(
+            reservation10 = reservationRepository.save(
+                    new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme2,
+                            defaultMember));
+            reservation10_waiting1 = reservationRepository.save(new Reservation(
                     reservation10.getDate(),
                     reservation10.getReservationTime(),
                     reservation10.getTheme(),
                     otherMember)
-            );*/
-            //reservation1_waiting1,
-                    /*reservation4_waiting1,
-                    reservation4_waiting2,*/
-            //reservation10_waiting1
-            reservation10 = reservationRepository.save(
-                    new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme2,
-                            defaultMember));
+            );
 
             allReservation = List.of(
                     reservation1,
+                    reservation1_waiting1,
                     reservation2,
                     reservation3,
                     reservation4,
+                    reservation4_waiting1,
+                    reservation4_waiting2,
                     reservation5,
                     reservation6,
                     reservation7,
                     reservation8,
                     reservation9,
-                    reservation10
+                    reservation10,
+                    reservation10_waiting1
             );
         }
 
@@ -478,7 +479,7 @@ public class ReservationControllerTest {
                     .when().get("/reservations/mine")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is( (int) countOfUserReservation));
+                    .body("size()", is((int) countOfUserReservation));
         }
 
         @DisplayName("날짜를 이용해서 검색할 수 있다.")
@@ -597,6 +598,39 @@ public class ReservationControllerTest {
                     .body().as(ReservationResponse[].class);
 
             assertThat(reservationResponses).containsExactlyElementsOf(expected);
+        }
+
+        @DisplayName("모든 예약 대기를 조회할 수 있다.")
+        @Test
+        void findAllWaitingTest() {
+            List<ReservationResponse> expected = List.of(reservation1_waiting1, reservation4_waiting1, reservation4_waiting2,
+                    reservation10_waiting1).stream()
+                    .filter(reservation -> reservation.isAfter(LocalDateTime.now()))
+                    .map(ReservationResponse::from)
+                    .toList();
+
+            ReservationResponse[] reservationResponses = RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", adminToken)
+                    .get("/reservations/waiting")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(expected.size()))
+                    .extract()
+                    .body().as(ReservationResponse[].class);
+
+            assertThat(reservationResponses).containsExactlyElementsOf(expected);
+        }
+
+        @DisplayName("모든 예약 대기 조회는 관리자만 할 수 있다.")
+        @Test
+        void findAllWaitingNotAdminFailTest() {
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .get("/reservations/waiting")
+                    .then().log().all()
+                    .statusCode(403);
         }
     }
 }

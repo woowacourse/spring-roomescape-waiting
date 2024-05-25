@@ -53,4 +53,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate date, Theme theme, ReservationTime reservationTime, LocalDateTime createdAt
     );
 
+    default List<Reservation> findAllRemainedWaiting(LocalDateTime base) {
+        List<Reservation> remainedAllReservation = findAllByDateGreaterThanEqual(base.toLocalDate());
+
+        return remainedAllReservation.stream()
+                .filter(reservation -> reservation.isAfter(base))
+                .filter(this::isWaiting)
+                .toList();
+    }
+
+    private boolean isWaiting(Reservation reservation) {
+        return calculateIndexOf(reservation) > 1;
+    }
+
+    List<Reservation> findAllByDateGreaterThanEqual(LocalDate date);
 }
