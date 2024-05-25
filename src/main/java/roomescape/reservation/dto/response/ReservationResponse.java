@@ -9,7 +9,8 @@ public record ReservationResponse(
         String memberName,
         LocalDate date,
         ReservationTimeResponse time,
-        ReservedThemeResponse theme
+        ReservedThemeResponse theme,
+        String status
 ) {
 
     public static ReservationResponse from(Reservation reservation) {
@@ -18,7 +19,8 @@ public record ReservationResponse(
                 reservation.getMemberName(),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
-                ReservedThemeResponse.from(reservation.getTheme())
+                ReservedThemeResponse.from(reservation.getTheme()),
+                reservation.getStatus().getStatus()
         );
     }
 }

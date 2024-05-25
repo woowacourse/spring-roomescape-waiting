@@ -19,4 +19,24 @@ INSERT INTO member (name, email, password, role)
 VALUES ('어드민', 'admin@admin.com', '1234', 'ADMIN'),
        ('미아', 'mia@mia.com', '1234', 'USER'),
        ('뽀로로', 'roro@roro.com', '1234', 'USER'),
-       ('수달', 'sudal@sudal.com', '1234', 'USER');
+       ('수달', 'sudal@sudal.com', '1234', 'USER'),
+       ('홍길동', 'gildong@gildong.com', '1234', 'USER'),
+       ('유저', 'user@user.com', '1234', 'USER');
+
+INSERT INTO reservation(member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-10', 1, 1, 'BOOKING'),
+       (2, '2025-05-11', 2, 2, 'BOOKING'),
+       (3, '2025-05-12', 1, 1, 'BOOKING'),
+       (3, '2025-05-13', 2, 2, 'BOOKING'),
+       (4, '2025-05-14', 1, 1, 'BOOKING'),
+       (4, '2025-05-15', 2, 2, 'BOOKING'),
+       (3, '2025-05-10', 1, 1, 'WAITING'),
+       (4, '2025-05-10', 1, 1, 'WAITING'),
+       (5, '2025-05-10', 1, 1, 'WAITING'),
+       (6, '2025-05-10', 1, 1, 'WAITING');
+
+INSERT INTO waiting(member_id, date, time_id, theme_id)
+VALUES (3, '2025-05-10', 1, 1),
+       (4, '2025-05-10', 1, 1),
+       (5, '2025-05-10', 1, 1),
+       (6, '2025-05-10', 1, 1);
