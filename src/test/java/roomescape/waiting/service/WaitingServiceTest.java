@@ -3,8 +3,6 @@ package roomescape.waiting.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
@@ -61,51 +59,6 @@ class WaitingServiceTest {
 
         assertThat(actual).isEqualTo(expected);
 
-    }
-
-    @DisplayName("특정 회원의 모든 예약 대기를 불러올 수 있다.")
-    @Test
-    void findWaitingsByMemberIdTest() {
-        given(waitingRepository.findByMemberId(2L)).willReturn(List.of(WAITING));
-        given(waitingRepository.countByReservationAndCreatedAtLessThanEqual(eq(RESERVATION), any(LocalDateTime.class)))
-                .willReturn(1L);
-        List<MyReservationResponse> expected = List.of(MY_RESPONSE1);
-
-        List<MyReservationResponse> actual = waitingService.findWaitingsByMemberId(2L);
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @DisplayName("가장 최우선 예약 대기를 조회할 수 있다.")
-    @Test
-    void findHighPriorityWaitingTest() {
-        given(waitingRepository.findTopByReservationIdOrderByCreatedAtAsc(1L)).willReturn(Optional.of(WAITING));
-        Optional<WaitingResponse> expected = Optional.of(RESPONSE1);
-
-        Optional<WaitingResponse> actual = waitingService.findHighPriorityWaiting(1L);
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @DisplayName("예약 대기에서 예약을 확정할 수 있다.")
-    @Test
-    void confirmReservationTest() {
-        given(waitingRepository.findById(3L)).willReturn(Optional.of(WAITING));
-
-        waitingService.confirmReservation(3L);
-
-        Member currentReservationOwner = RESERVATION.getMember();
-        assertThat(currentReservationOwner).isEqualTo(WAITING_OWNER);
-    }
-
-    @DisplayName("예약 대기에서 예약을 확정 시, 예약이 없다면 예외를 던진다.")
-    @Test
-    void confirmReservationTest_whenWaitingNotExist() {
-        given(waitingRepository.findById(3L)).willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> waitingService.confirmReservation(3L))
-                .isInstanceOf(BadArgumentRequestException.class)
-                .hasMessage("해당 예약 대기가 존재하지 않습니다.");
     }
 
     @DisplayName("예약 대기를 삭제할 수 있다.")

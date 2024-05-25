@@ -78,8 +78,4 @@ public class ReservationUpdateService {
             throw new BadArgumentRequestException("예약은 현재 시간 이후여야 합니다.");
         }
     }
-
-    public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
-    }
 }

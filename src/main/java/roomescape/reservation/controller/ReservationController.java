@@ -16,8 +16,8 @@ import roomescape.auth.dto.LoggedInMember;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationDeleteUsecase;
-import roomescape.reservation.service.ReservationFindMineUsecase;
+import roomescape.reservation.service.ReservationDeleteService;
+import roomescape.reservation.service.ReservationFindMineService;
 import roomescape.reservation.service.ReservationFindService;
 import roomescape.reservation.service.ReservationUpdateService;
 
@@ -25,18 +25,18 @@ import roomescape.reservation.service.ReservationUpdateService;
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationFindService findService;
+    private final ReservationFindMineService findMineService;
     private final ReservationUpdateService updateService;
-    private final ReservationDeleteUsecase deleteUsecase;
-    private final ReservationFindMineUsecase findMineUsecase;
+    private final ReservationDeleteService deleteService;
 
     public ReservationController(ReservationFindService findService,
+                                 ReservationFindMineService findMineService,
                                  ReservationUpdateService updateService,
-                                 ReservationDeleteUsecase deleteUsecase,
-                                 ReservationFindMineUsecase findMineUsecase) {
+                                 ReservationDeleteService deleteService) {
         this.findService = findService;
+        this.findMineService = findMineService;
         this.updateService = updateService;
-        this.deleteUsecase = deleteUsecase;
-        this.findMineUsecase = findMineUsecase;
+        this.deleteService = deleteService;
     }
 
     @GetMapping
@@ -46,7 +46,7 @@ public class ReservationController {
 
     @GetMapping("/accounts")
     public List<MyReservationResponse> findMyReservations(LoggedInMember member) {
-        return findMineUsecase.execute(member.id());
+        return findMineService.execute(member.id());
     }
 
     @PostMapping
@@ -63,6 +63,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable Long id) {
-        deleteUsecase.execute(id);
+        deleteService.execute(id);
     }
 }

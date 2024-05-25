@@ -18,7 +18,6 @@ import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -48,11 +47,6 @@ class ReservationFindServiceTest {
             LocalDate.of(2024, 8, 20),
             new TimeResponse(1L, LocalTime.of(19, 0)),
             new ThemeResponse(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg"));
-    private static final MyReservationResponse MY_RESPONSE1 = new MyReservationResponse(
-            1L, "레벨2 탈출",
-            LocalDate.of(2024, 8, 15), LocalTime.of(19, 0),
-            "예약", null
-    );
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -85,17 +79,6 @@ class ReservationFindServiceTest {
         List<ReservationResponse> expected = List.of(RESPONSE1, RESPONSE2);
 
         List<ReservationResponse> actual = reservationFindService.findReservations();
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @DisplayName("멤버 id를 통해 해당하는 모든 예약을 조회할 수 있다.")
-    @Test
-    void findReservationsByMemberIdTest() {
-        given(reservationRepository.findByMemberId(1L)).willReturn(List.of(RESERVATION1));
-        List<MyReservationResponse> expected = List.of(MY_RESPONSE1);
-
-        List<MyReservationResponse> actual = reservationFindService.findReservationsByMemberId(1L);
 
         assertThat(actual).isEqualTo(expected);
     }

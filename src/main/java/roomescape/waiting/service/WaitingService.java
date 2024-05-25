@@ -2,13 +2,11 @@ package roomescape.waiting.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingRequest;
@@ -34,24 +32,6 @@ public class WaitingService {
                 .stream()
                 .map(WaitingResponse::from)
                 .toList();
-    }
-
-    public List<MyReservationResponse> findWaitingsByMemberId(Long memberId) {
-        return waitingRepository.findByMemberId(memberId)
-                .stream()
-                .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))
-                .toList();
-
-    }
-
-    private Long countOrderOfWaiting(Waiting waiting) {
-        return waitingRepository.countByReservationAndCreatedAtLessThanEqual(
-                waiting.getReservation(), waiting.getCreatedAt());
-    }
-
-    public Optional<WaitingResponse> findHighPriorityWaiting(Long reservationId) {
-        return waitingRepository.findTopByReservationIdOrderByCreatedAtAsc(reservationId)
-                .map(WaitingResponse::from);
     }
 
     private Waiting findWaiting(Long waitingId) {
@@ -92,11 +72,6 @@ public class WaitingService {
     private boolean isAlreadyWaited(Reservation reservation, Member member) {
         return reservation.getMember().equals(member)
                 || waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), member.getId());
-    }
-
-    public void confirmReservation(Long waitingId) {
-        Waiting waiting = findWaiting(waitingId);
-        waiting.confirmReservation();
     }
 
     public void deleteWaiting(Long id) {
