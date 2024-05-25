@@ -16,7 +16,6 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.reservationwaiting.CannotCreateWaitingForOwnedReservationException;
-import roomescape.exception.reservationwaiting.CannotDeleteOtherMemberWaiting;
 import roomescape.exception.reservationwaiting.DuplicatedReservationWaitingException;
 import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
 import roomescape.exception.reservationwaiting.NotFoundReservationWaitingException;
@@ -103,22 +102,20 @@ public class ReservationWaitingServiceTest extends ServiceTest {
     @DisplayName("예약 대기 삭제")
     class DeleteReservation {
         Member user;
-        Member admin;
-        ReservationWaiting waiting;
+        Reservation reservation;
 
         @BeforeEach
         void setUp() {
             ReservationTime time = timeFixture.createFutureTime();
             Theme theme = themeFixture.createFirstTheme();
             user = memberFixture.createUserMember();
-            Reservation reservation = reservationFixture.createFutureReservation(time, theme, user);
-            waiting = waitingFixture.createWaiting(reservation, user);
-            admin = memberFixture.createAdminMember();
+            reservation = reservationFixture.createFutureReservation(time, theme, user);
+            waitingFixture.createWaiting(reservation, user);
         }
 
         @Test
         void 예약_대기를_삭제할_수_있다() {
-            reservationWaitingService.deleteReservationWaiting(waiting.getId(), user);
+            reservationWaitingService.deleteReservationWaiting(reservation.getId(), user);
 
             List<ReservationWaiting> waitings = waitingFixture.findAllWaiting();
             assertThat(waitings.size())
@@ -132,9 +129,11 @@ public class ReservationWaitingServiceTest extends ServiceTest {
         }
 
         @Test
-        void 다른_사용자의_예약_대기_삭제_시_예외가_발생한다() {
-            assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(waiting.getId(), admin))
-                    .isInstanceOf(CannotDeleteOtherMemberWaiting.class);
+        void 본인이_예약자로_존재하지_않는_예약_대기_삭제_시_예외가_발생한다() {
+            Member admin = memberFixture.createAdminMember();
+
+            assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(reservation.getId(), admin))
+                    .isInstanceOf(NotFoundReservationWaitingException.class);
         }
     }
 }

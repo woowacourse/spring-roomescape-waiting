@@ -1,5 +1,5 @@
 ### 예약 대기 추가 API
-POST {{base-url}}/waitings
+POST {{base-url}}/reservations/waitings
 Content-Type: application/json
 
 {
@@ -10,4 +10,4 @@ Content-Type: application/json
 
 ### 예약 대기 취소 API
 
-DELETE /waitings/1
+DELETE /reservations/waitings/1

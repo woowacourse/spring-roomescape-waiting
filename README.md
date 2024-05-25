@@ -26,7 +26,7 @@
 - [x] `내 예약 목록` 조회 API 응답에 `예약 대기 목록`도 포함한다
     - [x] 예약 대기 상태에 몇 번째 대기인지도 함께 표시 (같은 테마, 날짜, 시간의 예약 대기 중 내 예약 대기보다 빨리 생성된 갯수를 함께 응답)
     - [x] 시간 순대로 정렬
-- [ ] 클라이언트 코드를 수정한다
+- [x] 클라이언트 코드를 수정한다
 
 ## 4단계 - 예약 대기 관리
 
@@ -328,7 +328,7 @@ HTTP/1.1 204
 Request
 
 ```
-POST /waitings
+POST /reservations/waitings
 Cookie: token=hello.example.token
 Content-Type: application/json
 
@@ -351,7 +351,7 @@ Content-Type: application/json
 Request
 
 ```
-DELETE /waitings/1
+DELETE /reservations/waitings/1
 Cookie: token=hello.example.token
 ```
 
