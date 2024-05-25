@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.InitialReservationFixture.RESERVATION_2;
 import static roomescape.InitialWaitingFixture.MEMBER_2_INITIAL_WAITING_COUNT;
+import static roomescape.InitialWaitingFixture.PAGE_REQUEST;
 import static roomescape.InitialWaitingFixture.WAITING_1;
 import static roomescape.InitialWaitingFixture.WAITING_2;
 
@@ -27,8 +28,9 @@ class WaitingRepositoryTest {
     @Test
     @DisplayName("특정 회원이 가진 예약 대기들을 대기 순번과 함께 조회한다.")
     void findWaitingsWithRankByMemberId() {
-        List<WaitingWithRank> waitingsWithRanks =
-                waitingRepository.findWaitingsWithRankByMemberId(WAITING_1.getMember().getId());
+        List<WaitingWithRank> waitingsWithRanks = waitingRepository
+                .findWaitingsWithRankByMemberId(WAITING_1.getMember().getId(), PAGE_REQUEST)
+                .getContent();
         WaitingWithRank waiting1WithRank = waitingsWithRanks.get(0);
 
         assertAll(
@@ -42,8 +44,9 @@ class WaitingRepositoryTest {
     void WaitingReorderedByDeletingWaiting() {
         waitingRepository.deleteById(WAITING_1.getId());
 
-        List<WaitingWithRank> waitingWithRank =
-                waitingRepository.findWaitingsWithRankByMemberId(WAITING_2.getMember().getId());
+        List<WaitingWithRank> waitingWithRank = waitingRepository
+                .findWaitingsWithRankByMemberId(WAITING_2.getMember().getId(), PAGE_REQUEST)
+                .getContent();
         WaitingWithRank waiting2WithRank = waitingWithRank.get(0);
 
         assertThat(waiting2WithRank.rank()).isEqualTo(1);

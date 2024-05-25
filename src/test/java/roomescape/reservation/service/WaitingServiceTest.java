@@ -8,6 +8,8 @@ import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 import static roomescape.InitialReservationFixture.NO_RESERVATION_DATE;
 import static roomescape.InitialReservationFixture.RESERVATION_1;
+import static roomescape.InitialWaitingFixture.PAGE_NUMBER;
+import static roomescape.InitialWaitingFixture.PAGE_SIZE;
 import static roomescape.InitialWaitingFixture.WAITING_1;
 
 import java.time.format.DateTimeFormatter;
@@ -94,7 +96,8 @@ class WaitingServiceTest {
     void getWaitingsByMember() {
         MemberRequest memberRequest = new MemberRequest(MEMBER_2);
 
-        List<ReservationOrWaitingResponse> waitingsByMember = waitingService.findWaitingsByMember(memberRequest);
+        List<ReservationOrWaitingResponse> waitingsByMember =
+                waitingService.findWaitingsByMember(memberRequest, PAGE_NUMBER, PAGE_SIZE);
 
         assertThat(waitingsByMember).containsExactly(
                 new ReservationOrWaitingResponse(

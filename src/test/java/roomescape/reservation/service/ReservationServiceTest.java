@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
-import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
+import static roomescape.InitialReservationFixture.PAGE_REQUEST;
 import static roomescape.InitialReservationFixture.RESERVATION_1;
 import static roomescape.InitialReservationFixture.RESERVATION_2;
 import static roomescape.InitialReservationTimeFixture.RESERVATION_TIME_1;
@@ -135,7 +135,8 @@ class ReservationServiceTest {
                         WAITING_1.getTheme(),
                         WAITING_1.getMember()
                 )).isFalse(),
-                () -> assertThat(reservationRepository.findByMember(MEMBER_2).contains(new Reservation(WAITING_1)))
+                () -> assertThat(reservationRepository.findByMember(MEMBER_1, PAGE_REQUEST).getContent()
+                        .contains(new Reservation(WAITING_1)))
         );
     }
 

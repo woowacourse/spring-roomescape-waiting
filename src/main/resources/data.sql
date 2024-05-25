@@ -30,10 +30,26 @@ VALUES
     (1, DATEADD('DAY', -6, CURRENT_DATE), 2, 3),
     (1, DATEADD('DAY', -5, CURRENT_DATE), 3, 3),
     (2, DATEADD('DAY', -2, CURRENT_DATE), 2, 2),
-    (2, DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
+    (2, DATEADD('DAY', -1, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 1, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 2, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 3, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 4, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 5, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 6, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 7, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 8, CURRENT_DATE), 1, 1),
+    (2, DATEADD('DAY', 9, CURRENT_DATE), 1, 1);
 
 -- waiting 테이블에 데이터 추가
 INSERT INTO waiting (date, reservation_time_id, theme_id, member_id)
 VALUES
-    (DATEADD('DAY', -10, CURRENT_DATE), 1, 3, 2),
-    (DATEADD('DAY', -10, CURRENT_DATE), 1, 3, 3);
+    (DATEADD('DAY', -10, CURRENT_DATE), 1, 3, 3),
+    (DATEADD('DAY', 1, CURRENT_DATE), 1, 3, 2),
+    (DATEADD('DAY', 2, CURRENT_DATE), 1, 3, 2),
+    (DATEADD('DAY', 3, CURRENT_DATE), 1, 3, 2),
+    (DATEADD('DAY', 4, CURRENT_DATE), 1, 3, 2),
+    (DATEADD('DAY', 5, CURRENT_DATE), 1, 3, 2),
+    (DATEADD('DAY', 6, CURRENT_DATE), 1, 3, 2),
+    (DATEADD('DAY', 7, CURRENT_DATE), 1, 3, 2),
+    (DATEADD('DAY', 8, CURRENT_DATE), 1, 3, 2);

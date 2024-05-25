@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.AuthException;
@@ -92,8 +94,9 @@ public class WaitingService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationOrWaitingResponse> findWaitingsByMember(MemberRequest memberRequest) {
-        return waitingRepository.findWaitingsWithRankByMemberId(memberRequest.id())
+    public List<ReservationOrWaitingResponse> findWaitingsByMember(MemberRequest memberRequest, int page, int size) {
+        return waitingRepository.findWaitingsWithRankByMemberId(
+                        memberRequest.id(), PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "date")))
                 .stream()
                 .map(ReservationOrWaitingResponse::new)
                 .toList();

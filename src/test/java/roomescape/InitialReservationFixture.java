@@ -10,12 +10,15 @@ import static roomescape.InitialThemeFixture.THEME_2;
 import static roomescape.InitialThemeFixture.THEME_3;
 
 import java.time.LocalDate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import roomescape.reservation.domain.Reservation;
 
 public class InitialReservationFixture {
 
     public static final int INITIAL_RESERVATION_COUNT = 5;
     public static final int THEME3_MEMBER1_RESERVATION_COUNT = 3;
+    public static final PageRequest PAGE_REQUEST = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "date"));
     public static final LocalDate NO_RESERVATION_DATE = LocalDate.parse("2020-01-01");
     public static final Reservation RESERVATION_1 = new Reservation(
             1L,

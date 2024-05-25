@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
@@ -65,21 +67,29 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<ReservationOrWaitingResponse> findReservationsByMember(MemberRequest memberRequest) {
-        List<ReservationOrWaitingResponse> reservations = reservationService.findReservationsByMember(memberRequest);
-        List<ReservationOrWaitingResponse> waitings = waitingService.findWaitingsByMember(memberRequest);
+    public List<ReservationOrWaitingResponse> findReservationsByMember(
+            @RequestParam int page,
+            @RequestParam int size,
+            MemberRequest memberRequest
+    ) {
+        List<ReservationOrWaitingResponse> reservations =
+                reservationService.findReservationsByMember(memberRequest, page, size);
+        List<ReservationOrWaitingResponse> waitings = waitingService.findWaitingsByMember(memberRequest, page, size);
 
-        return combineReservationsAndWaitings(reservations, waitings);
+        return combineReservationsAndWaitings(reservations, waitings, size);
     }
 
     private List<ReservationOrWaitingResponse> combineReservationsAndWaitings(
             List<ReservationOrWaitingResponse> reservations,
-            List<ReservationOrWaitingResponse> waitings
+            List<ReservationOrWaitingResponse> waitings,
+            int size
     ) {
         List<ReservationOrWaitingResponse> result = new ArrayList<>(reservations);
         result.addAll(waitings);
-
-        return result;
+        return result.stream()
+                .sorted(Comparator.comparing(ReservationOrWaitingResponse::date))
+                .limit(size)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

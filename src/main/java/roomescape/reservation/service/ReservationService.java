@@ -3,6 +3,8 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
@@ -121,8 +123,10 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationOrWaitingResponse> findReservationsByMember(MemberRequest memberRequest) {
-        return reservationRepository.findByMember(memberRequest.toMember())
+    public List<ReservationOrWaitingResponse> findReservationsByMember(MemberRequest memberRequest, int page,
+                                                                       int size) {
+        return reservationRepository.findByMember(
+                        memberRequest.toMember(), PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "date")))
                 .stream()
                 .map(ReservationOrWaitingResponse::new)
                 .toList();

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
 import static roomescape.InitialReservationFixture.NO_RESERVATION_DATE;
+import static roomescape.InitialReservationFixture.PAGE_REQUEST;
 import static roomescape.InitialReservationFixture.RESERVATION_1;
 import static roomescape.InitialReservationFixture.RESERVATION_2;
 import static roomescape.InitialReservationFixture.RESERVATION_3;
@@ -149,7 +150,7 @@ class ReservationRepositoryTest {
     @Test
     @DisplayName("특정 회원이 예약한 예약들을 반환한다.")
     void findByMember() {
-        List<Reservation> reservations = reservationRepository.findByMember(MEMBER_1);
+        List<Reservation> reservations = reservationRepository.findByMember(MEMBER_1, PAGE_REQUEST).getContent();
 
         assertThat(reservations).containsExactlyInAnyOrder(RESERVATION_1, RESERVATION_2, RESERVATION_3);
     }
