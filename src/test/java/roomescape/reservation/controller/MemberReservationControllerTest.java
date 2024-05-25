@@ -64,7 +64,7 @@ class MemberReservationControllerTest {
                 .body("size()", is(6));
     }
 
-    @DisplayName("동일한 날짜, 시간, 테마에 예약 내역이 이미 있다면 예약할 수 없다.")
+    @DisplayName("동일한 날짜, 시간, 테마에 예약 내역이 이미 있다면 예약 대기 등록으로 진행된다.")
     @Test
     void cannotSaveDuplicatedReservation() {
         // given
@@ -81,7 +81,7 @@ class MemberReservationControllerTest {
                 .cookie("token", token)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(201);
     }
 
     @DisplayName("예약하려는 시간이 이전 시간보다 이전일 경우 예약할 수 없다.")

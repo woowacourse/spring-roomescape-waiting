@@ -41,7 +41,7 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
-    public ReservationResponse reserve(final ReservationSaveRequest saveRequest, final Member member) {
+    public synchronized ReservationResponse reserve(final ReservationSaveRequest saveRequest, final Member member) {
         ReservationTime reservationTime = findReservationTimeById(saveRequest.timeId());
         Theme theme = findThemeById(saveRequest.themeId());
         try {
