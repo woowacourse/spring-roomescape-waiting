@@ -30,24 +30,19 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationServiceValidator reservationServiceValidator;
 
     public ReservationService(ReservationRepository reservationRepository, WaitingRepository waitingRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+                              MemberRepository memberRepository,
+                              ReservationServiceValidator reservationServiceValidator) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-    }
-
-    private static FindAvailableTimesResponse generateFindAvailableTimesResponse(List<Reservation> reservations,
-                                                                                 ReservationTime reservationTime) {
-        return FindAvailableTimesResponse.from(
-                reservationTime,
-                reservations.stream()
-                        .anyMatch(reservation -> reservation.hasSameTime(reservationTime)));
+        this.reservationServiceValidator = reservationServiceValidator;
     }
 
     public CreateReservationResponse createReservation(AuthInfo authInfo,
@@ -58,37 +53,10 @@ public class ReservationService {
         Slot slot = new Slot(createReservationRequest.date(), reservationTime, theme);
         Reservation reservation = Reservation.create(member, slot);
 
-        checkAlreadyExistReservation(slot);
-        checkWaitingExists(slot);
+        reservationServiceValidator.checkAlreadyExistReservation(slot);
+        reservationServiceValidator.checkWaitingExists(slot);
 
         return CreateReservationResponse.from(reservationRepository.save(reservation));
-    }
-
-    private void checkAlreadyExistReservation(Slot slot) {
-        if (reservationRepository.existsBySlot(slot)) {
-            throw new IllegalArgumentException("이미 예약이 존재하여 예약을 생성할 수 없습니다.");
-        }
-    }
-
-    private void checkWaitingExists(Slot slot) {
-        if (waitingRepository.existsBySlot(slot)) {
-            throw new IllegalArgumentException("대기자가 있어 예약을 생성할 수 없습니다.");
-        }
-    }
-
-    private ReservationTime getReservationTime(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    private Theme getTheme(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    private Member getMember(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
     @Transactional(readOnly = true)
@@ -101,11 +69,6 @@ public class ReservationService {
         return FindReservationResponse.from(getReservation(id));
     }
 
-    private Reservation getReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
-    }
-
     @Transactional(readOnly = true)
     public List<FindAvailableTimesResponse> getAvailableTimes(LocalDate date, Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
@@ -113,6 +76,14 @@ public class ReservationService {
         return reservationTimes.stream()
                 .map(reservationTime -> generateFindAvailableTimesResponse(reservations, reservationTime))
                 .toList();
+    }
+
+    private FindAvailableTimesResponse generateFindAvailableTimesResponse(List<Reservation> reservations,
+                                                                          ReservationTime reservationTime) {
+        return FindAvailableTimesResponse.from(
+                reservationTime,
+                reservations.stream()
+                        .anyMatch(reservation -> reservation.hasSameTime(reservationTime)));
     }
 
     @Transactional(readOnly = true)
@@ -129,13 +100,28 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        validateExistReservation(id);
+        reservationServiceValidator.validateExistReservation(id);
         reservationRepository.deleteById(id);
     }
 
-    private void validateExistReservation(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않습니다. 삭제가 불가능합니다.");
-        }
+
+    private Reservation getReservation(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
+    }
+
+    private ReservationTime getReservationTime(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
+    }
+
+    private Theme getTheme(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
+    }
+
+    private Member getMember(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 }

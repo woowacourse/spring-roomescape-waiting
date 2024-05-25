@@ -26,17 +26,19 @@ public class AdminService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
+    private final AdminServiceValidator adminServiceValidator;
 
     public AdminService(MemberRepository memberRepository,
                         ReservationTimeRepository reservationTimeRepository,
                         ThemeRepository themeRepository,
                         ReservationRepository reservationRepository,
-                        WaitingRepository waitingRepository) {
+                        WaitingRepository waitingRepository, AdminServiceValidator adminServiceValidator) {
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
+        this.adminServiceValidator = adminServiceValidator;
     }
 
     public CreateReservationResponse createReservation(CreateReservationRequest createReservationRequest) {
@@ -47,6 +49,19 @@ public class AdminService {
         Reservation reservation = reservationRepository.save(
                 new Reservation(member, createReservationRequest.date(), reservationTime, theme));
         return CreateReservationResponse.from(reservation);
+    }
+
+    public ConfirmReservationResponse confirmWaiting(Long id) {
+        Waiting waiting = getWaiting(id);
+        Slot slot = waiting.getSlot();
+
+        adminServiceValidator.validateReservationExists(slot);
+        adminServiceValidator.validateFirstWaiting(slot, id);
+
+        waitingRepository.deleteById(id);
+        Reservation reservation = reservationRepository.save(new Reservation(waiting.getMember(), slot));
+
+        return ConfirmReservationResponse.from(reservation);
     }
 
     private Theme getTheme(Long id) {
@@ -62,31 +77,6 @@ public class AdminService {
     private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    public ConfirmReservationResponse confirmWaiting(Long id) {
-        Waiting waiting = getWaiting(id);
-        Slot slot = waiting.getSlot();
-
-        checkReservationExists(slot);
-        checkFirstWaiting(slot, id);
-
-        waitingRepository.deleteById(id);
-        Reservation reservation = reservationRepository.save(new Reservation(waiting.getMember(), slot));
-
-        return ConfirmReservationResponse.from(reservation);
-    }
-
-    private void checkReservationExists(Slot slot) {
-        if (reservationRepository.existsBySlot(slot)) {
-            throw new IllegalArgumentException("이미 예약이 존재하여 대기를 예약으로 변경할 수 없습니다.");
-        }
-    }
-
-    private void checkFirstWaiting(Slot slot, Long id) {
-        if (waitingRepository.existsBySlotAndIdLessThan(slot, id)) {
-            throw new IllegalArgumentException(id + "번 예약 대기보다 앞선 대기가 존재하여 예약으로 변경할 수 없습니다.");
-        }
     }
 
     private Waiting getWaiting(Long id) {

@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
@@ -9,35 +8,29 @@ import roomescape.reservation.dto.request.CreateReservationTimeRequest;
 import roomescape.reservation.dto.response.CreateReservationTimeResponse;
 import roomescape.reservation.dto.response.FindReservationTimeResponse;
 import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
 @Transactional
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationTimeServiceValidator reservationTimeServiceValidator;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+                                  ReservationTimeServiceValidator reservationTimeServiceValidator) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+        this.reservationTimeServiceValidator = reservationTimeServiceValidator;
     }
 
     public CreateReservationTimeResponse createReservationTime(
             CreateReservationTimeRequest createReservationTimeRequest) {
-        checkAlreadyExistsTime(createReservationTimeRequest.startAt());
+        reservationTimeServiceValidator.checkAlreadyExistsTime(createReservationTimeRequest.startAt());
 
         ReservationTime reservationTime = reservationTimeRepository.save(
                 createReservationTimeRequest.toReservationTime());
         return CreateReservationTimeResponse.from(reservationTime);
     }
 
-    private void checkAlreadyExistsTime(LocalTime time) {
-        if (reservationTimeRepository.existsByStartAt(time)) {
-            throw new IllegalArgumentException("생성하려는 시간 " + time + "가 이미 존재합니다. 시간을 생성할 수 없습니다.");
-        }
-    }
 
     @Transactional(readOnly = true)
     public List<FindReservationTimeResponse> getReservationTimes() {
@@ -54,21 +47,9 @@ public class ReservationTimeService {
     }
 
     public void deleteById(Long id) {
-        validateExistReservationTime(id);
-        validateReservationTimeUsage(id);
+        reservationTimeServiceValidator.validateExistReservationTime(id);
+        reservationTimeServiceValidator.validateReservationTimeUsage(id);
 
         reservationTimeRepository.deleteById(id);
-    }
-
-    private void validateExistReservationTime(Long id) {
-        if (!reservationTimeRepository.existsById(id)) {
-            throw new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않습니다. 삭제가 불가능합니다.");
-        }
-    }
-
-    private void validateReservationTimeUsage(Long id) {
-        if (reservationRepository.existsBySlot_ReservationTimeId(id)) {
-            throw new IllegalStateException("식별자 " + id + "인 시간을 사용 중인 예약이 존재합니다. 삭제가 불가능합니다.");
-        }
     }
 }

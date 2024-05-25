@@ -17,7 +17,6 @@ import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Slot;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.model.Waiting;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
@@ -27,20 +26,20 @@ import roomescape.reservation.repository.WaitingRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
-    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingServiceValidator waitingServiceValidator;
 
-    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository,
+    public WaitingService(WaitingRepository waitingRepository,
                           ReservationTimeRepository reservationTimeRepository,
                           ThemeRepository themeRepository,
-                          MemberRepository memberRepository) {
+                          MemberRepository memberRepository, WaitingServiceValidator waitingServiceValidator) {
         this.waitingRepository = waitingRepository;
-        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingServiceValidator = waitingServiceValidator;
     }
 
     public CreateWaitingResponse createWaiting(AuthInfo authInfo, CreateWaitingRequest createWaitingRequest) {
@@ -51,35 +50,11 @@ public class WaitingService {
         Slot slot = new Slot(date, reservationTime, theme);
         Waiting waiting = Waiting.create(member, slot);
 
-        checkBothWaitingAndReservationNotExist(slot);
-        checkMemberAlreadyHasReservation(member, slot);
-        checkMemberAlreadyHasWaiting(member, slot);
+        waitingServiceValidator.checkBothWaitingAndReservationNotExist(slot);
+        waitingServiceValidator.checkMemberAlreadyHasReservation(member, slot);
+        waitingServiceValidator.checkMemberAlreadyHasWaiting(member, slot);
 
         return CreateWaitingResponse.from(waitingRepository.save(waiting));
-    }
-
-    private void checkBothWaitingAndReservationNotExist(Slot slot) {
-        if (bothWaitingAndReservationNotExist(slot)) {
-            throw new IllegalArgumentException(
-                    slot.date() + " " + slot.reservationTime().getStartAt() + "의 " + slot.theme().getName()
-                            + " 테마는 바로 예약 가능하여 대기가 불가능합니다.");
-        }
-    }
-
-    private boolean bothWaitingAndReservationNotExist(Slot slot) {
-        return !waitingRepository.existsBySlot(slot) && !reservationRepository.existsBySlot(slot);
-    }
-
-    private void checkMemberAlreadyHasReservation(Member member, Slot slot) {
-        if (reservationRepository.existsBySlotAndMemberId(slot, member.getId())) {
-            throw new IllegalArgumentException("이미 본인의 예약이 존재하여 대기를 생성할 수 없습니다.");
-        }
-    }
-
-    private void checkMemberAlreadyHasWaiting(Member member, Slot slot) {
-        if (waitingRepository.existsBySlotAndMemberId(slot, member.getId())) {
-            throw new IllegalArgumentException("이미 본인의 대기가 존재하여 대기를 생성할 수 없습니다.");
-        }
     }
 
     private ReservationTime getReservationTime(Long id) {

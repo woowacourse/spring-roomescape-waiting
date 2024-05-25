@@ -17,24 +17,22 @@ public class AuthService {
 
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
+    private final AuthServiceValidator authServiceValidator;
 
-    public AuthService(MemberRepository memberRepository, TokenProvider tokenProvider) {
+    public AuthService(MemberRepository memberRepository, TokenProvider tokenProvider,
+                       AuthServiceValidator authServiceValidator) {
         this.memberRepository = memberRepository;
         this.tokenProvider = tokenProvider;
+        this.authServiceValidator = authServiceValidator;
     }
 
     public LoginResponse login(LoginRequest loginMemberRequest) {
         String email = loginMemberRequest.email();
-        Member member = memberRepository.findByEmail(new Email(email))
-                .orElseThrow(() -> new IllegalArgumentException("로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요."));
-        checkInvalidAuthInfo(member, loginMemberRequest.password());
-        return new LoginResponse(tokenProvider.createToken(member));
-    }
+        Member member = getMember(email);
 
-    private void checkInvalidAuthInfo(Member member, String password) {
-        if (member.hasNotSamePassword(password)) {
-            throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력했습니다. 다시 입력해주세요.");
-        }
+        authServiceValidator.checkInvalidAuthInfo(member, loginMemberRequest.password());
+
+        return new LoginResponse(tokenProvider.createToken(member));
     }
 
     @Transactional(readOnly = true)
@@ -42,5 +40,10 @@ public class AuthService {
         Member member = memberRepository.findById(authInfo.getMemberId())
                 .orElseThrow(() -> new SecurityException("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요."));
         return GetAuthInfoResponse.from(member);
+    }
+
+    private Member getMember(String email) {
+        return memberRepository.findByEmail(new Email(email))
+                .orElseThrow(() -> new IllegalArgumentException("로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요."));
     }
 }
