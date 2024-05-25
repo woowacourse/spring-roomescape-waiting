@@ -40,22 +40,22 @@ public class Reservation {
     @Column(name = "status", nullable = false)
     private ReservationStatus status;
 
-    @Column(name = "reservation_timestamp", nullable = false)
-    private LocalDateTime reservationTimestamp;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public Reservation() {
 
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member,
-                       ReservationStatus status, LocalDateTime reservationTimestamp) {
+                       ReservationStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.member = member;
         this.date = new ReservationDate(date);
         this.time = time;
         this.theme = theme;
         this.status = status;
-        this.reservationTimestamp = reservationTimestamp.withNano(0);
+        this.createdAt = createdAt.withNano(0);
     }
 
     public Long getId() {
@@ -82,12 +82,12 @@ public class Reservation {
         return status;
     }
 
-    public LocalDateTime getReservationTimestamp() {
-        return reservationTimestamp;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     public Reservation changeStatusToReserved() {
-        return new Reservation(id, date.getValue(), time, theme, member, RESERVED, reservationTimestamp);
+        return new Reservation(id, date.getValue(), time, theme, member, RESERVED, createdAt);
     }
 
     @Override
@@ -101,13 +101,13 @@ public class Reservation {
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id) && Objects.equals(date, that.date)
                 && Objects.equals(time, that.time) && Objects.equals(theme, that.theme)
-                && Objects.equals(member, that.member) && Objects.equals(reservationTimestamp,
-                that.reservationTimestamp);
+                && Objects.equals(member, that.member) && Objects.equals(createdAt,
+                that.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, time, theme, member, reservationTimestamp);
+        return Objects.hash(id, date, time, theme, member, createdAt);
     }
 
     @Override
@@ -118,7 +118,8 @@ public class Reservation {
                 ", time=" + time +
                 ", theme=" + theme +
                 ", member=" + member +
-                ", reservationTimestamp=" + reservationTimestamp +
+                ", status=" + status +
+                ", createAt=" + createdAt +
                 '}';
     }
 }

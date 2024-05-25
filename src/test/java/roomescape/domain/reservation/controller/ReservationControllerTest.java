@@ -29,7 +29,7 @@ class ReservationControllerTest extends ControllerTest {
         jdbcTemplate.update("insert into reservation_time (start_at) values('10:00')");
         jdbcTemplate.update("insert into theme (name, description, thumbnail) values('리비', '리비 설명', 'url')");
         jdbcTemplate.update(
-                "insert into reservation (date, time_id, theme_id, member_id,  status, reservation_timestamp) values(?,?,?,?,?,?)"
+                "insert into reservation (date, time_id, theme_id, member_id,  status, created_at) values(?,?,?,?,?,?)"
                 , AFTER_TWO_DAYS_DATE, 1, 1, 1, "RESERVED", TIMESTAMP_BEFORE_ONE_YEAR);
     }
 

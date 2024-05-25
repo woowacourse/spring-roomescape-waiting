@@ -31,7 +31,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
                 WHERE r2.date = r.date
                     AND r2.theme.id = r.theme.id
                     AND r2.time.id = r.time.id
-                    AND r2.reservationTimestamp < r.reservationTimestamp
+                    AND r2.createdAt < r.createdAt
             ))
             FROM Reservation r
             WHERE r.member.id = :memberId

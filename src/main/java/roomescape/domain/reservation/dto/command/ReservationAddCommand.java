@@ -16,7 +16,7 @@ public record ReservationAddCommand(LocalDate date, Long timeId, Long themeId, L
     }
 
     public Reservation toEntity(ReservationTime reservationTime, Theme theme, Member member,
-                                ReservationStatus reservationStatus, LocalDateTime timestamp) {
-        return new Reservation(null, date, reservationTime, theme, member, reservationStatus, timestamp);
+                                ReservationStatus reservationStatus, LocalDateTime createdAt) {
+        return new Reservation(null, date, reservationTime, theme, member, reservationStatus, createdAt);
     }
 }

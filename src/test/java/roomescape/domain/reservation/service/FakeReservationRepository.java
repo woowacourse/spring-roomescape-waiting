@@ -58,7 +58,7 @@ public class FakeReservationRepository implements ReservationRepository {
 
         Reservation addReservation = new Reservation(id, reservation.getDate(), reservation.getTime(),
                 reservation.getTheme(),
-                reservation.getMember(), reservation.getStatus(), reservation.getReservationTimestamp());
+                reservation.getMember(), reservation.getStatus(), reservation.getCreatedAt());
 
         if (reservations.containsKey(reservation.getId())) {
             reservations.replace(reservation.getId(), addReservation);
@@ -86,7 +86,7 @@ public class FakeReservationRepository implements ReservationRepository {
                 .min(new Comparator<Reservation>() {
                     @Override
                     public int compare(Reservation o1, Reservation o2) {
-                        return o1.getReservationTimestamp().compareTo(o2.getReservationTimestamp());
+                        return o1.getCreatedAt().compareTo(o2.getCreatedAt());
                     }
                 });
     }
@@ -137,7 +137,7 @@ public class FakeReservationRepository implements ReservationRepository {
                     .filter(r -> r.getDate().equals(reservation.getDate())
                             && r.getTheme().getId().equals(reservation.getTheme().getId())
                             && r.getTime().getId().equals(reservation.getTime().getId())
-                            && r.getReservationTimestamp().isBefore(reservation.getReservationTimestamp()))
+                            && r.getCreatedAt().isBefore(reservation.getCreatedAt()))
                     .count();
 
             result.add(new ReservationWithOrderDto(reservation, rank));
