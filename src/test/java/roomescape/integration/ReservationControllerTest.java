@@ -2,6 +2,7 @@ package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static roomescape.exception.ExceptionType.*;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
 import io.restassured.RestAssured;
@@ -29,6 +30,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -63,8 +65,15 @@ public class ReservationControllerTest {
             Role.USER,
             new Email("other@email.com"),
             new Password("otherPassword"));
+    private Member admin = new Member(
+            new Name("admin"),
+            Role.ADMIN,
+            new Email("admin@admin.com"),
+            new Password("adminPassword")
+    );
     private String token;
     private String othersToken;
+    private String adminToken;
 
     @BeforeEach
     void initData() {
@@ -75,18 +84,18 @@ public class ReservationControllerTest {
         defaultTime = reservationTimeRepository.save(defaultTime);
         defaultMember = memberRepository.save(defaultMember);
         otherMember = memberRepository.save(otherMember);
-        token = JWT_GENERATOR.generateWith(
+        admin = memberRepository.save(admin);
+        token = generateTokenWith(defaultMember);
+        othersToken = generateTokenWith(otherMember);
+        adminToken = generateTokenWith(admin);
+    }
+
+    private String generateTokenWith(Member member) {
+        return JWT_GENERATOR.generateWith(
                 Map.of(
-                        "id", defaultMember.getId(),
-                        "name", defaultMember.getName().getValue(),
-                        "role", defaultMember.getRole().getTokenValue()
-                )
-        );
-        othersToken = JWT_GENERATOR.generateWith(
-                Map.of(
-                        "id", otherMember.getId(),
-                        "name", otherMember.getName().getValue(),
-                        "role", otherMember.getRole().getTokenValue()
+                        "id", member.getId(),
+                        "name", member.getName().getValue(),
+                        "role", member.getRole().getTokenValue()
                 )
         );
     }
@@ -125,7 +134,7 @@ public class ReservationControllerTest {
                     .post("/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .body("id", is((int)savedReservation.getId() + 1),
+                    .body("id", is((int) savedReservation.getId() + 1),
                             "member.name", is(savedUser.getName().getValue()),
                             "date", is(reservationParam.get("date")),
                             "time.startAt", is(savedReservation.getReservationTime().getStartAt().toString()),
@@ -268,7 +277,90 @@ public class ReservationControllerTest {
                     .statusCode(200)
                     .body("size()", is(1));
         }
+
+        @DisplayName("관리자는 다른 사람의 예약 대기를 삭제할 수 있다.")
+        @Test
+        void deleteWaitingByAdminTest() {
+            //given
+            Map<String, Object> reservationParam = Map.of(
+                    "date", savedReservation.getDate().toString(),
+                    "timeId", savedReservation.getReservationTime().getId(),
+                    "themeId", savedReservation.getTheme().getId());
+
+            int waitingId = RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParam)
+                    .post("/reservations")
+                    .then().log().all()
+                    .extract().jsonPath().get("id");
+
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", adminToken)
+                    .delete("/admin/reservations/" + waitingId)
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
+        }
+
+        @DisplayName("관리자도 다른 사람의 예약을 삭제할 수 없다.")
+        @Test
+        void deleteReservationByAdminFailTest() {
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", adminToken)
+                    .delete("/admin/reservations/" + savedReservation.getId())
+                    .then().log().all()
+                    .statusCode(403)
+                    .body("message", is(FORBIDDEN_DELETE.getMessage()));
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
+        }
+
+        @DisplayName("일반 사용자는 관리자 권한 예약 삭제를 할 수 없다.")
+        @Test
+        void adminDeleteWaitingByUserFailTest() {
+            //given
+            Map<String, Object> reservationParam = Map.of(
+                    "date", savedReservation.getDate().toString(),
+                    "timeId", savedReservation.getReservationTime().getId(),
+                    "themeId", savedReservation.getTheme().getId());
+
+            int waitingId = RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParam)
+                    .post("/reservations")
+                    .then().log().all()
+                    .extract().jsonPath().get("id");
+
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", token)
+                    .delete("/admin/reservations/" + waitingId)
+                    .then().log().all()
+                    .statusCode(403);
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(2));
+        }
     }
+
     @DisplayName("예약이 10개 존재할 때")
     @Nested
     class ExistReservationTest {

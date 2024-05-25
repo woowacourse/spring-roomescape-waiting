@@ -28,6 +28,8 @@ import roomescape.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
+    private static final int NOT_WAITING_INDEX = 1;
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -123,5 +125,22 @@ public class ReservationService {
             throw new RoomescapeException(FORBIDDEN_DELETE);
         }
         reservationRepository.delete(requestedReservation);
+    }
+
+    public void deleteWaitingByAdmin(long id) {
+        Optional<Reservation> findResult = reservationRepository.findById(id);
+        if (findResult.isEmpty()) {
+            return;
+        }
+
+        Reservation requestedReservation = findResult.get();
+        if (isNotWaiting(requestedReservation)) {
+            throw new RoomescapeException(FORBIDDEN_DELETE);
+        }
+        reservationRepository.deleteById(id);
+    }
+
+    private boolean isNotWaiting(Reservation requestedReservation) {
+        return reservationRepository.calculateIndexOf(requestedReservation) == NOT_WAITING_INDEX;
     }
 }

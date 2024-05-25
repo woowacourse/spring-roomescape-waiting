@@ -70,4 +70,11 @@ public class ReservationController {
         reservationService.deleteByUser(loginMemberRequest, id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/admin/reservations/{id}")
+    @AdminOnly
+    public ResponseEntity<Void> deleteByAdmin(@PathVariable long id) {
+        reservationService.deleteWaitingByAdmin(id);
+        return ResponseEntity.noContent().build();
+    }
 }
