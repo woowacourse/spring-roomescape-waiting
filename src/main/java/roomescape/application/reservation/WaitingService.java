@@ -43,7 +43,7 @@ public class WaitingService {
 
     @Transactional
     public ReservationResponse create(ReservationRequest reservationRequest) {
-        Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(reservationRequest.date(),
+        Reservation reservation = reservationRepository.getByDateAndTimeIdAndThemeId(reservationRequest.date(),
                 reservationRequest.timeId(), reservationRequest.themeId());
         Member member = memberRepository.getById(reservationRequest.memberId());
         validateCreateWaiting(reservationRequest, reservation);
@@ -83,7 +83,6 @@ public class WaitingService {
 
     private void validateCreateWaiting(ReservationRequest reservationRequest, Reservation reservation) {
         validateWaitingAfterPresent(reservationRequest);
-        validateReservationExist(reservation);
         validateReservationDuplicate(reservationRequest, reservation);
         validateWaitingDuplicate(reservationRequest, reservation);
     }
@@ -93,12 +92,6 @@ public class WaitingService {
         LocalDateTime reservedDateTime = LocalDateTime.of(reservationRequest.date(), time.getStartAt());
         if (reservedDateTime.isBefore(LocalDateTime.now(clock))) {
             throw new IllegalArgumentException("현재 시간보다 과거로 예약할 수 없습니다.");
-        }
-    }
-
-    private void validateReservationExist(Reservation reservation) {
-        if (reservation == null) {
-            throw new IllegalArgumentException("대기를 하지 않고 예약이 가능합니다.");
         }
     }
 

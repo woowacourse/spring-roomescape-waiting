@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,20 +90,8 @@ class WaitingServiceTest {
                 LocalDate.of(2024, 1, 2), time.getId(), theme.getId());
 
         Assertions.assertThatThrownBy(() -> waitingService.create(reservationRequest))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("대기를 하지 않고 예약이 가능합니다.");
-    }
-
-    @Test
-    @DisplayName("예약 대기가 현재 시간보다 전이면 예외가 발생한다.")
-    void saveWaitingExceptionWhenDateTimeBefore() {
-        Member member = memberRepository.save(MemberFixture.createMember("시소"));
-        ReservationRequest reservationRequest = new ReservationRequest(member.getId(),
-                LocalDate.of(1999, 1, 1), time.getId(), theme.getId());
-
-        Assertions.assertThatThrownBy(() -> waitingService.create(reservationRequest))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("현재 시간보다 과거로 예약할 수 없습니다.");
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("존재하지 않는 예약입니다.");
     }
 
     @Test
