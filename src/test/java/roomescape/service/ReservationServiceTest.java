@@ -17,11 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -118,6 +120,8 @@ class ReservationServiceTest extends FixtureUsingTest {
 
         LocalDate defaultDate = LocalDate.now().plusDays(1);
         Reservation defaultReservation;
+        Member usedMember = USER1;
+        Member notUsedMember = USER2;
 
         @BeforeEach
         void addDefaultReservation() {
@@ -125,21 +129,61 @@ class ReservationServiceTest extends FixtureUsingTest {
             defaultReservation = reservationRepository.save(defaultReservation);
         }
 
-        //todo 삭제 테스트 추가 필요
-        @DisplayName("예약을 삭제할 수 있다.")
+        @DisplayName("본인의 예약을 삭제할 수 있다.")
         @Test
         void deleteReservationTest() {
             //when
-            reservationService.deleteByUser(LoginMemberRequest.from(defaultReservation.getMember()), 1L);
+            reservationService.deleteByUser(LoginMemberRequest.from(usedMember), 1L);
 
             //then
             assertThat(reservationRepository.findAll()).isEmpty();
         }
 
+        @DisplayName("다른 사람의 예약을 삭제할 수 없다.")
+        @Test
+        void deleteOthersReservationFailTest() {
+            assertThatThrownBy(() ->
+                    reservationService.deleteByUser(LoginMemberRequest.from(notUsedMember), 1L))
+                    .isInstanceOf(RoomescapeException.class)
+                    .hasMessage(ExceptionType.FORBIDDEN_DELETE.getMessage());
+
+            assertThat(reservationRepository.findAll()).isNotEmpty();
+        }
+
+        @DisplayName("관리자는 다른 사람의 예약을 삭제할 수 없다.")
+        @Test
+        void deleteOthersReservationByAdminFailTest() {
+            assertThatThrownBy(() ->
+                    reservationService.deleteByUser(LoginMemberRequest.from(ADMIN), 1L))
+                    .isInstanceOf(RoomescapeException.class)
+                    .hasMessage(ExceptionType.FORBIDDEN_DELETE.getMessage());
+
+            assertThat(reservationRepository.findAll()).isNotEmpty();
+        }
+
+        @DisplayName("관리자는 다른 사람의 예약 대기를 삭제할 수 있다.")
+        @Test
+        void deleteWaitingByAdminTest() {
+            //given
+            ReservationResponse waitingResponse = reservationService.saveByUser(LoginMemberRequest.from(USER2),
+                    new ReservationRequest(
+                            defaultReservation.getDate(),
+                            defaultReservation.getReservationTime().getId(),
+                            defaultReservation.getTheme().getId()
+                    ));
+
+            //when
+            reservationService.deleteWaitingByAdmin(waitingResponse.id());
+
+            //then
+            assertThat(reservationService.findAll().size()).isEqualTo(1);
+        }
+
         @DisplayName("존재하지 않는 예약에 대한 삭제 요청은 정상 요청으로 간주한다.")
         @Test
         void deleteNotExistReservationNotThrowsException() {
-            assertThatCode(() -> reservationService.deleteByUser(LoginMemberRequest.from(defaultReservation.getMember()), 2L))
+            assertThatCode(
+                    () -> reservationService.deleteByUser(LoginMemberRequest.from(defaultReservation.getMember()), 2L))
                     .doesNotThrowAnyException();
         }
     }
