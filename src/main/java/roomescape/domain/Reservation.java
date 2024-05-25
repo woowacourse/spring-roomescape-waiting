@@ -53,6 +53,10 @@ public class Reservation {
         this.status = status;
     }
 
+    public static Reservation approve(Waiting waiting) {
+        return new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
+    }
+
     public Member getMember() {
         return member;
     }

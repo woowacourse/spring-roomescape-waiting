@@ -2,9 +2,11 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,21 +15,30 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.TestDataInitExtension;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
+import roomescape.domain.Reservation;
 import roomescape.domain.Role;
+import roomescape.domain.Waiting;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.exception.ReservationFailException;
 import roomescape.exception.clienterror.InvalidClientFieldWithValueException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ExtendWith(TestDataInitExtension.class)
 class ReservationServiceTest {
     private final ReservationService service;
+    private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
     @Autowired
-    public ReservationServiceTest(final ReservationService service) {
+    public ReservationServiceTest(final ReservationService service, final ReservationRepository reservationRepository,
+                                  final WaitingRepository waitingRepository) {
         this.service = service;
+        this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     private long getReservationSize() {
@@ -65,6 +76,35 @@ class ReservationServiceTest {
         long afterCreateSize = getReservationSize();
         //then
         assertThat(afterCreateSize).isEqualTo(initialSize - 1);
+    }
+
+    /*
+     * 예약 대기 관련 초기 데이터
+     * 예약 테이블
+     * {ID=9, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=1, STATUS=RESERVED}
+     * {ID=10, DATE=내일일자, TIME_ID=2, THEME_ID=1, MEMBER_ID=1, STATUS=RESERVED}
+     * 예약 대기 테이블
+     * {ID=2, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=2, STATUS=WAITING}
+     */
+    @Test
+    @DisplayName("예약 삭제 시 대기중인 내역이 있으면 해당 대기를 삭제하고 예약으로 저장한다.")
+    void given_when_existWaiting_then_convertWaitingToReservation() {
+        //given
+        Reservation reservationToCancel = reservationRepository.findById(9L).get();
+        Waiting waitingToApprove = waitingRepository.findById(2L).get();
+
+        //when
+        service.delete(9L);
+
+        //then
+        Optional<Reservation> approvedReservation = reservationRepository.findById(11L);
+        assertAll(
+                () -> assertThat(waitingRepository.findById(2L)).isEmpty(),
+                () -> assertThat(approvedReservation).isNotEmpty(),
+                () -> assertThat(approvedReservation.get().getTheme()).isEqualTo(reservationToCancel.getTheme()),
+                () -> assertThat(approvedReservation.get().getDate()).isEqualTo(reservationToCancel.getDate()),
+                () -> assertThat(approvedReservation.get().getMember()).isEqualTo(waitingToApprove.getMember())
+        );
     }
 
     @Test

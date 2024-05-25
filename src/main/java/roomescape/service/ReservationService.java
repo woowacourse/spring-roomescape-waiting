@@ -101,17 +101,16 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
         reservationRepository.deleteById(id);
 
-        updateWaitingToReservation(reservation);
-    }
-
-    private void updateWaitingToReservation(Reservation reservation) {
         Optional<Waiting> foundWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderById(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        updateWaitingToReservation(foundWaiting);
+    }
+
+    private void updateWaitingToReservation(Optional<Waiting> foundWaiting) {
         foundWaiting.ifPresent(waiting -> {
-            Reservation createdReservation = new Reservation(reservation.getMember(), reservation.getDate(),
-                    reservation.getTime(), reservation.getTheme());
+            Reservation approvedReservation = Reservation.approve(waiting);
             waitingRepository.delete(waiting);
-            reservationRepository.save(createdReservation);
+            reservationRepository.save(approvedReservation);
         });
     }
 
