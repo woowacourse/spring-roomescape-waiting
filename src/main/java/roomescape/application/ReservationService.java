@@ -4,21 +4,20 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationdetail.ReservationDetail;
-import roomescape.domain.reservationdetail.ReservationDetailFactory;
-import roomescape.domain.reservation.ReservationFactory;
-import roomescape.domain.reservation.Status;
-import roomescape.domain.member.MemberRepository;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.dto.ReservationWithRank;
-import roomescape.exception.reservation.ReservationException;
-import roomescape.application.dto.request.member.MemberInfo;
 import roomescape.application.dto.request.reservation.ReservationRequest;
 import roomescape.application.dto.request.reservation.ReservationSearchCondition;
 import roomescape.application.dto.response.reservation.ReservationResponse;
 import roomescape.application.dto.response.reservation.UserReservationResponse;
+import roomescape.domain.dto.ReservationWithRank;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationFactory;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.Status;
+import roomescape.domain.reservationdetail.ReservationDetail;
+import roomescape.domain.reservationdetail.ReservationDetailFactory;
+import roomescape.exception.reservation.ReservationException;
 
 @Service
 @RequiredArgsConstructor
@@ -81,17 +80,5 @@ public class ReservationService {
         if (reservationExists) {
             throw new ReservationException("다른 예약이 존재합니다.");
         }
-    }
-
-    @Transactional
-    public void cancelReservation(Long reservationId, MemberInfo memberInfo) {
-        Reservation reservation = reservationRepository.getById(reservationId);
-        reservation.cancel(memberInfo.id());
-    }
-
-    @Transactional
-    public void forceCancelReservation(Long reservationId) {
-        Reservation reservation = reservationRepository.getById(reservationId);
-        reservation.forceCancel();
     }
 }

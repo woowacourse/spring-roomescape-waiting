@@ -13,16 +13,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservation.Reservation;
+import roomescape.application.CancelService;
 import roomescape.application.ReservationService;
 import roomescape.application.dto.request.reservation.ReservationRequest;
 import roomescape.application.dto.request.reservation.ReservationSearchCondition;
 import roomescape.application.dto.response.reservation.ReservationResponse;
+import roomescape.domain.reservation.Reservation;
 
 @RestController
 @RequiredArgsConstructor
 public class AdminReservationController {
     private final ReservationService reservationService;
+    private final CancelService cancelService;
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> makeReservation(@RequestBody @Valid ReservationRequest request) {
@@ -63,13 +65,13 @@ public class AdminReservationController {
 
     @DeleteMapping("/admin/waitings/{idWaiting}")
     public ResponseEntity<Void> cancelWaiting(@PathVariable("idWaiting") Long waitingId) {
-        reservationService.forceCancelReservation(waitingId);
+        cancelService.forceCancelReservation(waitingId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/admin/reservations/{idReservation}")
     public ResponseEntity<Void> cancelReservation(@PathVariable("idReservation") Long reservationId) {
-        reservationService.forceCancelReservation(reservationId);
+        cancelService.forceCancelReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
