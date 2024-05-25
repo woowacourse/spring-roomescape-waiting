@@ -1,11 +1,13 @@
 package roomescape.reservation.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
@@ -30,11 +32,14 @@ class WaitingsTest {
                 LocalDateTime.now().plusDays(1));
         List<Reservation> waiting = new ArrayList<>();
         waiting.add(reservation1);
-        waiting.add(reservation2);
         waiting.add(reservation3);
+        waiting.add(reservation2);
         Waitings waitings = new Waitings(waiting);
 
-        Assertions.assertThat(waitings.findMemberRank(reservation3, 3L)).isEqualTo(3);
+        assertAll(
+                () -> assertThat(waitings.findMemberRank(reservation3, 3L)).isEqualTo(3),
+                () -> assertThat(waitings.findMemberRank(reservation1, 2L)).isEqualTo(2),
+                () -> assertThat(waitings.findMemberRank(reservation2, 1L)).isEqualTo(1)
+        );
     }
-
 }
