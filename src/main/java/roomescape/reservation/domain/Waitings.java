@@ -7,9 +7,16 @@ public class Waitings {
     private final List<Reservation> waitings;
 
     public Waitings(List<Reservation> waitingReservations) {
-        this.waitings = waitingReservations.stream()
-                .sorted(Comparator.comparing(Reservation::getCreatedAt))
-                .toList();
+        waitings = getWaitings(waitingReservations);
+    }
+
+    private List<Reservation> getWaitings(List<Reservation> waitingReservations) {
+        if (!waitingReservations.isEmpty()) {
+            return waitingReservations.stream()
+                    .sorted(Comparator.comparing(Reservation::getCreatedAt))
+                    .toList();
+        }
+        return waitingReservations;
     }
 
     public int findMemberRank(Reservation reservation, Long memberId) {
@@ -27,5 +34,9 @@ public class Waitings {
 
     public Reservation getFirstWaiting() {
         return waitings.get(0);
+    }
+
+    public boolean haveWaiting() {
+        return !waitings.isEmpty();
     }
 }

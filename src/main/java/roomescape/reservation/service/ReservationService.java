@@ -96,6 +96,13 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
+//        List<Reservation> memberAllReservations = reservationRepository.findAllByMemberId(memberId);
+//        List<Waitings> memberWaitings = memberAllReservations.stream()
+//                .map(reservation -> reservationRepository.findAllByDateAndReservationTimeIdAndThemeIdAndStatus(
+//                        reservation.getTheme().getId(), reservation.getTime().getId(), reservation.getDate(),
+//                        Status.WAITING))
+//                .map(Waitings::new)
+//                .toList();
         List<Reservation> waitingReservation = reservationRepository.findAllByStatus(Status.WAITING);
         Waitings waitings = new Waitings(waitingReservation);
 
@@ -107,10 +114,9 @@ public class ReservationService {
 
     public void delete(Long id) {
         Reservation reservation = reservationRepository.findById(id).get();
-        List<Reservation> waitingReservation = reservationRepository.findAllByDateAndReservationTimeIdAndThemeIdAndStatus(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), Status.WAITING);
-        if (!waitingReservation.isEmpty()) {
-            Waitings waitings = new Waitings(waitingReservation);
+        Waitings waitings = new Waitings(reservationRepository.findAllByDateAndReservationTimeIdAndThemeIdAndStatus(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), Status.WAITING));
+        if (waitings.haveWaiting()) {
             Reservation firstWaiting = waitings.getFirstWaiting();
             firstWaiting.changeSuccess();
         }
