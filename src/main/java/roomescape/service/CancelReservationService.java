@@ -1,12 +1,10 @@
 package roomescape.service;
 
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.waiting.Waiting;
-import roomescape.domain.waiting.WaitingWithSequence;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
@@ -24,7 +22,7 @@ public class CancelReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = findReservationById(id);
-        Optional<WaitingWithSequence> priorityWaiting = findPriorityWaiting(reservation);
+        Optional<Waiting> priorityWaiting = waitingRepository.findFirstByReservationOrderByIdAsc(reservation);
         priorityWaiting.ifPresentOrElse(this::approve, () -> delete(reservation));
     }
 
@@ -36,16 +34,7 @@ public class CancelReservationService {
                 ));
     }
 
-    private Optional<WaitingWithSequence> findPriorityWaiting(Reservation reservation) {
-        List<WaitingWithSequence> waitings = waitingRepository.findWaitingsWithSequenceByReservation(reservation);
-
-        return waitings.stream()
-                .filter(WaitingWithSequence::isPriority)
-                .findFirst();
-    }
-
-    private void approve(WaitingWithSequence waitingWithSequence) {
-        Waiting waiting = waitingWithSequence.getWaiting();
+    private void approve(Waiting waiting) {
         waiting.approve();
         waitingRepository.delete(waiting);
     }

@@ -37,22 +37,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     )
     List<WaitingWithSequence> findWaitingsWithSequenceByMember(Member member);
 
-    @Query("""
-             SELECT new roomescape.domain.waiting.WaitingWithSequence(
-                 w,
-                 (
-                     SELECT count(*) + 1
-                     FROM Waiting w2
-                     WHERE
-                         w2.reservation = w.reservation AND
-                         w2.id < w.id
-                 )
-             )
-            FROM Waiting w
-            JOIN FETCH w.reservation
-            JOIN FETCH w.member
-            WHERE w.reservation = :reservation
-             """
-    )
-    List<WaitingWithSequence> findWaitingsWithSequenceByReservation(Reservation reservation);
+    @EntityGraph(attributePaths = {"member", "reservation"})
+    Optional<Waiting> findFirstByReservationOrderByIdAsc(Reservation reservation);
 }
