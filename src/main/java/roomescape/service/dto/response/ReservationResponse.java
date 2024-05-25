@@ -25,13 +25,13 @@ public record ReservationResponse(
         );
     }
 
-    public static ReservationResponse from(ReservationWaiting reservationWaiting) { // todo 디미터
+    public static ReservationResponse from(ReservationWaiting reservationWaiting) {
         return new ReservationResponse(
                 reservationWaiting.getId(),
-                reservationWaiting.getReservation().getDate(),
+                reservationWaiting.getDate(),
                 reservationWaiting.getMember().getName(),
-                reservationWaiting.getReservation().getTime().getStartAt(),
-                reservationWaiting.getReservation().getTheme().getRawName()
+                reservationWaiting.getTime(),
+                reservationWaiting.getThemeName()
         );
     }
 }
