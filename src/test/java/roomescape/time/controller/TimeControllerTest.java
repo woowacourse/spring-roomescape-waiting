@@ -1,10 +1,15 @@
 package roomescape.time.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.MEMBER_ADMIN;
+import static roomescape.fixture.ThemeFixture.THEME_1;
+import static roomescape.fixture.TimeFixture.TIME_1;
+import static roomescape.fixture.TimeFixture.TIME_2;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalTime;
+import io.restassured.http.Cookies;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,12 +19,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.fixture.RestAssuredTemplate;
+import roomescape.fixture.ThemeFixture;
+import roomescape.fixture.TimeFixture;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.time.dto.AvailableTimeResponse;
 import roomescape.time.dto.TimeCreateRequest;
 import roomescape.time.dto.TimeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class TimeControllerTest {
     private final int COUNT_OF_TIME = 3;
 
@@ -33,58 +42,68 @@ class TimeControllerTest {
         RestAssured.port = port;
     }
 
-    @DisplayName("시간 목록을 읽을 수 있다.")
+    @DisplayName("시간을 조회, 추가, 삭제 할 수 있다.")
     @Test
-    void findTimes() {
-        int size = RestAssured.given().log().all()
+    void findCreateDeleteTimes() {
+        TimeCreateRequest params = TimeFixture.toTimeCreateRequest(TIME_1);
+
+        // 시간 추가
+        TimeResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(201).extract()
+                .jsonPath().getObject("", TimeResponse.class);
+
+        // 시간 조회
+        List<TimeResponse> timeResponses = RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getInt("size()");
+                .jsonPath().getList("", TimeResponse.class);
 
-        assertThat(size).isEqualTo(COUNT_OF_TIME);
+        assertThat(timeResponses).containsExactlyInAnyOrder(response);
+
+        // 시간 삭제
+        RestAssured.given().log().all()
+                .when().delete("/times/" + response.id())
+                .then().log().all()
+                .statusCode(204);
+
+        // 시간 조회
+        timeResponses = RestAssured.given().log().all()
+                .when().get("/times")
+                .then().log().all()
+                .statusCode(200).extract()
+                .jsonPath().getList("", TimeResponse.class);
+
+        assertThat(timeResponses).isEmpty();
     }
 
     @DisplayName("예약 가능한 시간 목록을 읽을 수 있다.")
     @Test
     void findAvailableTimes() {
+        Cookies cookies = RestAssuredTemplate.makeUserCookie(MEMBER_ADMIN);
+        LocalDate date = LocalDate.of(2100, 1, 1);
+        Long themeId = RestAssuredTemplate.create(ThemeFixture.toThemeCreateRequest(THEME_1), cookies).id();
+        TimeResponse reservedTimeResponse = RestAssuredTemplate.create(TimeFixture.toTimeCreateRequest(TIME_1), cookies);
+        TimeResponse notReservedTimeResponse = RestAssuredTemplate.create(TimeFixture.toTimeCreateRequest(TIME_2), cookies);
+
+        ReservationCreateRequest reservationParams =
+                new ReservationCreateRequest(MEMBER_ADMIN.getId(), date, reservedTimeResponse.id(), themeId);
+        RestAssuredTemplate.create(reservationParams, cookies);
+
         List<AvailableTimeResponse> expected = List.of(
-                new AvailableTimeResponse(new TimeResponse(1L, LocalTime.of(10, 0)), false),
-                new AvailableTimeResponse(new TimeResponse(2L, LocalTime.of(19, 0)), true),
-                new AvailableTimeResponse(new TimeResponse(3L, LocalTime.of(21, 0)), false));
+                new AvailableTimeResponse(reservedTimeResponse, true),
+                new AvailableTimeResponse(notReservedTimeResponse, false));
+
         List<AvailableTimeResponse> response = RestAssured.given().log().all()
-                .when().get("/times/available?date=2022-05-05&themeId=1")
+                .when().get("/times/available?date=2100-01-01&themeId=" + themeId)
                 .then().log().all()
                 .statusCode(200).extract()
                 .jsonPath().getList(".", AvailableTimeResponse.class);
 
         assertThat(response).isEqualTo(expected);
-    }
-
-    @DisplayName("시간을 DB에 추가할 수 있다.")
-    @Test
-    void createTime() {
-        TimeCreateRequest params = new TimeCreateRequest(LocalTime.of(8, 0));
-        long expectedId = COUNT_OF_TIME + 1;
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .header("Location", "/times/" + expectedId);
-    }
-
-    @DisplayName("삭제할 id를 받아서 DB에서 해당 시간을 삭제 할 수 있다.")
-    @Test
-    void deleteTime() {
-        RestAssured.given().log().all()
-                .when().delete("/times/3")
-                .then().log().all()
-                .statusCode(204);
-
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation_time", Integer.class);
-        assertThat(countAfterDelete).isEqualTo(COUNT_OF_TIME - 1);
     }
 }

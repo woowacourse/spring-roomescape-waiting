@@ -1,6 +1,7 @@
 package roomescape.theme.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.ThemeFixture.THEME_1;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -13,11 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.fixture.ThemeFixture;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ThemeControllerTest {
     private static final int COUNT_OF_THEME = 3;
 
@@ -31,22 +33,51 @@ class ThemeControllerTest {
         RestAssured.port = port;
     }
 
-    @DisplayName("테마 목록을 읽을 수 있다.")
+    @DisplayName("테마를 조회, 추가, 삭제 할 수 있다.")
     @Test
-    void findReservations() {
-        int size = RestAssured.given().log().all()
+    void findCreateDeleteReservations() {
+        ThemeCreateRequest params = ThemeFixture.toThemeCreateRequest(THEME_1);
+
+        // 테마 추가
+        ThemeResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/themes")
+                .then().log().all()
+                .statusCode(201).extract()
+                .jsonPath().getObject("", ThemeResponse.class);
+
+        // 테마 조회
+        List<ThemeResponse> themeResponses = RestAssured.given().log().all()
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getInt("size()");
+                .jsonPath().getList("", ThemeResponse.class);
 
-        assertThat(size).isEqualTo(COUNT_OF_THEME);
+        assertThat(themeResponses).containsExactlyInAnyOrder(response);
+
+        // 테마 삭제
+        RestAssured.given().log().all()
+                .when().delete("/themes/" + response.id())
+                .then().log().all()
+                .statusCode(204);
+
+        // 테마 조회
+        themeResponses = RestAssured.given().log().all()
+                .when().get("/themes")
+                .then().log().all()
+                .statusCode(200).extract()
+                .jsonPath().getList("", ThemeResponse.class);
+
+        assertThat(themeResponses).isEmpty();
     }
 
     @DisplayName("인기 테마 목록을 읽을 수 있다.")
     @Test
+    @Sql(scripts = {"/init.sql", "/ranking-data.sql"})
     void findPopularReservations() {
         List<ThemeResponse> expected = List.of(
+                new ThemeResponse(3L, "레벨4 탈출", "우테코 레벨4 탈출기!", "https://img.jpg"),
                 new ThemeResponse(1L, "레벨2 탈출", "우테코 레벨2 탈출기!", "https://img.jpg"),
                 new ThemeResponse(2L, "레벨3 탈출", "우테코 레벨3 탈출기!", "https://img.jpg")
         );
@@ -58,35 +89,5 @@ class ThemeControllerTest {
                 .jsonPath().getList(".", ThemeResponse.class);
 
         assertThat(response).isEqualTo(expected);
-    }
-
-    @DisplayName("테마를 DB에 추가할 수 있다.")
-    @Test
-    void createTime() {
-        ThemeCreateRequest params = new ThemeCreateRequest(
-                "오리와 호랑이",
-                "오리들과 호랑이들 사이에서 살아남기",
-                "https://image.jpg");
-        long expectedId = COUNT_OF_THEME + 1;
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .header("Location", "/themes/" + expectedId);
-    }
-
-    @DisplayName("삭제할 id를 받아서 DB에서 해당 테마를 삭제 할 수 있다.")
-    @Test
-    void deleteTime() {
-        RestAssured.given().log().all()
-                .when().delete("/themes/3")
-                .then().log().all()
-                .statusCode(204);
-
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from theme", Integer.class);
-        assertThat(countAfterDelete).isEqualTo(COUNT_OF_THEME - 1);
     }
 }

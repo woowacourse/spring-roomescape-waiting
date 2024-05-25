@@ -1,8 +1,8 @@
 package roomescape.member.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.MEMBER_BRI;
 
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,34 +13,21 @@ import roomescape.member.domain.MemberPassword;
 import roomescape.test.RepositoryTest;
 
 class MemberRepositoryTest extends RepositoryTest {
-    private static final int COUNT_OF_MEMBER = 4;
-
     @Autowired
     private MemberRepository memberRepository;
-
-    @DisplayName("전체 멤버를 조회할 수 있다.")
-    @Test
-    void findAllTest() {
-        List<Member> actual = memberRepository.findAll();
-
-        assertThat(actual).hasSize(COUNT_OF_MEMBER);
-    }
-
-    @DisplayName("id로 멤버를 조회할 수 있다.")
-    @Test
-    void findByIdTest() {
-        Optional<Member> actual = memberRepository.findById(1L);
-
-        assertThat(actual.get().getId()).isEqualTo(1L);
-    }
 
     @DisplayName("email과 password로 멤버를 조회할 수 있다.")
     @Test
     void findByEmailAndPasswordTest() {
-        MemberEmail email = new MemberEmail("admin@abc.com");
-        MemberPassword password = new MemberPassword("1234");
-        Optional<Member> actual = memberRepository.findByEmailAndPassword(email, password);
+        // given
+        Member savedMember = memberRepository.save(MEMBER_BRI);
 
-        assertThat(actual.get().getId()).isEqualTo(1L);
+        // when
+        Optional<Member> actual = memberRepository.findByEmailAndPassword(
+                new MemberEmail(MEMBER_BRI.getEmail()),
+                new MemberPassword(MEMBER_BRI.getPassword()));
+
+        // then
+        assertThat(actual).contains(savedMember);
     }
 }

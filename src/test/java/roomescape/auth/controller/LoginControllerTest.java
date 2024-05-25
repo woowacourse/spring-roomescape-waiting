@@ -1,6 +1,7 @@
 package roomescape.auth.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.MEMBER_BROWN;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -17,7 +18,7 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.LoginResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class LoginControllerTest {
     @LocalServerPort
     private int port;
@@ -32,8 +33,8 @@ public class LoginControllerTest {
     @DisplayName("로그인을 하고, 해당 정보를 받아올 수 있다.")
     @Test
     void loginTest() {
-        LoginRequest request = new LoginRequest("brown@abc.com", "1234");
-        LoginResponse expectedResponse = new LoginResponse("브라운");
+        LoginRequest request = new LoginRequest(MEMBER_BROWN.getEmail(), MEMBER_BROWN.getPassword());
+        LoginResponse expectedResponse = new LoginResponse(MEMBER_BROWN.getName());
 
         Cookies cookies = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

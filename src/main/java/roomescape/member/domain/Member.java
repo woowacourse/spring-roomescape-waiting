@@ -28,12 +28,16 @@ public class Member {
     @Column(name = "role", nullable = false)
     private MemberRole role;
 
-    public Member(Long id, String name, String email) {
-        this(id, new MemberName(name), new MemberEmail(email), MemberRole.USER);
+    public Member(Long id, String name, String email, String password, MemberRole role) {
+        this.id = Objects.requireNonNull(id);
+        this.name = new MemberName(Objects.requireNonNull(name));
+        this.email = new MemberEmail(Objects.requireNonNull(email));
+        this.password = new MemberPassword(Objects.requireNonNull(password));
+        this.role = Objects.requireNonNull(role);
     }
 
-    public Member(Long id, String name, String email, String role) {
-        this(id, new MemberName(name), new MemberEmail(email), MemberRole.valueOf(role));
+    public Member(Long id, String name, String email) {
+        this(id, new MemberName(name), new MemberEmail(email), MemberRole.USER);
     }
 
     private Member(Long id, MemberName name, MemberEmail email, MemberRole role) {
@@ -64,6 +68,10 @@ public class Member {
 
     public MemberRole getRole() {
         return role;
+    }
+
+    public String getPassword() {
+        return password.password();
     }
 
     @Override

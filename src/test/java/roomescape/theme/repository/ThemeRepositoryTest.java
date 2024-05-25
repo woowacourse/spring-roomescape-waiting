@@ -1,78 +1,62 @@
 package roomescape.theme.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.MEMBER_BRI;
+import static roomescape.fixture.ThemeFixture.THEME_1;
+import static roomescape.fixture.ThemeFixture.THEME_2;
+import static roomescape.fixture.ThemeFixture.THEME_3;
+import static roomescape.fixture.TimeFixture.TIME_1;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.test.RepositoryTest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeName;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.TimeRepository;
 
 class ThemeRepositoryTest extends RepositoryTest {
-    private static final int COUNT_OF_THEME = 3;
     @Autowired
     private ThemeRepository themeRepository;
-
-    @DisplayName("전체 테마를 조회할 수 있다.")
-    @Test
-    void findAllTest() {
-        List<Theme> actual = themeRepository.findAll();
-
-        assertThat(actual).hasSize(COUNT_OF_THEME);
-    }
-
-    @DisplayName("id를 통해 테마를 조회할 수 있다.")
-    @Test
-    void findByIdTest() {
-        Optional<Theme> actual = themeRepository.findById(1L);
-
-        assertThat(actual.get().getId()).isEqualTo(1L);
-    }
+    @Autowired
+    private TimeRepository timeRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @DisplayName("인기 테마를 조회할 수 있다.")
     @Test
     void findPopularThemeTest() {
-        List<Theme> expected = List.of(
-                new Theme(1L, "레벨2 탈출", "우테코 레벨2 탈출기!", "https://img.jpg"),
-                new Theme(2L, "레벨3 탈출", "우테코 레벨3 탈출기!", "https://img.jpg")
-        );
-        LocalDate startDate = LocalDate.now().minusDays(3);
-        LocalDate endDate = LocalDate.now();
-        int count = 2;
+        Theme theme1 = themeRepository.save(THEME_1);
+        Theme theme2 = themeRepository.save(THEME_2);
+        Theme theme3 = themeRepository.save(THEME_3);
 
-        List<Theme> actual = themeRepository.findThemesSortedByCountOfReservation(startDate, endDate, count);
+        ReservationTime time = timeRepository.save(TIME_1);
+        LocalDate date = LocalDate.now();
+        reservationRepository.save(new Reservation(MEMBER_BRI, date.minusDays(1), time, theme2));
+        reservationRepository.save(new Reservation(MEMBER_BRI, date.minusDays(2), time, theme2));
+        reservationRepository.save(new Reservation(MEMBER_BRI, date.minusDays(3), time, theme2));
+        reservationRepository.save(new Reservation(MEMBER_BRI, date.minusDays(4), time, theme3));
+        reservationRepository.save(new Reservation(MEMBER_BRI, date.minusDays(5), time, theme3));
+        reservationRepository.save(new Reservation(MEMBER_BRI, date.minusDays(6), time, theme1));
 
-        assertThat(actual).isEqualTo(expected);
-    }
+        LocalDate startDate = date.minusDays(6);
+        LocalDate endDate = date.minusDays(1);
 
-    @DisplayName("테마를 저장할 수 있다.")
-    @Test
-    void saveTest() {
-        Theme newTheme = new Theme("우테코 탈출", "우테코 탈출기!", "https://img.jpg");
+        List<Theme> actual = themeRepository.findThemesSortedByCountOfReservation(startDate, endDate, 2);
 
-        themeRepository.save(newTheme);
-
-        Optional<Theme> savedTheme = themeRepository.findById(COUNT_OF_THEME + 1L);
-        assertThat(savedTheme).isNotEmpty();
-    }
-
-    @DisplayName("테마를 삭제할 수 있다.")
-    @Test
-    void deleteByIdTest() {
-        themeRepository.deleteById(3L);
-
-        Optional<Theme> savedTheme = themeRepository.findById(3L);
-        assertThat(savedTheme).isEmpty();
+        assertThat(actual).containsExactly(theme2, theme3);
     }
 
     @DisplayName("이름이 일치하는 테마 존재하는 것을 확인할 수 있다.")
     @Test
     void existsByNameTrueTest() {
-        boolean actual = themeRepository.existsByName(new ThemeName("레벨2 탈출"));
+        themeRepository.save(THEME_1);
+        boolean actual = themeRepository.existsByName(new ThemeName(THEME_1.getName()));
 
         assertThat(actual).isTrue();
     }
