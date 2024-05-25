@@ -1,8 +1,10 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Waiting;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 
 import java.util.ArrayList;

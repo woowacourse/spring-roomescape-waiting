@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;

@@ -1,8 +1,8 @@
 package roomescape.service.dto.response;
 
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

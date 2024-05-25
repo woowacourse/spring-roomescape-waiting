@@ -1,8 +1,8 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.customexception.RoomEscapeBusinessException;

@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.domain.ReservationStatus.RESERVED;
-import static roomescape.domain.ReservationStatus.WAITING;
+import static roomescape.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 class AdminWaitingControllerTest extends IntegrationTestSupport {
 

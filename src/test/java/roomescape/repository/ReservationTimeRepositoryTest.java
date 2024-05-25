@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
 
 import java.time.LocalTime;

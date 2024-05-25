@@ -2,8 +2,8 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dbservice.ReservationDbService;
 import roomescape.service.dto.request.ReservationConditionRequest;

@@ -3,7 +3,7 @@ package roomescape.service.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 
 public record MemberJoinRequest(
         @NotBlank(message = "이메일을 입력해주세요")

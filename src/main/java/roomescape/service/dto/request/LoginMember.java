@@ -1,6 +1,6 @@
 package roomescape.service.dto.request;
 
-import roomescape.domain.Role;
+import roomescape.domain.member.Role;
 import roomescape.service.dto.response.MemberResponse;
 
 public record LoginMember(

@@ -1,7 +1,8 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import roomescape.domain.member.Member;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
