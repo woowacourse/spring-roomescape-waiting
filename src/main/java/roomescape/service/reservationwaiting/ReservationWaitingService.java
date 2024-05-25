@@ -12,7 +12,6 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.reservationwaiting.CannotCreateWaitingForOwnedReservationException;
-import roomescape.exception.reservationwaiting.CannotDeleteOtherMemberWaiting;
 import roomescape.exception.reservationwaiting.DuplicatedReservationWaitingException;
 import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
 import roomescape.exception.reservationwaiting.NotFoundReservationWaitingException;
@@ -63,16 +62,13 @@ public class ReservationWaitingService {
         }
     }
 
-    public void deleteReservationWaiting(Long id, Member member) {
-        ReservationWaiting waiting = findReservationWaitingById(id);
-        if (waiting.isNotPublishedBy(member)) {
-            throw new CannotDeleteOtherMemberWaiting();
-        }
+    public void deleteReservationWaiting(Long reservationId, Member member) {
+        ReservationWaiting waiting = findReservationWaitingByReservationIdAndMember(reservationId, member.getId());
         reservationWaitingRepository.delete(waiting);
     }
 
-    private ReservationWaiting findReservationWaitingById(Long id) {
-        return reservationWaitingRepository.findById(id)
+    private ReservationWaiting findReservationWaitingByReservationIdAndMember(Long reservationId, Long memberId) {
+        return reservationWaitingRepository.findByReservationIdAndMemberId(reservationId, memberId)
                 .orElseThrow(NotFoundReservationWaitingException::new);
     }
 

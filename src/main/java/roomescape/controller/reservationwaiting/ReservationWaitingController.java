@@ -22,18 +22,18 @@ public class ReservationWaitingController {
     }
 
     @RoleAllowed
-    @PostMapping("/waitings")
+    @PostMapping("/reservations/waitings")
     public ResponseEntity<Void> saveReservationWaiting(@RequestBody ReservationWaitingRequest request,
                                                        @LoginMember Member member) {
         Long id = reservationWaitingService.saveReservationWaiting(request, member);
-        return ResponseEntity.created(URI.create("/waitings/" + id)).build();
+        return ResponseEntity.created(URI.create("/reservations/waitings/" + id)).build();
     }
 
     @RoleAllowed
-    @DeleteMapping("/waitings/{waitingId}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long waitingId,
+    @DeleteMapping("/reservations/waitings/{reservationId}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId,
                                                   @LoginMember Member member) {
-        reservationWaitingService.deleteReservationWaiting(waitingId, member);
+        reservationWaitingService.deleteReservationWaiting(reservationId, member);
         return ResponseEntity.noContent().build();
     }
 }
