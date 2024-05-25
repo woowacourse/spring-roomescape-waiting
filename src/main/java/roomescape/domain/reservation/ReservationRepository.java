@@ -15,9 +15,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 SELECT
                    r
                 FROM  Reservation r
-                JOIN r.member
-                JOIN r.time
-                JOIN r.theme
+                JOIN FETCH r.member
+                JOIN FETCH r.time
+                JOIN FETCH r.theme
                 WHERE (:memberId IS NULL OR r.member.id = :memberId)
                 AND (:themeId IS NULL OR r.theme.id = :themeId)
                 AND (:dateFrom IS NULL OR r.date >= :dateFrom)
