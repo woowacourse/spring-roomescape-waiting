@@ -3,13 +3,13 @@ package roomescape.domain.member.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.domain.member.service.MemberService.NON_EXIST_MEMBER_ERROR_MESSAGE;
-import static roomescape.fixture.MemberFixture.ADMIN_EMAIL;
+import static roomescape.fixture.MemberFixture.ADMIN_LOGIN_QUERY;
 import static roomescape.fixture.MemberFixture.ADMIN_MEMBER;
-import static roomescape.fixture.MemberFixture.ADMIN_PASSWORD;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.login.dto.LoginQuery;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.exception.InvalidEmailPasswordException;
 import roomescape.domain.member.repository.MemberRepository;
@@ -56,7 +56,7 @@ class MemberServiceTest {
     void should_find_member_by_email_and_password() {
         Member expectedMember = ADMIN_MEMBER;
 
-        Member actualMember = memberService.getMemberByEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
+        Member actualMember = memberService.getMemberByEmailAndPassword(ADMIN_LOGIN_QUERY);
 
         assertThat(actualMember).isEqualTo(expectedMember);
     }
@@ -64,14 +64,18 @@ class MemberServiceTest {
     @DisplayName("존재 하지 않는 email로 member를 찾으려 하면, 예외가 발생합니다.")
     @Test
     void should_throw_exception_when_find_member_by_non_exist_email() {
-        assertThatThrownBy(() -> memberService.getMemberByEmailAndPassword("wrongEmail@gmail.com", "123456"))
+        LoginQuery loginQuery = new LoginQuery("wrongEmail@gmail.com", "123456");
+
+        assertThatThrownBy(() -> memberService.getMemberByEmailAndPassword(loginQuery))
                 .isInstanceOf(InvalidEmailPasswordException.class);
     }
 
     @DisplayName("틀린 password로 member를 찾으려 하면, 예외가 발생합니다.")
     @Test
     void should_throw_exception_when_find_member_by_wrong_password() {
-        assertThatThrownBy(() -> memberService.getMemberByEmailAndPassword("admin@gmail.com", "1234567"))
+        LoginQuery loginQuery = new LoginQuery("admin@gmail.com", "1234567");
+
+        assertThatThrownBy(() -> memberService.getMemberByEmailAndPassword(loginQuery))
                 .isInstanceOf(InvalidEmailPasswordException.class);
     }
 }

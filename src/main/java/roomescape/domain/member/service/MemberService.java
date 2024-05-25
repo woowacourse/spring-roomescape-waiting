@@ -2,6 +2,7 @@ package roomescape.domain.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.login.dto.LoginQuery;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.exception.InvalidEmailPasswordException;
 import roomescape.domain.member.repository.MemberRepository;
@@ -27,8 +28,8 @@ public class MemberService {
                 .orElseThrow(() -> new NoMatchingDataException(NON_EXIST_MEMBER_ERROR_MESSAGE));
     }
 
-    public Member getMemberByEmailAndPassword(String email, String password) {
-        return memberRepository.findByEmailAndPassword(email, password)
+    public Member getMemberByEmailAndPassword(LoginQuery loginQuery) {
+        return memberRepository.findByEmailAndPassword(loginQuery.email(), loginQuery.password())
                 .orElseThrow(InvalidEmailPasswordException::new);
     }
 }
