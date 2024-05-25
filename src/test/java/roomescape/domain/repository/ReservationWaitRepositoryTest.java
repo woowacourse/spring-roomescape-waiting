@@ -1,7 +1,6 @@
 package roomescape.domain.repository;
 
 import static roomescape.domain.ReservationStatus.RESERVED;
-import static roomescape.domain.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -96,58 +95,6 @@ class ReservationWaitRepositoryTest {
     }
 
     @Test
-    @DisplayName("회원과 예약 대기 정보를 바탕으로 예약대기 정보를 가져온다")
-    void findAllByMemberAndStatus_ShouldGetSpecificWaitInfos() {
-        // given
-        Member member1 = new Member("aa", "aa@aa.aa", "aa");
-        Member member2 = new Member("bb", "bb@bb.bb", "bb");
-
-        memberRepository.save(member1);
-        memberRepository.save(member2);
-
-        ReservationWait wait1 = new ReservationWait(member1, dummyReservation, 1);
-        ReservationWait wait2 = new ReservationWait(member2, dummyReservation, 1);
-        ReservationWait wait3 = new ReservationWait(member2, dummyReservation, 0);
-
-        waitRepository.save(wait1);
-        waitRepository.save(wait2);
-        waitRepository.save(wait3);
-
-        // when
-        List<ReservationWait> waits = waitRepository.findAllByMemberAndStatus(member2, WAITING);
-
-        // then
-        Assertions.assertThat(waits).hasSize(1)
-                .containsExactlyInAnyOrder(wait2);
-    }
-
-    @Test
-    @DisplayName("멤버의 ID로 예약 대기 상태를 찾는다.")
-    void findByMemberIdAndStatus_ShouldGetSpecificReservationWait() {
-        // given
-        Member member1 = new Member("aa", "aa@aa.aa", "aa");
-        Member member2 = new Member("bb", "bb@bb.bb", "bb");
-
-        memberRepository.save(member1);
-        memberRepository.save(member2);
-
-        ReservationWait wait1 = new ReservationWait(member1, dummyReservation, 0);
-        ReservationWait wait2 = new ReservationWait(member1, dummyReservation, 1);
-        ReservationWait wait3 = new ReservationWait(member2, dummyReservation, 0);
-
-        waitRepository.save(wait1);
-        waitRepository.save(wait2);
-        waitRepository.save(wait3);
-
-        // when
-        List<ReservationWait> waits = waitRepository.findByMemberIdAndStatus(member1.getId(), RESERVED);
-
-        // then
-        Assertions.assertThat(waits).hasSize(1)
-                .containsExactlyInAnyOrder(wait1);
-    }
-
-    @Test
     @DisplayName("멤버의 ID로 예약 대기 정보를 삭제할 수 있다")
     void deleteByMemberId_ShouldRemovePersistence() {
         // given
@@ -226,32 +173,6 @@ class ReservationWaitRepositoryTest {
         // then
         Assertions.assertThat(foundWaits).hasSize(1)
                 .containsExactlyInAnyOrder(savedWaits);
-    }
-
-    @Test
-    @DisplayName("회원정보와 예약정보 바탕으로 예약 대기를 삭제한다")
-    void deleteByMemberAndReservation_ShouldRemovePersistence() {
-        // given
-        Member member = new Member("aa", "aa@aa.aa", "aa");
-        Theme theme = new Theme("n", "d", "t");
-        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
-        Reservation reservation = new Reservation(LocalDate.of(2017, 12, 11), time, theme);
-        memberRepository.save(member);
-        themeRepository.save(theme);
-        timeRepository.save(time);
-        reservationRepository.save(reservation);
-
-        ReservationWait wait = new ReservationWait(member, reservation, 0L);
-
-        waitRepository.save(wait);
-
-        // when
-        waitRepository.deleteByMemberAndReservation(member, reservation);
-
-        // then
-        Assertions.assertThat(waitRepository.findAll())
-                .isEmpty();
-
     }
 
     @Test

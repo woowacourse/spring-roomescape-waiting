@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     /*
-    TODO: [4단계] 예약 대기 관리 기능
+     [4단계] 예약 대기 관리 기능
           예약 대기 목록 조회 endpoint 설정
      */
     fetch('/admin/reservation-wait') // 내 예약 목록 조회 API 호출
@@ -20,14 +20,14 @@ function render(data) {
         const row = tableBody.insertRow();
 
         /*
-        TODO: [4단계] 예약 대기 관리 기능
-              예약 대기 목록 조회 response 명세에 맞춰 값 설정
+         [4단계] 예약 대기 관리 기능
+                  예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
-        const id = '';
-        const name = '';
-        const theme = '';
-        const date = '';
-        const startAt = '';
+        const id = item.waitId;
+        const name = item.memberName;
+        const theme = item.themeName;
+        const date = item.date;
+        const startAt = item.time;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명

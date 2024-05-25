@@ -19,8 +19,6 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
 
     List<ReservationWait> findAll();
 
-    List<ReservationWait> findAllByMemberAndStatus(Member member, ReservationStatus status);
-
     @Query("""
             SELECT w
             FROM ReservationWait w
@@ -36,8 +34,6 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
                                                                  @Param("memberName") String memberName,
                                                                  @Param("themeName") String themeName,
                                                                  @Param("status") ReservationStatus status);
-
-    List<ReservationWait> findByMemberIdAndStatus(Long memberId, ReservationStatus status);
 
     @Query("""
             SELECT w.priority
@@ -65,8 +61,6 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
     void deleteById(Long id);
 
     void deleteByMemberId(Long memberId);
-
-    void deleteByMemberAndReservation(Member member, Reservation reservation);
 
     void deleteByReservationId(Long reservationId);
 

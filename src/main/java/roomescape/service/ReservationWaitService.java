@@ -22,6 +22,7 @@ import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.time.NotFoundTimeException;
 import roomescape.service.dto.request.wait.WaitRequest;
+import roomescape.service.dto.response.wait.AdminWaitResponse;
 import roomescape.service.dto.response.wait.WaitResponse;
 
 @Service
@@ -41,6 +42,13 @@ public class ReservationWaitService {
         return waitRepository.findAllByMember(member)
                 .stream()
                 .map(wait -> WaitResponse.from(wait, waitRepository.countByPriorityBefore(wait.getPriority())))
+                .toList();
+    }
+
+    public List<AdminWaitResponse> findAllWaits() {
+        return waitRepository.findAll()
+                .stream()
+                .map(AdminWaitResponse::from)
                 .toList();
     }
 
