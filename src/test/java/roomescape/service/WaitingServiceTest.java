@@ -63,7 +63,7 @@ class WaitingServiceTest {
         //when, then
         assertAll(
                 () -> assertDoesNotThrow(() -> service.create(request)),
-                () -> assertThat(service.findEntireWaitingList()).hasSize(4)
+                () -> assertThat(service.findNotRejectedWaitingList()).hasSize(4)
         );
     }
 
@@ -124,7 +124,7 @@ class WaitingServiceTest {
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(3L, "user2@email.com", password, "user2", Role.USER);
         //when, then
-        assertThatThrownBy(() -> service.delete(4L, member)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> service.delete(10L, member)).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -138,13 +138,13 @@ class WaitingServiceTest {
     @DisplayName("관리자가 존재하지 않는 예약 대기를 삭제하면 예외가 발생한다.")
     void given_NonExistWaiting_when_deleteByAdmin_then_throwException() {
         //when, then
-        assertThatThrownBy(() -> service.deleteByAdmin(4L)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> service.deleteByAdmin(10L)).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
-    @DisplayName("예약 대기 목록을 반환한다.")
-    void given_when_findEntireWaitingList_then_returnWaitingResponse() {
+    @DisplayName("거절되지 않은 예약 대기 목록을 반환한다.")
+    void given_when_findNotRejectedWaitingList_then_returnWaitingResponse() {
         //when, then
-        assertThat(service.findEntireWaitingList()).hasSize(3);
+        assertThat(service.findNotRejectedWaitingList()).hasSize(3);
     }
 }

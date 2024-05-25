@@ -38,17 +38,17 @@ public class Waiting {
     private Theme theme;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "status")
-    private ReservationStatus status;
+    private WaitingStatus status;
 
     protected Waiting() {
     }
 
     public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme, ReservationStatus.WAITING);
+        this(null, member, date, time, theme, WaitingStatus.WAITING);
     }
 
     private Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                    ReservationStatus status) {
+                    WaitingStatus status) {
         validateDateTime(date, time);
         this.id = id;
         this.member = member;
@@ -88,8 +88,12 @@ public class Waiting {
         return theme;
     }
 
-    public ReservationStatus getStatus() {
+    public WaitingStatus getStatus() {
         return status;
+    }
+
+    public void setStatus(WaitingStatus status) {
+        this.status = status;
     }
 
     @Override

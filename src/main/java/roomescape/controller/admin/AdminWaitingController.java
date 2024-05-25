@@ -21,7 +21,7 @@ public class AdminWaitingController {
 
     @GetMapping
     public ResponseEntity<List<WaitingResponse>> read() {
-        return ResponseEntity.ok(waitingService.findEntireWaitingList());
+        return ResponseEntity.ok(waitingService.findNotRejectedWaitingList());
     }
 
     @DeleteMapping("/{id}")

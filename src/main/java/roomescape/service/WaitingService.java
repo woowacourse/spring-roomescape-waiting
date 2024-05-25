@@ -8,6 +8,7 @@ import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingStatus;
 import roomescape.domain.WaitingWithRank;
 import roomescape.domain.dto.WaitingRequest;
 import roomescape.domain.dto.WaitingResponse;
@@ -44,8 +45,8 @@ public class WaitingService {
     }
 
     @Transactional(readOnly = true)
-    public List<WaitingResponse> findEntireWaitingList() {
-        return waitingRepository.findAll().stream()
+    public List<WaitingResponse> findNotRejectedWaitingList() {
+        return waitingRepository.findByStatus(WaitingStatus.WAITING).stream()
                 .map(WaitingResponse::from)
                 .toList();
     }
@@ -80,7 +81,7 @@ public class WaitingService {
     private void validateDuplicatedWaiting(final WaitingRequest waitingRequest) {
         if (waitingRepository.existsByDateAndTimeIdAndMemberId(waitingRequest.date(), waitingRequest.timeId(),
                 waitingRequest.memberId())) {
-            throw new ReservationFailException("해당 시간에 예약 대기중인 내역이 있습니다.");
+            throw new ReservationFailException("해당 시간에 예약 대기중인 내역이 있거나 승인거절된 내역이 있습니다.");
         }
     }
 
@@ -111,8 +112,8 @@ public class WaitingService {
 
     @Transactional
     public void deleteByAdmin(final Long id) {
-        waitingRepository.findById(id)
+        Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기 내역이 없습니다."));
-        waitingRepository.deleteById(id);
+        waiting.setStatus(WaitingStatus.REJECTED);
     }
 }

@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingStatus;
 import roomescape.domain.WaitingWithRank;
 
 /*
@@ -20,6 +21,7 @@ import roomescape.domain.WaitingWithRank;
  * {ID=1, DATE='2024-04-30', TIME_ID=1, THEME_ID=1, MEMBER_ID=2, STATUS=WAITING}
  * {ID=2, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=2, STATUS=WAITING}
  * {ID=3, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=3, STATUS=WAITING}
+ * {ID=4, DATE=내일일자, TIME_ID=2, THEME_ID=1, MEMBER_ID=3, STATUS=REJECTED}
  */
 @DataJpaTest
 class WaitingRepositoryTest {
@@ -61,5 +63,15 @@ class WaitingRepositoryTest {
                 .orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기가 없습니다."));
         //then
         assertThat(waiting.getMember().getId()).isEqualTo(2L);
+    }
+
+    @Test
+    @DisplayName("대기 상태에 해당하는 예약 대기 정보를 조회한다.")
+    void given_when_findByStatus_then_getPendingWaitingList() {
+        //when
+        List<Waiting> waitings = waitingRepository.findByStatus(WaitingStatus.WAITING);
+
+        //then
+        assertThat(waitings).hasSize(3);
     }
 }

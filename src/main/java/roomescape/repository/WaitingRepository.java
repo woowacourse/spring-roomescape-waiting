@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingStatus;
 import roomescape.domain.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
@@ -27,4 +28,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
     Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderById(LocalDate date, Long timeId, Long themeId);
+
+    List<Waiting> findByStatus(WaitingStatus waitingStatus);
 }

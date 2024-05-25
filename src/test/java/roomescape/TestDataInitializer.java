@@ -80,7 +80,8 @@ public class TestDataInitializer {
                 INSERT INTO waiting(date, time_id, theme_id, member_id, status)
                 VALUES ('2024-04-30', 1, 1, 2, 'WAITING'),
                        (DATEADD(DAY, 1, current_date), 1, 1, 2, 'WAITING'),
-                       (DATEADD(DAY, 1, current_date), 1, 1, 3, 'WAITING')
+                       (DATEADD(DAY, 1, current_date), 1, 1, 3, 'WAITING'),
+                       (DATEADD(DAY, 1, current_date), 2, 1, 3, 'REJECTED')
                        """).executeUpdate();
     }
 }
