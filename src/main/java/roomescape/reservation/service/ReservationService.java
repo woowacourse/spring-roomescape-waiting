@@ -147,6 +147,7 @@ public class ReservationService {
         return ReservationResponse.from(reservation);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> readWaitings() {
         return reservationRepository.findAllByStatusFetchJoin(ReservationStatus.WAITING).stream()
                 .map(waiting -> WaitingResponse.of(waiting, findSequence(waiting)))
