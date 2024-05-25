@@ -10,7 +10,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
@@ -41,29 +40,16 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse saveByLoginMember(
-            ReservationSaveRequest saveRequest,
-            LoginMember loginMember
-    ) {
-        Reservation reservation = createValidReservation(saveRequest, loginMember.id());
+    public ReservationResponse save(ReservationSaveRequest saveRequest) {
+        Reservation reservation = createValidReservation(saveRequest);
+        validateReservation(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
-        return saveReservation(reservation);
+        return ReservationResponse.toResponse(savedReservation);
     }
 
-    @Transactional
-    public ReservationResponse saveByAdmin(AdminReservationSaveRequest adminRequest) {
-        ReservationSaveRequest saveRequest = new ReservationSaveRequest(
-                adminRequest.date(),
-                adminRequest.themeId(),
-                adminRequest.timeId()
-        );
-        Reservation reservation = createValidReservation(saveRequest, adminRequest.memberId());
-
-        return saveReservation(reservation);
-    }
-
-    private Reservation createValidReservation(ReservationSaveRequest saveRequest, Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    private Reservation createValidReservation(ReservationSaveRequest saveRequest) {
+        Member member = memberRepository.findById(saveRequest.memberId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         Theme theme = themeRepository.findById(saveRequest.themeId())
@@ -72,14 +58,7 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.findById(saveRequest.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
-        return saveRequest.toReservation(member, theme, reservationTime, Status.SUCCESS);
-    }
-
-    private ReservationResponse saveReservation(Reservation reservation) {
-        validateReservation(reservation);
-        Reservation savedReservation = reservationRepository.save(reservation);
-
-        return ReservationResponse.toResponse(savedReservation);
+        return saveRequest.toReservation(member, theme, reservationTime);
     }
 
     private void validateReservation(Reservation reservation) {

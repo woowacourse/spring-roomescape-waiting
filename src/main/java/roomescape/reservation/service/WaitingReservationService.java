@@ -4,14 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.auth.dto.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.request.WaitingReservationSaveRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -40,16 +39,16 @@ public class WaitingReservationService {
     }
 
     @Transactional
-    public ReservationResponse saveByLoginMember(ReservationSaveRequest saveRequest, LoginMember loginMember) {
-        Reservation reservation = createValidReservation(saveRequest, loginMember.id());
+    public ReservationResponse save(WaitingReservationSaveRequest saveRequest) {
+        Reservation reservation = createValidReservation(saveRequest);
         validateReservation(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
     }
 
-    private Reservation createValidReservation(ReservationSaveRequest saveRequest, Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    private Reservation createValidReservation(WaitingReservationSaveRequest saveRequest) {
+        Member member = memberRepository.findById(saveRequest.memberId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         Theme theme = themeRepository.findById(saveRequest.themeId())
@@ -58,7 +57,7 @@ public class WaitingReservationService {
         ReservationTime reservationTime = reservationTimeRepository.findById(saveRequest.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
-        return saveRequest.toReservation(member, theme, reservationTime, Status.WAIT);
+        return saveRequest.toWaitingReservation(member, theme, reservationTime);
     }
 
     private void validateReservation(Reservation reservation) {

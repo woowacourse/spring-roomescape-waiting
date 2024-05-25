@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.common.config.IntegrationTest;
 import roomescape.common.util.CookieUtils;
-import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.request.ReservationDetailRequest;
 
 class ReservationControllerTest extends IntegrationTest {
 
@@ -76,12 +76,12 @@ class ReservationControllerTest extends IntegrationTest {
         saveThemeAsHorror();
         saveReservationTimeAsTen();
 
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
+        ReservationDetailRequest reservationDetailRequest = new ReservationDetailRequest(LocalDate.now(), 1L, 1L);
 
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(reservationSaveRequest))
+                .body(objectMapper.writeValueAsString(reservationDetailRequest))
                 .accept(ContentType.JSON)
                 .when()
                 .post("/reservations")

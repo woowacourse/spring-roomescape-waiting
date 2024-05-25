@@ -8,15 +8,15 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 
-public record ReservationSaveRequest(
+public record WaitingReservationSaveRequest(
         @NotNull Long memberId,
         @NotNull LocalDate date,
         @NotNull Long themeId,
         @NotNull Long timeId
 ) {
 
-    public static ReservationSaveRequest of(ReservationDetailRequest detail, Long memberId) {
-        return new ReservationSaveRequest(
+    public static WaitingReservationSaveRequest of(ReservationDetailRequest detail, Long memberId) {
+        return new WaitingReservationSaveRequest(
                 memberId,
                 detail.date(),
                 detail.themeId(),
@@ -24,7 +24,7 @@ public record ReservationSaveRequest(
         );
     }
 
-    public Reservation toReservation(Member member, Theme theme, ReservationTime reservationTime) {
-        return new Reservation(member, date, theme, reservationTime, Status.SUCCESS);
+    public Reservation toWaitingReservation(Member member, Theme theme, ReservationTime reservationTime) {
+        return new Reservation(member, date, theme, reservationTime, Status.WAIT);
     }
 }

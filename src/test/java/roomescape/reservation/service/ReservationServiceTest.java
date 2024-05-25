@@ -3,21 +3,14 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.Fixture.HORROR_DESCRIPTION;
 import static roomescape.Fixture.HORROR_THEME;
-import static roomescape.Fixture.HORROR_THEME_NAME;
-import static roomescape.Fixture.JOJO_EMAIL;
-import static roomescape.Fixture.JOJO_NAME;
-import static roomescape.Fixture.LOGIN_JOJO;
 import static roomescape.Fixture.MEMBER_JOJO;
 import static roomescape.Fixture.MEMBER_KAKI;
 import static roomescape.Fixture.RESERVATION_TIME_10_00;
-import static roomescape.Fixture.THUMBNAIL;
 import static roomescape.Fixture.TODAY;
 import static roomescape.reservation.domain.Status.SUCCESS;
 import static roomescape.reservation.domain.Status.WAIT;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,12 +23,10 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.common.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -71,34 +62,32 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약 시간에 예약을 하면 예외가 발생한다.")
     @Test
     void notExistReservationTimeIdExceptionTest() {
-        themeRepository.save(
-                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme horror = themeRepository.save(HORROR_THEME);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
 
-        LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
+        ReservationSaveRequest saveRequest = new ReservationSaveRequest(jojo.getId(), TODAY, horror.getId(), 1L);
 
-        assertThatThrownBy(() -> reservationService.saveByLoginMember(reservationSaveRequest, loginMember))
+        assertThatThrownBy(() -> reservationService.save(saveRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("예약 시, 중복된 예약이 있다면 예외가 발생한다.")
     @Test
     void duplicateReservationExceptionTest() {
-        // given
-        Theme theme = themeRepository.save(HORROR_THEME);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
-        memberRepository.save(MEMBER_JOJO);
+        Theme horror = themeRepository.save(HORROR_THEME);
+        ReservationTime hour10 = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
 
-        // when
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(
+        ReservationSaveRequest saveRequest = new ReservationSaveRequest(
+                jojo.getId(),
                 TODAY,
-                theme.getId(),
-                reservationTime.getId()
+                horror.getId(),
+                hour10.getId()
         );
-        reservationService.saveByLoginMember(reservationSaveRequest, LOGIN_JOJO);
 
-        // then
-        assertThatThrownBy(() -> reservationService.saveByLoginMember(reservationSaveRequest, LOGIN_JOJO))
+        reservationService.save(saveRequest);
+
+        assertThatThrownBy(() -> reservationService.save(saveRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

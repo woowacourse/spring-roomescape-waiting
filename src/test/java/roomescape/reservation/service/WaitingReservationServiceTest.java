@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.Fixture.HORROR_THEME;
-import static roomescape.Fixture.LOGIN_JOJO;
 import static roomescape.Fixture.MEMBER_JOJO;
 import static roomescape.Fixture.MEMBER_KAKI;
 import static roomescape.Fixture.RESERVATION_TIME_10_00;
@@ -24,7 +23,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.request.WaitingReservationSaveRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -58,20 +57,18 @@ class WaitingReservationServiceTest {
     @DisplayName("예약 대기 시, 저장된 예약이 없다면 예외가 발생한다.")
     @Test
     void waitingReservationWithNotSavedReservationExceptionTest() {
-        // given
-        Theme theme = themeRepository.save(HORROR_THEME);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
-        memberRepository.save(MEMBER_JOJO);
+        Theme horror = themeRepository.save(HORROR_THEME);
+        ReservationTime hour10 = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
 
-        // when
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(
+        WaitingReservationSaveRequest saveRequest = new WaitingReservationSaveRequest(
+                jojo.getId(),
                 TODAY,
-                theme.getId(),
-                reservationTime.getId()
+                horror.getId(),
+                hour10.getId()
         );
 
-        // then
-        assertThatThrownBy(() -> waitingReservationService.saveByLoginMember(reservationSaveRequest, LOGIN_JOJO))
+        assertThatThrownBy(() -> waitingReservationService.save(saveRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

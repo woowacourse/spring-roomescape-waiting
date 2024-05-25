@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.dto.ResourcesResponse;
-import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.request.ReservationDetailRequest;
+import roomescape.reservation.dto.request.WaitingReservationSaveRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.WaitingReservationService;
@@ -36,10 +37,11 @@ public class WaitingReservationController {
 
     @PostMapping("/reservations/wait")
     public ResponseEntity<ReservationResponse> save(
-            @Valid @RequestBody ReservationSaveRequest saveRequest,
+            @Valid @RequestBody ReservationDetailRequest reservationDetail,
             LoginMember loginMember
     ) {
-        ReservationResponse response = waitingReservationService.saveByLoginMember(saveRequest, loginMember);
+        WaitingReservationSaveRequest request = WaitingReservationSaveRequest.of(reservationDetail, loginMember.id());
+        ReservationResponse response = waitingReservationService.save(request);
 
         return ResponseEntity.created(URI.create("/reservations/wait/" + response.id()))
                 .body(response);
