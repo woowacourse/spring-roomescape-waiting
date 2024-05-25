@@ -1,12 +1,13 @@
 package roomescape.dto;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 public record LoginMemberReservationResponse(
-        long reservationId,
+        long id,
         String theme,
         LocalDate date,
         LocalTime time,
