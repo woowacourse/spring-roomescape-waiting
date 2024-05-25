@@ -83,7 +83,7 @@ public class ReservationService {
     @Transactional
     public void delete(Long id) {
         Pageable pageable = PageRequest.of(0, 1);
-        Page<ReservationWaiting> page = reservationWaitingRepository.findAllByReservationIdOrderByPriorityAsc(
+        Page<ReservationWaiting> page = reservationWaitingRepository.findFirstByReservationIdOrderByPriorityAsc(
                 pageable, id);
         Optional<ReservationWaiting> nextWaiting = page.getContent().stream()
                 .findFirst();
