@@ -116,16 +116,24 @@ public class Reservation {
         return member;
     }
 
-    public LocalDate getDate() {
-        return slot.date();
-    }
-
     public ReservationTime getReservationTime() {
         return slot.reservationTime();
     }
 
     public Theme getTheme() {
         return slot.theme();
+    }
+
+    public LocalDate getDate() {
+        return slot.date();
+    }
+
+    public String getThemeName() {
+        return slot.getThemeName();
+    }
+
+    public LocalTime getStartAt() {
+        return slot.getStartAt();
     }
 
     @Override

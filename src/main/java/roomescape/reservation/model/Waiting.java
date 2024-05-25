@@ -119,10 +119,6 @@ public class Waiting {
         return member;
     }
 
-    public LocalDate getDate() {
-        return slot.date();
-    }
-
     public ReservationTime getReservationTime() {
         return slot.reservationTime();
     }
@@ -133,6 +129,18 @@ public class Waiting {
 
     public Slot getSlot() {
         return slot;
+    }
+
+    public LocalDate getDate() {
+        return slot.date();
+    }
+
+    public String getThemeName() {
+        return slot.getThemeName();
+    }
+
+    public LocalTime getStartAt() {
+        return slot.getStartAt();
     }
 
     @Override

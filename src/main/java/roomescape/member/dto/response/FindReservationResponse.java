@@ -12,9 +12,9 @@ public record FindReservationResponse(Long reservationId,
     public static FindReservationResponse from(Reservation reservation) {
         return new FindReservationResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
+                reservation.getThemeName(),
                 reservation.getDate(),
-                reservation.getReservationTime().getStartAt(),
+                reservation.getStartAt(),
                 "예약");
     }
 }
