@@ -30,7 +30,7 @@ public class DatabaseInitializer {
         Theme theme = createTheme();
         Reservation pastReservation = createPastReservation(member, time, theme);
         Reservation futureReservation = createFutureReservation(member, time, theme);
-        ReservationWaiting waiting = createReservationWaiting(pastReservation, member);
+        ReservationWaiting waiting = createReservationWaiting(futureReservation, member);
     }
 
     private Member createMember() {

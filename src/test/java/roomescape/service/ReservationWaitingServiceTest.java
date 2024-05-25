@@ -15,6 +15,7 @@ import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.reservationwaiting.CannotDeleteOtherMemberWaiting;
 import roomescape.exception.reservationwaiting.DuplicatedReservationWaitingException;
+import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
 import roomescape.exception.reservationwaiting.NotFoundReservationWaitingException;
 import roomescape.service.reservationwaiting.ReservationWaitingService;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingRequest;

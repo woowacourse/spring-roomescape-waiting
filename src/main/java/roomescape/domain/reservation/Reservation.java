@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -43,6 +44,11 @@ public class Reservation {
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(null, date, time, theme, member);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        LocalDateTime dateTime = date.atTime(time.getStartAt());
+        return dateTime.isBefore(now);
     }
 
     public Long getId() {

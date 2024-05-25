@@ -5,7 +5,6 @@ import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,15 +41,6 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
             params.put("date", "2000-04-08");
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createAdminCookies())
-                    .contentType(ContentType.JSON)
-                    .body(params)
-                    .when().post("/waitings")
-                    .then().log().all()
-                    .statusCode(201)
-                    .header("Location", "/waitings/2");
-
-            RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
@@ -73,7 +63,6 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         }
 
         @Test
-        @Disabled
         void 지난_예약에_대해선_예약_대기를_추가할_수_없다() {
             params.put("date", "2000-04-01");
 
