@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
+
     boolean existsByDateAndReservationTimeAndThemeAndMember(
             LocalDate date, ReservationTime reservationTime, Theme theme, Member member);
 

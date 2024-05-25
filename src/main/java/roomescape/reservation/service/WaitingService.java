@@ -43,12 +43,15 @@ public class WaitingService {
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(waitingRequest.time());
         ThemeResponse themeResponse = themeService.getTheme(waitingRequest.theme());
         Member member = memberService.getLoginMemberById(memberRequest.id());
+
         Waiting waiting = new Waiting(waitingRequest.date(),
                 timeResponse.toReservationTime(),
                 themeResponse.toTheme(),
                 member);
+
         validateIsBeforeNow(waiting);
         validateIsDuplicated(waiting);
+
         Waiting savedWaiting = waitingJpaRepository.save(waiting);
         return new ReservationResponse(savedWaiting);
     }

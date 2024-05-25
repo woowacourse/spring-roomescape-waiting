@@ -27,15 +27,13 @@ public class ThemeController {
     }
 
     @GetMapping
-    public List<ThemeResponse> findThemes() {
-        return themeService.findThemes();
+    public ResponseEntity<List<ThemeResponse>> findThemes() {
+        return ResponseEntity.ok(themeService.findThemes());
     }
 
     @GetMapping("/trending")
-    public List<ThemeResponse> findTrendingThemes(@RequestParam Long limit) {
-        return themeService.findTrendingThemes(limit)
-                .stream()
-                .toList();
+    public ResponseEntity<List<ThemeResponse>> findTrendingThemes(@RequestParam Long limit) {
+        return ResponseEntity.ok(themeService.findTrendingThemes(limit).stream().toList());
     }
 
     @DeleteMapping("/{id}")

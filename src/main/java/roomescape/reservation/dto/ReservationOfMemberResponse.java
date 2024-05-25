@@ -21,12 +21,12 @@ public record ReservationOfMemberResponse(
     }
 
     public static ReservationOfMemberResponse from(WaitingWithRank waitingWithRank) {
-        String reservationStatus = decideReservationStatus(waitingWithRank.getRank());
+        String reservationStatus = decideReservationStatus(waitingWithRank.rank());
         return new ReservationOfMemberResponse(
-                waitingWithRank.getWaiting().getId(),
-                waitingWithRank.getWaiting().getTheme().getName().name(),
-                waitingWithRank.getWaiting().getDate(DateTimeFormatter.ISO_DATE),
-                waitingWithRank.getWaiting().getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
+                waitingWithRank.waiting().getId(),
+                waitingWithRank.waiting().getTheme().getName().name(),
+                waitingWithRank.waiting().getDate(DateTimeFormatter.ISO_DATE),
+                waitingWithRank.waiting().getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
                 reservationStatus
         );
     }

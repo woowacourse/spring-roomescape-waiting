@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
+
     boolean existsByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime reservationTime, Theme theme);
 
     List<Reservation> findByThemeAndMember(Theme theme, Member member);

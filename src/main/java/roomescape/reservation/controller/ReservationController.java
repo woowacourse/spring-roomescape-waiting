@@ -8,7 +8,6 @@ import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.WaitingService;
 
 import java.net.URI;
 import java.util.List;
@@ -18,11 +17,9 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -45,8 +42,7 @@ public class ReservationController {
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationOfMemberResponse>> findReservationsByMember(
             @MemberArgumentResolver MemberRequest memberRequest) {
-        List<ReservationOfMemberResponse> myReservations = reservationService.findReservationsByMember(memberRequest);
-        return ResponseEntity.ok(myReservations);
+        return ResponseEntity.ok(reservationService.findReservationsByMember(memberRequest));
     }
 
     @DeleteMapping("/{id}")

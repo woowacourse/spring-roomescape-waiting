@@ -58,7 +58,6 @@ public class AdminReservationController {
 
     @GetMapping("/waitings")
     public ResponseEntity<List<WaitingResponse>> getWaitings() {
-        List<WaitingResponse> waitings = waitingService.findWaitings();
-        return ResponseEntity.ok(waitings);
+        return ResponseEntity.ok(waitingService.findWaitings());
     }
 }
