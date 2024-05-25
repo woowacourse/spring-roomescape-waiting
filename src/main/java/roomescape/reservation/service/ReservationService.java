@@ -24,17 +24,17 @@ import roomescape.time.repository.TimeRepository;
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
-    private final MemberRepository memberRepository;
     private final ReservationDetailRepository detailRepository;
+    private final MemberRepository memberRepository;
     private final TimeRepository timeRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              MemberRepository memberRepository,
                               ReservationDetailRepository detailRepository,
+                              MemberRepository memberRepository,
                               TimeRepository timeRepository) {
         this.reservationRepository = reservationRepository;
-        this.memberRepository = memberRepository;
         this.detailRepository = detailRepository;
+        this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
     }
 
@@ -73,6 +73,22 @@ public class ReservationService {
                 });
     }
 
+    public List<ReservationTimeAvailabilityResponse> findTimeAvailability(Long themeId, LocalDate date) {
+        List<Time> allTimes = timeRepository.findAllByOrderByStartAtAsc();
+        List<Time> bookedTimes = getBookedTimesOfThemeAtDate(themeId, date);
+
+        return allTimes.stream()
+                .map(time -> ReservationTimeAvailabilityResponse.from(time, bookedTimes.contains(time)))
+                .toList();
+    }
+
+    private List<Time> getBookedTimesOfThemeAtDate(long themeId, LocalDate date) {
+        List<Reservation> reservations = reservationRepository.findAllByDetailTheme_IdAndDetailDate(themeId, date);
+        return reservations.stream()
+                .map(Reservation::getTime)
+                .toList();
+    }
+
     public ReservationResponse addReservation(ReservationRequest reservationRequest) {
         Member member = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new BadRequestException("해당 멤버 정보가 존재하지 않습니다."));
@@ -96,23 +112,7 @@ public class ReservationService {
                 });
     }
 
-    public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
-        List<Time> allTimes = timeRepository.findAllByOrderByStartAtAsc();
-        List<Time> bookedTimes = getBookedTimesOfThemeAtDate(themeId, date);
-
-        return allTimes.stream()
-                .map(time -> ReservationTimeAvailabilityResponse.from(time, bookedTimes.contains(time)))
-                .toList();
-    }
-
-    private List<Time> getBookedTimesOfThemeAtDate(long themeId, LocalDate date) {
-        List<Reservation> reservations = reservationRepository.findAllByDetailTheme_IdAndDetailDate(themeId, date);
-        return reservations.stream()
-                .map(Reservation::getTime)
-                .toList();
-    }
-
-    public void removeReservations(long reservationId) {
+    public void deleteReservation(long reservationId) {
         reservationRepository.deleteById(reservationId);
     }
 }

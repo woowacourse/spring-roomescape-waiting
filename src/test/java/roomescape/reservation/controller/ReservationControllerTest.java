@@ -126,7 +126,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 가능한 시간을 정상적으로 불러오는지 확인한다.")
     void findAvailableTimeList() throws Exception {
-        when(reservationService.findTimeAvailability(1, LocalDate.now()))
+        when(reservationService.findTimeAvailability(1L, LocalDate.now()))
                 .thenReturn(
                         List.of(ReservationTimeAvailabilityResponse.from(reservation.getTime(), true)));
 
