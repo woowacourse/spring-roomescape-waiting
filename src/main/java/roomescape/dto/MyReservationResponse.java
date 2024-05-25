@@ -1,7 +1,7 @@
 package roomescape.dto;
 
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,15 +11,18 @@ public record MyReservationResponse(
         String theme,
         LocalDate date,
         LocalTime time,
-        ReservationStatus status
+        String status
 ) {
-    public static MyReservationResponse from(Reservation reservation) {
+    public static MyReservationResponse from(ReservationWithRank reservation) {
+        ReservationStatus reservationStatus = reservation.getStatus();
+        String statusMessage = reservationStatus.makeStatusMessage(reservationStatus, reservation.getRank());
+
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                reservation.getStatus()
+                statusMessage
         );
     }
 }
