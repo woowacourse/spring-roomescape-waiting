@@ -34,11 +34,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT r FROM Reservation r
             JOIN FETCH r.theme
-            WHERE r.status = :status
-            AND r.date BETWEEN :from AND :until
+            WHERE r.date BETWEEN :from AND :until
             """)
-    List<Reservation> findAllJoinThemeByStatusAndDateBetween(Status status, LocalDate from,
-                                                             LocalDate until);
+    List<Reservation> findAllJoinThemeByDateBetween(LocalDate from, LocalDate until);
 
     @Query("""
             SELECT r FROM Reservation r
@@ -54,8 +52,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                                       LocalDate date,
                                                                       Status status);
 
-    List<Reservation> findAllByTimeIdAndThemeIdAndDateAndStatus(Long timeId, Long themeId,
-                                                                LocalDate date, Status status);
+    int countByTimeIdAndThemeIdAndDateAndStatusAndIdLessThan(Long timeId, Long themeId,
+                                                             LocalDate date, Status status,
+                                                             Long currentId);
 
     default Reservation findByIdOrThrow(long id) {
         return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));

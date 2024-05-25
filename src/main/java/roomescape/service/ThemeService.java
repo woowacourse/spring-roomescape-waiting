@@ -1,17 +1,12 @@
 package roomescape.service;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import roomescape.controller.reservation.dto.PopularThemeResponse;
 import roomescape.controller.theme.dto.CreateThemeRequest;
 import roomescape.controller.theme.dto.ThemeResponse;
-import roomescape.domain.Reservation;
-import roomescape.domain.Status;
+import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.InvalidRequestException;
 import roomescape.repository.ReservationRepository;
@@ -56,15 +51,11 @@ public class ThemeService {
         if (from.isAfter(until)) {
             throw new InvalidRequestException("유효하지 않은 날짜 범위입니다.");
         }
-        final List<Reservation> reservations = reservationRepository
-                .findAllJoinThemeByStatusAndDateBetween(Status.RESERVED, from, until);
-        final Map<Theme, Long> themeBookedAmount = reservations.stream()
-                .collect(groupingBy(Reservation::getTheme, counting()));
-        return themeBookedAmount.entrySet()
+        final Reservations reservations = new Reservations(
+                reservationRepository.findAllJoinThemeByDateBetween(from, until));
+        return reservations.findMostBookedThemes(limit)
                 .stream()
-                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
-                .limit(limit)
-                .map(entry -> PopularThemeResponse.from(entry.getKey()))
+                .map(PopularThemeResponse::from)
                 .toList();
     }
 }

@@ -4,14 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.controller.time.dto.AvailabilityTimeRequest;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reservations;
 import roomescape.domain.Status;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -46,12 +45,10 @@ public class TimeService {
         if (reservationDate.isBefore(today)) {
             return List.of();
         }
-        final List<Reservation> reservations = reservationRepository
-                .findAllJoinTimeByStatusAndDateAndThemeId(
-                        Status.RESERVED, reservationDate, request.themeId());
-        final Set<ReservationTime> bookedTimes = reservations.stream()
-                .map(Reservation::getTime)
-                .collect(Collectors.toSet());
+        final Reservations reservations = new Reservations(
+                reservationRepository.findAllJoinTimeByStatusAndDateAndThemeId(
+                        Status.RESERVED, reservationDate, request.themeId()));
+        final Set<ReservationTime> bookedTimes = reservations.findBookedTimes();
         if (reservationDate.isEqual(today)) {
             return getAvailabilityTimesToday(bookedTimes);
         }

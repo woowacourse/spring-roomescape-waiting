@@ -9,9 +9,9 @@ public record MyReservationResponse(
         String themeName,
         LocalDate date,
         LocalTime time,
-        Long rank) {
-    
-    public static MyReservationResponse from(final Reservation reservation, final Long rank) {
+        int rank) {
+
+    public static MyReservationResponse from(final Reservation reservation, final int rank) {
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
