@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.Auth;
-import roomescape.dto.LoginMemberReservationResponse;
+import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
@@ -48,7 +48,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<LoginMemberReservationResponse> findLoginMemberReservations(@Auth long memberId) {
+    public List<MyReservationResponse> findLoginMemberReservations(@Auth long memberId) {
         return reservationService.findByMemberId(memberId);
     }
 

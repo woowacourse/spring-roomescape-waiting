@@ -8,7 +8,7 @@ import roomescape.domain.ReservationSearchCondition;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.LoginMemberReservationResponse;
+import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.ExceptionType;
@@ -93,10 +93,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<LoginMemberReservationResponse> findByMemberId(long memberId) {
+    public List<MyReservationResponse> findByMemberId(long memberId) {
         return reservationRepository.findAllByMemberId(memberId)
                 .stream()
-                .map(LoginMemberReservationResponse::from)
+                .map(MyReservationResponse::from)
                 .toList();
     }
 
