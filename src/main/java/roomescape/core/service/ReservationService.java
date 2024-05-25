@@ -100,16 +100,23 @@ public class ReservationService {
                 .orElseThrow(IllegalArgumentException::new);
         return reservationRepository.findAllByMember(member)
                 .stream()
-                .map(reservation -> MyReservationResponse.of(reservation.getId(), reservation.getTheme().getName(),
-                        reservation.getDateString(), reservation.getReservationTime().getStartAtString(),
-                        reservation.getStatus().getValue(), findRankByCreateAt(reservation)))
+                .map(this::getMyReservationResponse)
                 .toList();
     }
 
-    private Integer findRankByCreateAt(final Reservation reservation) {
+    private MyReservationResponse getMyReservationResponse(final Reservation reservation) {
         if (reservation.getStatus().equals(Status.BOOKED)) {
-            return rankOfBooked;
+            return MyReservationResponse.ofReservation(reservation.getId(), reservation.getTheme().getName(),
+                    reservation.getDateString(), reservation.getReservationTime().getStartAtString(),
+                    reservation.getStatus().getValue());
         }
+        return MyReservationResponse.ofReservationWaiting(reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDateString(), reservation.getReservationTime().getStartAtString(),
+                reservation.getStatus().getValue(), findRankByCreateAt(reservation));
+    }
+
+    private Integer findRankByCreateAt(final Reservation reservation) {
         return reservationRepository.countByCreateAtRank(reservation.getDate(), reservation.getReservationTime(),
                 reservation.getTheme(), reservation.getCreateAt());
     }

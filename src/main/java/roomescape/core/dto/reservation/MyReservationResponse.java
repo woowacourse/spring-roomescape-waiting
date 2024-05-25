@@ -1,8 +1,6 @@
 package roomescape.core.dto.reservation;
 
 public class MyReservationResponse {
-    private static final Integer rankOfBooked = 0;
-
     private Long reservationId;
     private String theme;
     private String date;
@@ -18,16 +16,18 @@ public class MyReservationResponse {
         this.status = status;
     }
 
-    public static MyReservationResponse of(final Long reservationId, final String theme, final String date,
-                                           final String time, final String status,
-                                           final Integer rank) {
+    public static MyReservationResponse ofReservationWaiting(final Long reservationId, final String theme,
+                                                             final String date, final String time,
+                                                             final String status, final Integer rank) {
         return new MyReservationResponse(reservationId, theme, date, time, waitingRankStatus(status, rank));
     }
 
+    public static MyReservationResponse ofReservation(final Long reservationId, final String theme,
+                                                      final String date, final String time, final String status) {
+        return new MyReservationResponse(reservationId, theme, date, time, status);
+    }
+
     private static String waitingRankStatus(final String status, final Integer rank) {
-        if (rank.equals(rankOfBooked)) {
-            return status;
-        }
         return rank + "번째 " + status;
     }
 
