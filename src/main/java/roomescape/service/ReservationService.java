@@ -24,6 +24,7 @@ import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateRequest;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.response.ReservationWaitingResponse;
 
 @Service
 public class ReservationService {
@@ -72,6 +73,13 @@ public class ReservationService {
 
         return reservationRepository.findAll(spec).stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationWaitingResponse> findReservationsWaiting() {
+         return reservationRepository.findByStatusIn(List.of(Status.WAITING))
+                .stream()
+                .map(ReservationWaitingResponse::from)
                 .toList();
     }
 

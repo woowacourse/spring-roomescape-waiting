@@ -17,6 +17,7 @@ import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.request.ReservationCreateRequest;
 import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.response.ReservationWaitingResponse;
 
 @RestController
 public class AdminReservationController {
@@ -40,6 +41,11 @@ public class AdminReservationController {
             @RequestParam(required = false, value = "dateTo") LocalDate dateTo)
     {
         return ResponseEntity.ok().body(reservationService.findBy(themeId, memberId, dateFrom, dateTo));
+    }
+
+    @GetMapping("/admin/reservations/waiting")
+    public ResponseEntity<List<ReservationWaitingResponse>> findReservationsWaiting() {
+        return ResponseEntity.ok().body(reservationService.findReservationsWaiting());
     }
 
     @PostMapping("/admin/reservations")
