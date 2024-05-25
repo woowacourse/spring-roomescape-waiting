@@ -235,7 +235,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .when().patch("/admin/reservations/" + id)
+                .when().delete("/admin/reservations/" + id)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 

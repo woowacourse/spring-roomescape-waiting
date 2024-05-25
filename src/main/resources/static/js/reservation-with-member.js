@@ -239,7 +239,7 @@ function requestCreate(reservation) {
 
 function requestDelete(id) {
   const requestOptions = {
-    method: 'PATCH',
+    method: 'DELETE',
   };
 
   return fetch('/admin/reservations/' + id, requestOptions)
