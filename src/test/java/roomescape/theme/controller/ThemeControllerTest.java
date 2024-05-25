@@ -1,6 +1,7 @@
 package roomescape.theme.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,7 +16,6 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -62,7 +62,7 @@ public class ThemeControllerTest {
     @Test
     @DisplayName("테마 정보를 정상적으로 저장하는지 확인한다.")
     void saveTheme() throws Exception {
-        Mockito.when(themeService.addTheme(any()))
+        when(themeService.addTheme(any()))
                 .thenReturn(ThemeResponse.from(theme));
 
         String content = new ObjectMapper().writeValueAsString(
@@ -78,7 +78,7 @@ public class ThemeControllerTest {
     @Test
     @DisplayName("예약 정보를 정상적으로 불러오는지 롹인한다.")
     void findAllThemes() throws Exception {
-        Mockito.when(themeService.findThemes())
+        when(themeService.findThemes())
                 .thenReturn(List.of(ThemeResponse.from(theme)));
 
         mockMvc.perform(get("/themes"))
@@ -89,7 +89,7 @@ public class ThemeControllerTest {
     @Test
     @DisplayName("인기많은 테마 정보를 정상적으로 가져오는지 확인한다.")
     void findTopRankThemes() throws Exception {
-        Mockito.when(themeService.findRankedThemes())
+        when(themeService.findRankedThemes())
                 .thenReturn(List.of(ThemeRankResponse.from(theme)));
 
         mockMvc.perform(get("/themes/rank"))

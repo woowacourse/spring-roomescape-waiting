@@ -1,6 +1,7 @@
 package roomescape.time.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -13,7 +14,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -49,7 +49,7 @@ class TimeControllerTest {
     @Test
     @DisplayName("시간을 잘 저장하는지 확인한다.")
     void createReservationTime() throws Exception {
-        Mockito.when(timeService.addReservationTime(any()))
+        when(timeService.addReservationTime(any()))
                 .thenReturn(toResponse(time));
 
         String content = new ObjectMapper()
@@ -72,7 +72,7 @@ class TimeControllerTest {
     @Test
     @DisplayName("시간 정보를 잘 불러오는지 확인한다.")
     void reservationTimesList() throws Exception {
-        Mockito.when(timeService.findReservationTimes())
+        when(timeService.findReservationTimes())
                 .thenReturn(List.of(toResponse(time)));
 
         mockMvc.perform(get("/times"))

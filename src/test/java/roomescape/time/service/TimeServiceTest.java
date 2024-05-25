@@ -3,6 +3,7 @@ package roomescape.time.service;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -38,7 +39,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("시간을 추가한다.")
     void addReservationTime() {
-        Mockito.when(timeRepository.save(any(Time.class)))
+        when(timeRepository.save(any(Time.class)))
                 .thenReturn(time);
 
         TimeRequest timeRequest = new TimeRequest(time.getStartAt());
@@ -51,7 +52,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("시간을 찾는다.")
     void findReservationTimes() {
-        Mockito.when(timeRepository.findAllByOrderByStartAtAsc())
+        when(timeRepository.findAllByOrderByStartAtAsc())
                 .thenReturn(List.of(time));
 
         List<TimeResponse> timeResponses = timeService.findReservationTimes();
@@ -63,7 +64,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("중복된 예약 시간 생성 요청시 예외를 던진다.")
     void validation_ShouldThrowException_WhenStartAtIsDuplicated() {
-        Mockito.when(timeRepository.countByStartAt(any(LocalTime.class)))
+        when(timeRepository.countByStartAt(any(LocalTime.class)))
                 .thenReturn(1);
 
         TimeRequest timeRequest = new TimeRequest(LocalTime.now());
@@ -86,7 +87,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
-        Mockito.when(detailRepository.countReservationsByTime_Id(1L))
+        when(detailRepository.countReservationsByTime_Id(1L))
                 .thenReturn(1);
 
         assertThatThrownBy(() -> timeService.removeReservationTime(1L))

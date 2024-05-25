@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -52,13 +53,13 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 추가한다.")
     void addReservation() {
-        Mockito.when(reservationRepository.save(any()))
+        when(reservationRepository.save(any()))
                 .thenReturn(reservation);
-        Mockito.when(memberRepository.findById(any(Long.class)))
+        when(memberRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getMember()));
-        Mockito.when(detailRepository.findById(any(Long.class)))
+        when(detailRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getDetail()));
-        Mockito.when(reservationRepository.findByDetail_Id(any(Long.class)))
+        when(reservationRepository.findByDetail_Id(any(Long.class)))
                 .thenReturn(Optional.empty());
 
         ReservationRequest reservationRequest = new ReservationRequest(
@@ -72,7 +73,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 찾는다.")
     void findReservations() {
-        Mockito.when(reservationRepository.findAllByOrderByDetailDateAsc())
+        when(reservationRepository.findAllByOrderByDetailDateAsc())
                 .thenReturn(List.of(reservation));
 
         List<ReservationResponse> reservationResponses = reservationService.findReservations();
@@ -94,11 +95,11 @@ class ReservationServiceTest {
     @Test
     @DisplayName("특정 테마의 예약이 존재하는 시간에 예약을 요청할 때 예외를 던진다.")
     void addReservation_ShouldThrowException_WhenDuplicatedReservationRequestOccurs() {
-        Mockito.when(detailRepository.findById(any(Long.class)))
+        when(detailRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getDetail()));
-        Mockito.when(memberRepository.findById(any(Long.class)))
+        when(memberRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getMember()));
-        Mockito.when(reservationRepository.findByDetail_Id(any(Long.class)))
+        when(reservationRepository.findByDetail_Id(any(Long.class)))
                 .thenReturn(Optional.of(reservation));
 
         ReservationRequest reservationRequest = new ReservationRequest(
