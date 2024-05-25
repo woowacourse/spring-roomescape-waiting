@@ -5,19 +5,26 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Waiting;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.PastTimeReservationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationSearchInput;
 import roomescape.service.dto.input.WaitingInput;
@@ -28,6 +35,12 @@ class ReservationServiceTest {
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    ReservationRepository reservationRepository;
+
+    @Autowired
+    WaitingRepository waitingRepository;
 
     @Autowired
     MemberRepository memberRepository;
@@ -139,5 +152,28 @@ class ReservationServiceTest {
 
         assertThat(reservationService.getAllMyReservations(member3))
                 .hasSize(2);
+    }
+
+    @Test
+    @DisplayName("예약을 삭제하면 첫 번 째 예약 대기가 예약으로 승인된다.")
+    void approve_waiting_when_reservation_deleted() {
+        final var time = reservationTimeRepository.save(ReservationTime.from(null, "10:00"));
+        final var theme = themeRepository.save(ThemeFixture.getDomain());
+        final var member1 = memberRepository.save(MemberFixture.getDomain());
+        final var member2 = memberRepository.save(MemberFixture.getDomain("new2@gmail.com"));
+        final var member3 = memberRepository.save(MemberFixture.getDomain("new3@gmail.com"));
+        final var reservation = reservationRepository.save(
+                new Reservation(null, ReservationDate.from("2024-05-30"), time, theme, member1,
+                        ReservationStatus.COMPLETE));
+        waitingRepository.save(
+                new Waiting(null, ReservationDate.from("2024-05-30"), time, theme, member2,
+                        LocalTime.now().minusHours(1)));
+        waitingRepository.save(
+                new Waiting(null, ReservationDate.from("2024-05-30"), time, theme, member3, LocalTime.now()));
+
+        reservationService.deleteReservation(reservation.getId());
+        assertThat(reservationRepository.existsByDateAndTimeIdAndMemberId(
+                ReservationDate.from("2024-05-30"), time.getId(), member2.getId()))
+                .isTrue();
     }
 }

@@ -62,4 +62,21 @@ class WaitingRepositoryTest {
         assertThat(myWaiting.getRank())
                 .isEqualTo(2L);
     }
+
+    @Test
+    @DisplayName("대기 순번이 1인 예약 대기를 반환환다.")
+    void find_first_waiting_by_reservation() {
+        final var theme = themeRepository.save(ThemeFixture.getDomain());
+        final var member1 = memberRepository.save(MemberFixture.getDomain());
+        final var member2 = memberRepository.save(MemberFixture.getDomain("new2@gmail.com"));
+        final var time = timeRepository.save(ReservationTimeFixture.getDomain());
+        final var date = ReservationDate.from("2025-05-30");
+
+        waitingRepository.save(new Waiting(null, date, time, theme, member2, LocalTime.now().minusHours(1)));
+        waitingRepository.save(new Waiting(null, date, time, theme, member1, LocalTime.now()));
+
+        Waiting waiting = waitingRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAt(date, time, theme).get();
+        assertThat(waiting.getMember().getEmail())
+                .isEqualTo(member2.getEmail());
+    }
 }

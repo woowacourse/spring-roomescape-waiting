@@ -1,9 +1,12 @@
 package roomescape.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.domain.user.Member;
 import roomescape.repository.ReservationRepository;
@@ -52,6 +55,27 @@ public class ReservationService {
     }
 
     public void deleteReservation(final long id) {
-        reservationRepository.deleteById(id);
+        Optional<Reservation> reservation = reservationRepository.findById(id);
+        if (reservation.isPresent()) {
+            reservationRepository.deleteById(id);
+            approveWaiting(reservation.get());
+        }
+    }
+
+    private void approveWaiting(Reservation reservation) {
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAt(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
+        waiting.ifPresent(value -> reservationRepository.save(new Reservation(
+                null,
+                value.getDate(),
+                value.getTime(),
+                value.getTheme(),
+                value.getMember(),
+                ReservationStatus.COMPLETE
+        )));
+        waiting.ifPresent(waitingRepository::delete);
     }
 }
