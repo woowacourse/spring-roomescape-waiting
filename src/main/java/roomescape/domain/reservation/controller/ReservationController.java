@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.login.controller.MemberResolver;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.dto.command.ReservationAddCommand;
 import roomescape.domain.reservation.dto.request.BookableTimesRequest;
 import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 import roomescape.domain.reservation.dto.response.BookableTimeResponse;
@@ -41,13 +42,12 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody ReservationAddRequest reservationAddRequest,
                                                               @MemberResolver Member member,
                                                               @RequestParam(name = "waiting", required = false, defaultValue = "false") boolean waiting) {
-        reservationAddRequest = reservationAddRequest.addMemberId(member.getId());
-        Reservation reservation;
-        if (waiting) {
-            reservation = reservationService.addWaitingReservation(reservationAddRequest);
-        } else {
-            reservation = reservationService.addReservation(reservationAddRequest);
-        }
+        ReservationAddCommand reservationAddCommand = ReservationAddCommand.of(
+                reservationAddRequest,
+                member.getId()
+        );
+        Reservation reservation = addReservationAccordingWaiting(reservationAddCommand, waiting);
+
         ReservationResponse reservationResponse = ReservationResponse.from(reservation);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
     }
@@ -67,5 +67,12 @@ public class ReservationController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<ReservationMineResponse>> findSpecificMemberReservation(@MemberResolver Member member) {
         return ResponseEntity.ok(reservationService.findReservationByMemberId(member.getId()));
+    }
+
+    private Reservation addReservationAccordingWaiting(ReservationAddCommand reservationAddCommand, boolean isWaiting) {
+        if (isWaiting) {
+            return reservationService.addWaitingReservation(reservationAddCommand);
+        }
+        return reservationService.addReservedReservation(reservationAddCommand);
     }
 }

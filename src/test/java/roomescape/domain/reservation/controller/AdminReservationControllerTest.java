@@ -47,7 +47,7 @@ public class AdminReservationControllerTest extends ControllerTest {
         String cookie = getAdminCookie();
 
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(
-                AFTER_THREE_DAYS_DATE, 1L, 1L, null);
+                AFTER_THREE_DAYS_DATE, 1L, 1L);
         RestAssured.given().log().all()
                 .header("Cookie", cookie)
                 .contentType(ContentType.JSON)

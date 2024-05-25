@@ -12,8 +12,8 @@ import roomescape.domain.member.repository.MemberRepository;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.reservation.dto.command.ReservationAddCommand;
 import roomescape.domain.reservation.dto.request.BookableTimesRequest;
-import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 import roomescape.domain.reservation.dto.response.BookableTimeResponse;
 import roomescape.domain.reservation.dto.response.ReservationMineResponse;
 import roomescape.domain.reservation.repository.reservation.ReservationRepository;
@@ -57,31 +57,33 @@ public class ReservationService {
         return reservationRepository.findAllBy(themeId, memberId, dateFrom, dateTo);
     }
 
-    public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
-        validateDuplicatedReservation(reservationAddRequest);
-        Reservation reservation = getReservationWithStatus(reservationAddRequest, RESERVED);
+    public Reservation addReservedReservation(ReservationAddCommand reservationAddCommand) {
+        validateDuplicatedReservation(reservationAddCommand);
+        Reservation reservation = getReservationWithStatus(reservationAddCommand, RESERVED);
         validateReservationDateTime(reservation);
         return reservationRepository.save(reservation);
     }
 
-    public Reservation addWaitingReservation(ReservationAddRequest reservationAddRequest) {
-        validateDuplicatedWaitingReservation(reservationAddRequest);
-        Reservation reservation = getReservationWithStatus(reservationAddRequest, WAITING);
+    public Reservation addWaitingReservation(ReservationAddCommand reservationAddCommand) {
+        validateDuplicatedWaitingReservation(reservationAddCommand);
+        Reservation reservation = getReservationWithStatus(reservationAddCommand, WAITING);
         validateReservationDateTime(reservation);
         return reservationRepository.save(reservation);
     }
 
-    private void validateDuplicatedReservation(ReservationAddRequest reservationAddRequest) {
-        if (reservationRepository.existByDateAndTimeIdAndThemeId(reservationAddRequest.date(),
-                reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
+    private void validateDuplicatedReservation(ReservationAddCommand reservationAddCommand) {
+        if (reservationRepository.existByDateAndTimeIdAndThemeId(reservationAddCommand.date(),
+                reservationAddCommand.timeId(), reservationAddCommand.themeId())) {
             throw new EscapeApplicationException(DUPLICATED_RESERVATION_ERROR_MESSAGE);
         }
     }
 
-    private void validateDuplicatedWaitingReservation(ReservationAddRequest reservationAddRequest) {
+    private void validateDuplicatedWaitingReservation(ReservationAddCommand reservationAddCommand) {
         if (reservationRepository.existByMemberIdAndDateAndTimeIdAndThemeId(
-                reservationAddRequest.memberId(), reservationAddRequest.date(),
-                reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
+                reservationAddCommand.memberId(),
+                reservationAddCommand.date(),
+                reservationAddCommand.timeId(),
+                reservationAddCommand.themeId())) {
             throw new EscapeApplicationException(DUPLICATED_RESERVATION_WAITING_ERROR_MESSAGE);
         }
     }
@@ -93,13 +95,13 @@ public class ReservationService {
         }
     }
 
-    private Reservation getReservationWithStatus(ReservationAddRequest reservationAddRequest,
+    private Reservation getReservationWithStatus(ReservationAddCommand reservationAddCommand,
                                                  ReservationStatus reservationStatus) {
-        ReservationTime reservationTime = getReservationTime(reservationAddRequest.timeId());
-        Theme theme = getTheme(reservationAddRequest.themeId());
-        Member member = getMember(reservationAddRequest.memberId());
+        ReservationTime reservationTime = getReservationTime(reservationAddCommand.timeId());
+        Theme theme = getTheme(reservationAddCommand.themeId());
+        Member member = getMember(reservationAddCommand.memberId());
 
-        return reservationAddRequest.toEntity(reservationTime, theme, member, reservationStatus, LocalDateTime.now());
+        return reservationAddCommand.toEntity(reservationTime, theme, member, reservationStatus, LocalDateTime.now());
     }
 
 

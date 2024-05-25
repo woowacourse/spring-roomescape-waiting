@@ -35,8 +35,8 @@ import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.service.FakeMemberRepository;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.reservation.dto.command.ReservationAddCommand;
 import roomescape.domain.reservation.dto.request.BookableTimesRequest;
-import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 import roomescape.domain.reservation.dto.response.BookableTimeResponse;
 import roomescape.domain.reservation.dto.response.ReservationMineResponse;
 import roomescape.domain.theme.domain.Theme;
@@ -69,9 +69,9 @@ class ReservationServiceTest {
         fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(MEMBER_MEMBER);
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
+        ReservationAddCommand reservationAddRequest = new ReservationAddCommand(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
 
-        Reservation reservation = reservationService.addReservation(reservationAddRequest);
+        Reservation reservation = reservationService.addReservedReservation(reservationAddRequest);
 
         assertThat(reservation.getStatus()).isEqualTo(RESERVED);
     }
@@ -82,7 +82,7 @@ class ReservationServiceTest {
         fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(MEMBER_MEMBER);
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
+        ReservationAddCommand reservationAddRequest = new ReservationAddCommand(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
 
         Reservation reservation = reservationService.addWaitingReservation(reservationAddRequest);
 
@@ -94,9 +94,9 @@ class ReservationServiceTest {
     void should_throw_exception_when_reserve_with_non_exist_member() {
         fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
         fakeThemeRepository.save(DUMMY_THEME);
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);//
+        ReservationAddCommand reservationAddRequest = new ReservationAddCommand(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);//
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
+        assertThatThrownBy(() -> reservationService.addReservedReservation(reservationAddRequest))
                 .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage(NON_EXIST_MEMBER_ERROR_MESSAGE);
     }
@@ -106,8 +106,8 @@ class ReservationServiceTest {
     void should_throw_exception_when_reserve_with_non_exist_theme() {
         fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
         fakeMemberRepository.save(ADMIN_MEMBER);
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
-        assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
+        ReservationAddCommand reservationAddRequest = new ReservationAddCommand(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
+        assertThatThrownBy(() -> reservationService.addReservedReservation(reservationAddRequest))
                 .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage(NON_EXIST_THEME_ERROR_MESSAGE);
     }
@@ -118,9 +118,9 @@ class ReservationServiceTest {
     void should_throw_exception_when_reserve_non_exist_time() {
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(ADMIN_MEMBER);
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_TWO_DAYS_DATE, 1L, 1L, 1L);
+        ReservationAddCommand reservationAddRequest = new ReservationAddCommand(AFTER_TWO_DAYS_DATE, 1L, 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
+        assertThatThrownBy(() -> reservationService.addReservedReservation(reservationAddRequest))
                 .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage(NON_EXIST_RESERVATION_TIME_ERROR_MESSAGE);
     }
@@ -135,9 +135,9 @@ class ReservationServiceTest {
                 TIMESTAMP_BEFORE_ONE_YEAR);
         fakeReservationRepository.save(reservation);
 
-        ReservationAddRequest conflictRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
+        ReservationAddCommand conflictRequest = new ReservationAddCommand(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(conflictRequest))
+        assertThatThrownBy(() -> reservationService.addReservedReservation(conflictRequest))
                 .isInstanceOf(EscapeApplicationException.class)
                 .hasMessage(DUPLICATED_RESERVATION_ERROR_MESSAGE);
     }
@@ -152,7 +152,7 @@ class ReservationServiceTest {
                 TIMESTAMP_BEFORE_ONE_YEAR);
         fakeReservationRepository.save(reservation);
 
-        ReservationAddRequest conflictRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
+        ReservationAddCommand conflictRequest = new ReservationAddCommand(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.addWaitingReservation(conflictRequest))
                 .isInstanceOf(EscapeApplicationException.class)
@@ -165,9 +165,9 @@ class ReservationServiceTest {
         fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(MEMBER_MEMBER);
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(BEFORE_ONE_DAYS_DATE, 1L, 1L, 1L);
+        ReservationAddCommand reservationAddRequest = new ReservationAddCommand(BEFORE_ONE_DAYS_DATE, 1L, 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
+        assertThatThrownBy(() -> reservationService.addReservedReservation(reservationAddRequest))
                 .isInstanceOf(EscapeApplicationException.class)
                 .hasMessage(BEFORE_ONE_DAYS_DATE.atTime(TEN_RESERVATION_TIME.getStartAt()) + ": 예약은 현재 보다 이전일 수 없습니다");
     }
@@ -178,9 +178,9 @@ class ReservationServiceTest {
         fakeReservationTimeRepository.save(new ReservationTime(null, BEFORE_ONE_HOUR));
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(MEMBER_MEMBER);
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(TODAY, 1L, 1L, 1L);
+        ReservationAddCommand reservationAddRequest = new ReservationAddCommand(TODAY, 1L, 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
+        assertThatThrownBy(() -> reservationService.addReservedReservation(reservationAddRequest))
                 .isInstanceOf(EscapeApplicationException.class)
                 .hasMessage(TODAY.atTime(BEFORE_ONE_HOUR) + PAST_RESERVATION_ERROR_MESSAGE);
     }
