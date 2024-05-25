@@ -323,6 +323,34 @@ HTTP/1.1 204
 
 ## 예약 대기
 
+### 예약 대기 목록 조회 API (접근 권한: 관리자)
+
+Request
+
+```
+GET /reservations/waitings
+Cookie: token=hello.example.token
+```
+
+Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+{
+  "waitings": [
+    {
+      "id": 1,
+      "name": "사용자",
+      "theme": "레벨2 탈출",
+      "date": "2024-08-05",
+      "startAt": "10:00:00"
+    }
+  ]
+}
+```
+
 ### 예약 대기 추가 API
 
 Request
@@ -357,6 +385,21 @@ Request
 
 ```
 DELETE /reservations/waitings/1
+Cookie: token=hello.example.token
+```
+
+Response
+
+```
+HTTP/1.1 204
+```
+
+### 관리자용 예약 대기 취소 API (접근 권한: 관리자)
+
+Request
+
+```
+DELETE /admin/reservations/waitings/1
 Cookie: token=hello.example.token
 ```
 
