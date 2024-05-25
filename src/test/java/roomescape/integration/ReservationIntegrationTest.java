@@ -83,9 +83,9 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 내_예약_목록을_조회할_수_있다() {
             ReservationTime time = timeFixture.createFutureTime();
             Theme theme = themeFixture.createFirstTheme();
-            Member user = memberFixture.createUserMember();
-            reservationFixture.createPastReservation(time, theme, user);
-            reservationFixture.createFutureReservation(time, theme, user);
+            Member member = memberFixture.createUserMember();
+            Reservation reservation = reservationFixture.createFutureReservation(time, theme, member);
+            waitingFixture.createWaiting(reservation, member);
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createUserCookies())

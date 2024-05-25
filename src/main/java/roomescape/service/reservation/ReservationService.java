@@ -83,7 +83,7 @@ public class ReservationService {
 
     private void validateDuplicateReservation(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(), reservation.getTime(), reservation.getTheme())) {
+                reservation.getDate(), reservation.getTime(), reservation.getTheme())) { // TODO: 세부 클래스로 분리
             throw new DuplicatedReservationException();
         }
     }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.reservation.DuplicatedReservationException;
@@ -88,18 +89,31 @@ class ReservationServiceTest extends ServiceTest {
     @Nested
     @DisplayName("내 예약 목록 조회")
     class FindMyReservation {
-        @Test
-        void 내_예약_목록을_조회할_수_있다() {
+        Member member;
+
+        @BeforeEach
+        void setUp() {
             ReservationTime time = timeFixture.createFutureTime();
             Theme theme = themeFixture.createFirstTheme();
-            Member member = memberFixture.createUserMember();
-            reservationFixture.createPastReservation(time, theme, member);
-            reservationFixture.createFutureReservation(time, theme, member);
+            member = memberFixture.createUserMember();
+            Reservation reservation = reservationFixture.createFutureReservation(time, theme, member);
+            waitingFixture.createWaiting(reservation, member);
+        }
 
+        @Test
+        void 내_예약_목록을_조회할_수_있다() {
             ReservationMineListResponse response = reservationService.findMyReservation(member);
 
             assertThat(response.getReservations().size())
                     .isEqualTo(2);
+        }
+
+        @Test
+        void 내_예약_목록_조회_시_대기_상태로_몇_번째_대기인지도_확인할_수_있다() {
+            ReservationMineListResponse response = reservationService.findMyReservation(member);
+
+            assertThat(response.getReservations().get(0).getStatus())
+                    .isEqualTo("1" + ReservationStatus.WAITING);
         }
     }
 
