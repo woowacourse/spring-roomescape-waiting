@@ -51,7 +51,7 @@ class ReservationTest {
                 USER_MIA(1L), MIA_RESERVATION_DATE, new ReservationTime(MIA_RESERVATION_TIME), WOOTECO_THEME(), BOOKING);
 
         // when
-        boolean hasSameOwner = reservation.hasModificationPermission(memberToModify);
+        boolean hasSameOwner = reservation.isModifiableBy(memberToModify);
 
         // then
         assertThat(hasSameOwner).isTrue();

@@ -3,6 +3,7 @@ package roomescape.reservation.presentation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,10 +14,11 @@ import roomescape.auth.presentation.LoginMemberArgumentResolver;
 import roomescape.common.ControllerTest;
 import roomescape.global.config.WebMvcConfiguration;
 import roomescape.member.application.MemberService;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.ReservationManageService;
+import roomescape.reservation.application.BookingQueryService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
-import roomescape.reservation.application.WaitingReservationService;
+import roomescape.reservation.application.WaitingQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -39,6 +41,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
+import static roomescape.common.StubLoginMemberArgumentResolver.STUBBED_LOGIN_MEMBER;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 @WebMvcTest(
@@ -48,10 +51,14 @@ import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 )
 class AdminReservationControllerTest extends ControllerTest {
     @MockBean
-    private ReservationService reservationService;
+    private BookingQueryService bookingQueryService;
 
     @MockBean
-    private WaitingReservationService waitingReservationService;
+    private WaitingQueryService waitingQueryService;
+
+    @MockBean
+    @Qualifier("bookingManageService")
+    private ReservationManageService bookingScheduler;
 
     @MockBean
     private MemberService memberService;
@@ -77,7 +84,7 @@ class AdminReservationControllerTest extends ControllerTest {
                 .willReturn(expectedTheme);
         BDDMockito.given(memberService.findById(anyLong()))
                 .willReturn(USER_MIA(1L));
-        BDDMockito.given(reservationService.create(any()))
+        BDDMockito.given(bookingScheduler.create(any()))
                 .willReturn(expectedReservation);
 
         // when
@@ -99,7 +106,7 @@ class AdminReservationControllerTest extends ControllerTest {
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
-        BDDMockito.given(reservationService.findReservations())
+        BDDMockito.given(bookingQueryService.findReservations())
                 .willReturn(List.of(expectedReservation));
 
         // when & then
@@ -120,7 +127,7 @@ class AdminReservationControllerTest extends ControllerTest {
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
-        BDDMockito.given(reservationService.findReservationsByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
+        BDDMockito.given(bookingQueryService.findReservationsByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
                 .willReturn(List.of(expectedReservation));
 
         // when & then
@@ -158,11 +165,11 @@ class AdminReservationControllerTest extends ControllerTest {
     void deleteReservation() throws Exception {
         // given
         BDDMockito.willDoNothing()
-                .given(reservationService)
-                .deleteReservation(anyLong());
+                .given(bookingScheduler)
+                .delete(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then
-        mockMvc.perform(delete("/admin/reservations/{id}", anyLong())
+        mockMvc.perform(delete("/admin/reservations/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNoContent());

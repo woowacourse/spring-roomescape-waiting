@@ -1,6 +1,7 @@
 package roomescape.reservation.presentation;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.application.MemberService;
 import roomescape.member.domain.Member;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.ReservationManageService;
+import roomescape.reservation.application.BookingQueryService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
-import roomescape.reservation.application.WaitingReservationService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -29,20 +30,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
-    private final ReservationService reservationService;
+    private final BookingQueryService bookingQueryService;
+    private final ReservationManageService bookingScheduler;
     private final MemberService memberService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final WaitingReservationService waitingReservationService;
 
-    public AdminReservationController(ReservationService reservationService, MemberService memberService,
-                                      ReservationTimeService reservationTimeService, ThemeService themeService,
-                                      WaitingReservationService waitingReservationService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(BookingQueryService bookingQueryService,
+                                      @Qualifier("bookingManageService") ReservationManageService bookingScheduler,
+                                      MemberService memberService,
+                                      ReservationTimeService reservationTimeService,
+                                      ThemeService themeService) {
+        this.bookingQueryService = bookingQueryService;
+        this.bookingScheduler = bookingScheduler;
         this.memberService = memberService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.waitingReservationService = waitingReservationService;
     }
 
     @PostMapping
@@ -51,14 +54,14 @@ public class AdminReservationController {
         Theme theme = themeService.findById(request.themeId());
         Member member = memberService.findById(request.memberId());
         Reservation newReservation = request.toModel(theme, reservationTime, member);
-        Reservation createdReservation = reservationService.create(newReservation);
+        Reservation createdReservation = bookingScheduler.create(newReservation);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationResponse.from(createdReservation));
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
-        List<Reservation> reservations = reservationService.findReservations();
+        List<Reservation> reservations = bookingQueryService.findReservations();
         return ResponseEntity.ok(reservations.stream()
                 .map(ReservationResponse::from)
                 .toList());
@@ -68,7 +71,7 @@ public class AdminReservationController {
     public ResponseEntity<List<ReservationResponse>> findReservationsByMemberIdAndThemeIdAndDateBetween(
             @RequestParam Long memberId, @RequestParam Long themeId,
             @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate) {
-        List<Reservation> reservations = reservationService.findReservationsByMemberIdAndThemeIdAndDateBetween(
+        List<Reservation> reservations = bookingQueryService.findReservationsByMemberIdAndThemeIdAndDateBetween(
                 memberId, themeId, fromDate, toDate);
         return ResponseEntity.ok(reservations.stream()
                 .map(ReservationResponse::from)
@@ -76,22 +79,8 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/waiting")
-    public ResponseEntity<List<ReservationResponse>> findWaitingReservations() {
-        List<Reservation> waitingReservations = waitingReservationService.findWaitingReservations();
-        return ResponseEntity.ok(waitingReservations.stream()
-                .map(ReservationResponse::from)
-                .toList());
-    }
-
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable Long id, Member loginAdminMember) {
-        waitingReservationService.deleteWaitingReservation(id, loginAdminMember);
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id, Member loginMember) {
+        bookingScheduler.delete(id, loginMember);
         return ResponseEntity.noContent().build();
     }
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.BDDMockito;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -20,10 +21,11 @@ import roomescape.common.TestWebMvcConfiguration;
 import roomescape.global.config.WebMvcConfiguration;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.ReservationManageService;
+import roomescape.reservation.application.BookingQueryService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
-import roomescape.reservation.application.WaitingReservationService;
+import roomescape.reservation.application.WaitingQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -65,10 +67,18 @@ class ReservationControllerTest extends ControllerTest {
     private static final Cookie COOKIE = new Cookie("token", "token");
 
     @MockBean
-    private ReservationService reservationService;
+    private BookingQueryService bookingQueryService;
 
     @MockBean
-    private WaitingReservationService waitingReservationService;
+    @Qualifier("bookingManageService")
+    private ReservationManageService bookingManageService;
+
+    @MockBean
+    @Qualifier("waitingManageService")
+    private ReservationManageService waitingManageService;
+
+    @MockBean
+    private WaitingQueryService waitingQueryService;
 
     @MockBean
     private ReservationTimeService reservationTimeService;
@@ -85,7 +95,7 @@ class ReservationControllerTest extends ControllerTest {
         Theme expectedTheme = WOOTECO_THEME(1L);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), BOOKING);
 
-        BDDMockito.given(reservationService.create(any()))
+        BDDMockito.given(bookingManageService.create(any()))
                 .willReturn(expectedReservation);
         BDDMockito.given(reservationTimeService.findById(anyLong()))
                 .willReturn(expectedTime);
@@ -188,7 +198,7 @@ class ReservationControllerTest extends ControllerTest {
         Theme expectedTheme = WOOTECO_THEME(1L);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), BOOKING);
 
-        BDDMockito.given(reservationService.create(any()))
+        BDDMockito.given(bookingManageService.create(any()))
                 .willReturn(expectedReservation);
         BDDMockito.given(reservationTimeService.findById(anyLong()))
                 .willReturn(expectedTime);
@@ -219,7 +229,7 @@ class ReservationControllerTest extends ControllerTest {
         BDDMockito.given(reservationTimeService.findById(timeId))
                 .willReturn(new ReservationTime(1L, MIA_RESERVATION_TIME));
         BDDMockito.willThrow(new ViolationException(TEST_ERROR_MESSAGE))
-                .given(reservationService)
+                .given(bookingManageService)
                 .create(any());
 
         // when & then
@@ -291,9 +301,9 @@ class ReservationControllerTest extends ControllerTest {
         WaitingReservation expectedWaitingReservation = new WaitingReservation(
                 MIA_RESERVATION(expectedTime, HORROR_THEME(), USER_MIA(), WAITING), 0);
 
-        BDDMockito.given(reservationService.findReservationsInBookingByMember(any()))
+        BDDMockito.given(bookingQueryService.findReservationsInBookingByMember(any()))
                 .willReturn(List.of(expectedReservation));
-        BDDMockito.given(waitingReservationService.findWaitingReservationsWithPreviousCountByMember(any()))
+        BDDMockito.given(waitingQueryService.findWaitingReservationsWithPreviousCountByMember(any()))
                 .willReturn(List.of(expectedWaitingReservation));
 
         // when & then
@@ -313,8 +323,8 @@ class ReservationControllerTest extends ControllerTest {
     void deleteMyWaitingReservation() throws Exception {
         // given
         BDDMockito.willDoNothing()
-                .given(waitingReservationService)
-                .deleteWaitingReservation(1L, STUBBED_LOGIN_MEMBER);
+                .given(waitingManageService)
+                .delete(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}/waiting", 1L)
@@ -328,8 +338,8 @@ class ReservationControllerTest extends ControllerTest {
     void deleteMyWaitingReservationWithoutOwnerShip() throws Exception {
         // given
         BDDMockito.willThrow(new ViolationException(TEST_ERROR_MESSAGE))
-                .given(waitingReservationService)
-                .deleteWaitingReservation(1L, STUBBED_LOGIN_MEMBER);
+                .given(waitingManageService)
+                .delete(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}/waiting", 1L)

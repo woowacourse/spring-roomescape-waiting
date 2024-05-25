@@ -74,7 +74,7 @@ public class Reservation {
         return status.isWaiting();
     }
 
-    public boolean hasModificationPermission(Member member) {
+    public boolean isModifiableBy(Member member) {
         Long memberId = member.getId();
         Long ownerId = this.member.getId();
         return ownerId.equals(memberId) || member.isAdmin();
