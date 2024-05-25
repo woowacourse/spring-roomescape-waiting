@@ -39,7 +39,7 @@ public class WaitingController {
         final ReservationResponse reservation
                 = reservationService.addWaiting(reservationRequest, loginMember.id());
 
-        final URI uri = UriComponentsBuilder.fromPath("/reservations/waiting/{id}")
+        final URI uri = UriComponentsBuilder.fromPath("/waiting/{id}")
                 .buildAndExpand(reservation.id())
                 .toUri();
         return ResponseEntity.created(uri).body(reservation);
