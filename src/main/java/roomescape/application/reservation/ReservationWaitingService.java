@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.waiting.Waiting;
 
@@ -26,6 +27,7 @@ public class ReservationWaitingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteById(long memberId, long id) {
         Optional<Waiting> waiting = waitingService.findFirstByReservationId(id);
         if (waiting.isEmpty()) {

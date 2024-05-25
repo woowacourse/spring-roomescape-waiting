@@ -78,6 +78,7 @@ public class WaitingService {
         throw new UnAuthorizedException();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         waitingRepository.deleteById(id);
     }

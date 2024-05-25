@@ -29,6 +29,7 @@ public class ThemeService {
         this.clock = clock;
     }
 
+    @Transactional
     public ThemeResponse create(ThemeRequest request) {
         Theme savedTheme = themeRepository.save(request.toTheme());
         return ThemeResponse.from(savedTheme);
