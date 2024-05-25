@@ -18,12 +18,12 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
 
-    public AuthService(final MemberRepository memberRepository, final TokenProvider tokenProvider) {
+    public AuthService(MemberRepository memberRepository, TokenProvider tokenProvider) {
         this.memberRepository = memberRepository;
         this.tokenProvider = tokenProvider;
     }
 
-    public LoginResponse login(final LoginRequest loginMemberRequest) {
+    public LoginResponse login(LoginRequest loginMemberRequest) {
         String email = loginMemberRequest.email();
         Member member = memberRepository.findByEmail(new Email(email))
                 .orElseThrow(() -> new IllegalArgumentException("로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요."));
@@ -31,14 +31,14 @@ public class AuthService {
         return new LoginResponse(tokenProvider.createToken(member));
     }
 
-    private void checkInvalidAuthInfo(final Member member, final String password) {
+    private void checkInvalidAuthInfo(Member member, String password) {
         if (member.hasNotSamePassword(password)) {
             throw new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력했습니다. 다시 입력해주세요.");
         }
     }
 
     @Transactional(readOnly = true)
-    public GetAuthInfoResponse getMemberAuthInfo(final AuthInfo authInfo) {
+    public GetAuthInfoResponse getMemberAuthInfo(AuthInfo authInfo) {
         Member member = memberRepository.findById(authInfo.getMemberId())
                 .orElseThrow(() -> new SecurityException("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요."));
         return GetAuthInfoResponse.from(member);

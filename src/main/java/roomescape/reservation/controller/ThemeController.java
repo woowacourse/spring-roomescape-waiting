@@ -25,7 +25,7 @@ public class ThemeController {
 
     private final ThemeService themeService;
 
-    public ThemeController(final ThemeService themeService) {
+    public ThemeController(ThemeService themeService) {
         this.themeService = themeService;
     }
 
@@ -37,7 +37,7 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<List<FindThemeResponse>> getThemes() {
-         return ResponseEntity.ok(themeService.getThemes());
+        return ResponseEntity.ok(themeService.getThemes());
     }
 
     @GetMapping("/popular")

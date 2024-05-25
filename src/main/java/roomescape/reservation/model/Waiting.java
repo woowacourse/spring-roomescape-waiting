@@ -29,18 +29,18 @@ public class Waiting {
     @Embedded
     private Slot slot;
 
-    public Waiting(final Member member, final Slot slot) {
+    public Waiting(Member member, Slot slot) {
         this(null, member, slot);
     }
 
-    public Waiting(final Member member, final LocalDate date, final ReservationTime reservationTime,
-                   final Theme theme) {
+    public Waiting(Member member, LocalDate date, ReservationTime reservationTime,
+                   Theme theme) {
         this(null, member, date, reservationTime, theme);
     }
 
-    public Waiting(final Long id,
-                   final Member member,
-                   final Slot slot) {
+    public Waiting(Long id,
+                   Member member,
+                   Slot slot) {
         validateReservationMemberIsNull(member);
         validateReservationDateIsNull(slot.date());
         validateReservationTimeIsNull(slot.reservationTime());
@@ -51,34 +51,34 @@ public class Waiting {
         this.slot = slot;
     }
 
-    public Waiting(final Long id,
-                   final Member member,
-                   final LocalDate date,
-                   final ReservationTime reservationTime,
-                   final Theme theme) {
+    public Waiting(Long id,
+                   Member member,
+                   LocalDate date,
+                   ReservationTime reservationTime,
+                   Theme theme) {
         this(id, member, new Slot(date, reservationTime, theme));
     }
 
     protected Waiting() {
     }
 
-    public static Waiting create(final Member member, final Slot slot) {
+    public static Waiting create(Member member, Slot slot) {
         validateCreateTimeIsPast(slot.date(), slot.reservationTime());
         return new Waiting(null, member, slot);
     }
 
-    public static Waiting create(final Member member,
-                                 final LocalDate date,
-                                 final ReservationTime reservationTime,
-                                 final Theme theme) {
+    public static Waiting create(Member member,
+                                 LocalDate date,
+                                 ReservationTime reservationTime,
+                                 Theme theme) {
         return create(member, new Slot(date, reservationTime, theme));
     }
 
-    private static void validateCreateTimeIsPast(final LocalDate date, final ReservationTime reservationTime) {
+    private static void validateCreateTimeIsPast(LocalDate date, ReservationTime reservationTime) {
         checkDateTimeIsPast(date, reservationTime.getStartAt());
     }
 
-    private static void checkDateTimeIsPast(final LocalDate date, final LocalTime startAt) {
+    private static void checkDateTimeIsPast(LocalDate date, LocalTime startAt) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime dateTime = LocalDateTime.of(date, startAt);
         if (dateTime.isBefore(now)) {
@@ -87,25 +87,25 @@ public class Waiting {
         }
     }
 
-    private void validateReservationMemberIsNull(final Member member) {
+    private void validateReservationMemberIsNull(Member member) {
         if (member == null) {
             throw new IllegalArgumentException("예약 대기 생성 시 예약 대기자는 필수입니다.");
         }
     }
 
-    private void validateReservationDateIsNull(final LocalDate date) {
+    private void validateReservationDateIsNull(LocalDate date) {
         if (date == null) {
             throw new IllegalArgumentException("예약 대기 생성 시 예약 대기 날짜는 필수입니다.");
         }
     }
 
-    private void validateReservationTimeIsNull(final ReservationTime reservationTime) {
+    private void validateReservationTimeIsNull(ReservationTime reservationTime) {
         if (reservationTime == null) {
             throw new IllegalArgumentException("예약 대기 생성 시 예약 대기 시간은 필수입니다.");
         }
     }
 
-    private void validateReservationThemeIsNull(final Theme theme) {
+    private void validateReservationThemeIsNull(Theme theme) {
         if (theme == null) {
             throw new IllegalArgumentException("예약 대기 생성 시 예약 대기 테마는 필수입니다.");
         }
@@ -136,7 +136,7 @@ public class Waiting {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

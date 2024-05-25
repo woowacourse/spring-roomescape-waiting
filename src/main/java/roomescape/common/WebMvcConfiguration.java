@@ -16,19 +16,19 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final AuthorizationManager authorizationManager;
     private final TokenProvider tokenProvider;
 
-    public WebMvcConfiguration(final AuthorizationManager authorizationManager, final TokenProvider tokenProvider) {
+    public WebMvcConfiguration(AuthorizationManager authorizationManager, TokenProvider tokenProvider) {
         this.authorizationManager = authorizationManager;
         this.tokenProvider = tokenProvider;
     }
 
     @Override
-    public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         WebMvcConfigurer.super.addArgumentResolvers(resolvers);
         resolvers.add(new AuthenticationPrincipalArgumentResolver(tokenProvider, authorizationManager));
     }
 
     @Override
-    public void addInterceptors(final InterceptorRegistry registry) {
+    public void addInterceptors(InterceptorRegistry registry) {
         WebMvcConfigurer.super.addInterceptors(registry);
         registry.addInterceptor(new AuthorizationInterceptor(authorizationManager, tokenProvider))
                 .addPathPatterns("/admin/**");

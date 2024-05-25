@@ -20,7 +20,7 @@ public class MemberService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public MemberService(final MemberRepository memberRepository, final ReservationRepository reservationRepository,
+    public MemberService(MemberRepository memberRepository, ReservationRepository reservationRepository,
                          WaitingRepository waitingRepository) {
         this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;
@@ -35,7 +35,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
+    public List<FindReservationResponse> getReservationsByMember(AuthInfo authInfo) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(authInfo.getMemberId());
         return reservations.stream()
                 .map(FindReservationResponse::from)

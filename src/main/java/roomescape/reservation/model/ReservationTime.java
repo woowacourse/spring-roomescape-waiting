@@ -17,11 +17,11 @@ public class ReservationTime {
     @Column(nullable = false, unique = true)
     private LocalTime startAt;
 
-    public ReservationTime(final LocalTime startAt) {
+    public ReservationTime(LocalTime startAt) {
         this(null, startAt);
     }
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
+    public ReservationTime(Long id, LocalTime startAt) {
         validateReservationTimeIsNull(startAt);
 
         this.id = id;
@@ -31,13 +31,13 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
-    private void validateReservationTimeIsNull(final LocalTime time) {
+    private void validateReservationTimeIsNull(LocalTime time) {
         if (time == null) {
             throw new IllegalArgumentException("예약 시간 생성 시 시작 시간은 필수입니다.");
         }
     }
 
-    public boolean isSameTo(final Long timeId) {
+    public boolean isSameTo(Long timeId) {
         return Objects.equals(this.id, timeId);
     }
 
@@ -50,7 +50,7 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

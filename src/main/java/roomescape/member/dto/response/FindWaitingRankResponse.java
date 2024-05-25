@@ -9,7 +9,7 @@ public record FindWaitingRankResponse(Long waitingId,
                                       LocalDate date,
                                       LocalTime time,
                                       Long waitingNumber) {
-    public static FindWaitingRankResponse from(final Waiting waiting) {
+    public static FindWaitingRankResponse from(Waiting waiting) {
         return new FindWaitingRankResponse(
                 waiting.getId(),
                 waiting.getTheme().getName(),

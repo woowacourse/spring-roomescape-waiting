@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import roomescape.member.domain.Member;
 import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.model.Waiting;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.model.Waiting;
 
 public class WaitingFixture {
 
-    public static Waiting getOneWithTheme(final Theme theme) {
+    public static Waiting getOneWithTheme(Theme theme) {
         return new Waiting(
                 null,
                 MemberFixture.getOne(),
@@ -20,7 +20,7 @@ public class WaitingFixture {
         );
     }
 
-    public static Waiting getOneWithMember(final Member member) {
+    public static Waiting getOneWithMember(Member member) {
         return new Waiting(
                 null,
                 member,
@@ -30,9 +30,9 @@ public class WaitingFixture {
         );
     }
 
-    public static Waiting getOneWithDateTimeTheme(final LocalDate date,
-                                                      final ReservationTime reservationTime,
-                                                      final Theme theme) {
+    public static Waiting getOneWithDateTimeTheme(LocalDate date,
+                                                  ReservationTime reservationTime,
+                                                  Theme theme) {
         return new Waiting(
                 null,
                 MemberFixture.getOne(),
@@ -42,8 +42,8 @@ public class WaitingFixture {
         );
     }
 
-    public static Waiting getOneWithTimeTheme(final ReservationTime reservationTime,
-                                                  final Theme theme) {
+    public static Waiting getOneWithTimeTheme(ReservationTime reservationTime,
+                                              Theme theme) {
         return new Waiting(
                 null,
                 MemberFixture.getOne(),
@@ -53,8 +53,8 @@ public class WaitingFixture {
         );
     }
 
-    public static Waiting getOneWithMemberTimeTheme(final Member member, final ReservationTime reservationTime,
-                                                        final Theme theme) {
+    public static Waiting getOneWithMemberTimeTheme(Member member, ReservationTime reservationTime,
+                                                    Theme theme) {
         return new Waiting(
                 null,
                 member,
@@ -64,8 +64,8 @@ public class WaitingFixture {
         );
     }
 
-    public static List<Waiting> get(final int count) {
-        final List<Waiting> reservations = new ArrayList<>();
+    public static List<Waiting> get(int count) {
+        List<Waiting> reservations = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             reservations.add(new Waiting(
                             null,

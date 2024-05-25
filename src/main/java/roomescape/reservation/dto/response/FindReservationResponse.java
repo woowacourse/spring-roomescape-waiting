@@ -10,7 +10,7 @@ public record FindReservationResponse(
         FindTimeOfReservationsResponse time,
         FindThemeOfReservationResponse theme) {
 
-    public static FindReservationResponse from(final Reservation reservation) {
+    public static FindReservationResponse from(Reservation reservation) {
         return new FindReservationResponse(
                 reservation.getId(),
                 FindMemberOfReservationResponse.from(reservation.getMember()),

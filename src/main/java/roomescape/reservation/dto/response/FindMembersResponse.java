@@ -4,7 +4,7 @@ import roomescape.member.domain.Member;
 
 public record FindMembersResponse(Long id,
                                   String name) {
-    public static FindMembersResponse of(final Member member) {
+    public static FindMembersResponse of(Member member) {
         return new FindMembersResponse(member.getId(), member.getName());
     }
 }

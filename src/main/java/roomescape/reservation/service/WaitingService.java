@@ -32,10 +32,10 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public WaitingService(WaitingRepository waitingRepository, final ReservationRepository reservationRepository,
-                          final ReservationTimeRepository reservationTimeRepository,
-                          final ThemeRepository themeRepository,
-                          final MemberRepository memberRepository) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository,
+                          ReservationTimeRepository reservationTimeRepository,
+                          ThemeRepository themeRepository,
+                          MemberRepository memberRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -83,17 +83,17 @@ public class WaitingService {
         }
     }
 
-    private ReservationTime findReservationTime(final Long id) {
+    private ReservationTime findReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private Theme findTheme(final Long id) {
+    private Theme findTheme(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private Member findMember(final Long id) {
+    private Member findMember(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }

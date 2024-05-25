@@ -23,11 +23,11 @@ public class Theme {
     @Column(nullable = false)
     private String thumbnail;
 
-    public Theme(final String name, final String description, final String thumbnail) {
+    public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
     }
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
+    public Theme(Long id, String name, String description, String thumbnail) {
         validateThemeNameIsBlank(name);
         validateThemeDescriptionIsBlank(description);
         validateThemeThumbnailIsBlank(thumbnail);
@@ -41,19 +41,19 @@ public class Theme {
     protected Theme() {
     }
 
-    private void validateThemeNameIsBlank(final String name) {
+    private void validateThemeNameIsBlank(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("테마 생성 시 테마 명은 필수입니다.");
         }
     }
 
-    private void validateThemeDescriptionIsBlank(final String description) {
+    private void validateThemeDescriptionIsBlank(String description) {
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException("테마 생성 시 테마 설명은 필수입니다.");
         }
     }
 
-    private void validateThemeThumbnailIsBlank(final String thumbnail) {
+    private void validateThemeThumbnailIsBlank(String thumbnail) {
         if (thumbnail == null || thumbnail.isBlank()) {
             throw new IllegalArgumentException("테마 생성 시 썸네일은 필수입니다.");
         }
@@ -76,7 +76,7 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

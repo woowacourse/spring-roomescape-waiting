@@ -4,7 +4,7 @@ import roomescape.reservation.model.Theme;
 
 public record CreateThemeOfWaitingResponse(Long id, String name, String description, String thumbnail) {
 
-    public static CreateThemeOfWaitingResponse from(final Theme theme) {
+    public static CreateThemeOfWaitingResponse from(Theme theme) {
         return new CreateThemeOfWaitingResponse(
                 theme.getId(),
                 theme.getName(),

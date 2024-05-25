@@ -27,10 +27,10 @@ public class AdminService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public AdminService(final MemberRepository memberRepository,
-                        final ReservationTimeRepository reservationTimeRepository,
-                        final ThemeRepository themeRepository,
-                        final ReservationRepository reservationRepository,
+    public AdminService(MemberRepository memberRepository,
+                        ReservationTimeRepository reservationTimeRepository,
+                        ThemeRepository themeRepository,
+                        ReservationRepository reservationRepository,
                         WaitingRepository waitingRepository) {
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -39,7 +39,7 @@ public class AdminService {
         this.waitingRepository = waitingRepository;
     }
 
-    public CreateReservationResponse createReservation(final CreateReservationRequest createReservationRequest) {
+    public CreateReservationResponse createReservation(CreateReservationRequest createReservationRequest) {
         Member member = getMember(createReservationRequest.memberId());
         Theme theme = getTheme(createReservationRequest.themeId());
         ReservationTime reservationTime = getReservationTime(createReservationRequest.timeId());

@@ -24,7 +24,7 @@ public class WaitingController {
 
     private final WaitingService waitingService;
 
-    public WaitingController(final WaitingService waitingService) {
+    public WaitingController(WaitingService waitingService) {
         this.waitingService = waitingService;
     }
 

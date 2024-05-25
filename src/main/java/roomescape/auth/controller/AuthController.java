@@ -21,13 +21,14 @@ public class AuthController {
     private final AuthorizationManager authorizationManager;
     private final AuthService authService;
 
-    public AuthController(final AuthorizationManager authorizationManager, final AuthService authService) {
+    public AuthController(AuthorizationManager authorizationManager, AuthService authService) {
         this.authorizationManager = authorizationManager;
         this.authService = authService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(HttpServletResponse httpServletResponse, @RequestBody @Valid LoginRequest loginMemberRequest) {
+    public ResponseEntity<Void> login(HttpServletResponse httpServletResponse,
+                                      @RequestBody @Valid LoginRequest loginMemberRequest) {
         LoginResponse loginResponse = authService.login(loginMemberRequest);
         authorizationManager.setAuthorization(httpServletResponse, loginResponse.token());
         return ResponseEntity.ok().build();

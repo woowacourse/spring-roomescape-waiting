@@ -8,8 +8,8 @@ public record CreateReservationResponse(Long id,
                                         CreateThemeOfReservationResponse theme,
                                         LocalDate date,
                                         CreateTimeOfReservationResponse time
-                                        ) {
-    public static CreateReservationResponse from(final Reservation reservation) {
+) {
+    public static CreateReservationResponse from(Reservation reservation) {
         return new CreateReservationResponse(reservation.getId(),
                 CreateMemberOfReservationResponse.from(reservation.getMember()),
                 CreateThemeOfReservationResponse.from(reservation.getTheme()),

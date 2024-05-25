@@ -11,7 +11,7 @@ public record FindWaitingResponse(
         FindThemeOfWaitingResponse theme,
         boolean isFirst) {
 
-    public static FindWaitingResponse from(final Waiting waiting, boolean isFirst) {
+    public static FindWaitingResponse from(Waiting waiting, boolean isFirst) {
         return new FindWaitingResponse(
                 waiting.getId(),
                 FindMemberOfWaitingResponse.from(waiting.getMember()),

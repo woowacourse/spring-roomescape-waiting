@@ -9,7 +9,7 @@ public record FindReservationResponse(Long reservationId,
                                       LocalDate date,
                                       LocalTime time,
                                       String status) {
-    public static FindReservationResponse from(final Reservation reservation) {
+    public static FindReservationResponse from(Reservation reservation) {
         return new FindReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),

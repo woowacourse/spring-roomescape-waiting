@@ -10,7 +10,7 @@ import roomescape.reservation.model.Theme;
 
 public class ReservationFixture {
 
-    public static Reservation getOneWithTheme(final Theme theme) {
+    public static Reservation getOneWithTheme(Theme theme) {
         return new Reservation(
                 null,
                 MemberFixture.getOne(),
@@ -20,7 +20,7 @@ public class ReservationFixture {
         );
     }
 
-    public static Reservation getOneWithMember(final Member member) {
+    public static Reservation getOneWithMember(Member member) {
         return new Reservation(
                 null,
                 member,
@@ -30,9 +30,9 @@ public class ReservationFixture {
         );
     }
 
-    public static Reservation getOneWithDateTimeTheme(final LocalDate date,
-                                                      final ReservationTime reservationTime,
-                                                      final Theme theme) {
+    public static Reservation getOneWithDateTimeTheme(LocalDate date,
+                                                      ReservationTime reservationTime,
+                                                      Theme theme) {
         return new Reservation(
                 null,
                 MemberFixture.getOne(),
@@ -42,8 +42,8 @@ public class ReservationFixture {
         );
     }
 
-    public static Reservation getOneWithTimeTheme(final ReservationTime reservationTime,
-                                                  final Theme theme) {
+    public static Reservation getOneWithTimeTheme(ReservationTime reservationTime,
+                                                  Theme theme) {
         return new Reservation(
                 null,
                 MemberFixture.getOne(),
@@ -53,8 +53,8 @@ public class ReservationFixture {
         );
     }
 
-    public static Reservation getOneWithMemberTimeTheme(final Member member, final ReservationTime reservationTime,
-                                                        final Theme theme) {
+    public static Reservation getOneWithMemberTimeTheme(Member member, ReservationTime reservationTime,
+                                                        Theme theme) {
         return new Reservation(
                 null,
                 member,
@@ -64,8 +64,8 @@ public class ReservationFixture {
         );
     }
 
-    public static List<Reservation> get(final int count) {
-        final List<Reservation> reservations = new ArrayList<>();
+    public static List<Reservation> get(int count) {
+        List<Reservation> reservations = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             reservations.add(new Reservation(
                             null,

@@ -22,13 +22,15 @@ public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
 
-    public ReservationTimeController(final ReservationTimeService reservationTimeService) {
+    public ReservationTimeController(ReservationTimeService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
     }
 
     @PostMapping
-    public ResponseEntity<CreateReservationTimeResponse> createReservationTime(@Valid @RequestBody final CreateReservationTimeRequest createReservationTimeRequest) {
-        CreateReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(createReservationTimeRequest);
+    public ResponseEntity<CreateReservationTimeResponse> createReservationTime(
+            @Valid @RequestBody CreateReservationTimeRequest createReservationTimeRequest) {
+        CreateReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(
+                createReservationTimeRequest);
         return ResponseEntity.created(URI.create("/times/" + reservationTime.id())).body(reservationTime);
     }
 
@@ -39,12 +41,12 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FindReservationTimeResponse> getReservationTime(@PathVariable final Long id) {
+    public ResponseEntity<FindReservationTimeResponse> getReservationTime(@PathVariable Long id) {
         return ResponseEntity.ok(reservationTimeService.getReservationTime(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable final Long id) {
+    public ResponseEntity<Void> deleteReservationTime(@PathVariable Long id) {
         reservationTimeService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

@@ -30,11 +30,11 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    public Member(final String name, final Role role, final String email, final String password) {
+    public Member(String name, Role role, String email, String password) {
         this(null, name, role, email, password);
     }
 
-    public Member(final Long id, final String name, final Role role, final String email, final String password) {
+    public Member(Long id, String name, Role role, String email, String password) {
         validateNameIsNull(name);
         validateRoleIsNull(role);
         validatePasswordIsNull(password);
@@ -49,25 +49,25 @@ public class Member {
     protected Member() {
     }
 
-    private void validateNameIsNull(final String name) {
+    private void validateNameIsNull(String name) {
         if (name == null) {
             throw new IllegalArgumentException("회원 생성 시 이름은 필수입니다.");
         }
     }
 
-    private void validateRoleIsNull(final Role role) {
+    private void validateRoleIsNull(Role role) {
         if (role == null) {
             throw new IllegalArgumentException("회원 생성 시 회원 권한 지정은 필수입니다.");
         }
     }
 
-    private void validatePasswordIsNull(final String password) {
+    private void validatePasswordIsNull(String password) {
         if (password == null) {
             throw new IllegalArgumentException("회원 생성 시 비밀번호는 필수입니다.");
         }
     }
 
-    public boolean hasNotSamePassword(final String password) {
+    public boolean hasNotSamePassword(String password) {
         return !this.password.equals(password);
     }
 
@@ -96,7 +96,7 @@ public class Member {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

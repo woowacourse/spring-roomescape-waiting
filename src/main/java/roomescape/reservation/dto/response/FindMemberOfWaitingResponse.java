@@ -4,7 +4,7 @@ import roomescape.member.domain.Member;
 
 public record FindMemberOfWaitingResponse(Long id,
                                           String name) {
-    public static FindMemberOfWaitingResponse from(final Member member) {
+    public static FindMemberOfWaitingResponse from(Member member) {
         return new FindMemberOfWaitingResponse(member.getId(), member.getName());
     }
 }
