@@ -79,11 +79,19 @@ class ReservationServiceTest extends IntegrationTestSupport {
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 
-    @DisplayName("예약 삭제")
+    @DisplayName("대기가 있는 예약 삭제 요청 시 대기가 자동 승인된다")
     @Test
-    void deleteReservation() {
+    void should_AcceptWaiting_When_ReservationHasWaiting() {
         int size = reservationRepository.findAll().size();
         reservationService.deleteReservation(1L);
+        assertThat(reservationRepository.findAll()).hasSize(size);
+    }
+
+    @DisplayName("대기가 없는 예약 삭제 요청시, 예약이 삭제된다")
+    @Test
+    void should_DeleteReservation_When_ReservationHasNotWaiting() {
+        int size = reservationRepository.findAll().size();
+        reservationService.deleteReservation(4L);
         assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 

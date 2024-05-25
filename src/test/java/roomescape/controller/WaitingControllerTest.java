@@ -5,6 +5,8 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
 import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.dto.response.UserReservationResponses;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
+@Transactional
 class WaitingControllerTest extends IntegrationTestSupport {
 
     long createdId;
@@ -38,24 +41,6 @@ class WaitingControllerTest extends IntegrationTestSupport {
                             .response().jsonPath().getObject("$", UserReservationResponses.class)
                             .userReservationResponses()
                             .size();
-                }),
-                dynamicTest("내 예약 목록에는 대기 목록도 포함한다.", () -> {
-                    List<UserReservationResponse> userReservationResponses = RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .cookie("token", USER_TOKEN)
-                            .when().get("/reservations-mine")
-                            .then().log().all()
-                            .statusCode(200)
-                            .extract().as(UserReservationResponses.class)
-                            .userReservationResponses();
-
-                    int waitingSize = userReservationResponses
-                            .stream()
-                            .filter(response -> response.status().contains(WAITING.name()))
-                            .toList()
-                            .size();
-
-                    assertThat(waitingSize).isEqualTo(2);
                 }),
                 dynamicTest("예약을 추가한다.", () -> {
                     Map<String, Object> params = Map.of(
@@ -114,6 +99,24 @@ class WaitingControllerTest extends IntegrationTestSupport {
                             .statusCode(200)
                             .extract().as(WaitingResponse.class)
                             .id();
+                }),
+                dynamicTest("내 예약 목록에는 대기 목록도 포함한다.", () -> {
+                    List<UserReservationResponse> userReservationResponses = RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", USER2_TOKEN)
+                            .when().get("/reservations-mine")
+                            .then().log().all()
+                            .statusCode(200)
+                            .extract().as(UserReservationResponses.class)
+                            .userReservationResponses();
+
+                    int waitingSize = userReservationResponses
+                            .stream()
+                            .filter(response -> response.status().contains(WAITING.name()))
+                            .toList()
+                            .size();
+
+                    assertThat(waitingSize).isEqualTo(1);
                 }),
                 dynamicTest("중복 예약 대기는 불가하다.", () -> {
                     Map<String, Object> params = Map.of(
