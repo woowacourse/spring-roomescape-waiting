@@ -73,20 +73,17 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findMyReservationsAndWaiting(Long memberId) {
-        Stream<MyReservationResponse> reservationsStream = getReservationsStreamBy(memberId);
-        Stream<MyReservationResponse> waitingsStream = getWaitingsStreamBy(memberId);
+        Stream<MyReservationResponse> reservationsStream = reservationQueryRepository.findAllByMemberIdOrderByDateDesc(memberId).stream()
+                .map(MyReservationResponse::convert);
+
+        Stream<MyReservationResponse> waitingsStream = waitingQueryRepository.findWaitingWithRankByMemberId(memberId)
+                .stream()
+                .map(MyReservationResponse::convert);
+
         return Stream.concat(reservationsStream, waitingsStream)
-                .sorted(Comparator.comparing(MyReservationResponse::date).thenComparing(MyReservationResponse::time).reversed())
+                .sorted(Comparator.comparing(MyReservationResponse::date).thenComparing(MyReservationResponse::time)
+                        .reversed())
                 .toList();
     }
 
-    private Stream<MyReservationResponse> getReservationsStreamBy(Long memberId) {
-        return reservationQueryRepository.findAllByMemberIdOrderByDateDesc(memberId).stream()
-                .map(MyReservationResponse::convert);
-    }
-
-    private Stream<MyReservationResponse> getWaitingsStreamBy(Long memberId) {
-        return waitingQueryRepository.findWaitingWithRankByMemberId(memberId).stream()
-                .map(MyReservationResponse::convert);
-    }
 }
