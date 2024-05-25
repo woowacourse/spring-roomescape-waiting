@@ -40,9 +40,6 @@ class AdminReservationServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
-
     private final LocalDate date = LocalDate.parse("2060-01-01");
 
     private final Long timeId = 1L;
