@@ -122,12 +122,15 @@ public class ReservationService {
 
     private void updateReservationStatus(final Long id) {
         Reservation delete = reservationRepository.findReservationById(id);
+        if (delete.getStatus().equals(Status.STANDBY)) {
+            return;
+        }
         List<Reservation> reservations = reservationRepository.findAllByDateAndTimeAndThemeOrderByCreateAtAsc(
                 delete.getDate(), delete.getReservationTime(), delete.getTheme());
-        reservations.remove(delete);
-        if (!reservations.isEmpty()) {
-            reservations.get(0).approve();
-        }
+        reservations.stream()
+                .filter(reservation -> reservation.getStatus().equals(Status.STANDBY))
+                .findFirst()
+                .ifPresent(Reservation::approve);
     }
 
     @Transactional(readOnly = true)
