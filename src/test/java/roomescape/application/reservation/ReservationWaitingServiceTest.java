@@ -10,7 +10,6 @@ import static roomescape.fixture.TimeFixture.TWELVE_PM;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,9 +52,9 @@ class ReservationWaitingServiceTest {
     @Test
     @DisplayName("예약을 대기한다.")
     void queueWaitList() {
-        Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
+        Theme theme = themeRepository.save(TEST_THEME.create());
         LocalDate date = LocalDate.parse("2023-01-01");
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
 
@@ -71,19 +70,18 @@ class ReservationWaitingServiceTest {
     @Test
     @DisplayName("예약 대기를 취소하면, 다음 대기자가 예약이 확정된다.")
     void cancelWaitList() {
-        Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
+        Theme theme = themeRepository.save(TEST_THEME.create());
         LocalDate date = LocalDate.parse("2023-01-01");
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         Member aru = memberRepository.save(MEMBER_ARU.create());
         Member pk = memberRepository.save(MEMBER_PK.create());
-        Reservation firstWaiting = new Reservation(aru, date, time, theme,
-                LocalDateTime.parse("1999-01-01T00:00:00"), BookStatus.WAITING);
-        Reservation nextWaiting = new Reservation(pk, date, time, theme,
-                LocalDateTime.parse("1999-01-03T00:00:00"), BookStatus.WAITING);
-        long firstId = reservationRepository.save(firstWaiting)
-                .getId();
-        long secondId = reservationRepository.save(nextWaiting)
-                .getId();
+        LocalDateTime createdAt = LocalDateTime.parse("1999-01-01T00:00:00");
+        long firstId = reservationRepository.save(
+                new Reservation(aru, date, time, theme, createdAt, BookStatus.WAITING)
+        ).getId();
+        long secondId = reservationRepository.save(
+                new Reservation(pk, date, time, theme, createdAt.plusDays(1), BookStatus.WAITING)
+        ).getId();
 
         reservationService.cancelWaitingList(aru.getId(), firstId);
 
@@ -95,15 +93,14 @@ class ReservationWaitingServiceTest {
     @EnumSource(value = BookStatus.class, names = {"BOOKED", "WAITING"})
     @DisplayName("이미 예약된 항목의 경우, 예약 대기를 시도할 경우 예외가 발생한다.")
     void alreadyBookedOnQueueing(BookStatus status) {
-        Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
+        Theme theme = themeRepository.save(TEST_THEME.create());
         LocalDate date = LocalDate.parse("2023-01-01");
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
+        LocalDateTime createdAt = LocalDateTime.parse("1999-01-01T00:00:00");
         reservationRepository.save(
-                new Reservation(
-                        member, date, time, theme, LocalDateTime.parse("1999-01-01T00:00:00"), status
-                )
+                new Reservation(member, date, time, theme, createdAt, status)
         );
 
         assertThatCode(() -> reservationService.enqueueWaitingList(request))
@@ -119,13 +116,14 @@ class ReservationWaitingServiceTest {
         Member pk = memberRepository.save(MEMBER_PK.create());
         LocalDate date = LocalDate.parse("2023-01-01");
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
+        LocalDateTime createdAt = LocalDateTime.of(1999, 1, 1, 12, 0);
         reservationRepository.save(
-                new Reservation(pk, date, time, theme, LocalDateTime.of(1999, 1, 1, 12, 0), BookStatus.BOOKED)
+                new Reservation(pk, date, time, theme, createdAt, BookStatus.BOOKED)
         );
         for (int count = 1; count <= 5; count++) {
             Member m = memberRepository.save(MemberFixture.createMember("name" + count));
             reservationRepository.save(
-                    new Reservation(m, date, time, theme, LocalDateTime.of(1999, 1, 1, 12, 0), BookStatus.WAITING)
+                    new Reservation(m, date, time, theme, createdAt, BookStatus.WAITING)
             );
         }
 

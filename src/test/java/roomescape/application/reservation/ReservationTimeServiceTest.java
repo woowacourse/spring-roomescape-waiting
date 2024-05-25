@@ -94,10 +94,12 @@ class ReservationTimeServiceTest {
         Member member = memberRepository.save(MEMBER_PK.create());
         Theme theme = themeRepository.save(TEST_THEME.create());
         ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
+        LocalDate date = LocalDate.parse("2024-01-01");
+        LocalDateTime createdAt = LocalDateTime.now(clock);
         long timeId = time.getId();
 
         reservationRepository.save(
-                new Reservation(member, LocalDate.parse("2024-01-01"), time, theme, LocalDateTime.now(clock), BookStatus.BOOKED)
+                new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED)
         );
         assertThatCode(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(IllegalArgumentException.class)

@@ -1,20 +1,27 @@
 package roomescape.infrastructure.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.ThemeFixture.TEST_THEME;
+import static roomescape.fixture.TimeFixture.ELEVEN_AM;
+import static roomescape.fixture.TimeFixture.ONE_PM;
+import static roomescape.fixture.TimeFixture.TEN_AM;
+import static roomescape.fixture.TimeFixture.TWELVE_PM;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.TimeSlot;
+import roomescape.fixture.TimeFixture;
 
 @DataJpaTest
 class ReservationTimeJpaRepositoryTest {
@@ -43,13 +50,18 @@ class ReservationTimeJpaRepositoryTest {
     }
 
     @Test
-    @Sql("/insert-reservations.sql")
     @DisplayName("날짜와 테마 id가 주어지면, 예약 가능한 시간을 반환한다.")
     void shouldReturnAvailableTimes() {
+        Theme theme = TEST_THEME.create();
+        entityManager.persist(theme);
+        Stream.of(TEN_AM, ELEVEN_AM, TWELVE_PM, ONE_PM)
+                .map(TimeFixture::create)
+                .forEach(entityManager::persist);
         LocalDate date = LocalDate.of(2024, 12, 25);
-        List<TimeSlot> times = timeRepository.getReservationTimeAvailabilities(date, 1L)
+
+        List<TimeSlot> times = timeRepository.getReservationTimeAvailabilities(date, theme.getId())
                 .stream()
-                .filter(time -> !time.isBooked())
+                .filter(TimeSlot::isAvailable)
                 .toList();
         assertThat(times).hasSize(4);
     }

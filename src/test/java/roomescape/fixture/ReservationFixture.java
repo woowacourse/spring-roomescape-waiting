@@ -1,11 +1,12 @@
 package roomescape.fixture;
 
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
+import static roomescape.fixture.ThemeFixture.TEST_THEME;
+import static roomescape.fixture.TimeFixture.TEN_AM;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import roomescape.domain.member.Member;
@@ -37,17 +38,13 @@ public class ReservationFixture {
     private Clock clock;
 
     public Reservation saveReservation() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
+        ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
+        Theme theme = themeRepository.save(TEST_THEME.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
-        Reservation reservation = new Reservation(
-                member,
-                LocalDate.of(2024, 1, 1),
-                time,
-                theme,
-                LocalDateTime.now(clock),
-                BookStatus.BOOKED
-        );
+        LocalDateTime createdAt = LocalDateTime.now(clock);
+        LocalDate date = LocalDate.of(2024, 1, 1);
+
+        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
         return reservationRepository.save(reservation);
     }
 }

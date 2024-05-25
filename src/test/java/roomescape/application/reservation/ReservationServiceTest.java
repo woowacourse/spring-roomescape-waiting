@@ -3,9 +3,10 @@ package roomescape.application.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
+import static roomescape.fixture.ThemeFixture.TEST_THEME;
+import static roomescape.fixture.TimeFixture.TWELVE_PM;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
@@ -43,8 +44,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("정상적인 예약 요청을 받아서 저장한다.")
     void shouldReturnReservationResponseWhenValidReservationRequestSave() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Theme theme = themeRepository.save(new Theme("themeName", "desc", "url"));
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
+        Theme theme = themeRepository.save(TEST_THEME.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest reservationRequest = new ReservationRequest(
                 member.getId(),
@@ -62,7 +63,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간으로 예약을 생성시 예외가 발생한다.")
     void shouldReturnIllegalArgumentExceptionWhenNotFoundReservationTime() {
-        Theme savedTheme = themeRepository.save(new Theme("test", "test", "test"));
+        Theme savedTheme = themeRepository.save(TEST_THEME.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
@@ -78,7 +79,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 테마로 예약을 생성시 예외를 반환한다.")
     void shouldThrowIllegalArgumentExceptionWhenNotFoundTheme() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
@@ -94,8 +95,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("과거 시간을 예약하는 경우 예외를 반환한다.")
     void shouldThrowsIllegalArgumentExceptionWhenReservationDateIsBeforeCurrentDate() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
+        Theme theme = themeRepository.save(TEST_THEME.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(
                 member.getId(),

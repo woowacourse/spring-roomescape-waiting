@@ -3,10 +3,7 @@ package roomescape.application.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static roomescape.fixture.MemberFixture.ADMIN_PK;
-import static roomescape.fixture.MemberFixture.MEMBER_ARU;
 import static roomescape.fixture.MemberFixture.MEMBER_PK;
-import static roomescape.fixture.ThemeFixture.TEST_THEME;
-import static roomescape.fixture.TimeFixture.TEN_AM;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,9 +19,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.UnAuthorizedException;
 import roomescape.exception.reservation.AlreadyBookedException;
 import roomescape.fixture.ReservationFixture;
@@ -35,12 +30,6 @@ class ReservationBookingServiceTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -54,16 +43,17 @@ class ReservationBookingServiceTest {
     @Test
     @DisplayName("중복된 예약을 하는 경우 예외를 반환한다.")
     void shouldReturnIllegalStateExceptionWhenDuplicatedReservationCreate() {
-        ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
-        Theme theme = themeRepository.save(TEST_THEME.create());
-        Member member = memberRepository.save(MEMBER_ARU.create());
+        Reservation reservation = reservationFixture.saveReservation();
+        Member member = reservation.getMember();
+        ReservationTime reservationTime = reservation.getTime();
+        Theme theme = reservation.getTheme();
+
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
                 LocalDate.of(2024, 1, 1),
-                time.getId(),
+                reservationTime.getId(),
                 theme.getId()
         );
-        reservationService.bookReservation(request);
         assertThatCode(() -> reservationService.bookReservation(request))
                 .isInstanceOf(AlreadyBookedException.class);
     }
