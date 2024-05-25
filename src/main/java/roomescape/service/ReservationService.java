@@ -102,13 +102,13 @@ public class ReservationService {
 
     public UserReservationResponses findAllUserReservation(Long memberId) {
         Member user = findMemberById(memberId);
-        return getAllUserReservations(user);
+        return getAllReservationAndWaiting(user);
     }
 
-    private UserReservationResponses getAllUserReservations(Member user) {
+    private UserReservationResponses getAllReservationAndWaiting(Member user) {
         List<UserReservationResponse> allReservations = new ArrayList<>();
         allReservations.addAll(findUserReservations(user));
-        allReservations.addAll(findUserWaitingReservations(user));
+        allReservations.addAll(findUserWaitings(user));
         return new UserReservationResponses(allReservations);
     }
 
@@ -119,7 +119,7 @@ public class ReservationService {
                 .toList();
     }
 
-    private List<UserReservationResponse> findUserWaitingReservations(Member user) {
+    private List<UserReservationResponse> findUserWaitings(Member user) {
         return waitingRepository.findByMember(user)
                 .stream()
                 .map(waiting -> UserReservationResponse.from(waiting, getWaitingRank(waiting)))
@@ -142,8 +142,7 @@ public class ReservationService {
         return new Reservation(findMemberById(request.memberId()), slot);
     }
 
-
-    public Member findMemberById(Long memberId) {
+    private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
     }
