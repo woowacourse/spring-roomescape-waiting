@@ -5,6 +5,7 @@ import roomescape.exception.ExceptionCode;
 
 public enum WaitingExceptionCode implements ExceptionCode {
 
+    WAITING_NOT_EXIST_EXCEPTION(HttpStatus.BAD_REQUEST, "예약 대기가 존재하지 않습니다."),
     WAITING_TIME_IS_PAST_EXCEPTION(HttpStatus.BAD_REQUEST, "지난 시간의 테마를 선택했습니다."),
     WAITING_DATE_IS_PAST_EXCEPTION(HttpStatus.BAD_REQUEST, "지난 날짜의 예약을 시도하였습니다."),
     THEME_INFO_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "필터링할 테마 정보가 존재하지 않습니다."),
