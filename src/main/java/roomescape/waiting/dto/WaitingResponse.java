@@ -6,8 +6,8 @@ import roomescape.waiting.domain.Waiting;
 
 public record WaitingResponse(
         Long id,
-        ReservationResponse reservationResponse,
-        MemberResponse waitingMemberResponse) {
+        ReservationResponse reservation,
+        MemberResponse waitingMember) {
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),

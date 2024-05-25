@@ -25,6 +25,13 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
+    public List<WaitingResponse> findWaitings() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
     public List<MyReservationWaitingResponse> findMyWaitings(Long memberId) {
         return waitingRepository.findByMember_idWithRank(memberId).stream()
                 .map(MyReservationWaitingResponse::from)
