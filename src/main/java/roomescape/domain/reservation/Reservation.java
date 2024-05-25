@@ -14,21 +14,19 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-    private LocalDate date;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
+
+    @Embedded
+    private ReservationSlot reservationSlot;
+
     @OneToMany(mappedBy = "reservation", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Waiting> waitings = new ArrayList<>();
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservationSlot = new ReservationSlot(date, time, theme);
     }
 
     protected Reservation() {
@@ -83,19 +81,23 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return reservationSlot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return reservationSlot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationSlot.getTheme();
     }
 
     public List<Waiting> getWaitings() {
         return List.copyOf(waitings);
+    }
+
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
     }
 
     @Override
