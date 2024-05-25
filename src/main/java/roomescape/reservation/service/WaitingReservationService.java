@@ -38,7 +38,7 @@ public class WaitingReservationService {
     private MyReservationResponse handler(MyReservationWithStatus myReservationWithStatus) {
         if (myReservationWithStatus.status().isWaiting()) {
             int waitingCount = reservationRepository
-                    .countMyWaitingOrderByReservationId(myReservationWithStatus.reservationId());
+                    .findMyWaitingOrder(myReservationWithStatus.reservationId());
             return MyReservationResponse.from(myReservationWithStatus, waitingCount);
         }
         return MyReservationResponse.from(myReservationWithStatus);

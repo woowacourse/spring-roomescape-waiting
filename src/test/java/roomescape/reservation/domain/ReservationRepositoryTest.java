@@ -11,6 +11,8 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSlotRepository;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -47,10 +49,10 @@ class ReservationRepositoryTest {
 
         //when
         Reservation savedReservation = reservationRepository.save(reservation);
-        int waitingReservationCount = reservationRepository.countMyWaitingOrderByReservationId(savedReservation.getId());
+        List<Reservation> all = reservationRepository.findAll();
+        int waitingReservationCount = reservationRepository.findMyWaitingOrder(savedReservation.getId());
 
         //then
-        assertThat(waitingReservationCount).isEqualTo(1);
+        assertThat(waitingReservationCount).isEqualTo(2);
     }
-    
 }

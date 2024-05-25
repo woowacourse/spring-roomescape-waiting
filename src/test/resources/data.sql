@@ -40,8 +40,8 @@ VALUES (DATEADD('MONTH', 1, CURRENT_DATE()), 3, 2);
 
 -- -- 예약 추가
 INSERT INTO reservation(member_id, reservation_slot_id, created_at, status)
-VALUES (1, 1, CURRENT_TIME(), 'BOOKED');
+VALUES (1, 1, DATEADD('HOUR', -2, CURRENT_TIME()), 'BOOKED');
 INSERT INTO reservation(member_id, reservation_slot_id, created_at, status)
-VALUES (2, 1, DATEADD('HOUR', 1, CURRENT_TIME()), 'WAITING');
+VALUES (2, 1, DATEADD('HOUR', -1, CURRENT_TIME()), 'WAITING');
 
 SET REFERENTIAL_INTEGRITY TRUE;

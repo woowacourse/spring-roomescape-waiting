@@ -23,7 +23,7 @@ class WaitingReservationSlotServiceTest extends ServiceTest {
     @Autowired
     WaitingReservationService waitingReservationService;
 
-    @DisplayName("예약 대기 변겅 성공 : 예약 삭제 시 대기 번호가 빠른 예약이 BOOKED 처리된다.")
+    @DisplayName("예약 대기 변경 성공 : 예약 삭제 시 대기 번호가 빠른 예약이 BOOKED 처리된다.")
     @Test
     void waitingReservationConfirm() {
         Reservation bookedMemberReservation = ReservationFixture.getBookedReservation();

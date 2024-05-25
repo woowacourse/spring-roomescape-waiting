@@ -36,7 +36,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         WHERE r.id = :reservationId
     )
     """)
-    int countMyWaitingOrderByReservationId(Long reservationId);
+    int findMyWaitingOrder(Long reservationId);
 
     boolean existsByReservationSlot(ReservationSlot reservationSlot);
 

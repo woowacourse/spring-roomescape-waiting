@@ -9,7 +9,7 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.global.annotation.LoginUser;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.service.MemberReservationService;
+import roomescape.reservation.service.ReservationService;
 
 import java.net.URI;
 
@@ -17,16 +17,16 @@ import java.net.URI;
 @RequestMapping("/reservations/waiting")
 public class WaitingReservationController {
 
-    private final MemberReservationService memberReservationService;
+    private final ReservationService reservationService;
 
-    public WaitingReservationController(MemberReservationService memberReservationService) {
-        this.memberReservationService = memberReservationService;
+    public WaitingReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(@LoginUser AuthInfo authInfo,
                                                       @RequestBody @Valid ReservationRequest reservationRequest) {
-        ReservationResponse response = memberReservationService.createReservation(authInfo, reservationRequest);
+        ReservationResponse response = reservationService.createReservation(authInfo, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.reservationId())).body(response);
     }
 
@@ -34,6 +34,6 @@ public class WaitingReservationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@LoginUser AuthInfo authInfo,
                        @PathVariable("id") @Min(1) long reservationMemberId) {
-        memberReservationService.deleteMemberReservation(authInfo, reservationMemberId);
+        reservationService.deleteMemberReservation(authInfo, reservationMemberId);
     }
 }

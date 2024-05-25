@@ -28,7 +28,6 @@ import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
-import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
@@ -38,9 +37,6 @@ import roomescape.util.ControllerTest;
 class ReservationSlotControllerTest extends ControllerTest {
     @Autowired
     ReservationService reservationService;
-
-    @Autowired
-    MemberReservationService memberReservationService;
 
     @Autowired
     ReservationTimeService reservationTimeService;
@@ -91,7 +87,7 @@ class ReservationSlotControllerTest extends ControllerTest {
                 new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
-        ReservationResponse reservationResponse = memberReservationService.createReservation(
+        ReservationResponse reservationResponse = reservationService.createReservation(
                 AuthInfo.of(getMemberChoco()),
                 new ReservationRequest(
                         LocalDate.now().plusDays(10).toString(),
