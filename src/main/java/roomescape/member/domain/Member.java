@@ -31,19 +31,19 @@ public class Member {
     }
 
     public Member(String name, String email, String password) {
-        this(null, name, email, password, "USER");
+        this(null, name, email, password, MemberRole.USER);
     }
 
     public Member(Long id, String name, String email, String password) {
-        this(id, name, email, password, "USER");
+        this(id, name, email, password, MemberRole.USER);
     }
 
-    public Member(Long id, String name, String email, String password, String role) {
+    public Member(Long id, String name, String email, String password, MemberRole role) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.role = MemberRole.valueOf(role);
+        this.role = role;
     }
 
     public boolean isAdmin() {
@@ -91,7 +91,6 @@ public class Member {
     public String toString() {
         return "Member{" +
                "id=" + id +
-               ", name='" + name + '\'' +
                ", email='" + email + '\'' +
                '}';
     }
