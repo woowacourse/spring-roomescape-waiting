@@ -1,19 +1,12 @@
 package roomescape.controller.web;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminPageController {
-    private final String waitingApprovalStrategy;
-
-    public AdminPageController(@Value("${waiting.approval-strategy}") String waitingApprovalStrategy) {
-        this.waitingApprovalStrategy = waitingApprovalStrategy;
-    }
 
     @GetMapping
     public String adminPage() {
@@ -36,8 +29,7 @@ public class AdminPageController {
     }
 
     @GetMapping("/waiting")
-    public String adminWaitingPage(Model model) {
-        model.addAttribute("approvalStrategy", waitingApprovalStrategy);
+    public String adminWaitingPage() {
         return "admin/waiting";
     }
 }
