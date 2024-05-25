@@ -14,12 +14,10 @@ import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeName;
 import roomescape.domain.Time;
-import roomescape.domain.Waiting;
 import roomescape.domain.repository.MemberCommandRepository;
 import roomescape.domain.repository.ReservationCommandRepository;
 import roomescape.domain.repository.ThemeCommandRepository;
 import roomescape.domain.repository.TimeCommandRepository;
-import roomescape.domain.repository.WaitingCommandRepository;
 
 @Component
 @Profile("test")
@@ -29,18 +27,15 @@ public class TestDataInitializer implements CommandLineRunner {
     private final MemberCommandRepository memberCommandRepository;
     private final TimeCommandRepository timeCommandRepository;
     private final ThemeCommandRepository themeCommandRepository;
-    private final WaitingCommandRepository waitingCommandRepository;
 
     public TestDataInitializer(ReservationCommandRepository reservationCommandRepository,
                                MemberCommandRepository memberCommandRepository,
                                TimeCommandRepository timeCommandRepository,
-                               ThemeCommandRepository themeCommandRepository,
-                               WaitingCommandRepository waitingCommandRepository) {
+                               ThemeCommandRepository themeCommandRepository) {
         this.reservationCommandRepository = reservationCommandRepository;
         this.memberCommandRepository = memberCommandRepository;
         this.timeCommandRepository = timeCommandRepository;
         this.themeCommandRepository = themeCommandRepository;
-        this.waitingCommandRepository = waitingCommandRepository;
     }
 
     @Override
@@ -94,9 +89,5 @@ public class TestDataInitializer implements CommandLineRunner {
 
     private Reservation createReservation(Member member, LocalDate date, Time time, Theme theme) {
         return reservationCommandRepository.save(new Reservation(member, date, time, theme));
-    }
-
-    private Waiting createWaiting(Member member, LocalDate date, Time time, Theme theme) {
-        return waitingCommandRepository.save(new Waiting(member, date, time, theme));
     }
 }
