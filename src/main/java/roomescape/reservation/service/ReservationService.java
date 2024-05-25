@@ -121,7 +121,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> readReservations() {
-        return reservationRepository.findAllFetchJoin().stream()
+        return reservationRepository.findAllByStatusFetchJoin(ReservationStatus.CONFIRMATION).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
