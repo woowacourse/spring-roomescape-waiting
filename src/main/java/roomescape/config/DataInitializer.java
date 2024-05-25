@@ -88,14 +88,11 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Theme createTheme(String name, String description) {
-        return themeCommandRepository.save(new Theme(new ThemeName(name), description, "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png"));
+        return themeCommandRepository.save(new Theme(new ThemeName(name), description,
+                "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png"));
     }
 
     private Reservation createReservation(Member member, LocalDate date, Time time, Theme theme) {
         return reservationCommandRepository.save(new Reservation(member, date, time, theme));
-    }
-
-    private Waiting createWaiting(Member member, LocalDate date, Time time, Theme theme) {
-        return waitingCommandRepository.save(new Waiting(member, date, time, theme));
     }
 }
