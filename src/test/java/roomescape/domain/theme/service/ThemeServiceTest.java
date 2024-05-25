@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.theme.domain.Theme;
-import roomescape.domain.theme.dto.ThemeAddRequest;
+import roomescape.domain.theme.dto.ThemeAddCommand;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.global.exception.NoMatchingDataException;
 
@@ -45,8 +45,9 @@ class ThemeServiceTest {
         ThemeRepository themeRepository = new FakeThemeRepository();
         themeService = new ThemeService(themeRepository);
         Theme expectedTheme = new Theme(1L, "테마1", "테마1설명", "url");
+        ThemeAddCommand themeAddCommand = new ThemeAddCommand("테마1", "테마1설명", "url");
 
-        Theme savedTheme = themeService.addTheme(new ThemeAddRequest("테마1", "테마1설명", "url"));
+        Theme savedTheme = themeService.addTheme(themeAddCommand);
 
         assertThat(savedTheme).isEqualTo(expectedTheme);
     }

@@ -3,7 +3,7 @@ package roomescape.domain.theme.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.theme.domain.Theme;
-import roomescape.domain.theme.dto.ThemeAddRequest;
+import roomescape.domain.theme.dto.ThemeAddCommand;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.global.exception.NoMatchingDataException;
 
@@ -22,8 +22,8 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
-    public Theme addTheme(ThemeAddRequest themeAddRequest) {
-        Theme theme = themeAddRequest.toEntity();
+    public Theme addTheme(ThemeAddCommand themeAddCommand) {
+        Theme theme = themeAddCommand.toEntity();
         return themeRepository.save(theme);
     }
 
