@@ -67,7 +67,7 @@ class ReservationServiceTest {
                 .thenReturn(0);
 
         assertThat(reservationService.findMemberReservationWithWaitingStatus(1L))
-                .containsExactly(new MemberReservationResponse(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 1)));
+                .containsExactly(new MemberReservationResponse(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 0)));
     }
 
     @DisplayName("예약을 추가하고 응답을 반환할 수 있다")
