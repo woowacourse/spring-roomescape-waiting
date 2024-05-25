@@ -15,7 +15,7 @@ public class Waiting implements Comparable<Waiting> {
     private Long id;
 
     @NotNull
-    @Column(name = "create_at")
+    @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createAt;
 
