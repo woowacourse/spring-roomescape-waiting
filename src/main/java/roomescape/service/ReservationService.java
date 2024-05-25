@@ -83,6 +83,15 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationDetailResponse> findAllByMemberId(long userId) {
+        List<Reservation> reservationsByMember = reservationRepository.findAllByMemberId(userId);
+        return reservationsByMember.stream()
+                .map(reservation -> ReservationDetailResponse.from(
+                        reservation,
+                        reservationRepository.calculateIndexOf(reservation)))
+                .toList();
+    }
+
     public List<ReservationResponse> searchReservation(Long themeId, Long memberId, LocalDate dateFrom,
                                                        LocalDate dateTo) {
         return findReservationsBy(themeId, memberId, dateFrom, dateTo).stream()
@@ -106,15 +115,6 @@ public class ReservationService {
 
     public void delete(long reservationId) {
         reservationRepository.deleteById(reservationId);
-    }
-
-    public List<ReservationDetailResponse> findAllByMemberId(long userId) {
-        List<Reservation> reservationsByMember = reservationRepository.findAllByMemberId(userId);
-        return reservationsByMember.stream()
-                .map(reservation -> ReservationDetailResponse.from(
-                        reservation,
-                        reservationRepository.calculateIndexOf(reservation)))
-                .toList();
     }
 
     @Transactional
