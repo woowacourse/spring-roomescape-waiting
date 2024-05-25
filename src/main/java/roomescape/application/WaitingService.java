@@ -10,7 +10,7 @@ import roomescape.application.dto.WaitingResponse;
 import roomescape.application.dto.WaitingWithRankResponse;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingFactory;
-import roomescape.domain.dto.WaitingWithRank;
+import roomescape.domain.dto.WaitingWithRankDto;
 import roomescape.domain.repository.WaitingCommandRepository;
 import roomescape.domain.repository.WaitingQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
@@ -39,12 +39,12 @@ public class WaitingService {
     public List<WaitingWithRankResponse> reserveWaiting(LoginMember loginMember, WaitingRequest request) {
         Waiting waiting = waitingFactory.create(loginMember.id(), request.date(), request.timeId(), request.themeId());
         waitingCommandRepository.save(waiting);
-        List<WaitingWithRank> waitingWithRanks = waitingQueryRepository.findWaitingWithRankByMemberId(loginMember.id());
-        return convertToWaitWithRankResponses(waitingWithRanks);
+        List<WaitingWithRankDto> waitingWithRankDtos = waitingQueryRepository.findWaitingWithRankByMemberId(loginMember.id());
+        return convertToWaitWithRankResponses(waitingWithRankDtos);
     }
 
-    private List<WaitingWithRankResponse> convertToWaitWithRankResponses(List<WaitingWithRank> waitingWithRanks) {
-        return waitingWithRanks.stream()
+    private List<WaitingWithRankResponse> convertToWaitWithRankResponses(List<WaitingWithRankDto> waitingWithRankDtos) {
+        return waitingWithRankDtos.stream()
                 .map(WaitingWithRankResponse::from)
                 .toList();
     }

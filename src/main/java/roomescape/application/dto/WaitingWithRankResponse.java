@@ -1,13 +1,13 @@
 package roomescape.application.dto;
 
-import roomescape.domain.dto.WaitingWithRank;
+import roomescape.domain.dto.WaitingWithRankDto;
 
 public record WaitingWithRankResponse(WaitingResponse waitingResponse, Long rank) {
 
-    public static WaitingWithRankResponse from(WaitingWithRank waitingWithRank) {
+    public static WaitingWithRankResponse from(WaitingWithRankDto waitingWithRankDto) {
         return new WaitingWithRankResponse(
-                WaitingResponse.from(waitingWithRank.waiting()),
-                Long.valueOf(waitingWithRank.rank())
+                WaitingResponse.from(waitingWithRankDto.waiting()),
+                Long.valueOf(waitingWithRankDto.rank())
         );
     }
 }

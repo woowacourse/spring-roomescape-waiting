@@ -9,14 +9,14 @@ import roomescape.domain.Member;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.Waiting;
-import roomescape.domain.dto.WaitingWithRank;
+import roomescape.domain.dto.WaitingWithRankDto;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 public interface WaitingQueryRepository extends Repository<Waiting, Long> {
 
     @Query("""
-            select new roomescape.domain.dto.WaitingWithRank(
+            select new roomescape.domain.dto.WaitingWithRankDto(
             w,
                 cast((select count(w2)
                 from Waiting w2
@@ -29,7 +29,7 @@ public interface WaitingQueryRepository extends Repository<Waiting, Long> {
             from Waiting w
             where w.member.id = :memberId
             """)
-    List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
+    List<WaitingWithRankDto> findWaitingWithRankByMemberId(Long memberId);
 
     boolean existsByMemberAndDateAndTimeAndTheme(Member member, LocalDate date, Time time, Theme theme);
 

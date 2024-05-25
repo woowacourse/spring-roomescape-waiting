@@ -16,7 +16,7 @@ import roomescape.application.ServiceTest;
 import roomescape.domain.Member;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
-import roomescape.domain.dto.WaitingWithRank;
+import roomescape.domain.dto.WaitingWithRankDto;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -47,9 +47,9 @@ class WaitingQueryRepositoryTest {
         Theme theme = themeCommandRepository.save(ThemeFixture.defaultValue());
         waitingCommandRepository.save(WaitingFixture.of(member, date, time, theme));
 
-        List<WaitingWithRank> waitingWithRank = waitingQueryRepository.findWaitingWithRankByMemberId(member.getId());
+        List<WaitingWithRankDto> waitingWithRankDto = waitingQueryRepository.findWaitingWithRankByMemberId(member.getId());
 
-        assertThat(waitingWithRank.size()).isOne();
+        assertThat(waitingWithRankDto.size()).isOne();
     }
 
     @DisplayName("존재하지 않는 예약 대기 id로 조회시 예외가 발생한다.")
