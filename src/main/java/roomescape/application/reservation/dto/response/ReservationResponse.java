@@ -25,9 +25,9 @@ public record ReservationResponse(long id,
         return new ReservationResponse(
                 waiting.getId(),
                 MemberResponse.from(waiting.getMember()),
-                waiting.getReservation().getDate(),
-                ReservationTimeResponse.from(waiting.getReservation().getTime()),
-                ThemeResponse.from(waiting.getReservation().getTheme())
+                waiting.getDate(),
+                ReservationTimeResponse.from(waiting.getTime()),
+                ThemeResponse.from(waiting.getTheme())
         );
     }
 }

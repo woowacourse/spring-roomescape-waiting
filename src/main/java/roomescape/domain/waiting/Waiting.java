@@ -8,10 +8,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
 
 @Entity
 public class Waiting {
@@ -44,6 +47,10 @@ public class Waiting {
 
     public boolean isOwnedBy(long memberId) {
         return member.hasId(memberId);
+    }
+
+    public boolean isWaiting() {
+        return waitingStatus.isWaiting();
     }
 
     @Override
@@ -80,5 +87,17 @@ public class Waiting {
 
     public WaitingStatus getWaitingStatus() {
         return waitingStatus;
+    }
+
+    public LocalDate getDate() {
+        return reservation.getDate();
+    }
+
+    public ReservationTime getTime() {
+        return reservation.getTime();
+    }
+
+    public Theme getTheme() {
+        return reservation.getTheme();
     }
 }

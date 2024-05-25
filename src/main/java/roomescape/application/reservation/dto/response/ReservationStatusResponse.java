@@ -45,13 +45,13 @@ public record ReservationStatusResponse(
     }
 
     public static ReservationStatusResponse of(Waiting waiting, int index) {
-        Theme theme = waiting.getReservation().getTheme();
-        ReservationTime time = waiting.getReservation().getTime();
+        Theme theme = waiting.getTheme();
+        ReservationTime time = waiting.getTime();
         WaitingStatus status = waiting.getWaitingStatus();
         return new ReservationStatusResponse(
                 waiting.getId(),
                 theme.getName(),
-                waiting.getReservation().getDate(),
+                waiting.getDate(),
                 time.getStartAt(),
                 index + COUNT_WAITING + status.getStatus()
         );

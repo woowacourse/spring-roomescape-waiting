@@ -108,7 +108,7 @@ public class WaitingService {
     }
 
     private ReservationStatusResponse makeReservationStatus(Waiting waiting) {
-        if (waiting.getWaitingStatus().isWaiting()) {
+        if (waiting.isWaiting()) {
             List<Waiting> sameReservationWaitings =
                     waitingRepository.findByReservationIdOrderByCreatedAtAsc(waiting.getReservation().getId());
             return ReservationStatusResponse.of(waiting, sameReservationWaitings.indexOf(waiting) + 1);
@@ -117,7 +117,6 @@ public class WaitingService {
     }
 
     public Optional<Waiting> findFirstByReservationId(long id) {
-        List<Waiting> waitings = waitingRepository.findByReservationIdOrderByCreatedAtAsc(id);
-        return waitings.stream().findFirst();
+        return waitingRepository.findFirstByReservationIdOrderByCreatedAtAsc(id);
     }
 }
