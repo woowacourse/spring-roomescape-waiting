@@ -36,7 +36,7 @@ class MemberServiceTest {
     private MemberService memberService;
 
     @Test
-    @DisplayName("실행 성공 : 이메일로 회원 정보를 얻을 수 있다.")
+    @DisplayName("성공 : 이메일로 회원 정보를 얻을 수 있다.")
     void findAllMembers() {
         // Given
         Member member = new Member(USERNAME, USER_EMAIL, USER_PASSWORD);
@@ -52,7 +52,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 이메일로 회원 정보를 얻을 수 있다.")
+    @DisplayName("성공 : 이메일로 회원 정보를 얻을 수 있다.")
     void findMemberByEmail() {
         // Given
         MemberLoginRequest request = new MemberLoginRequest(USER_EMAIL, USER_PASSWORD);
@@ -68,7 +68,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("실행 실패 : 등록되지 않은 이메일로 조회 시 예외가 발생한다.")
+    @DisplayName("실패 : 등록되지 않은 이메일로 조회 시 예외가 발생한다.")
     void findMemberByEmail_Exception() {
         // Given
         String email = "nonexistent@example.com";
@@ -83,7 +83,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : id로 회원 정보를 얻을 수 있다.")
+    @DisplayName("성공 : id로 회원 정보를 얻을 수 있다.")
     void findMemberById() {
         // Given
         Member expected = new Member(1L, USERNAME, USER_EMAIL, USER_PASSWORD);
@@ -98,7 +98,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("실행 실패 : 등록되지 않은 이메일로 조회 시 예외가 발생한다.")
+    @DisplayName("실패 : 등록되지 않은 이메일로 조회 시 예외가 발생한다.")
     void findMemberById_Exception() {
         // Given
         when(memberRepository.findById(any(Long.class)))
@@ -110,7 +110,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 회원 정보를 생성할 수 있다.")
+    @DisplayName("성공 : 회원 정보를 생성할 수 있다.")
     void createMember() {
         // Given
         MemberCreateRequest request = new MemberCreateRequest(USERNAME, USER_EMAIL, USER_PASSWORD);
@@ -130,7 +130,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("실행 실패 : 존재하는 이메일로 생성하려고 하면 예외가 발생한다.")
+    @DisplayName("실패 : 존재하는 이메일로 생성하려고 하면 예외가 발생한다.")
     void createMember_Exception() {
         // Given
         MemberCreateRequest request = new MemberCreateRequest(USERNAME, USER_EMAIL, USER_PASSWORD);

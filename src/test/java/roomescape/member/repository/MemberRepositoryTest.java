@@ -33,7 +33,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 회원 정보를 DB에 저장할 수 있다.")
+    @DisplayName("성공 : 회원 정보를 DB에 저장할 수 있다.")
     void save() {
         // Given
         Member member = new Member("newbie", "new@memeber.com", "password");
@@ -47,7 +47,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : DB에 있는 모든 회원 정보를 얻을 수 있다.")
+    @DisplayName("성공 : DB에 있는 모든 회원 정보를 얻을 수 있다.")
     void findAll() {
         // Given
         entityManager.persist(new Member("어드민", "admin@admin.com", "1234"));
@@ -66,7 +66,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 이메일로 회원 정보를 얻을 수 있다.")
+    @DisplayName("성공 : 이메일로 회원 정보를 얻을 수 있다.")
     void findByEmail() {
         // Given
         String checkEmail = "kyummi@email.com";
@@ -81,7 +81,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 주어진 권한과 동일한 권한인 회원 정보를 얻을 수 있다.")
+    @DisplayName("성공 : 주어진 권한과 동일한 권한인 회원 정보를 얻을 수 있다.")
     void findAllByRole() {
         // Given
         Member admin = new Member(null, "어드민", "admin@admin.com", "1234", MemberRole.ADMIN);
@@ -99,7 +99,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : id로 회원 정보를 찾아 지운다.")
+    @DisplayName("성공 : id로 회원 정보를 찾아 지운다.")
     void deleteById() {
         // Given
         Member expected = new Member("도비", "kimdobby@wootaeco.com", "pass1");

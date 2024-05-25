@@ -45,7 +45,7 @@ class ReservationDetailRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 해당 예약 시간에 예약 정보 갯수를 알 수 있다.")
+    @DisplayName("성공 : 해당 예약 시간에 예약 정보 갯수를 알 수 있다.")
     void countReservationsByTime_Id() {
         // when
         int actual = detailRepository.countReservationsByTime_Id(reservationDetail.getTimeId());
@@ -55,7 +55,7 @@ class ReservationDetailRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 존재하는 예약 정보의 ID를 알 수 있다.")
+    @DisplayName("성공 : 존재하는 예약 정보의 ID를 알 수 있다.")
     void findIdByDateAndThemeIdAndTimeId() {
         // when
         Long actual = detailRepository.findIdByDateAndThemeIdAndTimeId(LocalDate.MAX, theme.getId(), time.getId())

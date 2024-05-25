@@ -38,7 +38,7 @@ class MemberLoginControllerTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 로그인을 할 수 있다.")
+    @DisplayName("성공 : 로그인을 할 수 있다.")
     void login() {
         String accessToken = RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -53,7 +53,7 @@ class MemberLoginControllerTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 로그인 정보를 확인 수 있다.")
+    @DisplayName("성공 : 로그인 정보를 확인 수 있다.")
     void loginCheck() {
         String accessToken = RestAssured.given()
                 .contentType(ContentType.JSON)

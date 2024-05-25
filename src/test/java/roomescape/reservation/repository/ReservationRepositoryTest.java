@@ -56,7 +56,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 예약 정보를 DB에 저장할 수 있다.")
+    @DisplayName("성공 : 예약 정보를 DB에 저장할 수 있다.")
     void save() {
         // when
         reservationRepository.save(reservation);
@@ -67,7 +67,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : DB에 있는 모든 예약을 모두 얻을 수 있다.")
+    @DisplayName("성공 : DB에 있는 모든 예약을 모두 얻을 수 있다.")
     void findAllByOrderByDateAsc() {
         // Given
         List<Reservation> expected = reservationRepository.findAll();
@@ -81,7 +81,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 해당 테마에 해당 날짜인 예약을 모두 얻을 수 있다.")
+    @DisplayName("성공 : 해당 테마에 해당 날짜인 예약을 모두 얻을 수 있다.")
     void findAllByDetailTheme_IdAndDetailDate() {
         // Given
         entityManager.persist(reservation);
@@ -95,7 +95,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 얻을 수 있다.")
+    @DisplayName("성공 : 해당 멤버가 예약한 예약을 모두 얻을 수 있다.")
     void findAllByMember_Id() {
         // Given
         entityManager.persist(reservation);
@@ -108,7 +108,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
+    @DisplayName("성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
     void findAllByMember_IdOrderByDetailDateAsc() {
         // Given
         entityManager.persist(reservation);
@@ -122,7 +122,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
+    @DisplayName("성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
     void findByDetail_IdAndMember_Id() {
         // Given
         entityManager.persist(reservation);
@@ -137,7 +137,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
+    @DisplayName("성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
     void findByDetail_Id() {
         // Given
         entityManager.persist(reservation);
@@ -152,7 +152,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : id로 회원 정보를 찾아 지운다.")
+    @DisplayName("성공 : id로 회원 정보를 찾아 지운다.")
     void deleteById() {
         // Given
         entityManager.persist(reservation);

@@ -42,7 +42,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("실행 성공 : 유저인 회원 정보를 얻을 수 있다.")
+    @DisplayName("성공 : 유저인 회원 정보를 얻을 수 있다.")
     void findMembers() {
         int actualSize = RestAssured
                 .when().get("/members")
@@ -56,7 +56,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("실행 설공 : 회원 정보를 만들 수 있다.")
+    @DisplayName("설공 : 회원 정보를 만들 수 있다.")
     void createMember() {
         MemberCreateRequest params = new MemberCreateRequest("호돌", "bbb@naver.com", "2222");
 
