@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Role;
 import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
@@ -85,10 +84,13 @@ public class ReservationWaitingService {
     }
 
     private boolean canDelete(long memberId, long waitingId) {
-        Role role = memberRepository.findById(memberId)
+        return isAdmin(memberId) || isMembersWaiting(memberId, waitingId);
+    }
+
+    private boolean isAdmin(long memberId) {
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER))
-                .getRole();
-        return Role.ADMIN.equals(role) || isMembersWaiting(memberId, waitingId);
+                .isAdmin();
     }
 
     private boolean isMembersWaiting(long memberId, long waitingId) {
