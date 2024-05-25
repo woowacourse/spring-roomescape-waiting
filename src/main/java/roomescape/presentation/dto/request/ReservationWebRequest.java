@@ -2,7 +2,9 @@ package roomescape.presentation.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.application.dto.request.ReservationRequest;
 
 public record ReservationWebRequest(
@@ -18,7 +20,7 @@ public record ReservationWebRequest(
         Long themeId
 ) {
 
-    public ReservationRequest toReservationRequest(Long memberId) {
-        return new ReservationRequest(date, themeId, timeId, memberId);
+    public ReservationRequest toReservationRequest(Clock clock, Long memberId) {
+        return new ReservationRequest(LocalDateTime.now(clock), date, themeId, timeId, memberId);
     }
 }

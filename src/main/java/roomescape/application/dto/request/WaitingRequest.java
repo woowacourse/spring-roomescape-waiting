@@ -1,6 +1,13 @@
 package roomescape.application.dto.request;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-public record WaitingRequest(LocalDate date, Long timeId, Long themeId, Long memberId) {
+public record WaitingRequest(
+        LocalDateTime currentDateTime,
+        LocalDate date,
+        Long themeId,
+        Long timeId,
+        Long memberId
+) {
 }

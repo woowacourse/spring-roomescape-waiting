@@ -8,6 +8,7 @@ import static roomescape.fixture.Fixture.RESERVATION_TIME_1;
 import static roomescape.fixture.Fixture.THEME_1;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,9 +75,11 @@ class ReservationServiceTest extends BaseServiceTest {
         @Test
         @DisplayName("성공한다.")
         void success() {
-            LocalDate date = LocalDate.of(2024, 4, 9);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate reservationDate = LocalDate.of(2024, 4, 9);
             ReservationRequest request = new ReservationRequest(
-                    date,
+                    currentDateTime,
+                    reservationDate,
                     time1.getId(),
                     theme.getId(),
                     member1.getId()
@@ -85,7 +88,7 @@ class ReservationServiceTest extends BaseServiceTest {
 
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(response).isNotNull();
-                softly.assertThat(response.date()).isEqualTo(date);
+                softly.assertThat(response.date()).isEqualTo(reservationDate);
                 softly.assertThat(response.member()).isEqualTo(MemberResponse.from(member1));
                 softly.assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(time1));
                 softly.assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
@@ -95,12 +98,14 @@ class ReservationServiceTest extends BaseServiceTest {
         @Test
         @DisplayName("이미 해당 날짜/시간의 테마에 예약이 존재하면 예외를 발생시킨다.")
         void failWhenReservationExists() {
-            LocalDate date = LocalDate.of(2024, 4, 9);
-            ReservationDetail detail = new ReservationDetail(date, time1, theme);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate reservationDate = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(reservationDate, time1, theme);
             reservationRepository.save(new Reservation(detail, member2));
 
             ReservationRequest request = new ReservationRequest(
-                    date,
+                    currentDateTime,
+                    reservationDate,
                     time1.getId(),
                     theme.getId(),
                     member1.getId()
@@ -114,12 +119,14 @@ class ReservationServiceTest extends BaseServiceTest {
         @Test
         @DisplayName("이미 해당 날짜/시간의 테마에 예약 대기가 존재하면 예외를 발생시킨다.")
         void failWhenWaitingExists() {
-            LocalDate date = LocalDate.of(2024, 4, 9);
-            ReservationDetail detail = new ReservationDetail(date, time1, theme);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate reservationDate = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(reservationDate, time1, theme);
             waitingRepository.save(new Waiting(detail, member2));
 
             ReservationRequest request = new ReservationRequest(
-                    date,
+                    currentDateTime,
+                    reservationDate,
                     time1.getId(),
                     theme.getId(),
                     member1.getId()

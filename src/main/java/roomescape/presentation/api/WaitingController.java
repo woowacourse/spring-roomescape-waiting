@@ -2,6 +2,7 @@ package roomescape.presentation.api;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.Clock;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +22,11 @@ import roomescape.presentation.dto.request.WaitingWebRequest;
 public class WaitingController {
 
     private final WaitingService waitingService;
+    private final Clock clock;
 
-    public WaitingController(WaitingService waitingService) {
+    public WaitingController(WaitingService waitingService, Clock clock) {
         this.waitingService = waitingService;
+        this.clock = clock;
     }
 
     @PostMapping
@@ -31,7 +34,7 @@ public class WaitingController {
             @RequestBody @Valid WaitingWebRequest request,
             @Auth Accessor accessor
     ) {
-        WaitingRequest waitingRequest = request.toWaitingRequest(accessor.id());
+        WaitingRequest waitingRequest = request.toWaitingRequest(clock, accessor.id());
         WaitingResponse waitingResponse = waitingService.addWaiting(waitingRequest);
 
         return ResponseEntity.created(URI.create("/waitings/" + waitingResponse.id()))

@@ -1,6 +1,5 @@
 package roomescape.application;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,27 +31,30 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
-    private final Clock clock;
 
     public WaitingService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             MemberRepository memberRepository,
-            WaitingRepository waitingRepository,
-            Clock clock
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.waitingRepository = waitingRepository;
-        this.clock = clock;
     }
 
     @Transactional
     public WaitingResponse addWaiting(WaitingRequest request) {
-        Waiting waiting = createWaiting(request.date(), request.memberId(), request.timeId(), request.themeId());
+        Waiting waiting = createWaiting(
+                request.currentDateTime(),
+                request.date(),
+                request.timeId(),
+                request.themeId(),
+                request.memberId()
+        );
 
         validateReservationNotExists(waiting);
         validateCurrentMemberAlreadyReserved(waiting);
@@ -83,13 +85,13 @@ public class WaitingService {
     }
 
     @Transactional
-    public ReservationResponse approveWaitingToReservation(Long waitingId) {
+    public ReservationResponse approveWaitingToReservation(LocalDateTime currentDateTime, Long waitingId) {
         Waiting waiting = waitingRepository.getById(waitingId);
 
         validateReservationAlreadyExists(waiting);
 
         Reservation reservation = Reservation.create(
-                LocalDateTime.now(clock),
+                currentDateTime,
                 waiting.getDetail(),
                 waiting.getMember()
         );
@@ -107,14 +109,20 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
-    private Waiting createWaiting(LocalDate date, Long memberId, Long timeId, Long themeId) {
+    private Waiting createWaiting(
+            LocalDateTime currentDateTime,
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long memberId
+    ) {
         Member member = memberRepository.getById(memberId);
         ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
         Theme theme = themeRepository.getById(themeId);
 
         ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
 
-        return Waiting.create(LocalDateTime.now(clock), detail, member);
+        return Waiting.create(currentDateTime, detail, member);
     }
 
     private void validateReservationNotExists(Waiting waiting) {

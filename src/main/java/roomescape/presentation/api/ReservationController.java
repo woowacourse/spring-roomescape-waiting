@@ -2,6 +2,7 @@ package roomescape.presentation.api;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.Clock;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +25,16 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
+    private final Clock clock;
 
-    public ReservationController(ReservationService reservationService,
-                                 ReservationWaitingService reservationWaitingService) {
+    public ReservationController(
+            ReservationService reservationService,
+            ReservationWaitingService reservationWaitingService,
+            Clock clock
+    ) {
         this.reservationService = reservationService;
         this.reservationWaitingService = reservationWaitingService;
+        this.clock = clock;
     }
 
     @GetMapping("/mine")
@@ -44,7 +50,7 @@ public class ReservationController {
             @RequestBody @Valid ReservationWebRequest request,
             @Auth Accessor accessor
     ) {
-        ReservationRequest reservationRequest = request.toReservationRequest(accessor.id());
+        ReservationRequest reservationRequest = request.toReservationRequest(clock, accessor.id());
         ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest);
 
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))

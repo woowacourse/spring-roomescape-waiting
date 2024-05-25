@@ -9,6 +9,7 @@ import static roomescape.fixture.Fixture.RESERVATION_TIME_2;
 import static roomescape.fixture.Fixture.THEME_1;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,13 +80,15 @@ class WaitingServiceTest extends BaseServiceTest {
         @DisplayName("성공한다.")
         void success() {
             // given
-            LocalDate date = LocalDate.of(2024, 4, 9);
-            ReservationDetail detail = new ReservationDetail(date, time1, theme);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate waitingDate = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(waitingDate, time1, theme);
             reservationRepository.save(new Reservation(detail, member1));
 
             // when
             WaitingRequest request = new WaitingRequest(
-                    date,
+                    currentDateTime,
+                    waitingDate,
                     time1.getId(),
                     theme.getId(),
                     member2.getId()
@@ -96,7 +99,7 @@ class WaitingServiceTest extends BaseServiceTest {
             // then
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(response).isNotNull();
-                softly.assertThat(response.date()).isEqualTo(date);
+                softly.assertThat(response.date()).isEqualTo(waitingDate);
                 softly.assertThat(response.member()).isEqualTo(MemberResponse.from(member2));
                 softly.assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(time1));
                 softly.assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
@@ -106,10 +109,12 @@ class WaitingServiceTest extends BaseServiceTest {
         @Test
         @DisplayName("현재 예약이 없을 경우 예외를 발생시킨다.")
         void failWhenReservationWaitingExists() {
-            LocalDate date = LocalDate.of(2024, 4, 9);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate waitingDate = LocalDate.of(2024, 4, 9);
 
             WaitingRequest request = new WaitingRequest(
-                    date,
+                    currentDateTime,
+                    waitingDate,
                     time1.getId(),
                     theme.getId(),
                     member1.getId()
@@ -124,13 +129,15 @@ class WaitingServiceTest extends BaseServiceTest {
         @DisplayName("해당 회원이 이미 예약을 한 경우 예외를 발생시킨다.")
         void failWhenMemberAlreadyReserved() {
             // given
-            LocalDate date = LocalDate.of(2024, 4, 9);
-            ReservationDetail detail = new ReservationDetail(date, time1, theme);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate waitingDate = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(waitingDate, time1, theme);
             reservationRepository.save(new Reservation(detail, member1));
 
             // when
             WaitingRequest request = new WaitingRequest(
-                    date,
+                    currentDateTime,
+                    waitingDate,
                     time1.getId(),
                     theme.getId(),
                     member1.getId()
@@ -146,14 +153,16 @@ class WaitingServiceTest extends BaseServiceTest {
         @DisplayName("해당 회원이 이미 예약 대기를 한 경우 예외를 발생시킨다.")
         void failWhenMemberAlreadyReservedWaiting() {
             // given
-            LocalDate date = LocalDate.of(2024, 4, 9);
-            ReservationDetail detail = new ReservationDetail(date, time1, theme);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate waitingDate = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(waitingDate, time1, theme);
             reservationRepository.save(new Reservation(detail, member2));
             waitingRepository.save(new Waiting(detail, member1));
 
             // when
             WaitingRequest request = new WaitingRequest(
-                    date,
+                    currentDateTime,
+                    waitingDate,
                     time1.getId(),
                     theme.getId(),
                     member1.getId()
@@ -192,11 +201,13 @@ class WaitingServiceTest extends BaseServiceTest {
         @Test
         @DisplayName("성공한다.")
         void success() {
-            LocalDate date = LocalDate.of(2024, 4, 9);
-            ReservationDetail detail = new ReservationDetail(date, time1, theme);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate waitingDate = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(waitingDate, time1, theme);
             Waiting waiting = waitingRepository.save(new Waiting(detail, member2));
 
-            ReservationResponse reservationResponse = waitingService.approveWaitingToReservation(waiting.getId());
+            ReservationResponse reservationResponse = waitingService.approveWaitingToReservation(currentDateTime,
+                    waiting.getId());
 
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(waitingRepository.findById(waiting.getId())).isEmpty();
@@ -207,13 +218,14 @@ class WaitingServiceTest extends BaseServiceTest {
         @Test
         @DisplayName("이미 예약이 존재할 경우 예외를 발생시킨다.")
         void failWhenReservationExists() {
-            LocalDate date = LocalDate.of(2024, 4, 9);
-            ReservationDetail detail = new ReservationDetail(date, time1, theme);
+            LocalDateTime currentDateTime = LocalDateTime.of(2024, 4, 8, 10, 0);
+            LocalDate waitingDate = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(waitingDate, time1, theme);
             reservationRepository.save(new Reservation(detail, member2));
             Waiting waiting = waitingRepository.save(new Waiting(detail, member2));
 
             Long waitingId = waiting.getId();
-            assertThatThrownBy(() -> waitingService.approveWaitingToReservation(waitingId))
+            assertThatThrownBy(() -> waitingService.approveWaitingToReservation(currentDateTime, waitingId))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("이미 예약이 존재합니다.");
         }

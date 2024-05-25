@@ -1,5 +1,7 @@
 package roomescape.presentation.api.admin;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,9 +19,11 @@ import roomescape.application.dto.response.WaitingResponse;
 public class AdminWaitingController {
 
     private final WaitingService waitingService;
+    private final Clock clock;
 
-    public AdminWaitingController(WaitingService waitingService) {
+    public AdminWaitingController(WaitingService waitingService, Clock clock) {
         this.waitingService = waitingService;
+        this.clock = clock;
     }
 
     @GetMapping
@@ -31,7 +35,8 @@ public class AdminWaitingController {
 
     @PostMapping("/{id}/approve")
     public ResponseEntity<ReservationResponse> approveReservationWaiting(@PathVariable Long id) {
-        ReservationResponse reservationResponse = waitingService.approveWaitingToReservation(id);
+        LocalDateTime currentDateTime = LocalDateTime.now(clock);
+        ReservationResponse reservationResponse = waitingService.approveWaitingToReservation(currentDateTime, id);
 
         return ResponseEntity.ok(reservationResponse);
     }

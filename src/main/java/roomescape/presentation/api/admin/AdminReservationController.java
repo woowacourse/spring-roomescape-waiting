@@ -2,6 +2,7 @@ package roomescape.presentation.api.admin;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,11 @@ import roomescape.presentation.dto.request.AdminReservationWebRequest;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final Clock clock;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService, Clock clock) {
         this.reservationService = reservationService;
+        this.clock = clock;
     }
 
     @GetMapping
@@ -45,7 +48,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> addAdminReservation(
             @RequestBody @Valid AdminReservationWebRequest webRequest
     ) {
-        ReservationRequest reservationRequest = webRequest.toReservationRequest();
+        ReservationRequest reservationRequest = webRequest.toReservationRequest(clock);
         ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest);
 
         return ResponseEntity.created(URI.create("/reservation/" + reservationResponse.id()))

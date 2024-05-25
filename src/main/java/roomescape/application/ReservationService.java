@@ -1,6 +1,5 @@
 package roomescape.application;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,27 +28,25 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
-    private final Clock clock;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             MemberRepository memberRepository,
-            WaitingRepository waitingRepository,
-            Clock clock
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.waitingRepository = waitingRepository;
-        this.clock = clock;
     }
 
     @Transactional
     public synchronized ReservationResponse addReservation(ReservationRequest request) {
         Reservation reservation = createReservation(
+                request.currentDateTime(),
                 request.date(),
                 request.timeId(),
                 request.themeId(),
@@ -84,14 +81,20 @@ public class ReservationService {
         reservationRepository.delete(reservation);
     }
 
-    private Reservation createReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
+    private Reservation createReservation(
+            LocalDateTime currentDateTime,
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long memberId
+    ) {
         Member member = memberRepository.getById(memberId);
         ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
         Theme theme = themeRepository.getById(themeId);
 
         ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
 
-        return Reservation.create(LocalDateTime.now(clock), detail, member);
+        return Reservation.create(currentDateTime, detail, member);
     }
 
     private void validateReservationExists(Reservation reservation) {
