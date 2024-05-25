@@ -2,11 +2,9 @@ package roomescape.service;
 
 import static roomescape.exception.ExceptionType.DUPLICATE_WAITING;
 import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
-import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,20 +42,15 @@ public class ReservationWaitingService {
                 () -> new RoomescapeException(WAITING_WITHOUT_RESERVATION));
         Member waitingMember = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        validatePastTimeReservation(reservation);
+
+        reservation.validatePastTimeReservation();
         validateDuplicateWaiting(reservation, waitingMember);
 
         ReservationWaiting beforeSave = new ReservationWaiting(reservation, waitingMember);
-        ReservationWaiting save = waitingRepository.save(beforeSave);
+        ReservationWaiting saved = waitingRepository.save(beforeSave);
 
-        int priority = save.calculatePriority(waitingRepository.findByReservation(reservation));
-        return ReservationWaitingResponseMapper.toResponse(save, priority);
-    }
-
-    private void validatePastTimeReservation(Reservation beforeSave) {
-        if (beforeSave.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
-        }
+        int priority = saved.calculatePriority(waitingRepository.findByReservation(reservation));
+        return ReservationWaitingResponseMapper.toResponse(saved, priority);
     }
 
     private void validateDuplicateWaiting(Reservation reservation, Member waitingMember) {
