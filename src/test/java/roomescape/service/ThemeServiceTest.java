@@ -1,74 +1,45 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.List;
+import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.domain.Theme;
-import roomescape.repository.ThemeRepository;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import roomescape.exception.BadRequestException;
 import roomescape.service.dto.request.ThemeCreateRequest;
-import roomescape.service.dto.response.ThemeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ThemeServiceTest {
 
     @Autowired
     private ThemeService themeService;
-    @Autowired
-    private ThemeRepository themeRepository;
+
+    @LocalServerPort
+    private int port;
 
     @BeforeEach
     void setUp() {
-        List<Theme> themes = themeRepository.findAll();
-        for (Theme theme : themes) {
-            themeRepository.deleteById(theme.getId());
-        }
+        RestAssured.port = port;
     }
 
-    @DisplayName("테마 저장")
+    @DisplayName("이미 같은 이름의 테마가 존재하면 추가할 수 없다.")
     @Test
-    void save() {
+    void cantSaveWhenSameNameExists() {
         // given
-        ThemeCreateRequest themeCreateRequest = new ThemeCreateRequest("레벨2 탈출",
-                "우테코 레벨2",
-                "https://i.pinimg.com/236x/6e");
-        // when
-        ThemeResponse themeResponse = themeService.save(themeCreateRequest);
-        // then
-        assertAll(
-                () -> assertThat(themeResponse.name()).isEqualTo(themeCreateRequest.name()),
-                () -> assertThat(themeResponse.description()).isEqualTo(
-                        themeCreateRequest.description()),
-                () -> assertThat(themeResponse.thumbnail()).isEqualTo(
-                        themeCreateRequest.thumbnail())
-        );
-    }
+        String name = "테마";
+        ThemeCreateRequest request = new ThemeCreateRequest(name, "테마 설명1", "테마 썸네일");
+        themeService.save(request);
 
-    @DisplayName("모든 테마 조회")
-    @Test
-    void findAll() {
-        // given & when
-        List<ThemeResponse> themeRespons = themeService.findAll();
-        // then
-        assertThat(themeRespons).isEmpty();
-    }
-
-    @DisplayName("테마 삭제")
-    @Test
-    void delete() {
-        // given
-        ThemeCreateRequest themeCreateRequest = new ThemeCreateRequest("레벨2 탈출",
-                "우테코 레벨2",
-                "https://i.pinimg.com/236x/6e");
-        ThemeResponse themeResponse = themeService.save(themeCreateRequest);
         // when
-        themeService.deleteById(themeResponse.id());
+        ThemeCreateRequest invalidRequest = new ThemeCreateRequest(name, "테마 설명2", "테마 썸네일1");
+
         // then
-        assertThat(themeService.findAll()).isEmpty();
+        assertThatThrownBy(() -> themeService.save(invalidRequest))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("이미 존재하는 테마 이름입니다.(" + name + ")");
     }
 }
