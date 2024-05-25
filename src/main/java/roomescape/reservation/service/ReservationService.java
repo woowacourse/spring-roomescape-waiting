@@ -1,5 +1,9 @@
 package roomescape.reservation.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
@@ -20,10 +24,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -33,12 +33,10 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository
-    ) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository,
+                              MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -154,9 +152,15 @@ public class ReservationService {
                 .toList();
     }
 
+    private void deleteById(Long id) {
+        reservationRepository.deleteById(id);
+    }
+
     @Transactional
     public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
+        reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
+        deleteById(id);
     }
 
     @Transactional
@@ -170,7 +174,7 @@ public class ReservationService {
             throw new UnauthorizedException("삭제할 수 없는 예약입니다");
         }
 
-        deleteReservation(id);
+        deleteById(id);
     }
 
     @Transactional
@@ -181,7 +185,7 @@ public class ReservationService {
             throw new UnauthorizedException("예약 대기만 삭제할 수 있습니다");
         }
 
-        deleteReservation(id);
+        deleteById(id);
     }
 
     private void validateDuplicatedReservation(Reservation reservation) {
