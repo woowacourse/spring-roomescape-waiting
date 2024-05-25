@@ -107,9 +107,11 @@ class ReservationServiceTest extends ServiceTest {
         Reservation duplicatedReservation = new Reservation(
                 tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme, BOOKING);
 
-        // when & then
-        assertThatThrownBy(() -> reservationService.create(duplicatedReservation))
-                .isInstanceOf(ViolationException.class);
+        // when
+        Reservation savedReservation = reservationService.create(duplicatedReservation);
+
+        // then
+        assertThat(savedReservation.getStatus()).isEqualTo(WAITING);
     }
 
     @Test
@@ -135,12 +137,14 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("동일한 테마, 날짜, 시간에 예약이 없다면 대기할 수 없다.")
     void createInvalidWaitingReservation() {
         // given
-        Reservation invalidWaitingReservation = new Reservation(
+        Reservation waitingReservation = new Reservation(
                 tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme, WAITING);
 
-        // when & then
-        assertThatThrownBy(() -> reservationService.create(invalidWaitingReservation))
-                .isInstanceOf(ViolationException.class);
+        // when
+        Reservation savedReservation = reservationService.create(waitingReservation);
+
+        // then
+        assertThat(savedReservation.getStatus()).isEqualTo(BOOKING);
     }
 
     @Test

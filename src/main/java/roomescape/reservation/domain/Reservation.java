@@ -84,6 +84,10 @@ public class Reservation {
         this.status = ReservationStatus.BOOKING;
     }
 
+    public void changeToWaiting() {
+        this.status = ReservationStatus.WAITING;
+    }
+
     public String getMemberName() {
         return member.getName();
     }

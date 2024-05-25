@@ -15,6 +15,7 @@ import roomescape.reservation.domain.ThemeRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 @Service
 public class ReservationService {
@@ -32,8 +33,29 @@ public class ReservationService {
 
     @Transactional
     public Reservation create(Reservation reservation) {
+        if (reservation.isBooking()) {
+            return createWithStatus(reservation, this::checkBookingCapable);
+        }
+        return createWithStatus(reservation, this::checkWaitingCapable);
+    }
+
+    private void checkBookingCapable(boolean existInSameTime, Reservation reservation) {
+        if (existInSameTime && reservation.isBooking()) {
+            reservation.changeToWaiting();
+        }
+    }
+
+    private void checkWaitingCapable(boolean existInSameTime, Reservation reservation) {
+        if (existInSameTime && reservation.isBooking()) {
+            reservation.changeToWaiting();
+        }
+    }
+
+    private Reservation createWithStatus(Reservation reservation, BiConsumer<Boolean, Reservation> statusChecker) {
         validateReservationDate(reservation);
-        validateReservationCapacity(reservation);
+        boolean existInSameTime = reservationRepository.existsByDateAndTimeAndTheme(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        statusChecker.accept(existInSameTime, reservation);
         validateDuplicatedReservation(reservation);
         return reservationRepository.save(reservation);
     }
@@ -42,17 +64,6 @@ public class ReservationService {
         LocalDate today = LocalDate.now();
         if (reservation.isBeforeOrOnToday(today)) {
             throw new ViolationException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
-        }
-    }
-
-    private void validateReservationCapacity(Reservation reservation) {
-        boolean existInSameTime = reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(), reservation.getTime(), reservation.getTheme());
-        if (existInSameTime && reservation.isBooking()) {
-            throw new ViolationException("해당 시간대에 예약이 모두 찼습니다.");
-        }
-        if (!existInSameTime && reservation.isWaiting()) {
-            throw new ViolationException("해당 시간대에 예약이 가능합니다. 대기 말고 예약을 해주세요.");
         }
     }
 

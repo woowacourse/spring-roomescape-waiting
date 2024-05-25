@@ -246,12 +246,12 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .extract();
-        ErrorResponse errorResponse = response.as(ErrorResponse.class);
+        ReservationResponse reservationResponse = response.as(ReservationResponse.class);
 
         // then
         assertSoftly(softly -> {
-            checkHttpStatusBadRequest(softly, response);
-            softly.assertThat(errorResponse.message()).isNotNull();
+            checkHttpStatusCreated(softly, response);
+            softly.assertThat(reservationResponse.id()).isNotNull();
         });
     }
 
