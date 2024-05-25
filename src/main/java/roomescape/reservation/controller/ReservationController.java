@@ -48,7 +48,7 @@ public class ReservationController {
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findReservationsByMember(MemberProfileInfo memberProfileInfo) {
         List<MyReservationResponse> reservationResponse = reservationService.findReservationByMemberId(memberProfileInfo.id());
-        List<MyReservationResponse> waitingResponse = waitingService.findReservationByMemberId(memberProfileInfo.id());
+        List<MyReservationResponse> waitingResponse = waitingService.findReservationWaitingByMemberId(memberProfileInfo.id());
 
         List<MyReservationResponse> response = new ArrayList<>();
         response.addAll(reservationResponse);
@@ -81,7 +81,9 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createWaitingReservation(ReservationCreateRequest request) {
         Long detailId = reservationDetailService.findReservationDetailId(request);
         ReservationRequest reservationRequest = new ReservationRequest(request.memberId(), detailId);
-        ReservationResponse reservationCreateResponse = waitingService.addReservation(reservationRequest);
+
+        reservationService.findReservationByDetailId(reservationRequest);
+        ReservationResponse reservationCreateResponse = waitingService.addReservationWaiting(reservationRequest);
 
         URI uri = URI.create("/reservations/waiting/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)

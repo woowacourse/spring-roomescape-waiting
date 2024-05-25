@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -60,6 +61,17 @@ public class ReservationService {
         return reservationsByMember.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    public void findReservationByDetailId(ReservationRequest request) {
+        reservationRepository.findByDetail_IdAndMember_Id(request.detailId(), request.memberId())
+                .ifPresent(reservation -> {
+                    throw new ConflictException(
+                            "해당 테마(%s)의 해당 시간(%s)에 이미 예약 되어있습니다."
+                                    .formatted(
+                                            reservation.getTheme().getName(),
+                                            reservation.getTime().getStartAt()));
+                });
     }
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest) {
