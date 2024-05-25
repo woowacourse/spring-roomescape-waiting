@@ -1,5 +1,7 @@
 package roomescape.integration;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
@@ -14,6 +16,27 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public class ReservationWaitingIntegrationTest extends IntegrationTest {
+    @Nested
+    @DisplayName("예약 대기 목록 조회 API")
+    class FindAllReservationWaiting {
+        @Test
+        void 예약_대기_목록을_조회할_수_있다() {
+            ReservationTime time = timeFixture.createFutureTime();
+            Theme theme = themeFixture.createFirstTheme();
+            Member member = memberFixture.createUserMember();
+            Reservation reservation = reservationFixture.createFutureReservation(time, theme, member);
+            waitingFixture.createWaiting(reservation, member);
+            memberFixture.createAdminMember();
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().get("/reservations/waitings")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("waitings.size()", is(1));
+        }
+    }
+
     @Nested
     @DisplayName("예약 대기 추가 API")
     class SaveReservationWaiting {

@@ -20,12 +20,31 @@ import roomescape.exception.reservationwaiting.DuplicatedReservationWaitingExcep
 import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
 import roomescape.exception.reservationwaiting.NotFoundReservationWaitingException;
 import roomescape.service.reservationwaiting.ReservationWaitingService;
+import roomescape.service.reservationwaiting.dto.ReservationWaitingListResponse;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingResponse;
 
 public class ReservationWaitingServiceTest extends ServiceTest {
     @Autowired
     private ReservationWaitingService reservationWaitingService;
+
+    @Nested
+    @DisplayName("예약 대기 목록 조회 API")
+    class FindAllReservationWaiting {
+        @Test
+        void 예약_대기_목록을_조회할_수_있다() {
+            ReservationTime time = timeFixture.createFutureTime();
+            Theme theme = themeFixture.createFirstTheme();
+            Member member = memberFixture.createUserMember();
+            Reservation reservation = reservationFixture.createFutureReservation(time, theme, member);
+            waitingFixture.createWaiting(reservation, member);
+
+            ReservationWaitingListResponse response = reservationWaitingService.findAllReservationWaiting();
+
+            assertThat(response.getWaitings().size())
+                    .isEqualTo(1);
+        }
+    }
 
     @Nested
     @DisplayName("예약 대기 추가")
@@ -57,7 +76,7 @@ public class ReservationWaitingServiceTest extends ServiceTest {
 
             ReservationWaitingResponse response = reservationWaitingService.saveReservationWaiting(request, user);
 
-            assertThat(response.getWaitingId())
+            assertThat(response.getId())
                     .isEqualTo(1L);
         }
 

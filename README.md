@@ -30,7 +30,7 @@
 
 ## 4단계 - 예약 대기 관리
 
-- [ ] 관리자용 예약 대기 목록 조회 API를 구현한다
+- [x] 관리자용 예약 대기 목록 조회 API를 구현한다
 - [ ] 관리자용 예약 대기 취소 API를 구현한다
 - [ ] 예약 취소 API 요청 시, 예약 대기자가 자동으로 예약 승인이 된다
 
@@ -220,7 +220,7 @@ Content-Type: application/json
       "reservationId": 1,
       "theme": "레벨2 탈출",
       "date": "2024-08-05",
-      "time": "10:00:00",
+      "time": "10:00",
       "status": "예약"
     }
   ]
@@ -345,7 +345,8 @@ Content-Type: application/json
       "name": "사용자",
       "theme": "레벨2 탈출",
       "date": "2024-08-05",
-      "startAt": "10:00:00"
+      "startAt": "10:00",
+      "reservationId": 1
     }
   ]
 }
@@ -374,7 +375,11 @@ HTTP/1.1 201
 Content-Type: application/json
 
 {
-  "waitingId": 1,
+  "id": 1,
+  "name": "사용자",
+  "theme": "레벨2 탈출",
+  "date": "2024-08-05",
+  "startAt": "10:00",
   "reservationId": 1
 }
 ```

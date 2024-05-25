@@ -3,6 +3,7 @@ package roomescape.service.reservationwaiting;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -15,6 +16,7 @@ import roomescape.exception.reservationwaiting.CannotCreateWaitingForOwnedReserv
 import roomescape.exception.reservationwaiting.DuplicatedReservationWaitingException;
 import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
 import roomescape.exception.reservationwaiting.NotFoundReservationWaitingException;
+import roomescape.service.reservationwaiting.dto.ReservationWaitingListResponse;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingResponse;
 
@@ -31,6 +33,14 @@ public class ReservationWaitingService {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.clock = clock;
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationWaitingListResponse findAllReservationWaiting() {
+        List<ReservationWaiting> waitings = reservationWaitingRepository.findAll();
+        return new ReservationWaitingListResponse(waitings.stream()
+                .map(ReservationWaitingResponse::new)
+                .toList());
     }
 
     public ReservationWaitingResponse saveReservationWaiting(ReservationWaitingRequest request, Member member) {
