@@ -123,7 +123,7 @@ Content-Type: application/json
 Response
 
 ```
-HTTP/1.1 200 OK
+HTTP/1.1 201 OK
 Content-Type: application/json
 
 {

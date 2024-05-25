@@ -159,7 +159,7 @@ function onReservationButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (!response.ok) throw new Error('Reservation failed');
+                if (response.status !== 201) throw new Error('Reservation failed');
                 return response.json();
             })
             .then(data => {
@@ -187,7 +187,7 @@ function onWaitButtonClick() {
             timeId: selectedTimeId
         };
 
-        fetch('/waitings', {
+        fetch('/reservations/waitings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ function onWaitButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (!response.ok) throw new Error('Reservation waiting failed');
+                if (response.status !== 201) throw new Error('Reservation waiting failed');
                 return response.json();
             })
             .then(data => {
