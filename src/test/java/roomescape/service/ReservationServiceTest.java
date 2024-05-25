@@ -183,7 +183,7 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate("t1@t1.com", 1L, "2025-11-30", 1L);
         ReservationResponse actual = reservationService.createReservation(reservationDto);
 
-        assertThat(actual.getReservationStatus()).isEqualTo(WAITING.toString());
+        assertThat(actual.getStatus()).isEqualTo(WAITING.toString());
     }
 
     @DisplayName("같은 테마, 날짜, 시간에 대기중인 예약이 존재하지 않으면 예약의 상태를 예약으로 생성한다.")
@@ -196,7 +196,7 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
         ReservationResponse actual = reservationService.createReservation(reservationDto);
 
-        assertThat(actual.getReservationStatus()).isEqualTo(CONFIRMED.toString());
+        assertThat(actual.getStatus()).isEqualTo(CONFIRMED.toString());
     }
 
     @DisplayName("예약을 정상적으로 생성한다.")

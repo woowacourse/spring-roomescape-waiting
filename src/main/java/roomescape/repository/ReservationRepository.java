@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +14,6 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.dto.ReservationRankResponse;
-import roomescape.repository.dto.WaitingReservationResponse;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
@@ -49,11 +49,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             """)
     List<ReservationRankResponse> findReservationRankByMember(Member member);
 
-    @Query("""
-            SELECT new roomescape.repository.dto.WaitingReservationResponse
-            (r.id, r.member.name, r.theme.name, r.date, r.time)
-            FROM Reservation r
-            WHERE r.status = :reservationStatus
-            """)
-    List<WaitingReservationResponse> findReservationByStatus(ReservationStatus reservationStatus);
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
 }

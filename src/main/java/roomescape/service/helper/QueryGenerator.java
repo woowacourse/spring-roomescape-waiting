@@ -16,6 +16,9 @@ public class QueryGenerator {
             root.fetch("theme");
             root.fetch("time");
 
+            if (request.getStatus() != null) {
+                predicates.add(builder.equal(root.get("status"), request.getStatus()));
+            }
             if (request.getEmail() != null && !request.getEmail().isBlank()) {
                 predicates.add(builder.equal(root.get("member").get("email"), request.getEmail()));
             }
@@ -27,9 +30,6 @@ public class QueryGenerator {
             }
             if (request.getEndDate() != null) {
                 predicates.add(builder.lessThanOrEqualTo(root.get("date"), request.getEndDate()));
-            }
-            if (request.getStatus() != null) {
-                predicates.add(builder.equal(root.get("status"), request.getStatus()));
             }
             return builder.and(predicates.toArray(new Predicate[0]));
         });

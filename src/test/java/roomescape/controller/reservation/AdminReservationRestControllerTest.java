@@ -19,14 +19,10 @@ import roomescape.controller.dto.MemberReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.dto.member.MemberCreateRequest;
-import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.theme.ThemeRequest;
-import roomescape.service.dto.theme.ThemeResponse;
 import roomescape.service.dto.time.ReservationTimeRequest;
-import roomescape.service.dto.time.ReservationTimeResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -112,7 +108,7 @@ class AdminReservationRestControllerTest {
                 .statusCode(201);
     }
 
-    @DisplayName("예약 목록을 조회하는데 성공하면 응답과 200 상태 코드를 반환한다.")
+    @DisplayName("확정된 예약 목록을 조회하는데 성공하면 응답과 200 상태 코드를 반환한다.")
     @Test
     void return_200_when_find_all_reservations() {
         AdminReservationRequest reservationCreate = new AdminReservationRequest("tt@tt.com", 1L,
@@ -128,7 +124,7 @@ class AdminReservationRestControllerTest {
 
         List<ReservationResponse> actualResponse = RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .when().get("/admin/reservations/confirmed")
+                .when().get("/admin/reservations?status=confirmed")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
@@ -136,11 +132,7 @@ class AdminReservationRestControllerTest {
                 .getList(".", ReservationResponse.class);
 
         ReservationResponse expectedResponse = new ReservationResponse(
-                actualResponse.get(0).getId(), new MemberResponse("tt@tt.com", "재즈"),
-                new ThemeResponse(1L, "공포", "공포는 무서워", "hi.jpg"),
-                "2100-08-05",
-                new ReservationTimeResponse(1L, "10:00"),
-                "CONFIRMED"
+                actualResponse.get(0).getId(), "재즈", "공포", "2100-08-05", "10:00", "CONFIRMED"
         );
 
         assertThat(actualResponse).usingRecursiveComparison().isEqualTo(List.of(expectedResponse));
@@ -176,18 +168,19 @@ class AdminReservationRestControllerTest {
                 .then().log().all()
                 .statusCode(201);
 
-        List<WaitingReservationResponse> actual = RestAssured.given().log().all()
+        List<ReservationResponse> actual = RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .when().get("/admin/reservations/waiting")
+                .when().get("/admin/reservations?status=waiting")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
                 .jsonPath()
-                .getList(".", WaitingReservationResponse.class);
+                .getList(".", ReservationResponse.class);
 
-        List<WaitingReservationResponse> expected = List.of(
-                new WaitingReservationResponse(2L, "영이", "공포", "2100-08-05", "10:00"),
-                new WaitingReservationResponse(3L, "재즈", "공포", "2100-08-05", "10:00"));
+        List<ReservationResponse> expected = List.of(
+                new ReservationResponse(2L, "영이", "공포", "2100-08-05", "10:00", "WAITING"),
+                new ReservationResponse(3L, "재즈", "공포", "2100-08-05", "10:00", "WAITING")
+        );
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }

@@ -17,7 +17,6 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.dto.ReservationRankResponse;
-import roomescape.repository.dto.WaitingReservationResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -68,26 +67,6 @@ class ReservationRepositoryTest {
                 2);
 
         List<ReservationRankResponse> actual = reservationRepository.findReservationRankByMember(member1);
-
-        assertThat(actual).usingRecursiveComparison().isEqualTo(List.of(response1, response2));
-    }
-
-    @DisplayName("특정 예약 상태에 해당하는 예약들을 모두 조회한다.")
-    @Test
-    void find_reservation_by_status() {
-        timeRepository.save(time);
-        themeRepository.save(theme);
-        memberRepository.save(member1);
-        memberRepository.save(member2);
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
-        reservationRepository.save(reservation3);
-        WaitingReservationResponse response1 = new WaitingReservationResponse(1L, "재즈", "공포", date1.toString(),
-                time.getStartAt().toString());
-        WaitingReservationResponse response2 = new WaitingReservationResponse(2L, "영이", "공포", date2.toString(),
-                time.getStartAt().toString());
-
-        List<WaitingReservationResponse> actual = reservationRepository.findReservationByStatus(CONFIRMED);
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(List.of(response1, response2));
     }

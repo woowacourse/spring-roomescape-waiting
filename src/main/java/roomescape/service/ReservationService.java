@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.member.MemberNotFoundException;
@@ -24,7 +25,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationRankResponse;
-import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -49,7 +49,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> searchConfirmedReservations(ReservationSearchParams request) {
+    public List<ReservationResponse> searchReservations(ReservationSearchParams request) {
         Specification<Reservation> specification = QueryGenerator.getSearchSpecification(request);
         return reservationRepository.findAll(specification)
                 .stream()
@@ -58,8 +58,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<WaitingReservationResponse> findAllWaitingReservations() {
-        return reservationRepository.findReservationByStatus(WAITING);
+    public List<ReservationResponse> findAllReservationsByStatus(String status) {
+        return reservationRepository.findAllByStatus(ReservationStatus.fromString(status))
+                .stream()
+                .map(ReservationResponse::new)
+                .toList();
     }
 
     @Transactional(readOnly = true)
