@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -18,16 +19,21 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationDetailService;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationService reservationService;
     private final ReservationDetailService reservationDetailService;
+    private final ReservationWaitingService waitingService;
 
-    public AdminReservationController(ReservationService reservationService, ReservationDetailService reservationDetailService) {
+    public AdminReservationController(ReservationService reservationService,
+                                      ReservationDetailService reservationDetailService,
+                                      ReservationWaitingService waitingService) {
         this.reservationService = reservationService;
         this.reservationDetailService = reservationDetailService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping("/search")
@@ -39,7 +45,13 @@ public class AdminReservationController {
     ) {
         ReservationConditionSearchRequest request
                 = new ReservationConditionSearchRequest(memberId, themeId, dateFrom, dateTo);
-        List<ReservationResponse> response = reservationService.findReservationsByConditions(request);
+        List<ReservationResponse> reservationResponse = reservationService.findReservationsByConditions(request);
+        List<ReservationResponse> waitingResponse = waitingService.findReservationWaitingByConditions(request);
+
+        List<ReservationResponse> response = new ArrayList<>();
+        response.addAll(reservationResponse);
+        response.addAll(waitingResponse);
+
         return ResponseEntity.ok(response);
     }
 

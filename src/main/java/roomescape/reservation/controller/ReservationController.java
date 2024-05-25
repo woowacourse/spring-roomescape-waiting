@@ -41,7 +41,13 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
-        List<ReservationResponse> response = reservationService.findReservations();
+        List<ReservationResponse> reservationResponse = reservationService.findReservations();
+        List<ReservationResponse> waitingResponse = waitingService.findReservationWaitings();
+
+        List<ReservationResponse> response = new ArrayList<>();
+        response.addAll(reservationResponse);
+        response.addAll(waitingResponse);
+
         return ResponseEntity.ok(response);
     }
 

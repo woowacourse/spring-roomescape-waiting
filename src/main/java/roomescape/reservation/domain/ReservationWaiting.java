@@ -2,6 +2,7 @@ package roomescape.reservation.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +26,7 @@ import roomescape.time.domain.Time;
 })
 public class ReservationWaiting {
     private static final String status = "대기";
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -81,10 +82,6 @@ public class ReservationWaiting {
         return detail;
     }
 
-    public Long getDetailId() {
-        return detail.getId();
-    }
-
     public LocalDate getDate() {
         return detail.getDate();
     }
@@ -104,8 +101,38 @@ public class ReservationWaiting {
     public Long getThemeId() {
         return detail.getThemeId();
     }
-    
+
     public String getStatus() {
         return status;
+    }
+
+    public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
+        return detail.isReservedAtPeriod(start, end);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReservationWaiting that)) return false;
+
+        if (id == null || that.id == null) {
+            return Objects.equals(member, that.member) && Objects.equals(detail, that.detail);
+        }
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id == null) return Objects.hash(detail);
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "ReservationWaiting{" +
+               "id=" + id +
+               ", member=" + member +
+               ", detail=" + detail +
+               '}';
     }
 }

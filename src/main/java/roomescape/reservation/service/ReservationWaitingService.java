@@ -8,9 +8,11 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationDetailRepository;
@@ -35,6 +37,15 @@ public class ReservationWaitingService {
                 = waitingRepository.findAllByMember_IdOrderByDetailDateAsc(id);
         return reservationsByMember.stream()
                 .map(MyReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> findReservationWaitingByConditions(ReservationConditionSearchRequest request) {
+        List<ReservationWaiting> reservations = waitingRepository.findAllByMember_Id(request.memberId());
+
+        return reservations.stream()
+                .filter(reservation -> reservation.isReservedAtPeriod(request.dateFrom(), request.dateTo()))
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -63,5 +74,13 @@ public class ReservationWaitingService {
 
     public void removeReservations(long id) {
         waitingRepository.deleteById(id);
+    }
+
+    public List<ReservationResponse> findReservationWaitings() {
+        List<ReservationWaiting> reservations = waitingRepository.findAllByOrderByDetailDateAsc();
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 }
