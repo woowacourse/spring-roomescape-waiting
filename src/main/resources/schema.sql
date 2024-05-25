@@ -62,3 +62,10 @@ INSERT INTO reservation(member_id, detail_id)
 VALUES (1,8);
 INSERT INTO reservation(member_id, detail_id)
 VALUES (2,9);
+
+INSERT INTO reservation_waiting(member_id, detail_id, create_at)
+VALUES (1,6, CURRENT_TIMESTAMP);
+INSERT INTO reservation_waiting(member_id, detail_id, create_at)
+VALUES (1,7, CURRENT_TIMESTAMP);
+INSERT INTO reservation_waiting(member_id, detail_id, create_at)
+VALUES (2,8, CURRENT_TIMESTAMP);
