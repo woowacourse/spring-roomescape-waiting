@@ -501,6 +501,7 @@ public class ReservationControllerTest {
         Member member2 = memberRepository.save(new Member("name2", "email2@email.com", "password", Role.MEMBER));
         Member member3 = memberRepository.save(new Member("name3", "email3@email.com", "password", Role.MEMBER));
 
+        // TODO: 01시에 발생한 NanoSecond 관련 DateTimeException 트러블슈팅
         reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme1.getId()), member1.getId(), ReservationStatus.RESERVED);
         ReservationResponse firstWaitingOrder1 = reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme1.getId()), member2.getId(), ReservationStatus.WAITING);
         reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme2.getId()), member2.getId(), ReservationStatus.RESERVED);

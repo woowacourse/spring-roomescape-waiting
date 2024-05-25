@@ -228,9 +228,8 @@ public class ReservationService {
 //        return new ReservationsResponse(response);
 //    }
 
-    public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
+    public MemberReservationsResponse findUnexpiredReservationByMemberId(final Long memberId) {
         Member member = memberRepository.getById(memberId);
-        // MemberReservation에서 member의 예약 중 날짜가 지나지 않은 예약만 조회 후, ID 순으로 오름차순 정렬
         List<MemberReservation> memberReservations = memberReservationRepository.findAfterAndEqualDateReservationByMemberOrderByIdAsc(member);
 
         List<MemberReservationResponse> responses = new ArrayList<>();
@@ -240,5 +239,5 @@ public class ReservationService {
         return new MemberReservationsResponse(responses);
     }
 
-    //TODO: 지난 날짜의 예약은 ReservationStatus.FINISH 상태로 변경하는 기능 추가
+    //TODO: 지난 날짜/시간의 예약은 ReservationStatus.FINISH 상태로 변경하는 기능 추가
 }

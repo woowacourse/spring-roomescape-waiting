@@ -46,7 +46,7 @@ public class ReservationController {
     @Auth
     @GetMapping("/reservations/my")
     public ApiResponse<MemberReservationsResponse> getMemberReservations(@MemberId final Long memberId) {
-        return ApiResponse.success(reservationService.findReservationByMemberId(memberId));
+        return ApiResponse.success(reservationService.findUnexpiredReservationByMemberId(memberId));
     }
 
     @GetMapping("/reservations/themes/{themeId}/times")

@@ -23,10 +23,11 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
                         String.format("회원 예약(MemberReservation) 정보가 존재하지 않습니다. [memberReservationId: %d]", id)));
     }
 
+    // TODO: 지나지 않은 날짜의 예약만 조회 가능하므로, 지난 예약 보기 기능을 따로 추가하기
     @Query("""
             SELECT mr
             FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
-            WHERE mr.member = :member AND r.date >= CURRENT_DATE AND rt.startAt >= CURRENT_TIME
+            WHERE mr.member = :member AND r.date > CURRENT_DATE OR (r.date = CURRENT_DATE AND rt.startAt >= CURRENT_TIME)
             ORDER BY mr.id ASC
             """)
     List<MemberReservation> findAfterAndEqualDateReservationByMemberOrderByIdAsc(final Member member);
