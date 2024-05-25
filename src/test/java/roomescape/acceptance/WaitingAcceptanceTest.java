@@ -21,7 +21,7 @@ public class WaitingAcceptanceTest extends AcceptanceTest {
         final Long themeId = saveTheme();
         saveReservation(timeId, themeId, MEMBER_MIA_EMAIL);
         final ReservationSaveRequest request
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId);
+                = new ReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
 
         final ReservationResponse response = assertPostResponseWithToken(request, MEMBER_TENNY_EMAIL, "/waitings", 201)
                 .extract().as(ReservationResponse.class);

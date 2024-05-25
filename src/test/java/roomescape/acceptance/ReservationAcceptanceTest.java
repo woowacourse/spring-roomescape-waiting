@@ -5,6 +5,7 @@ import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.dto.reservation.AdminReservationSaveRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationSaveRequest;
 
@@ -20,7 +21,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
         final ReservationSaveRequest request
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId);
+                = new ReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
 
         final ReservationResponse response = assertPostResponseWithToken(
                 request, MEMBER_TENNY_EMAIL, "/reservations", 201)
@@ -39,7 +40,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondCreatedWhenAdminCreateReservation() {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
-        final ReservationSaveRequest request = new ReservationSaveRequest(1L, DATE_MAY_EIGHTH, timeId, themeId);
+        final AdminReservationSaveRequest request = new AdminReservationSaveRequest(1L, DATE_MAY_EIGHTH, timeId, themeId);
 
         final ReservationResponse response = assertPostResponseWithToken(
                 request, ADMIN_EMAIL, "/admin/reservations", 201)
@@ -59,7 +60,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         saveReservationTime();
         final Long themeId = saveTheme();
         final ReservationSaveRequest request
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, 0L, themeId);
+                = new ReservationSaveRequest(DATE_MAY_EIGHTH, 0L, themeId);
 
         assertPostResponseWithToken(request, MEMBER_TENNY_EMAIL, "/reservations", 400);
     }
@@ -70,7 +71,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         saveTheme();
         final Long timeId = saveReservationTime();
         final ReservationSaveRequest request
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, 0L);
+                = new ReservationSaveRequest(DATE_MAY_EIGHTH, timeId, 0L);
 
         assertPostResponseWithToken(request, MEMBER_TENNY_EMAIL, "/reservations", 400);
     }

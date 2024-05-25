@@ -63,7 +63,7 @@ abstract class AcceptanceTest {
     protected Long saveReservation(final Long timeId, final Long themeId, final String email) {
         final String accessToken = getAccessToken(email);
         final ReservationSaveRequest request
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId);
+                = new ReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
 
         final Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
@@ -98,7 +98,7 @@ abstract class AcceptanceTest {
 
     protected Long saveReservationAndWaiting(final Long timeId, final Long themeId) {
         final ReservationSaveRequest reservationRequest
-                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId);
+                = new ReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
         RestAssured.given().log().all()
                 .cookie("token", getAccessToken(ADMIN_EMAIL))
                 .contentType(ContentType.JSON)

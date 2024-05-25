@@ -12,7 +12,8 @@ import roomescape.dto.theme.ThemeResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
-public record ReservationSaveRequest(
+public record AdminReservationSaveRequest(
+        Long memberId,
         String date,
         Long timeId,
         Long themeId
