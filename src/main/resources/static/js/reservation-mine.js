@@ -33,10 +33,12 @@ function render(data) {
     row.insertCell(2).textContent = time;
     row.insertCell(3).textContent = status;
 
+    // TODO 상태코드 변경필요
+
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
      */
-    if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+    if (status !== '예약' && status !== '삭제된 예약입니다.') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
       const cancelCell = row.insertCell(4);
       const cancelButton = document.createElement('button');
       cancelButton.textContent = '취소';

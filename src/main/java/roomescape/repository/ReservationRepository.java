@@ -33,7 +33,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                      AND r2.createdAt < r1.createdAt
                      AND r2.status IN :statuses) AS Long))
         FROM Reservation r1
-        WHERE r1.member.id = :memberId and r1.status IN :statuses
+        WHERE r1.member.id = :memberId
         order by r1.date
         """)
     List<ReservationWithRank> findMyReservationsAndStatusIn(Long memberId, List<Status> statuses);

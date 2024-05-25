@@ -113,8 +113,13 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        reservationRepository.deleteById(id);
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.WAITING)
+                .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+
+        reservation.updateStatus(Status.DELETED);
+        reservationRepository.save(reservation);
     }
 
     private void validateDateCondition(LocalDate dateFrom, LocalDate dateTo) {

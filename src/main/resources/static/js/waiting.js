@@ -71,11 +71,11 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = '' + id;
+    const endpoint = '/admin/reservations/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'PUT'
     }).then(response => {
-        if (response.status === 200) return;
+        if (response.status === 204) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
 }
