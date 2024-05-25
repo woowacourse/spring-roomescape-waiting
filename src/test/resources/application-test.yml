@@ -17,4 +17,4 @@ spring:
     defer-datasource-initialization: true
   sql:
     init:
-      data-locations: classpath:data-test.sql
+      mode: never

@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,45 +12,40 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
-import roomescape.core.dto.auth.TokenRequest;
+import roomescape.core.domain.ReservationTime;
 import roomescape.core.dto.reservation.MemberReservationRequest;
-import roomescape.core.dto.reservationtime.ReservationTimeRequest;
-import roomescape.utils.ReservationRequestGenerator;
-import roomescape.utils.ReservationTimeRequestGenerator;
+import roomescape.core.dto.waiting.MemberWaitingRequest;
+import roomescape.utils.AccessTokenGenerator;
+import roomescape.utils.DatabaseCleaner;
+import roomescape.utils.TestFixture;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@AcceptanceTest
 class ReservationControllerTest {
-    private static final String TOMORROW = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE);
-    private static final String DAY_AFTER_TOMORROW = LocalDate.now().plusDays(2).format(DateTimeFormatter.ISO_DATE);
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
-
-    private String accessToken;
+    private static final String TOMORROW = TestFixture.getTomorrowDate();
+    private static final String DAY_AFTER_TOMORROW = TestFixture.getDayAfterTomorrowDate();
+    private static final String RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE = "본인의 예약만 취소할 수 있습니다.";
 
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private TestFixture testFixture;
+
+    private String accessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
 
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        databaseCleaner.executeTruncate();
+        testFixture.initTestData();
 
-        ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
+        accessToken = AccessTokenGenerator.adminTokenGenerate();
     }
 
     @ParameterizedTest
@@ -87,20 +81,11 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 생성 시, date는 오늘이고 time은 이미 지난 시간이면 예외가 발생한다.")
     void validateReservationWithTodayPastTime() {
-        ReservationTimeRequest timeRequest = new ReservationTimeRequest(
-                LocalTime.now().minusMinutes(1).format(DateTimeFormatter.ofPattern("HH:mm")));
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
+        final ReservationTime pastTime = testFixture.persistReservationTimeBeforeMinute(1);
 
         MemberReservationRequest memberReservationRequest = new MemberReservationRequest(
                 LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                4L, 1L);
+                pastTime.getId(), 1L);
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
@@ -214,25 +199,21 @@ class ReservationControllerTest {
     @Test
     @DisplayName("조건에 따라 예약을 조회한다.")
     void findReservationsByCondition() {
-        MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, 1L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TOMORROW, 1L, 1L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(DAY_AFTER_TOMORROW, 1L, 1L);
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
+                .queryParams(
+                        "memberId", 1L,
+                        "themeId", 1L,
+                        "dateFrom", TOMORROW,
+                        "dateTo", TOMORROW
+                )
+                .when().get("/reservations")
                 .then().log().all()
-                .statusCode(201);
-
-        MemberReservationRequest request2 = new MemberReservationRequest(DAY_AFTER_TOMORROW, 1L, 1L);
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request2)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+                .statusCode(200)
+                .body("size()", is(1));
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
@@ -263,13 +244,36 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("현재 로그인된 회원의 예약 목록을 조회한다.")
+    @DisplayName("현재 로그인된 회원의 예약 대기를 포함한 예약 목록을 조회한다.")
     void findLoginMemberReservation() {
+        MemberWaitingRequest waitingRequest = new MemberWaitingRequest(TOMORROW, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201);
+
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
+    }
+
+    @Test
+    @DisplayName("내 예약이 아닌 다른 회원의 예약을 삭제하면 예외가 발생한다.")
+    void validateDeleteOtherMemberReservation() {
+        testFixture.persistReservationWithDateAndTimeAndTheme(TOMORROW, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookies("token", AccessTokenGenerator.memberTokenGenerate())
+                .when().delete("/reservations/2")
+                .then().log().all()
+                .statusCode(400)
+                .body("detail", is(RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE));
     }
 }

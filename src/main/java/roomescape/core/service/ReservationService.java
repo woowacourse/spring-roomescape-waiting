@@ -1,14 +1,17 @@
 package roomescape.core.service;
 
-import io.jsonwebtoken.MalformedJwtException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
+import roomescape.core.domain.Role;
 import roomescape.core.domain.Theme;
+import roomescape.core.domain.Waiting;
 import roomescape.core.dto.member.LoginMember;
 import roomescape.core.dto.reservation.MyReservationResponse;
 import roomescape.core.dto.reservation.ReservationRequest;
@@ -17,22 +20,34 @@ import roomescape.core.repository.MemberRepository;
 import roomescape.core.repository.ReservationRepository;
 import roomescape.core.repository.ReservationTimeRepository;
 import roomescape.core.repository.ThemeRepository;
+import roomescape.core.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
+    protected static final String MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 회원입니다.";
+    protected static final String TIME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 예약 시간입니다.";
+    protected static final String THEME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 테마입니다.";
+    protected static final String ALREADY_BOOKED_TIME_EXCEPTION_MESSAGE = "해당 시간에 이미 예약 내역이 존재합니다.";
+    protected static final String RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 예약입니다.";
+    protected static final String RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE = "본인의 예약만 취소할 수 있습니다.";
+    protected static final String NOT_ALLOWED_TO_MEMBER_EXCEPTION_MESSAGE = "관리자만 예약을 취소할 수 있습니다.";
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository) {
+                              final MemberRepository memberRepository,
+                              final WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -45,12 +60,9 @@ public class ReservationService {
     }
 
     private Reservation createReservation(final ReservationRequest request) {
-        final Member member = memberRepository.findById(request.getMemberId())
-                .orElseThrow(IllegalArgumentException::new);
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.getTimeId())
-                .orElseThrow(IllegalArgumentException::new);
-        final Theme theme = themeRepository.findById(request.getThemeId())
-                .orElseThrow(IllegalArgumentException::new);
+        final Member member = getMemberById(request.getMemberId());
+        final ReservationTime reservationTime = getReservationTimeById(request.getTimeId());
+        final Theme theme = getThemeById(request.getThemeId());
         final Reservation reservation = new Reservation(member, request.getDate(), reservationTime, theme);
 
         validateDuplicatedReservation(reservation, reservationTime);
@@ -58,12 +70,26 @@ public class ReservationService {
         return reservation;
     }
 
+    private Member getMemberById(final Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE));
+    }
+
+    private ReservationTime getReservationTimeById(final Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(TIME_NOT_EXISTS_EXCEPTION_MESSAGE));
+    }
+
+    private Theme getThemeById(final Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(THEME_NOT_EXISTS_EXCEPTION_MESSAGE));
+    }
+
     private void validateDuplicatedReservation(final Reservation reservation, final ReservationTime reservationTime) {
         final Integer reservationCount = reservationRepository.countByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservationTime, reservation.getTheme());
+                reservation.getDate(), reservationTime, reservation.getTheme());
         if (reservationCount > 0) {
-            throw new IllegalArgumentException("해당 시간에 이미 예약 내역이 존재합니다.");
+            throw new IllegalArgumentException(ALREADY_BOOKED_TIME_EXCEPTION_MESSAGE);
         }
     }
 
@@ -77,24 +103,34 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<MyReservationResponse> findAllByMember(final LoginMember loginMember) {
-        final Member member = memberRepository.findById(loginMember.getId())
-                .orElseThrow(() -> new MalformedJwtException("올바르지 않은 접근입니다."));
-        return reservationRepository.findAllByMember(member)
-                .stream()
-                .map(MyReservationResponse::new)
-                .toList();
+        final Member member = getMemberById(loginMember.getId());
+
+        final List<MyReservationResponse> waitings = getResponsesByWaiting(member);
+        final List<MyReservationResponse> reservations = getResponsesByReservation(member);
+        reservations.addAll(waitings);
+
+        return reservations;
     }
 
-    @Transactional
-    public void delete(final long id) {
-        reservationRepository.deleteById(id);
+    private List<MyReservationResponse> getResponsesByReservation(final Member member) {
+        return new ArrayList<>(reservationRepository.findAllByMember(member)
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList());
+    }
+
+    private List<MyReservationResponse> getResponsesByWaiting(final Member member) {
+        return waitingRepository.findAllWithRankByMember(member)
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(final Long memberId, final Long themeId,
                                                                       final String from, final String to) {
-        final Member member = memberRepository.findById(memberId).orElseThrow(IllegalArgumentException::new);
-        final Theme theme = themeRepository.findById(themeId).orElseThrow(IllegalArgumentException::new);
+        final Member member = getMemberById(memberId);
+        final Theme theme = getThemeById(themeId);
         final LocalDate dateFrom = LocalDate.parse(from);
         final LocalDate dateTo = LocalDate.parse(to);
 
@@ -102,5 +138,52 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResponse::new)
                 .toList();
+    }
+
+    @Transactional
+    public void delete(final long id, final LoginMember loginMember) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE));
+        final Long reservationMemberId = reservation.getMember().getId();
+        final Long loginMemberId = loginMember.getId();
+
+        if (!reservationMemberId.equals(loginMemberId)) {
+            throw new IllegalArgumentException(RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE);
+        }
+
+        reservationRepository.delete(reservation);
+        changeFirstWaitingToReservation(reservation);
+    }
+
+    private void changeFirstWaitingToReservation(final Reservation reservation) {
+        final LocalDate date = reservation.getDate();
+        final ReservationTime time = reservation.getReservationTime();
+        final Theme theme = reservation.getTheme();
+
+        if (waitingRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
+            final Waiting waiting = waitingRepository.findFirstByDateAndTimeAndTheme(date, time, theme);
+            final Member member = waiting.getMember();
+            final String dateString = date.format(DateTimeFormatter.ISO_DATE);
+
+            final Reservation nextReservation = new Reservation(member, dateString, time, theme);
+
+            waitingRepository.delete(waiting);
+            reservationRepository.save(nextReservation);
+        }
+    }
+
+    @Transactional
+    public void deleteByAdmin(final long id, final LoginMember loginMember) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE));
+        final Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> new IllegalArgumentException(MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE));
+
+        if (member.getRole() != Role.ADMIN) {
+            throw new IllegalArgumentException(NOT_ALLOWED_TO_MEMBER_EXCEPTION_MESSAGE);
+        }
+
+        reservationRepository.delete(reservation);
+        changeFirstWaitingToReservation(reservation);
     }
 }

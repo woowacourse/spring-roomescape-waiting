@@ -36,9 +36,9 @@ public class ReservationController {
                 memberRequest.getTimeId(),
                 memberRequest.getThemeId());
 
-        final ReservationResponse result = reservationService.create(request);
-        return ResponseEntity.created(URI.create("/reservations/" + result.getId()))
-                .body(result);
+        final ReservationResponse response = reservationService.create(request);
+        return ResponseEntity.created(URI.create("/reservations/" + response.getId()))
+                .body(response);
     }
 
     @GetMapping
@@ -62,8 +62,8 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
-        reservationService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable("id") final long id, final LoginMember loginMember) {
+        reservationService.delete(id, loginMember);
         return ResponseEntity.noContent().build();
     }
 }

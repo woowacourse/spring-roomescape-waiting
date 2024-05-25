@@ -7,11 +7,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.utils.TestFixture;
 
 class ReservationTest {
-    private static final Member member = new Member("리건", "test@email.com", "password", Role.ADMIN);
-    private static final Theme theme = new Theme("테마", "테마 설명", "테마 이미지");
-    private static final ReservationTime time = new ReservationTime("10:00");
+    private static final Member member = TestFixture.getAdmin();
+    private static final Theme theme = TestFixture.getTheme("테마");
+    private static final ReservationTime time = TestFixture.getReservationTimeAfterMinute(1);
+    private static final ReservationTime pastTime = TestFixture.getReservationTimeBeforeMinute(1);
 
     @Test
     @DisplayName("예약 날짜를 저장할 때, 문자열을 LocalDate 타입으로 변환한다.")
@@ -29,7 +31,7 @@ class ReservationTest {
 
         assertThatThrownBy(() -> new Reservation(member, date, time, theme))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("날짜 형식이 잘못되었습니다.");
+                .hasMessage(Reservation.DATE_FORMAT_EXCEPTION_MESSAGE);
     }
 
     @Test
@@ -40,17 +42,17 @@ class ReservationTest {
 
         assertThatThrownBy(reservation::validateDateAndTime)
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("지난 날짜에는 예약할 수 없습니다.");
+                .hasMessage(Reservation.PAST_DATE_EXCEPTION_MESSAGE);
     }
 
     @Test
-    @DisplayName("예약 날짜가 오늘인지 확인할 수 있다.")
-    void isDateToday() {
+    @DisplayName("예약 날짜가 오늘이지만 지난 시간인지 확인할 수 있다.")
+    void isDateTodayButTimePast() {
         final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        final Reservation reservation = new Reservation(member, date, time, theme);
+        final Reservation reservation = new Reservation(member, date, pastTime, theme);
 
         assertThatThrownBy(reservation::validateDateAndTime)
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("지난 시간에는 예약할 수 없습니다.");
+                .hasMessage(Reservation.PAST_TIME_EXCEPTION_MESSAGE);
     }
 }

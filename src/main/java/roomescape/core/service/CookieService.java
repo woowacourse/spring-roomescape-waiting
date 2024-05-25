@@ -5,7 +5,8 @@ import java.util.Arrays;
 import roomescape.core.dto.auth.TokenResponse;
 
 public class CookieService {
-    public static final String COOKIE_NAME = "token";
+    protected static final String COOKIE_NAME = "token";
+    protected static final String TOKEN_NOT_EXISTS_EXCEPTION_MESSAGE = "토큰이 존재하지 않습니다.";
 
     public Cookie createCookie(final TokenResponse tokenResponse) {
         final Cookie cookie = new Cookie(COOKIE_NAME, tokenResponse.getAccessToken());
@@ -26,6 +27,6 @@ public class CookieService {
                 .filter(cookie -> cookie.getName().equals(COOKIE_NAME))
                 .findFirst()
                 .map(Cookie::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("토큰이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException(TOKEN_NOT_EXISTS_EXCEPTION_MESSAGE));
     }
 }

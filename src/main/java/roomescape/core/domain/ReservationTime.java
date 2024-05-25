@@ -11,7 +11,8 @@ import java.time.format.DateTimeParseException;
 
 @Entity
 public class ReservationTime {
-    public static final String TIME_FORMAT = "HH:mm";
+    protected static final String TIME_FORMAT = "HH:mm";
+    protected static final String TIME_FORMAT_EXCEPTION_MESSAGE = "시간 형식이 잘못되었습니다.";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +37,7 @@ public class ReservationTime {
         try {
             return LocalTime.parse(startAt);
         } catch (final DateTimeParseException e) {
-            throw new IllegalArgumentException("시간 형식이 잘못되었습니다.");
+            throw new IllegalArgumentException(TIME_FORMAT_EXCEPTION_MESSAGE);
         }
     }
 

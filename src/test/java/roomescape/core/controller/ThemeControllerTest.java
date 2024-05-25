@@ -7,39 +7,33 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
-import roomescape.core.dto.auth.TokenRequest;
-import roomescape.utils.ReservationRequestGenerator;
-import roomescape.utils.ReservationTimeRequestGenerator;
+import roomescape.utils.DatabaseCleaner;
+import roomescape.utils.TestFixture;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@AcceptanceTest
 class ThemeControllerTest {
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
-
-    private String accessToken;
+    private static final String TODAY = TestFixture.getTodayDate();
 
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private TestFixture testFixture;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
 
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        databaseCleaner.executeTruncate();
+
+        testFixture.persistAdmin();
+        testFixture.persistTheme("테마 1");
+        testFixture.persistTheme("테마 2");
     }
 
     @Test
@@ -49,7 +43,7 @@ class ThemeControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(5));
+                .body("size()", is(2));
     }
 
     @Test
@@ -63,17 +57,17 @@ class ThemeControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
-                .body("name", is(List.of("테마2", "테마1")));
+                .body("name", is(List.of("테마 2", "테마 1")));
     }
 
     private void createReservationTimes() {
-        ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationTimeRequestGenerator.generateTwoMinutesAfter();
+        testFixture.persistReservationTimeAfterMinute(1);
+        testFixture.persistReservationTimeAfterMinute(2);
     }
 
     private void createReservations() {
-        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 2L);
-        ReservationRequestGenerator.generateWithTimeAndTheme(5L, 2L);
-        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 2L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 2L, 2L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 1L);
     }
 }

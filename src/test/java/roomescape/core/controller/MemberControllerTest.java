@@ -3,31 +3,45 @@ package roomescape.core.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.RestAssured;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.member.MemberRequest;
 import roomescape.core.dto.member.MemberResponse;
+import roomescape.utils.AdminGenerator;
+import roomescape.utils.DatabaseCleaner;
+import roomescape.utils.TestFixture;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@AcceptanceTest
 class MemberControllerTest {
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
+    private static final String EMAIL = TestFixture.getAdminEmail();
+    private static final String PASSWORD = TestFixture.getPassword();
 
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private AdminGenerator adminGenerator;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+
+        databaseCleaner.executeTruncate();
+        adminGenerator.generate();
+    }
+
+    @AfterEach
+    void tearDown() {
+        databaseCleaner.executeTruncate();
     }
 
     @Test
@@ -80,7 +94,7 @@ class MemberControllerTest {
                 .then().log().all()
                 .statusCode(200).extract().as(MemberResponse.class);
 
-        assertThat(user.getName()).isEqualTo("어드민");
+        assertThat(user.getName()).isEqualTo("리건");
     }
 
     @Test

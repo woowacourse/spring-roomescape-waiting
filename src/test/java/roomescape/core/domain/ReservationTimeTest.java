@@ -25,7 +25,7 @@ class ReservationTimeTest {
 
         assertThatThrownBy(() -> new ReservationTime(startAt))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("시간 형식이 잘못되었습니다.");
+                .hasMessage(ReservationTime.TIME_FORMAT_EXCEPTION_MESSAGE);
     }
 
     @Test
