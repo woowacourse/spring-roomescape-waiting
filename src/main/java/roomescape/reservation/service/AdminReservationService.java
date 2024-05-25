@@ -82,9 +82,9 @@ public class AdminReservationService {
     ) {
         return reservations.stream()
                 .filter(reservation ->
-                        (memberId == null || reservation.getMember().getId().equals(memberId))
+                        (memberId == null || reservation.getMember().getId() == memberId)
                 ).filter(reservation ->
-                        (themeId == null || reservation.getTheme().getId().equals(themeId))
+                        (themeId == null || reservation.getTheme().getId() == themeId)
                 ).filter(reservation ->
                         (dateFrom == null ||
                                 (reservation.getDate().isEqual(dateFrom) || reservation.getDate().isAfter(dateFrom)))

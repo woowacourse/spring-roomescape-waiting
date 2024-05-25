@@ -44,8 +44,11 @@ public class ReservationService {
     public ReservationResponse reserve(final ReservationSaveRequest saveRequest, final Member member) {
         ReservationTime reservationTime = findReservationTimeById(saveRequest.timeId());
         Theme theme = findThemeById(saveRequest.themeId());
-        validateDuplicateReservation(saveRequest.date(), saveRequest.timeId(), saveRequest.themeId());
-
+        try {
+            validateDuplicateReservation(saveRequest.date(), saveRequest.timeId(), saveRequest.themeId());
+        } catch (IllegalArgumentException exception) {
+            return registerWaiting(saveRequest, member);
+        }
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.RESERVED);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
