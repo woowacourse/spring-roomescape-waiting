@@ -3,9 +3,11 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.Waiting;
+import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.WaitingRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.Waiting;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dbservice.ReservationDbService;
 import roomescape.service.dto.request.WaitingRequest;
@@ -20,60 +22,61 @@ import java.util.List;
 public class WaitingService {
     private final ReservationDbService reservationDbService;
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
 
-    public WaitingService(ReservationDbService reservationDbService, WaitingRepository waitingRepository) {
+    public WaitingService(ReservationDbService reservationDbService, WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
         this.reservationDbService = reservationDbService;
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public WaitingResponse saveWaiting(WaitingRequest waitingRequest, long memberId) {
         Reservation alreadyBookedReservation = reservationDbService.findReservation(waitingRequest.date(), waitingRequest.themeId(), waitingRequest.timeId());
-        Waiting waiting = createWaiting(alreadyBookedReservation, reservationDbService.findMemberById(memberId));
+        Member member = reservationDbService.findMemberById(memberId);
+        Waiting waiting = createWaiting(alreadyBookedReservation, member);
 
-        validateAlreadyReservedMember(waiting, alreadyBookedReservation);
-        validateDuplicatedWaiting(waiting);
+        validateAlreadyReservedMember(member, alreadyBookedReservation.getReservationSlot());
+        validateDuplicatedWaiting(member, alreadyBookedReservation);
 
-        alreadyBookedReservation.addWaiting(waiting);
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         return new WaitingResponse(savedWaiting);
     }
 
     public WaitingResponses findAllWaitings() {
-        List<WaitingResponse> waitingResponses = reservationDbService.findAllReservation().stream()
-                .flatMap(reservation -> reservation.getWaitings().stream())
+        // TODO 배치 처리 고민해보기
+        List<WaitingResponse> waitingResponses = waitingRepository.findAll()
+                .stream()
                 .map(WaitingResponse::new)
                 .toList();
         return new WaitingResponses(waitingResponses);
     }
 
     public void deleteWaiting(long id) {
-        Waiting waiting = findWaitingById(id);
-        waiting.delete();
-        waitingRepository.delete(waiting);
+        waitingRepository.delete(findWaitingById(id));
     }
 
     public void deleteUserWaiting(long waitingId, long memberId) {
         Member member = reservationDbService.findMemberById(memberId);
         Waiting waiting = findWaitingById(waitingId);
-
-        if (!member.hasWaiting(waiting)) {
-            throw new RoomEscapeBusinessException("본인의 대기가 아니면 삭제할 수 없습니다.");
-        }
+        validateWaitingOwn(waiting, member);
         waitingRepository.delete(waiting);
     }
 
-    private void validateAlreadyReservedMember(Waiting waiting, Reservation alreadyBookedReservation) {
-        Member requestMember = waiting.getMember();
-        Member alreadyBookedMember = alreadyBookedReservation.getMember();
+    private void validateWaitingOwn(Waiting waiting, Member member) {
+        if (!waitingRepository.existsByWaitingAndMember(waiting, member)) {
+            throw new RoomEscapeBusinessException("본인의 대기가 아니면 삭제할 수 없습니다.");
+        }
+    }
 
-        if (requestMember.equals(alreadyBookedMember)) {
+    private void validateAlreadyReservedMember(Member member, ReservationSlot slot) {
+        if (reservationRepository.existsByMemberAndReservationSlot(member, slot)) {
             throw new RoomEscapeBusinessException("예약에 성공한 유저는 대기를 요청할 수 없습니다.");
         }
     }
 
-    private void validateDuplicatedWaiting(Waiting waiting) {
-        if (waiting.getMember().hasWaiting(waiting)) {
+    private void validateDuplicatedWaiting(Member member, Reservation reservation) {
+        if (waitingRepository.existsByMemberAndReservation(member, reservation)) {
             throw new RoomEscapeBusinessException("중복 예약 대기는 불가합니다.");
         }
     }

@@ -76,7 +76,7 @@ class AdminWaitingControllerTest extends IntegrationTestSupport {
                             .userReservationResponses();
 
                     boolean hasReservation = userReservationResponses.stream()
-                            .filter(response -> response.status().equals(RESERVED.getMessage()))
+                            .filter(response -> response.status().equals(RESERVED.name()))
                             .anyMatch(response -> createdId.equals(String.valueOf(response.id())));
 
                     assertThat(hasReservation).isTrue();
@@ -139,7 +139,7 @@ class AdminWaitingControllerTest extends IntegrationTestSupport {
                             .userReservationResponses();
 
                     boolean hasWaiting = userReservationResponses.stream()
-                            .filter(response -> response.status().contains(WAITING.getMessage()))
+                            .filter(response -> response.status().contains(WAITING.name()))
                             .anyMatch(response -> createdWaitingId == response.id());
 
                     assertThat(hasWaiting).isFalse();

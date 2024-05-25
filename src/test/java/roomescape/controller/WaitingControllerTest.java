@@ -51,7 +51,7 @@ class WaitingControllerTest extends IntegrationTestSupport {
 
                     int waitingSize = userReservationResponses
                             .stream()
-                            .filter(response -> response.status().contains(WAITING.getMessage()))
+                            .filter(response -> response.status().contains(WAITING.name()))
                             .toList()
                             .size();
 
@@ -114,6 +114,20 @@ class WaitingControllerTest extends IntegrationTestSupport {
                             .statusCode(200)
                             .extract().as(WaitingResponse.class)
                             .id();
+                }),
+                dynamicTest("중복 예약 대기는 불가하다.", () -> {
+                    Map<String, Object> params = Map.of(
+                            "date", LocalDate.now().plusDays(1L).toString(),
+                            "timeId", 1L,
+                            "themeId", 1L);
+
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", USER2_TOKEN)
+                            .body(params)
+                            .when().post("/waitings")
+                            .then().log().all()
+                            .statusCode(400);
                 }),
                 dynamicTest("유저는 다른 유저의 예약 대기를 삭제할 수 없다.", () -> {
                     RestAssured.given().log().all()

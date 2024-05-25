@@ -8,6 +8,6 @@ public record MemberResponse(
         String role
 ) {
     public static MemberResponse from(Member member) {
-        return new MemberResponse(member.getId(), member.getName(), member.getRole().name());
+        return new MemberResponse(member.getId(), member.getName(), member.getRole());
     }
 }
