@@ -1,8 +1,8 @@
-package roomescape.registration.waiting.dto;
+package roomescape.registration.domain.waiting.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.registration.waiting.Waiting;
+import roomescape.registration.domain.waiting.domain.Waiting;
 
 public record WaitingResponse(
         long id,

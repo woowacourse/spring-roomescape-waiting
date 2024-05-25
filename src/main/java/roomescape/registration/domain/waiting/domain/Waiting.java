@@ -1,4 +1,4 @@
-package roomescape.registration.waiting;
+package roomescape.registration.domain.waiting.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

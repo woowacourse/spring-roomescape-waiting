@@ -1,4 +1,4 @@
-package roomescape.registration.waiting.service;
+package roomescape.registration.domain.waiting.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -6,12 +6,12 @@ import roomescape.exception.RoomEscapeException;
 import roomescape.exception.model.WaitingExceptionCode;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.registration.reservation.repository.ReservationRepository;
-import roomescape.registration.waiting.Waiting;
-import roomescape.registration.waiting.WaitingWithRank;
-import roomescape.registration.waiting.dto.WaitingRequest;
-import roomescape.registration.waiting.dto.WaitingResponse;
-import roomescape.registration.waiting.repository.WaitingRepository;
+import roomescape.registration.domain.reservation.repository.ReservationRepository;
+import roomescape.registration.domain.waiting.domain.Waiting;
+import roomescape.registration.domain.waiting.domain.WaitingWithRank;
+import roomescape.registration.domain.waiting.dto.WaitingRequest;
+import roomescape.registration.domain.waiting.dto.WaitingResponse;
+import roomescape.registration.domain.waiting.repository.WaitingRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -59,6 +59,11 @@ public class WaitingService {
         return waitings.stream()
                 .map(WaitingResponse::from)
                 .toList();
+    }
+
+    public Waiting findWaitingById(long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeException(WaitingExceptionCode.WAITING_NOT_EXIST_EXCEPTION));
     }
 
     public List<WaitingWithRank> findMemberWaitingWithRank(long memberId) {

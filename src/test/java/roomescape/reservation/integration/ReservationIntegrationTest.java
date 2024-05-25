@@ -10,7 +10,7 @@ import org.springframework.http.ResponseCookie;
 import roomescape.auth.domain.Token;
 import roomescape.auth.provider.CookieProvider;
 import roomescape.model.IntegrationTest;
-import roomescape.registration.reservation.dto.ReservationRequest;
+import roomescape.registration.domain.reservation.dto.ReservationRequest;
 
 class ReservationIntegrationTest extends IntegrationTest {
 

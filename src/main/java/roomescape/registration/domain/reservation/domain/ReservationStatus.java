@@ -1,4 +1,4 @@
-package roomescape.registration.reservation.domain;
+package roomescape.registration.domain.reservation.domain;
 
 public enum ReservationStatus {
 

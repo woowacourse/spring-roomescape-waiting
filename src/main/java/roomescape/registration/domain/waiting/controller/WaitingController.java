@@ -1,4 +1,4 @@
-package roomescape.registration.waiting.controller;
+package roomescape.registration.domain.waiting.controller;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
-import roomescape.registration.waiting.dto.WaitingRequest;
-import roomescape.registration.waiting.dto.WaitingResponse;
-import roomescape.registration.waiting.service.WaitingService;
+import roomescape.registration.domain.waiting.service.WaitingService;
+import roomescape.registration.domain.waiting.dto.WaitingRequest;
+import roomescape.registration.domain.waiting.dto.WaitingResponse;
 
 @RestController
 public class WaitingController {
@@ -25,7 +25,7 @@ public class WaitingController {
 
     @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> waitingSave(@RequestBody WaitingRequest waitingRequest,
-                                                         @LoginMemberId long memberId) {
+                                                       @LoginMemberId long memberId) {
         WaitingResponse waiting = waitingService.addWaiting(waitingRequest, memberId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(waiting);

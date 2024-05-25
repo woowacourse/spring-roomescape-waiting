@@ -1,4 +1,4 @@
-package roomescape.registration.waiting.dto;
+package roomescape.registration.domain.waiting.dto;
 
 import java.time.LocalDate;
 

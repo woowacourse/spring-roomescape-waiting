@@ -1,4 +1,4 @@
-package roomescape.registration.reservation.controller;
+package roomescape.registration.domain.reservation.controller;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
-import roomescape.registration.reservation.service.ReservationService;
-import roomescape.registration.reservation.dto.ReservationRequest;
-import roomescape.registration.reservation.dto.ReservationResponse;
-import roomescape.registration.reservation.dto.ReservationTimeAvailabilityResponse;
+import roomescape.registration.domain.reservation.service.ReservationService;
+import roomescape.registration.domain.reservation.dto.ReservationRequest;
+import roomescape.registration.domain.reservation.dto.ReservationResponse;
+import roomescape.registration.domain.reservation.dto.ReservationTimeAvailabilityResponse;
 
 @RestController
 @RequestMapping("/reservations")
@@ -49,7 +49,7 @@ public class ReservationController {
 
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> reservationRemove(@PathVariable long reservationId) {
-        reservationService.removeReservations(reservationId);
+        reservationService.removeReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

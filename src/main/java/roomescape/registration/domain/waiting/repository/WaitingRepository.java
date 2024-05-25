@@ -1,17 +1,17 @@
-package roomescape.registration.waiting.repository;
+package roomescape.registration.domain.waiting.repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import roomescape.registration.waiting.Waiting;
-import roomescape.registration.waiting.WaitingWithRank;
+import roomescape.registration.domain.waiting.domain.WaitingWithRank;
+import roomescape.registration.domain.waiting.domain.Waiting;
 
 public interface WaitingRepository extends CrudRepository<Waiting, Long> {
 
     List<Waiting> findAll();
 
-    @Query("SELECT new roomescape.registration.waiting.WaitingWithRank(" +
+    @Query("SELECT new roomescape.registration.domain.waiting.domain.WaitingWithRank(" +
             "    w, " +
             "    (SELECT COUNT(w2) + 1" +
             "     FROM Waiting w2 " +

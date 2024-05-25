@@ -8,8 +8,8 @@ import roomescape.auth.annotation.LoginMemberId;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
 import roomescape.registration.dto.RegistrationInfo;
-import roomescape.registration.reservation.service.ReservationService;
-import roomescape.registration.waiting.service.WaitingService;
+import roomescape.registration.domain.reservation.service.ReservationService;
+import roomescape.registration.domain.waiting.service.WaitingService;
 
 // todo : 멤버별 예약은 멤버에 있는게 맞을까 예약에 있는게 맞을까...흠
 // 예약 컨트롤러에 있는게 맞는것 같은데 그럼 RegistrationController만든담에 reservationService, waitingService 필드로 갖게 해야됨.

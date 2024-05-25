@@ -16,15 +16,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.registration.reservation.service.ReservationService;
+import roomescape.registration.domain.reservation.service.ReservationService;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.vo.Name;
 import roomescape.member.domain.MemberRole;
-import roomescape.registration.reservation.domain.Reservation;
-import roomescape.registration.reservation.dto.ReservationRequest;
-import roomescape.registration.reservation.dto.ReservationResponse;
-import roomescape.registration.reservation.repository.ReservationRepository;
+import roomescape.registration.domain.reservation.domain.Reservation;
+import roomescape.registration.domain.reservation.dto.ReservationRequest;
+import roomescape.registration.domain.reservation.dto.ReservationResponse;
+import roomescape.registration.domain.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -98,6 +98,6 @@ class ReservationServiceTest {
                 .when(reservationRepository)
                 .deleteById(reservation.getId());
 
-        assertDoesNotThrow(() -> reservationService.removeReservations(reservation.getId()));
+        assertDoesNotThrow(() -> reservationService.removeReservation(reservation.getId()));
     }
 }

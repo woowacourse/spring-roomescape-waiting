@@ -2,10 +2,10 @@ package roomescape.registration.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.registration.reservation.domain.ReservationStatus;
-import roomescape.registration.reservation.dto.ReservationResponse;
-import roomescape.registration.waiting.Waiting;
-import roomescape.registration.waiting.WaitingWithRank;
+import roomescape.registration.domain.reservation.domain.ReservationStatus;
+import roomescape.registration.domain.reservation.dto.ReservationResponse;
+import roomescape.registration.domain.waiting.domain.Waiting;
+import roomescape.registration.domain.waiting.domain.WaitingWithRank;
 
 /**
  * todo: 상태를 어디서 지정할까?

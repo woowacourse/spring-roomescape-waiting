@@ -1,4 +1,4 @@
-package roomescape.registration.waiting.controller;
+package roomescape.registration.domain.waiting.controller;
 
 
 import static org.mockito.Mockito.when;
@@ -19,9 +19,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.model.ControllerTest;
-import roomescape.registration.waiting.Waiting;
-import roomescape.registration.waiting.dto.WaitingResponse;
-import roomescape.registration.waiting.service.WaitingService;
+import roomescape.registration.domain.waiting.domain.Waiting;
+import roomescape.registration.domain.waiting.dto.WaitingResponse;
+import roomescape.registration.domain.waiting.service.WaitingService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.vo.Name;
