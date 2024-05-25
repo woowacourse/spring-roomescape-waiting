@@ -95,12 +95,24 @@ public class Reservation implements Comparable<Reservation> {
         return this.getLocalDateTime().isBefore(base);
     }
 
+    public boolean isAfter(LocalDateTime base) {
+        return this.getLocalDateTime().isAfter(base);
+    }
+
     public boolean isBetween(Duration duration) {
         return duration.contains(date);
     }
 
     public boolean isReservationTimeOf(long id) {
         return this.time.isIdOf(id);
+    }
+
+    public boolean isMemberIdOf(long memberId) {
+        return member.getId() == memberId;
+    }
+
+    public boolean isThemeIdOf(long themeId) {
+        return theme.getId() == themeId;
     }
 
     public boolean isSameReservation(Reservation beforeSave) {
