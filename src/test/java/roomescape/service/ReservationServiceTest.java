@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.TestFixture;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
@@ -18,6 +19,7 @@ import roomescape.dto.theme.ReservedThemeResponse;
 import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -76,7 +78,8 @@ class ReservationServiceTest {
     @MethodSource("invalidLocalDate")
     @DisplayName("예약 날짜가 현재 날짜 이후가 아닌 경우 예외가 발생한다.")
     void throwExceptionWhenInvalidDate(final LocalDate invalidDate) {
-        assertThatThrownBy(() -> reservationService.create(new Reservation(TestFixture.MEMBER_CAT(), invalidDate, RESERVATION_TIME_SIX(), TestFixture.THEME_COMIC())))
+        ReservationTime oneHourBefore = new ReservationTime(LocalTime.now().minusHours(1L).toString());
+        assertThatThrownBy(() -> reservationService.create(new Reservation(TestFixture.MEMBER_CAT(), invalidDate, oneHourBefore, TestFixture.THEME_COMIC())))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
