@@ -12,10 +12,13 @@ import jakarta.persistence.Id;
 public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "name")
     private String name;
+    @Column(name = "description")
     private String description;
+    @Column(name = "thumbnail")
     private String thumbnail;
 
     public Theme() {

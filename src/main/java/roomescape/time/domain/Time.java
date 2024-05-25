@@ -17,8 +17,9 @@ public class Time {
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "start_at")
     private LocalTime startAt;
 
     public Time() {
