@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 @SqlMergeMode(MergeMode.MERGE)
 @Sql("/init/truncate.sql")
 class MemberReservationTest {
+    private static final Map<String, String> TOKEN_CACHE = new HashMap<>();
 
     @LocalServerPort
     private int port;
@@ -30,13 +33,21 @@ class MemberReservationTest {
     }
 
     private String getToken(String email, String password) {
+        if (TOKEN_CACHE.containsKey(email)) {
+            return TOKEN_CACHE.get(email);
+        }
+
         String requestBody = String.format("{\"email\":\"%s\", \"password\":\"%s\"}", email, password);
 
-        return given()
-                .body(requestBody).contentType("application/json")
+        String token = given().log().all()
+                .contentType("application/json")
+                .body(requestBody)
                 .when().post("/login")
-                .then()
+                .then().log().all().statusCode(200)
                 .extract().cookie("token");
+
+        TOKEN_CACHE.put(email, token);
+        return token;
     }
 
     @DisplayName("동일한 예약이 존재하지 않는 상황에, 예약 요청을 보내면, resolved 예약된다")

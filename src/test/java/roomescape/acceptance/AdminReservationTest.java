@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,8 @@ import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 @Sql("/init/truncate.sql")
 class AdminReservationTest {
 
+    private static final Map<String, String> TOKEN_CACHE = new HashMap<>();
+
     @LocalServerPort
     private int port;
 
@@ -29,14 +33,21 @@ class AdminReservationTest {
     }
 
     private String getToken(String email, String password) {
+        if (TOKEN_CACHE.containsKey(email)) {
+            return TOKEN_CACHE.get(email);
+        }
+
         String requestBody = String.format("{\"email\":\"%s\", \"password\":\"%s\"}", email, password);
 
-        return given().log().all()
+        String token = given().log().all()
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/login")
                 .then().log().all().statusCode(200)
                 .extract().cookie("token");
+
+        TOKEN_CACHE.put(email, token);
+        return token;
     }
 
     @DisplayName("어드민이 예약을 추가하면, 예약이 추가된다")
