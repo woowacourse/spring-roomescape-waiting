@@ -32,4 +32,12 @@ class WaitingRepositoryTest extends RepositoryTest {
         assertThat(waitingRepository.findByMember_idWithRank(3L))
                 .isEqualTo(List.of(new WaitingWithOrder(waiting, 1L)));
     }
+
+    @DisplayName("예약 대기 중 첫번째 예약 대기를 가져올 수 있다.")
+    @Test
+    void findFirstByReservation_idOrderByCreatedAtAscTest() {
+        Waiting waiting = waitingRepository.findFirstByReservation_idOrderByCreatedAtAsc(1L).get();
+
+        assertThat(waiting.getId()).isEqualTo(1L);
+    }
 }

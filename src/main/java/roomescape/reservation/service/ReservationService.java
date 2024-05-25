@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -15,6 +16,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.TimeRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -22,16 +25,19 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     // TODO: CRD별로 분리해서 다른 서비스에서 재사용 하도록 구현해보기
     public ReservationService(ReservationRepository reservationRepository,
                               MemberRepository memberRepository,
                               TimeRepository timeRepository,
-                              ThemeRepository themeRepository) {
+                              ThemeRepository themeRepository,
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findReservations() {
@@ -108,7 +114,17 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
+        waitingRepository.findFirstByReservation_idOrderByCreatedAtAsc(id)
+                .ifPresentOrElse(this::promptWaiting, () -> reservationRepository.deleteById(id));
+
+    }
+
+    private void promptWaiting(Waiting waiting) {
+        Reservation promptedReservation = waiting.promptToReservation();
+
+        reservationRepository.save(promptedReservation);
+        waitingRepository.deleteById(waiting.getId());
     }
 }

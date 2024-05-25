@@ -53,6 +53,16 @@ public class Waiting {
         }
     }
 
+    public Reservation promptToReservation() {
+        return new Reservation(
+                reservation.getId(),
+                member,
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
+    }
+
     public Long getId() {
         return id;
     }
