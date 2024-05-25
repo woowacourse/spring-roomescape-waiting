@@ -11,7 +11,7 @@ spring:
         format_sql: true
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     open-in-view: false
 
   sql:
