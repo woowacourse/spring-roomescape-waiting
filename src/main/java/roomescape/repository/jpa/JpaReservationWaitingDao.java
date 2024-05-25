@@ -9,6 +9,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
 
 public interface JpaReservationWaitingDao extends JpaRepository<ReservationWaiting, Long> {
+    @EntityGraph(attributePaths = {"reservation", "waitingMember"})
     Optional<ReservationWaiting> findTopByReservationOrderByCreateAt(Reservation reservation);
 
     @EntityGraph(attributePaths = {"reservation", "waitingMember"})
