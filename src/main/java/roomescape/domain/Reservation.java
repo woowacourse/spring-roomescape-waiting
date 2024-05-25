@@ -87,12 +87,12 @@ public class Reservation extends BaseEntity implements Comparable<Reservation> {
     }
 
     public void validatePastTimeReservation() {
-        if (this.isBefore(LocalDateTime.now())) {
+        if (isBefore(LocalDateTime.now())) {
             throw new RoomescapeException(PAST_TIME_RESERVATION);
         }
     }
 
-    public boolean isBefore(LocalDateTime base) {
+    private boolean isBefore(LocalDateTime base) {
         return LocalDateTime.of(date, getTime()).isBefore(base);
     }
 
