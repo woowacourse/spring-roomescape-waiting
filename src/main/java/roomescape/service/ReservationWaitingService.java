@@ -48,7 +48,6 @@ public class ReservationWaitingService {
     @Transactional
     public ReservationResponse addReservationWaiting(CreateReservationRequest request) {
         Reservation reservation = getReservation(request);
-        reservation.validateFutureReservation(LocalDateTime.now(clock));
         Member waitingMember = getMember(request.memberId());
         reservation.validateOwnerNotSameAsWaitingMember(waitingMember);
         List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findAllByReservation(reservation);
@@ -56,6 +55,7 @@ public class ReservationWaitingService {
         validateAlreadyWaitingMember(reservationWaitings, waitingMember);
         ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
                 request.toReservationWaiting(reservation, waitingMember));
+        reservationWaiting.validateFutureReservationWaiting(LocalDateTime.now(clock));
         return ReservationResponse.from(reservationWaiting);
     }
 

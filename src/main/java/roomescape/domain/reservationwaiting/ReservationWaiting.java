@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.AuditingEntity;
@@ -55,6 +56,10 @@ public class ReservationWaiting extends AuditingEntity {
         }
     }
 
+    public void validateFutureReservationWaiting(LocalDateTime now) {
+        reservation.validateFutureReservation(now);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -70,8 +75,6 @@ public class ReservationWaiting extends AuditingEntity {
     public int hashCode() {
         return Objects.hash(id);
     }
-
-    // todo 시간 검증
 
     public Long getId() {
         return id;
