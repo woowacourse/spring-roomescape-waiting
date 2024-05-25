@@ -10,15 +10,19 @@ public class Member {
     private Long id;
 
     @Embedded
+    @AttributeOverride(name = "name", column = @Column(nullable = false))
     private MemberName name;
 
     @Embedded
+    @AttributeOverride(name = "email", column = @Column(nullable = false))
     private MemberEmail email;
 
     @Embedded
+    @AttributeOverride(name = "password", column = @Column(nullable = false))
     private MemberPassword password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MemberRole role;
 
     public Member() {
@@ -86,5 +90,26 @@ public class Member {
 
     public MemberRole getRole() {
         return role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        if (id == null || member.id == null) {
+            throw new IllegalArgumentException("ID가 비어 있을 경우 equals()를 호출할 수 없습니다.");
+        }
+
+        return id.equals(member.id);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id == null) {
+            throw new IllegalArgumentException("ID가 비어 있을 경우 hashCode()를 호출할 수 없습니다.");
+        }
+
+        return id.hashCode();
     }
 }

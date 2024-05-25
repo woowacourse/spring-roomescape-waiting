@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.ReservationExistsException;
-import roomescape.service.request.ThemeAppRequest;
+import roomescape.service.request.ThemeSaveDto;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -36,7 +36,7 @@ class ThemeServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     void save_IllegalName(String name) {
-        assertThatThrownBy(() -> themeService.save(new ThemeAppRequest(name, validDescription, validThumbnail)))
+        assertThatThrownBy(() -> themeService.save(new ThemeSaveDto(name, validDescription, validThumbnail)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -44,7 +44,7 @@ class ThemeServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     void save_IllegalDescription(String description) {
-        assertThatThrownBy(() -> themeService.save(new ThemeAppRequest(validName, description, validThumbnail)))
+        assertThatThrownBy(() -> themeService.save(new ThemeSaveDto(validName, description, validThumbnail)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -53,7 +53,7 @@ class ThemeServiceTest {
     @NullAndEmptySource
     @ValueSource(strings = {"ftp://hello.jpg"})
     void save_IllegalThumbnail(String thumbnail) {
-        assertThatThrownBy(() -> themeService.save(new ThemeAppRequest(validName, validDescription, thumbnail)))
+        assertThatThrownBy(() -> themeService.save(new ThemeSaveDto(validName, validDescription, thumbnail)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -63,7 +63,7 @@ class ThemeServiceTest {
         when(themeRepository.existsByName(validName))
                 .thenReturn(true);
 
-        assertThatThrownBy(() -> themeService.save(new ThemeAppRequest(validName, validDescription, validThumbnail)))
+        assertThatThrownBy(() -> themeService.save(new ThemeSaveDto(validName, validDescription, validThumbnail)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

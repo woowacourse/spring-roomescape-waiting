@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.*;
 import roomescape.infrastructure.MemberRepository;
-import roomescape.service.request.MemberSignUpAppRequest;
-import roomescape.service.response.MemberAppResponse;
+import roomescape.service.request.MemberSignUpDto;
+import roomescape.service.response.MemberDto;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -32,15 +32,15 @@ class MemberAuthServiceTest {
     @DisplayName("회원을 저장한다.")
     @Test
     void signUp() {
-        MemberSignUpAppRequest request = new MemberSignUpAppRequest(VALID_USER_NAME.getName(),
+        MemberSignUpDto request = new MemberSignUpDto(VALID_USER_NAME.getName(),
                 VALID_USER_EMAIL.getEmail(), VALID_USER_PASSWORD.getPassword());
 
         when(memberRepository.save(any(Member.class)))
                 .thenReturn(
                         new Member(1L, VALID_USER_NAME, VALID_USER_EMAIL, VALID_USER_PASSWORD, MemberRole.USER));
 
-        MemberAppResponse actual = memberAuthService.signUp(request);
-        MemberAppResponse expected = new MemberAppResponse(1L, VALID_USER_NAME.getName(),
+        MemberDto actual = memberAuthService.signUp(request);
+        MemberDto expected = new MemberDto(1L, VALID_USER_NAME.getName(),
                 MemberRole.USER.name());
 
         assertThat(actual).isEqualTo(expected);
@@ -49,7 +49,7 @@ class MemberAuthServiceTest {
     @DisplayName("같은 이메일로 중복 회원가입을 시도하면 예외가 발생한다.")
     @Test
     void signUp_duplicatedEmail() {
-        MemberSignUpAppRequest request = new MemberSignUpAppRequest(VALID_USER_NAME.getName(),
+        MemberSignUpDto request = new MemberSignUpDto(VALID_USER_NAME.getName(),
                 VALID_USER_EMAIL.getEmail(), VALID_USER_PASSWORD.getPassword());
 
         when(memberRepository.existsByEmail(VALID_USER_EMAIL))
@@ -66,8 +66,8 @@ class MemberAuthServiceTest {
                 .thenReturn(Optional.of(
                         new Member(1L, VALID_USER_NAME, VALID_USER_EMAIL, VALID_USER_PASSWORD, MemberRole.USER)));
 
-        MemberAppResponse actual = memberAuthService.findMemberByEmail(VALID_USER_EMAIL.getEmail());
-        MemberAppResponse expected = new MemberAppResponse(1L, VALID_USER_NAME.getName(),
+        MemberDto actual = memberAuthService.findMemberByEmail(VALID_USER_EMAIL.getEmail());
+        MemberDto expected = new MemberDto(1L, VALID_USER_NAME.getName(),
                 MemberRole.USER.name());
 
         assertThat(actual).isEqualTo(expected);
@@ -93,9 +93,9 @@ class MemberAuthServiceTest {
         when(memberRepository.findAll())
                 .thenReturn(List.of(member1, member2));
 
-        List<MemberAppResponse> actual = memberAuthService.findAll();
-        List<MemberAppResponse> expected = List.of(new MemberAppResponse(1L, "회원1", "USER"),
-                new MemberAppResponse(2L, "관리자", "ADMIN"));
+        List<MemberDto> actual = memberAuthService.findAll();
+        List<MemberDto> expected = List.of(new MemberDto(1L, "회원1", "USER"),
+                new MemberDto(2L, "관리자", "ADMIN"));
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }

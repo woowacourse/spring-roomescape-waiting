@@ -12,10 +12,10 @@ import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
 import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.PastReservationException;
-import roomescape.service.request.ReservationAppRequest;
-import roomescape.service.response.ReservationAppResponse;
-import roomescape.service.response.ReservationTimeAppResponse;
-import roomescape.service.response.ThemeAppResponse;
+import roomescape.service.request.ReservationSaveDto;
+import roomescape.service.response.ReservationDto;
+import roomescape.service.response.ReservationTimeDto;
+import roomescape.service.response.ThemeDto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -68,16 +68,15 @@ class ReservationServiceTest {
                         VALID_THEME)
                 );
 
-        ReservationAppRequest request = new ReservationAppRequest(VALID_RESERVATION_DATE.getDate().toString(), timeId,
+        ReservationSaveDto request = new ReservationSaveDto(VALID_RESERVATION_DATE.getDate().toString(), timeId,
                 themeId, memberId);
-        ReservationAppResponse actual = reservationService.save(request);
-        ReservationAppResponse expected = new ReservationAppResponse(
+        ReservationDto actual = reservationService.save(request);
+        ReservationDto expected = new ReservationDto(
                 reservationId,
                 reservation.getMember().getName().getName(),
-                reservation.getReservationDate(),
-                ReservationTimeAppResponse.from(reservation.getReservationTime()),
-                ThemeAppResponse.from(reservation.getTheme()),
-                ReservationStatus.RESERVATION.getStatus());
+                reservation.getDate(),
+                ReservationTimeDto.from(reservation.getTime()),
+                ThemeDto.from(reservation.getTheme()));
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -85,7 +84,7 @@ class ReservationServiceTest {
     @DisplayName("실패: 존재하지 않는 시간,테마,사용자 ID 입력 시 예외가 발생한다.")
     @Test
     void save_TimeIdDoesntExist() {
-        assertThatThrownBy(() -> reservationService.save(new ReservationAppRequest("2030-12-31", 1L, 1L, 1L)))
+        assertThatThrownBy(() -> reservationService.save(new ReservationSaveDto("2030-12-31", 1L, 1L, 1L)))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -105,7 +104,7 @@ class ReservationServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(
-                () -> reservationService.save(new ReservationAppRequest(rawDate, timeId, themeId, memberId)))
+                () -> reservationService.save(new ReservationSaveDto(rawDate, timeId, themeId, memberId)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -123,7 +122,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(
                 () -> reservationService.save(
-                        new ReservationAppRequest(yesterday.toString(), timeId, themeId, memberId))
+                        new ReservationSaveDto(yesterday.toString(), timeId, themeId, memberId))
         ).isInstanceOf(PastReservationException.class);
     }
 
@@ -145,7 +144,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(
                 () -> reservationService.save(
-                        new ReservationAppRequest(today.toString(), timeId, themeId, memberId))
+                        new ReservationSaveDto(today.toString(), timeId, themeId, memberId))
         ).isInstanceOf(PastReservationException.class);
     }
 }

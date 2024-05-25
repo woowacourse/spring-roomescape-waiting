@@ -25,22 +25,33 @@ VALUES ('09:00'),
 INSERT INTO member (name, email, password, role)
 VALUES ('aaa', '111@aaa.com', 'asd', 'USER'),
        ('teco', 'admin@gmail.com', 'asd', 'ADMIN'),
-       ('potato', 'user@gmail.com', 'asd', 'USER');
+       ('potato', 'user@gmail.com', 'asd', 'USER'),
+       ('potato1', 'user2@gmail.com', 'asd', 'USER'),
+       ('potato2', 'user3@gmail.com', 'asd', 'USER');
 
-INSERT INTO reservation(date, time_id, theme_id, member_id, status)
-VALUES (TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 1, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 1, 2, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 3, 1, 3, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 2, 1, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 3, 2, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 3, 4, 3, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 5, 1, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 6, 2, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 3, 7, 3, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 8, 1, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 9, 2, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 10, 3, 'RESERVATION'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 11, 1, 'RESERVATION'),
-       (TIMESTAMPADD(DAY , -3, CURRENT_DATE), 1, 2, 1, 'RESERVATION'),
-       (TIMESTAMPADD(DAY , -2, CURRENT_DATE), 1, 7, 1, 'RESERVATION'),
-       (TIMESTAMPADD(DAY , -2, CURRENT_DATE), 1, 2, 1, 'RESERVATION');
+INSERT INTO reservation(date, time_id, theme_id, member_id)
+VALUES (TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 1),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 1, 2),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 3, 1, 3),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 2, 1),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 3, 2),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 3, 4, 3),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 5, 1),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 6, 2),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 3, 7, 3),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 8, 1),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 9, 2),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 10, 3),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 11, 1),
+       (TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 2, 1),
+       (TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 7, 1),
+       (TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 2, 1),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 1),
+       (TIMESTAMPADD(DAY, 1, CURRENT_DATE), 1, 1, 3),
+       (TIMESTAMPADD(DAY, 3, CURRENT_DATE), 1, 1, 1);
+
+INSERT INTO reservation_waiting(date, time_id, theme_id, member_id, status)
+VALUES (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 3, 'ALLOWED'),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 1, 'ALLOWED'),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 4, 'ALLOWED'),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 2, 'ALLOWED');

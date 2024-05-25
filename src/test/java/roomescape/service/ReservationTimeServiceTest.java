@@ -14,8 +14,8 @@ import roomescape.domain.ReservationTime;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
 import roomescape.service.exception.ReservationExistsException;
-import roomescape.service.request.ReservationTimeAppRequest;
-import roomescape.service.response.ReservationTimeAppResponse;
+import roomescape.service.request.ReservationTimeSaveDto;
+import roomescape.service.response.ReservationTimeDto;
 
 import java.time.LocalTime;
 
@@ -45,8 +45,8 @@ class ReservationTimeServiceTest {
         when(reservationTimeRepository.save(any(ReservationTime.class)))
                 .thenReturn(reservationTime);
 
-        ReservationTimeAppResponse actual = reservationTimeService.save(new ReservationTimeAppRequest(startAt));
-        ReservationTimeAppResponse expected = ReservationTimeAppResponse.from(reservationTime);
+        ReservationTimeDto actual = reservationTimeService.save(new ReservationTimeSaveDto(startAt));
+        ReservationTimeDto expected = ReservationTimeDto.from(reservationTime);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -56,7 +56,7 @@ class ReservationTimeServiceTest {
     @ValueSource(strings = {"24:00", "-1:00", "10:60"})
     @NullAndEmptySource
     void save_IllegalTimeFormat(String time) {
-        assertThatThrownBy(() -> reservationTimeService.save(new ReservationTimeAppRequest(time)))
+        assertThatThrownBy(() -> reservationTimeService.save(new ReservationTimeSaveDto(time)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -68,7 +68,7 @@ class ReservationTimeServiceTest {
         when(reservationTimeRepository.existsByStartAt(LocalTime.parse(rawTime)))
                 .thenReturn(true);
 
-        assertThatThrownBy(() -> reservationTimeService.save(new ReservationTimeAppRequest(rawTime)))
+        assertThatThrownBy(() -> reservationTimeService.save(new ReservationTimeSaveDto(rawTime)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

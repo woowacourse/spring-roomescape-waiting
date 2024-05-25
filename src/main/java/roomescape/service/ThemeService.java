@@ -6,8 +6,8 @@ import roomescape.domain.Theme;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.ReservationExistsException;
-import roomescape.service.request.ThemeAppRequest;
-import roomescape.service.response.ThemeAppResponse;
+import roomescape.service.request.ThemeSaveDto;
+import roomescape.service.response.ThemeDto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,15 +26,15 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ThemeAppResponse save(ThemeAppRequest request) {
+    public ThemeDto save(ThemeSaveDto request) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
         validateDuplication(request);
         Theme savedTheme = themeRepository.save(theme);
 
-        return ThemeAppResponse.from(savedTheme);
+        return ThemeDto.from(savedTheme);
     }
 
-    private void validateDuplication(ThemeAppRequest request) {
+    private void validateDuplication(ThemeSaveDto request) {
         if (themeRepository.existsByName(request.name())) {
             throw new IllegalArgumentException("이미 존재하는 테마 입니다.");
         }
@@ -47,18 +47,18 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public List<ThemeAppResponse> findAll() {
+    public List<ThemeDto> findAll() {
         return themeRepository.findAll().stream()
-                .map(ThemeAppResponse::from)
+                .map(ThemeDto::from)
                 .toList();
     }
 
-    public List<ThemeAppResponse> findPopular() {
+    public List<ThemeDto> findPopular() {
         LocalDate from = LocalDate.now().minusDays(BASED_ON_PERIOD_POPULAR_THEME);
         LocalDate to = LocalDate.now().minusDays(1);
         return themeRepository.findMostReservedThemesInPeriod(from, to,
                         PageRequest.of(0, MAX_POPULAR_THEME_COUNT)).stream()
-                .map(ThemeAppResponse::from)
+                .map(ThemeDto::from)
                 .toList();
     }
 }

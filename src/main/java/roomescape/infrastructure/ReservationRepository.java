@@ -7,6 +7,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
@@ -20,4 +21,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     boolean existsByThemeId(Long id);
 
     List<Reservation> findAllByMemberId(Long id);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 }

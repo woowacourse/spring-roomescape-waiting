@@ -8,10 +8,10 @@ import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
 import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.PastReservationException;
-import roomescape.service.exception.ReservationSpecification;
-import roomescape.service.request.AdminSearchedReservationAppRequest;
-import roomescape.service.request.ReservationAppRequest;
-import roomescape.service.response.ReservationAppResponse;
+import roomescape.service.specification.ReservationSpecification;
+import roomescape.service.request.AdminSearchedReservationDto;
+import roomescape.service.request.ReservationSaveDto;
+import roomescape.service.response.ReservationDto;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -35,7 +35,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationAppResponse save(ReservationAppRequest request) {
+    public ReservationDto save(ReservationSaveDto request) {
         Member member = findMember(request.memberId());
         ReservationDate date = new ReservationDate(request.date());
         ReservationTime time = findTime(request.timeId());
@@ -46,7 +46,7 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        return ReservationAppResponse.from(savedReservation);
+        return new ReservationDto(savedReservation);
     }
 
     private ReservationTime findTime(Long timeId) {
@@ -80,26 +80,26 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<ReservationAppResponse> findAll() {
+    public List<ReservationDto> findAll() {
         return reservationRepository.findAll().stream()
-                .map(ReservationAppResponse::from)
+                .map(ReservationDto::new)
                 .toList();
     }
 
-    public List<ReservationAppResponse> findAllSearched(AdminSearchedReservationAppRequest request) {
+    public List<ReservationDto> findAllSearched(AdminSearchedReservationDto request) {
         Specification<Reservation> reservationSpecification = new ReservationSpecification().generate(request);
         List<Reservation> searchedReservations = reservationRepository.findAll(reservationSpecification);
 
         return searchedReservations.stream()
-                .map(ReservationAppResponse::from)
+                .map(ReservationDto::new)
                 .toList();
     }
 
-    public List<ReservationAppResponse> findByMemberId(Long id) {
+    public List<ReservationDto> findByMemberId(Long id) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
 
         return reservations.stream()
-                .map(ReservationAppResponse::from)
+                .map(ReservationDto::new)
                 .toList();
     }
 }

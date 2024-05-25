@@ -10,19 +10,20 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Member member;
 
     @Embedded
+    @AttributeOverride(name = "date", column = @Column(nullable = false))
     private ReservationDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Theme theme;
-
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
 
     public Reservation() {
     }
@@ -41,7 +42,6 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.RESERVATION;
     }
 
     private void validateMember(Member member) {
@@ -80,19 +80,15 @@ public class Reservation {
         return member;
     }
 
-    public ReservationDate getReservationDate() {
+    public ReservationDate getDate() {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
+    public ReservationTime getTime() {
         return time;
     }
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 }
