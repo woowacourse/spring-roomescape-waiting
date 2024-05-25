@@ -7,6 +7,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.waiting.domain.WaitingWithOrder;
 
 public record MyReservationWaitingResponse(
+        Long ownerId,
         String themeName,
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
@@ -18,6 +19,7 @@ public record MyReservationWaitingResponse(
 
     public static MyReservationWaitingResponse from(Reservation reservation) {
         return new MyReservationWaitingResponse(
+                reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
@@ -26,9 +28,10 @@ public record MyReservationWaitingResponse(
 
     public static MyReservationWaitingResponse from(WaitingWithOrder waitingWithOrder) {
         return new MyReservationWaitingResponse(
+                waitingWithOrder.getWaiting().getId(),
                 waitingWithOrder.getWaiting().getReservation().getTheme().getName(),
                 waitingWithOrder.getWaiting().getReservation().getDate(),
                 waitingWithOrder.getWaiting().getReservation().getTime().getStartAt(),
-                String.format(WAITING_STATUS, waitingWithOrder.getOrder()));
+                java.lang.String.format(WAITING_STATUS, waitingWithOrder.getOrder()));
     }
 }

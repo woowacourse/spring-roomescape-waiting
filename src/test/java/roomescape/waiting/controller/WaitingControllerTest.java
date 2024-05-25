@@ -144,4 +144,13 @@ class WaitingControllerTest {
                 .statusCode(400)
                 .body("errorMessage", is("존재하지 않는 예약에 대해 대기할 수 없습니다."));
     }
+
+    @DisplayName("삭제할 id를 받아서 DB에서 해당 예약 대기를 삭제 할 수 있다.")
+    @Test
+    void deleteReservation() {
+        RestAssured.given().log().all()
+                .when().delete("/waitings/1")
+                .then().log().all()
+                .statusCode(204);
+    }
 }

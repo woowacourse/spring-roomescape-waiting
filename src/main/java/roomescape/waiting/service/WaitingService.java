@@ -68,4 +68,8 @@ public class WaitingService {
             throw new IllegalArgumentException("중복으로 예약 대기를 할 수 없습니다.");
         }
     }
+
+    public void deleteWait(Long id) {
+        waitingRepository.deleteById(id);
+    }
 }
