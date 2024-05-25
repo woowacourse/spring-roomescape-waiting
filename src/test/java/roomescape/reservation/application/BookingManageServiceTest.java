@@ -1,17 +1,11 @@
 package roomescape.reservation.application;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import roomescape.common.ServiceTest;
 import roomescape.global.exception.ViolationException;
-import roomescape.member.application.MemberService;
-import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
 
 import java.util.List;
 
@@ -21,14 +15,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.MIA_RESERVATION;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
-import static roomescape.TestFixture.MIA_RESERVATION_TIME;
-import static roomescape.TestFixture.USER_ADMIN;
-import static roomescape.TestFixture.USER_MIA;
-import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
-class BookingSchedulerTest extends ServiceTest {
+class BookingManageServiceTest extends ReservationServiceTest {
     @Autowired
     @Qualifier("bookingManageService")
     private ReservationManageService bookingManageService;
@@ -39,28 +29,6 @@ class BookingSchedulerTest extends ServiceTest {
 
     @Autowired
     private BookingQueryService bookingQueryService;
-
-    @Autowired
-    private ReservationTimeService reservationTimeService;
-
-    @Autowired
-    private ThemeService themeService;
-
-    @Autowired
-    private MemberService memberService;
-
-    private ReservationTime miaReservationTime;
-    private Theme wootecoTheme;
-    private Member mia;
-    private Member admin;
-
-    @BeforeEach
-    void setUp() {
-        this.miaReservationTime = reservationTimeService.create(new ReservationTime(MIA_RESERVATION_TIME));
-        this.wootecoTheme = themeService.create(WOOTECO_THEME());
-        this.mia = memberService.create(USER_MIA());
-        this.admin = memberService.create(USER_ADMIN());
-    }
 
     @Test
     @DisplayName("예약을 생성한다.")

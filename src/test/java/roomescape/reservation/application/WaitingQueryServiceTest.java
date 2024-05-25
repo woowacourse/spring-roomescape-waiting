@@ -1,16 +1,10 @@
 package roomescape.reservation.application;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import roomescape.common.ServiceTest;
-import roomescape.member.application.MemberService;
-import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.WaitingReservation;
 
 import java.util.List;
@@ -19,17 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
-import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TOMMY_NAME;
 import static roomescape.TestFixture.TOMMY_RESERVATION;
 import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
-import static roomescape.TestFixture.USER_MIA;
-import static roomescape.TestFixture.USER_TOMMY;
-import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
-class WaitingBookingQueryServiceTest extends ServiceTest {
+class WaitingQueryServiceTest extends ReservationServiceTest {
     @Autowired
     private WaitingQueryService waitingQueryService;
 
@@ -40,28 +30,6 @@ class WaitingBookingQueryServiceTest extends ServiceTest {
     @Autowired
     @Qualifier("waitingManageService")
     private ReservationManageService waitingManageService;
-
-    @Autowired
-    private ReservationTimeService reservationTimeService;
-
-    @Autowired
-    private ThemeService themeService;
-
-    @Autowired
-    private MemberService memberService;
-
-    private ReservationTime miaReservationTime;
-    private Theme wootecoTheme;
-    private Member mia;
-    private Member tommy;
-
-    @BeforeEach
-    void setUp() {
-        this.miaReservationTime = reservationTimeService.create(new ReservationTime(MIA_RESERVATION_TIME));
-        this.wootecoTheme = themeService.create(WOOTECO_THEME());
-        this.mia = memberService.create(USER_MIA());
-        this.tommy = memberService.create(USER_TOMMY());
-    }
 
     @Test
     @DisplayName("대기 중인 모든 예약 목록을 조회한다.")
