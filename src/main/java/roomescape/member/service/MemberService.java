@@ -28,7 +28,7 @@ public class MemberService {
                 .toList();
     }
 
-    public Member findMember(MemberLoginRequest memberLoginRequest) {
+    public Member findMemberByEmail(MemberLoginRequest memberLoginRequest) {
         return memberRepository.findByEmail(memberLoginRequest.email())
                 .orElseThrow(AuthorizationLoginFailException::new);
     }

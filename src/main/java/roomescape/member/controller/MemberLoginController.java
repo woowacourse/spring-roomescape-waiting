@@ -38,7 +38,7 @@ public class MemberLoginController {
 
     @PostMapping
     public ResponseEntity<Void> login(@RequestBody MemberLoginRequest memberRequest, HttpServletResponse response) {
-        Member member = memberService.findMember(memberRequest);
+        Member member = memberService.findMemberByEmail(memberRequest);
 
         memberAuthService.validateAuthentication(member, memberRequest);
         String token = memberAuthService.publishToken(member);
