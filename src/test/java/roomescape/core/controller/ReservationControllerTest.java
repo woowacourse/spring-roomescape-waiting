@@ -17,9 +17,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.core.domain.Status;
+import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.utils.e2eTest;
@@ -241,5 +243,33 @@ class ReservationControllerTest {
         ValidatableResponse response = e2eTest.get("/reservations/waiting", accessToken);
         response.statusCode(200)
                 .body("size()", is(2));
+    }
+
+    /*
+    멤버 정보
+    { "id": 1 "name": 어드민 "email": test@email.com "password": password "role": ADMIN }
+    { "id": 2 "name": 유저  "email": user@email.com "password": password "role": USER }
+    { "id": 3 "name": 릴리  "email": lily@email.com "password": password "role": USER }
+
+    예약 정보
+    {"date": '2024-05-07', "member_id": 1, "time_id": 1, "theme_id": 1, "status": 'BOOKED'}
+    {"date": '2224-05-08', "member_id": 2, "time_id": 1, "theme_id": 1, "status": 'BOOKED'}
+    {"date": '2224-05-08', "member_id": 3, "time_id": 1, "theme_id": 1, "status": 'STANDBY'}
+    {"date": '2224-05-08', "member_id": 1, "time_id": 1, "theme_id": 1, "status": 'STANDBY'}
+    */
+    @Test
+    @DisplayName("예약 상태인 예약을 삭제하는 경우, 첫번째 예약 대기가 예약으로 승격한다.")
+    void updateFirstReservationWaiting_WhenReservationDeleted() {
+        String lilyToken = RestAssured
+                .given().log().all()
+                .body(new TokenRequest("lily@email.com", "password"))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().cookies().extract().cookie("token");
+
+        e2eTest.delete("/reservations/2", lilyToken);
+        ValidatableResponse response = e2eTest.get("/reservations/mine", lilyToken);
+        response.body("status", is(List.of("예약")));
     }
 }
