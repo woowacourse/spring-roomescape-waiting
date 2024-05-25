@@ -42,11 +42,13 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.reservation.service.ReservationDetailService;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationWaitingService;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
 @WebMvcTest(ReservationController.class)
-@TestPropertySource(properties = {"security.jwt.token.secret-key=test_secret_key",
+@TestPropertySource(properties = {
+        "security.jwt.token.secret-key=test_secret_key",
         "security.jwt.token.expire-length=3600000"})
 class ReservationControllerTest {
     private final Member member = new Member("tester", "test@email.com", "pass");
@@ -65,9 +67,11 @@ class ReservationControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
+    private ReservationDetailService detailService;
+    @MockBean
     private ReservationService reservationService;
     @MockBean
-    private ReservationDetailService detailService;
+    private ReservationWaitingService waitingService;
     @MockBean
     private MemberAuthService memberAuthService;
     @MockBean
@@ -111,6 +115,8 @@ class ReservationControllerTest {
     void findAllReservations() throws Exception {
         Mockito.when(reservationService.findReservations())
                 .thenReturn(List.of(ReservationResponse.from(reservation)));
+        Mockito.when(waitingService.findReservationWaitings())
+                .thenReturn(List.of());
 
         mockMvc.perform(get("/reservations"))
                 .andDo(print())
