@@ -1,7 +1,5 @@
 package roomescape.domain.repository;
 
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
@@ -30,10 +28,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select r
             from Reservation r
-            join fetch r.reservationSlot.theme
-            join fetch r.reservationSlot.date
+            join fetch r.reservationSlot
             join fetch r.member
-            where (:startDate is null or r.reservationSlot.date >= :startDate)
+            where (:startDate is null or r.reservationSlot.date>= :startDate)
                 and (:endDate is null or r.reservationSlot.date <= :endDate)
                 and (:themeId is null or r.reservationSlot.theme.id = :themeId)
                 and (:memberId is null or r.member.id = :memberId)""")
@@ -46,7 +43,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByMember(Member member);
 
-    boolean existsByMemberAndReservationSlot(Member member, ReservationSlot slot);
+    boolean existsByMemberAndReservationSlot(Member member, ReservationSlot reservationSlot);
 
     @Query("select exists(select 1 from Reservation r where r.reservationSlot.time=:time)")
     boolean existsByTime(ReservationTime time);

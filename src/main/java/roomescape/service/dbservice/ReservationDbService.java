@@ -1,14 +1,16 @@
 package roomescape.service.dbservice;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 
 import java.time.LocalDate;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ReservationDbService {
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
@@ -45,7 +48,7 @@ public class ReservationDbService {
     }
 
     public Reservation createReservation(long memberId, LocalDate date, long timeId, long themeId) {
-        return new Reservation(findMemberById(memberId), date, findTimeById(timeId), findThemeById(themeId));
+        return new Reservation(findMemberById(memberId), new ReservationSlot(date, findTimeById(timeId), findThemeById(themeId)));
     }
 
     public Reservation save(Reservation reservation) {
@@ -65,12 +68,17 @@ public class ReservationDbService {
     }
 
     public List<Reservation> findByConditions(
-            Optional<LocalDate> start,
-            Optional<LocalDate> end,
+            LocalDate start,
+            LocalDate end,
             Long themeId,
             Long memberId
     ) {
-        return reservationRepository.findByConditions(start, end, themeId, memberId);
+        return reservationRepository.findByConditions(
+                    Optional.ofNullable(start),
+                    Optional.ofNullable(end),
+                    themeId,
+                    memberId
+        );
     }
 
     public Reservation findById(long id) {

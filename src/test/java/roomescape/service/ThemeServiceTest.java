@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.repository.MemberRepository;
@@ -97,7 +98,7 @@ class ThemeServiceTest extends IntegrationTestSupport {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
         Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
         Member member = memberRepository.save(Member.createUser("생강", "email@email.com", "1234"));
-        reservationRepository.save(new Reservation(member, LocalDate.parse("2025-05-13"), time, theme));
+        reservationRepository.save(new Reservation(member, new ReservationSlot(LocalDate.parse("2025-05-13"), time, theme)));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))

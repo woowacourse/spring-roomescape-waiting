@@ -74,8 +74,8 @@ public class ReservationService {
 
     public ReservationResponses findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
         List<Reservation> reservations = reservationDbService.findByConditions(
-                Optional.ofNullable(reservationConditionRequest.dateFrom()),
-                Optional.ofNullable(reservationConditionRequest.dateTo()),
+                reservationConditionRequest.dateFrom(),
+                reservationConditionRequest.dateTo(),
                 reservationConditionRequest.themeId(),
                 reservationConditionRequest.memberId()
         );

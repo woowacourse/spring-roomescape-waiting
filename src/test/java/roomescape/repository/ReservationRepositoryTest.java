@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.repository.MemberRepository;
@@ -48,7 +49,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         Member member = Member.createUser("생강", "email@email.com", "1234");
         Member savedMember = memberRepository.save(member);
 
-        Reservation reservation = new Reservation(savedMember, LocalDate.parse("2025-01-01"), savedReservationTime, savedTheme);
+        Reservation reservation = new Reservation(savedMember, new ReservationSlot(LocalDate.parse("2025-01-01"), savedReservationTime, savedTheme));
         Reservation savedReservation = reservationRepository.save(reservation);
         assertAll(
                 () -> assertThat(savedReservation.getMember().getName()).isEqualTo("생강"),

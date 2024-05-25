@@ -7,11 +7,15 @@ import java.util.Objects;
 
 @Embeddable
 public class ReservationSlot {
-    @Temporal(TemporalType.DATE)
+    @Column(nullable = false)
     private LocalDate date;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private ReservationTime time;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable=false)
     private Theme theme;
 
     public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {
@@ -32,6 +36,18 @@ public class ReservationSlot {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void setTime(ReservationTime time) {
+        this.time = time;
+    }
+
+    public void setTheme(Theme theme) {
+        this.theme = theme;
     }
 
     @Override

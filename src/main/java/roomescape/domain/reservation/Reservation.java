@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
+@Table
 public class Reservation {
     public static int RESERVATION_RANK = 0;
 
@@ -21,9 +21,9 @@ public class Reservation {
     @Embedded
     private ReservationSlot reservationSlot;
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Member member, ReservationSlot reservationSlot) {
         this.member = member;
-        this.reservationSlot = new ReservationSlot(date, time, theme);
+        this.reservationSlot = reservationSlot;
     }
 
     protected Reservation() {
