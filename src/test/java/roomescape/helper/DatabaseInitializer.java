@@ -28,8 +28,9 @@ public class DatabaseInitializer {
         Member admin = createAdmin();
         ReservationTime time = createTime();
         Theme theme = createTheme();
-        Reservation reservation = createReservation(member, time, theme);
-        ReservationWaiting waiting = createReservationWaiting(reservation, member);
+        Reservation pastReservation = createPastReservation(member, time, theme);
+        Reservation futureReservation = createFutureReservation(member, time, theme);
+        ReservationWaiting waiting = createReservationWaiting(pastReservation, member);
     }
 
     private Member createMember() {
@@ -66,8 +67,14 @@ public class DatabaseInitializer {
         return theme;
     }
 
-    private Reservation createReservation(Member member, ReservationTime time, Theme theme) {
+    private Reservation createPastReservation(Member member, ReservationTime time, Theme theme) {
         Reservation reservation = new Reservation(LocalDate.of(2000, 4, 1), time, theme, member);
+        entityManager.persist(reservation);
+        return reservation;
+    }
+
+    private Reservation createFutureReservation(Member member, ReservationTime time, Theme theme) {
+        Reservation reservation = new Reservation(LocalDate.of(2000, 4, 8), time, theme, member);
         entityManager.persist(reservation);
         return reservation;
     }

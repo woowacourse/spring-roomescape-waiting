@@ -92,8 +92,8 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().post("/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/reservations/2")
-                    .body("id", is(2));
+                    .header("Location", "/reservations/3")
+                    .body("id", is(3));
         }
 
         @Test
@@ -171,8 +171,8 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/reservations/2")
-                    .body("id", is(2));
+                    .header("Location", "/reservations/3")
+                    .body("id", is(3));
         }
 
         @Test

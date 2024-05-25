@@ -140,6 +140,12 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/reservations/2")
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/times/1")
                     .then().log().all()
                     .statusCode(204);

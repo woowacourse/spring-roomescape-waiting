@@ -100,6 +100,12 @@ class ThemeIntegrationTest extends IntegrationTest {
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/reservations/2")
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/themes/1")
                     .then().log().all()
                     .statusCode(204);

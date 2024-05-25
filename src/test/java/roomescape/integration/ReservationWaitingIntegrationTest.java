@@ -25,7 +25,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 예약_대기를_추가할_수_있다() {
-            params.put("date", "2000-04-01");
+            params.put("date", "2000-04-08");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
@@ -38,8 +38,8 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         }
 
         @Test
-        void 예약_id가_빈값이면_시간을_추가할_수_없다() {
-            params.put("reservationId", null);
+        void 같은_사용자가_같은_예약에_대해선_예약_대기를_두_번_이상_추가할_수_없다() {
+            params.put("date", "2000-04-08");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
@@ -47,12 +47,8 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
                     .body(params)
                     .when().post("/waitings")
                     .then().log().all()
-                    .statusCode(400);
-        }
-
-        @Test
-        void 같은_사용자가_같은_예약에_대해선_예약_대기를_두_번_이상_추가할_수_없다() {
-            params.put("date", "2000-04-01");
+                    .statusCode(201)
+                    .header("Location", "/waitings/2");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -65,7 +61,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 존재하지_않는_예약에_대해선_예약_대기를_추가할_수_없다() {
-            params.put("date", "2000-04-02");
+            params.put("date", "2000-04-09");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -79,6 +75,15 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         @Test
         @Disabled
         void 지난_예약에_대해선_예약_대기를_추가할_수_없다() {
+            params.put("date", "2000-04-01");
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waitings")
+                    .then().log().all()
+                    .statusCode(400);
         }
     }
 

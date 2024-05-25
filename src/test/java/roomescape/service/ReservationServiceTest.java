@@ -26,7 +26,7 @@ import roomescape.service.reservation.dto.ReservationResponse;
 class ReservationServiceTest extends ServiceTest {
     @Autowired
     private ReservationService reservationService;
-    
+
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -45,7 +45,7 @@ class ReservationServiceTest extends ServiceTest {
                     null, null, null, null);
 
             assertThat(response.getReservations().size())
-                    .isEqualTo(1);
+                    .isEqualTo(2);
         }
 
         @Test
@@ -54,7 +54,7 @@ class ReservationServiceTest extends ServiceTest {
                     1L, null, null, null);
 
             assertThat(response.getReservations().size())
-                    .isEqualTo(1);
+                    .isEqualTo(2);
         }
 
         @Test
@@ -63,7 +63,7 @@ class ReservationServiceTest extends ServiceTest {
                     null, 1L, null, null);
 
             assertThat(response.getReservations().size())
-                    .isEqualTo(1);
+                    .isEqualTo(2);
         }
 
         @Test
@@ -88,7 +88,7 @@ class ReservationServiceTest extends ServiceTest {
             ReservationMineListResponse response = reservationService.findMyReservation(member);
 
             assertThat(response.getReservations().size())
-                    .isEqualTo(1);
+                    .isEqualTo(2);
         }
     }
 
@@ -131,9 +131,11 @@ class ReservationServiceTest extends ServiceTest {
         @Test
         void 예약을_삭제할_수_있다() {
             ReservationWaiting waiting = reservationWaitingRepository.findById(1L).orElseThrow();
-            Reservation reservation = reservationRepository.findById(1L).orElseThrow();
+            Reservation pastReservation = reservationRepository.findById(1L).orElseThrow();
+            Reservation futureReservation = reservationRepository.findById(2L).orElseThrow();
             reservationWaitingRepository.delete(waiting);
-            reservationRepository.delete(reservation);
+            reservationRepository.delete(pastReservation);
+            reservationRepository.delete(futureReservation);
 
             ReservationListResponse response = reservationService.findAllReservation(null, null, null, null);
             assertThat(response.getReservations().size())

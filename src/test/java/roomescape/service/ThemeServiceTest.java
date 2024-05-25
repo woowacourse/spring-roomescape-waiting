@@ -78,9 +78,11 @@ class ThemeServiceTest extends ServiceTest {
         @Test
         void 테마를_삭제할_수_있다() {
             ReservationWaiting waiting = reservationWaitingRepository.findById(1L).orElseThrow();
-            Reservation reservation = reservationRepository.findById(1L).orElseThrow();
+            Reservation pastReservation = reservationRepository.findById(1L).orElseThrow();
+            Reservation futureReservation = reservationRepository.findById(2L).orElseThrow();
             reservationWaitingRepository.delete(waiting);
-            reservationRepository.delete(reservation);
+            reservationRepository.delete(pastReservation);
+            reservationRepository.delete(futureReservation);
 
             themeService.deleteTheme(1L);
 
