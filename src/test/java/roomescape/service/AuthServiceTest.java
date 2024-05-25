@@ -11,11 +11,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import roomescape.controller.dto.request.LoginRequest;
-import roomescape.domain.member.Role;
-import roomescape.security.TokenProvider;
+import roomescape.security.authentication.Authentication;
+import roomescape.security.provider.TokenProvider;
 import roomescape.service.dto.request.CreateMemberRequest;
-import roomescape.service.dto.response.MemberResponse;
+import roomescape.service.dto.request.CreateTokenRequest;
+import roomescape.service.dto.response.TokenResponse;
 
 class AuthServiceTest extends BaseServiceTest {
 
@@ -39,47 +39,34 @@ class AuthServiceTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("토큰을 생성한다.")
+    @DisplayName("인증 후 토큰을 생성한다.")
     void createToken() {
         doReturn("created_token").when(tokenProvider).createToken(any());
-
-        String token = authService.createToken(1L);
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(token).isEqualTo("created_token");
-        });
-    }
-
-    @Test
-    @DisplayName("비밀번호가 일치하는지 검증한다.")
-    void validatePassword() {
-        LoginRequest request = new LoginRequest(EMAIL, PASSWORD);
-
-        MemberResponse response = authService.validatePassword(request);
+        CreateTokenRequest request = new CreateTokenRequest(EMAIL, PASSWORD);
+        TokenResponse response = authService.authenticateMember(request);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.name()).isEqualTo(NICKNAME);
-            softly.assertThat(response.role()).isEqualTo(Role.USER);
+            softly.assertThat(response.token()).isEqualTo("created_token");
         });
     }
 
     @Test
     @DisplayName("비밀번호가 일치하지 않을 경우 예외를 발생시킨다.")
     void validatePassword_fail_when_password_not_matched() {
-        LoginRequest request = new LoginRequest(EMAIL, "wrong_password");
+        CreateTokenRequest request = new CreateTokenRequest(EMAIL, "wrong_password");
 
-        assertThatThrownBy(() -> authService.validatePassword(request))
+        assertThatThrownBy(() -> authService.authenticateMember(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("등록되지 않은 이메일이거나 비밀번호가 틀렸습니다.");
     }
 
     @Test
-    @DisplayName("토큰으로 회원 아이디를 가져올 수 있다.")
+    @DisplayName("토큰으로 인증 객체를 가져올 수 있다.")
     void getMemberId() {
-        doReturn(1L).when(tokenProvider).getMemberId(any());
+        doReturn("1").when(tokenProvider).extractSubject(any());
 
-        Long memberId = authService.getMemberIdByToken("token");
+        Authentication authentication = authService.createAuthentication("token");
 
-        assertThat(memberId).isEqualTo(1L);
+        assertThat(authentication.getId()).isEqualTo(1L);
     }
 }

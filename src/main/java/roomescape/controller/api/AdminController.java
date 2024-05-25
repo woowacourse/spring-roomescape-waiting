@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.AdminReservationRequest;
 import roomescape.controller.dto.response.ApiResponses;
 import roomescape.controller.support.Auth;
-import roomescape.security.Accessor;
+import roomescape.security.authentication.Authentication;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationWaitingService;
 import roomescape.service.dto.response.ReservationResponse;
@@ -47,12 +47,10 @@ public class AdminController {
         return new ApiResponses<>(reservationWaitings);
     }
 
-    // todo post
-
     @DeleteMapping("/waitings/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteReservationWaiting(@PathVariable long id, @Auth Accessor accessor) {
-        long memberId = accessor.id();
+    public void deleteReservationWaiting(@PathVariable long id, @Auth Authentication authentication) {
+        long memberId = authentication.getId();
         reservationWaitingService.deleteReservationWaiting(id, memberId);
     }
 }
