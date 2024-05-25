@@ -96,12 +96,6 @@ public class Reservation {
         }
     }
 
-    public void validateStatus() {
-        if (this.status == Status.WAITING_CANCEL || this.status == Status.DELETED) {
-            throw new BadRequestException("조회 불가능한 예약입니다.");
-        }
-    }
-
     public Long getId() {
         return id;
     }

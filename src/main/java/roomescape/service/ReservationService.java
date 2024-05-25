@@ -27,6 +27,7 @@ import roomescape.service.dto.response.ReservationResponse;
 
 @Service
 public class ReservationService {
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final RoomThemeRepository roomThemeRepository;
@@ -45,7 +46,7 @@ public class ReservationService {
 
     @Transactional
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
+        return reservationRepository.findAllAndStatusIn(List.of(Status.CREATED))
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -53,7 +54,9 @@ public class ReservationService {
 
     @Transactional
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
-        return reservationRepository.findMyReservationsWithStatus(authInfo.id(), List.of(Status.CREATED, Status.WAITING))
+        return reservationRepository.findMyReservationsAndStatusIn(
+                        authInfo.id(),
+                        List.of(Status.CREATED, Status.WAITING))
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
