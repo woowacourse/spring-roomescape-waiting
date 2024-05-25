@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.request.ReservationTimeRequest;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.AvailableReservationTimeDto;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
-import roomescape.dto.request.ReservationTimeRequest;
-import roomescape.dto.response.AvailableReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.response.AvailableReservationTimeResponse;
+import roomescape.service.dto.response.ReservationTimeResponse;
 
 @Service
 @Transactional(readOnly = true)

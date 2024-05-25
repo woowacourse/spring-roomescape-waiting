@@ -16,13 +16,13 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.BaseControllerTest;
+import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.PersonalReservationResponse;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.service.dto.response.PersonalReservationResponse;
+import roomescape.service.dto.response.ReservationResponse;
 import roomescape.support.fixture.ReservationTimeFixture;
 import roomescape.support.fixture.ThemeFixture;
 

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.BaseControllerTest;
-import roomescape.dto.request.LoginRequest;
+import roomescape.controller.dto.request.LoginRequest;
 
 class AuthControllerTest extends BaseControllerTest {
 

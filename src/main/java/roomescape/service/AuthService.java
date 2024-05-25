@@ -2,12 +2,12 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.request.LoginRequest;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.dto.request.LoginRequest;
-import roomescape.dto.response.MemberResponse;
 import roomescape.security.TokenProvider;
+import roomescape.service.dto.response.MemberResponse;
 
 @Service
 @Transactional(readOnly = true)

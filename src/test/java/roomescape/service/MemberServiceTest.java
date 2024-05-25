@@ -5,10 +5,10 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.controller.dto.request.SignupRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.dto.request.SignupRequest;
-import roomescape.dto.response.MemberResponse;
+import roomescape.service.dto.response.MemberResponse;
 import roomescape.support.fixture.MemberFixture;
 
 class MemberServiceTest extends BaseServiceTest {

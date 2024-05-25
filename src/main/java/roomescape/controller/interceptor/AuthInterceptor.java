@@ -5,11 +5,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Role;
-import roomescape.dto.response.MemberResponse;
 import roomescape.security.TokenProvider;
 import roomescape.security.exception.AccessDeniedException;
 import roomescape.security.exception.UnauthorizedException;
 import roomescape.service.MemberService;
+import roomescape.service.dto.response.MemberResponse;
 import roomescape.util.CookieUtil;
 
 @Component

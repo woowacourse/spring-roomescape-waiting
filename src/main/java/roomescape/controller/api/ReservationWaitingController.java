@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.support.Auth;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.ReservationResponse;
 import roomescape.security.Accessor;
 import roomescape.service.ReservationWaitingService;
+import roomescape.service.dto.response.ReservationResponse;
 
 @RestController
 @RequestMapping("/waitings")

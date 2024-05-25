@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestConfig;
-import roomescape.dto.request.LoginRequest;
+import roomescape.controller.dto.request.LoginRequest;
 import roomescape.support.extension.DatabaseClearExtension;
 
 @ExtendWith(DatabaseClearExtension.class)

@@ -15,12 +15,12 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.BaseControllerTest;
+import roomescape.controller.dto.request.AdminReservationRequest;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.service.dto.response.ReservationResponse;
 
 class AdminControllerTest extends BaseControllerTest {
 

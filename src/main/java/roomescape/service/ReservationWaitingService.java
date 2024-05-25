@@ -15,8 +15,8 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.response.ReservationResponse;
-import roomescape.service.dto.CreateReservationRequest;
+import roomescape.service.dto.request.CreateReservationRequest;
+import roomescape.service.dto.response.ReservationResponse;
 
 @Service
 @Transactional(readOnly = true)

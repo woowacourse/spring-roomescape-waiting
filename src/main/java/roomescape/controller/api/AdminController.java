@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.request.AdminReservationRequest;
 import roomescape.controller.dto.response.ApiResponses;
 import roomescape.controller.support.Auth;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.response.ReservationResponse;
 import roomescape.security.Accessor;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationWaitingService;
+import roomescape.service.dto.response.ReservationResponse;
 
 @RestController
 @RequestMapping("/admin")
