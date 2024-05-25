@@ -2,7 +2,6 @@ package roomescape.domain.member;
 
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
-import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 
@@ -12,13 +11,13 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NonNull
+    @Column(nullable = false)
     private String name;
-    @NonNull
+    @Column(nullable = false)
     private String email;
-    @NonNull
+    @Column(nullable = false)
     private String password;
-    @NonNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
 
