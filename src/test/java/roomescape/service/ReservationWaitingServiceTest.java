@@ -21,6 +21,7 @@ import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
 import roomescape.exception.reservationwaiting.NotFoundReservationWaitingException;
 import roomescape.service.reservationwaiting.ReservationWaitingService;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingRequest;
+import roomescape.service.reservationwaiting.dto.ReservationWaitingResponse;
 
 public class ReservationWaitingServiceTest extends ServiceTest {
     @Autowired
@@ -54,9 +55,9 @@ public class ReservationWaitingServiceTest extends ServiceTest {
         void 예약_대기를_추가할_수_있다() {
             ReservationWaitingRequest request = new ReservationWaitingRequest(date, timeId, themeId);
 
-            Long waitingId = reservationWaitingService.saveReservationWaiting(request, user);
+            ReservationWaitingResponse response = reservationWaitingService.saveReservationWaiting(request, user);
 
-            assertThat(waitingId)
+            assertThat(response.getWaitingId())
                     .isEqualTo(1L);
         }
 

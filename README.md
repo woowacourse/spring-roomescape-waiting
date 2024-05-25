@@ -344,6 +344,11 @@ Response
 ```
 HTTP/1.1 201
 Content-Type: application/json
+
+{
+  "waitingId": 1,
+  "reservationId": 1
+}
 ```
 
 ### 예약 대기 취소 API

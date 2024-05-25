@@ -12,6 +12,7 @@ import roomescape.controller.auth.RoleAllowed;
 import roomescape.domain.member.Member;
 import roomescape.service.reservationwaiting.ReservationWaitingService;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingRequest;
+import roomescape.service.reservationwaiting.dto.ReservationWaitingResponse;
 
 @RestController
 public class ReservationWaitingController {
@@ -23,10 +24,11 @@ public class ReservationWaitingController {
 
     @RoleAllowed
     @PostMapping("/reservations/waitings")
-    public ResponseEntity<Void> saveReservationWaiting(@RequestBody ReservationWaitingRequest request,
-                                                       @LoginMember Member member) {
-        Long id = reservationWaitingService.saveReservationWaiting(request, member);
-        return ResponseEntity.created(URI.create("/reservations/waitings/" + id)).build();
+    public ResponseEntity<ReservationWaitingResponse> saveReservationWaiting(
+            @RequestBody ReservationWaitingRequest request,
+            @LoginMember Member member) {
+        ReservationWaitingResponse response = reservationWaitingService.saveReservationWaiting(request, member);
+        return ResponseEntity.created(URI.create("/reservations/waitings/" + response.getWaitingId())).body(response);
     }
 
     @RoleAllowed

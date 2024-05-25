@@ -16,6 +16,7 @@ import roomescape.exception.reservationwaiting.DuplicatedReservationWaitingExcep
 import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
 import roomescape.exception.reservationwaiting.NotFoundReservationWaitingException;
 import roomescape.service.reservationwaiting.dto.ReservationWaitingRequest;
+import roomescape.service.reservationwaiting.dto.ReservationWaitingResponse;
 
 @Service
 @Transactional
@@ -32,7 +33,7 @@ public class ReservationWaitingService {
         this.clock = clock;
     }
 
-    public Long saveReservationWaiting(ReservationWaitingRequest request, Member member) {
+    public ReservationWaitingResponse saveReservationWaiting(ReservationWaitingRequest request, Member member) {
         Reservation reservation = findReservationByDateAndTimeIdAndThemeId(
                 request.getDate(), request.getTimeId(), request.getThemeId());
         validateOwnedReservation(reservation, member);
@@ -41,7 +42,7 @@ public class ReservationWaitingService {
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(reservation, member);
         ReservationWaiting savedReservationWaiting = reservationWaitingRepository.save(reservationWaiting);
-        return savedReservationWaiting.getId();
+        return new ReservationWaitingResponse(savedReservationWaiting);
     }
 
     private void validateOwnedReservation(Reservation reservation, Member member) {

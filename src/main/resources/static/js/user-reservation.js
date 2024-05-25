@@ -200,7 +200,7 @@ function onWaitButtonClick() {
             })
             .then(data => {
                 alert('Reservation waiting successful!');
-                window.location.href = "/";
+                window.location.href = "/reservation";
             })
             .catch(error => {
                 alert("An error occurred while making the reservation waiting.");
