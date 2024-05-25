@@ -12,7 +12,6 @@ import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberPassword;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
@@ -68,8 +67,7 @@ public class DatabaseInitializer {
     }
 
     private Reservation createReservation(Member member, ReservationTime time, Theme theme) {
-        Reservation reservation = new Reservation(
-                ReservationStatus.BOOKED, LocalDate.of(2000, 4, 1), time, theme, member);
+        Reservation reservation = new Reservation(LocalDate.of(2000, 4, 1), time, theme, member);
         entityManager.persist(reservation);
         return reservation;
     }

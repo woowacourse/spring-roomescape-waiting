@@ -3,6 +3,7 @@ package roomescape.service.reservation.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 
 public class ReservationMineResponse {
     private final Long reservationId;
@@ -24,7 +25,7 @@ public class ReservationMineResponse {
                 reservation.getTheme().getName().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getDescription()
+                ReservationStatus.BOOKED.getDescription()
         );
     }
 

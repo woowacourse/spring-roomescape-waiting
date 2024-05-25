@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -77,7 +76,7 @@ public class ReservationService {
         Theme theme = findThemeById(request.getThemeId());
         validateDateTimeReservation(request, time);
 
-        Reservation reservation = request.toReservation(ReservationStatus.BOOKED, time, theme, member);
+        Reservation reservation = request.toReservation(time, theme, member);
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }

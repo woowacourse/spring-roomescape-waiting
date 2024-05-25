@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import roomescape.controller.reservation.dto.AdminReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.common.InvalidRequestBodyException;
@@ -41,9 +40,8 @@ public class ReservationRequest {
         }
     }
 
-    public Reservation toReservation(
-            ReservationStatus status, ReservationTime reservationTime, Theme theme, Member member) {
-        return new Reservation(status, date, reservationTime, theme, member);
+    public Reservation toReservation(ReservationTime reservationTime, Theme theme, Member member) {
+        return new Reservation(date, reservationTime, theme, member);
     }
 
     public LocalDate getDate() {
