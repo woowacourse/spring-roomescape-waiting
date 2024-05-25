@@ -59,7 +59,7 @@ class JwtTokenProviderTest {
         assertThatCode(() -> jwtTokenProvider.getPayload(token))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.TOKEN_NOT_FOUND);
+                .isEqualTo(RoomescapeErrorCode.NOT_FOUND_TOKEN);
     }
 
     private JwtTokenProvider createJwtTokenProvider(int validityInMilliseconds) {

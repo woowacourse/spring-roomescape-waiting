@@ -47,7 +47,7 @@ public class JwtTokenProvider implements TokenProvider {
         } catch (ExpiredJwtException e) {
             throw new RoomescapeException(RoomescapeErrorCode.TOKEN_EXPIRED);
         } catch (Exception e) {
-            throw new RoomescapeException(RoomescapeErrorCode.TOKEN_NOT_FOUND);
+            throw new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TOKEN);
         }
     }
 }
