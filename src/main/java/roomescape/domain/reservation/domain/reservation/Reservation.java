@@ -55,14 +55,7 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
-        this.reservationTimestamp = LocalDateTime.of(
-                reservationTimestamp.getYear(),
-                reservationTimestamp.getMonth(),
-                reservationTimestamp.getDayOfMonth(),
-                reservationTimestamp.getHour(),
-                reservationTimestamp.getMinute(),
-                reservationTimestamp.getSecond()
-        );
+        this.reservationTimestamp = reservationTimestamp.withNano(0);
     }
 
     public Long getId() {
