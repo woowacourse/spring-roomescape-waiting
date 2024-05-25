@@ -32,7 +32,7 @@ abstract class AcceptanceTest {
     protected Long saveReservationTime() {
         final ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(START_AT_SIX);
 
-        Integer id = RestAssured.given().log().all()
+        final Integer id = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/times")
@@ -48,7 +48,7 @@ abstract class AcceptanceTest {
         final ThemeSaveRequest request
                 = new ThemeSaveRequest(THEME_HORROR_NAME, THEME_HORROR_DESCRIPTION, THEME_HORROR_THUMBNAIL);
 
-        Integer id = RestAssured.given().log().all()
+        final Integer id = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/themes")
@@ -60,14 +60,12 @@ abstract class AcceptanceTest {
         return Long.valueOf(id);
     }
 
-    protected Long saveReservation() {
-        final Long timeId = saveReservationTime();
-        final Long themeId = saveTheme();
-        final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
+    protected Long saveReservation(final Long timeId, final Long themeId, final String email) {
+        final String accessToken = getAccessToken(email);
         final ReservationSaveRequest request
                 = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId);
 
-        Integer id = RestAssured.given().log().all()
+        final Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(request)
@@ -80,17 +78,41 @@ abstract class AcceptanceTest {
         return Long.valueOf(id);
     }
 
-    protected Long saveReservationWaiting() {
-        final Long timeId = saveReservationTime();
-        final Long themeId = saveTheme();
+    protected Long saveReservationWaiting(final Long timeId, final Long themeId) {
         final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
         final ReservationWaitingSaveRequest request
                 = new ReservationWaitingSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
 
-        Integer id = RestAssured.given().log().all()
+        final Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(request)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .jsonPath().get("id");
+
+        return Long.valueOf(id);
+    }
+
+    protected Long saveReservationAndWaiting(final Long timeId, final Long themeId) {
+        final ReservationSaveRequest reservationRequest
+                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId);
+        RestAssured.given().log().all()
+                .cookie("token", getAccessToken(ADMIN_EMAIL))
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        final ReservationWaitingSaveRequest waitingRequest
+                = new ReservationWaitingSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
+        final Integer id = RestAssured.given().log().all()
+                .cookie("token", getAccessToken(MEMBER_TENNY_EMAIL))
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
                 .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201)

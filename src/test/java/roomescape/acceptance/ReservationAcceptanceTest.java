@@ -78,7 +78,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("예약 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFindReservations() {
-        saveReservation();
+        final Long timeId = saveReservationTime();
+        final Long themeId = saveTheme();
+        saveReservation(timeId, themeId, MEMBER_TENNY_EMAIL);
         
         final JsonPath jsonPath = assertGetResponse("/reservations", 200)
                 .extract().response().jsonPath();
@@ -94,7 +96,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("테마, 사용자, 예약 날짜로 예약 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFilteredFindReservations() {
-        saveReservation();
+        final Long timeId = saveReservationTime();
+        final Long themeId = saveTheme();
+        saveReservation(timeId, themeId, MEMBER_TENNY_EMAIL);
         final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
 
         final JsonPath jsonPath = RestAssured.given().log().all()
@@ -119,7 +123,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("예약을 성공적으로 삭제하면 204를 응답한다.")
     void respondNoContentWhenDeleteReservation() {
-        final Long reservationId = saveReservation();
+        final Long timeId = saveReservationTime();
+        final Long themeId = saveTheme();
+        final Long reservationId = saveReservation(timeId, themeId, MEMBER_TENNY_EMAIL);
 
         assertDeleteResponse("/reservations/", reservationId, 204);
     }
@@ -127,7 +133,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("존재하지 않는 예약을 삭제하면 400을 응답한다.")
     void respondBadRequestWhenDeleteNotExistingReservation() {
-        saveReservation();
+        final Long timeId = saveReservationTime();
+        final Long themeId = saveTheme();
+        saveReservation(timeId, themeId, MEMBER_TENNY_EMAIL);
         final Long notExistingReservationTimeId = 0L;
 
         assertDeleteResponse("/reservations/", notExistingReservationTimeId, 400);
@@ -136,19 +144,19 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("특정 사용자의 예약 및 예약 대기 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFindMyReservations() {
-        saveReservation();
-        saveReservationWaiting();
+        final Long timeId = saveReservationTime();
+        final Long themeId = saveTheme();
+        saveReservationAndWaiting(timeId, themeId);
         final String accessToken = getAccessToken(MEMBER_TENNY_EMAIL);
 
         final JsonPath jsonPath = assertGetResponseWithToken(accessToken, "/reservations/mine", 200)
                 .extract().response().jsonPath();
 
-        System.out.println(jsonPath);
         assertAll(() -> {
-            assertThat(jsonPath.getString("theme[1]")).isEqualTo(THEME_HORROR_NAME);
-            assertThat(jsonPath.getString("date[1]")).isEqualTo(DATE_MAY_EIGHTH);
-            assertThat(jsonPath.getString("time[1]")).isEqualTo(START_AT_SIX);
-            assertThat(jsonPath.getString("status[1]")).isEqualTo(ReservationStatus.WAITING.getValue());
+            assertThat(jsonPath.getString("theme[0]")).isEqualTo(THEME_HORROR_NAME);
+            assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH);
+            assertThat(jsonPath.getString("time[0]")).isEqualTo(START_AT_SIX);
+            assertThat(jsonPath.getString("status[0]")).isEqualTo(ReservationStatus.WAITING.getValue());
         });
     }
 }

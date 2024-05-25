@@ -35,6 +35,9 @@ class WaitingServiceTest {
     void createReservationWaiting() {
         final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED))
+                .willReturn(true);
         given(reservationRepository.save(any())).willReturn(waiting);
 
         final ReservationResponse actual = waitingService.createReservationWaiting(waiting);
@@ -60,6 +63,9 @@ class WaitingServiceTest {
     void throwExceptionWhenAlreadyReserved() {
         final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED
+        )).willReturn(true);
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED, waiting.getMember()
         )).willReturn(true);
@@ -73,6 +79,9 @@ class WaitingServiceTest {
     void throwExceptionWhenDuplicatedWaiting() {
         final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED
+        )).willReturn(true);
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED, waiting.getMember()
         )).willReturn(false);

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.MEMBER_MIA;
+import static roomescape.TestFixture.MEMBER_BROWN;
 
 @DataJpaTest
 class MemberRepositoryTest {
@@ -25,7 +25,7 @@ class MemberRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(MEMBER_MIA());
+        member = memberRepository.save(MEMBER_BROWN());
     }
 
     @Test
@@ -94,6 +94,6 @@ class MemberRepositoryTest {
         final List<Member> actual = memberRepository.findAll();
 
         // then
-        assertThat(actual).hasSize(3);
+        assertThat(actual).hasSize(4);
     }
 }

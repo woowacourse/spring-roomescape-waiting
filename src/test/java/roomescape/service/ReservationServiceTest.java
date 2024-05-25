@@ -40,7 +40,7 @@ class ReservationServiceTest {
     @DisplayName("예약을 생성한다.")
     void create() {
         // given
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation reservation = new Reservation(MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
         given(reservationRepository.save(reservation))
                 .willReturn(new Reservation(1L, reservation.getMember(), reservation.getDate(),
@@ -157,23 +157,33 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("특정 사용자의 예약 목록을 조회한다.")
+    @DisplayName("특정 사용자의 예약 및 예약 대기 목록을 조회한다.")
     void findMyReservations() {
         // given
-        final LoginMember loginMember = new LoginMember(1L, MEMBER_TENNY_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
-        final Reservation reservation = new Reservation(1L, MEMBER_TENNY(1L), LocalDate.parse(DATE_MAY_EIGHTH),
+        final LoginMember loginMember = new LoginMember(1L, MEMBER_TENNY_NAME, MEMBER_TENNY_EMAIL, Role.MEMBER);
+        final Reservation memberReservation = new Reservation(1L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation = new Reservation(2L, ADMIN(), LocalDate.parse(DATE_MAY_NINTH),
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation waiting = new Reservation(3L, MEMBER_MIA(), LocalDate.parse(DATE_MAY_NINTH),
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final Reservation memberWaiting = new Reservation(4L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_NINTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findByMemberId(loginMember.id()))
-                .willReturn(List.of(reservation));
+                .willReturn(List.of(memberReservation, memberWaiting));
+        given(reservationRepository.findAll())
+                .willReturn(List.of(memberReservation, reservation, waiting, memberWaiting));
 
         // when
         final List<MyReservationWithRankResponse> actual = reservationService.findMyReservationsAndWaitings(loginMember);
 
         // then
         assertAll(
-                () -> assertThat(actual).hasSize(1),
-                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.WAITING.getValue()),
-                () -> assertThat(actual.get(0).getRank()).isEqualTo(1L)
+                () -> assertThat(actual).hasSize(2),
+                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.RESERVED.getValue()),
+                () -> assertThat(actual.get(0).getRank()).isEqualTo(1L),
+                () -> assertThat(actual.get(1).getStatus()).isEqualTo(ReservationStatus.WAITING.getValue()),
+                () -> assertThat(actual.get(1).getRank()).isEqualTo(2L)
         );
     }
 }
