@@ -10,6 +10,7 @@ import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.ReservationRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,8 +28,15 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final Reservation reservation) {
+        validateDate(reservation.getDate());
         validateDuplicatedReservation(reservation);
         return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    private void validateDate(final LocalDate date) {
+        if (date.isBefore(LocalDate.now()) || date.equals(LocalDate.now())) {
+            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
+        }
     }
 
     private void validateDuplicatedReservation(final Reservation reservation) {

@@ -52,10 +52,6 @@ public class Reservation {
         this.status = status;
     }
 
-    public boolean hasSameDateTime(final LocalDate date, final ReservationTime time) {
-        return this.time.equals(time) && this.date.equals(date);
-    }
-
     public void toReserved() {
         this.status = ReservationStatus.RESERVED;
     }

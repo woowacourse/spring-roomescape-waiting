@@ -3,6 +3,8 @@ package roomescape.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,6 +53,17 @@ class ReservationServiceTest {
 
         // then
         assertThat(response).isNotNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 0})
+    @DisplayName("이전 날짜 혹은 당일 예약을 할 경우 예외가 발생한다.")
+    void throwExceptionWhenCreateReservationAtInvalidDate(final int days) {
+        final Reservation reservation = new Reservation(MEMBER_TENNY(), LocalDate.now().minusDays(days),
+                RESERVATION_TIME_SIX(), THEME_HORROR(1L), ReservationStatus.RESERVED);
+
+        assertThatThrownBy(() -> reservationService.create(reservation))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
