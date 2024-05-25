@@ -33,7 +33,6 @@ import roomescape.domain.reservation.ThemeRepository;
 
 @DataJpaTest
 class ReservationJpaRepositoryTest {
-    private static final LocalDateTime BASE_TIME = LocalDateTime.of(2000, 1, 1, 12, 0);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -57,8 +56,9 @@ class ReservationJpaRepositoryTest {
         Theme theme = themeRepository.save(TEST_THEME.create());
         LocalDate date = LocalDate.of(2024, 12, 25);
         ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
+        LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
-        Reservation reservation = new Reservation(member, date, time, theme, BASE_TIME, BookStatus.BOOKED);
+        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
         entityManager.persist(reservation);
 
         boolean exists = reservationRepository.existsByTimeId(time.getId());
@@ -72,8 +72,9 @@ class ReservationJpaRepositoryTest {
         Theme theme = themeRepository.save(TEST_THEME.create());
         LocalDate date = LocalDate.of(2024, 12, 25);
         ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
+        LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
-        Reservation reservation = new Reservation(member, date, time, theme, BASE_TIME, BookStatus.BOOKED);
+        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
         entityManager.persist(reservation);
 
         boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(
