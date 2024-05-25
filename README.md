@@ -30,6 +30,9 @@
 - [x] 자신의 예약 목록 조회 기능 추가
   - [x] 예약 목록에 예약 대기 목록도 포함하도록 변경
 
+- [ ] 관리자가 예약 대기 목록을 조회할 수 있는 페이지 추가
+- [ ] 관리자 권한으로 예약 대기 삭제 기능 추가
+
 # API 명세
 
 ## 예약 조회 API
@@ -194,11 +197,12 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 > HTTP/1.1 204
 
-## 예약대기 취소 API
+
+## 예약대기 취소 API - 관리자
 
 ### Request
 
-> DELETE /reservations/waiting/11 HTTP/1.1
+> DELETE /admin/reservations/waiting/11 HTTP/1.1
 
 ### Response
 
@@ -212,7 +216,8 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 #### 예약 대기가 아닐 경우
 
-> HTTP/1.1 403
+> HTTP/1.1 400
+> message : 예약은 삭제할 수 없습니다. 
 
 ## 시간 추가 API
 
