@@ -91,7 +91,7 @@ class ReservationSlotControllerTest extends ControllerTest {
                 new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
+        ReservationResponse reservationResponse = memberReservationService.createReservation(
                 AuthInfo.of(getMemberChoco()),
                 new ReservationRequest(
                         LocalDate.now().plusDays(10).toString(),

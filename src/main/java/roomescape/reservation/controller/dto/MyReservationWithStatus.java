@@ -8,9 +8,12 @@ import java.time.LocalTime;
 
 public record MyReservationWithStatus(long reservationId, String themeName, LocalDate date, LocalTime time,
                                       ReservationStatus status) {
-    public static MyReservationWithStatus from(Reservation memberReservation) {
-        return new MyReservationWithStatus(memberReservation.getId(),
-                memberReservation.getReservationSlot().getTheme().getName(), memberReservation.getReservationSlot().getDate(),
-                memberReservation.getReservationSlot().getTime().getStartAt(), memberReservation.getStatus());
+    public static MyReservationWithStatus from(Reservation reservation) {
+        return new MyReservationWithStatus(
+                reservation.getId(),
+                reservation.getReservationSlot().getTheme().getName(),
+                reservation.getReservationSlot().getDate(),
+                reservation.getReservationSlot().getTime().getStartAt(),
+                reservation.getStatus());
     }
 }

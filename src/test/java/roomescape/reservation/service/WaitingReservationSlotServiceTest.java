@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.fixture.MemberFixture;
-import roomescape.fixture.MemberReservationFixture;
+import roomescape.fixture.ReservationFixture;
 import roomescape.reservation.controller.dto.MyReservationWithStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
@@ -26,7 +26,7 @@ class WaitingReservationSlotServiceTest extends ServiceTest {
     @DisplayName("예약 대기 변겅 성공 : 예약 삭제 시 대기 번호가 빠른 예약이 BOOKED 처리된다.")
     @Test
     void waitingReservationConfirm() {
-        Reservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
+        Reservation bookedMemberReservation = ReservationFixture.getBookedReservation();
         waitingReservationService.deleteMemberReservation(AuthInfo.of(bookedMemberReservation.getMember()), bookedMemberReservation.getId());
         ReservationSlot reservationSlot = bookedMemberReservation.getReservationSlot();
 

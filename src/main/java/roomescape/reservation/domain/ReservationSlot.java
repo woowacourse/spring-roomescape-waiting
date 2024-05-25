@@ -85,7 +85,7 @@ public class ReservationSlot {
 
     @Override
     public String toString() {
-        return "Reservation{" +
+        return "ReservationSlot{" +
                 "id=" + id +
                 ", date=" + date +
                 ", time=" + time +

@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
-import static roomescape.fixture.ReservationFixture.getNextDayReservation;
+import static roomescape.fixture.ReservationSlotFixture.getNextDayReservationSlot;
 import static roomescape.fixture.ReservationTimeFixture.get1PM;
 import static roomescape.fixture.ReservationTimeFixture.get2PM;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
@@ -92,7 +92,7 @@ class ReservationSlotTimeServiceTest extends ServiceTest {
         //given
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
-        ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservationSlot(time, theme));
         //when & then
         assertThatThrownBy(() -> reservationTimeService.delete(getNoon().getId()))
                 .isInstanceOf(BadRequestException.class);
@@ -119,7 +119,7 @@ class ReservationSlotTimeServiceTest extends ServiceTest {
         reservationTimeRepository.save(get1PM());
         reservationTimeRepository.save(get2PM());
         Theme theme = themeRepository.save(getTheme1());
-        ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservation(time, theme));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(getNextDayReservationSlot(time, theme));
         Member member = memberRepository.save(getMemberChoco());
         reservationRepository.save(new Reservation(member, reservationSlot));
 

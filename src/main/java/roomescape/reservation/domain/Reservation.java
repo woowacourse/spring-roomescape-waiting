@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 import roomescape.member.domain.Member;
 
 @Entity
@@ -19,6 +22,7 @@ public class Reservation {
     @ManyToOne
     private ReservationSlot reservationSlot;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
@@ -29,11 +33,9 @@ public class Reservation {
 
     public Reservation(Member member,
                        ReservationSlot reservationSlot,
-                       LocalDateTime createdAt,
                        ReservationStatus status) {
         this.member = member;
         this.reservationSlot = reservationSlot;
-        this.createdAt = createdAt;
         this.status = status;
     }
 
@@ -93,10 +95,12 @@ public class Reservation {
 
     @Override
     public String toString() {
-        return "MemberReservation{" +
+        return "Reservation{" +
                 "id=" + id +
                 ", member=" + member +
                 ", reservationSlot=" + reservationSlot +
+                ", createdAt=" + createdAt +
+                ", status=" + status +
                 '}';
     }
 }

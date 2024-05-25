@@ -12,7 +12,7 @@ ALTER TABLE reservation_slot ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE reservation_time ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE theme ALTER COLUMN ID RESTART WITH 1;
 
-
+-- 회원 추가
 INSERT INTO member(name, email, password, role)
 VALUES ('초코칩', 'dev.chocochip@gmail.com', '$2a$10$DORK.bYhWWXTEiWjwy9mxu.vodUPmuyiBeiShqRnSRcA1.buwN06K', 'USER');
 INSERT INTO member(name, email, password, role)
@@ -34,11 +34,11 @@ VALUES ('추리', '추리 테마입니다.', 'https://image.yes24.com/goods/7316
 INSERT INTO theme(name, description, thumbnail)
 VALUES ('아날로그식', '아날로그식 테마입니다.', 'https://image.yes24.com/goods/62087889/L');
 
--- 예약 추가
+-- 예약 슬롯 추가
 INSERT INTO reservation_slot(date, reservation_time_id, theme_id)
 VALUES (DATEADD('MONTH', 1, CURRENT_DATE()), 3, 2);
 
--- -- 예약 목록 추가
+-- -- 예약 추가
 INSERT INTO reservation(member_id, reservation_slot_id, created_at, status)
 VALUES (1, 1, CURRENT_TIME(), 'BOOKED');
 INSERT INTO reservation(member_id, reservation_slot_id, created_at, status)

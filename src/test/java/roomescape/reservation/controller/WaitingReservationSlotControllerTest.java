@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.service.TokenProvider;
-import roomescape.fixture.MemberReservationFixture;
+import roomescape.fixture.ReservationFixture;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
@@ -38,7 +38,7 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
     @DisplayName("예약이 존재하는 경우에도 사용자가 다르면 예약이 된다")
     void waiting() {
         //given
-        Reservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
+        Reservation bookedMemberReservation = ReservationFixture.getBookedReservation();
         ReservationSlot alreadBookedReservationSlot = bookedMemberReservation.getReservationSlot();
         ReservationRequest reservationRequest = new ReservationRequest(
                 alreadBookedReservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),
@@ -60,7 +60,7 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
     @Test
     void delete() {
         //given
-        Reservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
+        Reservation bookedMemberReservation = ReservationFixture.getBookedReservation();
         ReservationSlot bookedReservationSlot = bookedMemberReservation.getReservationSlot();
         ReservationRequest reservationRequest = new ReservationRequest(
                 bookedReservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),

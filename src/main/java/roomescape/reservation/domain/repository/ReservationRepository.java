@@ -24,12 +24,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     SELECT count(*)
     FROM Reservation  r
     WHERE r.reservationSlot = 
-    (SELECT r.reservationSlot
-    FROM Reservation r
-    WHERE r.id = :reservationId)
-    AND r.id < :reservationId
+    (
+        SELECT r.reservationSlot
+        FROM Reservation r
+        WHERE r.id = :reservationId
+    )
+    AND r.createdAt < 
+    (
+        SELECT r.createdAt 
+        FROM Reservation  r
+        WHERE r.id = :reservationId
+    )
     """)
-    int countWaitingReservation(Long reservationId);
+    int countMyWaitingOrderByReservationId(Long reservationId);
 
     boolean existsByReservationSlot(ReservationSlot reservationSlot);
 

@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.ReservationFixture.getNextDayReservation;
+import static roomescape.fixture.ReservationSlotFixture.getNextDayReservationSlot;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
 
@@ -91,7 +91,7 @@ class ThemeServiceTest extends ServiceTest {
         //given
         ReservationTime time = timeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
-        reservationSlotRepository.save(getNextDayReservation(time, theme));
+        reservationSlotRepository.save(getNextDayReservationSlot(time, theme));
 
         //when & then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))

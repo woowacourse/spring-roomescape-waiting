@@ -16,7 +16,6 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.specification.MemberReservationSpecification;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -45,7 +44,7 @@ public class MemberReservationService {
                 .toList();
     }
 
-    public ReservationResponse createMemberReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
+    public ReservationResponse createReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
         LocalDate date = LocalDate.parse(reservationRequest.date());
         return createMemberReservation(
                 authInfo.getId(),
@@ -79,7 +78,7 @@ public class MemberReservationService {
         }
 
         Reservation memberReservation = reservationRepository.save(
-                new Reservation(member, reservationSlot, LocalDateTime.now(), reservationStatus));
+                new Reservation(member, reservationSlot, reservationStatus));
         return ReservationResponse.from(memberReservation.getId(), reservationSlot, member);
     }
 
