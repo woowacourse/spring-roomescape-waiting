@@ -24,6 +24,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 
 @Transactional
 class ReservationServiceTest extends IntegrationTestSupport {
@@ -116,8 +117,8 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void findAllMyReservations() {
         // given
-        long memberId = 2L;
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L);
+        long memberId = 1L;
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now().plusDays(1L), 1L, 1L);
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         // when
@@ -128,8 +129,8 @@ class ReservationServiceTest extends IntegrationTestSupport {
                 () -> assertThat(allUserReservation).hasSize(1),
                 () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationSaveRequest.date()),
                 () -> assertThat(allUserReservation.get(0).time()).isEqualTo(reservationResponse.time().startAt()),
-                () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name())
-//                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatusMessageMapper.messageOf(RESERVED, 0))
+                () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name()),
+                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(RESERVED.name())
         );
     }
 }
