@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSearchCondition;
@@ -10,6 +11,7 @@ import roomescape.domain.Theme;
 import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -98,7 +100,18 @@ public class ReservationService {
                 .toList();
     }
 
-    public void delete(long id) {
-        reservationRepository.deleteById(id);
+    @Transactional
+    public void delete(long reservationId, long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_MEMBER));
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_RESERVATION));
+
+        if (member.isAdmin() || reservation.isAuthor(member)) {
+            reservationRepository.deleteById(reservationId);
+            return;
+        }
+        throw new RoomescapeException(ExceptionType.NO_AUTHORITY);
     }
 }

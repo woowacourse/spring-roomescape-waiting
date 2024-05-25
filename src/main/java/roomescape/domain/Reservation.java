@@ -7,11 +7,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import roomescape.exception.ExceptionType;
+import roomescape.exception.RoomescapeException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import roomescape.exception.ExceptionType;
-import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Reservation implements Comparable<Reservation> {
@@ -122,6 +123,10 @@ public class Reservation implements Comparable<Reservation> {
         }
     }
 
+    public boolean isAuthor(Member member) {
+        return this.reservationMember == member;
+    }
+
     @Override
     public int compareTo(Reservation other) {
         LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
@@ -135,6 +140,10 @@ public class Reservation implements Comparable<Reservation> {
 
     public long getId() {
         return id;
+    }
+
+    public Member getMember() {
+        return reservationMember;
     }
 
     public String getName() {
