@@ -76,4 +76,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.member.id = :memberId
             """)
     List<ReservationRankResponse> findMyReservation(@Param("memberId") long memberId);
+
+    @Query("""
+            SELECT r FROM Reservation r JOIN FETCH r.member JOIN FETCH r.theme JOIN FETCH r.time
+            WHERE (r.theme, r.time, r.date) IN
+            (SELECT r2.theme, r2.time, r2.date FROM Reservation r2 GROUP BY r2.theme, r2.time, r2.date)
+            AND r.id NOT IN (SELECT MIN(r3.id) FROM Reservation r3 GROUP BY r3.theme, r3.time, r3.date)
+            """)
+    List<Reservation> findAllWaiting();
 }

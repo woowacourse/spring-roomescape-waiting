@@ -115,13 +115,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllWaiting() {
-        final LocalDate date = LocalDate.now();
-        final List<Reservation> reservations = reservationRepository.findAllByDateIsGreaterThanEqual(date);
-        final Set<ReservationInfo> preReservations = new HashSet<>();
-
-        return reservations.stream()
-                .filter(reservation -> !preReservations.add(ReservationInfo.from(reservation)))
-                .toList();
+        return reservationRepository.findAllWaiting();
     }
 
     @Transactional(readOnly = true)

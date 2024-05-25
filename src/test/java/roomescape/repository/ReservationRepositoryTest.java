@@ -114,6 +114,14 @@ class ReservationRepositoryTest {
         assertThat(myReservation).isEqualTo(expected);
     }
 
+    @Test
+    @DisplayName("예약 대기만 조회")
+    void methodName() {
+        final List<Reservation> reservations = reservationRepository.findAllWaiting();
+        final List<Reservation> expected = List.of(new Reservation(8L, null, null, null, null));
+        assertThat(reservations).isEqualTo(expected);
+    }
+
     static Stream<Arguments> searchMyReservationsParameterProvider() {
         final LocalDate date = LocalDate.now();
         return Stream.of(
