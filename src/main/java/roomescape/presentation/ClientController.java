@@ -24,7 +24,7 @@ public class ClientController {
         return "reservation";
     }
 
-    @GetMapping("/reservation/my")
+    @GetMapping("/reservation/mine")
     public String reservationMinePage() {
         return "reservation-mine";
     }
