@@ -95,20 +95,20 @@ public class Member {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Member member)) {
             return false;
         }
-        Member member = (Member) o;
-        return Objects.equals(id, member.id);
+
+        return this.getId() != null && Objects.equals(getId(), member.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getId());
     }
 
     public Long getId() {

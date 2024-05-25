@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.domain.exception.DomainValidationException;
+import roomescape.domain.member.Member;
 
 @Entity
 public class Theme {
@@ -81,20 +82,20 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Theme theme)) {
             return false;
         }
-        Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+
+        return this.getId() != null && Objects.equals(getId(), theme.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getId());
     }
 
     public Long getId() {

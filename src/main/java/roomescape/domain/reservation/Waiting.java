@@ -73,20 +73,20 @@ public class Waiting {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Waiting waiting)) {
             return false;
         }
-        Waiting that = (Waiting) o;
-        return Objects.equals(id, that.id);
+
+        return this.getId() != null && Objects.equals(getId(), waiting.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getId());
     }
 
     public Long getId() {
