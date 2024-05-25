@@ -123,8 +123,8 @@ class ReservationServiceTest extends BaseServiceTest {
         long id = reservation.getId();
         reservationService.deleteReservationById(id);
 
-        Reservation updatedReservation = reservationRepository.findById(id).orElseThrow();
-        assertThat(updatedReservation.getMember()).isEqualTo(targetWaitingMember);
+        List<Reservation> reservations = reservationRepository.findAllByMember(targetWaitingMember);
+        assertThat(reservations).hasSize(1);
     }
 
     @Test

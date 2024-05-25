@@ -120,6 +120,7 @@ public class ReservationService {
                 .thenComparing(ReservationWaiting::getTime));
         ReservationWaiting firstWaiting = reservationWaitings.get(0);
         reservation.changeMember(firstWaiting.getMember());
+        reservationWaitingRepository.delete(firstWaiting);
     }
 
     public List<PersonalReservationResponse> getReservationsByMemberId(long memberId) {
