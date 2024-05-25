@@ -60,10 +60,6 @@ public class Reservation {
         this.status = ReservationStatus.RESERVED;
     }
 
-    public String getThemeName() {
-        return theme.getName();
-    }
-
     public Long getId() {
         return id;
     }
@@ -90,6 +86,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     public ReservationStatus getStatus() {

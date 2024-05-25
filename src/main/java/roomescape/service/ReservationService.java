@@ -17,6 +17,7 @@ import java.util.List;
 public class ReservationService {
 
     private static final int MAX_RESERVATIONS_PER_TIME = 1;
+    private static final int INCREMENT_VALUE_FOR_RANK = 1;
 
     private final ReservationRepository reservationRepository;
 
@@ -67,7 +68,19 @@ public class ReservationService {
     }
 
     public List<MyReservationWithRankResponse> findMyReservationsAndWaitings(final LoginMember loginMember) {
-        final List<MyReservationWithRankResponse> reservations = reservationRepository.findByMemberId(loginMember.id());
-        return reservations;
+        final List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
+        return reservations.stream()
+                .map(reservation -> new MyReservationWithRankResponse(reservation, calculateRank(reservations, reservation)))
+                .toList();
+    }
+
+    private Long calculateRank(final List<Reservation> reservations, final Reservation reservation) {
+        return reservations.stream()
+                .filter(r -> r.getDate().equals(reservation.getDate()) &&
+                        r.getTheme().equals(reservation.getTheme()) &&
+                        r.getTime().equals(reservation.getTime()) &&
+                        r.getStatus().equals(reservation.getStatus()) &&
+                        r.getId() < reservation.getId())
+                .count() + INCREMENT_VALUE_FOR_RANK;
     }
 }

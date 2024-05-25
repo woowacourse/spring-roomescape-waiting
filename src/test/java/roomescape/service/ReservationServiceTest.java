@@ -161,11 +161,10 @@ class ReservationServiceTest {
     void findMyReservations() {
         // given
         final LoginMember loginMember = new LoginMember(1L, MEMBER_TENNY_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation reservation = new Reservation(1L, MEMBER_TENNY(1L), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
-        final MyReservationWithRankResponse response = new MyReservationWithRankResponse(reservation, 1L);
         given(reservationRepository.findByMemberId(loginMember.id()))
-                .willReturn(List.of(response));
+                .willReturn(List.of(reservation));
 
         // when
         final List<MyReservationWithRankResponse> actual = reservationService.findMyReservationsAndWaitings(loginMember);

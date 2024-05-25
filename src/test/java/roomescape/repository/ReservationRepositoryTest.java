@@ -12,7 +12,6 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservation.MyReservationWithRankResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -147,17 +146,16 @@ class ReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 사용자의 예약 목록 및 대기 목록을 조회한다.")
-    void findByReservationsMemberIdWithRank() {
+    void findByReservationsMemberId() {
         final Long memberId = member.getId();
         reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
 
-        final List<MyReservationWithRankResponse> actual = reservationRepository.findByMemberId(memberId);
+        final List<Reservation> actual = reservationRepository.findByMemberId(memberId);
 
         assertAll(
                 () -> assertThat(actual).hasSize(2),
-                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.RESERVED.getValue()),
-                () -> assertThat(actual.get(1).getStatus()).isEqualTo(ReservationStatus.WAITING.getValue()),
-                () -> assertThat(actual.get(1).getRank()).isEqualTo(1L)
+                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.RESERVED),
+                () -> assertThat(actual.get(1).getStatus()).isEqualTo(ReservationStatus.WAITING)
         );
     }
     
