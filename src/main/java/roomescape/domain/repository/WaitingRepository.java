@@ -1,13 +1,11 @@
 package roomescape.domain.repository;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Waiting;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 

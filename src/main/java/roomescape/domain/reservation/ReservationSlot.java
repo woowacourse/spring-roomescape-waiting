@@ -15,7 +15,7 @@ public class ReservationSlot {
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable=false)
+    @JoinColumn(nullable = false)
     private Theme theme;
 
     public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {
@@ -24,26 +24,27 @@ public class ReservationSlot {
         this.theme = theme;
     }
 
-    protected ReservationSlot() {}
+    protected ReservationSlot() {
+    }
 
     public LocalDate getDate() {
         return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
     }
 
     public void setDate(LocalDate date) {
         this.date = date;
     }
 
+    public ReservationTime getTime() {
+        return time;
+    }
+
     public void setTime(ReservationTime time) {
         this.time = time;
+    }
+
+    public Theme getTheme() {
+        return theme;
     }
 
     public void setTheme(Theme theme) {

@@ -53,9 +53,9 @@ class WaitingServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("모든 예약 대기를 가져올 수 있다")
-    void findAllWaitings(){
+    void findAllWaitings() {
         int beforeSize = waitingRepository.findAll().size();
-        int actualSize= waitingService.findAllWaitings().waitingResponses().size();
+        int actualSize = waitingService.findAllWaitings().waitingResponses().size();
 
         assertThat(actualSize).isEqualTo(beforeSize);
     }

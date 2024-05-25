@@ -1,7 +1,6 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
-import org.hibernate.Hibernate;
 
 import java.time.LocalTime;
 import java.util.Objects;

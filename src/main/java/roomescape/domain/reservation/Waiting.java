@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import roomescape.domain.member.Member;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -57,7 +56,7 @@ public class Waiting implements Comparable<Waiting> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null ||!(o instanceof Waiting)) return false;
+        if (o == null || !(o instanceof Waiting)) return false;
         Waiting waiting = (Waiting) o;
         return Objects.equals(this.getId(), waiting.getId());
     }

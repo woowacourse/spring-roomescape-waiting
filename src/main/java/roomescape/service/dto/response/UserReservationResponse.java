@@ -1,9 +1,6 @@
 package roomescape.service.dto.response;
 
-import jakarta.annotation.Nullable;
-import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.Waiting;
 
 import java.time.LocalDate;
@@ -20,7 +17,7 @@ public record UserReservationResponse(
         String status,
         int rank
 ) {
-    public static UserReservationResponse reserved(Reservation reservation){
+    public static UserReservationResponse reserved(Reservation reservation) {
         return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
@@ -31,7 +28,7 @@ public record UserReservationResponse(
         );
     }
 
-    public static UserReservationResponse from(Waiting waiting, int rank){
+    public static UserReservationResponse from(Waiting waiting, int rank) {
         return new UserReservationResponse(
                 waiting.getId(),
                 waiting.getReservation().getTheme().getName(),
