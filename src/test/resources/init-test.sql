@@ -50,3 +50,10 @@ INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (4, CURRENT_DATE - 2, 2, 2);
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, '2022-05-05', 2, 1);
+
+INSERT INTO waiting (reservation_id, member_id)
+VALUES (1, 3);
+INSERT INTO waiting (reservation_id, member_id)
+VALUES (1, 1);
+INSERT INTO waiting (reservation_id, member_id)
+VALUES (2, 2);

@@ -26,13 +26,10 @@ class WaitingRepositoryTest extends RepositoryTest {
     @Test
     void findByMember_idTest() {
         Reservation reservation = reservationRepository.findById(1L).get();
-        Member member1 = memberRepository.findById(1L).get();
-        Member member2 = memberRepository.findById(3L).get();
-
-        waitingRepository.save(new Waiting(reservation, member1));
-        Waiting waiting = waitingRepository.save(new Waiting(reservation, member2));
+        Member member = memberRepository.findById(3L).get();
+        Waiting waiting = new Waiting(1L, reservation, member);
 
         assertThat(waitingRepository.findByMember_idWithRank(3L))
-                .isEqualTo(List.of(new WaitingWithOrder(waiting, 2L)));
+                .isEqualTo(List.of(new WaitingWithOrder(waiting, 1L)));
     }
 }

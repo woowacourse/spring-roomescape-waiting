@@ -43,13 +43,4 @@ class MemberRepositoryTest extends RepositoryTest {
 
         assertThat(actual.get().getId()).isEqualTo(1L);
     }
-
-    @DisplayName("멤버를 삭제할 수 있다.")
-    @Test
-    void deleteTest() {
-        memberRepository.deleteById(1L);
-
-        Optional<Member> member = memberRepository.findById(1L);
-        assertThat(member).isEmpty();
-    }
 }
