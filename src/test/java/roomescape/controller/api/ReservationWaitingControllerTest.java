@@ -54,7 +54,7 @@ class ReservationWaitingControllerTest extends BaseControllerTest {
                 .contentType("application/json")
                 .cookie("token", token)
                 .body(request)
-                .when().post("/reservations/waiting")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201);
     }

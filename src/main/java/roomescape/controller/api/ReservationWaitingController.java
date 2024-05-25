@@ -20,7 +20,7 @@ import roomescape.security.Auth;
 import roomescape.service.ReservationWaitingService;
 
 @RestController
-@RequestMapping("/reservations/waiting")
+@RequestMapping("/waitings")
 @Validated
 public class ReservationWaitingController {
 

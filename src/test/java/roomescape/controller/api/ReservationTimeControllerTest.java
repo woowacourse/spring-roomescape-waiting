@@ -72,7 +72,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
                 .extract();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             softly.assertThat(response.body().asString()).contains("해당 id의 시간이 존재하지 않습니다.");
         });
     }
