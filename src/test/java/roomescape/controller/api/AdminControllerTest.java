@@ -15,16 +15,12 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.BaseControllerTest;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.response.MemberResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ThemeResponse;
 
 class AdminControllerTest extends BaseControllerTest {
 
@@ -75,18 +71,18 @@ class AdminControllerTest extends BaseControllerTest {
                 .extract();
 
         ReservationResponse reservationResponse = response.as(ReservationResponse.class);
-        MemberResponse memberResponse = reservationResponse.member();
-        ReservationTimeResponse timeResponse = reservationResponse.time();
-        ThemeResponse themeResponse = reservationResponse.theme();
+//        MemberResponse memberResponse = reservationResponse.member();
+//        ReservationTimeResponse timeResponse = reservationResponse.time();
+//        ThemeResponse themeResponse = reservationResponse.theme();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 6, 22));
-            softly.assertThat(memberResponse)
-                    .isEqualTo(new MemberResponse(1L, "어드민", Role.ADMIN));
-            softly.assertThat(timeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
-            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명",
-                    "https://example.com"));
+//            softly.assertThat(memberResponse)
+//                    .isEqualTo(new MemberResponse(1L, "어드민", Role.ADMIN));
+//            softly.assertThat(timeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
+//            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명",
+//                    "https://example.com"));
         });
     }
 

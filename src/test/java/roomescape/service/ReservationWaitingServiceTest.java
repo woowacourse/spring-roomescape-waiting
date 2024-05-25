@@ -75,9 +75,9 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.date()).isEqualTo(reservation.getDate());
-            softly.assertThat(response.member().id()).isEqualTo(prin.getId());
-            softly.assertThat(response.theme().id()).isEqualTo(theme.getId());
-            softly.assertThat(response.time().id()).isEqualTo(time.getId());
+            softly.assertThat(response.name()).isEqualTo(prin.getName());
+            softly.assertThat(response.theme()).isEqualTo(theme.getRawName());
+            softly.assertThat(response.startAt()).isEqualTo(time.getStartAt());
         });
     }
 
