@@ -10,7 +10,6 @@ import static roomescape.fixture.TimeFixture.TEN_AM;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
@@ -21,10 +20,8 @@ import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationStatusRepository;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -38,13 +35,13 @@ import roomescape.fixture.ReservationFixture;
 class ReservationBookingServiceTest {
 
     @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationStatusRepository reservationStatusRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -70,12 +67,7 @@ class ReservationBookingServiceTest {
                 time.getId(),
                 theme.getId()
         );
-        reservationStatusRepository.save(
-                new ReservationStatus(
-                        request.toReservation(member, time, theme, LocalDateTime.now(clock)),
-                        BookStatus.BOOKED)
-        );
-
+        reservationBookingService.bookReservation(request);
         assertThatCode(() -> reservationBookingService.bookReservation(request))
                 .isInstanceOf(AlreadyBookedException.class);
     }
@@ -87,7 +79,7 @@ class ReservationBookingServiceTest {
         Member member = reservation.getMember();
         reservationBookingService.cancelReservation(member.getId(), reservation.getId());
 
-        List<Reservation> reservations = reservationStatusRepository.findAllBookedReservations();
+        List<Reservation> reservations = reservationRepository.findAllBookedReservations();
         assertThat(reservations).isEmpty();
     }
 
@@ -107,7 +99,7 @@ class ReservationBookingServiceTest {
         Member admin = memberRepository.save(ADMIN_PK.create());
         reservationBookingService.cancelReservation(admin.getId(), reservation.getId());
 
-        List<Reservation> reservations = reservationStatusRepository.findAllBookedReservations();
+        List<Reservation> reservations = reservationRepository.findAllBookedReservations();
         assertThat(reservations).isEmpty();
     }
 

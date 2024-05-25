@@ -2,11 +2,6 @@ package roomescape.application.reservation.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
 
 public record ReservationRequest(
         Long memberId,
@@ -19,13 +14,6 @@ public record ReservationRequest(
 
     public ReservationRequest(LocalDate date, Long timeId, Long themeId) {
         this(null, date, timeId, themeId);
-    }
-
-    public Reservation toReservation(Member member,
-                                     ReservationTime reservationTime,
-                                     Theme theme,
-                                     LocalDateTime createdAt) {
-        return new Reservation(member, date, reservationTime, theme, createdAt);
     }
 
     public ReservationRequest withMemberId(long memberId) {

@@ -12,8 +12,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationStatusRepository;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -32,7 +31,7 @@ public class ReservationFixture {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ReservationStatusRepository reservationStatusRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
     private Clock clock;
@@ -46,10 +45,9 @@ public class ReservationFixture {
                 LocalDate.of(2024, 1, 1),
                 time,
                 theme,
-                LocalDateTime.now(clock)
+                LocalDateTime.now(clock),
+                BookStatus.BOOKED
         );
-        return reservationStatusRepository.save(
-                new ReservationStatus(reservation, BookStatus.BOOKED)
-        ).getReservation();
+        return reservationRepository.save(reservation);
     }
 }

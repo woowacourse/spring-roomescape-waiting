@@ -27,7 +27,7 @@ class ReservationTest {
         Theme theme = new Theme("테마명", "설명", "url");
         Member member = MEMBER_ARU.create();
 
-        assertThatCode(() -> new Reservation(member, date, time, theme, createdAt))
+        assertThatCode(() -> new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("현재 시간보다 과거로 예약할 수 없습니다.");
     }
@@ -42,7 +42,8 @@ class ReservationTest {
                 LocalDate.now(),
                 TEN_AM.create(),
                 TEST_THEME.create(),
-                LocalDateTime.now().minusDays(1)
+                LocalDateTime.now().minusDays(1),
+                BookStatus.BOOKED
         );
 
         assertAll(
@@ -59,7 +60,8 @@ class ReservationTest {
                 LocalDate.now(),
                 TEN_AM.create(),
                 TEST_THEME.create(),
-                LocalDateTime.now().minusDays(1)
+                LocalDateTime.now().minusDays(1),
+                BookStatus.BOOKED
         );
 
         Member other = MEMBER_ARU.createWithId(2L);

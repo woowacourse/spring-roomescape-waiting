@@ -20,6 +20,7 @@ import roomescape.application.reservation.dto.request.ReservationTimeRequest;
 import roomescape.application.reservation.dto.response.ReservationTimeResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -95,9 +96,9 @@ class ReservationTimeServiceTest {
         ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
         long timeId = time.getId();
 
-        reservationRepository.save(new Reservation(
-                member, LocalDate.parse("2024-01-01"), time, theme, LocalDateTime.now(clock)
-        ));
+        reservationRepository.save(
+                new Reservation(member, LocalDate.parse("2024-01-01"), time, theme, LocalDateTime.now(clock), BookStatus.BOOKED)
+        );
         assertThatCode(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("연관된 예약이 존재하여 삭제할 수 없습니다.");

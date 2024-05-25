@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -35,11 +36,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation create(ReservationRequest request) {
+    public Reservation create(ReservationRequest request, BookStatus status) {
         Member member = memberRepository.getById(request.memberId());
         Theme theme = themeRepository.getById(request.themeId());
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
-        Reservation reservation = request.toReservation(member, time, theme, LocalDateTime.now(clock));
+        LocalDateTime now = LocalDateTime.now(clock);
+        Reservation reservation = new Reservation(member, request.date(), time, theme, now, status);
         return reservationRepository.save(reservation);
     }
 }

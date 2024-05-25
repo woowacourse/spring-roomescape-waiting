@@ -9,20 +9,15 @@ import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.infrastructure.reservation.ReservationSpec;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationLookupService {
     private final ReservationRepository reservationRepository;
-    private final ReservationStatusRepository reservationStatusRepository;
 
-    public ReservationLookupService(ReservationRepository reservationRepository,
-                                    ReservationStatusRepository reservationStatusRepository) {
+    public ReservationLookupService(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.reservationStatusRepository = reservationStatusRepository;
     }
 
     public List<ReservationResponse> findByFilter(ReservationFilterRequest request) {
@@ -40,26 +35,25 @@ public class ReservationLookupService {
     }
 
     public List<ReservationResponse> findAllBookedReservations() {
-        return reservationStatusRepository.findAllBookedReservations()
+        return reservationRepository.findAllBookedReservations()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> findAllWaitingReservations() {
+        return reservationRepository.findAllWaitingReservations()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<ReservationStatusResponse> getReservationStatusesByMemberId(long memberId) {
-        return reservationStatusRepository.findActiveReservationStatusesByMemberId(memberId)
+        return reservationRepository.findActiveReservationByMemberId(memberId)
                 .stream()
-                .map(ReservationStatus::getReservation)
                 .map(reservation -> {
-                    long waitingCount = reservationStatusRepository.getWaitingCount(reservation);
+                    long waitingCount = reservationRepository.getWaitingCount(reservation);
                     return ReservationStatusResponse.of(reservation, waitingCount);
                 }).toList();
-    }
-
-    public List<ReservationResponse> findAllWaitingReservations() {
-        return reservationStatusRepository.findAllWaitingReservations()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 }

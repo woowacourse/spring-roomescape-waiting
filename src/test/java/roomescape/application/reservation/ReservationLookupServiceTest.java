@@ -20,8 +20,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationStatusRepository;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -45,10 +44,10 @@ class ReservationLookupServiceTest {
     private ReservationFixture reservationFixture;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationStatusRepository reservationStatusRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -74,9 +73,10 @@ class ReservationLookupServiceTest {
 
         Reservation reservation = new Reservation(
                 aru, LocalDate.of(2024, 5, 21), time, theme,
-                LocalDateTime.of(1999, 1, 1, 12, 0)
+                LocalDateTime.of(1999, 1, 1, 12, 0),
+                BookStatus.BOOKED
         );
-        reservationStatusRepository.save(new ReservationStatus(reservation, BookStatus.BOOKED));
+        reservationRepository.save(reservation);
         reservationWaitingService.enqueueWaitingList(new ReservationRequest(
                 pk.getId(), LocalDate.of(2024, 5, 21), time.getId(), theme.getId()
         ));

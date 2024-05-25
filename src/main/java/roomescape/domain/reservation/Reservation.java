@@ -2,6 +2,8 @@ package roomescape.domain.reservation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,11 +42,15 @@ public class Reservation {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BookStatus status;
+
     protected Reservation() {
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                       LocalDateTime createdAt) {
+                       LocalDateTime createdAt, BookStatus status) {
         validateCreatedAtAfterReserveTime(date, time.getStartAt(), createdAt);
         this.id = id;
         this.member = member;
@@ -52,10 +58,12 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.createdAt = createdAt;
+        this.status = status;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
-        this(null, member, date, time, theme, createdAt);
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme,
+                       LocalDateTime createdAt, BookStatus status) {
+        this(null, member, date, time, theme, createdAt, status);
     }
 
     private void validateCreatedAtAfterReserveTime(LocalDate date, LocalTime startAt, LocalDateTime createdAt) {
@@ -71,6 +79,22 @@ public class Reservation {
 
     private boolean isNotOwnedBy(Member member) {
         return !member.equals(this.member);
+    }
+
+    public void book() {
+        this.status = BookStatus.BOOKED;
+    }
+
+    public boolean isBooked() {
+        return status == BookStatus.BOOKED;
+    }
+
+    public void cancelWaiting() {
+        status = BookStatus.WAITING_CANCELLED;
+    }
+
+    public void cancelBooking() {
+        status = BookStatus.BOOKING_CANCELLED;
     }
 
     @Override

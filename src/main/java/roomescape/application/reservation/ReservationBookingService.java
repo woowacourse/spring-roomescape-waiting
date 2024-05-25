@@ -9,8 +9,6 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.exception.UnAuthorizedException;
 import roomescape.exception.reservation.AlreadyBookedException;
 
@@ -19,27 +17,23 @@ public class ReservationBookingService {
     private final ReservationService reservationService;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
-    private final ReservationStatusRepository reservationStatusRepository;
 
     public ReservationBookingService(ReservationService reservationService,
                                      MemberRepository memberRepository,
-                                     ReservationRepository reservationRepository,
-                                     ReservationStatusRepository reservationStatusRepository) {
+                                     ReservationRepository reservationRepository) {
         this.reservationService = reservationService;
         this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;
-        this.reservationStatusRepository = reservationStatusRepository;
     }
 
     @Transactional
     public ReservationResponse bookReservation(ReservationRequest request) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId())) {
+                request.date(), request.timeId(), request.themeId())
+        ) {
             throw new AlreadyBookedException(request.date(), request.timeId(), request.themeId());
         }
-        Reservation reservation = reservationService.create(request);
-        ReservationStatus reservationStatus = new ReservationStatus(reservation, BookStatus.BOOKED);
-        reservationStatusRepository.save(reservationStatus);
+        Reservation reservation = reservationService.create(request, BookStatus.BOOKED);
         return ReservationResponse.from(reservation);
     }
 
@@ -50,9 +44,9 @@ public class ReservationBookingService {
         if (reservation.isNotModifiableBy(member)) {
             throw new UnAuthorizedException();
         }
-        ReservationStatus reservationStatus = reservationStatusRepository.getById(id);
-        reservationStatus.cancelBooking();
-        reservationStatusRepository.findFirstWaiting(reservationStatus.getReservation())
-                .ifPresent(ReservationStatus::book);
+        reservation.cancelBooking();
+        reservationRepository.findFirstWaiting(
+                reservation.getTheme(), reservation.getDate(), reservation.getTime()
+        ).ifPresent(Reservation::book);
     }
 }

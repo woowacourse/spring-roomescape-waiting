@@ -44,8 +44,12 @@ public class ReservationAdvice {
     @ExceptionHandler(DuplicatedReservationException.class)
     public ProblemDetail handleDuplicatedReservationException(DuplicatedReservationException exception) {
         TokenPayload payload = context.getPayload();
-        String message = "Member %s (#%d) failed to book Reservation #%d: Duplicated booking or waiting"
-                .formatted(payload.name(), payload.memberId(), exception.getReservationId());
+        String message = ("Member %s (#%d) failed to book Reservation"
+                + "(theme #%d, date %s, time #%d: Duplicated booking or waiting")
+                .formatted(
+                        payload.name(), payload.memberId(),
+                        exception.getThemeId(), exception.getDate(), exception.getTimeId()
+                );
         logger.error(message, exception);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
