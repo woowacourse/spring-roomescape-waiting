@@ -57,7 +57,7 @@ class MemberControllerTest extends BaseControllerTest {
                 .extract();
 
         List<MemberResponse> memberResponses = response.jsonPath()
-                .getList(".", MemberResponse.class);
+                .getList("list", MemberResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());

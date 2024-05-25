@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.response.ApiResponses;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.security.Accessor;
@@ -34,8 +35,7 @@ public class AdminController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addAdminReservation(
-            @RequestBody @Valid AdminReservationRequest request
-    ) {
+            @RequestBody @Valid AdminReservationRequest request) {
         ReservationResponse reservationResponse = reservationService.addReservation(
                 request.date(),
                 request.timeId(),
@@ -48,8 +48,9 @@ public class AdminController {
     }
 
     @GetMapping("/waitings")
-    public List<ReservationResponse> getReservations() {
-        return reservationWaitingService.getReservationWaitings();
+    public ApiResponses<ReservationResponse> getReservations() {
+        List<ReservationResponse> reservationWaitings = reservationWaitingService.getReservationWaitings();
+        return new ApiResponses<>(reservationWaitings);
     }
 
     @DeleteMapping("/waitings/{id}")
@@ -58,5 +59,4 @@ public class AdminController {
         long memberId = accessor.id();
         reservationWaitingService.deleteReservationWaiting(id, memberId);
     }
-
 }

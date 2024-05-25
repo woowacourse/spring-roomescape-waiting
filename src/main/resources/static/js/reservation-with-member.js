@@ -24,7 +24,7 @@ function render(data) {
   const tableBody = document.getElementById('table-body');
   tableBody.innerHTML = '';
 
-  data.forEach(item => {
+  data.list.forEach(item => {
     const row = tableBody.insertRow();
 
     row.insertCell(0).textContent = item.id;       // 예약 id
@@ -66,7 +66,7 @@ function fetchMembers() {
 
 function populateSelect(selectId, options, textProperty) {
   const select = document.getElementById(selectId);
-  options.forEach(optionData => {
+  options.list.forEach(optionData => {
     const option = document.createElement('option');
     option.value = optionData.id;
     option.textContent = optionData[textProperty];

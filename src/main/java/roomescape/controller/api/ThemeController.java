@@ -5,6 +5,7 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.response.ApiResponses;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
@@ -22,11 +25,10 @@ import roomescape.service.ThemeService;
 @RequestMapping("/themes")
 public class ThemeController {
 
+    public static final int POPULAR_THEME_END_DATE_OFFSET = 1;
     private static final String POPULAR_THEME_LIMIT = "10";
     private static final int POPULAR_THEME_MIN_LIMIT = 1;
     private static final int POPULAR_THEME_DAYS_AGO = 6;
-    public static final int POPULAR_THEME_END_DATE_OFFSET = 1;
-
     private final ThemeService themeService;
     private final Clock clock;
 
@@ -36,33 +38,28 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> getAllThemes() {
+    public ApiResponses<ThemeResponse> getAllThemes() {
         List<ThemeResponse> themeResponses = themeService.getAllThemes();
-
-        return ResponseEntity.ok(themeResponses);
+        return new ApiResponses<>(themeResponses);
     }
 
     @PostMapping
     public ResponseEntity<ThemeResponse> addTheme(@RequestBody @Valid ThemeRequest themeRequest) {
         ThemeResponse themeResponse = themeService.addTheme(themeRequest);
-
         return ResponseEntity.created(URI.create("/themes/" + themeResponse.id()))
                 .body(themeResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteThemeById(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteThemeById(@PathVariable Long id) {
         themeService.deleteThemeById(id);
-
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<ThemeResponse>> getPopularThemes(
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(defaultValue = POPULAR_THEME_LIMIT) int limit
-    ) {
+    public ApiResponses<ThemeResponse> getPopularThemes(@RequestParam(required = false) LocalDate startDate,
+                                                        @RequestParam(required = false) LocalDate endDate,
+                                                        @RequestParam(defaultValue = POPULAR_THEME_LIMIT) int limit) {
         if (endDate == null) {
             endDate = LocalDate.now(clock).minusDays(POPULAR_THEME_END_DATE_OFFSET);
         }
@@ -80,7 +77,6 @@ public class ThemeController {
         }
 
         List<ThemeResponse> themeResponses = themeService.getPopularThemes(startDate, endDate, limit);
-
-        return ResponseEntity.ok(themeResponses);
+        return new ApiResponses<>(themeResponses);
     }
 }

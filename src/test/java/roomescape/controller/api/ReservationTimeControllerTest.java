@@ -108,7 +108,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
                 .extract();
 
         List<AvailableReservationTimeResponse> responses = extractResponse.jsonPath()
-                .getList(".", AvailableReservationTimeResponse.class);
+                .getList("list", AvailableReservationTimeResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(responses).hasSize(4);
@@ -173,7 +173,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
                 .extract();
 
         List<ReservationTimeResponse> reservationTimeResponses = response.jsonPath()
-                .getList(".", ReservationTimeResponse.class);
+                .getList("list", ReservationTimeResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());

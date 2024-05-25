@@ -2,6 +2,7 @@ let isEditing = false;
 const API_ENDPOINT = '/themes';
 const cellFields = ['id', 'name', 'description', 'thumbnail'];
 const createCellFields = ['', createInput(), createInput(), createInput()];
+
 function createBody(inputs) {
   return {
     name: inputs[0].value,
@@ -21,7 +22,7 @@ function render(data) {
   const tableBody = document.getElementById('table-body');
   tableBody.innerHTML = '';
 
-  data.forEach(item => {
+  data.list.forEach(item => {
     const row = tableBody.insertRow();
 
     cellFields.forEach((field, index) => {

@@ -31,9 +31,8 @@ public class ReservationWaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservationWaiting(
-            @Valid @RequestBody ReservationRequest request,
-            @Auth Accessor accessor) {
+    public ResponseEntity<ReservationResponse> createReservationWaiting(@Valid @RequestBody ReservationRequest request,
+                                                                        @Auth Accessor accessor) {
         long memberId = accessor.id();
         ReservationResponse response = reservationWaitingService.addReservationWaiting(
                 request.toCreateReservationRequest(memberId));

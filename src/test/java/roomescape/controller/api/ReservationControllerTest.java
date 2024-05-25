@@ -94,7 +94,7 @@ class ReservationControllerTest extends BaseControllerTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-            softly.assertThat(response.body().asString()).contains("해당 id의 예약이 존재하지 않습니다.");
+            softly.assertThat(response.body().asString()).contains("존재하지 않는 예약입니다.");
         });
     }
 
@@ -118,7 +118,7 @@ class ReservationControllerTest extends BaseControllerTest {
                 .statusCode(200)
                 .extract()
                 .jsonPath()
-                .getList(".", PersonalReservationResponse.class);
+                .getList("list", PersonalReservationResponse.class);
         PersonalReservationResponse personalReservationResponse = personalReservationResponses.get(0);
 
         SoftAssertions.assertSoftly(softly -> {
@@ -165,7 +165,7 @@ class ReservationControllerTest extends BaseControllerTest {
                 .extract();
 
         List<ReservationResponse> reservationResponses = response.jsonPath()
-                .getList(".", ReservationResponse.class);
+                .getList("list", ReservationResponse.class);
 
         ReservationResponse reservationResponse = reservationResponses.get(0);
 

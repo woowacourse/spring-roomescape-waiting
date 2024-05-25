@@ -2,6 +2,7 @@ let isEditing = false;
 const API_ENDPOINT = '/times';
 const cellFields = ['id', 'startAt'];
 const createCellFields = ['', createInput()];
+
 function createBody(inputs) {
   return {
     startAt: inputs[0].value,
@@ -19,7 +20,7 @@ function render(data) {
   const tableBody = document.getElementById('table-body');
   tableBody.innerHTML = '';
 
-  data.forEach(item => {
+  data.list.forEach(item => {
     const row = tableBody.insertRow();
 
     cellFields.forEach((field, index) => {

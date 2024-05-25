@@ -109,7 +109,7 @@ class ThemeControllerTest extends BaseControllerTest {
                 .extract();
 
         List<ThemeResponse> popularThemes = response.jsonPath()
-                .getList(".", ThemeResponse.class);
+                .getList("list", ThemeResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(popularThemes).hasSize(3);
@@ -175,7 +175,7 @@ class ThemeControllerTest extends BaseControllerTest {
                 .extract();
 
         List<ThemeResponse> themeResponses = response.jsonPath()
-                .getList(".", ThemeResponse.class);
+                .getList("list", ThemeResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
