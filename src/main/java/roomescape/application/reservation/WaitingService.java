@@ -26,19 +26,16 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
     private final RoleRepository roleRepository;
-    private final Clock clock;
 
-    public WaitingService(ReservationRepository reservationRepository, WaitingRepository waitingRepository,
-                          MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository,
-                          RoleRepository roleRepository, Clock clock) {
+    public WaitingService(ReservationRepository reservationRepository,
+                          WaitingRepository waitingRepository,
+                          MemberRepository memberRepository,
+                          RoleRepository roleRepository) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
         this.roleRepository = roleRepository;
-        this.clock = clock;
     }
 
     @Transactional
@@ -47,8 +44,8 @@ public class WaitingService {
                 reservationRequest.timeId(), reservationRequest.themeId());
         Member member = memberRepository.getById(reservationRequest.memberId());
         validateCreateWaiting(reservationRequest, reservation);
-        Waiting waiting = new Waiting(reservation, member, LocalDateTime.now(clock));
-        waitingRepository.save(waiting);
+        Waiting waiting = waitingRepository.save(new Waiting(reservation, member));
+        reservation.validateCreatedAtAfterReserveTime(waiting.getCreatedAt());
         return ReservationResponse.from(waiting);
     }
 
@@ -82,17 +79,8 @@ public class WaitingService {
     }
 
     private void validateCreateWaiting(ReservationRequest reservationRequest, Reservation reservation) {
-        validateWaitingAfterPresent(reservationRequest);
         validateReservationDuplicate(reservationRequest, reservation);
         validateWaitingDuplicate(reservationRequest, reservation);
-    }
-
-    private void validateWaitingAfterPresent(ReservationRequest reservationRequest) {
-        ReservationTime time = reservationTimeRepository.getById(reservationRequest.timeId());
-        LocalDateTime reservedDateTime = LocalDateTime.of(reservationRequest.date(), time.getStartAt());
-        if (reservedDateTime.isBefore(LocalDateTime.now(clock))) {
-            throw new IllegalArgumentException("현재 시간보다 과거로 예약할 수 없습니다.");
-        }
     }
 
     private void validateReservationDuplicate(ReservationRequest reservationRequest, Reservation reservation) {

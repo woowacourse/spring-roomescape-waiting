@@ -27,20 +27,17 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
-    private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
                               MemberRepository memberRepository,
-                              RoleRepository roleRepository,
-                              Clock clock) {
+                              RoleRepository roleRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.roleRepository = roleRepository;
-        this.clock = clock;
     }
 
     @Transactional
@@ -48,12 +45,13 @@ public class ReservationService {
         Member member = memberRepository.getById(request.memberId());
         Theme theme = themeRepository.getById(request.themeId());
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
-        Reservation reservation = request.toReservation(member, time, theme, LocalDateTime.now(clock));
-
+        Reservation reservation = request.toReservation(member, time, theme);
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), time.getId(), theme.getId())) {
             throw new IllegalArgumentException("이미 존재하는 예약입니다.");
         }
-        return ReservationResponse.from(reservationRepository.save(reservation));
+        reservation = reservationRepository.save(reservation);
+        reservation.validateCreatedAtAfterReserveTime(reservation.getCreatedAt());
+        return ReservationResponse.from(reservation);
     }
 
     public List<ReservationResponse> findByFilter(ReservationFilterRequest request) {
@@ -92,7 +90,7 @@ public class ReservationService {
     public void updateMemberById(long id, long memberId, Member member) {
         Reservation reservation = reservationRepository.getById(id);
         if (isAuthorized(memberId, reservation)) {
-            reservation.updateMember(member, LocalDateTime.now(clock));
+            reservation.updateMember(member);
             return;
         }
         throw new UnAuthorizedException();

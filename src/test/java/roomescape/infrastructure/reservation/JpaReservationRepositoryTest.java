@@ -94,7 +94,7 @@ class JpaReservationRepositoryTest {
     private Reservation createReservation(Member member, LocalDate date) {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Theme theme = themeRepository.save(new Theme("theme1", "desc", "url"));
-        Reservation reservation = new Reservation(member, date, reservationTime, theme, BASE_TIME);
+        Reservation reservation = new Reservation(member, date, reservationTime, theme);
         entityManager.persist(reservation);
         return reservation;
     }

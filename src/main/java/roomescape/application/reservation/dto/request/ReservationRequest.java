@@ -23,9 +23,8 @@ public record ReservationRequest(
 
     public Reservation toReservation(Member member,
                                      ReservationTime reservationTime,
-                                     Theme theme,
-                                     LocalDateTime createdAt) {
-        return new Reservation(member, date, reservationTime, theme, createdAt);
+                                     Theme theme) {
+        return new Reservation(member, date, reservationTime, theme);
     }
 
     public ReservationRequest withMemberId(long memberId) {

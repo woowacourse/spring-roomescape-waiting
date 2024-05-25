@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
@@ -51,9 +52,6 @@ class WaitingServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private Clock clock;
-
     private LocalDate date;
     private ReservationTime time;
     private Theme theme;
@@ -66,7 +64,7 @@ class WaitingServiceTest {
         time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         theme = themeRepository.save(new Theme("themeName", "desc", "url"));
         member = memberRepository.save(MemberFixture.createMember("아루"));
-        reservation = reservationRepository.save(new Reservation(member, date, time, theme, LocalDateTime.now(clock)));
+        reservation = reservationRepository.save(new Reservation(member, date, time, theme));
     }
 
     @Test
@@ -123,7 +121,7 @@ class WaitingServiceTest {
     @DisplayName("예약 대기 삭제 요청시 예약이 존재하면 예약 대기를 삭제한다.")
     void deleteWaiting() {
         Member newMember = memberRepository.save(MemberFixture.createMember("시소"));
-        Waiting waiting = waitingRepository.save(new Waiting(reservation, newMember, LocalDateTime.now(clock)));
+        Waiting waiting = waitingRepository.save(new Waiting(reservation, newMember));
 
         waitingService.deleteByIdWhenAuthorization(newMember.getId(), waiting.getId());
 
@@ -133,31 +131,33 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("멤버의 예약 대기를 생성 순서에 따라 조회한다.")
+    @Transactional
     void readAllWaitingByMemberId() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
-        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+        waitingRepository.save(new Waiting(reservation, member1));
 
         Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
-        waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+        waitingRepository.save(new Waiting(reservation, member2));
 
         List<ReservationStatusResponse> reservationResponses1 = waitingService.findAllByMemberId(member1.getId());
         List<ReservationStatusResponse> reservationResponses2 = waitingService.findAllByMemberId(member2.getId());
         assertAll(
                 () -> assertThat(reservationResponses1.size()).isEqualTo(1),
                 () -> assertThat(reservationResponses2.size()).isEqualTo(1),
-                () -> assertThat(reservationResponses1.get(0).status()).contains("2번째"),
-                () -> assertThat(reservationResponses2.get(0).status()).contains("1번째")
+                () -> assertThat(reservationResponses1.get(0).status()).contains("1번째"),
+                () -> assertThat(reservationResponses2.get(0).status()).contains("2번째")
         );
     }
 
     @Test
     @DisplayName("모든 예약 대기를 조회한다.")
+    @Transactional
     void readAllWaiting() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
-        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+        waitingRepository.save(new Waiting(reservation, member1));
 
         Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
-        waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+        waitingRepository.save(new Waiting(reservation, member2));
 
         List<ReservationResponse> responses = waitingService.findAll();
         assertThat(responses.size()).isEqualTo(2);
@@ -167,11 +167,10 @@ class WaitingServiceTest {
     @DisplayName("예약 Id에 대한 가장 빠른 대기를 조회한다.")
     void findFirstByReservationId() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
-        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+        Waiting firstWaiting =  waitingRepository.save(new Waiting(reservation, member1));
 
         Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
-        Waiting firstWaiting = waitingRepository.save(
-                new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+        waitingRepository.save(new Waiting(reservation, member2));
 
         Optional<Waiting> waiting = waitingService.findFirstByReservationId(reservation.getId());
         assertAll(

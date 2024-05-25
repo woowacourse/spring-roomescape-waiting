@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
@@ -41,8 +43,6 @@ class ReservationWaitingServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
-    @Autowired
-    private Clock clock;
 
     private LocalDate date;
     private ReservationTime time;
@@ -56,17 +56,18 @@ class ReservationWaitingServiceTest {
         time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         theme = themeRepository.save(new Theme("themeName", "desc", "url"));
         member = memberRepository.save(MemberFixture.createMember("아루"));
-        reservation = reservationRepository.save(new Reservation(member, date, time, theme, LocalDateTime.now(clock)));
+        reservation = reservationRepository.save(new Reservation(member, date, time, theme));
     }
 
     @Test
     @DisplayName("예약과 예약 대기를 모두 조회한다")
+    @Transactional
     void readAllReservationAndWaiting() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
-        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+        waitingRepository.save(new Waiting(reservation, member1));
 
         Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
-        waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+        waitingRepository.save(new Waiting(reservation, member2));
 
         List<ReservationStatusResponse> responses = reservationWaitingService.findAllByMemberId(member1.getId());
         assertThat(responses.size()).isEqualTo(1);
@@ -84,7 +85,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("대기가 있는 경우, 예약을 업데이트한다.")
     void deleteByIdWhenExistWaiting() {
         Member updatedMember = memberRepository.save(MemberFixture.createMember("시소"));
-        waitingRepository.save(new Waiting(reservation, updatedMember, LocalDateTime.now(clock)));
+        waitingRepository.save(new Waiting(reservation, updatedMember));
 
         reservationWaitingService.deleteById(member.getId(), reservation.getId());
 

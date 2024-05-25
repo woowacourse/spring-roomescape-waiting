@@ -53,9 +53,6 @@ class ReservationServiceTest {
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private Clock clock;
-
     @Test
     @DisplayName("정상적인 예약 요청을 받아서 저장한다.")
     void shouldReturnReservationResponseWhenValidReservationRequestSave() {
@@ -119,7 +116,7 @@ class ReservationServiceTest {
                 time.getId(),
                 theme.getId()
         );
-        reservationRepository.save(request.toReservation(member, time, theme, LocalDateTime.now(clock)));
+        reservationRepository.save(request.toReservation(member, time, theme));
 
         assertThatCode(() -> reservationService.create(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -212,8 +209,7 @@ class ReservationServiceTest {
                 member,
                 LocalDate.of(2024, 1, 1),
                 time,
-                theme,
-                LocalDateTime.now(clock)
+                theme
         );
         return reservationRepository.save(reservation);
     }

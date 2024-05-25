@@ -12,13 +12,14 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.TimeStamp;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 
 @Entity
-public class Waiting {
+public class Waiting extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,24 +27,21 @@ public class Waiting {
     private Reservation reservation;
     @ManyToOne(optional = false)
     private Member member;
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
     @Enumerated(EnumType.STRING)
     private WaitingStatus waitingStatus;
 
     protected Waiting() {
     }
 
-    public Waiting(Long id, Reservation reservation, Member member, LocalDateTime createdAt) {
+    public Waiting(Long id, Reservation reservation, Member member) {
         this.id = id;
         this.reservation = reservation;
         this.member = member;
-        this.createdAt = createdAt;
         this.waitingStatus = WaitingStatus.WAITING;
     }
 
-    public Waiting(Reservation reservation, Member member, LocalDateTime createdAt) {
-        this(null, reservation, member, createdAt);
+    public Waiting(Reservation reservation, Member member) {
+        this(null, reservation, member);
     }
 
     public boolean isOwnedBy(long memberId) {
