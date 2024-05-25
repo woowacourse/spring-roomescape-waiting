@@ -10,6 +10,7 @@ import roomescape.controller.member.dto.CookieMemberResponse;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.domain.Role;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AuthControllerTest extends IntegrationTestSupport {
@@ -40,5 +41,6 @@ class AuthControllerTest extends IntegrationTestSupport {
 
         //then
         assertThat(check.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(check.getBody()).isNull();
     }
 }
