@@ -45,21 +45,9 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> findMemberReservationWithTwoSimpleQuery(Long memberId) {
+    public List<MemberReservationResponse> findMemberReservationWithWaitingStatus(Long memberId) {
         return reservationRepository.findByMemberId(memberId).stream()
                 .map(reservation -> new ReservationWithWaiting(reservation, countEarlierReservation(reservation)))
-                .map(MemberReservationResponse::new)
-                .toList();
-    }
-
-    public List<MemberReservationResponse> findMemberReservationWithJoinAndGroupBy(Long memberId) {
-        return reservationRepository.findMemberReservationWithJoinAndGroupBy(memberId).stream()
-                .map(MemberReservationResponse::new)
-                .toList();
-    }
-
-    public List<MemberReservationResponse> findMemberReservationWithSubQuery(Long memberId) {
-        return reservationRepository.findMemberReservationWithSubQuery(memberId).stream()
                 .map(MemberReservationResponse::new)
                 .toList();
     }
