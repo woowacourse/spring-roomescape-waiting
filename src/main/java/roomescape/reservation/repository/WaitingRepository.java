@@ -23,17 +23,19 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     boolean existsBySlotAndMemberId(Slot slot, Long memberId);
 
     @Query("""
-                SELECT new roomescape.member.dto.response.FindWaitingRankResponse(
-                    myWaiting.id AS waitingId,
-                    myWaiting.slot.theme.name AS theme,
-                    myWaiting.slot.date AS date,
-                    myWaiting.slot.reservationTime.startAt AS time,
-                    COUNT(otherWaiting.id) AS waitingNumber
-                )
-                FROM Waiting myWaiting
-                JOIN Waiting otherWaiting ON myWaiting.slot = otherWaiting.slot
-                WHERE myWaiting.member.id = :memberId AND otherWaiting.id <= myWaiting.id
-                GROUP BY otherWaiting.slot
+            SELECT new roomescape.member.dto.response.FindWaitingRankResponse(
+                myWaiting.id AS waitingId,
+                myWaiting.slot.theme.name AS theme,
+                myWaiting.slot.date AS date,
+                myWaiting.slot.reservationTime.startAt AS time,
+                COUNT(otherWaiting) AS waitingNumber
+            )
+            FROM Waiting myWaiting
+            JOIN Waiting otherWaiting
+              ON myWaiting.slot = otherWaiting.slot
+            WHERE myWaiting.member.id = :memberId
+              AND otherWaiting.id <= myWaiting.id
+            GROUP BY otherWaiting.slot
             """)
     List<FindWaitingRankResponse> findAllWaitingResponses(Long memberId);
 

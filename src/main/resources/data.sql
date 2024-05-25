@@ -3,6 +3,7 @@ truncate table reservation_time;
 truncate table reservation;
 truncate table member;
 truncate table theme;
+truncate table waiting;
 SET REFERENTIAL_INTEGRITY TRUE;
 
 INSERT INTO reservation_time (start_at) VALUES ('10:00');
@@ -26,7 +27,7 @@ INSERT INTO theme (name, description, thumbnail) VALUES ('감성', '감동적', 
 INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'hihi@naver.com', 'hihi');
 INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'bibap@naver.com', 'hihi');
 INSERT INTO member (name, role, email, password) values ( '포비', 'ADMIN', 'test@naver.com', 'hihi');
-INSERT INTO member (name, role, email, password) values ( '로키', 'ADMIN', 'loki@naver.com', 'hihi');
+INSERT INTO member (name, role, email, password) values ( '로키', 'ADMIN', 'lokiii@naver.com', 'hihi');
 INSERT INTO member (name, role, email, password) values ( '호돌', 'ADMIN', 'hodol@naver.com', 'hihi');
 
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-04-23', 1, 1);

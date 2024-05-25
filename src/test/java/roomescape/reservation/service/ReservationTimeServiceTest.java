@@ -14,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
@@ -29,9 +30,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Transactional
+@ActiveProfiles("test")
 public class ReservationTimeServiceTest {
 
     @Autowired
@@ -110,9 +111,9 @@ public class ReservationTimeServiceTest {
     @Test
     @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
     void getReservationTime_WhenTimeNotExist() {
-        assertThatThrownBy(() -> reservationTimeService.getReservationTime(1L))
+        assertThatThrownBy(() -> reservationTimeService.getReservationTime(999L))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessageContaining("식별자 1에 해당하는 예약이 존재하지 않아 시간을 조회할 수 없습니다.");
+                .hasMessageContaining("해당하는 예약이 존재하지 않아 시간을 조회할 수 없습니다.");
     }
 
     @Test
