@@ -16,7 +16,7 @@ public class ReservationWaiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
