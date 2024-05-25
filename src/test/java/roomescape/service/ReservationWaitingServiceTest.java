@@ -60,7 +60,11 @@ class ReservationWaitingServiceTest {
     @Test
     void findAllByMemberId() {
         long memberId = 1L;
-        ReservationWaiting data = new ReservationWaiting(VALID_MEMBER, VALID_RESERVATION, 3L);
+        ReservationWaiting data = new ReservationWaiting(
+                new Member(memberId, VALID_USER_NAME, VALID_USER_EMAIL, VALID_USER_PASSWORD, MemberRole.USER),
+                new Reservation(reservationId, VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME,
+                        VALID_THEME),
+                3L);
         when(reservationWaitingRepository.findAllByMemberId(memberId))
                 .thenReturn(List.of(data));
         when(reservationWaitingRepository.getRankByReservationAndPriority(reservationId, priority))
@@ -83,7 +87,7 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.of(findMember));
         Reservation findReservation = new Reservation(
                 reservationId,
-                VALID_MEMBER,
+                new Member(2L, VALID_USER_NAME, VALID_USER_EMAIL, VALID_USER_PASSWORD, MemberRole.USER),
                 VALID_RESERVATION_DATE,
                 VALID_RESERVATION_TIME,
                 VALID_THEME);
@@ -149,6 +153,28 @@ class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.save(appRequest))
                 .isInstanceOf(PastReservationException.class);
+
+    }
+
+    @DisplayName("예약자와 예약 대기자가 동일하면, 예외가 발생한다.")
+    @Test
+    void save_SameMember() {
+        Member findMember = new Member(memberId, VALID_USER_NAME, VALID_USER_EMAIL, VALID_USER_PASSWORD,
+                MemberRole.USER);
+        when(memberRepository.findById(memberId))
+                .thenReturn(Optional.of(findMember));
+        Reservation findReservation = new Reservation(reservationId, findMember,
+                VALID_RESERVATION_DATE,
+                VALID_RESERVATION_TIME,
+                VALID_THEME);
+        when(reservationRepository.findByDateAndTimeIdAndThemeId(VALID_RESERVATION_DATE, timeId, themeId))
+                .thenReturn(Optional.of(findReservation));
+
+        ReservationWaitingAppRequest appRequest = new ReservationWaitingAppRequest(VALID_RESERVATION_DATE.getDate(),
+                timeId, themeId, memberId);
+
+        assertThatThrownBy(() -> reservationWaitingService.save(appRequest))
+                .isInstanceOf(IllegalStateException.class);
 
     }
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.util.Objects;
 import roomescape.domain.exception.PastReservationException;
 
 @Entity
@@ -45,12 +46,19 @@ public class ReservationWaiting {
     public static ReservationWaiting create(Member member, Reservation reservation, long priority) {
         ReservationWaiting newInstance = new ReservationWaiting(member, reservation, priority);
         validatePast(newInstance);
+        validateWaitingMember(member, reservation);
         return newInstance;
     }
 
     private static void validatePast(ReservationWaiting reservationWaiting) {
         if (reservationWaiting.isPast()) {
             throw new PastReservationException();
+        }
+    }
+
+    private static void validateWaitingMember(final Member member, final Reservation reservation) {
+        if (Objects.equals(member.getId(), reservation.getMember().getId())) {
+            throw new IllegalStateException("예약자는 예약대기를 할 수 없습니다.");
         }
     }
 

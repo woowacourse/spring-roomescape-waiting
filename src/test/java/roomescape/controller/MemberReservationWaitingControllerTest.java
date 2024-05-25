@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import static roomescape.Fixture.COOKIE_NAME;
+import static roomescape.Fixture.VALID_ADMIN;
 import static roomescape.Fixture.VALID_MEMBER;
 import static roomescape.Fixture.VALID_RESERVATION;
 import static roomescape.Fixture.VALID_RESERVATION_DATE;
@@ -16,13 +17,14 @@ import org.junit.jupiter.api.Test;
 import roomescape.web.controller.request.ReservationWaitingWebRequest;
 
 class MemberReservationWaitingControllerTest extends ControllerTest {
-    
+
     @BeforeEach
     void setInitialData() {
         reservationTimeRepository.save(VALID_RESERVATION_TIME);
         themeRepository.save(VALID_THEME);
         memberRepository.save(VALID_MEMBER);
         reservationRepository.save(VALID_RESERVATION);
+        memberRepository.save(VALID_ADMIN);
     }
 
     @DisplayName("사용자가 예약 대기를 생성한다. -> 201")
@@ -32,7 +34,7 @@ class MemberReservationWaitingControllerTest extends ControllerTest {
                 VALID_RESERVATION_DATE.getDate().toString(), 1L, 1L);
 
         RestAssured.given().log().all()
-                .cookie(COOKIE_NAME, getUserToken())
+                .cookie(COOKIE_NAME, getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations/waiting")
