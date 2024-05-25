@@ -13,15 +13,11 @@ import org.springframework.context.annotation.Import;
 import roomescape.MemberFixture;
 import roomescape.ThemeFixture;
 import roomescape.TimeFixture;
-import roomescape.application.ServiceTest;
 import roomescape.config.TestConfig;
 import roomescape.domain.repository.MemberCommandRepository;
-import roomescape.domain.repository.MemberQueryRepository;
 import roomescape.domain.repository.ReservationCommandRepository;
 import roomescape.domain.repository.ThemeCommandRepository;
-import roomescape.domain.repository.ThemeQueryRepository;
 import roomescape.domain.repository.TimeCommandRepository;
-import roomescape.domain.repository.TimeQueryRepository;
 
 @Import({TestConfig.class, PopularThemeFinder.class})
 @DataJpaTest

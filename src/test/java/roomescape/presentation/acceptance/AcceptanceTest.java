@@ -10,7 +10,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.application.dto.TokenRequest;
 import roomescape.config.TestConfig;
-import roomescape.config.TestDataCleaner;
 import roomescape.config.TestDataClearExtension;
 import roomescape.config.TestDataInitializer;
 

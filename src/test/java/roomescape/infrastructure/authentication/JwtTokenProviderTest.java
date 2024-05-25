@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.validation.constraints.Null;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import org.junit.jupiter.api.DisplayName;

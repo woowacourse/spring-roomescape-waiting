@@ -16,7 +16,6 @@ import roomescape.application.ServiceTest;
 import roomescape.domain.Member;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
-import roomescape.domain.Waiting;
 import roomescape.domain.dto.WaitingWithRank;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
