@@ -1,17 +1,26 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.ROOM_THEME1;
+import static roomescape.TestFixture.MEMBER1;
+import static roomescape.TestFixture.RESERVATION_TIME_10AM;
+import static roomescape.TestFixture.THEME1;
+import static roomescape.TestFixture.THEME2;
 
+import io.restassured.RestAssured;
+import java.time.LocalDate;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.exception.NotFoundException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ThemeRepositoryTest {
@@ -19,68 +28,50 @@ class ThemeRepositoryTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationTimeRepository timeRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @LocalServerPort
+    private int port;
+
     @BeforeEach
     void setUp() {
-        List<Theme> themes = themeRepository.findAll();
-        for (Theme theme : themes) {
-            themeRepository.deleteById(theme.getId());
-        }
+        RestAssured.port = port;
     }
 
-    @DisplayName("테마를 저장한다.")
+    @AfterEach
+    void tearDown() {
+        reservationRepository.deleteAllInBatch();
+        themeRepository.deleteAllInBatch();
+        timeRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+    }
+
+    @DisplayName("특정 기간동안 가장 많이 예약된 테마를 갯수만큼 조회한다.")
     @Test
-    void save() {
+    void findMostReservedThemeInPeriodByCount() {
         // given
-        Theme theme = ROOM_THEME1;
-        // when
-        Theme savedTheme = themeRepository.save(theme);
-        // then
-        assertAll(
-                () -> assertThat(savedTheme.getName()).isEqualTo(theme.getName()),
-                () -> assertThat(savedTheme.getDescription()).isEqualTo(
-                        theme.getDescription()),
-                () -> assertThat(savedTheme.getThumbnail()).isEqualTo(theme.getThumbnail())
-        );
-    }
+        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
+        Theme theme1 = themeRepository.save(THEME1);
+        Theme theme2 = themeRepository.save(THEME2);
 
-    @DisplayName("저장된 모든 테마를 보여준다.")
-    @Test
-    void findAll() {
-        // given & when
-        List<Theme> themes = themeRepository.findAll();
-        // then
-        assertThat(themes).isEmpty();
-    }
+        reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme1, Status.CONFIRMED));
+        reservationRepository.save(
+                new Reservation(member, LocalDate.now().minusDays(1), time, theme2, Status.CONFIRMED));
 
-    @DisplayName("테마를 삭제한다.")
-    @Test
-    void deleteTheme() {
-        // given
-        Theme theme = ROOM_THEME1;
-        Theme savedTheme = themeRepository.save(theme);
-        // when
-        themeRepository.deleteById(savedTheme.getId());
-        // then
-        assertThat(themeRepository.findAll()).isEmpty();
-    }
+        // when: LIMIT 을 확인하기 위해 1개만 조회한다.
+        List<Theme> themes = themeRepository.findMostReservedThemeInPeriodByCount(LocalDate.now().minusDays(1),
+                LocalDate.now(), 1);
 
-    @DisplayName("해당 id의 테마를 보여준다.")
-    @Test
-    void findById() {
-        // given
-        Theme theme = ROOM_THEME1;
-        Theme savedTheme = themeRepository.save(theme);
-        // when
-        Theme findTheme = themeRepository.findById(savedTheme.getId())
-                .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다."));
         // then
-        assertAll(
-                () -> assertThat(findTheme.getId()).isEqualTo(savedTheme.getId()),
-                () -> assertThat(findTheme.getName()).isEqualTo(savedTheme.getName()),
-                () -> assertThat(findTheme.getDescription()).isEqualTo(
-                        savedTheme.getDescription()),
-                () -> assertThat(findTheme.getThumbnail()).isEqualTo(
-                        savedTheme.getThumbnail())
-        );
+        assertThat(themes).hasSize(1);
+        assertThat(themes).extracting(Theme::getName).containsAnyOf(theme1.getName(), theme2.getName());
     }
 }

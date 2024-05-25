@@ -1,21 +1,25 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DATE_AFTER_1DAY;
-import static roomescape.TestFixture.MEMBER_BROWN;
+import static roomescape.TestFixture.MEMBER1;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.ROOM_THEME1;
+import static roomescape.TestFixture.THEME1;
 
+import io.restassured.RestAssured;
+import java.time.LocalDate;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithWaitingOrder;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,80 +34,55 @@ class ReservationRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @LocalServerPort
+    private int port;
+
     @BeforeEach
     void setUp() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        for (Reservation reservation : reservations) {
-            reservationRepository.deleteById(reservation.getId());
-        }
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationTimeRepository.deleteById(reservationTime.getId());
-        }
-        List<Theme> themes = themeRepository.findAll();
-        for (Theme theme : themes) {
-            themeRepository.deleteById(theme.getId());
-        }
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
+        RestAssured.port = port;
     }
 
-    @DisplayName("존재하는 모든 예약을 보여준다.")
-    @Test
-    void findAll() {
-        assertThat(reservationRepository.findAll()).isEmpty();
+    @AfterEach
+    void tearDown() {
+        reservationRepository.deleteAllInBatch();
+        reservationTimeRepository.deleteAllInBatch();
+        themeRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
     }
 
-
-    @DisplayName("날짜와 시간이 같은 예약이 존재하는지 여부를 반환한다.")
+    @DisplayName("테마 ID로 예약을 조회한다.")
     @Test
-    void duplicatedReservationTest() {
+    void findByThemeId() {
         // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        Theme savedTheme = themeRepository.save(ROOM_THEME1);
-        boolean existsFalse
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
-                savedTheme.getId());
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedTheme));
+        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        Theme theme = themeRepository.save(THEME1);
+        Member member = memberRepository.save(MEMBER1);
+        reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme, Status.CONFIRMED));
+        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme, Status.CONFIRMED));
+
         // when
-        boolean existsTrue
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
-                savedTheme.getId());
+        List<Reservation> reservations = reservationRepository.findByThemeId(theme.getId());
+
         // then
-        assertAll(
-                () -> assertThat(existsFalse).isFalse(),
-                () -> assertThat(existsTrue).isTrue()
-        );
+        assertThat(reservations).hasSize(2);
     }
 
-    @DisplayName("예약을 저장한다.")
+    @DisplayName("멤버의 모든 예약 및 대기를 조회한다.")
     @Test
-    void save() {
+    void findMemberReservationAndWaiting() {
         // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(ROOM_THEME1);
-        // when
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, theme));
-        // then
-        assertThat(reservationRepository.findAll()).hasSize(1);
-    }
+        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        Theme theme = themeRepository.save(THEME1);
+        reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme, Status.WAITING));
+        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme, Status.CONFIRMED));
 
-    @DisplayName("해당 id의 예약을 삭제한다.")
-    @Test
-    void deleteById() {
-        // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(ROOM_THEME1);
-        Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, reservationTime, theme));
         // when
-        reservationRepository.deleteById(savedReservation.getId());
+        List<ReservationWithWaitingOrder> myReservations = reservationRepository.findMyReservations(member.getId());
+
         // then
-        assertThat(reservationRepository.findAll()).isEmpty();
+        assertThat(myReservations).hasSize(2);
+        assertThat(myReservations).extracting("reservation.status").contains(Status.WAITING, Status.CONFIRMED);
+        assertThat(myReservations).extracting("reservation.member.id").containsOnly(member.getId());
     }
 }
