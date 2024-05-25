@@ -9,6 +9,8 @@ import roomescape.global.exception.ValueNullOrEmptyException;
 @Embeddable
 public class ReservationDate {
 
+    protected static final String RESERVATION_DATE_NULL_ERROR_MESSAGE = "예약 날짜는 비어있을 수 없습니다.";
+
     public ReservationDate() {
 
     }
@@ -23,7 +25,7 @@ public class ReservationDate {
 
     private void validateNullAndBlank(LocalDate value) {
         if (value == null) {
-            throw new ValueNullOrEmptyException("예약 날짜는 비어있을 수 없습니다.");
+            throw new ValueNullOrEmptyException(RESERVATION_DATE_NULL_ERROR_MESSAGE);
         }
     }
 

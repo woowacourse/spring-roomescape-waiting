@@ -2,6 +2,8 @@ package roomescape.domain.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.reservation.service.AdminReservationTimeService.DUPLICATED_RESERVATION_TIME_ERROR_MESSAGE;
+import static roomescape.domain.reservation.service.AdminReservationTimeService.NON_EXIST_RESERVATION_TIME_ID_ERROR_MESSAGE;
 import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
 
 import java.time.LocalTime;
@@ -55,7 +57,7 @@ class AdminReservationTimeServiceTest {
 
         assertThatThrownBy(() -> adminReservationTimeService.addReservationTime(reservationTimeAddRequest))
                 .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage("이미 존재하는 예약시간은 추가할 수 없습니다.");
+                .hasMessage(DUPLICATED_RESERVATION_TIME_ERROR_MESSAGE);
     }
 
     @DisplayName("원하는 id의 예약시간을 삭제합니다")
@@ -72,8 +74,8 @@ class AdminReservationTimeServiceTest {
     @DisplayName("없는 id의 예약시간을 삭제하면 예외를 발생합니다.")
     @Test
     void should_throw_ClientIllegalArgumentException_when_remove_reservation_time_with_non_exist_id() {
-        assertThatThrownBy(() -> adminReservationTimeService.removeReservationTime(1L)).isInstanceOf(
-                        NoMatchingDataException.class)
-                .hasMessage("해당 id를 가진 예약시간이 존재하지 않습니다.");
+        assertThatThrownBy(() -> adminReservationTimeService.removeReservationTime(1L))
+                .isInstanceOf(NoMatchingDataException.class)
+                .hasMessage(NON_EXIST_RESERVATION_TIME_ID_ERROR_MESSAGE);
     }
 }

@@ -26,6 +26,14 @@ import roomescape.global.exception.NoMatchingDataException;
 @Service
 public class ReservationService {
 
+    protected static final String DUPLICATED_RESERVATION_ERROR_MESSAGE = "예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.";
+    protected static final String DUPLICATED_RESERVATION_WAITING_ERROR_MESSAGE = "겹치는 예약대기 또는 예약은 할 수 없습니다.";
+    protected static final String PAST_RESERVATION_ERROR_MESSAGE = ": 예약은 현재 보다 이전일 수 없습니다";
+    protected static final String NON_EXIST_THEME_ERROR_MESSAGE = "존재 하지 않는 테마로 예약할 수 없습니다";
+    protected static final String NON_EXIST_RESERVATION_TIME_ERROR_MESSAGE = "존재 하지 않는 예약시각으로 예약할 수 없습니다.";
+    protected static final String NON_EXIST_MEMBER_ERROR_MESSAGE = "존재 하지 않는 멤버로 예약할 수 없습니다.";
+    protected static final String NON_EXIST_RESERVATION_ID_ERROR_MESSAGE = "해당 id를 가진 예약이 존재하지 않습니다.";
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -66,7 +74,7 @@ public class ReservationService {
     private void validateDuplicatedReservation(ReservationAddRequest reservationAddRequest) {
         if (reservationRepository.existByDateAndTimeIdAndThemeId(reservationAddRequest.date(),
                 reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
-            throw new EscapeApplicationException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
+            throw new EscapeApplicationException(DUPLICATED_RESERVATION_ERROR_MESSAGE);
         }
     }
 
@@ -74,14 +82,14 @@ public class ReservationService {
         if (reservationRepository.existByMemberIdAndDateAndTimeIdAndThemeId(
                 reservationAddRequest.memberId(), reservationAddRequest.date(),
                 reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
-            throw new EscapeApplicationException("겹치는 예약대기 또는 예약은 할 수 없습니다.");
+            throw new EscapeApplicationException(DUPLICATED_RESERVATION_WAITING_ERROR_MESSAGE);
         }
     }
 
     private void validateReservationDateTime(Reservation reservation) {
         LocalDateTime reservationDateTime = reservation.getDate().atTime(reservation.getTime().getStartAt());
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            throw new EscapeApplicationException(reservationDateTime + ": 예약은 현재 보다 이전일 수 없습니다");
+            throw new EscapeApplicationException(reservationDateTime + PAST_RESERVATION_ERROR_MESSAGE);
         }
     }
 
@@ -97,17 +105,17 @@ public class ReservationService {
 
     private Theme getTheme(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoMatchingDataException("존재 하지 않는 테마로 예약할 수 없습니다"));
+                .orElseThrow(() -> new NoMatchingDataException(NON_EXIST_THEME_ERROR_MESSAGE));
     }
 
     private ReservationTime getReservationTime(Long reservationTimeId) {
         return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new NoMatchingDataException("존재 하지 않는 예약시각으로 예약할 수 없습니다."));
+                .orElseThrow(() -> new NoMatchingDataException(NON_EXIST_RESERVATION_TIME_ERROR_MESSAGE));
     }
 
     private Member getMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoMatchingDataException("존재 하지 않는 멤버로 예약할 수 없습니다."));
+                .orElseThrow(() -> new NoMatchingDataException(NON_EXIST_MEMBER_ERROR_MESSAGE));
     }
 
     public List<BookableTimeResponse> findBookableTimes(BookableTimesRequest bookableTimesRequest) {
@@ -128,7 +136,7 @@ public class ReservationService {
 
     public void removeReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NoMatchingDataException("해당 id를 가진 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new NoMatchingDataException(NON_EXIST_RESERVATION_ID_ERROR_MESSAGE));
 
         reservationRepository.deleteById(id);
         updateWaitingToReserved(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());

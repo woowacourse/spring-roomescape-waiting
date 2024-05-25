@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.domain;
+package roomescape.domain.reservation.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
@@ -11,7 +11,6 @@ import static roomescape.fixture.ThemeFixture.DUMMY_THEME;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.domain.reservation.Reservation;
 
 public class ReservationTest {
 

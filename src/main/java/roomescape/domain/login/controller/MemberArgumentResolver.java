@@ -16,6 +16,8 @@ import roomescape.global.exception.AuthorizationException;
 @Component
 public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
+    protected static final String SHOULD_LOGIN_ERROR_MESSAGE = "로그인 해야 합니다.";
+
     private final MemberService memberService;
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -36,7 +38,7 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         Cookie[] cookie = request.getCookies();
         if (cookie == null) {
-            throw new AuthorizationException("로그인 해야 합니다.");
+            throw new AuthorizationException(SHOULD_LOGIN_ERROR_MESSAGE);
         }
         String token = jwtTokenProvider.extractTokenFromCookie(request.getCookies());
         Long memberId = jwtTokenProvider.validateAndGetLongSubject(token);

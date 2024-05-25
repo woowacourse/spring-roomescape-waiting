@@ -6,6 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.domain.member.domain.Role.ADMIN;
 import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
+import static roomescape.domain.reservation.service.ReservationService.DUPLICATED_RESERVATION_ERROR_MESSAGE;
+import static roomescape.domain.reservation.service.ReservationService.DUPLICATED_RESERVATION_WAITING_ERROR_MESSAGE;
+import static roomescape.domain.reservation.service.ReservationService.NON_EXIST_MEMBER_ERROR_MESSAGE;
+import static roomescape.domain.reservation.service.ReservationService.NON_EXIST_RESERVATION_ID_ERROR_MESSAGE;
+import static roomescape.domain.reservation.service.ReservationService.NON_EXIST_RESERVATION_TIME_ERROR_MESSAGE;
+import static roomescape.domain.reservation.service.ReservationService.NON_EXIST_THEME_ERROR_MESSAGE;
+import static roomescape.domain.reservation.service.ReservationService.PAST_RESERVATION_ERROR_MESSAGE;
 import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.BEFORE_ONE_DAYS_DATE;
@@ -91,7 +98,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
                 .isInstanceOf(NoMatchingDataException.class)
-                .hasMessage("존재 하지 않는 멤버로 예약할 수 없습니다.");
+                .hasMessage(NON_EXIST_MEMBER_ERROR_MESSAGE);
     }
 
     @DisplayName("존재 하지 않는 테마로 예약 시 예외를 발생합니다.")
@@ -102,7 +109,7 @@ class ReservationServiceTest {
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
                 .isInstanceOf(NoMatchingDataException.class)
-                .hasMessage("존재 하지 않는 테마로 예약할 수 없습니다");
+                .hasMessage(NON_EXIST_THEME_ERROR_MESSAGE);
     }
 
 
@@ -115,7 +122,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
                 .isInstanceOf(NoMatchingDataException.class)
-                .hasMessage("존재 하지 않는 예약시각으로 예약할 수 없습니다.");
+                .hasMessage(NON_EXIST_RESERVATION_TIME_ERROR_MESSAGE);
     }
 
     @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 경우 예외를 발생합니다.")
@@ -132,10 +139,10 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservation(conflictRequest))
                 .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
+                .hasMessage(DUPLICATED_RESERVATION_ERROR_MESSAGE);
     }
 
-    @DisplayName("멤버 id와 예약 날짜와 예약시각 그리고 테마 아이디가 같은 경우 예외를 발생합니다.")
+    @DisplayName("예약 대기가 멤버 id와 예약 날짜와 예약시각 그리고 테마 아이디가 같은 경우 예외를 발생합니다.")
     @Test
     void should_throw_exception_when_reserve_waiting_with_member_id_and_date_and_time_duplicated() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
@@ -149,7 +156,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addWaitingReservation(conflictRequest))
                 .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage("겹치는 예약대기 또는 예약은 할 수 없습니다.");
+                .hasMessage(DUPLICATED_RESERVATION_WAITING_ERROR_MESSAGE);
     }
 
     @DisplayName("date가 현재날짜 보다 이전이면 예약시 예외가 발생한다")
@@ -175,7 +182,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
                 .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage(TODAY.atTime(BEFORE_ONE_HOUR) + ": 예약은 현재 보다 이전일 수 없습니다");
+                .hasMessage(TODAY.atTime(BEFORE_ONE_HOUR) + PAST_RESERVATION_ERROR_MESSAGE);
     }
 
     @DisplayName("예약 가능 시각을 알 수 있습니다.")
@@ -211,7 +218,7 @@ class ReservationServiceTest {
     void should_throw_ClientIllegalArgumentException_when_remove_reservation_with_non_exist_id() {
         assertThatThrownBy(() -> reservationService.removeReservation(1L))
                 .isInstanceOf(NoMatchingDataException.class)
-                .hasMessage("해당 id를 가진 예약이 존재하지 않습니다.");
+                .hasMessage(NON_EXIST_RESERVATION_ID_ERROR_MESSAGE);
     }
 
     @DisplayName("필터링된 예약 목록을 불러올 수 있습니다.")

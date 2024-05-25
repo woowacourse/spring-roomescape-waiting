@@ -1,11 +1,10 @@
-package roomescape.domain.reservation.domain;
+package roomescape.domain.member.domain;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.member.domain.MemberName;
 import roomescape.global.exception.ValueLengthException;
 import roomescape.global.exception.ValueNullOrEmptyException;
 

@@ -1,12 +1,12 @@
-package roomescape.domain.reservation.domain;
+package roomescape.domain.reservation.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.reservation.domain.reservation.ReservationDate.RESERVATION_DATE_NULL_ERROR_MESSAGE;
 import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.domain.reservation.ReservationDate;
 import roomescape.global.exception.EscapeApplicationException;
 
 class ReservationDateTest {
@@ -23,6 +23,6 @@ class ReservationDateTest {
     void should_throw_ClientIllegalArgumentException_when_date_is_null() {
         assertThatThrownBy(() -> new ReservationDate(null))
                 .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage("예약 날짜는 비어있을 수 없습니다.");
+                .hasMessage(RESERVATION_DATE_NULL_ERROR_MESSAGE);
     }
 }
