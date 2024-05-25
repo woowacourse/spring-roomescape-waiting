@@ -53,7 +53,7 @@ public class ReservationService {
 
     @Transactional
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
-        return reservationRepository.findMyReservations(authInfo.id())
+        return reservationRepository.findMyReservationsWithStatus(authInfo.id(), List.of(Status.CREATED, Status.WAITING))
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
@@ -120,11 +120,12 @@ public class ReservationService {
     }
 
     private void validateDuplication(Reservation reservation) {
-        reservationRepository.findByDateAndTimeAndThemeAndMember(
+        reservationRepository.findByDateAndTimeAndThemeAndMemberAndStatusIn(
                         reservation.getDate(),
                         reservation.getTime(),
                         reservation.getTheme(),
-                        reservation.getMember())
+                        reservation.getMember(),
+                        List.of(Status.CREATED, Status.WAITING))
                 .ifPresent(reservation::validateDuplication);
     }
 }

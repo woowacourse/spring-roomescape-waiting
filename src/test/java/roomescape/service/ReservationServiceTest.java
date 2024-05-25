@@ -89,7 +89,7 @@ class ReservationServiceTest {
         MyReservationResponse myReservationResponse = myReservations.get(0);
 
         assertAll(
-                () -> assertThat(myReservationResponse.reservationId()).isEqualTo(reservationResponse.id()),
+                () -> assertThat(myReservationResponse.id()).isEqualTo(reservationResponse.id()),
                 () -> assertThat(myReservationResponse.theme()).isEqualTo(ROOM_THEME1.getName()),
                 () -> assertThat(myReservationResponse.date()).isEqualTo(VALID_STRING_DATE),
                 () -> assertThat(myReservationResponse.time()).isEqualTo(VALID_STRING_TIME),
