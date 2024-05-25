@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 import roomescape.exception.custom.BadRequestException;
@@ -47,7 +49,8 @@ public class ReservationSlot {
     }
 
     public boolean isPast() {
-        return LocalDateTime.of(this.date, this.time.getStartAt()).isBefore(LocalDateTime.now());
+        LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/seoul")).toLocalDateTime();
+        return LocalDateTime.of(this.date, this.time.getStartAt()).isBefore(now);
     }
 
     public Long getId() {

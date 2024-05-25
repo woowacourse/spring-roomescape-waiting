@@ -9,7 +9,7 @@ import static roomescape.fixture.ReservationTimeFixture.get2PM;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
 
-import java.time.LocalTime;
+import java.time.*;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -136,4 +136,17 @@ class ReservationSlotTimeServiceTest extends ServiceTest {
         assertThat(count)
                 .isEqualTo(expectedCount);
     }
+
+    @DisplayName("")
+    @Test
+    void asd() {
+        //given
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        System.out.println("now = " + now);
+
+        //when
+
+        //then
+    }
+
 }
