@@ -27,7 +27,6 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
 
-    // TODO: CRD별로 분리해서 다른 서비스에서 재사용 하도록 구현해보기
     public ReservationService(ReservationRepository reservationRepository,
                               MemberRepository memberRepository,
                               TimeRepository timeRepository,
