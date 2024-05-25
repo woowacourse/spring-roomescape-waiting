@@ -3,7 +3,10 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Waiting;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dbservice.ReservationDbService;
 import roomescape.service.dto.request.ReservationConditionRequest;
@@ -21,9 +24,13 @@ import java.util.Optional;
 @Transactional
 public class ReservationService {
     private final ReservationDbService reservationDbService;
+    private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationService(ReservationDbService reservationDbService) {
+    public ReservationService(ReservationDbService reservationDbService, WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
         this.reservationDbService = reservationDbService;
+        this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
@@ -48,11 +55,21 @@ public class ReservationService {
 
     public void deleteReservation(Long id) {
         Reservation reservation = reservationDbService.findById(id);
-        if (reservation.isEmptyWaitings()) {
-            reservationDbService.delete(reservation);
+        List<Waiting> waitings = waitingRepository.findByReservationOrderById(reservation);
+
+        if (!waitings.isEmpty()) {
+            acceptWaiting(waitings.get(0), reservation);
             return;
         }
-        reservation.changeToNextWaitingMember();
+
+        reservationRepository.delete(reservation);
+    }
+
+    private void acceptWaiting(Waiting waiting, Reservation reservation) {
+        Member member = waiting.getMember();
+        reservation.setMember(member);
+        reservationRepository.save(reservation);
+        waitingRepository.delete(waiting);
     }
 
     public ReservationResponses findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
@@ -88,14 +105,21 @@ public class ReservationService {
     private List<UserReservationResponse> findUserReservations(Member user) {
         return reservationDbService.findMemberReservations(user)
                 .stream()
-                .map(reservation -> new UserReservationResponse(reservation.getId(), reservation, user))
+                .map(UserReservationResponse::reserved)
                 .toList();
     }
 
     private List<UserReservationResponse> findUserWaitingReservations(Member user) {
-        return user.getWaitings().stream()
-                .map(waiting -> new UserReservationResponse(waiting.getId(), waiting.getReservation(), user))
+        return waitingRepository.findByMember(user)
+                .stream()
+                .map(waiting -> UserReservationResponse.from(waiting, getWaitingRank(waiting)))
                 .toList();
+    }
+
+    // TODO 성능 생각해서 쿼리 줄이기
+    private int getWaitingRank(Waiting waiting) {
+        List<Waiting> waitings = waitingRepository.findByReservationOrderById(waiting.getReservation());
+        return waitings.indexOf(waiting);
     }
 }
 

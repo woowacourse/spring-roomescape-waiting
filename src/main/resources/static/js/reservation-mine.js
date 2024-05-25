@@ -26,12 +26,18 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        let message;
+        if (item.status == "RESERVED") {
+            message = "예약"
+        } else {
+            message = item.rank + "번째 예약 대기"
+        }
+
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+        row.insertCell(3).textContent = message;
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
@@ -55,7 +61,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '/waitings?id='+id;
+    const endpoint = '/waitings?id=' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

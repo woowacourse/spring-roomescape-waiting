@@ -3,24 +3,7 @@ package roomescape.domain.reservation;
 import roomescape.domain.member.Member;
 
 public enum ReservationStatus {
-    RESERVED("예약"),
-    WAITING("예약 대기"),
+    RESERVED,
+    WAITING,
     ;
-
-    private final String message;
-
-    ReservationStatus(String message) {
-        this.message = message;
-    }
-
-    public static String messageOf(Reservation reservation, Member member) {
-        if (reservation.isOwn(member)) {
-            return RESERVED.message;
-        }
-        return member.getWaitingRanking(reservation) + "번째 " + WAITING.message;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }
