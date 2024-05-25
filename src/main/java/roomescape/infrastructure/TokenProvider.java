@@ -10,8 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.global.handler.exception.CustomException;
-import roomescape.global.handler.exception.ExceptionCode;
+import roomescape.global.handler.exception.AuthenticationException;
 
 @Component
 public class TokenProvider {
@@ -43,7 +42,7 @@ public class TokenProvider {
     private String parseAuthenticationInfo(String token) {
         String authenticationInfo = parsePayload(token).get(AUTHENTICATION_PAYLOAD, String.class);
         if (authenticationInfo == null) {
-            throw new CustomException(ExceptionCode.NO_AUTHENTICATION_INFO);
+            throw new AuthenticationException("권한 정보가 없는 토큰입니다.");
         }
         return authenticationInfo;
     }
@@ -56,7 +55,7 @@ public class TokenProvider {
     private Role parseAuthenticationRole(String token) {
         String authenticationInfo = parsePayload(token).get(AUTHENTICATION_ROLE, String.class);
         if (authenticationInfo == null) {
-            throw new CustomException(ExceptionCode.NO_AUTHENTICATION_INFO);
+            throw new AuthenticationException("권한 정보가 없는 토큰입니다.");
         }
         return Role.of(authenticationInfo);
     }
@@ -69,19 +68,19 @@ public class TokenProvider {
     public long parseMemberId(String token) {
         String authenticationInfo = parsePayload(token).getSubject();
         if (authenticationInfo == null) {
-            throw new CustomException(ExceptionCode.NO_AUTHENTICATION_INFO);
+            throw new AuthenticationException("권한 정보가 없는 토큰입니다.");
         }
         return Long.parseLong(authenticationInfo);
     }
 
     public String extractTokenFromCookie(Cookie[] cookies) {
         if (cookies == null) {
-            throw new CustomException(ExceptionCode.NO_AUTHENTICATION_ACCESS);
+            throw new AuthenticationException("토큰을 찾을 수 없습니다.");
         }
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(TOKEN_COOKIE_NAME))
                 .findAny()
-                .orElseThrow(() -> new CustomException(ExceptionCode.NO_AUTHENTICATION_ACCESS))
+                .orElseThrow(() -> new AuthenticationException("토큰을 찾을 수 없습니다."))
                 .getValue();
     }
 

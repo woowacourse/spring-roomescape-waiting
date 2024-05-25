@@ -14,24 +14,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
-import roomescape.global.handler.exception.CustomException;
-import roomescape.global.handler.exception.ExceptionCode;
+import roomescape.global.handler.exception.NotFoundException;
+import roomescape.global.handler.exception.ValidationException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.reservation.dto.request.ReservationRequest;
 import roomescape.service.member.dto.MemberResponse;
+import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.dto.request.ReservationRequest;
 import roomescape.service.reservation.dto.response.MyReservationResponse;
 import roomescape.service.reservation.dto.response.ReservationResponse;
 import roomescape.service.reservation.dto.response.ReservationTimeResponse;
 import roomescape.service.reservation.dto.response.ThemeResponse;
-import roomescape.service.reservation.ReservationService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -89,8 +89,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(
                 () -> reservationService.createReservation(reservationRequest))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ExceptionCode.NOT_FOUND_RESERVATION_TIME.getErrorMessage());
+                .isInstanceOf(NotFoundException.class);
     }
 
     @DisplayName("과거 시간을 예약하는 경우 예외가 발생한다.")
@@ -104,8 +103,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(
                 () -> reservationService.createReservation(reservationRequest))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ExceptionCode.PAST_TIME_SLOT_RESERVATION.getErrorMessage());
+                .isInstanceOf(ValidationException.class);
     }
 
 

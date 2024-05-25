@@ -7,9 +7,8 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.global.handler.exception.AuthenticationException;
 import roomescape.infrastructure.MemberId;
-import roomescape.global.handler.exception.CustomException;
-import roomescape.global.handler.exception.ExceptionCode;
 import roomescape.infrastructure.TokenProvider;
 
 @Component
@@ -31,7 +30,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         if (request == null) {
-            throw new CustomException(ExceptionCode.BAD_REQUEST);
+            throw new AuthenticationException("토큰을 찾을 수 없습니다.");
         }
         return tokenProvider.parseMemberIdFromCookies(request.getCookies());
     }

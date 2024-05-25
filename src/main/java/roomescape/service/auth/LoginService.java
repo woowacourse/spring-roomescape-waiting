@@ -5,13 +5,12 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Password;
-import roomescape.repository.MemberRepository;
-import roomescape.global.handler.exception.CustomException;
-import roomescape.global.handler.exception.ExceptionCode;
+import roomescape.global.handler.exception.NotFoundException;
 import roomescape.infrastructure.TokenProvider;
+import roomescape.repository.MemberRepository;
+import roomescape.service.auth.dto.AuthenticationInfoResponse;
 import roomescape.service.auth.dto.TokenRequest;
 import roomescape.service.auth.dto.TokenResponse;
-import roomescape.service.auth.dto.AuthenticationInfoResponse;
 
 @Service
 public class LoginService {
@@ -32,7 +31,7 @@ public class LoginService {
 
     private Member findMemberBy(String email, String password) {
         return memberRepository.findMemberByEmailAndPassword(new Email(email), new Password(password))
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new NotFoundException(String.format("email값: %s 에 대한 사용자가 존재하지 않습니다.", email)));
     }
 
     public AuthenticationInfoResponse loginCheck(HttpServletRequest request) {

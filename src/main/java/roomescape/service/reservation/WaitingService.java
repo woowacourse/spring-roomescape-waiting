@@ -8,8 +8,8 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
-import roomescape.global.handler.exception.CustomException;
-import roomescape.global.handler.exception.ExceptionCode;
+import roomescape.global.handler.exception.NotFoundException;
+import roomescape.global.handler.exception.ValidationException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -56,21 +56,21 @@ public class WaitingService {
 
     private void validateMemberWaitingAlreadyExist(LocalDate date, Theme theme, Member member) {
         if (waitingRepository.existsBySchedule_DateAndSchedule_ThemeAndMember(date, theme, member)) {
-            throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
+            throw new ValidationException("테마당 하나의 날짜에 하나의 예약대기를 생성할 수 있습니다.");
         }
     }
 
     private void validateMemberReservationAlreadyExist(LocalDate date, Theme theme,
                                                        Member member) {
         if (reservationRepository.existsBySchedule_DateAndSchedule_ThemeAndMember(date, theme, member)) {
-            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
-        }
+            throw new ValidationException(String.format("해당 (날짜: %s / 테마: %s)에 회원님에 대한 예약이 이미 존재합니다.",
+                    date.toString(), theme.getName()));        }
     }
 
     private void validateIsWaitingInThePast(LocalDate date, ReservationTime time) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (LocalDateTime.now().isAfter(reservationDateTime)) {
-            throw new CustomException(ExceptionCode.PAST_TIME_SLOT_RESERVATION);
+            throw new ValidationException("이미 지나간 시점을 예약할 수 없습니다.");
         }
     }
 
@@ -87,16 +87,16 @@ public class WaitingService {
 
     private Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_THEME));
+                .orElseThrow(() -> new NotFoundException(String.format("id값: %d에 대한 테마가 존재하지 않습니다.", id)));
     }
 
     private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION_TIME));
+                .orElseThrow(() -> new NotFoundException(String.format("id값: %d에 대한 예약시간이 존재하지 않습니다.", id)));
     }
 
     private Member getMember(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new NotFoundException(String.format("id값: %d에 대한 멤버가 존재하지 않습니다.", id)));
     }
 }

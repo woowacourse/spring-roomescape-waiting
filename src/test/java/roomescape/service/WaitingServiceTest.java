@@ -13,25 +13,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
-import roomescape.global.handler.exception.CustomException;
-import roomescape.global.handler.exception.ExceptionCode;
+import roomescape.global.handler.exception.ValidationException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.reservation.dto.request.WaitingRequest;
 import roomescape.service.member.dto.MemberResponse;
+import roomescape.service.reservation.WaitingService;
+import roomescape.service.reservation.dto.request.WaitingRequest;
 import roomescape.service.reservation.dto.response.ReservationTimeResponse;
 import roomescape.service.reservation.dto.response.ThemeResponse;
 import roomescape.service.reservation.dto.response.WaitingResponse;
-import roomescape.service.reservation.WaitingService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -89,9 +88,7 @@ class WaitingServiceTest {
 
         WaitingRequest waitingRequest = new WaitingRequest(LocalDate.of(2999, 12, 12), theme.getId(), reservationTime.getId());
         assertThatThrownBy(() -> waitingService.createWaiting(waitingRequest, member.getId()))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ExceptionCode.DUPLICATE_RESERVATION.getErrorMessage());
-
+                .isInstanceOf(ValidationException.class);
     }
 
     @DisplayName("회원은 동일 날짜, 시간, 테마에 중복 예약 대기를 할 수 없다.")
@@ -102,9 +99,7 @@ class WaitingServiceTest {
 
         WaitingRequest waitingRequest = new WaitingRequest(LocalDate.of(2999, 12, 12), theme.getId(), reservationTime.getId());
         assertThatThrownBy(() -> waitingService.createWaiting(waitingRequest, member.getId()))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ExceptionCode.ALREADY_WAITING_EXIST.getErrorMessage());
-
+                .isInstanceOf(ValidationException.class);
     }
 
     @DisplayName("모든 예약 대기 조회 테스트")

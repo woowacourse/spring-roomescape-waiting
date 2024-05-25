@@ -1,13 +1,10 @@
 package roomescape.service.reservation;
 
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
-import roomescape.global.handler.exception.CustomException;
-import roomescape.global.handler.exception.ExceptionCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -70,10 +67,6 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTime(Long id) {
-        try {
-            reservationTimeRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new CustomException(ExceptionCode.TIME_IN_USE);
-        }
+        reservationTimeRepository.deleteById(id);
     }
 }
