@@ -1,6 +1,8 @@
 INSERT INTO member(name, email, password, role)
 VALUES ('켬미', 'aaa@naver.com', '1111', 'USER');
 INSERT INTO member(name, email, password, role)
+VALUES ('도비', '111@naver.com', '1111', 'USER');
+INSERT INTO member(name, email, password, role)
 VALUES ('관리자', 'admin@naver.com', '1111', 'ADMIN');
 
 INSERT INTO time(start_at)
@@ -39,20 +41,24 @@ INSERT INTO reservation_detail(theme_id, time_id, date)
 VALUES (3, 2, CURRENT_DATE - 2);
 INSERT INTO reservation_detail(theme_id, time_id, date)
 VALUES (1, 1, CURRENT_DATE - 1);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (1, 1, CURRENT_DATE);
 
 INSERT INTO reservation(member_id, detail_id)
 VALUES (1,1);
 INSERT INTO reservation(member_id, detail_id)
 VALUES (1,2);
 INSERT INTO reservation(member_id, detail_id)
-VALUES (1,3);
+VALUES (2,3);
 INSERT INTO reservation(member_id, detail_id)
-VALUES (1,4);
+VALUES (2,4);
 INSERT INTO reservation(member_id, detail_id)
 VALUES (1,5);
 INSERT INTO reservation(member_id, detail_id)
-VALUES (1,6);
+VALUES (2,6);
 INSERT INTO reservation(member_id, detail_id)
-VALUES (1,7);
+VALUES (2,7);
 INSERT INTO reservation(member_id, detail_id)
 VALUES (1,8);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (2,9);

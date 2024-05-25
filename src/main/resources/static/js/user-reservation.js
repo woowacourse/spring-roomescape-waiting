@@ -183,7 +183,7 @@ function onReservationButtonClick() {
             })
             .then(data => {
                 alert("예약되었습니다!");
-                location.reload();
+                window.location.href = "/reservation-mine";
             })
             .catch(error => {
                 alert("예약 생성 중 오류가 발생하였습니다. 다시 시도해주시기 바랍니다.");
@@ -219,7 +219,7 @@ function onWaitButtonClick() {
             })
             .then(data => {
                 alert("예약 대기 되었습니다!");
-                location.reload();
+                window.location.href = "/reservation-mine";
             })
             .catch(error => {
                 alert("예약 대기 중 오류가 발생하였습니다. 다시 시도해주시기 바랍니다.");
