@@ -62,7 +62,7 @@ class ReservationServiceTest {
     @Test
     void readReservations() {
         // given
-        Mockito.when(reservationRepository.findAllFetchJoin())
+        Mockito.when(reservationRepository.findAllByStatusFetchJoin(any()))
                 .thenReturn(List.of(Fixtures.reservationFixture));
 
         // when
