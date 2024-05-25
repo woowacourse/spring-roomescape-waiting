@@ -26,11 +26,11 @@ import roomescape.time.domain.Time;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationRepositoryTest {
-    private static final Member MEMBER = new Member("범블비", "aa@email.com", "1111");
-    private static final Theme THEME = new Theme("Harry Potter", "해리포터와 도비", "thumbnail.jpg");
-    private static final Time TIME = new Time(LocalTime.of(12, 0));
-    public static final ReservationDetail RESERVATION_DETAIL = new ReservationDetail(THEME, TIME, LocalDate.MAX);
-    public static final Reservation RESERVATION = new Reservation(MEMBER, RESERVATION_DETAIL);
+    private Member member;
+    private Theme theme;
+    private Time time;
+    private ReservationDetail reservationDetail;
+    private Reservation reservation;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -40,89 +40,127 @@ class ReservationRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        entityManager.merge(MEMBER);
-        entityManager.merge(TIME);
-        entityManager.merge(THEME);
-        entityManager.merge(RESERVATION_DETAIL);
+        member = new Member("범블비", "aa@email.com", "1111");
+        theme = new Theme("Harry Potter", "해리포터와 도비", "thumbnail.jpg");
+        time = new Time(LocalTime.of(12, 0));
+        reservationDetail = new ReservationDetail(theme, time, LocalDate.MAX);
+        reservation = new Reservation(member, reservationDetail);
+
+        entityManager.persist(member);
+        entityManager.persist(time);
+        entityManager.persist(theme);
+        entityManager.persist(reservationDetail);
+
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
-    @DisplayName("데이터를 정상적으로 저장한다.")
-    void saveReservation() {
-        reservationRepository.save(RESERVATION);
+    @DisplayName("실행 성공 : 예약 정보를 DB에 저장할 수 있다.")
+    void save() {
+        // when
+        reservationRepository.save(reservation);
 
+        // then
         List<Reservation> expected = reservationRepository.findAll();
-        assertThat(RESERVATION).isEqualTo(expected.iterator()
-                .next());
+        assertThat(reservation).isEqualTo(expected.get(0));
     }
 
     @Test
-    @DisplayName("데이터를 날짜순으로 정상적으로 조회한다.")
+    @DisplayName("실행 성공 : DB에 있는 모든 예약을 모두 얻을 수 있다.")
     void findAllByOrderByDateAsc() {
         // Given
-        entityManager.merge(RESERVATION);
+        List<Reservation> expected = reservationRepository.findAll();
+        entityManager.persist(reservation);
 
         // When
         List<Reservation> reservations = reservationRepository.findAllByOrderByDetailDateAsc();
 
         // Then
-        assertThat(reservations)
-                .hasSize(1);
+        assertThat(reservations).containsExactly(reservation);
     }
 
     @Test
-    @DisplayName("해당 테마에 해당 날짜인 예약을 모두 정상적으로 조회한다.")
-    void findAllByTheme_IdAndDate() {
+    @DisplayName("실행 성공 : 해당 테마에 해당 날짜인 예약을 모두 얻을 수 있다.")
+    void findAllByDetailTheme_IdAndDetailDate() {
         // Given
-        entityManager.merge(RESERVATION);
+        entityManager.persist(reservation);
 
         // When
-        List<Reservation> reservations = reservationRepository
-                .findAllByDetailTheme_IdAndDetailDate(THEME.getId(), LocalDate.MAX);
+        List<Reservation> reservations
+                = reservationRepository.findAllByDetailTheme_IdAndDetailDate(theme.getId(), LocalDate.MIN);
 
         // Then
-        assertThat(reservations)
-                .hasSize(1);
+        assertThat(reservations).hasSize(0);
     }
 
     @Test
-    @DisplayName("해당 멤버가 예약한 예약의 id를 정상적으로 조회한다.")
+    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 얻을 수 있다.")
     void findAllByMember_Id() {
         // Given
-        entityManager.merge(RESERVATION);
+        entityManager.persist(reservation);
 
         // When
-        List<Reservation> reservationIds = reservationRepository
-                .findAllByMember_Id(MEMBER.getId());
+        List<Reservation> reservationIds = reservationRepository.findAllByMember_Id(member.getId());
 
         // Then
-        assertThat(reservationIds)
-                .hasSize(1);
+        assertThat(reservationIds).hasSize(1);
     }
 
     @Test
-    @DisplayName("해당 멤버가 예약한 예약을 모두 날짜순으로 정상적으로 조회한다.")
-    void findAllByMember_IdOrderByDateAsc() {
+    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
+    void findAllByMember_IdOrderByDetailDateAsc() {
         // Given
-        entityManager.merge(RESERVATION);
+        entityManager.persist(reservation);
 
         // When
-        List<Reservation> reservations = reservationRepository
-                .findAllByMember_IdOrderByDetailDateAsc(MEMBER.getId());
+        List<Reservation> reservations
+                = reservationRepository.findAllByMember_IdOrderByDetailDateAsc(member.getId());
 
         // Then
-        assertThat(reservations)
-                .hasSize(1);
+        assertThat(reservations).hasSize(1);
     }
 
     @Test
-    @DisplayName("데이터를 정상적으로 삭제한다.")
-    void deleteReservations() {
-        Reservation expectedReservation = entityManager.merge(RESERVATION);
+    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
+    void findByDetail_IdAndMember_Id() {
+        // Given
+        entityManager.persist(reservation);
 
-        reservationRepository.deleteById(expectedReservation.getId());
+        // When
+        Reservation actual = reservationRepository
+                .findByDetail_IdAndMember_Id(reservationDetail.getId(), member.getId())
+                .get();
 
-        assertThat(reservationRepository.findById(expectedReservation.getId()))
-                .isEmpty();
+        // Then
+        assertThat(actual).isEqualTo(reservation);
+    }
+
+    @Test
+    @DisplayName("실행 성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
+    void findByDetail_Id() {
+        // Given
+        entityManager.persist(reservation);
+
+        // When
+        Reservation actual = reservationRepository
+                .findByDetail_Id(reservationDetail.getId())
+                .get();
+
+        // Then
+        assertThat(actual).isEqualTo(reservation);
+    }
+
+    @Test
+    @DisplayName("실행 성공 : id로 회원 정보를 찾아 지운다.")
+    void deleteById() {
+        // Given
+        entityManager.persist(reservation);
+
+        // When
+        reservationRepository.deleteById(reservation.getId());
+
+        // Then
+        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
     }
 }

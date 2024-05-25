@@ -43,8 +43,7 @@ class MemberRepositoryTest {
 
         // Then
         List<Member> expected = memberRepository.findAll();
-        assertThat(actual).isEqualTo(expected.iterator()
-                .next());
+        assertThat(actual).isEqualTo(expected.get(0));
     }
 
     @Test
