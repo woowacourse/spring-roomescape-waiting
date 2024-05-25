@@ -86,6 +86,10 @@ public class Reservation {
         }
     }
 
+    public void changeMember(Member member) {
+        this.member = member;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

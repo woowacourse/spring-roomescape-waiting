@@ -15,6 +15,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.domain.reservationwaiting.WaitingWithRank;
 import roomescape.domain.theme.Theme;
@@ -104,12 +105,21 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservationById(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new IllegalArgumentException("해당 id의 예약이 존재하지 않습니다.");
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+        List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findAllByReservation(reservation);
+        if (reservationWaitings.isEmpty()) {
+            reservationRepository.delete(reservation);
+            return;
         }
+        changeReservationMember(reservation, reservationWaitings);
+    }
 
-        reservationRepository.deleteById(id);
-        // todo 예약 대기 자동 승인
+    private void changeReservationMember(Reservation reservation, List<ReservationWaiting> reservationWaitings) {
+        reservationWaitings.sort(Comparator.comparing(ReservationWaiting::getDate)
+                .thenComparing(ReservationWaiting::getTime));
+        ReservationWaiting firstWaiting = reservationWaitings.get(0);
+        reservation.changeMember(firstWaiting.getMember());
     }
 
     public List<PersonalReservationResponse> getReservationsByMemberId(long memberId) {
