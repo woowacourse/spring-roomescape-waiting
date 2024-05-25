@@ -127,6 +127,10 @@ public class Reservation implements Comparable<Reservation> {
         return this.reservationMember == member;
     }
 
+    public void approve() {
+        status = ReservationStatus.APPROVED;
+    }
+
     @Override
     public int compareTo(Reservation other) {
         LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());

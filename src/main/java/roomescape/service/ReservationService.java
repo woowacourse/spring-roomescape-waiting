@@ -104,12 +104,14 @@ public class ReservationService {
     public void delete(long reservationId, long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_MEMBER));
-
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_RESERVATION));
 
         if (member.isAdmin() || reservation.isAuthor(member)) {
             reservationRepository.deleteById(reservationId);
+            reservationRepository.findFirstByDateAndAndTimeAndTheme(
+                    reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())
+                    .ifPresent(firstReservation -> firstReservation.approve());
             return;
         }
         throw new RoomescapeException(ExceptionType.NO_AUTHORITY);
