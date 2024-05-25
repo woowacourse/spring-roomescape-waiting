@@ -24,11 +24,13 @@ public class ControllerAdvice {
             IllegalStateException.class,
     })
     public ResponseEntity<String> handleServiceException(RuntimeException e) {
+        e.printStackTrace();
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<String> handleAuthException(AuthorizationException e) {
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 
@@ -38,12 +40,13 @@ public class ControllerAdvice {
         String errMessage = result.getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(","));
-
+        e.printStackTrace();
         return ResponseEntity.badRequest().body(errMessage);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handlerException(Exception e) {
-        return ResponseEntity.internalServerError().body("예기치 못한 에러 발생   " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.internalServerError().body("예기치 못한 에러 발생");
     }
 }
