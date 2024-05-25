@@ -111,9 +111,10 @@ public class WaitingService {
     }
 
     @Transactional
-    public void deleteByAdmin(final Long id) {
+    public WaitingResponse rejectedByAdmin(final Long id) {
         Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기 내역이 없습니다."));
         waiting.setStatus(WaitingStatus.REJECTED);
+        return WaitingResponse.from(waiting);
     }
 }

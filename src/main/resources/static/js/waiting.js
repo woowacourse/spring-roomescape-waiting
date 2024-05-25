@@ -54,10 +54,10 @@ function deny(event) {
 
     const endpoint = '/admin/waitings/' + id;
     return fetch(endpoint, {
-        method: 'DELETE'
+        method: 'PATCH'
     }).then(response => {
-        if (response.status === 204) return;
-        throw new Error('Delete failed');
+        if (response.status === 200) return;
+        throw new Error('Patch failed');
     }).then(() => location.reload());
 }
 

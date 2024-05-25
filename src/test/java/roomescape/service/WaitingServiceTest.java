@@ -128,17 +128,17 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("관리자는 존재하는 예약 대기를 삭제할 수 있다.")
-    void given_existWaiting_when_deleteByAdmin_then_deleteWaiting() {
+    @DisplayName("관리자는 존재하는 예약 대기를 거절할 수 있다.")
+    void given_existWaiting_when_rejectByAdmin_then_deleteWaiting() {
         //when, then
-        assertDoesNotThrow(() -> service.deleteByAdmin(3L));
+        assertDoesNotThrow(() -> service.rejectedByAdmin(3L));
     }
 
     @Test
-    @DisplayName("관리자가 존재하지 않는 예약 대기를 삭제하면 예외가 발생한다.")
-    void given_NonExistWaiting_when_deleteByAdmin_then_throwException() {
+    @DisplayName("관리자가 존재하지 않는 예약 대기를 거절하면 예외가 발생한다.")
+    void given_NonExistWaiting_when_rejectByAdmin_then_throwException() {
         //when, then
-        assertThatThrownBy(() -> service.deleteByAdmin(10L)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> service.rejectedByAdmin(10L)).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

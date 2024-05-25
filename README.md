@@ -17,10 +17,11 @@
 
 - [x] 예약 대기 요청
     - [x] 동일한 시간에 중복 예약 불가
-    - [x] 동일한 시간에 중복 예약 대기 불가
+    - [x] 동일한 시간에 중복 예약 대기 불가, 거절된 내역으로 다시 예약 대기 불가
 - [x] 예약 대기 목록 조회
     - [x] 예약 날짜 순서대로 정렬
     - [x] 몇 번째 대기인지 표시
+    - [x] 거절된 대기인 경우 "승인거절"로 표시
 - [x] 예약 대기 취소
 
 ## 4단계
@@ -28,7 +29,9 @@
 -[x] 관리자 예약 대기 관리 기능
     - [x] 관리자 예약 대기 관리 페이지 추가
     - [x] 전체 예약 대기 목록 조회
+        - 거절되지 않은 예약 대기 목록만 조회
     - [x] 예약 대기 취소
+        - 관리자 예약 대기 취소 시 대기 상태를 REJECTED(승인거절)로 변경
 - [x] 예약 대기 승인
     - [x] 예약 취소가 발생하면 우선순위에 따라 자동으로 예약으로 전환
 
@@ -146,11 +149,20 @@ Content-Type: application/json
 
 #### request
 ```http request
-DELETE /admin/waitings/1
+PATCH /admin/waitings/2
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTcxNjM3MTA4NiwiZXhwIjoxNzE2Mzc0Njg2fQ.4PoyEWxALi18Z7Hz3XBxwFqFuANGnudm3OTc4BrpLFY
 ```
 
 #### response
 ```http request
-HTTP/1.1 204 
+HTTP/1.1 200
+Content-Type: application/json
+
+{
+    "id": 2,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "승인거절"
+} 
 ```
