@@ -88,7 +88,7 @@ public class ReservationService {
         Optional<ReservationWaiting> nextWaiting = page.getContent().stream()
                 .findFirst();
         nextWaiting.ifPresentOrElse(reservationWaiting -> {
-                    reservationWaiting.approve();
+                    reservationWaiting.approveWaitingMember();
                     reservationWaitingRepository.delete(reservationWaiting);
                 },
                 () -> reservationRepository.deleteById(id)

@@ -72,7 +72,7 @@ public class ReservationWaiting {
         return reservation.isPast();
     }
 
-    public void approve() {
+    public void approveWaitingMember() {
         reservation.changeMember(member);
     }
 
