@@ -48,7 +48,7 @@ public interface WaitingQueryRepository extends Repository<Waiting, Long> {
             order by w.id
             limit 1
             """)
-    Optional<Waiting> findCandidateWaiting(LocalDate date, Time time, Theme theme);
+    Optional<Waiting> findFirstWaiting(LocalDate date, Time time, Theme theme);
 
     default Waiting getById(Long id) {
         return findById(id).orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_WAITING,

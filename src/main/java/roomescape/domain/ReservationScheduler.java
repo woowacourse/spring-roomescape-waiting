@@ -45,7 +45,7 @@ public class ReservationScheduler {
         LocalDate date = reservation.getDate();
         Time time = reservation.getTime();
         Theme theme = reservation.getTheme();
-        waitingQueryRepository.findCandidateWaiting(date, time, theme)
+        waitingQueryRepository.findFirstWaiting(date, time, theme)
                 .ifPresent(this::replaceWaitingToReservation);
     }
 
