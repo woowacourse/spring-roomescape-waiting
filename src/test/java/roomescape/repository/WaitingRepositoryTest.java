@@ -30,7 +30,7 @@ class WaitingRepositoryTest {
     @DisplayName("예약 대기를 추가한다")
     @Test
     void should_add_waiting() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
+        LocalDate day = LocalDate.now().plusDays(1);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
@@ -49,7 +49,7 @@ class WaitingRepositoryTest {
     @DisplayName("예약 대기를 삭제한다")
     @Test
     void should_delete_waiting() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
+        LocalDate day = LocalDate.now().plusDays(1);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
@@ -74,7 +74,7 @@ class WaitingRepositoryTest {
     @DisplayName("아이디에 해당하는 예약 대기가 존재하면 참을 반환한다.")
     @Test
     void should_return_true_when_id_exist() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
+        LocalDate day = LocalDate.now().plusDays(1);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
@@ -98,7 +98,7 @@ class WaitingRepositoryTest {
     @DisplayName("사용자 아이디에 해당하는 예약 대기를 반환한다.")
     @Test
     void should_return_member_waiting() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
+        LocalDate day = LocalDate.now().plusDays(1);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
@@ -122,7 +122,7 @@ class WaitingRepositoryTest {
     @DisplayName("날짜, 시간, 테마, 멤버에 해당하는 예약 대기가 존재하면 참을 반환한다.")
     @Test
     void should_return_true_when_date_and_time_and_theme_and_member_exist() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
+        LocalDate day = LocalDate.now().plusDays(1);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
@@ -146,7 +146,7 @@ class WaitingRepositoryTest {
     @DisplayName("모든 예약 대기를 조회한다.")
     @Test
     void should_get_all_waiting() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
+        LocalDate day = LocalDate.now().plusDays(1);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
@@ -170,7 +170,7 @@ class WaitingRepositoryTest {
     @DisplayName("주어진 조건에 맞는 예약 대기를 조회한다.")
     @Test
     void should_return_waiting_when_given_theme_and_date_and_time_and_member() {
-        LocalDate day = LocalDate.of(2024, 5, 15);
+        LocalDate day = LocalDate.now().plusDays(1);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");

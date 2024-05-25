@@ -79,8 +79,8 @@ class WaitingServiceTest {
         memberRepository.save(new Member("배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        waitingRepository.save(new Waiting(now(), reservationTime, theme1, member));
-        waitingRepository.save(new Waiting(now(), reservationTime, theme2, member));
+        waitingRepository.save(new Waiting(now().plusDays(1), reservationTime, theme1, member));
+        waitingRepository.save(new Waiting(now().plusDays(1), reservationTime, theme2, member));
 
         waitingService.findAllWaiting().forEach(waiting -> {
             System.out.println(waiting.getId());
@@ -112,8 +112,8 @@ class WaitingServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        waitingRepository.save(new Waiting(now(), reservationTime, theme1, member));
-        waitingRepository.save(new Waiting(now(), reservationTime, theme2, member));
+        waitingRepository.save(new Waiting(now().plusDays(1), reservationTime, theme1, member));
+        waitingRepository.save(new Waiting(now().plusDays(1), reservationTime, theme2, member));
 
         assertThatCode(() -> waitingService.deleteWaiting(1))
                 .doesNotThrowAnyException();
@@ -160,8 +160,8 @@ class WaitingServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        waitingRepository.save(new Waiting(now(), reservationTime, theme, member));
-        waitingRepository.save(new Waiting(now(), reservationTime, theme, member));
+        waitingRepository.save(new Waiting(now().plusDays(1), reservationTime, theme, member));
+        waitingRepository.save(new Waiting(now().plusDays(1), reservationTime, theme, member));
 
         List<WaitingWithRank> waiting = waitingService
                 .findMemberWaiting(member.getId());
@@ -215,8 +215,8 @@ class WaitingServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        waitingRepository.save(new Waiting(1L, now(), reservationTime, theme1, member));
-        waitingRepository.save(new Waiting(2L, now(), reservationTime, theme2, member));
+        waitingRepository.save(new Waiting(1L, now().plusDays(1), reservationTime, theme1, member));
+        waitingRepository.save(new Waiting(2L, now().plusDays(1), reservationTime, theme2, member));
 
         List<Waiting> reservations = waitingRepository.findAll();
 
@@ -233,7 +233,7 @@ class WaitingServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
 
         waitingRepository.save(new Waiting(1L, date, time, theme, member));
         waitingRepository.save(new Waiting(2L, date, time, theme, member));
@@ -253,7 +253,7 @@ class WaitingServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
 
         waitingRepository.save(new Waiting(1L, date, time, theme, member));
 
@@ -272,7 +272,7 @@ class WaitingServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
 
         waitingRepository.save(new Waiting(1L, date, time, theme, member));
         waitingRepository.save(new Waiting(2L, date, time, theme, member));

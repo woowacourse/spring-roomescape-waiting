@@ -9,8 +9,6 @@ import roomescape.model.*;
 import roomescape.repository.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -34,7 +32,8 @@ public class WaitingService {
 
     @Transactional
     public Waiting addWaiting(WaitingRequest request, Member member) {
-        ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
+        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(request.timeId())));
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(request.themeId())));
 
@@ -43,15 +42,6 @@ public class WaitingService {
 
         Waiting waiting = new Waiting(request.date(), reservationTime, theme, member);
         return waitingRepository.save(waiting);
-    }
-
-    private ReservationTime findReservationTime(LocalDate date, long timeId) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
-        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && reservationTime.isBefore(LocalTime.now()))) {
-            throw new BadRequestException("현재(%s) 이전 시간으로 예약 대기를 추가할 수 없습니다.".formatted(LocalDateTime.now()));
-        }
-        return reservationTime;
     }
 
     private void validateWaitingInExistingReservation(Theme theme, LocalDate date, ReservationTime time, Member member) {
