@@ -20,7 +20,7 @@ import roomescape.security.Auth;
 import roomescape.service.ReservationWaitingService;
 
 @RestController
-@RequestMapping("/reservations/waiting")
+@RequestMapping("/waitings")
 @Validated
 public class ReservationWaitingController {
 
@@ -37,7 +37,7 @@ public class ReservationWaitingController {
         long memberId = accessor.id();
         ReservationResponse response = reservationWaitingService.addReservationWaiting(
                 request.toCreateReservationRequest(memberId));
-        URI location = URI.create("/reservations/waiting/" + response.id());
+        URI location = URI.create("/waitings/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 

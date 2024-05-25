@@ -44,7 +44,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-  return fetch(`/reservations/waiting/${id}`, {
+  return fetch(`/waitings/${id}`, {
     method: 'DELETE'
   }).then(response => {
     if (response.status === 204) return;

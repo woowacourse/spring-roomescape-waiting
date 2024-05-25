@@ -83,7 +83,7 @@ class ReservationControllerTest extends BaseControllerTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-            softly.assertThat(response.body().asString()).contains("지나간 날짜/시간에 대한 예약은 불가능합니다.");
+            softly.assertThat(response.body().asString()).contains("예약은 최소 1일 전에 해야합니다.");
         });
     }
 
@@ -96,7 +96,7 @@ class ReservationControllerTest extends BaseControllerTest {
                 .extract();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             softly.assertThat(response.body().asString()).contains("해당 id의 예약이 존재하지 않습니다.");
         });
     }
