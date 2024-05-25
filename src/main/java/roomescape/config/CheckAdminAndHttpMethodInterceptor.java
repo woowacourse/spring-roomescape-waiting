@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.controller.exception.AuthorizationException;
-import roomescape.domain.Role;
 import roomescape.infrastructure.TokenExtractor;
 import roomescape.service.AuthService;
 
@@ -22,11 +21,9 @@ public class CheckAdminAndHttpMethodInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(final HttpServletRequest request,
                              final HttpServletResponse response, final Object handler) {
-        if (request.getMethod().equals(httpMethod.name())) {
+        if (httpMethod.name().equals(request.getMethod())) {
             final Optional<String> token = TokenExtractor.fromRequest(request);
-            final boolean isAdmin = token.map(authService::findMemberRoleByToken)
-                    .filter(Role::isAdmin)
-                    .isPresent();
+            final boolean isAdmin = token.map(authService::IsMemberAdminByToken).orElse(false);
             if (isAdmin) {
                 return true;
             }

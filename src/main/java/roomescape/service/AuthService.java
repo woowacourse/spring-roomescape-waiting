@@ -22,9 +22,10 @@ public class AuthService {
         return new TokenResponse(accessToken);
     }
 
-    public Role findMemberRoleByToken(String token) {
+    public boolean IsMemberAdminByToken(String token) {
         validateToken(token);
-        return Role.valueOf(jwtTokenProvider.getRole(token));
+        Role role = Role.valueOf(jwtTokenProvider.getRole(token));
+        return role.isAdmin();
     }
 
     public Long findMemberIdByToken(String token) {
