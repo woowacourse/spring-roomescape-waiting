@@ -136,17 +136,4 @@ class ReservationSlotTimeServiceTest extends ServiceTest {
         assertThat(count)
                 .isEqualTo(expectedCount);
     }
-
-    @DisplayName("")
-    @Test
-    void asd() {
-        //given
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        System.out.println("now = " + now);
-
-        //when
-
-        //then
-    }
-
 }
