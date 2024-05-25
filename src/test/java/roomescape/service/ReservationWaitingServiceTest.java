@@ -94,6 +94,18 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     }
 
     @Test
+    @DisplayName("이미 예약한 멤버는 예약 대기를 생성할 수 없다")
+    void createReservationWaitingFailWhenAlreadyReserved() {
+        Reservation reservation = reservationRepository.save(notSavedReservation);
+        CreateReservationRequest request = new CreateReservationRequest(reservation.getDate(), time.getId(),
+                theme.getId(), reservation.getMember().getId());
+
+        assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("예약자와 대기자가 동일합니다.");
+    }
+
+    @Test
     @DisplayName("예약 대기 제한 개수를 초과하면 예약 대기를 생성할 수 없다.")
     void createReservationWaitingFailWhenExceedLimit() {
         Reservation reservation = reservationRepository.save(notSavedReservation);
@@ -106,7 +118,7 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("최대 예약 대기 10개");
+                .hasMessageContaining("예약 대기열이 가득 찼습니다.");
     }
 
     @Test
@@ -119,7 +131,7 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("이미 예약 대기 중입니다.");
+                .hasMessageContaining("현재 멤버는 이미 예약 대기 중입니다.");
     }
 
     @Test
