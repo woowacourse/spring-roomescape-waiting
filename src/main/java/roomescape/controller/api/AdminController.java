@@ -36,15 +36,9 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addAdminReservation(
             @RequestBody @Valid AdminReservationRequest request) {
-        ReservationResponse reservationResponse = reservationService.addReservation(
-                request.date(),
-                request.timeId(),
-                request.themeId(),
-                request.memberId()
-        );
-
-        return ResponseEntity.created(URI.create("/reservation/" + reservationResponse.id()))
-                .body(reservationResponse);
+        ReservationResponse response = reservationService.addReservation(request.toCreateReservationRequest());
+        return ResponseEntity.created(URI.create("/reservation/" + response.id()))
+                .body(response);
     }
 
     @GetMapping("/waitings")

@@ -20,6 +20,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.response.PersonalReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.service.dto.CreateReservationRequest;
 import roomescape.support.fixture.MemberFixture;
 import roomescape.support.fixture.ReservationFixture;
 import roomescape.support.fixture.ReservationTimeFixture;
@@ -83,12 +84,13 @@ class ReservationServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("예약을 추가한다.")
     void addReservation() {
-        ReservationResponse response = reservationService.addReservation(
+        CreateReservationRequest request = new CreateReservationRequest(
                 LocalDate.of(2024, 4, 9),
                 time.getId(),
                 theme.getId(),
                 member.getId()
         );
+        ReservationResponse response = reservationService.addReservation(request);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.date()).isEqualTo("2024-04-09");

@@ -22,6 +22,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.response.PersonalReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.service.dto.CreateReservationRequest;
 
 @Service
 @Transactional(readOnly = true)
@@ -65,19 +66,19 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse addReservation(LocalDate date, long timeId, long themeId, long memberId) {
-        Reservation reservation = createReservation(date, timeId, themeId, memberId);
+    public ReservationResponse addReservation(CreateReservationRequest request) {
+        Reservation reservation = createReservation(request);
         reservation.validateFutureReservation(LocalDateTime.now(clock));
         validateDuplicatedReservation(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
-    private Reservation createReservation(LocalDate date, long timeId, long themeId, long memberId) {
-        Member member = getMember(memberId);
-        ReservationTime reservationTime = getTime(timeId);
-        Theme theme = getTheme(themeId);
-        return new Reservation(date, member, reservationTime, theme);
+    private Reservation createReservation(CreateReservationRequest request) {
+        Member member = getMember(request.memberId());
+        ReservationTime reservationTime = getTime(request.timeId());
+        Theme theme = getTheme(request.themeId());
+        return new Reservation(request.date(), member, reservationTime, theme);
     }
 
     private Member getMember(long memberId) {

@@ -53,15 +53,10 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid ReservationRequest request,
                                                               @Auth Accessor accessor) {
-        ReservationResponse reservationResponse = reservationService.addReservation(
-                request.date(),
-                request.timeId(),
-                request.themeId(),
-                accessor.id()
-        );
-
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
-                .body(reservationResponse);
+        long memberId = accessor.id();
+        ReservationResponse response = reservationService.addReservation(request.toCreateReservationRequest(memberId));
+        return ResponseEntity.created(URI.create("/reservations/" + response.id()))
+                .body(response);
     }
 
     @DeleteMapping("/{id}")

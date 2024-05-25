@@ -3,6 +3,7 @@ package roomescape.dto.request;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
+import roomescape.service.dto.CreateReservationRequest;
 
 public record AdminReservationRequest(
         @NotNull(message = "날짜는 필수 값입니다.")
@@ -20,4 +21,8 @@ public record AdminReservationRequest(
         @Positive
         Long memberId
 ) {
+
+    public CreateReservationRequest toCreateReservationRequest() {
+        return new CreateReservationRequest(date, timeId, themeId, memberId);
+    }
 }
