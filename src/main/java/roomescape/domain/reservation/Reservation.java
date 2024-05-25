@@ -36,7 +36,7 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {

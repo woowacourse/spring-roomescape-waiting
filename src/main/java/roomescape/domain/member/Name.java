@@ -13,7 +13,7 @@ public class Name {
 
     private String name;
 
-    public Name() {
+    protected Name() {
     }
 
     public Name(final String name) {

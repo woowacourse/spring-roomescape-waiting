@@ -1,6 +1,13 @@
 package roomescape.domain.member;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.exception.AuthorizationException;
 
 import java.util.Objects;
@@ -26,7 +33,7 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(final Long id, final Name name, final String email) {

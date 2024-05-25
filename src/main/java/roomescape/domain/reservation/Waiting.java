@@ -37,7 +37,7 @@ public class Waiting {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    public Waiting() {
+    protected Waiting() {
     }
 
     public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
