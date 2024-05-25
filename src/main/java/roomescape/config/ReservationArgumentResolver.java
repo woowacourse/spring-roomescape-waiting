@@ -47,8 +47,8 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
             MemberProfileInfo payload = memberAuthService.extractPayload(cookies);
             ReservationCreateRequest reservationRequest = convertToRequestBody(request);
             return new ReservationCreateRequest(
-                    reservationRequest.themeId(),
                     payload.id(),
+                    reservationRequest.themeId(),
                     reservationRequest.timeId(),
                     LocalDate.from(reservationRequest.date())
             );
