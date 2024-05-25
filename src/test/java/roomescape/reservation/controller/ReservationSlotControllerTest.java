@@ -88,11 +88,11 @@ class ReservationSlotControllerTest extends ControllerTest {
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         ReservationResponse reservationResponse = reservationService.createReservation(
-                AuthInfo.of(getMemberChoco()),
                 new ReservationRequest(
                         LocalDate.now().plusDays(10).toString(),
                         reservationTimeResponse.id(),
-                        themeResponse.id())
+                        themeResponse.id()),
+                getMemberChoco().getId()
         );
 
         return Stream.of(

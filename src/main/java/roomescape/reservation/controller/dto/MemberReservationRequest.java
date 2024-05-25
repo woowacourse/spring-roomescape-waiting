@@ -18,4 +18,7 @@ public record MemberReservationRequest(
         @NotNull
         long themeId
 ) {
+        public ReservationRequest toReservationRequest() {
+                return new ReservationRequest(date, timeId, themeId);
+        }
 }

@@ -49,10 +49,6 @@ public class ReservationTimeService {
     }
 
     public void delete(long timeId) {
-        List<ReservationTime> list = reservationSlotRepository.findAll()
-                .stream()
-                .map(ReservationSlot::getTime)
-                .toList();
         if (reservationSlotRepository.existsByTimeId(timeId)) {
             throw new BadRequestException("예약이 존재하여 삭제할 수 없습니다.");
         }

@@ -45,29 +45,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse createReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
+    public ReservationResponse createReservation(ReservationRequest reservationRequest, Long memberId) {
         LocalDate date = LocalDate.parse(reservationRequest.date());
-        return createMemberReservation(
-                authInfo.getId(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId(),
-                date
-        );
-    }
-
-    public ReservationResponse createMemberReservation(MemberReservationRequest memberReservationRequest) {
-        LocalDate date = LocalDate.parse(memberReservationRequest.date());
-        return createMemberReservation(
-                memberReservationRequest.memberId(),
-                memberReservationRequest.timeId(),
-                memberReservationRequest.themeId(),
-                date
-        );
-    }
-
-    private ReservationResponse createMemberReservation(long memberId, long timeId, long themeId, LocalDate date) {
-        ReservationTime reservationTime = commonFindService.getReservationSlotTime(timeId);
-        Theme theme = commonFindService.getTheme(themeId);
+        ReservationTime reservationTime = commonFindService.getReservationSlotTime(reservationRequest.timeId());
+        Theme theme = commonFindService.getTheme(reservationRequest.themeId());
         Member member = commonFindService.getMember(memberId);
         ReservationSlot reservationSlot = commonFindService.getReservationSlot(date, reservationTime, theme);
         ReservationStatus reservationStatus = ReservationStatus.BOOKED;

@@ -59,8 +59,8 @@ class ReservationSlotServiceTest extends ServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(date, time.getId(), theme.getId());
 
         //when
-        ReservationResponse reservationResponse = reservationService.createReservation(AuthInfo.of(member),
-                reservationRequest);
+        ReservationResponse reservationResponse = reservationService.createReservation(
+                reservationRequest, member.getId());
 
         //then
         assertAll(() -> assertThat(reservationResponse.date()).isEqualTo(date),
@@ -205,7 +205,7 @@ class ReservationSlotServiceTest extends ServiceTest {
                 theme.getId());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.createReservation(AuthInfo.of(member), reservationRequest))
+        assertThatThrownBy(() -> reservationService.createReservation(reservationRequest, member.getId()))
                 .isInstanceOf(ForbiddenException.class);
     }
 
@@ -264,12 +264,11 @@ class ReservationSlotServiceTest extends ServiceTest {
         Reservation save = reservationRepository.save(new Reservation(choco, reservationSlot));
 
         //when
-        ReservationResponse memberReservation1 = reservationService.createMemberReservation(new MemberReservationRequest(
-                tacan.getId(),
+        ReservationResponse memberReservation1 = reservationService.createReservation(new ReservationRequest(
                 reservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),
                 reservationSlot.getTime().getId(),
                 reservationSlot.getTheme().getId(
-                )));
+                )), tacan.getId());
         List<Reservation> allByMember = reservationRepository.findAllByMember(tacan);
         Reservation addedMemberReservation = allByMember
                 .stream()

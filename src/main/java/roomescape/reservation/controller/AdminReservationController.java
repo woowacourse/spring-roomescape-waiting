@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
+import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingReservationService;
@@ -31,7 +32,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid MemberReservationRequest memberReservationRequest) {
         ReservationResponse reservationResponse = reservationService
-                .createMemberReservation(memberReservationRequest);
+                .createReservation(memberReservationRequest.toReservationRequest(), memberReservationRequest.memberId());
         return ResponseEntity.created(URI.create("/admin/reservations/" + reservationResponse.reservationId()))
                 .body(reservationResponse);
     }
