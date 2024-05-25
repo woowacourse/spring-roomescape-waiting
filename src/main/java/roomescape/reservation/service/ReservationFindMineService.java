@@ -3,11 +3,13 @@ package roomescape.reservation.service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.stereotype.Service;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
+@Service
 public class ReservationFindMineService {
     private static final Comparator<MyReservationResponse> RESERVATION_SORTING_COMPARATOR = Comparator
             .comparing(MyReservationResponse::date).thenComparing(MyReservationResponse::startAt);
