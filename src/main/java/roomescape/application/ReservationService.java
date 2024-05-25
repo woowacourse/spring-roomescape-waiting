@@ -63,10 +63,10 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findByCriteria(ReservationCriteria reservationCriteria) {
-        Long themeId = reservationCriteria.themeId();
         Long memberId = reservationCriteria.memberId();
         LocalDate dateFrom = reservationCriteria.dateFrom();
         LocalDate dateTo = reservationCriteria.dateTo();
+        Long themeId = reservationCriteria.themeId();
         return reservationQueryRepository.findByCriteria(memberId, dateFrom, dateTo, themeId).stream()
                 .map(ReservationResponse::from)
                 .toList();
