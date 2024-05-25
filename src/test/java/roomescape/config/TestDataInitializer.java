@@ -40,6 +40,7 @@ public class TestDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        System.out.println("asdf!!!!!!!!!!!!!!!!!!!!!");
         Member member1 = createMember("피케이", "pk@wooteco.com", "wootecoCrew6!", Role.BASIC);
         Member member2 = createMember("이상", "ls@wooteco.com", "wootecoCrew6!", Role.BASIC);
         Member member3 = createMember("회원", "member@wooteco.com", "wootecoCrew6!", Role.BASIC);
