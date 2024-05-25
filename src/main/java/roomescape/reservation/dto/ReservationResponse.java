@@ -5,7 +5,7 @@ import roomescape.reservation.domain.ReservationWaiting;
 
 public record ReservationResponse(
         Long id,
-        String memberName,
+        String name,
         ReservationDetailResponse detailResponse
 ) {
     public static ReservationResponse from(Reservation reservation) {

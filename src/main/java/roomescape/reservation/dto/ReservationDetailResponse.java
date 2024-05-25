@@ -1,20 +1,21 @@
 package roomescape.reservation.dto;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 import roomescape.reservation.domain.ReservationDetail;
+import roomescape.theme.dto.ThemeResponse;
+import roomescape.time.dto.TimeResponse;
 
 public record ReservationDetailResponse(
         Long id,
         LocalDate date,
-        LocalTime startAt,
-        String themeName) {
+        TimeResponse time,
+        ThemeResponse theme) {
     public static ReservationDetailResponse from(ReservationDetail detail) {
         return new ReservationDetailResponse(
                 detail.getId(),
                 detail.getDate(),
-                detail.getTime().getStartAt(),
-                detail.getTheme().getName());
+                TimeResponse.toResponse(detail.getTime()),
+                ThemeResponse.fromTheme(detail.getTheme()));
     }
 }

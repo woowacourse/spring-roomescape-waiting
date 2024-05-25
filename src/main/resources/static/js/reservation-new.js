@@ -28,10 +28,10 @@ function render(data) {
           response 명세에 맞춰 값 설정
     */
     row.insertCell(0).textContent = item.id;            // 예약 id
-    row.insertCell(1).textContent = item.reservationName;          // 예약자명
-    row.insertCell(2).textContent = item.themeName;    // 테마명
-    row.insertCell(3).textContent = item.date;          // 예약 날짜
-    row.insertCell(4).textContent = item.startAt;  // 시작 시간
+    row.insertCell(1).textContent = item.name;          // 예약자명
+    row.insertCell(2).textContent = item.detailResponse.theme.name;    // 테마명
+    row.insertCell(3).textContent = item.detailResponse.date;          // 예약 날짜
+    row.insertCell(4).textContent = item.detailResponse.time.startAt;  // 시작 시간
 
     const actionCell = row.insertCell(row.cells.length);
     actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
