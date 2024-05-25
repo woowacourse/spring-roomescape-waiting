@@ -4,11 +4,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import roomescape.domain.member.Member;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-public class Waiting {
+public class Waiting implements Comparable<Waiting> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +47,11 @@ public class Waiting {
 
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public int compareTo(Waiting o) {
+        return createAt.compareTo(o.createAt);
     }
 
     @Override

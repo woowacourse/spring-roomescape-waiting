@@ -3,13 +3,13 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.WaitingRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.Waiting;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
-import roomescape.service.dbservice.ReservationDbService;
 import roomescape.service.dto.request.WaitingRequest;
 import roomescape.service.dto.response.WaitingResponse;
 import roomescape.service.dto.response.WaitingResponses;
@@ -20,19 +20,23 @@ import java.util.List;
 @Service
 @Transactional
 public class WaitingService {
-    private final ReservationDbService reservationDbService;
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
+    private final MemberRepository memberRepository;
 
-    public WaitingService(ReservationDbService reservationDbService, WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
-        this.reservationDbService = reservationDbService;
+    public WaitingService(
+            WaitingRepository waitingRepository,
+            ReservationRepository reservationRepository,
+            MemberRepository memberRepository
+    ) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository;
     }
 
     public WaitingResponse saveWaiting(WaitingRequest waitingRequest, long memberId) {
-        Reservation alreadyBookedReservation = reservationDbService.findReservation(waitingRequest.date(), waitingRequest.themeId(), waitingRequest.timeId());
-        Member member = reservationDbService.findMemberById(memberId);
+        Reservation alreadyBookedReservation = findAlreadyBookedReservation(waitingRequest);
+        Member member = findMemberById(memberId);
         Waiting waiting = createWaiting(alreadyBookedReservation, member);
 
         validateAlreadyReservedMember(member, alreadyBookedReservation.getReservationSlot());
@@ -41,6 +45,14 @@ public class WaitingService {
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         return new WaitingResponse(savedWaiting);
+    }
+
+    private Reservation findAlreadyBookedReservation(WaitingRequest waitingRequest) {
+        return reservationRepository.findByDateAndThemeIdAndTimeId(
+                waitingRequest.date(),
+                waitingRequest.themeId(),
+                waitingRequest.timeId()
+        ).orElseThrow(() -> new RoomEscapeBusinessException("이미 예약된 예약이 없습니다"));
     }
 
     public WaitingResponses findAllWaitings() {
@@ -57,7 +69,7 @@ public class WaitingService {
     }
 
     public void deleteUserWaiting(long waitingId, long memberId) {
-        Member member = reservationDbService.findMemberById(memberId);
+        Member member = findMemberById(memberId);
         Waiting waiting = findWaitingById(waitingId);
         validateWaitingOwn(waiting, member);
         waitingRepository.delete(waiting);
@@ -92,5 +104,10 @@ public class WaitingService {
     private Waiting findWaitingById(long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("예약 대기 기록을 찾을 수 없습니다."));
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
     }
 }

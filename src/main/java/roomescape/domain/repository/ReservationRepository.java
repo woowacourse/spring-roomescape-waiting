@@ -13,12 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    @Query("select r from Reservation r where r.reservationSlot.date = :date and r.reservationSlot.theme = :theme and r.reservationSlot.time = :time")
-    Optional<Reservation> findByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
-
-//    @EntityGraph(attributePaths = {"time", "theme"})
-//    List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
-
     @Query("select r from Reservation r where r.reservationSlot.date = :date and r.reservationSlot.theme = :theme")
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
@@ -40,6 +34,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             Long themeId,
             Long memberId
     );
+
+    @Query("""
+            select r
+            from Reservation r 
+            where r.reservationSlot.date = :date 
+             and r.reservationSlot.theme.id =:themeId 
+             and r.reservationSlot.time.id = :timeId""")
+    Optional<Reservation> findByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
 
     List<Reservation> findByMember(Member member);
 
