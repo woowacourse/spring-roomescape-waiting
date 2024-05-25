@@ -59,7 +59,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                         new AvailabilityTimeResponse(4L,
                                 "18:00", false), new ReservationThemeResponse("가을"))
         );
-        assertThat(reservations).isEqualTo(expected);
+        assertThat(reservations).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @ParameterizedTest

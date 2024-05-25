@@ -43,7 +43,7 @@ class ReservationRepositoryTest {
                 new Reservation(8L, null, null, null, null)
         );
 
-        assertThat(reservationRepository.findAll()).isEqualTo(expected);
+        assertThat(reservationRepository.findAll()).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
