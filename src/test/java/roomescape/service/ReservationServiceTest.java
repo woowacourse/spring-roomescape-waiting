@@ -1,5 +1,10 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,15 +15,13 @@ import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.PastTimeReservationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationSearchInput;
+import roomescape.service.dto.input.WaitingInput;
 import roomescape.util.DatabaseCleaner;
-
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 class ReservationServiceTest {
@@ -27,16 +30,22 @@ class ReservationServiceTest {
     ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    ReservationService reservationService;
+    MemberRepository memberRepository;
 
     @Autowired
     ThemeRepository themeRepository;
 
     @Autowired
-    private MemberService memberService;
+    DatabaseCleaner databaseCleaner;
 
     @Autowired
-    DatabaseCleaner databaseCleaner;
+    ReservationService reservationService;
+
+    @Autowired
+    MemberService memberService;
+
+    @Autowired
+    WaitingService waitingService;
 
     @BeforeEach
     void setUp() {
@@ -111,5 +120,24 @@ class ReservationServiceTest {
         assertThat(reservationService.searchReservation(new ReservationSearchInput(themeId, memberId,
                 LocalDate.parse("2024-05-01"), LocalDate.parse("2024-05-20"))))
                 .hasSize(1);
+    }
+
+    @Test
+    @DisplayName("내 예약 및 예약 대기 목록을 반환한다.")
+    void get_all_my_reservations() {
+        final Long timeId = reservationTimeRepository.save(ReservationTime.from(null, "10:00"))
+                .getId();
+        final Long themeId = themeRepository.save(ThemeFixture.getDomain())
+                .getId();
+        final var member1 = memberRepository.save(MemberFixture.getDomain());
+        final var member2 = memberRepository.save(MemberFixture.getDomain("new2@gmail.com"));
+        final var member3 = memberRepository.save(MemberFixture.getDomain("new3@gmail.com"));
+        reservationService.createReservation(new ReservationInput("2024-05-30", timeId, themeId, member1.getId()));
+        reservationService.createReservation(new ReservationInput("2024-06-30", timeId, themeId, member3.getId()));
+        waitingService.createWaiting(new WaitingInput("2024-05-30", timeId, themeId, member2.getId()));
+        waitingService.createWaiting(new WaitingInput("2024-05-30", timeId, themeId, member3.getId()));
+
+        assertThat(reservationService.getAllMyReservations(member3))
+                .hasSize(2);
     }
 }
