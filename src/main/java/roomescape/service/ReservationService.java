@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +76,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public List<ReservationWaitingResponse> findReservationsWaiting() {
          return reservationRepository.findByStatusIn(List.of(Status.WAITING))
                 .stream()
@@ -102,7 +102,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelWaiting(Long id, AuthInfo authInfo) {
+    public void deleteWaiting(Long id, AuthInfo authInfo) {
         Member member = memberRepository.findById(authInfo.id())
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
         Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.WAITING)
@@ -110,24 +110,26 @@ public class ReservationService {
 
         reservation.validateAuthorization(member);
 
-        reservation.updateStatus(Status.WAITING_CANCEL);
+        updateReservationStatus(reservation, Status.WAITING_CANCEL);
+    }
+
+    private void updateReservationStatus(Reservation reservation, Status status) {
+        reservation.updateStatus(status);
         reservationRepository.save(reservation);
     }
 
     @Transactional
     public void deleteById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.CREATED)
                 .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+        Reservation reservationWaiting = reservationRepository
+                .findTopByStatusInOrderByCreatedAt(List.of(Status.WAITING))
+                .orElse(null);
 
-        Optional<Reservation> reservationWaiting = reservationRepository.findTopByStatusInOrderByCreatedAt(
-                List.of(Status.WAITING));
+        updateReservationStatus(reservation, Status.DELETED);
 
-        reservation.updateStatus(Status.DELETED);
-        reservationRepository.save(reservation);
-
-        if (reservationWaiting.isPresent()) {
-            reservationWaiting.get().updateStatus(Status.CREATED);
-            reservationRepository.save(reservationWaiting.get());
+        if (reservationWaiting != null) {
+            updateReservationStatus(reservationWaiting, Status.CREATED);
         }
     }
 
