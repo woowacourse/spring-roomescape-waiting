@@ -13,6 +13,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.exception.reservation.NotFoundReservationException;
+import roomescape.exception.reservationwaiting.CannotCreateWaitingForOwnedReservationException;
 import roomescape.exception.reservationwaiting.CannotDeleteOtherMemberWaiting;
 import roomescape.exception.reservationwaiting.DuplicatedReservationWaitingException;
 import roomescape.exception.reservationwaiting.InvalidDateTimeWaitingException;
@@ -35,6 +36,7 @@ public class ReservationWaitingServiceTest extends ServiceTest {
     class SaveReservationWaiting {
         @Test
         void 예약_대기를_추가할_수_있다() {
+            reservationWaitingRepository.deleteById(1L);
             ReservationWaitingRequest request = new ReservationWaitingRequest("2000-04-08", "1", "1");
             Member member = memberRepository.findById(2L).orElseThrow();
 
@@ -47,10 +49,19 @@ public class ReservationWaitingServiceTest extends ServiceTest {
         @Test
         void 같은_사용자가_같은_예약에_대해선_예약_대기를_두_번_이상_추가_시_예외가_발생한다() {
             ReservationWaitingRequest request = new ReservationWaitingRequest("2000-04-08", "1", "1");
-            Member member = memberRepository.findById(1L).orElseThrow();
+            Member member = memberRepository.findById(2L).orElseThrow();
 
             assertThatThrownBy(() -> reservationWaitingService.saveReservationWaiting(request, member))
                     .isInstanceOf(DuplicatedReservationWaitingException.class);
+        }
+
+        @Test
+        void 본인이_예약한_건에_대해서_예약_대기_추가_시_예외가_발생한다() {
+            ReservationWaitingRequest request = new ReservationWaitingRequest("2000-04-08", "1", "1");
+            Member member = memberRepository.findById(1L).orElseThrow();
+
+            assertThatThrownBy(() -> reservationWaitingService.saveReservationWaiting(request, member))
+                    .isInstanceOf(CannotCreateWaitingForOwnedReservationException.class);
         }
 
 
@@ -66,7 +77,7 @@ public class ReservationWaitingServiceTest extends ServiceTest {
         @Test
         void 지난_예약에_대해_예약_대기_추가_시_예외가_발생한다() {
             ReservationWaitingRequest request = new ReservationWaitingRequest("2000-04-01", "1", "1");
-            Member member = memberRepository.findById(1L).orElseThrow();
+            Member member = memberRepository.findById(2L).orElseThrow();
 
             assertThatThrownBy(() -> reservationWaitingService.saveReservationWaiting(request, member))
                     .isInstanceOf(InvalidDateTimeWaitingException.class);
@@ -78,7 +89,7 @@ public class ReservationWaitingServiceTest extends ServiceTest {
     class DeleteReservation {
         @Test
         void 예약_대기를_삭제할_수_있다() {
-            Member member = memberRepository.findById(1L).orElseThrow();
+            Member member = memberRepository.findById(2L).orElseThrow();
 
             reservationWaitingService.deleteReservationWaiting(1L, member);
 
@@ -89,7 +100,7 @@ public class ReservationWaitingServiceTest extends ServiceTest {
 
         @Test
         void 존재하지_않는_예약_대기_삭제_시_예외가_발생한다() {
-            Member member = memberRepository.findById(1L).orElseThrow();
+            Member member = memberRepository.findById(2L).orElseThrow();
 
             assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(10L, member))
                     .isInstanceOf(NotFoundReservationWaitingException.class);
@@ -97,7 +108,7 @@ public class ReservationWaitingServiceTest extends ServiceTest {
 
         @Test
         void 다른_사용자의_예약_대기_삭제_시_예외가_발생한다() {
-            Member member = memberRepository.findById(2L).orElseThrow();
+            Member member = memberRepository.findById(1L).orElseThrow();
 
             assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(1L, member))
                     .isInstanceOf(CannotDeleteOtherMemberWaiting.class);

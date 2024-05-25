@@ -30,7 +30,7 @@ public class DatabaseInitializer {
         Theme theme = createTheme();
         Reservation pastReservation = createPastReservation(member, time, theme);
         Reservation futureReservation = createFutureReservation(member, time, theme);
-        ReservationWaiting waiting = createReservationWaiting(futureReservation, member);
+        ReservationWaiting waiting = createWaiting(futureReservation, admin);
     }
 
     private Member createMember() {
@@ -79,7 +79,7 @@ public class DatabaseInitializer {
         return reservation;
     }
 
-    private ReservationWaiting createReservationWaiting(Reservation reservation, Member member) {
+    private ReservationWaiting createWaiting(Reservation reservation, Member member) {
         ReservationWaiting reservationWaiting = new ReservationWaiting(reservation, member);
         entityManager.persist(reservationWaiting);
         return reservationWaiting;

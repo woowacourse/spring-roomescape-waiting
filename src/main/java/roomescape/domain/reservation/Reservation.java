@@ -51,6 +51,10 @@ public class Reservation {
         return dateTime.isBefore(now);
     }
 
+    public boolean isOwnedBy(Member otherMember) {
+        return member.equals(otherMember);
+    }
+
     public Long getId() {
         return id;
     }

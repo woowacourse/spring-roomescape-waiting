@@ -24,8 +24,13 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 예약_대기를_추가할_수_있다() {
-            params.put("date", "2000-04-08");
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/waitings/1")
+                    .then().log().all()
+                    .statusCode(204);
 
+            params.put("date", "2000-04-08");
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
                     .contentType(ContentType.JSON)
@@ -41,7 +46,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
             params.put("date", "2000-04-08");
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/waitings")
@@ -82,7 +87,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         @Test
         void 예약_대기를_삭제할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/waitings/1")
                     .then().log().all()
                     .statusCode(204);
@@ -91,7 +96,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         @Test
         void 존재하지_않는_예약_대기는_삭제할_수_없다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/waitings/10")
                     .then().log().all()
                     .statusCode(404);

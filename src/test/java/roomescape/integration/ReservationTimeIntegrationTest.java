@@ -127,7 +127,7 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
         @Test
         void 시간을_삭제할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/waitings/1")
                     .then().log().all()
                     .statusCode(204);
