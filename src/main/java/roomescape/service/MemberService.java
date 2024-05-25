@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
-import roomescape.dto.request.LogInRequest;
+import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.MemberPreviewResponse;
 import roomescape.dto.response.MemberReservationResponse;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -23,12 +23,10 @@ public class MemberService {
         this.jwtProvider = jwtProvider;
     }
 
-    public String logIn(LogInRequest logInRequest) {
-        String email = logInRequest.email();
-        String password = logInRequest.password();
-
+    public String login(LoginRequest loginRequest) {
+        String email = loginRequest.email();
+        String password = loginRequest.password();
         Member member = findMemberByEmailAndPassword(email, password);
-
         return jwtProvider.createToken(member);
     }
 

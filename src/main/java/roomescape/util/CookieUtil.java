@@ -15,6 +15,13 @@ public class CookieUtil {
 
     protected CookieUtil() {}
 
+    public static Cookie create(String value) {
+        Cookie cookie = new Cookie(TOKEN_NAME, value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
+    }
+
     public static Optional<String> extractToken(Cookie[] cookies) {
         return Arrays.stream(cookies)
                 .filter(cookie -> Objects.equals(TOKEN_NAME, cookie.getName()))
@@ -25,6 +32,8 @@ public class CookieUtil {
     public static Cookie expired() {
         Cookie cookie = new Cookie(TOKEN_NAME, null);
         cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
         return cookie;
     }
 
