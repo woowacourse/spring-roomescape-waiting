@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,7 +17,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 
 @Entity
-@Table(name = "waiting")
+@Table(name = "waiting", uniqueConstraints = @UniqueConstraint(columnNames = {"reservation_id", "member_id"}))
 @EntityListeners(AuditingEntityListener.class)
 public class Waiting {
     @Id
