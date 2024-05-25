@@ -4,9 +4,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ConflictException;
+import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationDetailRepository;
 import roomescape.reservation.repository.ReservationWaitingRepository;
 
@@ -24,11 +30,34 @@ public class ReservationWaitingService {
         this.detailRepository = detailRepository;
     }
 
-    public List<MyReservationResponse> findReservationByMemberId(Long id) {
+    public List<MyReservationResponse> findReservationWaitingByMemberId(Long id) {
         List<ReservationWaiting> reservationsByMember
                 = waitingRepository.findAllByMember_IdOrderByDetailDateAsc(id);
         return reservationsByMember.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    public ReservationResponse addReservationWaiting(ReservationRequest reservationRequest) {
+        Member member = memberRepository.findById(reservationRequest.memberId())
+                .orElseThrow(() -> new BadRequestException("해당 멤버 정보가 존재하지 않습니다."));
+        ReservationDetail detail = detailRepository.findById(reservationRequest.detailId())
+                .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
+        validateReservationDetail(detail);
+
+        ReservationWaiting reservation = reservationRequest.toReservationWaiting(member, detail);
+        ReservationWaiting savedReservation = waitingRepository.save(reservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
+    private void validateReservationDetail(ReservationDetail detail) {
+        waitingRepository.findByDetail_Id(detail.getId())
+                .ifPresent(reservation -> {
+                    throw new ConflictException(
+                            "해당 테마(%s)의 해당 시간(%s)에는 이미 예약 대기가 존재합니다."
+                                    .formatted(
+                                            reservation.getTheme().getName(),
+                                            reservation.getTime().getStartAt()));
+                });
     }
 }

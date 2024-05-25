@@ -1,6 +1,6 @@
 const THEME_API_ENDPOINT = '/themes';
 const RESERVATION_API_ENDPOINT = '/reservations';
-const RESERVATION_WAITING_API_ENDPOINT = '/reservation/waiting';
+const RESERVATION_WAITING_API_ENDPOINT = '/reservations/waiting';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
@@ -165,7 +165,7 @@ function onReservationButtonClick() {
             timeId: selectedTimeId,
         };
 
-        fetch('/reservations', {
+        fetch(RESERVATION_API_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -202,13 +202,10 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId,
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
         fetch(RESERVATION_WAITING_API_ENDPOINT, {
             method: 'POST',
             headers: {
@@ -221,11 +218,11 @@ function onWaitButtonClick() {
                 return response.json();
             })
             .then(data => {
-                alert('Reservation waiting successful!');
-                window.location.href = "/";
+                alert("예약 대기 되었습니다!");
+                location.reload();
             })
             .catch(error => {
-                alert("An error occurred while making the reservation waiting.");
+                alert("예약 대기 생성 중 오류가 발생하였습니다. 다시 시도해주시기 바랍니다.");
                 console.error(error);
             });
     } else {
