@@ -44,7 +44,6 @@ public class WaitingService {
     }
 
     public CreateWaitingResponse createWaiting(AuthInfo authInfo, CreateWaitingRequest createWaitingRequest) {
-
         Member member = findMember(authInfo.getMemberId());
         LocalDate date = createWaitingRequest.date();
         ReservationTime reservationTime = findReservationTime(createWaitingRequest.timeId());
