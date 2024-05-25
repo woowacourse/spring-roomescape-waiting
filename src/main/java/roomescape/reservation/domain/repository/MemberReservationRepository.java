@@ -66,4 +66,5 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     void updateStatusBy(ReservationStatus toSetStatus, Reservation reservation, ReservationStatus toChangeStatus,
                         int waitingNumber);
 
+    boolean existsByReservationAndReservationStatus(Reservation reservation, ReservationStatus reservationStatus);
 }

@@ -11,6 +11,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
@@ -61,6 +62,10 @@ public class ReservationCommonService {
         if (reservation.isPast()) {
             throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
         }
+    }
+
+    public boolean isReservationConfirmed(Reservation reservation) {
+        return memberReservationRepository.existsByReservationAndReservationStatus(reservation, ReservationStatus.APPROVED);
     }
 
     public ReservationTime getReservationTime(long timeId) {

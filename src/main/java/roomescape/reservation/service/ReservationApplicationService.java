@@ -57,6 +57,14 @@ public class ReservationApplicationService {
         reservationCommonService.validatePastReservation(reservation);
         reservationCommonService.validateDuplicatedReservation(reservation, member);
 
+        return createReservation(reservation, member);
+    }
+
+    private ReservationResponse createReservation(Reservation reservation, Member member) {
+        if (reservationCommonService.isReservationConfirmed(reservation)) {
+            MemberReservation waiting = waitingReservationService.addWaiting(member, reservation);
+            return ReservationResponse.from(waiting.getId(), reservation, member);
+        }
         MemberReservation memberReservation = memberReservationService.createMemberReservation(member, reservation);
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
