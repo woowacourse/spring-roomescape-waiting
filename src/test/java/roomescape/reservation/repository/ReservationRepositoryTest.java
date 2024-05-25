@@ -26,10 +26,10 @@ import roomescape.time.domain.Time;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationRepositoryTest {
-    private static final Member MEMBER = new Member(1L, "범블비", "aa@email.com", "1111");
-    private static final Theme THEME = new Theme(1L, "Harry Potter", "해리포터와 도비", "thumbnail.jpg");
-    private static final Time TIME = new Time(1L, LocalTime.of(12, 0));
-    public static final ReservationDetail RESERVATION_DETAIL = new ReservationDetail(1L, THEME, TIME, LocalDate.MAX);
+    private static final Member MEMBER = new Member("범블비", "aa@email.com", "1111");
+    private static final Theme THEME = new Theme("Harry Potter", "해리포터와 도비", "thumbnail.jpg");
+    private static final Time TIME = new Time(LocalTime.of(12, 0));
+    public static final ReservationDetail RESERVATION_DETAIL = new ReservationDetail(THEME, TIME, LocalDate.MAX);
     public static final Reservation RESERVATION = new Reservation(MEMBER, RESERVATION_DETAIL);
 
     @PersistenceContext

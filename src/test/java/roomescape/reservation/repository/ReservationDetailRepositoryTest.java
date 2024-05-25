@@ -13,36 +13,55 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
 @DataJpaTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationDetailRepositoryTest {
-    private static final Theme THEME = new Theme(1L, "Harry Potter", "해리포터와 도비", "thumbnail.jpg");
-    private static final Time TIME = new Time(1L, LocalTime.of(12, 0));
-    public static final ReservationDetail RESERVATION_DETAIL = new ReservationDetail(1L, THEME, TIME, LocalDate.MAX);
     @PersistenceContext
     EntityManager entityManager;
 
     @Autowired
     private ReservationDetailRepository detailRepository;
 
+    private Theme theme;
+    private Time time;
+    private ReservationDetail reservationDetail;
+
     @BeforeEach
     void setUp() {
-        entityManager.merge(TIME);
-        entityManager.merge(THEME);
-        entityManager.merge(RESERVATION_DETAIL);
+        theme = new Theme("Harry Potter", "해리포터와 도비", "thumbnail.jpg");
+        time = new Time(LocalTime.of(12, 0));
+        reservationDetail = new ReservationDetail(theme, time, LocalDate.MAX);
+
+        entityManager.persist(time);
+        entityManager.persist(theme);
+        entityManager.persist(reservationDetail);
+
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
-    @DisplayName("존재하는 예약시간인지 확인한다.")
-    void countReservationTime() {
-        assertThat(detailRepository.countReservationsByTime_Id(RESERVATION_DETAIL.getTimeId()))
-                .isEqualTo(1);
+    @DisplayName("실행 성공 : 해당 예약 시간에 예약 정보 갯수를 알 수 있다.")
+    void countReservationsByTime_Id() {
+        // when
+        int actual = detailRepository.countReservationsByTime_Id(reservationDetail.getTimeId());
+
+        // then
+        assertThat(actual).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("실행 성공 : 존재하는 예약 정보의 ID를 알 수 있다.")
+    void findIdByDateAndThemeIdAndTimeId() {
+        // when
+        Long actual = detailRepository.findIdByDateAndThemeIdAndTimeId(LocalDate.MAX, theme.getId(), time.getId())
+                .get();
+
+        // then
+        assertThat(actual).isEqualTo(reservationDetail.getId());
     }
 }
