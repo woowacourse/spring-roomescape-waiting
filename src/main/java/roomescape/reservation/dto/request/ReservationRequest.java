@@ -2,8 +2,7 @@ package roomescape.reservation.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -19,7 +18,7 @@ public record ReservationRequest(
         Long themeId
 ) {
 
-    public Reservation toEntity(final ReservationTime reservationTime, final Theme theme, final Member member) {
-        return new Reservation(this.date, reservationTime, theme, member);
+    public ReservationDetail toEntity(final ReservationTime reservationTime, final Theme theme) {
+        return new ReservationDetail(this.date, reservationTime, theme);
     }
 }

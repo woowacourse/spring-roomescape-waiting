@@ -1,7 +1,7 @@
 DELETE
 FROM member_reservation;
 DELETE
-FROM reservation;
+FROM reservation_detail;
 DELETE
 FROM reservation_time;
 DELETE
@@ -11,7 +11,7 @@ FROM member;
 
 ALTER TABLE member_reservation
     ALTER COLUMN id RESTART WITH 1;
-ALTER TABLE reservation
+ALTER TABLE reservation_detail
     ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE reservation_time
     ALTER COLUMN id RESTART WITH 1;

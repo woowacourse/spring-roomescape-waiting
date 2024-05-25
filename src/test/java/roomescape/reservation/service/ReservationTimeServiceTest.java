@@ -3,17 +3,14 @@ package roomescape.reservation.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.DataDuplicateException;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
@@ -59,10 +56,9 @@ class ReservationTimeServiceTest {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
-        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1L), reservationTime, theme, member));
+        reservationRepository.save(new ReservationDetail(LocalDate.now().plusDays(1L), reservationTime, theme));
 
         // then
         assertThatThrownBy(() -> reservationTimeService.removeTimeById(reservationTime.getId()))

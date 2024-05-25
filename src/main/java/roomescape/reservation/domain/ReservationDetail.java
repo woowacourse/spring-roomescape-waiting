@@ -10,16 +10,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
-import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-//TODO: ReservationDetail 로 변경
 @Entity
-public class Reservation {
+public class ReservationDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,31 +29,26 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
-    //TODO: 제거
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
 
-    public Reservation() {
+    public ReservationDetail() {
     }
 
-    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member) {
-        this(null, date, reservationTime, theme, member);
+    public ReservationDetail(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
+        this(null, date, reservationTime, theme);
     }
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member) {
+    public ReservationDetail(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
-        this.member = member;
 
         validateNotNull();
     }
 
     private void validateNotNull() {
-        if (date == null || reservationTime == null || theme == null || member == null) {
-            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약(Reservation) 생성에 null이 입력되었습니다.");
+        if (date == null || reservationTime == null || theme == null) {
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약(Reservation) 생성 정보(date, reservationTime, theme) 에 null이 입력되었습니다.");
         }
     }
 
@@ -96,9 +89,6 @@ public class Reservation {
         return theme;
     }
 
-    public Member getMember() {
-        return member;
-    }
 
     @Override
     public String toString() {
@@ -107,7 +97,6 @@ public class Reservation {
                 ", date=" + date +
                 ", reservationTime=" + reservationTime +
                 ", theme=" + theme +
-                ", member=" + member +
                 '}';
     }
 }

@@ -23,7 +23,7 @@ public class MemberReservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
-    private Reservation reservation;
+    private ReservationDetail reservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -36,7 +36,7 @@ public class MemberReservation {
     public MemberReservation() {
     }
 
-    public MemberReservation(final Reservation reservation, final Member member, final ReservationStatus status) {
+    public MemberReservation(final ReservationDetail reservation, final Member member, final ReservationStatus status) {
         this.reservation = reservation;
         this.member = member;
         this.status = status;
@@ -49,15 +49,19 @@ public class MemberReservation {
         }
     }
 
-    public boolean isReserved() {
+    public boolean isReservedStatus() {
         return status.isReserved();
+    }
+
+    public boolean isWaitingStatus() {
+        return status.isWaiting();
     }
 
     public Long getId() {
         return id;
     }
 
-    public Reservation getReservation() {
+    public ReservationDetail getReservation() {
         return reservation;
     }
 

@@ -6,7 +6,7 @@ import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -47,11 +47,11 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             """)
     List<MemberReservation> findByReservationTimeAndDateAndThemeOrderByIdAsc(ReservationTime time, LocalDate date, Theme theme);
 
-    List<MemberReservation> findByReservation(Reservation reservation);
+    List<MemberReservation> findByReservation(ReservationDetail reservation);
 
-    Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
+    Optional<MemberReservation> findByReservationAndMember(ReservationDetail reservation, Member member);
 
-    Long countByReservation(Reservation reservation);
+    Long countByReservation(ReservationDetail reservation);
 
     @Query("""
             SELECT mr

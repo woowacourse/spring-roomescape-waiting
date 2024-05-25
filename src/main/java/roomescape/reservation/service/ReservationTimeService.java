@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.DataDuplicateException;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
@@ -55,7 +55,7 @@ public class ReservationTimeService {
     @Transactional
     public void removeTimeById(final Long id) {
         ReservationTime reservationTime = reservationTimeRepository.getById(id);
-        List<Reservation> usingTimeReservations = reservationRepository.findByReservationTime(reservationTime);
+        List<ReservationDetail> usingTimeReservations = reservationRepository.findByReservationTime(reservationTime);
         if (usingTimeReservations.size() > 0) {
             throw new AssociatedDataExistsException(ErrorType.TIME_IS_USED_CONFLICT,
                     String.format("해당 예약 시간(ReservationTime) 에 예약이 존재하여 시간을 삭제할 수 없습니다. [timeId: %d]", id));

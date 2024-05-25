@@ -2,7 +2,7 @@ package roomescape.reservation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,7 +11,7 @@ public record MemberReservationResponse(
         Long reservationId, String theme, LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time, String status) {
     public static MemberReservationResponse fromEntity(final MemberReservation memberReservation, final long order) {
-        Reservation reservation = memberReservation.getReservation();
+        ReservationDetail reservation = memberReservation.getReservation();
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getThemeName(),

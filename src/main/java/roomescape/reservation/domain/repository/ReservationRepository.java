@@ -4,8 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.NotFoundException;
-import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -13,17 +12,17 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
+public interface ReservationRepository extends JpaRepository<ReservationDetail, Long>, JpaSpecificationExecutor<ReservationDetail> {
 
-    default Reservation getById(final Long id) {
+    default ReservationDetail getById(final Long id) {
         return findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorType.RESERVATION_NOT_FOUND,
                         String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
     }
 
-    List<Reservation> findByReservationTime(ReservationTime reservationTime);
+    List<ReservationDetail> findByReservationTime(ReservationTime reservationTime);
 
-    Optional<Reservation> findByReservationTimeAndDateAndTheme(ReservationTime reservationTime, LocalDate date, Theme theme);
+    Optional<ReservationDetail> findByReservationTimeAndDateAndTheme(ReservationTime reservationTime, LocalDate date, Theme theme);
 
 //    default List<Reservation> searchWith(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo) {
 //        return this.findAll((root, query, cb) -> {
@@ -44,7 +43,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 //        });
 //    }
 
-    List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
-
-    List<Reservation> findByMember(Member member);
+    List<ReservationDetail> findByDateAndTheme(LocalDate date, Theme theme);
 }

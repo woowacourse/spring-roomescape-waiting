@@ -16,7 +16,6 @@ import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
@@ -124,14 +123,11 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(tomorrow.toLocalTime()));
         Theme theme1 = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         Theme theme2 = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
-        Theme theme3 = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
-        Reservation reservation1 = reservationRepository.save(new Reservation(tomorrow.toLocalDate(), reservationTime, theme1, member));
-        Reservation reservation2 = reservationRepository.save(new Reservation(tomorrow.toLocalDate(), reservationTime, theme2, member));
-        memberReservationRepository.save(new MemberReservation(reservation1, member, ReservationStatus.RESERVED));
-        memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.RESERVED));
-        memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.WAITING));
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), reservationTime.getId(), theme1.getId()), member.getId(), ReservationStatus.RESERVED);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), reservationTime.getId(), theme2.getId()), member.getId(), ReservationStatus.RESERVED);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), reservationTime.getId(), theme2.getId()), member.getId(), ReservationStatus.WAITING);
 
         // when
         List<MemberReservation> reservedReservations = memberReservationRepository.findByStatus(ReservationStatus.RESERVED);

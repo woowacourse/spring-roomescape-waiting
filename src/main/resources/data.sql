@@ -49,9 +49,9 @@ VALUES ('21:00');
 INSERT INTO reservation_time (start_at)
 VALUES ('23:00');
 
-INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1, 1);
-INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1, 2);
-INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1, 3);
+INSERT INTO reservation_detail (date, reservation_time_id, theme_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation_detail (date, reservation_time_id, theme_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation_detail (date, reservation_time_id, theme_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1);
 
 INSERT INTO member_reservation (reservation_id, member_id, status) VALUES (1, 1, 'RESERVED');
 INSERT INTO member_reservation (reservation_id, member_id, status) VALUES (2, 2, 'WAITING');
