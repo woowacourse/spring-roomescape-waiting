@@ -165,7 +165,7 @@ public class ReservationService {
         Member member = memberRepository.findByEmail(loginMember.email())
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 멤버입니다."));
 
-        if (!waitingReservation.getMember().isSameMember(member)) {
+        if (!waitingReservation.isOwnedBy(member)) {
             throw new UnauthorizedException("삭제할 수 없는 예약입니다");
         }
 

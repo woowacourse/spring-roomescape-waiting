@@ -64,6 +64,10 @@ public class Reservation {
         return member.isSameMember(other.member);
     }
 
+    public boolean isOwnedBy(Member other) {
+        return member.equals(other);
+    }
+
     public Long getId() {
         return id;
     }
