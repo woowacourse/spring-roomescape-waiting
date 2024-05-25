@@ -228,22 +228,14 @@ class ReservationControllerTest {
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme, Status.CREATED));
 
+        String accessToken = getTokenByLoginRequest(member);
+
         // when & then
         Long id = savedReservation.getId();
         RestAssured.given().log().all()
-                .when().delete("/reservations/" + id)
-                .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
-    }
-
-    @DisplayName("예약 취소 실패 테스트")
-    @Test
-    void deleteReservationFail() {
-        // given
-        long invalidId = 0;
-
-        // when & then
-        RestAssured.given().log().all()
-                .when().delete("/reservations/" + invalidId)
+                .header("cookie", accessToken)
+                .contentType(ContentType.JSON)
+                .when().patch("/admin/reservations/" + id)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 

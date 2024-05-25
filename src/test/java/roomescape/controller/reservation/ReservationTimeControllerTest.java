@@ -5,7 +5,6 @@ import static roomescape.TestFixture.TIME;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -111,7 +107,7 @@ class ReservationTimeControllerTest {
 
         // when & then
         RestAssured.given().log().all()
-                .when().delete("/reservations/" + invalidId)
+                .when().delete("/times/" + invalidId)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 

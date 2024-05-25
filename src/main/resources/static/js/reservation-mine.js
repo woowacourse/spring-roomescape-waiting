@@ -59,7 +59,7 @@ function requestDeleteWaiting(id) {
    */
   const endpoint = '/reservations/waiting/' + id;
   return fetch(endpoint, {
-    method: 'PUT'
+    method: 'PATCH'
   }).then(response => {
     if (response.status === 204) return;
     throw new Error('Delete failed');

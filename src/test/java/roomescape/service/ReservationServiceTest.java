@@ -148,9 +148,11 @@ class ReservationServiceTest {
     @Test
     void deleteById() {
         // given
-        createReservationRequest(MEMBER_BROWN, RESERVATION_TIME_10AM, ROOM_THEME1, VALID_STRING_DATE);
+        ReservationCreateRequest request = createReservationRequest(MEMBER_BROWN, RESERVATION_TIME_10AM,
+                ROOM_THEME1, VALID_STRING_DATE);
+        ReservationResponse response = reservationService.save(request);
         // when
-        reservationService.deleteById(1L);
+        reservationService.deleteById(response.id());
         // then
         assertThat(reservationService.findAll()).isEmpty();
     }
