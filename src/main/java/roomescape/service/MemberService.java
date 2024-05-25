@@ -3,10 +3,11 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.controller.dto.request.SignupRequest;
+import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
+import roomescape.service.dto.request.CreateMemberRequest;
 import roomescape.service.dto.response.MemberResponse;
 
 @Service
@@ -22,21 +23,17 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse createMember(SignupRequest request) {
-        Member member = new Member(
-                request.email(),
-                passwordEncoder.encode(request.password()),
-                request.name(),
-                Role.USER
-        );
+    public MemberResponse createMember(CreateMemberRequest request) {
+        Member member = request.toMember(passwordEncoder.encode(request.password()), Role.USER);
+        validateDuplicatedEmail(member.getEmail());
+        Member savedMember = memberRepository.save(member);
+        return MemberResponse.from(savedMember);
+    }
 
-        if (memberRepository.existsByEmail(member.getEmail())) {
+    private void validateDuplicatedEmail(Email email) {
+        if (memberRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
-
-        Member savedMember = memberRepository.save(member);
-
-        return MemberResponse.from(savedMember);
     }
 
     public List<MemberResponse> getAllMembers() {

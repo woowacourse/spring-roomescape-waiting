@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import roomescape.controller.dto.request.LoginRequest;
-import roomescape.controller.dto.request.SignupRequest;
 import roomescape.domain.member.Role;
 import roomescape.security.TokenProvider;
+import roomescape.service.dto.request.CreateMemberRequest;
 import roomescape.service.dto.response.MemberResponse;
 
 class AuthServiceTest extends BaseServiceTest {
@@ -34,7 +34,7 @@ class AuthServiceTest extends BaseServiceTest {
 
     @BeforeEach
     void setUp() {
-        SignupRequest request = new SignupRequest(EMAIL, PASSWORD, NICKNAME);
+        CreateMemberRequest request = new CreateMemberRequest(EMAIL, PASSWORD, NICKNAME);
         memberService.createMember(request);
     }
 

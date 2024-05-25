@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.controller.dto.request.ThemeRequest;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.service.dto.request.CreateThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;
 
 @Service
@@ -31,8 +31,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponse addTheme(ThemeRequest themeRequest) {
-        Theme theme = themeRequest.toTheme();
+    public ThemeResponse addTheme(CreateThemeRequest request) {
+        Theme theme = request.toTheme();
         validateDuplicateName(theme);
         Theme savedTheme = themeRepository.save(theme);
         return ThemeResponse.from(savedTheme);

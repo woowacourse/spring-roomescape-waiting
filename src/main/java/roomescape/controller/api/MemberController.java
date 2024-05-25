@@ -26,7 +26,7 @@ public class MemberController {
 
     @PostMapping
     public ResponseEntity<MemberResponse> signup(@RequestBody @Valid SignupRequest request) {
-        MemberResponse memberResponse = memberService.createMember(request);
+        MemberResponse memberResponse = memberService.createMember(request.toCreateMemberRequest());
         return ResponseEntity.created(URI.create("/members/" + memberResponse.id()))
                 .body(memberResponse);
     }

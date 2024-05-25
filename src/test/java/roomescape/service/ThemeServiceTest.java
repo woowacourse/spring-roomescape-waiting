@@ -8,7 +8,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.controller.dto.request.ThemeRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.ReservationRepository;
@@ -16,6 +15,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.service.dto.request.CreateThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;
 import roomescape.support.fixture.MemberFixture;
 import roomescape.support.fixture.ReservationFixture;
@@ -57,7 +57,7 @@ class ThemeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("테마를 추가한다.")
     void addTheme() {
-        ThemeRequest request = new ThemeRequest("테마", "테마 설명", "https://example.com");
+        CreateThemeRequest request = new CreateThemeRequest("테마", "테마 설명", "https://example.com");
 
         ThemeResponse themeResponse = themeService.addTheme(request);
 

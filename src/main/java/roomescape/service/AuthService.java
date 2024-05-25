@@ -37,7 +37,7 @@ public class AuthService {
         return tokenProvider.getMemberId(token);
     }
 
-    public MemberResponse validatePassword(LoginRequest loginRequest) { // todo void
+    public MemberResponse validatePassword(LoginRequest loginRequest) { // todo void, dto 분리
         Member member = getMember(loginRequest);
         validatePassword(loginRequest, member);
         return MemberResponse.from(member);

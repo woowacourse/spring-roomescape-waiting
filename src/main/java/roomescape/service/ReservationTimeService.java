@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.controller.dto.request.ReservationTimeRequest;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.AvailableReservationTimeDto;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.service.dto.request.CreateReservationTimeRequest;
 import roomescape.service.dto.response.AvailableReservationTimeResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 
@@ -36,8 +36,8 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ReservationTimeResponse addReservationTime(ReservationTimeRequest reservationTimeRequest) {
-        ReservationTime reservationTime = reservationTimeRequest.toReservationTime();
+    public ReservationTimeResponse addReservationTime(CreateReservationTimeRequest request) {
+        ReservationTime reservationTime = request.toReservationTime();
         validateDuplicatedStartAt(reservationTime);
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         return ReservationTimeResponse.from(savedReservationTime);
