@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -22,13 +25,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findAllByConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
-    boolean existsByTimeId(long id);
+    boolean existsByTime(ReservationTime time);
 
-    boolean existsByThemeId(long id);
+    boolean existsByTheme(Theme theme);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId); // todo 객체로
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
-    List<Reservation> findAllByMemberId(long id);
+    List<Reservation> findAllByMember(Member member); // todo test
 }

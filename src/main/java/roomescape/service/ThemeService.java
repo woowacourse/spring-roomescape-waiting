@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
@@ -34,11 +33,8 @@ public class ThemeService {
     @Transactional
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
         Theme theme = themeRequest.toTheme();
-
         validateDuplicateName(theme);
-
         Theme savedTheme = themeRepository.save(theme);
-
         return ThemeResponse.from(savedTheme);
     }
 
@@ -50,15 +46,20 @@ public class ThemeService {
 
     @Transactional
     public void deleteThemeById(Long id) {
-        if (!themeRepository.existsById(id)) {
-            throw new NoSuchElementException("해당 id의 테마가 존재하지 않습니다.");
-        }
+        Theme theme = getThemeById(id);
+        validateReservedTheme(theme);
+        themeRepository.delete(theme);
+    }
 
-        if (reservationRepository.existsByThemeId(id)) {
+    private Theme getThemeById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 id의 테마가 존재하지 않습니다."));
+    }
+
+    private void validateReservedTheme(Theme theme) {
+        if (reservationRepository.existsByTheme(theme)) {
             throw new IllegalArgumentException("해당 테마를 사용하는 예약이 존재합니다.");
         }
-
-        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponse> getPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {

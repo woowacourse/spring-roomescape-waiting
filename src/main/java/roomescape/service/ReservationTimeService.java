@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
@@ -39,27 +38,33 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTimeResponse addReservationTime(ReservationTimeRequest reservationTimeRequest) {
         ReservationTime reservationTime = reservationTimeRequest.toReservationTime();
+        validateDuplicatedStartAt(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        return ReservationTimeResponse.from(savedReservationTime);
+    }
 
+    private void validateDuplicatedStartAt(ReservationTime reservationTime) {
         if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
             throw new IllegalArgumentException("해당 시간은 이미 존재합니다.");
         }
-
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-
-        return ReservationTimeResponse.from(savedReservationTime);
     }
 
     @Transactional
     public void deleteReservationTimeById(Long id) {
-        if (!reservationTimeRepository.existsById(id)) {
-            throw new NoSuchElementException("해당 id의 시간이 존재하지 않습니다.");
-        }
+        ReservationTime reservationTime = getReservationTimeById(id);
+        validateReservedTime(reservationTime);
+        reservationTimeRepository.delete(reservationTime);
+    }
 
-        if (reservationRepository.existsByTimeId(id)) {
+    private ReservationTime getReservationTimeById(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 id의 시간이 존재하지 않습니다."));
+    }
+
+    private void validateReservedTime(ReservationTime reservationTime) {
+        if (reservationRepository.existsByTime(reservationTime)) {
             throw new IllegalArgumentException("해당 시간을 사용하는 예약이 존재합니다.");
         }
-
-        reservationTimeRepository.deleteById(id);
     }
 
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(LocalDate date, Long themeId) {

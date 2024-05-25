@@ -13,6 +13,10 @@ public class ReservationFixture {
     }
 
     public static Reservation create(String date, Member member, ReservationTime time, Theme theme) {
-        return new Reservation(LocalDate.parse(date), member, time, theme);
+        return create(LocalDate.parse(date), member, time, theme);
+    }
+
+    public static Reservation create(LocalDate date, Member member, ReservationTime time, Theme theme) {
+        return new Reservation(date, member, time, theme);
     }
 }

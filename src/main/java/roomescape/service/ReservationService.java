@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,11 +100,10 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+        if (reservationRepository.existsByDateAndTimeAndTheme(
                 reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        )) {
+                reservation.getTime(),
+                reservation.getTheme())) {
             throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
         }
     }
@@ -113,10 +111,11 @@ public class ReservationService {
     @Transactional
     public void deleteReservationById(Long id) {
         if (!reservationRepository.existsById(id)) {
-            throw new NoSuchElementException("해당 id의 예약이 존재하지 않습니다.");
+            throw new IllegalArgumentException("해당 id의 예약이 존재하지 않습니다.");
         }
 
         reservationRepository.deleteById(id);
+        // todo 예약 대기 자동 승인
     }
 
     public List<PersonalReservationResponse> getReservationsByMemberId(long memberId) {

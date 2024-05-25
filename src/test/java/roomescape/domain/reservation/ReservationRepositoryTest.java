@@ -8,8 +8,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.BaseRepositoryTest;
 import roomescape.domain.member.Member;
@@ -60,37 +58,56 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약 시간 id에 해당하는 예약이 존재하는지 확인한다.")
-    void existsByTimeId() {
+    @DisplayName("예약 시간을 사용하는 예약이 존재하는지 확인한다.")
+    void existsByTime() {
         save(ReservationFixture.create(member, time, theme));
 
-        assertThat(reservationRepository.existsByTimeId(time.getId())).isTrue();
+        assertThat(reservationRepository.existsByTime(time)).isTrue();
     }
 
     @Test
-    @DisplayName("테마 id에 해당하는 예약이 존재하는지 확인한다.")
-    void existsByThemeId() {
+    @DisplayName("테마를 사용하는 예약이 존재하는지 확인한다.")
+    void existsByTheme() {
         save(ReservationFixture.create(member, time, theme));
 
-        assertThat(reservationRepository.existsByThemeId(theme.getId())).isTrue();
+        assertThat(reservationRepository.existsByTheme(theme)).isTrue();
     }
 
     @Test
-    @DisplayName("날짜와 시간 id, 테마 id에 해당하는 예약이 존재하면 true를 반환한다.")
-    void existsByValidReservation() {
-        String date = "2024-04-09";
+    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하면 true를 반환한다.")
+    void existsByDateAndTimeAndTheme() {
+        LocalDate date = LocalDate.parse("2024-04-09");
         save(ReservationFixture.create(date, member, time, theme));
 
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(LocalDate.parse(date), time.getId(),
-                theme.getId())).isTrue();
+        assertThat(reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)).isTrue();
     }
 
-    @ParameterizedTest
-    @CsvSource({"2024-04-10, 1, 1", "2024-04-09, 1, 2", "2024-04-09, 2, 1"})
-    @DisplayName("날짜와 시간 id, 테마 id에 해당하는 예약이 존재하지 않으면 false를 반환한다.")
-    void existsByInvalidReservation(LocalDate date, Long timeId, Long themeId) {
+    @Test
+    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하지 않으면 false를 반환한다. [다른 날짜]")
+    void existsByOtherDate() {
         save(ReservationFixture.create("2024-04-09", member, time, theme));
 
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).isFalse();
+        LocalDate otherDate = LocalDate.parse("2024-04-10");
+        assertThat(reservationRepository.existsByDateAndTimeAndTheme(otherDate, time, theme)).isFalse();
+    }
+
+    @Test
+    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하지 않으면 false를 반환한다. [다른 시간]")
+    void existsByOtherTime() {
+        LocalDate date = LocalDate.parse("2024-04-09");
+        save(ReservationFixture.create(date, member, time, theme));
+
+        ReservationTime otherTime = save(ReservationTimeFixture.create("11:00"));
+        assertThat(reservationRepository.existsByDateAndTimeAndTheme(date, otherTime, theme)).isFalse();
+    }
+
+    @Test
+    @DisplayName("날짜와 시간, 테마를 사용하는 예약이 존재하지 않으면 false를 반환한다. [다른 테마]")
+    void existsByOtherTheme() {
+        LocalDate date = LocalDate.parse("2024-04-09");
+        save(ReservationFixture.create(date, member, time, theme));
+
+        Theme otherTheme = save(ThemeFixture.create("다른 테마"));
+        assertThat(reservationRepository.existsByDateAndTimeAndTheme(date, time, otherTheme)).isFalse();
     }
 }
