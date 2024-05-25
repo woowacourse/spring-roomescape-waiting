@@ -1,7 +1,6 @@
 package roomescape.domain.member;
 
 import jakarta.persistence.*;
-import org.hibernate.Hibernate;
 
 import java.util.Objects;
 
@@ -60,11 +59,11 @@ public class Member {
         if (this == o) {
             return true;
         }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+        if (o == null || !(o instanceof Member)) {
             return false;
         }
         Member member = (Member) o;
-        return id != null && Objects.equals(id, member.getId());
+        return this.getId() != null && Objects.equals(this.getId(), member.getId());
     }
 
     @Override

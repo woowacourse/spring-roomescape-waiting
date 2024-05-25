@@ -57,9 +57,9 @@ public class Waiting implements Comparable<Waiting> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null ||!(o instanceof Waiting)) return false;
         Waiting waiting = (Waiting) o;
-        return Objects.equals(id, waiting.id);
+        return Objects.equals(this.getId(), waiting.getId());
     }
 
     @Override

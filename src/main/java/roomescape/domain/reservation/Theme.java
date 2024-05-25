@@ -1,7 +1,6 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
-import org.hibernate.Hibernate;
 
 import java.util.Objects;
 
@@ -48,7 +47,7 @@ public class Theme {
         if (this == o) {
             return true;
         }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+        if (o == null || !(o instanceof Theme)) {
             return false;
         }
         Theme theme = (Theme) o;

@@ -35,7 +35,7 @@ public class ReservationTime implements Comparable<ReservationTime> {
         if (this == o) {
             return true;
         }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+        if (o == null || !(o instanceof ReservationTime)) {
             return false;
         }
         ReservationTime that = (ReservationTime) o;

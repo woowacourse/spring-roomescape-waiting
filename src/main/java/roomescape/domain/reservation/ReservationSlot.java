@@ -53,7 +53,7 @@ public class ReservationSlot {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof ReservationSlot)) return false;
         ReservationSlot that = (ReservationSlot) o;
         return Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
     }

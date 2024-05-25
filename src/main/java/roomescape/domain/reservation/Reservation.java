@@ -62,7 +62,7 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !(o instanceof Reservation)) {
             return false;
         }
         Reservation that = (Reservation) o;
