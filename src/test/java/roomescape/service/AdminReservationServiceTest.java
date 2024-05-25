@@ -19,7 +19,6 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateReservationResponse;
 import roomescape.controller.dto.FindReservationResponse;
 import roomescape.controller.dto.FindReservationStandbyResponse;
-import roomescape.domain.member.Member;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
@@ -146,10 +145,9 @@ class AdminReservationServiceTest {
     @Test
     void deleteStandby_ByAdmin() {
         adminReservationService.reserve(adminId, date, timeId, themeId);
-        userReservationService.reserve(userId, date, timeId, themeId);
-        Member admin = memberRepository.findById(adminId).get();
+        userReservationService.standby(userId, date, timeId, themeId);
 
-        assertThatCode(() -> adminReservationService.deleteStandby(2L, admin))
+        assertThatCode(() -> adminReservationService.deleteStandby(2L))
             .doesNotThrowAnyException();
     }
 

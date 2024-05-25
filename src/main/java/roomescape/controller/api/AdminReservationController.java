@@ -16,8 +16,6 @@ import roomescape.controller.dto.CreateReservationResponse;
 import roomescape.controller.dto.FindReservationResponse;
 import roomescape.controller.dto.FindReservationStandbyResponse;
 import roomescape.controller.dto.SearchReservationFilterRequest;
-import roomescape.domain.member.Member;
-import roomescape.global.argumentresolver.AuthenticationPrincipal;
 import roomescape.service.AdminReservationService;
 
 @RestController
@@ -62,8 +60,8 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/standby/{id}")
-    public ResponseEntity<Void> deleteStandby(@PathVariable Long id, @AuthenticationPrincipal Member member) {
-        adminReservationService.deleteStandby(id, member);
+    public ResponseEntity<Void> deleteStandby(@PathVariable Long id) {
+        adminReservationService.deleteStandby(id);
         return ResponseEntity.noContent().build();
     }
 
