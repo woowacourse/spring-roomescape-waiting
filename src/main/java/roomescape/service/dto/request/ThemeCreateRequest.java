@@ -11,7 +11,7 @@ public record ThemeCreateRequest(
         @NotBlank(message = "썸네일에 빈값을 입력할 수 없습니다.")
         String thumbnail
 ) {
-    public Theme toRoomTheme() {
+    public Theme toTheme() {
         return new Theme(name, description, thumbnail);
     }
 }
