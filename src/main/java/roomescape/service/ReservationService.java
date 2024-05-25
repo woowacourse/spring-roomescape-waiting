@@ -46,7 +46,7 @@ public class ReservationService {
 
     @Transactional
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findAllAndStatusIn(List.of(Status.CREATED))
+        return reservationRepository.findByStatusIn(List.of(Status.CREATED))
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -128,7 +128,7 @@ public class ReservationService {
                         reservation.getTime(),
                         reservation.getTheme(),
                         reservation.getMember(),
-                        List.of(Status.CREATED, Status.WAITING))
+                        List.of(Status.CREATED))
                 .ifPresent(reservation::validateDuplication);
     }
 }
