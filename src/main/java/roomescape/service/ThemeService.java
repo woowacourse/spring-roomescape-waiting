@@ -56,9 +56,8 @@ public class ThemeService {
         if (from.isAfter(until)) {
             throw new InvalidRequestException("유효하지 않은 날짜 범위입니다.");
         }
-        final List<Reservation> reservations =
-                reservationRepository.findAllJoinThemeByStatusAndDateBetween(
-                Status.RESERVED, from, until);
+        final List<Reservation> reservations = reservationRepository
+                .findAllJoinThemeByStatusAndDateBetween(Status.RESERVED, from, until);
         final Map<Theme, Long> themeBookedAmount = reservations.stream()
                 .collect(groupingBy(Reservation::getTheme, counting()));
         return themeBookedAmount.entrySet()

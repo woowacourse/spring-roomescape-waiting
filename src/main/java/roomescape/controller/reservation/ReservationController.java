@@ -43,8 +43,8 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> addReservation(
             @RequestBody @Valid final CreateReservationRequest reservationRequest,
             @Valid final LoginMember loginMember) {
-        final ReservationResponse reservation
-                = reservationService.addReservation(reservationRequest, loginMember.id());
+        final ReservationResponse reservation = reservationService
+                .addReservedReservation(reservationRequest, loginMember.id());
 
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
                 .buildAndExpand(reservation.id())
@@ -60,7 +60,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id) {
-        reservationService.deleteReservation(id);
+        reservationService.deleteReservedReservation(id);
         return ResponseEntity.noContent()
                 .build();
     }

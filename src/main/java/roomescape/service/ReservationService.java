@@ -94,7 +94,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse addReservation(
+    public ReservationResponse addReservedReservation(
             final CreateReservationRequest reservationRequest,
             final Long memberId) {
         return createReservation(reservationRequest, memberId, Status.RESERVED);
@@ -125,7 +125,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(final Long id) {
+    public void deleteReservedReservation(final Long id) {
         final Reservation deleteReservation = reservationRepository.findByIdOrThrow(id);
         if (deleteReservation.isWaiting()) {
             throw new InvalidRequestException("이 예약은 현재 대기 상태입니다.");

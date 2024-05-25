@@ -73,15 +73,15 @@ class ReservationServiceTest {
         final CreateReservationRequest reservationRequest = new CreateReservationRequest(
                 now.plusDays(1), 3L, 2L);
 
-        reservationService.addReservation(reservationRequest, 1L);
+        reservationService.addReservedReservation(reservationRequest, 1L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, 1L))
+        assertThatThrownBy(() -> reservationService.addReservedReservation(reservationRequest, 1L))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 
     @Test
     @DisplayName("예약이 존재하지 않는데 예약 대기를 시도하면 예외가 발생한다.")
-    void addReservationWaitingNotDuplicatedReservationThrowsException() {
+    void addReservationWaitingNotDuplicatedReservedReservationThrowsException() {
         final LocalDate now = LocalDate.now();
         final CreateReservationRequest reservationRequest = new CreateReservationRequest(
                 now.plusDays(15), 3L, 2L);
@@ -96,7 +96,7 @@ class ReservationServiceTest {
         final LocalDate now = LocalDate.now();
         final CreateReservationRequest reservationRequest = new CreateReservationRequest(
                 now.plusDays(1), 3L, 2L);
-        reservationService.addReservation(reservationRequest, 1L);
+        reservationService.addReservedReservation(reservationRequest, 1L);
 
         assertThatThrownBy(() -> reservationService.addWaiting(reservationRequest, 1L))
                 .isInstanceOf(DuplicateReservationException.class);
@@ -104,15 +104,15 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약을 삭제한다.")
-    void deleteReservation() {
-        assertThatCode(() -> reservationService.deleteReservation(1L))
+    void deleteReservedReservation() {
+        assertThatCode(() -> reservationService.deleteReservedReservation(1L))
                 .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("예약대기가 있는 예약을 삭제하는 경우, 예약대기가 예약으로 바뀐다.")
     void deleteExistWaitingReservation() {
-        reservationService.deleteReservation(6L);
+        reservationService.deleteReservedReservation(6L);
         assertThat(reservationService.getWaitings()).hasSize(1);
     }
 }

@@ -26,8 +26,8 @@ public class AdminReservationController {
             @RequestBody @Valid final AdminCreateReservationRequest adminRequest) {
         CreateReservationRequest reservationRequest = new CreateReservationRequest(
                 adminRequest.date(), adminRequest.timeId(), adminRequest.themeId());
-        final ReservationResponse reservation
-                = reservationService.addReservation(reservationRequest, adminRequest.memberId());
+        final ReservationResponse reservation = reservationService
+                .addReservedReservation(reservationRequest, adminRequest.memberId());
 
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
                 .buildAndExpand(reservation.id())
