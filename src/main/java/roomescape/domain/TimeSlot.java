@@ -19,8 +19,8 @@ public class TimeSlot {
     protected TimeSlot() {
     }
 
-    public TimeSlot(Long id, LocalTime startAt) {
-        this.id = id;
+    public TimeSlot(LocalTime startAt) {
+        this.id = null;
         this.startAt = startAt;
     }
 

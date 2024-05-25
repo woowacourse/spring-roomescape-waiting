@@ -32,8 +32,8 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {
-        this.id = id;
+    public Reservation(Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {
+        this.id = null;
         this.member = member;
         this.date = date;
         this.time = time;

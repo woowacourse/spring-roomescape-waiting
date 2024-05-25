@@ -9,6 +9,6 @@ public record TimeSlotRequest(
         @NotNull(message = "시작 시간은 비어있을 수 없습니다.") @JsonFormat(pattern = "HH:mm") LocalTime startAt) {
 
     public TimeSlot toEntity() {
-        return new TimeSlot(null, startAt);
+        return new TimeSlot(startAt);
     }
 }

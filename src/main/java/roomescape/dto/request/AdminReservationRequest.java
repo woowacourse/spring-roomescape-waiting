@@ -14,6 +14,6 @@ public record AdminReservationRequest(@NotNull(message = "예약자는 비워둘
                                       @NotNull(message = "테마는 비워둘 수 없습니다.") Long themeId) {
 
     public Reservation toEntity(Member member, TimeSlot time, Theme theme, ReservationStatus status) {
-        return new Reservation(null, member, date, time, theme, status);
+        return new Reservation(member, date, time, theme, status);
     }
 }

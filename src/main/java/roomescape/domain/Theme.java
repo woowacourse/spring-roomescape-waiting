@@ -21,8 +21,8 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(Long id, String name, String description, Thumbnail thumbnail) {
-        this.id = id;
+    public Theme(String name, String description, Thumbnail thumbnail) {
+        this.id = null;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;

@@ -9,6 +9,6 @@ public class TimeSlotFixtures {
     }
 
     public static TimeSlot createReservationTime(LocalTime startAt) {
-        return new TimeSlot(null, startAt);
+        return new TimeSlot(startAt);
     }
 }

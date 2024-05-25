@@ -9,6 +9,6 @@ public class MemberFixtures {
     }
 
     public static Member createAdminMember(String name, String email) {
-        return new Member(null, name, email, "default", MemberRole.ADMIN);
+        return new Member(name, email, "default", MemberRole.ADMIN);
     }
 }

@@ -23,8 +23,8 @@ public class Member {
     protected Member() {
     }
 
-    public Member(Long id, String name, String email, String password, MemberRole role) {
-        this.id = id;
+    public Member(String name, String email, String password, MemberRole role) {
+        this.id = null;
         this.name = name;
         this.email = email;
         this.password = password;

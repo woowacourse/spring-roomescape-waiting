@@ -13,6 +13,6 @@ public record ReservationRequest(@NotNull(message = "예약 날짜는 비워둘 
                                  @NotNull(message = "테마는 비워둘 수 없습니다.") Long themeId) {
 
     public Reservation toEntity(Member member, TimeSlot timeSlot, Theme theme, ReservationStatus status) {
-        return new Reservation(null, member, date, timeSlot, theme, status);
+        return new Reservation(member, date, timeSlot, theme, status);
     }
 }

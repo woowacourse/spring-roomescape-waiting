@@ -13,10 +13,10 @@ public class ReservationFixtures {
     }
 
     public static Reservation createBookingReservation(Member member, LocalDate date, TimeSlot time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
+        return new Reservation(member, date, time, theme, ReservationStatus.BOOKING);
     }
 
     public static Reservation createPendingReservation(Member member, LocalDate date, TimeSlot time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.PENDING);
+        return new Reservation(member, date, time, theme, ReservationStatus.PENDING);
     }
 }
