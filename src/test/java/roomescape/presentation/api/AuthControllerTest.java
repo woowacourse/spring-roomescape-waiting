@@ -11,19 +11,25 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.request.LoginRequest;
+import roomescape.domain.member.MemberRepository;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
 
 class AuthControllerTest extends BaseControllerTest {
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     private String token;
 
     @TestFactory
     @DisplayName("로그인, 로그인 상태 확인, 로그아웃을 한다.")
-    @Sql("/member.sql")
     Stream<DynamicTest> authControllerTests() {
+        memberRepository.save(Fixture.MEMBER_USER);
+
         return Stream.of(
                 DynamicTest.dynamicTest("로그인한다.", this::login),
                 DynamicTest.dynamicTest("로그인 상태를 확인한다.", this::checkLogin),
@@ -46,7 +52,7 @@ class AuthControllerTest extends BaseControllerTest {
     }
 
     void login() {
-        LoginRequest request = new LoginRequest(ADMIN_EMAIL, ADMIN_PASSWORD);
+        LoginRequest request = new LoginRequest("user@gmail.com", "abc123");
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

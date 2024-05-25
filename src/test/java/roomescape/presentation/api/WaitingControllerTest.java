@@ -11,14 +11,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.application.dto.response.MemberResponse;
 import roomescape.application.dto.response.ReservationResponse;
 import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.application.dto.response.ThemeResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Waiting;
@@ -28,10 +25,10 @@ import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
-import roomescape.presentation.dto.request.ReservationWebRequest;
+import roomescape.presentation.dto.request.WaitingWebRequest;
 
-@Sql("/member.sql")
 class WaitingControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -52,17 +49,18 @@ class WaitingControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("예약 대기를 추가하고 성공할 경우 201을 반환한다.")
     void addReservationWaiting() {
-        userLogin();
+        Member user = memberRepository.save(Fixture.MEMBER_USER);
+        String token = tokenProvider.createToken(user.getId().toString());
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-        Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
-        Member member = memberRepository.save(new Member("ex@gmail.com", "password", "ex", Role.USER));
+        // given
+        ReservationTime reservationTime = reservationTimeRepository.save(Fixture.RESERVATION_TIME_1);
+        Theme theme = themeRepository.save(Fixture.THEME_1);
         LocalDate date = LocalDate.of(2024, 4, 9);
         ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
-
+        Member member = memberRepository.save(Fixture.MEMBER_2);
         reservationRepository.save(new Reservation(detail, member));
 
-        ReservationWebRequest request = new ReservationWebRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
+        WaitingWebRequest request = new WaitingWebRequest(date, reservationTime.getId(), theme.getId());
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
@@ -73,7 +71,6 @@ class WaitingControllerTest extends BaseControllerTest {
                 .extract();
 
         ReservationResponse reservationResponse = response.as(ReservationResponse.class);
-        MemberResponse memberResponse = reservationResponse.member();
         ReservationTimeResponse reservationTimeResponse = reservationResponse.time();
         ThemeResponse themeResponse = reservationResponse.theme();
 
@@ -81,7 +78,7 @@ class WaitingControllerTest extends BaseControllerTest {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
             softly.assertThat(response.header("Location")).isEqualTo("/waitings/" + reservationResponse.id());
 
-            softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
+            softly.assertThat(reservationResponse.date()).isEqualTo(date);
             softly.assertThat(reservationTimeResponse).isEqualTo(ReservationTimeResponse.from(reservationTime));
             softly.assertThat(themeResponse).isEqualTo(ThemeResponse.from(theme));
         });
@@ -90,16 +87,17 @@ class WaitingControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("예약 대기를 제거하고 성공할 경우 200을 반환한다.")
     void deleteReservationWaiting() {
-        userLogin();
+        Member user = memberRepository.save(Fixture.MEMBER_USER);
+        String token = tokenProvider.createToken(user.getId().toString());
 
+        // given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
-        Member member = memberRepository.getById(2L);
 
         LocalDate date = LocalDate.of(2024, 4, 9);
         ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
 
-        Waiting savedWaiting = waitingRepository.save(new Waiting(detail, member));
+        Waiting savedWaiting = waitingRepository.save(new Waiting(detail, user));
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)

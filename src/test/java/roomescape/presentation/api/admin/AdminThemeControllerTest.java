@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.request.ThemeRequest;
 import roomescape.application.dto.response.ThemeResponse;
 import roomescape.domain.member.Member;
@@ -25,9 +24,9 @@ import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
 
-@Sql("/member.sql")
 class AdminThemeControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -49,7 +48,8 @@ class AdminThemeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("성공하면 201을 반환한다.")
         void success() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             ThemeRequest request = new ThemeRequest("테마 이름", "테마 설명", "https://example.com/image.jpg");
 
@@ -74,7 +74,8 @@ class AdminThemeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("이미 존재하는 테마 이름이면 400을 반환한다.")
         void addThemeFailWhenNameAlreadyExists() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com/image.jpg"));
 
@@ -98,10 +99,12 @@ class AdminThemeControllerTest extends BaseControllerTest {
     @Nested
     @DisplayName("테마를 삭제하는 경우")
     class DeleteTheme extends BaseControllerTest {
+
         @Test
         @DisplayName("성공하면 204를 반환한다.")
         void success() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
 
@@ -120,7 +123,8 @@ class AdminThemeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("존재하지 않는 테마를 삭제하면 404를 반환한다.")
         void deleteThemeByIdFailWhenNotFoundId() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             ExtractableResponse<Response> response = RestAssured.given().log().all()
                     .cookie("token", token)
@@ -137,7 +141,8 @@ class AdminThemeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("이미 사용 중인 테마을 삭제하면 400을 반환한다.")
         void deleteThemeByIdFailWhenUsedTheme() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             Member member = memberRepository.save(new Member("member@gmail.com", "password", "member", Role.USER));
             ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));

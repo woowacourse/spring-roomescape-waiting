@@ -1,13 +1,13 @@
 package roomescape.support.extension;
 
-import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-public class DatabaseClearExtension implements AfterTestExecutionCallback {
+public class DatabaseClearExtension implements BeforeEachCallback {
 
     @Override
-    public void afterTestExecution(ExtensionContext context) {
+    public void beforeEach(ExtensionContext context) {
         DatabaseCleaner databaseCleaner = getDataCleaner(context);
         databaseCleaner.clear();
     }

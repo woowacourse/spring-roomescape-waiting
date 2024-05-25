@@ -6,13 +6,13 @@ import static roomescape.fixture.Fixture.MEMBER_1;
 import static roomescape.fixture.Fixture.RESERVATION_TIME_1;
 import static roomescape.fixture.Fixture.THEME_1;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -22,12 +22,10 @@ import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
 import roomescape.domain.reservation.dto.WaitingWithRankDto;
+import roomescape.fixture.Fixture;
 
 @DataJpaTest
 class WaitingRepositoryTest {
-
-    @Autowired
-    private WaitingRepository waitingRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -38,19 +36,39 @@ class WaitingRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @Test
-    @Sql("/waitings.sql")
     @DisplayName("회원 아이디로 예약 대기 순번을 포함한 예약 대기들을 조회한다.")
     void findWaitingsWithRankByMemberId() {
-        List<WaitingWithRankDto> waitingWithRankDtos = waitingRepository.findWaitingsWithRankByMemberId(4L);
+        // given
+        LocalDate date = LocalDate.of(2024, 4, 6);
 
+        Member member1 = memberRepository.save(Fixture.MEMBER_1);
+        Member member2 = memberRepository.save(Fixture.MEMBER_2);
+
+        Theme theme1 = themeRepository.save(Fixture.THEME_1);
+
+        ReservationTime time1 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_1);
+        ReservationTime time2 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_2);
+
+        waitingRepository.save(new Waiting(new ReservationDetail(date, time1, theme1), member2));
+        Waiting waiting1 = waitingRepository.save(new Waiting(new ReservationDetail(date, time1, theme1), member1));
+        Waiting waiting2 = waitingRepository.save(new Waiting(new ReservationDetail(date, time2, theme1), member1));
+
+        // when
+        List<WaitingWithRankDto> waitingWithRankDtos = waitingRepository
+                .findWaitingsWithRankByMemberId(member1.getId());
+
+        // then
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(waitingWithRankDtos).hasSize(2);
 
-            softly.assertThat(waitingWithRankDtos.get(0).waiting().getId()).isEqualTo(3L);
-            softly.assertThat(waitingWithRankDtos.get(0).rank()).isEqualTo(3);
+            softly.assertThat(waitingWithRankDtos.get(0).waiting().getId()).isEqualTo(waiting1.getId());
+            softly.assertThat(waitingWithRankDtos.get(0).rank()).isEqualTo(2);
 
-            softly.assertThat(waitingWithRankDtos.get(1).waiting().getId()).isEqualTo(6L);
+            softly.assertThat(waitingWithRankDtos.get(1).waiting().getId()).isEqualTo(waiting2.getId());
             softly.assertThat(waitingWithRankDtos.get(1).rank()).isEqualTo(1);
         });
     }

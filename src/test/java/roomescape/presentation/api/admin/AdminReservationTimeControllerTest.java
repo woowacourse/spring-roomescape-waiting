@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.request.ReservationTimeRequest;
 import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.domain.member.Member;
@@ -27,9 +26,9 @@ import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
 
-@Sql("/member.sql")
 class AdminReservationTimeControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -51,7 +50,8 @@ class AdminReservationTimeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("성공할 경우 201을 반환한다.")
         void success() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(10, 30));
 
@@ -76,7 +76,8 @@ class AdminReservationTimeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("이미 예약 시간이 존재하면 400을 반환한다.")
         void addReservationTimeFailWhenDuplicatedTime() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));
 
@@ -106,7 +107,8 @@ class AdminReservationTimeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("성공할 경우 204를 반환한다.")
         void success() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));
 
@@ -122,7 +124,8 @@ class AdminReservationTimeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("존재하지 않는 예약 시간을 삭제하면 404를 반환한다.")
         void deleteReservationTimeByIdFailWhenNotFoundId() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             ExtractableResponse<Response> response = RestAssured.given().log().all()
                     .cookie("token", token)
@@ -140,7 +143,8 @@ class AdminReservationTimeControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("이미 사용 중인 예약 시간을 삭제하면 400을 반환한다.")
         void deleteReservationTimeByIdFailWhenUsedTime() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             Member member = memberRepository.save(new Member("member@gmail.com", "password", "member", Role.USER));
             ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));

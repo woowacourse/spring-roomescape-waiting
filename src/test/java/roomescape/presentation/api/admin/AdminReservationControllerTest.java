@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.response.MemberResponse;
 import roomescape.application.dto.response.ReservationResponse;
 import roomescape.application.dto.response.ReservationTimeResponse;
@@ -32,10 +31,10 @@ import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
 import roomescape.presentation.dto.request.AdminReservationWebRequest;
 
-@Sql("/member.sql")
 class AdminReservationControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -56,7 +55,8 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("조건에 맞는 예약들(예약 대기 제외)을 조회하고 성공할 경우 200을 반환한다.")
     void getReservationsByConditions() {
-        adminLogin();
+        Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+        String token = tokenProvider.createToken(admin.getId().toString());
 
         LocalDate date = LocalDate.of(2024, 4, 9);
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
@@ -99,7 +99,8 @@ class AdminReservationControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("성공할 경우 201을 반환한다.")
         void addAdminReservation() {
-            adminLogin();
+            Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+            String token = tokenProvider.createToken(admin.getId().toString());
 
             ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
             Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
@@ -108,7 +109,7 @@ class AdminReservationControllerTest extends BaseControllerTest {
                     LocalDate.of(2024, 6, 22),
                     reservationTime.getId(),
                     theme.getId(),
-                    ADMIN_ID
+                    admin.getId()
             );
 
             ExtractableResponse<Response> response = RestAssured.given().log().all()
@@ -137,7 +138,8 @@ class AdminReservationControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("어드민 권한이 아닐 경우 403을 반환한다.")
         void addAdminReservationFailWhenNotAdmin() {
-            userLogin();
+            Member user = memberRepository.save(Fixture.MEMBER_USER);
+            String token = tokenProvider.createToken(user.getId().toString());
 
             AdminReservationWebRequest request = new AdminReservationWebRequest(
                     LocalDate.of(2024, 6, 22),
@@ -161,7 +163,8 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("예약을 삭제하고 성공할 경우 204를 반환한다.")
     void deleteReservationById() {
-        adminLogin();
+        Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+        String token = tokenProvider.createToken(admin.getId().toString());
 
         LocalDate date = LocalDate.of(2024, 4, 9);
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));

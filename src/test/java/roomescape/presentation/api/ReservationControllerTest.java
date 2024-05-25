@@ -13,22 +13,27 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.response.MemberResponse;
 import roomescape.application.dto.response.MyReservationResponse;
 import roomescape.application.dto.response.ReservationResponse;
 import roomescape.application.dto.response.ReservationStatus;
 import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.application.dto.response.ThemeResponse;
-import roomescape.domain.member.Role;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
 import roomescape.presentation.dto.request.ReservationWebRequest;
 
-@Sql("/member.sql")
 class ReservationControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -37,12 +42,35 @@ class ReservationControllerTest extends BaseControllerTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @Test
-    @Sql("/waitings.sql")
     @DisplayName("나의 예약들을 예약 대기 순번과 함께 조회하고, 성공하면 200을 반환한다.")
     void getMyReservations() {
-        adminLogin();
+        // given
+        LocalDate date = LocalDate.of(2024, 4, 6);
 
+        Member user1 = memberRepository.save(Fixture.MEMBER_1);
+        Member user2 = memberRepository.save(Fixture.MEMBER_2);
+
+        Theme theme1 = themeRepository.save(Fixture.THEME_1);
+
+        ReservationTime time1 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_1);
+        ReservationTime time2 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_2);
+
+        Reservation reservation = reservationRepository
+                .save(new Reservation(new ReservationDetail(date, time1, theme1), user1));
+        reservationRepository.save(new Reservation(new ReservationDetail(date, time1, theme1), user2));
+        Waiting waiting = waitingRepository.save(new Waiting(new ReservationDetail(date, time2, theme1), user1));
+
+        String token = tokenProvider.createToken(user1.getId().toString());
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().get("/reservations/mine")
@@ -54,19 +82,15 @@ class ReservationControllerTest extends BaseControllerTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-            softly.assertThat(responses).hasSize(3);
+            softly.assertThat(responses).hasSize(2);
 
-            softly.assertThat(responses.get(0).id()).isEqualTo(1);
+            softly.assertThat(responses.get(0).id()).isEqualTo(reservation.getId());
             softly.assertThat(responses.get(0).rank()).isEqualTo(0);
             softly.assertThat(responses.get(0).status()).isEqualTo(ReservationStatus.RESERVED);
 
-            softly.assertThat(responses.get(1).id()).isEqualTo(5);
+            softly.assertThat(responses.get(1).id()).isEqualTo(waiting.getId());
             softly.assertThat(responses.get(1).rank()).isEqualTo(1);
             softly.assertThat(responses.get(1).status()).isEqualTo(ReservationStatus.WAITING);
-
-            softly.assertThat(responses.get(2).id()).isEqualTo(3);
-            softly.assertThat(responses.get(2).rank()).isEqualTo(0);
-            softly.assertThat(responses.get(2).status()).isEqualTo(ReservationStatus.RESERVED);
         });
     }
 
@@ -77,10 +101,12 @@ class ReservationControllerTest extends BaseControllerTest {
         @Test
         @DisplayName("성공할 경우 201을 반환한다.")
         void addReservation() {
-            userLogin();
+            Member user = memberRepository.save(Fixture.MEMBER_USER);
+            String token = tokenProvider.createToken(user.getId().toString());
 
-            reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-            themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
+            // given
+            ReservationTime time = reservationTimeRepository.save(Fixture.RESERVATION_TIME_1);
+            Theme theme = themeRepository.save(Fixture.THEME_1);
 
             ReservationWebRequest request = new ReservationWebRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
 
@@ -102,19 +128,19 @@ class ReservationControllerTest extends BaseControllerTest {
                 softly.assertThat(response.header("Location")).isEqualTo("/reservations/1");
 
                 softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-                softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "user@gmail.com", "유저", Role.USER));
-                softly.assertThat(reservationTimeResponse)
-                        .isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
-                softly.assertThat(themeResponse)
-                        .isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
+                softly.assertThat(memberResponse).isEqualTo(MemberResponse.from(user));
+                softly.assertThat(reservationTimeResponse).isEqualTo(ReservationTimeResponse.from(time));
+                softly.assertThat(themeResponse).isEqualTo(ThemeResponse.from(theme));
             });
         }
 
         @Test
         @DisplayName("지나간 날짜/시간이면 400을 반환한다.")
         void failWhenDateTimePassed() {
-            userLogin();
+            Member user = memberRepository.save(Fixture.MEMBER_USER);
+            String token = tokenProvider.createToken(user.getId().toString());
 
+            // given
             reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
             themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
 

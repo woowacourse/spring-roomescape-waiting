@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.fixture.Fixture.MEMBER_1;
 import static roomescape.fixture.Fixture.MEMBER_2;
 import static roomescape.fixture.Fixture.RESERVATION_TIME_1;
-import static roomescape.fixture.Fixture.RESERVATION_TIME_2;
 import static roomescape.fixture.Fixture.THEME_1;
 
 import java.time.LocalDate;
@@ -60,7 +59,6 @@ class WaitingServiceTest extends BaseServiceTest {
     private Member member1;
     private Member member2;
     private ReservationTime time1;
-    private ReservationTime time2;
     private Theme theme;
 
     @BeforeEach
@@ -69,7 +67,6 @@ class WaitingServiceTest extends BaseServiceTest {
         member2 = memberRepository.save(MEMBER_2);
         theme = themeRepository.save(THEME_1);
         time1 = reservationTimeRepository.save(RESERVATION_TIME_1);
-        time2 = reservationTimeRepository.save(RESERVATION_TIME_2);
     }
 
     @Nested

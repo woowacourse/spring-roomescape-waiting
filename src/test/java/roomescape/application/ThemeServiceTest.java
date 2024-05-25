@@ -11,7 +11,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.request.ThemeRequest;
 import roomescape.application.dto.response.ThemeResponse;
 import roomescape.domain.exception.DomainNotFoundException;
@@ -26,6 +25,7 @@ import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
 import roomescape.exception.BadRequestException;
+import roomescape.fixture.Fixture;
 
 class ThemeServiceTest extends BaseServiceTest {
 
@@ -91,32 +91,39 @@ class ThemeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    @Sql("/popular-themes.sql")
-    @DisplayName("인기 테마들을 조회한다.")
+    @DisplayName("특정 기간 중 예약이 많은 순으로 인기 테마를 조회한다.")
     void getPopularThemes() {
         LocalDate stateDate = LocalDate.of(2024, 4, 6);
-        LocalDate endDate = LocalDate.of(2024, 4, 10);
-        int limit = 3;
+        LocalDate endDate = LocalDate.of(2024, 4, 7);
+        int limit = 2;
+
+        LocalDate includedDate = LocalDate.of(2024, 4, 6);
+        LocalDate excludedDate = LocalDate.of(2024, 4, 8);
+
+        Member member = memberRepository.save(Fixture.MEMBER_1);
+
+        Theme theme1 = themeRepository.save(Fixture.THEME_1);
+        Theme theme2 = themeRepository.save(Fixture.THEME_2);
+
+        ReservationTime time1 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_1);
+        ReservationTime time2 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_2);
+
+        reservationRepository.save(new Reservation(new ReservationDetail(includedDate, time1, theme2), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(includedDate, time2, theme2), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(includedDate, time2, theme1), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(excludedDate, time1, theme1), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(excludedDate, time2, theme1), member));
 
         List<ThemeResponse> themeResponses = themeService.getPopularThemes(stateDate, endDate, limit);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(themeResponses).hasSize(3);
+            softly.assertThat(themeResponses).hasSize(2);
 
-            softly.assertThat(themeResponses.get(0).id()).isEqualTo(4);
-            softly.assertThat(themeResponses.get(0).name()).isEqualTo("마법의 숲");
-            softly.assertThat(themeResponses.get(0).description()).isEqualTo("요정과 마법사들이 사는 신비로운 숲 속으로!");
-            softly.assertThat(themeResponses.get(0).thumbnail()).isEqualTo("https://via.placeholder.com/150/30f9e7");
+            softly.assertThat(themeResponses.get(0).id()).isEqualTo(theme2.getId());
+            softly.assertThat(themeResponses.get(0).name()).isEqualTo(theme2.getName());
 
-            softly.assertThat(themeResponses.get(1).id()).isEqualTo(3);
-            softly.assertThat(themeResponses.get(1).name()).isEqualTo("시간여행");
-            softly.assertThat(themeResponses.get(1).description()).isEqualTo("과거와 미래를 오가며 역사의 비밀을 밝혀보세요.");
-            softly.assertThat(themeResponses.get(1).thumbnail()).isEqualTo("https://via.placeholder.com/150/24f355");
-
-            softly.assertThat(themeResponses.get(2).id()).isEqualTo(2);
-            softly.assertThat(themeResponses.get(2).name()).isEqualTo("우주 탐험");
-            softly.assertThat(themeResponses.get(2).description()).isEqualTo("끝없는 우주에 숨겨진 비밀을 파헤치세요.");
-            softly.assertThat(themeResponses.get(2).thumbnail()).isEqualTo("https://via.placeholder.com/150/771796");
+            softly.assertThat(themeResponses.get(1).id()).isEqualTo(theme1.getId());
+            softly.assertThat(themeResponses.get(1).name()).isEqualTo(theme1.getName());
         });
     }
 

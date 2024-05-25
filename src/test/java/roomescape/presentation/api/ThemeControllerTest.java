@@ -3,22 +3,39 @@ package roomescape.presentation.api;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.time.LocalDate;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.response.ThemeResponse;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
+import roomescape.domain.reservation.detail.ReservationTime;
+import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
 
 class ThemeControllerTest extends BaseControllerTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("모든 테마를 조회하고 성공할 경우 200을 반환한다.")
@@ -42,13 +59,29 @@ class ThemeControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @DisplayName("인기있는 테마들을 조회하고 성공할 경우 200을 반환한다.")
-    @Sql("/popular-themes.sql")
+    @DisplayName("특정 기간 중 예약이 많은 순으로 인기 테마를 조회하고 성공할 경우 200을 반환한다.")
     void getPopularThemes() {
+        LocalDate includedDate = LocalDate.of(2024, 4, 6);
+        LocalDate excludedDate = LocalDate.of(2024, 4, 8);
+
+        Member member = memberRepository.save(Fixture.MEMBER_1);
+
+        Theme theme1 = themeRepository.save(Fixture.THEME_1);
+        Theme theme2 = themeRepository.save(Fixture.THEME_2);
+
+        ReservationTime time1 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_1);
+        ReservationTime time2 = reservationTimeRepository.save(Fixture.RESERVATION_TIME_2);
+
+        reservationRepository.save(new Reservation(new ReservationDetail(includedDate, time1, theme2), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(includedDate, time2, theme2), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(includedDate, time2, theme1), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(excludedDate, time1, theme1), member));
+        reservationRepository.save(new Reservation(new ReservationDetail(excludedDate, time2, theme1), member));
+
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .param("startDate", "2024-04-06")
-                .param("endDate", "2024-04-10")
-                .param("limit", "3")
+                .param("endDate", "2024-04-07")
+                .param("limit", "2")
                 .when().get("/themes/popular")
                 .then().log().all()
                 .extract();
@@ -57,22 +90,13 @@ class ThemeControllerTest extends BaseControllerTest {
                 .getList(".", ThemeResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(popularThemes).hasSize(3);
+            softly.assertThat(popularThemes).hasSize(2);
 
-            softly.assertThat(popularThemes.get(0).id()).isEqualTo(4);
-            softly.assertThat(popularThemes.get(0).name()).isEqualTo("마법의 숲");
-            softly.assertThat(popularThemes.get(0).description()).isEqualTo("요정과 마법사들이 사는 신비로운 숲 속으로!");
-            softly.assertThat(popularThemes.get(0).thumbnail()).isEqualTo("https://via.placeholder.com/150/30f9e7");
+            softly.assertThat(popularThemes.get(0).id()).isEqualTo(theme2.getId());
+            softly.assertThat(popularThemes.get(0).name()).isEqualTo(theme2.getName());
 
-            softly.assertThat(popularThemes.get(1).id()).isEqualTo(3);
-            softly.assertThat(popularThemes.get(1).name()).isEqualTo("시간여행");
-            softly.assertThat(popularThemes.get(1).description()).isEqualTo("과거와 미래를 오가며 역사의 비밀을 밝혀보세요.");
-            softly.assertThat(popularThemes.get(1).thumbnail()).isEqualTo("https://via.placeholder.com/150/24f355");
-
-            softly.assertThat(popularThemes.get(2).id()).isEqualTo(2);
-            softly.assertThat(popularThemes.get(2).name()).isEqualTo("우주 탐험");
-            softly.assertThat(popularThemes.get(2).description()).isEqualTo("끝없는 우주에 숨겨진 비밀을 파헤치세요.");
-            softly.assertThat(popularThemes.get(2).thumbnail()).isEqualTo("https://via.placeholder.com/150/771796");
+            softly.assertThat(popularThemes.get(1).id()).isEqualTo(theme1.getId());
+            softly.assertThat(popularThemes.get(1).name()).isEqualTo(theme1.getName());
         });
     }
 }

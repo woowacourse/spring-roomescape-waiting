@@ -10,13 +10,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.exception.ErrorResponse;
+import roomescape.fixture.Fixture;
 import roomescape.presentation.BaseControllerTest;
 
-@Sql("/member.sql")
 class AdminPageControllerTest extends BaseControllerTest {
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @ParameterizedTest(name = "{0} 페이지를 조회한다.")
     @ValueSource(strings = {
@@ -28,7 +33,8 @@ class AdminPageControllerTest extends BaseControllerTest {
     })
     @DisplayName("어드민 페이지를 조회한다.")
     void pageTest(String path) {
-        adminLogin();
+        Member admin = memberRepository.save(Fixture.MEMBER_ADMIN);
+        String token = tokenProvider.createToken(admin.getId().toString());
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
@@ -58,7 +64,8 @@ class AdminPageControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("로그인을 했지만 어드민이 아니면 403 에러가 발생한다.")
     void notAdmin() {
-        userLogin();
+        Member user = memberRepository.save(Fixture.MEMBER_USER);
+        String token = tokenProvider.createToken(user.getId().toString());
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)

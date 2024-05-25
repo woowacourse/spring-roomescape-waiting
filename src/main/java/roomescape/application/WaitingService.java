@@ -146,6 +146,7 @@ public class WaitingService {
                 waiting.getDetail(),
                 waiting.getMember().getId()
         );
+        System.out.println("currentMemberId :" + waiting.getMember().getId());
 
         if (currentMemberAlreadyReserved) {
             throw new BadRequestException("해당 회원은 이미 예약을 하였습니다.");
