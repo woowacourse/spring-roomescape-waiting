@@ -36,7 +36,7 @@ import roomescape.fixture.MemberFixture;
 class ReservationWaitingServiceTest {
 
     @Autowired
-    private ReservationWaitingService reservationWaitingService;
+    private ReservationService reservationService;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -59,7 +59,7 @@ class ReservationWaitingServiceTest {
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
 
-        reservationWaitingService.enqueueWaitingList(request);
+        reservationService.enqueueWaitingList(request);
 
         Optional<Reservation> firstWaiting = reservationRepository.findFirstWaiting(theme, date, time);
         assertThat(firstWaiting).isPresent()
@@ -85,7 +85,7 @@ class ReservationWaitingServiceTest {
         long secondId = reservationRepository.save(nextWaiting)
                 .getId();
 
-        reservationWaitingService.cancelWaitingList(aru.getId(), firstId);
+        reservationService.cancelWaitingList(aru.getId(), firstId);
 
         Reservation reservation = reservationRepository.getById(secondId);
         assertThat(reservation.isBooked()).isTrue();
@@ -100,13 +100,13 @@ class ReservationWaitingServiceTest {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
-        Reservation reservation = reservationRepository.save(
+        reservationRepository.save(
                 new Reservation(
                         member, date, time, theme, LocalDateTime.parse("1999-01-01T00:00:00"), status
                 )
         );
 
-        assertThatCode(() -> reservationWaitingService.enqueueWaitingList(request))
+        assertThatCode(() -> reservationService.enqueueWaitingList(request))
                 .isInstanceOf(DuplicatedReservationException.class);
     }
 
@@ -129,7 +129,7 @@ class ReservationWaitingServiceTest {
             );
         }
 
-        assertThatThrownBy(() -> reservationWaitingService.enqueueWaitingList(request))
+        assertThatThrownBy(() -> reservationService.enqueueWaitingList(request))
                 .isInstanceOf(WaitingListExceededException.class);
     }
 }

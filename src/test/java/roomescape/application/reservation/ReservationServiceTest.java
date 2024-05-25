@@ -15,7 +15,6 @@ import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -54,7 +53,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.create(reservationRequest, BookStatus.BOOKED);
+        reservationService.bookReservation(reservationRequest);
 
         List<Reservation> reservations = reservationRepository.findAllBookedReservations();
         assertThat(reservations).hasSize(1);
@@ -71,7 +70,7 @@ class ReservationServiceTest {
                 99L,
                 savedTheme.getId());
 
-        assertThatCode(() -> reservationService.create(request, BookStatus.BOOKED))
+        assertThatCode(() -> reservationService.bookReservation(request))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 예약 시간입니다.");
     }
@@ -87,7 +86,7 @@ class ReservationServiceTest {
                 time.getId(),
                 99L
         );
-        assertThatCode(() -> reservationService.create(request, BookStatus.BOOKED))
+        assertThatCode(() -> reservationService.bookReservation(request))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 테마입니다.");
     }
@@ -105,7 +104,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        assertThatCode(() -> reservationService.create(request, BookStatus.BOOKED))
+        assertThatCode(() -> reservationService.bookReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("현재 시간보다 과거로 예약할 수 없습니다.");
     }

@@ -35,10 +35,7 @@ class ReservationLookupServiceTest {
     private ReservationLookupService reservationLookupService;
 
     @Autowired
-    private ReservationBookingService reservationBookingService;
-
-    @Autowired
-    private ReservationWaitingService reservationWaitingService;
+    private ReservationService reservationService;
 
     @Autowired
     private ReservationFixture reservationFixture;
@@ -77,10 +74,10 @@ class ReservationLookupServiceTest {
                 BookStatus.BOOKED
         );
         reservationRepository.save(reservation);
-        reservationWaitingService.enqueueWaitingList(new ReservationRequest(
+        reservationService.enqueueWaitingList(new ReservationRequest(
                 pk.getId(), LocalDate.of(2024, 5, 21), time.getId(), theme.getId()
         ));
-        reservationBookingService.bookReservation(new ReservationRequest(
+        reservationService.bookReservation(new ReservationRequest(
                 pk.getId(), LocalDate.of(2024, 5, 22), time.getId(), theme.getId()
         ));
         List<ReservationStatusResponse> responses =

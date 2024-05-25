@@ -8,7 +8,6 @@ import static roomescape.fixture.MemberFixture.MEMBER_PK;
 import static roomescape.fixture.ThemeFixture.TEST_THEME;
 import static roomescape.fixture.TimeFixture.TEN_AM;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,10 +46,7 @@ class ReservationBookingServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ReservationBookingService reservationBookingService;
-
-    @Autowired
-    private Clock clock;
+    private ReservationService reservationService;
 
     @Autowired
     private ReservationFixture reservationFixture;
@@ -67,8 +63,8 @@ class ReservationBookingServiceTest {
                 time.getId(),
                 theme.getId()
         );
-        reservationBookingService.bookReservation(request);
-        assertThatCode(() -> reservationBookingService.bookReservation(request))
+        reservationService.bookReservation(request);
+        assertThatCode(() -> reservationService.bookReservation(request))
                 .isInstanceOf(AlreadyBookedException.class);
     }
 
@@ -77,7 +73,7 @@ class ReservationBookingServiceTest {
     void shouldDeleteReservationWhenReservationExist() {
         Reservation reservation = reservationFixture.saveReservation();
         Member member = reservation.getMember();
-        reservationBookingService.cancelReservation(member.getId(), reservation.getId());
+        reservationService.cancelReservation(member.getId(), reservation.getId());
 
         List<Reservation> reservations = reservationRepository.findAllBookedReservations();
         assertThat(reservations).isEmpty();
@@ -88,7 +84,7 @@ class ReservationBookingServiceTest {
     void shouldThrowExceptionWhenDeleteOtherMemberReservation() {
         Long reservationId = reservationFixture.saveReservation().getId();
         long memberId = memberRepository.save(MEMBER_PK.create()).getId();
-        assertThatCode(() -> reservationBookingService.cancelReservation(memberId, reservationId))
+        assertThatCode(() -> reservationService.cancelReservation(memberId, reservationId))
                 .isInstanceOf(UnAuthorizedException.class);
     }
 
@@ -97,7 +93,7 @@ class ReservationBookingServiceTest {
     void shouldDeleteReservationWhenAdmin() {
         Reservation reservation = reservationFixture.saveReservation();
         Member admin = memberRepository.save(ADMIN_PK.create());
-        reservationBookingService.cancelReservation(admin.getId(), reservation.getId());
+        reservationService.cancelReservation(admin.getId(), reservation.getId());
 
         List<Reservation> reservations = reservationRepository.findAllBookedReservations();
         assertThat(reservations).isEmpty();
@@ -106,7 +102,7 @@ class ReservationBookingServiceTest {
     @Test
     @DisplayName("예약 삭제 요청시 예약이 존재하지 않으면 예외를 반환한다.")
     void shouldThrowsIllegalArgumentExceptionWhenReservationDoesNotExist() {
-        assertThatCode(() -> reservationBookingService.cancelReservation(1L, 99L))
+        assertThatCode(() -> reservationService.cancelReservation(1L, 99L))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
     }
