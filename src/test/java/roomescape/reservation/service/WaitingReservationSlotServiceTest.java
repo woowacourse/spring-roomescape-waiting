@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationFixture;
-import roomescape.reservation.controller.dto.MyReservationWithStatus;
+import roomescape.reservation.controller.dto.ReservationWithStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
@@ -30,8 +30,8 @@ class WaitingReservationSlotServiceTest extends ServiceTest {
         waitingReservationService.deleteMemberReservation(AuthInfo.of(bookedMemberReservation.getMember()), bookedMemberReservation.getId());
         ReservationSlot reservationSlot = bookedMemberReservation.getReservationSlot();
 
-        List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(AuthInfo.of(MemberFixture.getMemberAdmin()));
-        MyReservationWithStatus nextReservationWithStatus = myReservations.stream()
+        List<ReservationWithStatus> myReservations = reservationService.findReservations(AuthInfo.of(MemberFixture.getMemberAdmin()));
+        ReservationWithStatus nextReservationWithStatus = myReservations.stream()
                 .filter(myReservationWithStatus -> myReservationWithStatus.themeName().equals(reservationSlot.getTheme().getName()))
                 .filter(myReservationWithStatus -> myReservationWithStatus.time().equals(reservationSlot.getTime().getStartAt()))
                 .filter(myReservationWithStatus -> myReservationWithStatus.date().equals(reservationSlot.getDate()))

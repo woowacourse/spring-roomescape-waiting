@@ -33,7 +33,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findMemberReservations(ReservationQueryRequest request) {
+    public List<ReservationResponse> findReservations(ReservationQueryRequest request) {
         Specification<Reservation> spec = Specification
                 .where(MemberReservationSpecification.greaterThanOrEqualToStartDate(request.getStartDate()))
                 .and(MemberReservationSpecification.lessThanOrEqualToEndDate(request.getEndDate()))
@@ -42,6 +42,15 @@ public class ReservationService {
         return reservationRepository.findAll(spec)
                 .stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationWithStatus> findReservations(AuthInfo authInfo) {
+        Member member = commonFindService.getMember(authInfo.getId());
+        return reservationRepository.findAllByMember(member)
+                .stream()
+                .map(ReservationWithStatus::from)
                 .toList();
     }
 
@@ -80,15 +89,6 @@ public class ReservationService {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
         reservationRepository.deleteById(memberReservationId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<MyReservationWithStatus> findMyReservations(AuthInfo authInfo) {
-        Member member = commonFindService.getMember(authInfo.getId());
-        return reservationRepository.findAllByMember(member)
-                .stream()
-                .map(MyReservationWithStatus::from)
-                .toList();
     }
 
     public void delete(long reservationId) {

@@ -84,7 +84,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         reservationRepository.save(new Reservation(memberClover, reservationSlot2));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = reservationService.findReservations(
                 new ReservationQueryRequest(theme1.getId(), memberChoco.getId(), LocalDate.now(),
                         LocalDate.now().plusDays(1)));
 
@@ -110,7 +110,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         reservationRepository.save(new Reservation(memberClover, reservationSlot));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = reservationService.findReservations(
                 new ReservationQueryRequest(null, memberChoco.getId(), LocalDate.now(), LocalDate.now().plusDays(1)));
 
         //then
@@ -135,7 +135,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         reservationRepository.save(new Reservation(memberChoco, reservationSlot2));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = reservationService.findReservations(
                 new ReservationQueryRequest(theme1.getId(), null, LocalDate.now(), LocalDate.now().plusDays(1)));
 
         //then
@@ -160,7 +160,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         reservationRepository.save(new Reservation(memberChoco, reservationSlot2));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = reservationService.findReservations(
                 new ReservationQueryRequest(theme1.getId(), null, LocalDate.now(), LocalDate.now().plusDays(2)));
 
         //then
@@ -223,7 +223,7 @@ class ReservationSlotServiceTest extends ServiceTest {
         reservationService.delete(reservationSlot.getId());
 
         //then
-        assertThat(reservationService.findMemberReservations(
+        assertThat(reservationService.findReservations(
                 new ReservationQueryRequest(theme.getId(), member.getId(), LocalDate.now(),
                         LocalDate.now().plusDays(1)))).hasSize(0);
     }
@@ -243,12 +243,12 @@ class ReservationSlotServiceTest extends ServiceTest {
         reservationRepository.save(new Reservation(member, reservationSlot2));
 
         //when
-        List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(AuthInfo.of(member));
+        List<ReservationWithStatus> myReservations = reservationService.findReservations(AuthInfo.of(member));
 
         //then
         assertAll(
                 () -> assertThat(myReservations).hasSize(2),
-                () -> assertThat(myReservations).extracting(MyReservationWithStatus::time).containsOnly(time.getStartAt())
+                () -> assertThat(myReservations).extracting(ReservationWithStatus::time).containsOnly(time.getStartAt())
         );
     }
 

@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
-import roomescape.reservation.controller.dto.MyReservationResponse;
-import roomescape.reservation.controller.dto.MyReservationWithStatus;
+import roomescape.reservation.controller.dto.ReservationViewResponse;
+import roomescape.reservation.controller.dto.ReservationWithStatus;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -28,20 +28,20 @@ public class WaitingReservationService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<MyReservationResponse> handleWaitingOrder(List<MyReservationWithStatus> myReservationWithStatuses) {
-        return myReservationWithStatuses
+    public List<ReservationViewResponse> handleWaitingOrder(List<ReservationWithStatus> reservationWithStatuses) {
+        return reservationWithStatuses
                 .stream()
                 .map(this::handler)
                 .toList();
     }
 
-    private MyReservationResponse handler(MyReservationWithStatus myReservationWithStatus) {
-        if (myReservationWithStatus.status().isWaiting()) {
+    private ReservationViewResponse handler(ReservationWithStatus reservationWithStatus) {
+        if (reservationWithStatus.status().isWaiting()) {
             int waitingCount = reservationRepository
-                    .findMyWaitingOrder(myReservationWithStatus.reservationId());
-            return MyReservationResponse.from(myReservationWithStatus, waitingCount);
+                    .findMyWaitingOrder(reservationWithStatus.reservationId());
+            return ReservationViewResponse.from(reservationWithStatus, waitingCount);
         }
-        return MyReservationResponse.from(myReservationWithStatus);
+        return ReservationViewResponse.from(reservationWithStatus);
     }
 
     @Transactional(readOnly = true)

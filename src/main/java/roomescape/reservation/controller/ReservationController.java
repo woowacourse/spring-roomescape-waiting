@@ -34,7 +34,7 @@ public class ReservationController {
             @RequestParam(value = "dateFrom", required = false) LocalDate startDate,
             @RequestParam(value = "dateTo", required = false) LocalDate endDate
     ) {
-        return reservationService.findMemberReservations(
+        return reservationService.findReservations(
                 new ReservationQueryRequest(themeId, memberId, startDate, endDate));
     }
 
@@ -53,8 +53,8 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations/mine")
-    public List<MyReservationResponse> getMyReservations(@LoginUser AuthInfo authInfo) {
-        List<MyReservationWithStatus> myReservationWithStatuses = reservationService.findMyReservations(authInfo);
-        return waitingReservationService.handleWaitingOrder(myReservationWithStatuses);
+    public List<ReservationViewResponse> getMyReservations(@LoginUser AuthInfo authInfo) {
+        List<ReservationWithStatus> reservationWithStatuses = reservationService.findReservations(authInfo);
+        return waitingReservationService.handleWaitingOrder(reservationWithStatuses);
     }
 }
