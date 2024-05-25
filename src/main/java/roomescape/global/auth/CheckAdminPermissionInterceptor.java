@@ -13,6 +13,7 @@ import roomescape.global.exception.ForBiddenException;
 @Component
 public class CheckAdminPermissionInterceptor implements HandlerInterceptor {
 
+    protected static final String SHOULD_LOGIN_ERROR_MESSAGE = "로그인 해야 합니다.";
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -25,13 +26,13 @@ public class CheckAdminPermissionInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            throw new AuthorizationException("로그인 해야 합니다.");
+            throw new AuthorizationException(SHOULD_LOGIN_ERROR_MESSAGE);
         }
         String token = jwtTokenProvider.extractTokenFromCookie(cookies);
         Long memberId = jwtTokenProvider.validateAndGetLongSubject(token);
         Member member = memberService.getMemberById(memberId);
         if (member == null || !member.isAdmin()) {
-            throw new ForBiddenException("허가되지않은 접근입니다.");
+            throw new ForBiddenException();
         }
         return true;
     }
