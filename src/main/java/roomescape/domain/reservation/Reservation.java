@@ -49,7 +49,7 @@ public class Reservation {
         this(null, date, member, time, theme);
     }
 
-    public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme) {
+    private Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme) {
         validate(date, member, time, theme);
 
         this.id = id;
