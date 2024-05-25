@@ -7,11 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.reservation.Waiting;
 import roomescape.dto.reservation.AutoReservedFilter;
-import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.WaitingRepository;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.ADMIN;
@@ -52,12 +50,14 @@ class AutoReserveServiceTest {
     @DisplayName("예약이 존재하면 예약으로 변경하지 않는다.")
     void notCreateWithReservation() {
         // given
-        AutoReservedFilter filter = new AutoReservedFilter(LocalDate.of(2024, 5, 22), 2L, 10L);
+        Waiting waiting = new Waiting(ADMIN(1L), LocalDate.of(2024, 5, 22), RESERVATION_TIME_SEVEN(2L), THEME_ANIME(10L));
+        Waiting saved = waitingRepository.save(waiting);
+        AutoReservedFilter filter = new AutoReservedFilter(saved.getDate(), saved.getThemeId(), saved.getTimeId());
 
         // when
-        Optional<ReservationResponse> reservationResponse = autoReserveService.reserveWaiting(filter);
+        autoReserveService.reserveWaiting(filter);
 
         // then
-        assertThat(reservationResponse).isEmpty();
+        assertThat(waitingRepository.findTopByDateAndTime_IdAndTheme_IdOrderById(filter.date(), filter.timeId(), filter.themeId()).get()).isEqualTo(waiting);
     }
 }

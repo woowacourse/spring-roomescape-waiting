@@ -55,10 +55,10 @@ public class WaitingController {
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
         final Waiting waiting = saveRequest.toWaiting(memberResponse, themeResponse, reservationTimeResponse);
-        ReservationResponse waitingResponse = waitingService.create(waiting);
+        ReservationResponse response = waitingService.create(waiting);
 
-        AutoReservedFilter filter = AutoReservedFilter.from(waitingResponse);
-        ReservationResponse response = autoReserveService.reserveWaiting(filter).orElse(waitingResponse);
+        AutoReservedFilter filter = AutoReservedFilter.from(response);
+        autoReserveService.reserveWaiting(filter);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
