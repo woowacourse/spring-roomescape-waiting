@@ -27,11 +27,9 @@ import roomescape.reservation.controller.ReservationController;
 import roomescape.reservation.controller.ReservationPageController;
 import roomescape.reservation.controller.ReservationTimeController;
 import roomescape.reservation.controller.ThemeController;
-import roomescape.reservation.service.MemberReservationService;
-import roomescape.reservation.service.ReservationCommonService;
+import roomescape.reservation.service.ReservationApplicationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
-import roomescape.reservation.service.WaitingReservationService;
 
 @WebMvcTest({
         LoginUserArgumentResolver.class,
@@ -56,13 +54,7 @@ public class ControllerTest {
     protected AuthService authService;
 
     @MockBean
-    protected ReservationCommonService reservationCommonService;
-
-    @MockBean
-    protected WaitingReservationService waitingReservationService;
-
-    @MockBean
-    protected MemberReservationService memberReservationService;
+    protected ReservationApplicationService reservationApplicationService;
 
     @MockBean
     protected ReservationTimeService reservationTimeService;

@@ -54,7 +54,7 @@ class ReservationControllerTest extends ControllerTest {
 
         //when
         doReturn(reservationResponse)
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .createMemberReservation(any());
 
         //then
@@ -82,7 +82,7 @@ class ReservationControllerTest extends ControllerTest {
 
         //when
         doNothing()
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .deleteMemberReservation(isA(AuthInfo.class), isA(Long.class));
 
         //then
@@ -109,7 +109,7 @@ class ReservationControllerTest extends ControllerTest {
 
         //when
         doThrow(new AuthorizationException(ErrorType.NOT_A_RESERVATION_MEMBER))
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .deleteMemberReservation(isA(AuthInfo.class), isA(Long.class));
 
         //then
@@ -136,7 +136,7 @@ class ReservationControllerTest extends ControllerTest {
 
         //when
         doReturn(List.of(reservationResponse))
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .findMemberReservations(any());
 
         //then
@@ -161,7 +161,7 @@ class ReservationControllerTest extends ControllerTest {
 
         //when
         doThrow(new BadRequestException(ErrorType.INVALID_REQUEST_ERROR))
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .createMemberReservation(any());
 
         //then
@@ -194,7 +194,7 @@ class ReservationControllerTest extends ControllerTest {
 
         //when
         doReturn(reservationResponse)
-                .when(waitingReservationService)
+                .when(reservationApplicationService)
                 .addWaiting(any());
 
         //then
@@ -222,7 +222,7 @@ class ReservationControllerTest extends ControllerTest {
 
         //when
         doReturn(reservationResponse)
-                .when(waitingReservationService)
+                .when(reservationApplicationService)
                 .addWaiting(any());
 
         //then

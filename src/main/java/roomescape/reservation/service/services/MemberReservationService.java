@@ -1,20 +1,16 @@
-package roomescape.reservation.service;
+package roomescape.reservation.service.services;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
 
 @Service
@@ -25,14 +21,10 @@ public class MemberReservationService {
 
     private final MemberReservationRepository memberReservationRepository;
 
-    private final ReservationCommonService reservationCommonService;
-
     public MemberReservationService(ReservationRepository reservationRepository,
-                                    MemberReservationRepository memberReservationRepository,
-                                    ReservationCommonService reservationCommonService) {
+                                    MemberReservationRepository memberReservationRepository) {
         this.reservationRepository = reservationRepository;
         this.memberReservationRepository = memberReservationRepository;
-        this.reservationCommonService = reservationCommonService;
     }
 
 
@@ -48,8 +40,7 @@ public class MemberReservationService {
                 .toList();
     }
 
-    public List<MyReservationInfo> findMyReservations(AuthInfo authInfo) {
-        Member member = reservationCommonService.getMember(authInfo.getId());
+    public List<MyReservationInfo> findMyReservations(Member member) {
         return memberReservationRepository.findByMember(member.getId())
                 .stream()
                 .map(MyReservationInfo::of)
@@ -57,28 +48,14 @@ public class MemberReservationService {
     }
 
     @Transactional
-    public ReservationResponse createMemberReservation(MemberReservationCreate memberReservationCreate) {
-        ReservationTime reservationTime = reservationCommonService.getReservationTime(memberReservationCreate.timeId());
-        Theme theme = reservationCommonService.getTheme(memberReservationCreate.themeId());
-        Member member = reservationCommonService.getMember(memberReservationCreate.memberId());
-        Reservation reservation = reservationCommonService.getReservation(memberReservationCreate.date(),
-                reservationTime, theme);
-
-        reservationCommonService.validatePastReservation(reservation);
-        reservationCommonService.validateDuplicatedReservation(reservation, member);
-
-        MemberReservation memberReservation = memberReservationRepository.save(
+    public MemberReservation createMemberReservation(Member member, Reservation reservation) {
+        return memberReservationRepository.save(
                 new MemberReservation(member, reservation, ReservationStatus.APPROVED));
-        return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
     @Transactional
-    public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
-        MemberReservation memberReservation = reservationCommonService.getMemberReservation(memberReservationId);
-        Member member = reservationCommonService.getMember(authInfo.getId());
-        reservationCommonService.delete(member, memberReservation);
-        memberReservationRepository.updateStatusBy(ReservationStatus.APPROVED, memberReservation.getReservation(),
-                ReservationStatus.PENDING, 1);
+    public void updateStatus(MemberReservation memberReservation, ReservationStatus from, ReservationStatus to) {
+        memberReservationRepository.updateStatusBy(to, memberReservation.getReservation(), from, 1);
     }
 
     @Transactional

@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
 import static roomescape.fixture.MemberFixture.getMemberClover;
@@ -10,17 +9,12 @@ import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
 import static roomescape.fixture.ThemeFixture.getTheme2;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.BadRequestException;
-import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
@@ -30,21 +24,23 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
+import roomescape.reservation.service.services.MemberReservationService;
 import roomescape.util.ServiceTest;
 
 @DisplayName("사용자 예약 로직 테스트")
 class MemberReservationServiceTest extends ServiceTest {
-    @PersistenceContext
-    EntityManager entityManager;
 
     @Autowired
     MemberRepository memberRepository;
+
     @Autowired
     MemberReservationService memberReservationService;
+
     ReservationTime time;
+
     Theme theme1;
+
     Member memberChoco;
 
     @BeforeEach
@@ -59,21 +55,20 @@ class MemberReservationServiceTest extends ServiceTest {
     void create() {
         //given
         LocalDate date = LocalDate.now().plusMonths(1);
-        reservationRepository.save(new Reservation(date, time, theme1));
+        Reservation reservation = reservationRepository.save(new Reservation(date, time, theme1));
 
         //when
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
-                new MemberReservationCreate(
-                        memberChoco.getId(),
-                        date,
-                        time.getId(),
-                        theme1.getId()
-                )
-        );
+        MemberReservation memberReservation = memberReservationService.createMemberReservation(memberChoco,
+                reservation);
 
         //then
-        assertAll(() -> assertThat(reservationResponse.date()).isEqualTo(date),
-                () -> assertThat(reservationResponse.time().id()).isEqualTo(time.getId()));
+        assertAll(
+                () -> assertThat(memberReservation.getReservationStatus()).isEqualTo(ReservationStatus.APPROVED),
+                () -> assertThat(memberReservation.getMember()).isEqualTo(memberChoco),
+                () -> assertThat(memberReservation.getReservation().getDate()).isEqualTo(date),
+                () -> assertThat(memberReservation.getReservation().getTime()).isEqualTo(time),
+                () -> assertThat(memberReservation.getReservation().getTheme()).isEqualTo(theme1)
+        );
     }
 
     @DisplayName("예약 조회에 성공한다.")
@@ -167,9 +162,9 @@ class MemberReservationServiceTest extends ServiceTest {
                 () -> assertThat(reservations.get(0).time().startAt()).isEqualTo(time.getStartAt()));
     }
 
-    @DisplayName("예약 삭제에 성공한다.")
+    @DisplayName("예약 상태 변경에 성공한다.")
     @Test
-    void delete() {
+    void updateStatus() {
         //given
         Reservation reservation = getNextDayReservation(time, theme1);
         reservationRepository.save(reservation);
@@ -177,31 +172,12 @@ class MemberReservationServiceTest extends ServiceTest {
                 new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
 
         //when
-        memberReservationService.deleteMemberReservation(AuthInfo.from(memberChoco), memberReservation.getId());
+        memberReservationService.updateStatus(memberReservation, ReservationStatus.PENDING, ReservationStatus.APPROVED);
 
         //then
         assertThat(
                 memberReservationRepository.findBy(null, null, ReservationStatus.APPROVED, LocalDate.now(),
-                        LocalDate.now().plusDays(1))).hasSize(
-                0);
-    }
-
-    @DisplayName("일자와 시간 중복 시 예외가 발생한다.")
-    @Test
-    void duplicatedReservation() {
-        //given
-        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
-
-        //when & then
-        assertThatThrownBy(() -> memberReservationService.createMemberReservation(
-                new MemberReservationCreate(
-                        memberChoco.getId(),
-                        reservation.getDate(),
-                        time.getId(),
-                        theme1.getId()
-                ))).isInstanceOf(
-                BadRequestException.class).hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
+                        LocalDate.now().plusDays(1))).hasSize(1);
     }
 
     @DisplayName("예약 삭제 시, 사용자 예약도 함께 삭제된다.")
@@ -232,34 +208,9 @@ class MemberReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.APPROVED));
 
         //when
-        List<MyReservationInfo> myReservations = memberReservationService.findMyReservations(
-                AuthInfo.from(memberChoco));
+        List<MyReservationInfo> myReservations = memberReservationService.findMyReservations(memberChoco);
 
         //then
         assertThat(myReservations).hasSize(2);
-    }
-
-    @DisplayName("기존 예약이 삭제 될 경우, 대기하는 다음 예약이 자동으로 승인된다.")
-    @Test
-    void changeToApprove() {
-        //given
-        Member memberClover = memberRepository.save(getMemberClover());
-
-        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
-        MemberReservation firstReservation = memberReservationRepository.save(
-                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
-        MemberReservation waitingReservation = memberReservationRepository.save(
-                new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
-
-        entityManager.clear();
-        entityManager.flush();
-
-        //when
-        memberReservationService.deleteMemberReservation(AuthInfo.from(memberChoco), firstReservation.getId());
-
-        //then
-        assertThat(memberReservationRepository.findById(waitingReservation.getId())).isNotNull();
-        assertThat(memberReservationRepository.findById(waitingReservation.getId()).get()
-                .getReservationStatus()).isEqualTo(ReservationStatus.APPROVED);
     }
 }

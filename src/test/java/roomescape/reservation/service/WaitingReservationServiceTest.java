@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.DateFixture.getNextDay;
 import static roomescape.fixture.MemberFixture.getMemberAdmin;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
 import static roomescape.fixture.MemberFixture.getMemberClover;
@@ -12,13 +11,11 @@ import static roomescape.fixture.ReservationFixture.getNextDayReservation;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.AuthorizationException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
@@ -31,16 +28,19 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.dto.MyReservationProjection;
-import roomescape.reservation.service.dto.MemberReservationCreate;
-import roomescape.reservation.service.dto.WaitingCreate;
+import roomescape.reservation.service.services.MemberReservationService;
+import roomescape.reservation.service.services.WaitingReservationService;
 import roomescape.util.ServiceTest;
 
 @DisplayName("예약 대기 로직 테스트")
 class WaitingReservationServiceTest extends ServiceTest {
+
     @Autowired
     MemberRepository memberRepository;
+
     @Autowired
     WaitingReservationService waitingReservationService;
+
     @Autowired
     MemberReservationService memberReservationService;
 
@@ -60,65 +60,20 @@ class WaitingReservationServiceTest extends ServiceTest {
     void addWaitingList() {
         //given
         Member memberClover = memberRepository.save(getMemberClover());
-        LocalDate date = getNextDay();
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
-                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
-        );
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
 
         //when
-        ReservationResponse waitingResponse = waitingReservationService.addWaiting(
-                new WaitingCreate(memberClover.getId(), date, time.getId(), theme1.getId())
-        );
+        MemberReservation waitingReservation = waitingReservationService.addWaiting(memberClover, reservation);
         List<MyReservationProjection> response = memberReservationRepository.findByMember(
                 memberClover.getId());
 
         //then
         assertAll(
-                () -> assertThat(reservationResponse.memberReservationId()).isNotEqualTo(
-                        waitingResponse.memberReservationId()),
+                () -> assertThat(waitingReservation.getReservationStatus()).isEqualTo(ReservationStatus.PENDING),
                 () -> assertThat(response.get(0)).isNotNull(),
                 () -> assertThat(response.get(0).getWaitingNumber()).isEqualTo(2)
         );
-
-    }
-
-    @DisplayName("중복 예약 대기 시 예외가 발생한다.")
-    @Test
-    void duplicatedWaitingList() {
-        //given
-        LocalDate date = getNextDay();
-        memberReservationService.createMemberReservation(
-                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
-        );
-
-        //when & then
-        assertThatThrownBy(() -> waitingReservationService.addWaiting(
-                new WaitingCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
-        ))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
-    }
-
-    @DisplayName("대기한 예약 취소에 성공한다.")
-    @Test
-    void deleteWaiting() {
-        //given
-        Member memberClover = memberRepository.save(getMemberClover());
-        LocalDate date = getNextDay();
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
-                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
-        );
-        ReservationResponse waitingResponse = waitingReservationService.addWaiting(
-                new WaitingCreate(memberClover.getId(), date, time.getId(), theme1.getId())
-        );
-
-        //when
-        AuthInfo authInfo = new AuthInfo(memberClover.getId(), memberClover.getName(), memberClover.getEmail(),
-                memberClover.getRole());
-        memberReservationService.deleteMemberReservation(authInfo, waitingResponse.memberReservationId());
-
-        //then
-        assertThat(memberReservationRepository.findByMember(memberClover.getId())).hasSize(0);
     }
 
     @DisplayName("모든 예약 대기 조회에 성공한다.")
@@ -141,21 +96,6 @@ class WaitingReservationServiceTest extends ServiceTest {
         assertThat(waiting).extracting("date").containsOnly(getNextDayReservation(time, theme1).getDate());
     }
 
-    @DisplayName("대기 예약이 아닌 예약 삭제 시, 예외가 발생한다.")
-    @Test
-    void deleteNotWaitingReservation() {
-        //given
-        LocalDate date = getNextDay();
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
-                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
-
-        //when & then
-        assertThatThrownBy(() -> waitingReservationService.deleteWaiting(AuthInfo.from(memberChoco),
-                reservationResponse.memberReservationId()))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
-    }
-
     @DisplayName("대기 예약을 승인한다.")
     @Test
     void approve() {
@@ -169,7 +109,7 @@ class WaitingReservationServiceTest extends ServiceTest {
         Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when
-        waitingReservationService.approveWaiting(AuthInfo.from(admin), waitingReservation.getId());
+        waitingReservationService.approveWaiting(admin, waitingReservation);
 
         //then
         MemberReservation memberReservation = memberReservationRepository.findById(waitingReservation.getId())
@@ -181,14 +121,13 @@ class WaitingReservationServiceTest extends ServiceTest {
     @Test
     void approveNotWaitingReservation() {
         //given
-        LocalDate date = getNextDay();
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
-                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        MemberReservation memberReservation = memberReservationRepository.save(
+                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
         Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when & then
-        assertThatThrownBy(() -> waitingReservationService.approveWaiting(AuthInfo.from(admin),
-                reservationResponse.memberReservationId()))
+        assertThatThrownBy(() -> waitingReservationService.approveWaiting(admin, memberReservation))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
     }
@@ -206,7 +145,7 @@ class WaitingReservationServiceTest extends ServiceTest {
         Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when
-        waitingReservationService.denyWaiting(AuthInfo.from(admin), waitingReservation.getId());
+        waitingReservationService.denyWaiting(admin, waitingReservation);
 
         //then
         MemberReservation memberReservation = memberReservationRepository.findById(waitingReservation.getId())
@@ -218,15 +157,13 @@ class WaitingReservationServiceTest extends ServiceTest {
     @Test
     void denyNotWaitingReservation() {
         //given
-        LocalDate date = getNextDay();
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
-                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        MemberReservation memberReservation = memberReservationRepository.save(
+                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
         Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when & then
-        assertThatThrownBy(
-                () -> waitingReservationService.denyWaiting(AuthInfo.from(admin),
-                        reservationResponse.memberReservationId()))
+        assertThatThrownBy(() -> waitingReservationService.denyWaiting(admin, memberReservation))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
     }
@@ -235,18 +172,16 @@ class WaitingReservationServiceTest extends ServiceTest {
     @Test
     void approveAndDenyPermissionException() {
         //given
-        LocalDate date = getNextDay();
-        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
-                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        MemberReservation memberReservation = memberReservationRepository.save(
+                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
 
         //when & then
         assertAll(
-                () -> assertThatThrownBy(() -> waitingReservationService.approveWaiting(AuthInfo.from(memberChoco),
-                        reservationResponse.memberReservationId()))
+                () -> assertThatThrownBy(() -> waitingReservationService.approveWaiting(memberChoco, memberReservation))
                         .isInstanceOf(AuthorizationException.class)
                         .hasMessage(ErrorType.NOT_ALLOWED_PERMISSION_ERROR.getMessage()),
-                () -> assertThatThrownBy(() -> waitingReservationService.denyWaiting(AuthInfo.from(memberChoco),
-                        reservationResponse.memberReservationId()))
+                () -> assertThatThrownBy(() -> waitingReservationService.denyWaiting(memberChoco, memberReservation))
                         .isInstanceOf(AuthorizationException.class)
                         .hasMessage(ErrorType.NOT_ALLOWED_PERMISSION_ERROR.getMessage())
         );

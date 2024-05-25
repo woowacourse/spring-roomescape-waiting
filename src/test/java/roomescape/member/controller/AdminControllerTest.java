@@ -43,7 +43,7 @@ class AdminControllerTest extends ControllerTest {
 
         //when
         doReturn(List.of(reservationResponse))
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .findMemberReservations(any());
 
         //then
@@ -75,7 +75,7 @@ class AdminControllerTest extends ControllerTest {
 
         //when
         doReturn(reservationResponse)
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .createMemberReservation(any());
 
         //then
@@ -102,7 +102,7 @@ class AdminControllerTest extends ControllerTest {
 
         //when
         doNothing()
-                .when(memberReservationService)
+                .when(reservationApplicationService)
                 .delete(isA(Long.class));
 
         //then
@@ -129,7 +129,7 @@ class AdminControllerTest extends ControllerTest {
         );
 
         doNothing()
-                .when(waitingReservationService)
+                .when(reservationApplicationService)
                 .approveWaiting(isA(AuthInfo.class), isA(Long.class));
 
         //when & then
@@ -155,7 +155,7 @@ class AdminControllerTest extends ControllerTest {
 
         //when
         doNothing()
-                .when(waitingReservationService)
+                .when(reservationApplicationService)
                 .approveWaiting(isA(AuthInfo.class), isA(Long.class));
 
         //when & then
