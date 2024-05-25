@@ -1,5 +1,9 @@
 package roomescape.reservation.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,12 +24,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
@@ -191,7 +192,7 @@ class ReservationServiceTest {
     void createWithNonExistentTime() {
         // given
         Mockito.when(memberRepository.findById(id))
-                        .thenReturn(Optional.of(Fixtures.memberFixture));
+                .thenReturn(Optional.of(Fixtures.memberFixture));
         Mockito.when(reservationTimeRepository.findById(id))
                 .thenReturn(Optional.empty());
 
@@ -247,7 +248,8 @@ class ReservationServiceTest {
     @Test
     void deleteReservation() {
         // given
-        Mockito.doNothing().when(reservationRepository).deleteById(id);
+        Mockito.when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(Fixtures.reservationFixture));
 
         // when & then
         assertThatCode(() -> reservationService.deleteReservation(id))
