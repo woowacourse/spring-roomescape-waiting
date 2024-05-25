@@ -3,7 +3,6 @@ package roomescape.domain.policy;
 import java.time.LocalDate;
 
 public class WeeklyRankingPolicy implements RankingPolicy {
-
     @Override
     public LocalDate getStartDateAsString() {
         return LocalDate.now()

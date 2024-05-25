@@ -13,7 +13,6 @@ public record WaitResponse(
         LocalDate date,
         LocalTime time,
         String status) {
-    private static final long RESERVED_RANK = 0;
 
     public WaitResponse(ReservationWait wait, String statusText) {
         this(

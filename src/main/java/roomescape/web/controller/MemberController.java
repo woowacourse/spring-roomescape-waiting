@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.MemberService;
-import roomescape.service.ReservationService;
 import roomescape.service.dto.request.member.SignupRequest;
 import roomescape.service.dto.response.member.MemberResponse;
 
@@ -25,7 +24,6 @@ import roomescape.service.dto.response.member.MemberResponse;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
-    private final ReservationService reservationService;
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> findAllMember() {

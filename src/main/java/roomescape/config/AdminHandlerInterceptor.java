@@ -11,7 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.domain.Role;
-import roomescape.exception.member.AuthenticationFailureException;
+import roomescape.exception.member.AuthorizationFailureException;
 import roomescape.service.AuthService;
 
 @RequiredArgsConstructor
@@ -34,6 +34,6 @@ public class AdminHandlerInterceptor implements HandlerInterceptor {
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(cookieName))
                 .findAny()
-                .orElseThrow(AuthenticationFailureException::new);
+                .orElseThrow(AuthorizationFailureException::new);
     }
 }

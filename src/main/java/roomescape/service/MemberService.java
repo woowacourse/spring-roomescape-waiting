@@ -14,8 +14,8 @@ import roomescape.service.dto.request.member.SignupRequest;
 import roomescape.service.dto.response.member.MemberResponse;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
     private final ReservationWaitRepository waitRepository;

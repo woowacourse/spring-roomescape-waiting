@@ -9,7 +9,6 @@ public record ReservationSearchCond(
         @NotNull(message = "시작일은 비어있을 수 없습니다.") LocalDate start,
         @NotNull(message = "종료일은 비어있을 수 없습니다.") LocalDate end,
         @NotBlank(message = "예약자명은 비어있을 수 없습니다.") String memberName,
-        @NotBlank(message = "테마명은 비어있을 수 없습니다.") String themeName
-) {
+        @NotBlank(message = "테마명은 비어있을 수 없습니다.") String themeName) {
 
 }

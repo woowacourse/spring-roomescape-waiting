@@ -21,5 +21,4 @@ public record AdminWaitResponse(String waitId,
                 reservation.getDate(),
                 reservation.getTime().getStartAt());
     }
-
 }

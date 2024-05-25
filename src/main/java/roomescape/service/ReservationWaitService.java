@@ -26,8 +26,8 @@ import roomescape.service.dto.response.wait.AdminWaitResponse;
 import roomescape.service.dto.response.wait.WaitResponse;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationWaitService {
     private final ReservationWaitRepository waitRepository;
     private final ReservationRepository reservationRepository;

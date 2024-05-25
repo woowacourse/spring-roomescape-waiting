@@ -19,8 +19,8 @@ import roomescape.service.dto.request.theme.ThemeRequest;
 import roomescape.service.dto.response.theme.ThemeResponse;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ThemeService {
     private final ThemeRepository themeRepository;
 

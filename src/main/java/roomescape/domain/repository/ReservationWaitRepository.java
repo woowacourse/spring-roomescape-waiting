@@ -14,7 +14,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationWait;
 
 public interface ReservationWaitRepository extends Repository<ReservationWait, Long> {
-
     ReservationWait save(ReservationWait wait);
 
     List<ReservationWait> findAll();
