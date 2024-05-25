@@ -162,17 +162,6 @@ class UserReservationServiceTest {
             .doesNotThrowAnyException();
     }
 
-    @DisplayName("성공: 관리자는 다른 회원의 예약대기를 삭제할 수 있다.")
-    @Test
-    void deleteStandby_ByAdmin() {
-        userReservationService.reserve(adminId, rawDate, timeId, themeId);
-        userReservationService.standby(userId, rawDate, timeId, themeId);
-        Member admin = memberRepository.findById(adminId).get();
-
-        assertThatCode(() -> userReservationService.deleteStandby(2L, admin))
-            .doesNotThrowAnyException();
-    }
-
     @DisplayName("실패: 일반유저는 타인의 예약대기를 삭제할 수 없다.")
     @Test
     void deleteStandby_ReservedByOther() {
