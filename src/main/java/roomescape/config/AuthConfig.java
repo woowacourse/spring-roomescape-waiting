@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.security.AuthArgumentResolver;
-import roomescape.security.AuthInterceptor;
+import roomescape.controller.interceptor.AuthInterceptor;
+import roomescape.controller.support.AuthArgumentResolver;
 
 @Configuration
 public class AuthConfig implements WebMvcConfigurer {
@@ -30,3 +30,4 @@ public class AuthConfig implements WebMvcConfigurer {
                 .addPathPatterns("/admin/**");
     }
 }
+// 인터셉터 추가해서 수동 승인 접근 exception만 던지도록

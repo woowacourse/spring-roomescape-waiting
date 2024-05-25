@@ -1,13 +1,14 @@
-package roomescape.security;
+package roomescape.controller.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.controller.exception.AccessDeniedException;
-import roomescape.controller.exception.UnauthorizedException;
 import roomescape.domain.member.Role;
 import roomescape.dto.response.MemberResponse;
+import roomescape.security.TokenProvider;
+import roomescape.security.exception.AccessDeniedException;
+import roomescape.security.exception.UnauthorizedException;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 

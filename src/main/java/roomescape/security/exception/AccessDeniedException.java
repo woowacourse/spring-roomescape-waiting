@@ -1,4 +1,4 @@
-package roomescape.controller.exception;
+package roomescape.security.exception;
 
 public class AccessDeniedException extends RuntimeException {
 
