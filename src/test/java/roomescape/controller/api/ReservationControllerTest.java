@@ -143,18 +143,14 @@ class ReservationControllerTest extends BaseControllerTest {
                 .extract();
 
         ReservationResponse reservationResponse = response.as(ReservationResponse.class);
-//        MemberResponse memberResponse = reservationResponse.member();
-//        ReservationTimeResponse reservationTimeResponse = reservationResponse.time();
-//        ThemeResponse themeResponse = reservationResponse.theme();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
             softly.assertThat(response.header("Location")).isEqualTo("/reservations/1");
 
             softly.assertThat(reservationResponse.date()).isEqualTo(date);
-//            softly.assertThat(memberResponse.id()).isEqualTo(2L);
-//            softly.assertThat(reservationTimeResponse.id()).isEqualTo(time.getId());
-//            softly.assertThat(themeResponse.id()).isEqualTo(theme.getId());
+            softly.assertThat(reservationResponse.theme()).isEqualTo(theme.getRawName());
+            softly.assertThat(reservationResponse.startAt()).isEqualTo(time.getStartAt());
         });
     }
 
@@ -169,17 +165,11 @@ class ReservationControllerTest extends BaseControllerTest {
 
         ReservationResponse reservationResponse = reservationResponses.get(0);
 
-//        MemberResponse memberResponse = reservationResponse.member();
-//        ReservationTimeResponse reservationTimeResponse = reservationResponse.time();
-//        ThemeResponse themeResponse = reservationResponse.theme();
-
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
             softly.assertThat(reservationResponses).hasSize(1);
 
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-//            softly.assertThat(reservationTimeResponse.id()).isEqualTo(time.getId());
-//            softly.assertThat(themeResponse.id()).isEqualTo(theme.getId());
         });
     }
 
