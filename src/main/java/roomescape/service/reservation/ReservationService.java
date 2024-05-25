@@ -71,26 +71,25 @@ public class ReservationService {
     }
 
     public ReservationResponse saveReservation(ReservationRequest request, Member member) {
-        validateDuplicateReservation(request);
         ReservationTime time = findReservationTimeById(request.getTimeId());
         Theme theme = findThemeById(request.getThemeId());
-        validateDateTimeReservation(request, time);
-
         Reservation reservation = request.toReservation(time, theme, member);
+        validateDuplicateReservation(reservation);
+        validateDateTimeReservation(reservation);
+
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
 
-    private void validateDuplicateReservation(ReservationRequest request) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.getDate(), request.getTimeId(), request.getThemeId())) {
+    private void validateDuplicateReservation(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme())) {
             throw new DuplicatedReservationException();
         }
     }
 
-    private void validateDateTimeReservation(ReservationRequest request, ReservationTime time) {
-        LocalDateTime localDateTime = request.getDate().atTime(time.getStartAt());
-        if (localDateTime.isBefore(LocalDateTime.now(clock))) {
+    private void validateDateTimeReservation(Reservation reservation) {
+        if (reservation.isPast(LocalDateTime.now(clock))) {
             throw new InvalidDateTimeReservationException();
         }
     }
