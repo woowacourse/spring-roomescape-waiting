@@ -11,6 +11,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.ReservationRepository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Transactional
 @Service
@@ -68,18 +69,19 @@ public class ReservationService {
     }
 
     public List<MyReservationWithRankResponse> findMyReservationsAndWaitings(final LoginMember loginMember) {
-        final List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
-        return reservations.stream()
+        final List<Reservation> reservationsByMemberId = reservationRepository.findByMemberId(loginMember.id());
+        final List<Reservation> reservations = reservationRepository.findAll();
+        return reservationsByMemberId.stream()
                 .map(reservation -> new MyReservationWithRankResponse(reservation, calculateRank(reservations, reservation)))
                 .toList();
     }
 
     private Long calculateRank(final List<Reservation> reservations, final Reservation reservation) {
         return reservations.stream()
-                .filter(r -> r.getDate().equals(reservation.getDate()) &&
-                        r.getTheme().equals(reservation.getTheme()) &&
-                        r.getTime().equals(reservation.getTime()) &&
-                        r.getStatus().equals(reservation.getStatus()) &&
+                .filter(r -> Objects.equals(r.getDate(), reservation.getDate()) &&
+                        Objects.equals(r.getTheme().getId(), reservation.getTheme().getId()) &&
+                        Objects.equals(r.getTime().getId(), reservation.getTime().getId()) &&
+                        r.getStatus() == reservation.getStatus() &&
                         r.getId() < reservation.getId())
                 .count() + INCREMENT_VALUE_FOR_RANK;
     }
