@@ -106,4 +106,11 @@ public class ReservationWaitingService {
         }
         reservationWaitingRepository.delete(reservationWaiting);
     }
+
+    public List<ReservationResponse> getReservationWaitings() {
+        return reservationWaitingRepository.findAll()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
 }
