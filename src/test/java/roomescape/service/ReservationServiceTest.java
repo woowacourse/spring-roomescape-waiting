@@ -159,7 +159,7 @@ class ReservationServiceTest {
 
     @DisplayName("존재하지 않는 예약을 삭제하면 예외가 발생한다.")
     @Test
-    void should_throw_exception_when_not_exist_reservation_time() {
+    void should_throw_exception_when_not_exist_reservation() {
         assertThatThrownBy(() -> reservationService.deleteReservation(1000000))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[ERROR] 해당 id:[1000000] 값으로 예약된 내역이 존재하지 않습니다.");
@@ -167,7 +167,7 @@ class ReservationServiceTest {
 
     @DisplayName("존재하는 예약을 삭제하면 예외가 발생하지 않는다.")
     @Test
-    void should_not_throw_exception_when_exist_reservation_time() {
+    void should_not_throw_exception_when_exist_reservation() {
         themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
         themeRepository.save(new Theme(2L, "name2", "description2", "thumbnail2"));
         reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));

@@ -53,7 +53,7 @@ class WaitingServiceTest {
 
     @DisplayName("사용자가 예약 대기를 추가한다")
     @Test
-    void should_add_reservation_times_when_give_member_request() {
+    void should_add_waiting_when_give_member_request() {
         themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
         reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
@@ -69,7 +69,7 @@ class WaitingServiceTest {
 
     @DisplayName("예약 대기를 삭제한다")
     @Test
-    void should_remove_reservation_times() {
+    void should_remove_waiting() {
         themeRepository.save(new Theme("name1", "description1", "thumbnail1"));
         themeRepository.save(new Theme("name2", "description2", "thumbnail2"));
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
@@ -94,7 +94,7 @@ class WaitingServiceTest {
 
     @DisplayName("존재하지 않는 예약 대기를 삭제하면 예외가 발생한다.")
     @Test
-    void should_throw_exception_when_not_exist_reservation_time() {
+    void should_throw_exception_when_not_exist_waiting() {
         assertThatThrownBy(() -> waitingService.deleteWaiting(1000000))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[ERROR] 해당 id:[1000000] 값으로 예약된 예약 대기 내역이 존재하지 않습니다.");
@@ -102,7 +102,7 @@ class WaitingServiceTest {
 
     @DisplayName("존재하는 예약 대기를 삭제하면 예외가 발생하지 않는다.")
     @Test
-    void should_not_throw_exception_when_exist_reservation_time() {
+    void should_not_throw_exception_when_exist_waiting() {
         themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
         themeRepository.save(new Theme(2L, "name2", "description2", "thumbnail2"));
         reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
@@ -152,7 +152,7 @@ class WaitingServiceTest {
 
     @DisplayName("사용자가 예약한 예약 대기를 반환한다.")
     @Test
-    void should_return_member_reservations() {
+    void should_return_member_waiting() {
         themeRepository.save(new Theme(1L, "name1", "description1", "thumbnail1"));
         reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
         Theme theme = themeRepository.findById(1L).get();
