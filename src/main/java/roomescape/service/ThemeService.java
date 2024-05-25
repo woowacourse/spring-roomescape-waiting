@@ -29,14 +29,18 @@ public class ThemeService {
     }
 
     public ThemeResponse save(ThemeRequest themeRequest) {
+        validateDuplicateTheme(themeRequest);
+        Theme beforeSave = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
+        Theme saved = themeRepository.save(beforeSave);
+        return toResponse(saved);
+    }
+
+    private void validateDuplicateTheme(ThemeRequest themeRequest) {
         boolean hasDuplicateTheme = themeRepository.findAll().stream()
                 .anyMatch(theme -> theme.hasNameOf(themeRequest.name()));
         if (hasDuplicateTheme) {
             throw new RoomescapeException(DUPLICATE_THEME);
         }
-        Theme saved = themeRepository.save(
-                new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail()));
-        return toResponse(saved);
     }
 
     public List<ThemeResponse> findAll() {

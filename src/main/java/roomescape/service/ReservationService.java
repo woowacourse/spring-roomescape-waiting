@@ -84,13 +84,13 @@ public class ReservationService {
     }
 
     private boolean canCancel(long requestMemberId, long reservationId) {
-        Member requestMember = memberRepository.findById(requestMemberId)
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
+        return isAdmin(requestMemberId) || isMembersReservation(requestMemberId, reservationId);
+    }
 
-        if (requestMember.isAdmin()) {
-            return true;
-        }
-        return isMembersReservation(requestMemberId, reservationId);
+    private boolean isAdmin(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER))
+                .isAdmin();
     }
 
     private boolean isMembersReservation(long memberId, long reservationId) {
