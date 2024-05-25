@@ -15,7 +15,7 @@ VALUES ('John Doe', 'john@example.com', 'password123', 'ADMIN'),
        ('Jane Smith', 'jane@example.com', 'abc12345', 'USER'),
        ('Alice Lee', 'alice@example.com', 'qwerty1234', 'USER');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id, reservation_status)
-VALUES ('2024-05-30', 1, 1, 2, 'COMPLETE'),
-       ('2024-05-31', 2, 2, 3, 'COMPLETE'),
-       ('2024-06-01', 3, 3, 1, 'COMPLETE');
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES ('2024-05-30', 1, 1, 2),
+       ('2024-05-31', 2, 2, 3),
+       ('2024-06-01', 3, 3, 1);

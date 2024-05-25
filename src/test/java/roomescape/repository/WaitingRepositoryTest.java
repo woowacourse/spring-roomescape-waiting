@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.fixture.MemberFixture;
@@ -53,8 +52,7 @@ class WaitingRepositoryTest {
         final var member3 = memberRepository.save(MemberFixture.getDomain("new3@gmail.com"));
         final var time = timeRepository.save(ReservationTimeFixture.getDomain());
         final var date = ReservationDate.from("2025-05-30");
-        reservationRepository.save(new Reservation(null, date, time, theme, member1,
-                ReservationStatus.COMPLETE));
+        reservationRepository.save(new Reservation(null, date, time, theme, member1));
         waitingRepository.save(new Waiting(null, date, time, theme, member2, LocalTime.now().minusHours(1)));
         waitingRepository.save(new Waiting(null, date, time, theme, member3, LocalTime.now()));
 

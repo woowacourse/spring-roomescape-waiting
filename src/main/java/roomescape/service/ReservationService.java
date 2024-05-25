@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.domain.user.Member;
@@ -73,8 +72,7 @@ public class ReservationService {
                 value.getDate(),
                 value.getTime(),
                 value.getTheme(),
-                value.getMember(),
-                ReservationStatus.COMPLETE
+                value.getMember()
         )));
         waiting.ifPresent(waitingRepository::delete);
     }

@@ -17,8 +17,7 @@ public record ReservationOutput(long id, ThemeOutput theme, String date, Reserva
                         .asString(),
                 ReservationTimeOutput.toOutput(reservation.getTime()),
                 MemberOutput.toOutput(reservation.getMember()),
-                reservation.getReservationStatus()
-                        .getValue()
+                "예약"
         );
     }
 

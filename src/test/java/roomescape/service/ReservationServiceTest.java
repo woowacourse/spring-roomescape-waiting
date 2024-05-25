@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Waiting;
 import roomescape.exception.AlreadyExistsException;
@@ -163,8 +162,7 @@ class ReservationServiceTest {
         final var member2 = memberRepository.save(MemberFixture.getDomain("new2@gmail.com"));
         final var member3 = memberRepository.save(MemberFixture.getDomain("new3@gmail.com"));
         final var reservation = reservationRepository.save(
-                new Reservation(null, ReservationDate.from("2024-05-30"), time, theme, member1,
-                        ReservationStatus.COMPLETE));
+                new Reservation(null, ReservationDate.from("2024-05-30"), time, theme, member1));
         waitingRepository.save(
                 new Waiting(null, ReservationDate.from("2024-05-30"), time, theme, member2,
                         LocalTime.now().minusHours(1)));
