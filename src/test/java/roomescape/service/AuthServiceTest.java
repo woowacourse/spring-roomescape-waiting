@@ -5,7 +5,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,11 +42,10 @@ class AuthServiceTest extends BaseServiceTest {
     void createToken() {
         doReturn("created_token").when(tokenProvider).createToken(any());
         CreateTokenRequest request = new CreateTokenRequest(EMAIL, PASSWORD);
+
         TokenResponse response = authService.authenticateMember(request);
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.token()).isEqualTo("created_token");
-        });
+        assertThat(response.token()).isEqualTo("created_token");
     }
 
     @Test
