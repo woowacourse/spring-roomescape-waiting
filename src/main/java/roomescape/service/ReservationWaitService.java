@@ -88,6 +88,15 @@ public class ReservationWaitService {
                 .orElseThrow(AuthenticationFailureException::new);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(NotFoundReservationException::new);
-        waitRepository.deleteByMemberAndReservation(member, reservation);
+        ReservationWait wait = waitRepository.findByMemberAndReservation(member, reservation).get(0);
+        waitRepository.deleteById(wait.getId());
+        proceedAutoScheduling(wait, reservationId);
+    }
+
+    private void proceedAutoScheduling(ReservationWait wait, Long reservationId) {
+        if (wait.getStatus().isReserved()) {
+            waitRepository.findTopPriorityByReservationId(reservationId)
+                    .ifPresent(ReservationWait::reserve);
+        }
     }
 }

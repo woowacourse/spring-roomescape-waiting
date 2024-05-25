@@ -22,4 +22,8 @@ public enum ReservationStatus {
         }
         throw new IllegalArgumentException("우선순위는 %d보다는 작을 수 없습니다.".formatted(RESERVED.startIndex));
     }
+
+    public boolean isReserved() {
+        return this == RESERVED;
+    }
 }

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     TODO: [4단계] 예약 대기 관리 기능
           예약 대기 목록 조회 endpoint 설정
      */
-    fetch('') // 내 예약 목록 조회 API 호출
+    fetch('/admin/reservation-wait') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');

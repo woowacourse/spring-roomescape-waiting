@@ -253,4 +253,17 @@ class ReservationWaitRepositoryTest {
                 .isEmpty();
 
     }
+
+    @Test
+    @DisplayName("우선 순위가 가장 높은 예약 대기를 찾는다")
+    void findTopPriority_ShouldGetTopPriorityWait() {
+        // given
+        ReservationWait wait = new ReservationWait(dummyMember, dummyReservation, 1);
+        waitRepository.save(wait);
+
+        // when & then
+        Assertions.assertThat(waitRepository.findTopPriorityByReservationId(dummyReservation.getId()))
+                .isPresent()
+                .hasValue(wait);
+    }
 }

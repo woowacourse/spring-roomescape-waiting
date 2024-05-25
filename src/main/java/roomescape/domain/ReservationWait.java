@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import static roomescape.domain.ReservationStatus.RESERVED;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -14,6 +16,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import org.hibernate.proxy.HibernateProxy;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +29,8 @@ import roomescape.exception.wait.DuplicatedReservationException;
 @Table(name = "reservation_wait")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReservationWait {
+public class
+ReservationWait {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,21 +62,36 @@ public class ReservationWait {
         throw new DuplicatedReservationException();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ReservationWait that = (ReservationWait) o;
-        return priority == that.priority && Objects.equals(id, that.id) && Objects.equals(member,
-                that.member) && Objects.equals(reservation, that.reservation) && status == that.status;
+    public void reserve() {
+        this.status = RESERVED;
+        this.priority = 0;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, member, reservation, priority, status);
+    public final boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
+        Class<?> oEffectiveClass = o instanceof HibernateProxy
+                ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) {
+            return false;
+        }
+        ReservationWait that = (ReservationWait) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                .getPersistentClass()
+                .hashCode() : getClass().hashCode();
     }
 }

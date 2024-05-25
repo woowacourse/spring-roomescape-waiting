@@ -47,6 +47,15 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
             """)
     Optional<Long> findPriorityIndex();
 
+    @Query("""
+            SELECT w
+            FROM ReservationWait w
+            WHERE w.reservation.id = :reservationId
+            ORDER BY w.priority
+            LIMIT 1
+            """)
+    Optional<ReservationWait> findTopPriorityByReservationId(@Param("reservationId") Long reservationId);
+
     List<ReservationWait> findByMemberAndReservation(Member member, Reservation reservation);
 
     List<ReservationWait> findAllByMember(Member member);

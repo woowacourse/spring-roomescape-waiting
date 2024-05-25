@@ -63,6 +63,7 @@ public class ReservationService {
                 .orElseThrow(NotFoundThemeException::new);
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(AuthenticationFailureException::new);
+
         Reservation verifiedReservation = verifyReservation(request, time, theme);
         Reservation savedReservation = reservationRepository.save(verifiedReservation);
 
