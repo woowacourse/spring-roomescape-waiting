@@ -43,8 +43,10 @@ public class AdminReservationController {
         ReservationSearchQuery reservationSearchQuery = ReservationSearchQuery.from(reservationSearchRequest);
 
         List<Reservation> reservations = reservationService.findFilteredReservationList(reservationSearchQuery);
-        List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
 
+        List<ReservationResponse> reservationResponses = reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
         return ResponseEntity.ok(reservationResponses);
     }
 
