@@ -51,8 +51,10 @@ public class AdminReservationController {
     @GetMapping("/reservations/waiting")
     public ResponseEntity<List<WaitingReservationResponse>> getWaitingReservationList() {
         List<Reservation> reservations = reservationService.findWaitingReservations();
-        List<WaitingReservationResponse> waitingReservationResponses = WaitingReservationResponse.fromList(
-                reservations);
+
+        List<WaitingReservationResponse> waitingReservationResponses = reservations.stream()
+                .map(WaitingReservationResponse::from)
+                .toList();
         return ResponseEntity.ok(waitingReservationResponses);
     }
 }
