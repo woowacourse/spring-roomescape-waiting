@@ -140,15 +140,17 @@ public class ReservationCreateServiceTest {
     @Test
     void createWithReservedTheme() {
         // given
-        ReservationCreateRequest request = new ReservationCreateRequest(
-                3L,
-                LocalDate.of(2024, 12, 1),
-                1L,
-                2L
-        );
+        LocalDate date = LocalDate.of(2024, 12, 1);
+        Long themeId = 2L;
+        Long timeId = 2L;
+
+        ReservationCreateRequest request = new ReservationCreateRequest(3L, date, themeId, timeId);
+        reservationCreateService.createReservation(request);
+
+        ReservationCreateRequest duplicatedRequest = new ReservationCreateRequest(4L, date, themeId, timeId);
 
         // when & then
-        assertThatThrownBy(() -> reservationCreateService.createReservation(request))
+        assertThatThrownBy(() -> reservationCreateService.createReservation(duplicatedRequest))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("다른 사용자가 이미 예약한 테마입니다.");
     }
