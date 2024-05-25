@@ -111,11 +111,6 @@ public class Waiting {
         }
     }
 
-    public Slot getSlot() {
-        return slot;
-//        return new Slot(date, reservationTime, theme);
-    }
-
     public Long getId() {
         return id;
     }
@@ -134,6 +129,10 @@ public class Waiting {
 
     public Theme getTheme() {
         return slot.theme();
+    }
+
+    public Slot getSlot() {
+        return slot;
     }
 
     @Override
