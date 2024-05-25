@@ -3,9 +3,9 @@ package roomescape.dto.request;
 import static roomescape.dto.InputValidator.validateNotBlank;
 import static roomescape.dto.InputValidator.validateNotNull;
 
-public record LogInRequest(String email, String password) {
+public record LoginRequest(String email, String password) {
 
-    public LogInRequest {
+    public LoginRequest {
         validateNotNull(email, password);
         validateNotBlank(email, password);
     }

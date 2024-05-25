@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.request.LogInRequest;
+import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.MemberPreviewResponse;
 import roomescape.util.JwtProvider;
 
@@ -30,7 +30,7 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("관리자가 로그인 후, 로그인 정보를 확인한다.")
     @TestFactory
     Stream<DynamicTest> login_andGetLoginInfo_success() {
-        LogInRequest adminRequest = new LogInRequest(
+        LoginRequest adminRequest = new LoginRequest(
                 PRE_INSERTED_ADMIN.getEmail(),
                 PRE_INSERTED_ADMIN.getPassword()
         );
@@ -55,7 +55,7 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
         );
     }
 
-    private String sendLoginRequest(LogInRequest requestBody) {
+    private String sendLoginRequest(LoginRequest requestBody) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
@@ -77,7 +77,7 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("관리자가 로그아웃 한다.")
     @Test
     void logout_success() {
-        LogInRequest adminRequest = new LogInRequest(
+        LoginRequest adminRequest = new LoginRequest(
                 PRE_INSERTED_ADMIN.getEmail(),
                 PRE_INSERTED_ADMIN.getPassword()
         );
