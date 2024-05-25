@@ -55,7 +55,7 @@ public class ThemeController {
     @GetMapping(value = "/popular", params = {"from", "until", "limit"})
     public List<PopularThemeResponse> getPopularThemes(
             @Valid final PopularThemeRequest popularThemeRequest) {
-        return themeService.findMostBookedThemesBetweenLimited(popularThemeRequest.from(),
+        return themeService.findMostBookedThemes(popularThemeRequest.from(),
                 popularThemeRequest.until(),
                 popularThemeRequest.limit());
     }

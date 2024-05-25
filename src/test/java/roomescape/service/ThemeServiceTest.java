@@ -40,7 +40,7 @@ class ThemeServiceTest {
         );
         //when
         final List<PopularThemeResponse> popularThemes = themeService
-                .findMostBookedThemesBetweenLimited(
+                .findMostBookedThemes(
                         now.minusDays(8), now.minusDays(1), 10);
         //then
         assertThat(popularThemes).isEqualTo(expected);
@@ -50,7 +50,7 @@ class ThemeServiceTest {
     @DisplayName("인기 테마 조회시 from이 until보다 앞일 경우 예외가 발생한다.")
     void invalidPopularDate() {
         final LocalDate now = LocalDate.now();
-        assertThatThrownBy(() -> themeService.findMostBookedThemesBetweenLimited(now.minusDays(1),
+        assertThatThrownBy(() -> themeService.findMostBookedThemes(now.minusDays(1),
                 now.minusDays(8), 10))
                 .isInstanceOf(InvalidRequestException.class);
     }
