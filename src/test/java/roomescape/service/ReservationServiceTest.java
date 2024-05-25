@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
@@ -126,11 +125,12 @@ class ReservationServiceTest extends FixtureUsingTest {
             defaultReservation = reservationRepository.save(defaultReservation);
         }
 
+        //todo 삭제 테스트 추가 필요
         @DisplayName("예약을 삭제할 수 있다.")
         @Test
         void deleteReservationTest() {
             //when
-            reservationService.delete(1L);
+            reservationService.deleteByUser(LoginMemberRequest.from(defaultReservation.getMember()), 1L);
 
             //then
             assertThat(reservationRepository.findAll()).isEmpty();
@@ -139,7 +139,7 @@ class ReservationServiceTest extends FixtureUsingTest {
         @DisplayName("존재하지 않는 예약에 대한 삭제 요청은 정상 요청으로 간주한다.")
         @Test
         void deleteNotExistReservationNotThrowsException() {
-            assertThatCode(() -> reservationService.delete(2L))
+            assertThatCode(() -> reservationService.deleteByUser(LoginMemberRequest.from(defaultReservation.getMember()), 2L))
                     .doesNotThrowAnyException();
         }
     }

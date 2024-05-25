@@ -225,7 +225,7 @@ public class ReservationControllerTest {
             RestAssured.given().log().all()
                     .when()
                     .cookie("token", token)
-                    .delete("/reservations/waiting/" + waitingId)
+                    .delete("/reservations/" + waitingId)
                     .then().log().all()
                     .statusCode(204);
 
@@ -241,7 +241,7 @@ public class ReservationControllerTest {
         void deleteReservationWaitWithoutLoginFailTest() {
             RestAssured.given().log().all()
                     .when()
-                    .delete("/reservations/waiting/" + savedReservation.getId())
+                    .delete("/reservations/" + savedReservation.getId())
                     .then().log().all()
                     .statusCode(401);
 
@@ -258,7 +258,7 @@ public class ReservationControllerTest {
             RestAssured.given().log().all()
                     .when()
                     .cookie("token", othersToken)
-                    .delete("/reservations/waiting/" + savedReservation.getId())
+                    .delete("/reservations/" + savedReservation.getId())
                     .then().log().all()
                     .statusCode(403);
 
