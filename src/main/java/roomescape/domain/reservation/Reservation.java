@@ -121,4 +121,12 @@ public class Reservation {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public boolean isNotWaiting() {
+        return !status.isWaiting();
+    }
+
+    public boolean isNotMyWaiting(Long memberId) {
+        return !(member.getId() == memberId);
+    }
 }

@@ -151,4 +151,20 @@ class UserReservationControllerTest {
             .body("time", is("10:00"))
             .body("themeName", is("theme1"));
     }
+
+    @DisplayName("성공: 예약 대기 삭제 -> 204")
+    @Test
+    void delete() {
+        RestAssured.given().log().all()
+            .cookie("token", userToken)
+            .when().delete("/reservations-mine/5")
+            .then().log().all()
+            .statusCode(204);
+
+        RestAssured.given().log().all()
+            .cookie("token", userToken)
+            .when().get("/reservations-mine")
+            .then().log().all()
+            .body("reservationId", contains(2, 4));
+    }
 }

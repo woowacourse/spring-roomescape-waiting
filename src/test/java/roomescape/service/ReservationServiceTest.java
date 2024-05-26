@@ -134,4 +134,32 @@ class ReservationServiceTest {
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("동일한 멤버가 다수의 예약을 생성할 수 없습니다.");
     }
+
+    @DisplayName("성공: 내 예약 대기를 삭제 한다.")
+    @Test
+    void deleteWaiting() {
+        // given
+        // when
+        reservationService.deleteWaiting(2L, 5L);
+        //then
+        assertThat(reservationService.findAll()).hasSize(4);
+    }
+
+    @DisplayName("실패: 대기가 아닌 예약을 삭제 시도시 예외 발생.")
+    @Test
+    void deleteWaiting_NotWaiting() {
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteWaiting(1L, 1L))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessage("대기가 아닌 예약은 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("실패: 내 예약이 아닌 대기를 삭제 시도시 예외 발생.")
+    @Test
+    void deleteWaiting_NotMine() {
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteWaiting(1L, 5L))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessage("다른 유저의 예약 대기는 삭제할 수 없습니다.");
+    }
 }
