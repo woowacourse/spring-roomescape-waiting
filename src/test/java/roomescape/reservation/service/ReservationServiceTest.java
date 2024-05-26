@@ -54,6 +54,18 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("이미 예약이 있는 경우 예약하지 못한다.")
+    void throwException_WhenReservationExist() {
+        ReservationAddRequest reservationRequest = new ReservationAddRequest(reservation.getDate(), TIME_MOCK_DATA,
+                THEME_MOCK_DATA, MEMBER_MOCK_DATA);
+
+        Throwable existReservation = assertThrows(RoomEscapeException.class,
+                () -> reservationService.addReservation(reservationRequest));
+
+        assertEquals(existReservation.getMessage(), ReservationExceptionCode.DUPLICATE_RESERVATION.getMessage());
+    }
+
+    @Test
     @DisplayName("이미 예약한 경우, 예약 대기를 추가하지 못한다.")
     void tryAddDuplicateReservation() {
         ReservationAddRequest reservationRequest = new ReservationAddRequest(reservation.getDate(), TIME_MOCK_DATA,

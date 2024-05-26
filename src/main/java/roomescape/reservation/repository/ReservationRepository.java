@@ -31,6 +31,10 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeId(Date date, long memberId, long themeId, long timeId);
 
+    Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(Date date, long memberId,
+                                                                                       long themeId, long timeId,
+                                                                                       ReservationStatus reservationStatus);
+
     List<Reservation> findByThemeId(long themeId);
 
     List<Reservation> findByReservationStatus(ReservationStatus reservationStatus);

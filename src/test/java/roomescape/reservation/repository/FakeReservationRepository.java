@@ -88,6 +88,19 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(Date date, long memberId,
+                                                                                              long themeId, long timeId,
+                                                                                              ReservationStatus reservationStatus) {
+        return reservations.values().stream()
+                .filter(reservation -> isSameThemeId(themeId, reservation))
+                .filter(reservation -> isSameDate(date, reservation))
+                .filter(reservation -> isSameTimeId(timeId, reservation))
+                .filter(reservation -> isSameMember(memberId, reservation))
+                .filter(reservation -> isSameStatus(reservationStatus, reservation))
+                .findAny();
+    }
+
+    @Override
     public List<Reservation> findByThemeId(long themeId) {
         return reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))

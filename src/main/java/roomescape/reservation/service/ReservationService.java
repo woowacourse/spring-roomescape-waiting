@@ -37,6 +37,7 @@ public class ReservationService {
     }
 
     public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
+        validateExistReservation(reservationAddRequest);
         Reservation reservation = Reservation.of(reservationAddRequest.date(), reservationAddRequest.time(),
                 reservationAddRequest.theme(), reservationAddRequest.member(), ReservationStatus.RESERVED);
 
@@ -54,6 +55,7 @@ public class ReservationService {
     }
 
     public void addAdminReservation(ReservationAddRequest reservationAddRequest) {
+        validateExistReservation(reservationAddRequest);
         Reservation saveReservation = Reservation.of(reservationAddRequest.date(), reservationAddRequest.time(),
                 reservationAddRequest.theme(), reservationAddRequest.member(), ReservationStatus.RESERVED);
 
@@ -152,6 +154,17 @@ public class ReservationService {
         if (topWaiting.isPresent()) {
             Reservation nextReservation = topWaiting.get();
             nextReservation.setReservationStatus(ReservationStatus.RESERVED);
+        }
+    }
+
+    private void validateExistReservation(ReservationAddRequest reservationAddRequest) {
+        Optional<Reservation> reservation = reservationRepository.findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(
+                Date.saveFrom(reservationAddRequest.date()), reservationAddRequest.member().getId(),
+                reservationAddRequest.theme().getId(), reservationAddRequest.time().getId(),
+                ReservationStatus.RESERVED);
+
+        if (reservation.isPresent()) {
+            throw new RoomEscapeException(ReservationExceptionCode.DUPLICATE_RESERVATION);
         }
     }
 
