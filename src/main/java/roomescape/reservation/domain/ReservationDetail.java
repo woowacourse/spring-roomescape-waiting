@@ -105,7 +105,7 @@ public class ReservationDetail {
 
     @Override
     public String toString() {
-        return "Reservation{" +
+        return "ReservationDetail{" +
                "id=" + id +
                ", theme=" + theme +
                ", time=" + time +
