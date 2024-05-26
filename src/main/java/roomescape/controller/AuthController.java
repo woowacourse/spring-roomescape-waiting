@@ -31,10 +31,6 @@ public class AuthController {
 
     @GetMapping("/login/check")
     public ResponseEntity<MemberResponse> checkLogin(@Authenticated AuthInfo authInfo) {
-        if (authInfo == null) {
-            return ResponseEntity.noContent().build();
-        }
-
         MemberResponse memberResponse = MemberResponse.from(authInfo);
         return ResponseEntity.ok(memberResponse);
     }
