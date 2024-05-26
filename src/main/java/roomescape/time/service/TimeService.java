@@ -39,8 +39,7 @@ public class TimeService {
     }
 
     private void validateDuplicateTime(LocalTime startAt) {
-        int duplicateTimeCount = timeRepository.countByStartAt(startAt);
-        if (duplicateTimeCount > 0) {
+        if (timeRepository.existsByStartAt(startAt)) {
             throw new ConflictException("이미 존재하는 예약 시간입니다.");
         }
     }

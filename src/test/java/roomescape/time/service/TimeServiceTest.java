@@ -64,8 +64,8 @@ class TimeServiceTest {
     @Test
     @DisplayName("중복된 예약 시간 생성 요청시 예외를 던진다.")
     void validation_ShouldThrowException_WhenStartAtIsDuplicated() {
-        when(timeRepository.countByStartAt(any(LocalTime.class)))
-                .thenReturn(1);
+        when(timeRepository.existsByStartAt(any(LocalTime.class)))
+                .thenReturn(true);
 
         TimeRequest timeRequest = new TimeRequest(LocalTime.now());
         assertThatThrownBy(() -> timeService.addReservationTime(timeRequest))
