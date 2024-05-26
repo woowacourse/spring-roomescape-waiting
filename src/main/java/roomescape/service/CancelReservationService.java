@@ -9,6 +9,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
 @Service
+@Transactional
 public class CancelReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -19,7 +20,6 @@ public class CancelReservationService {
         this.waitingRepository = waitingRepository;
     }
 
-    @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = reservationRepository.getById(id);
         Optional<Waiting> priorityWaiting = waitingRepository.findFirstByReservationOrderByIdAsc(reservation);

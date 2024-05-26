@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.time.ReservationTime;
 import roomescape.dto.reservationtime.AvailableTimeResponse;
@@ -15,6 +16,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
@@ -28,6 +30,7 @@ public class ReservationTimeService {
         this.timeRepository = timeRepository;
     }
 
+    @Transactional
     public Long addReservationTime(ReservationTimeRequest reservationTimeRequest) {
         validateTimeDuplicate(reservationTimeRequest.startAt());
         ReservationTime reservationTime = reservationTimeRequest.toEntity();
@@ -43,6 +46,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional
     public void deleteReservationTime(Long id) {
         ReservationTime reservationTime = timeRepository.getById(id);
         validateDeletable(reservationTime);

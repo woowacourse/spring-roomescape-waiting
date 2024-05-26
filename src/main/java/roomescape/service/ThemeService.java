@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.dto.theme.ThemeRequest;
@@ -11,6 +12,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.util.DateUtil;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -21,6 +23,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public Long addTheme(ThemeRequest themeRequest) {
         ThemeName name = new ThemeName(themeRequest.name());
         validateNameDuplicate(name);
@@ -38,6 +41,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional
     public void deleteTheme(Long id) {
         Theme theme = themeRepository.getById(id);
         validateDeletable(theme);

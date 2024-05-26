@@ -2,6 +2,7 @@ package roomescape.service;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
@@ -14,6 +15,7 @@ import roomescape.infrastructure.auth.PasswordEncoder;
 import roomescape.repository.MemberRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final MemberRepository memberRepository;
