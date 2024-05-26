@@ -3,7 +3,6 @@ package roomescape.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.controller.request.MemberLoginRequest;
 import roomescape.exception.AuthenticationException;
@@ -27,8 +26,7 @@ public class MemberService {
     }
 
     public String findMemberNameById(Long id) {
-        Member member = findMemberById(id);
-        return member.getName();
+        return findMemberById(id).getName();
     }
 
     public Member findMemberById(Long id) {
@@ -37,17 +35,6 @@ public class MemberService {
     }
 
     public List<Member> findAllMembers() {
-        return memberRepository.findAll();
-    }
-
-    @Transactional
-    public Member findMemberByIdTransaction(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다."));
-    }
-
-    @Transactional
-    public List<Member> findAllMembersTransaction() {
         return memberRepository.findAll();
     }
 }
