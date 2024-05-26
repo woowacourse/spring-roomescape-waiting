@@ -74,7 +74,7 @@ class LoginControllerTest {
                 .statusCode(200);
     }
 
-    @DisplayName("이메일과 비밀번호를 모두 정확하게 입력해야 로그인 작업을 수행할 수 있다.")
+    @DisplayName("이메일과 비밀번호가 유효하지 않으면 400 Bad Request를 반환한다.")
     @ParameterizedTest
     @CsvSource({"test,test", "test@naver.com,", ",test"})
     void given_InvalidInput_when_logins_then_statusCodeIsBadRequest(String email, String password) {
@@ -85,5 +85,14 @@ class LoginControllerTest {
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @DisplayName("모든 회원 정보를 조회가 성공하면 200 OK를 반환한다.")
+    @Test
+    void readMembers() {
+        RestAssured.given().log().all()
+                .when().get("/members")
+                .then().log().all()
+                .statusCode(200);
     }
 }

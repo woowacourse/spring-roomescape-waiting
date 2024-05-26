@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
@@ -28,7 +27,6 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Transactional
 @Sql(value = "classpath:test-db-clean.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class BookServiceTest {
 
@@ -48,10 +46,10 @@ class BookServiceTest {
     void findAvailableBookList() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
-        timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now().plusHours(1)));
-        timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now().plusHours(2)));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
+        timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now().plusHours(1)));
+        timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now().plusHours(2)));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         reservationRepository.save(ReservationFixtures.createBookingReservation(member, curDate, timeSlot, theme));
 

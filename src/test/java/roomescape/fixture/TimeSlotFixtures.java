@@ -8,7 +8,7 @@ public class TimeSlotFixtures {
     private TimeSlotFixtures() {
     }
 
-    public static TimeSlot createReservationTime(LocalTime startAt) {
+    public static TimeSlot createTimeSlot(LocalTime startAt) {
         return new TimeSlot(startAt);
     }
 }

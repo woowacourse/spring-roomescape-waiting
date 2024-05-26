@@ -51,9 +51,9 @@ class ReservationServiceTest {
     void delete() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        Member member2 = memberRepository.save(MemberFixtures.createAdminMember("daon", "test2@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        Member member2 = memberRepository.save(MemberFixtures.createAdminMemberDaon("test2@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         Reservation reservation = reservationRepository.save(
                 ReservationFixtures.createBookingReservation(member, curDate, timeSlot, theme));
@@ -73,8 +73,8 @@ class ReservationServiceTest {
     void create() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         LoginMember loginMember = new LoginMember(member.getId());
         ReservationRequest request = new ReservationRequest(curDate, timeSlot.getId(), theme.getId());
@@ -92,9 +92,9 @@ class ReservationServiceTest {
     void createWhenAlreadyExist() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        Member member2 = memberRepository.save(MemberFixtures.createAdminMember("daon", "test2@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        Member member2 = memberRepository.save(MemberFixtures.createAdminMemberDaon("test2@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         reservationRepository.save(ReservationFixtures.createBookingReservation(member, curDate, timeSlot, theme));
         LoginMember loginMember = new LoginMember(member2.getId());
@@ -113,15 +113,16 @@ class ReservationServiceTest {
     void createWhenDuplicated() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         reservationRepository.save(ReservationFixtures.createBookingReservation(member, curDate, timeSlot, theme));
         LoginMember loginMember = new LoginMember(member.getId());
         ReservationRequest request = new ReservationRequest(curDate, timeSlot.getId(), theme.getId());
+        LocalDateTime now = LocalDateTime.now();
 
         //when //then
-        assertThatThrownBy(() -> reservationService.create(loginMember, request, LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.create(loginMember, request, now))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -130,8 +131,8 @@ class ReservationServiceTest {
     void createWithAdmin() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         AdminReservationRequest request = new AdminReservationRequest(member.getId(), curDate, timeSlot.getId(),
                 theme.getId());
@@ -149,9 +150,9 @@ class ReservationServiceTest {
     void createWhenAlreadyExistWithAdmin() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        Member member2 = memberRepository.save(MemberFixtures.createAdminMember("daon", "test2@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        Member member2 = memberRepository.save(MemberFixtures.createAdminMemberDaon("test2@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         reservationRepository.save(ReservationFixtures.createBookingReservation(member, curDate, timeSlot, theme));
         AdminReservationRequest request = new AdminReservationRequest(member2.getId(), curDate, timeSlot.getId(),
@@ -170,15 +171,16 @@ class ReservationServiceTest {
     void createWhenDuplicatedWithAdmin() {
         //given
         LocalDate curDate = LocalDate.now();
-        Member member = memberRepository.save(MemberFixtures.createAdminMember("daon", "test@email.com"));
-        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(MemberFixtures.createAdminMemberDaon("test@email.com"));
+        TimeSlot timeSlot = timeSlotRepository.save(TimeSlotFixtures.createTimeSlot(LocalTime.now()));
         Theme theme = themeRepository.save(ThemeFixtures.createDefaultTheme());
         reservationRepository.save(ReservationFixtures.createBookingReservation(member, curDate, timeSlot, theme));
         AdminReservationRequest request = new AdminReservationRequest(member.getId(), curDate, timeSlot.getId(),
                 theme.getId());
+        LocalDateTime now = LocalDateTime.now();
 
         //when //then
-        assertThatThrownBy(() -> reservationService.create(request, LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.create(request, now))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
