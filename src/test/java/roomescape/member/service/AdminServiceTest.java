@@ -11,10 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.request.CreateReservationRequest;
@@ -30,11 +26,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
+import roomescape.util.ServiceTest;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-public class AdminServiceTest {
+public class AdminServiceTest extends ServiceTest {
 
     @Autowired
     private AdminService adminService;
@@ -55,7 +49,6 @@ public class AdminServiceTest {
     private WaitingRepository waitingRepository;
 
     private Member member;
-    private AuthInfo authInfo;
     private LocalDate date;
     private ReservationTime reservationTime;
     private Theme theme;
@@ -64,7 +57,6 @@ public class AdminServiceTest {
     void setUp() {
         date = LocalDate.now().plusDays(1);
         member = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
-        authInfo = new AuthInfo(member.getId(), member.getName(), member.getRole());
         reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
         theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
     }

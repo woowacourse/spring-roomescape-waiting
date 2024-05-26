@@ -34,8 +34,7 @@ import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
 import roomescape.util.IntegrationTest;
 
-@IntegrationTest
-class AdminIntegrationTest {
+class AdminIntegrationTest extends IntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;

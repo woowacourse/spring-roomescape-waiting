@@ -13,10 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
@@ -29,11 +25,9 @@ import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.util.ServiceTest;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Transactional
-@ActiveProfiles("test")
-public class ReservationTimeServiceTest {
+public class ReservationTimeServiceTest extends ServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;

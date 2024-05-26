@@ -18,15 +18,14 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 
-@IntegrationTest
-class MemberIntegrationTest {
+class MemberIntegrationTest extends IntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -77,9 +76,12 @@ class MemberIntegrationTest {
         Member member2 = memberRepository.save(new Member("로키", Role.USER, "qwer@naver.com", "hihi"));
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
         List<Theme> themes = ThemeFixture.get(3).stream().map(themeRepository::save).toList();
-        reservationRepository.save(ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(0)));
-        reservationRepository.save(ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(1)));
-        reservationRepository.save(ReservationFixture.getOneWithMemberTimeTheme(member2, reservationTime, themes.get(2)));
+        reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(0)));
+        reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(1)));
+        reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member2, reservationTime, themes.get(2)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

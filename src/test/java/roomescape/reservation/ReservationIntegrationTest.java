@@ -32,8 +32,7 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 
-@IntegrationTest
-class ReservationIntegrationTest {
+class ReservationIntegrationTest extends IntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;

@@ -10,9 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
@@ -28,11 +25,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
+import roomescape.util.ServiceTest;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-public class MemberServiceTest {
+public class MemberServiceTest extends ServiceTest {
 
     @Autowired
     private MemberService memberService;

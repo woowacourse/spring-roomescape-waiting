@@ -17,8 +17,7 @@ import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.util.IntegrationTest;
 
-@IntegrationTest
-class AuthIntegrationTest {
+class AuthIntegrationTest extends IntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;

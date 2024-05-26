@@ -21,15 +21,14 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 
-@IntegrationTest
-class ThemeIntegrationTest {
+class ThemeIntegrationTest extends IntegrationTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
