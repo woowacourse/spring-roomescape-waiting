@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import roomescape.member.dto.response.CreateMemberOfReservationResponse;
 import roomescape.reservation.model.Reservation;
 
-public record ConfirmReservationResponse(Long id, CreateMemberOfReservationResponse member, LocalDate date,
+public record ConfirmReservationResponse(Long id, CreateMemberOfReservationResponse member,
+                                         LocalDate date,
                                          CreateTimeOfReservationsResponse time,
                                          CreateThemeOfReservationResponse theme) {
     public static ConfirmReservationResponse from(Reservation reservation) {

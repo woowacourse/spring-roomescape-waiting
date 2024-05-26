@@ -33,7 +33,9 @@ public class Reservation {
         this(null, member, slot);
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime reservationTime,
+    public Reservation(Member member,
+                       LocalDate date,
+                       ReservationTime reservationTime,
                        Theme theme) {
         this(null, member, date, reservationTime, theme);
     }
@@ -49,7 +51,10 @@ public class Reservation {
         this.slot = slot;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime,
+    public Reservation(Long id,
+                       Member member,
+                       LocalDate date,
+                       ReservationTime reservationTime,
                        Theme theme) {
         this(id, member, new Slot(date, reservationTime, theme));
     }
@@ -62,7 +67,9 @@ public class Reservation {
         return new Reservation(null, member, slot);
     }
 
-    public static Reservation create(Member member, LocalDate date, ReservationTime reservationTime,
+    public static Reservation create(Member member,
+                                     LocalDate date,
+                                     ReservationTime reservationTime,
                                      Theme theme) {
         return create(member, new Slot(date, reservationTime, theme));
     }

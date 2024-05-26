@@ -19,26 +19,23 @@ import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
-import roomescape.reservation.repository.WaitingRepository;
 
 @Service
 @Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final ReservationServiceValidator reservationServiceValidator;
 
-    public ReservationService(ReservationRepository reservationRepository, WaitingRepository waitingRepository,
+    public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
                               MemberRepository memberRepository,
                               ReservationServiceValidator reservationServiceValidator) {
         this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
@@ -87,8 +84,10 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindReservationResponse> searchBy(Long themeId, Long memberId,
-                                                  LocalDate dateFrom, LocalDate dateTo) {
+    public List<FindReservationResponse> searchBy(Long themeId,
+                                                  Long memberId,
+                                                  LocalDate dateFrom,
+                                                  LocalDate dateTo) {
         return mapToFindReservationResponse(
                 reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
     }

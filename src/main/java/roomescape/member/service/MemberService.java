@@ -20,7 +20,8 @@ public class MemberService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public MemberService(MemberRepository memberRepository, ReservationRepository reservationRepository,
+    public MemberService(MemberRepository memberRepository,
+                         ReservationRepository reservationRepository,
                          WaitingRepository waitingRepository) {
         this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;

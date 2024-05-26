@@ -34,7 +34,8 @@ public class WaitingService {
     public WaitingService(WaitingRepository waitingRepository,
                           ReservationTimeRepository reservationTimeRepository,
                           ThemeRepository themeRepository,
-                          MemberRepository memberRepository, WaitingServiceValidator waitingServiceValidator) {
+                          MemberRepository memberRepository,
+                          WaitingServiceValidator waitingServiceValidator) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;

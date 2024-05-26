@@ -33,7 +33,9 @@ public class Waiting {
         this(null, member, slot);
     }
 
-    public Waiting(Member member, LocalDate date, ReservationTime reservationTime,
+    public Waiting(Member member,
+                   LocalDate date,
+                   ReservationTime reservationTime,
                    Theme theme) {
         this(null, member, date, reservationTime, theme);
     }

@@ -32,7 +32,8 @@ public class AdminService {
                         ReservationTimeRepository reservationTimeRepository,
                         ThemeRepository themeRepository,
                         ReservationRepository reservationRepository,
-                        WaitingRepository waitingRepository, AdminServiceValidator adminServiceValidator) {
+                        WaitingRepository waitingRepository,
+                        AdminServiceValidator adminServiceValidator) {
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;

@@ -40,7 +40,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
               AND m.id = :memberId
               AND r.slot.date BETWEEN :dateFrom AND :dateTo
             """)
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId,
+                                                                Long memberId,
+                                                                LocalDate dateFrom,
                                                                 LocalDate dateTo);
 
     boolean existsBySlotAndMemberId(Slot slot, Long memberId);

@@ -19,7 +19,8 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final AuthServiceValidator authServiceValidator;
 
-    public AuthService(MemberRepository memberRepository, TokenProvider tokenProvider,
+    public AuthService(MemberRepository memberRepository,
+                       TokenProvider tokenProvider,
                        AuthServiceValidator authServiceValidator) {
         this.memberRepository = memberRepository;
         this.tokenProvider = tokenProvider;
