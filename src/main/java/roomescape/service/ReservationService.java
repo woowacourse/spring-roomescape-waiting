@@ -23,6 +23,8 @@ import roomescape.system.exception.RoomescapeException;
 @Service
 public class ReservationService {
 
+    public static final int EXCLUDE_CURRENT_RESERVATION = 1;
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -83,7 +85,7 @@ public class ReservationService {
 
         reservations.stream()
             .sorted(Comparator.comparingLong(Reservation::getId))
-            .skip(1)
+            .skip(EXCLUDE_CURRENT_RESERVATION)
             .findFirst()
             .ifPresentOrElse(
                 waiting -> {
