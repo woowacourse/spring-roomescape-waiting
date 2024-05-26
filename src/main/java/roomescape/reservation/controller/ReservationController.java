@@ -58,18 +58,18 @@ public class ReservationController {
 
     }
 
-//    @Admin
-//    @GetMapping("/reservations/search")
-//    @ResponseStatus(HttpStatus.OK)
-//    public ApiResponse<ReservationsResponse> getReservationBySearching(
-//            @RequestParam(required = false) final Long themeId,
-//            @RequestParam(required = false) final Long memberId,
-//            @RequestParam(required = false) final LocalDate dateFrom,
-//            @RequestParam(required = false) final LocalDate dateTo
-//    ) {
-//        return ApiResponse.success(
-//                reservationService.searchWith(themeId, memberId, dateFrom, dateTo));
-//    }
+    @Admin
+    @GetMapping("/reservations/search")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<ReservationsResponse> getReservationBySearching(
+            @RequestParam(required = false) final Long themeId,
+            @RequestParam(required = false) final Long memberId,
+            @RequestParam(required = false) final LocalDate dateFrom,
+            @RequestParam(required = false) final LocalDate dateTo
+    ) {
+        return ApiResponse.success(
+                reservationService.searchWith(themeId, memberId, dateFrom, dateTo));
+    }
 
     // TODO: @Auth, @Admin 애노테이션 대신 @RequiredRole(value = ), @RequiredRole(values = {}) 애노테이션으로 변경
     @Auth

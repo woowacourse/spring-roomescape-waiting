@@ -213,16 +213,13 @@ public class ReservationService {
         }
     }
 
-//    public ReservationsResponse searchWith(
-//            final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo) {
-//        Member member = memberRepository.getById(memberId);
-//        Theme theme = themeRepository.getById(themeId);
-//
-//        List<ReservationResponse> response = reservationRepository.searchWith(theme, member, dateFrom, dateTo).stream()
-//                .map(ReservationResponse::from)
-//                .toList();
-//        return new ReservationsResponse(response);
-//    }
+    public ReservationsResponse searchWith(
+            final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo) {
+        List<ReservationResponse> response = memberReservationRepository.searchWith(themeId, memberId, dateFrom, dateTo).stream()
+                .map(ReservationResponse::from)
+                .toList();
+        return new ReservationsResponse(response);
+    }
 
     public MemberReservationsResponse findUnexpiredReservationByMemberId(final Long memberId) {
         Member member = memberRepository.getById(memberId);
