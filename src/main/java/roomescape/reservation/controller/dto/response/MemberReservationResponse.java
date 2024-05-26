@@ -3,7 +3,10 @@ package roomescape.reservation.controller.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.function.Function;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 
 public record MemberReservationResponse(
         long id,
@@ -20,14 +23,30 @@ public record MemberReservationResponse(
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getTheme().getThemeNameValue(),
-                makeStatus(count)
+                StatusMapper.generateMessage(reservation.getStatus(), count)
         );
     }
 
-    private static String makeStatus(final int count) {
-        if (count == 0) {
-            return "예약";
+    private enum StatusMapper {
+
+        RESERVED(Status.RESERVATION, count -> "예약"),
+        WAITING(Status.WAITING, count -> String.format("%d번째 예약대기", count)),
+        ;
+
+        private final Status status;
+        private final Function<Integer, String> messageGenerator;
+
+        StatusMapper(Status status, Function<Integer, String> messageGenerator) {
+            this.status = status;
+            this.messageGenerator = messageGenerator;
         }
-        return String.format("%d번째 %s", count, "예약대기");
+
+        public static String generateMessage(final Status status, final int count) {
+            return Arrays.stream(values())
+                    .filter(mapper -> mapper.status == status)
+                    .findAny()
+                    .map(mapper -> mapper.messageGenerator.apply(count))
+                    .orElseThrow();
+        }
     }
 }
