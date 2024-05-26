@@ -8,7 +8,6 @@ import roomescape.model.Role;
 
 public class TestMemberFactory {
 
-
     public static Member createMember(Long id, String name, Role role, String email, String password) {
         return new Member(id, name, role, email, password);
     }
@@ -20,6 +19,4 @@ public class TestMemberFactory {
     public static Member createAdmin(Long id) {
         return createMember(id, "name", ADMIN, "email@email", "password");
     }
-
-
 }

@@ -14,14 +14,21 @@ import roomescape.model.Theme;
 
 public class TestReservationFactory {
 
-    public static Reservation createReservation(Long id, LocalDate date, ReservationStatus status,
-                                                LocalDateTime createdAt, ReservationTime time, Theme theme,
+    public static Reservation createReservation(Long id, LocalDate date,
+                                                ReservationStatus status,
+                                                LocalDateTime createdAt,
+                                                ReservationTime time,
+                                                Theme theme,
                                                 Member member) {
         return new Reservation(id, date, status, createdAt, time, theme, member);
     }
 
-    public static Reservation createReservation(Long id, LocalDate date, ReservationStatus status, ReservationTime time,
-                                                Theme theme, Member member) {
+    public static Reservation createReservation(Long id,
+                                                LocalDate date,
+                                                ReservationStatus status,
+                                                ReservationTime time,
+                                                Theme theme,
+                                                Member member) {
         return createReservation(id, date, status, LocalDateTime.now(), time, theme, member);
     }
 
@@ -29,7 +36,10 @@ public class TestReservationFactory {
         return createReservation(id, LocalDate.now(), ACCEPT, LocalDateTime.now(), time, theme, member);
     }
 
-    public static Reservation createAcceptReservation(Long id, LocalDate date, ReservationTime time, Theme theme,
+    public static Reservation createAcceptReservation(Long id,
+                                                      LocalDate date,
+                                                      ReservationTime time,
+                                                      Theme theme,
                                                       Member member) {
         return createReservation(id, date, ACCEPT, time, theme, member);
     }
