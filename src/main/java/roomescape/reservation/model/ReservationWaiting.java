@@ -10,7 +10,6 @@ import jakarta.persistence.ManyToOne;
 import roomescape.member.model.Member;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 public class ReservationWaiting {
@@ -68,6 +67,16 @@ public class ReservationWaiting {
     }
 
     protected ReservationWaiting() {
+    }
+
+    public Reservation makeReservation() {
+        return new Reservation(
+                ReservationStatus.RESERVATION,
+                date.getValue(),
+                time,
+                theme,
+                member
+        );
     }
 
     public ReservationDate getDate() {

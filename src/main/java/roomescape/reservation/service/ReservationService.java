@@ -10,7 +10,6 @@ import roomescape.reservation.dto.SearchReservationsParams;
 import roomescape.reservation.dto.SearchReservationsRequest;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
-import roomescape.reservation.model.ReservationStatus;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.ReservationWaiting;
 import roomescape.reservation.model.Theme;
@@ -111,13 +110,7 @@ public class ReservationService {
     }
 
     private void saveReservationWithWaiting(final ReservationWaiting reservationWaiting) {
-        final Reservation reservation = new Reservation(
-                ReservationStatus.RESERVATION,
-                reservationWaiting.getDate().getValue(),
-                reservationWaiting.getTime(),
-                reservationWaiting.getTheme(),
-                reservationWaiting.getMember()
-        );
+        final Reservation reservation = reservationWaiting.makeReservation();
         reservationRepository.save(reservation);
         reservationWaitingRepository.delete(reservationWaiting);
     }
