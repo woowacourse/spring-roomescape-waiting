@@ -1,96 +1,63 @@
 package roomescape.controller.admin;
 
-import static roomescape.TestFixture.ADMIN;
-import static roomescape.TestFixture.ADMIN_LOGIN_REQUEST;
-import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
-
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import roomescape.TestFixture;
-import roomescape.repository.MemberRepository;
+import roomescape.BaseControllerTest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AdminPageControllerTest {
+class AdminPageControllerTest extends BaseControllerTest {
 
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        memberRepository.deleteAllInBatch();
-    }
-
-    @DisplayName("Admin Page 홈화면 접근 성공 테스트")
+    @DisplayName("어드민 홈페이지에 접근한다.")
     @Test
     void responseAdminPage() {
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().get("/admin")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
 
-    @DisplayName("Admin Reservation Page 접근 성공 테스트")
+    @DisplayName("어드민 예약 페이지에 접근한다.")
     @Test
     void responseAdminReservationPage() {
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().get("/admin/reservation")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
 
-    @DisplayName("Admin Time Page 접근 성공 테스트")
+    @DisplayName("어드민 시간 페이지에 접근한다.")
     @Test
     void responseAdminTimePage() {
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().get("/admin/time")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
 
-    @DisplayName("Admin Theme Page 접근 성공 테스트")
+    @DisplayName("어드민 테마 페이지에 접근한다.")
     @Test
     void responseAdminThemePage() {
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().get("/admin/theme")
+                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+    }
+
+    @DisplayName("어드민 예약 대기 페이지에 접근한다.")
+    @Test
+    void responseAdminWaitingPage() {
+        RestAssured.given().log().all()
+                .header("cookie", getAdminWithToken())
+                .when().get("/admin/waiting")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("관리자가 아닌 회원은 접속할 수 없다.")
     @Test
     void responseAdminPageWithoutAdmin() {
-        memberRepository.save(TestFixture.MEMBER1);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
-
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember1WithToken())
                 .when().get("/admin")
                 .then().log().all()
                 .statusCode(HttpStatus.FORBIDDEN.value());

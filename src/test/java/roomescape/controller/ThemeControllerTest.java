@@ -2,73 +2,32 @@ package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.THEME1;
 import static roomescape.TestFixture.THEME2;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import roomescape.TestFixture;
+import roomescape.BaseControllerTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ThemeControllerTest {
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationTimeRepository timeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        themeRepository.deleteAllInBatch();
-        timeRepository.deleteAllInBatch();
-    }
+class ThemeControllerTest extends BaseControllerTest {
 
     @DisplayName("모든 테마를 조회한다.")
     @Test
     void findAllThemes() {
         // given
         themeRepository.save(THEME1);
-        memberRepository.save(MEMBER1);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
 
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember1WithToken())
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())

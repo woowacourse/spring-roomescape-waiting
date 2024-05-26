@@ -3,8 +3,6 @@ package roomescape.controller;
 import static org.hamcrest.Matchers.is;
 import static roomescape.TestFixture.MEMBER1;
 import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
-import static roomescape.TestFixture.MEMBER2;
-import static roomescape.TestFixture.MEMBER2_LOGIN_REQUEST;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.RESERVATION_TIME_11AM;
 import static roomescape.TestFixture.THEME1;
@@ -14,64 +12,29 @@ import static roomescape.TestFixture.TOMORROW;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import roomescape.BaseControllerTest;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationCreateMemberRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ReservationControllerTest {
-
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAllInBatch();
-        reservationTimeRepository.deleteAllInBatch();
-        themeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-    }
+class ReservationControllerTest extends BaseControllerTest {
 
     @DisplayName("모든 예약 내역을 조회한다.")
     @Test
     void findAllReservations() {
         // given
         reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
 
         // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember2WithToken())
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -82,16 +45,12 @@ class ReservationControllerTest {
     @Test
     void createMemberReservation() {
         // given
-        memberRepository.save(MEMBER1);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
-
-        // when
         ReservationCreateMemberRequest request = createMemberReservationRequest(TOMORROW, RESERVATION_TIME_10AM,
                 THEME1);
 
-        // then
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember1WithToken())
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations")
@@ -103,16 +62,12 @@ class ReservationControllerTest {
     void createMemberWaiting() {
         // given
         Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-        memberRepository.save(MEMBER2);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER2_LOGIN_REQUEST);
-
-        // when
         ReservationCreateMemberRequest request = createMemberReservationRequest(TOMORROW, saved.getTime(),
                 saved.getTheme());
 
-        // then
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember2WithToken())
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations/waiting")
@@ -124,8 +79,7 @@ class ReservationControllerTest {
     void findMyReservationsAndWaiting() {
         // given
         Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-        reserveWithSavedMember(saved.getMember(), TOMORROW, RESERVATION_TIME_11AM, THEME2, Status.WAITING);
-
+        reserveBySavedMember(saved.getMember(), TOMORROW, RESERVATION_TIME_11AM, THEME2, Status.WAITING);
         String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
 
         // when & then
@@ -142,16 +96,12 @@ class ReservationControllerTest {
     @Test
     void outdatedReservation() {
         // given
-        memberRepository.save(MEMBER1);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
-
-        // when
         ReservationCreateMemberRequest request = createMemberReservationRequest(LocalDate.now().minusDays(1),
                 RESERVATION_TIME_10AM, THEME1);
 
-        // then
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember1WithToken())
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations")
@@ -163,17 +113,12 @@ class ReservationControllerTest {
     void duplicateReservation() {
         // given
         Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-
-        memberRepository.save(MEMBER2);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER2_LOGIN_REQUEST);
-
-        // when
         ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(TOMORROW, saved.getTime().getId(),
                 saved.getTheme().getId());
 
         // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember2WithToken())
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations")
@@ -187,7 +132,6 @@ class ReservationControllerTest {
         Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
         String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
 
-        // when
         ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(TOMORROW, saved.getTime().getId(),
                 saved.getTheme().getId());
 
@@ -218,15 +162,15 @@ class ReservationControllerTest {
     private Reservation reserveAfterSave(Member member, LocalDate date, ReservationTime time, Theme theme,
                                          Status status) {
         Member savedMember = memberRepository.save(member);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(time);
+        ReservationTime savedReservationTime = timeRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
 
         return reservationRepository.save(new Reservation(savedMember, date, savedReservationTime, savedTheme, status));
     }
 
-    private Reservation reserveWithSavedMember(Member member, LocalDate date, ReservationTime time, Theme theme,
-                                               Status status) {
-        ReservationTime savedReservationTime = reservationTimeRepository.save(time);
+    private Reservation reserveBySavedMember(Member member, LocalDate date, ReservationTime time, Theme theme,
+                                             Status status) {
+        ReservationTime savedReservationTime = timeRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
 
         return reservationRepository.save(new Reservation(member, date, savedReservationTime, savedTheme, status));
@@ -234,7 +178,7 @@ class ReservationControllerTest {
 
     private ReservationCreateMemberRequest createMemberReservationRequest(LocalDate date, ReservationTime time,
                                                                           Theme theme) {
-        ReservationTime savedReservationTime = reservationTimeRepository.save(time);
+        ReservationTime savedReservationTime = timeRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
 
         return new ReservationCreateMemberRequest(date, savedReservationTime.getId(), savedTheme.getId());

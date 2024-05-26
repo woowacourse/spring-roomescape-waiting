@@ -2,9 +2,6 @@ package roomescape.controller.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static roomescape.TestFixture.ADMIN;
-import static roomescape.TestFixture.ADMIN_LOGIN_REQUEST;
 import static roomescape.TestFixture.MEMBER1;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.THEME1;
@@ -13,74 +10,104 @@ import static roomescape.TestFixture.TOMORROW;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.HttpStatus;
-import roomescape.TestFixture;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.BaseControllerTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationCreateRequest;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-class AdminReservationControllerTest {
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ReservationTimeRepository timeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAllInBatch();
-        timeRepository.deleteAllInBatch();
-        themeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-    }
+class AdminReservationControllerTest extends BaseControllerTest {
 
     @DisplayName("어드민이 예약을 추가한다.")
     @Test
     void createReservation() {
         // given
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         ReservationCreateRequest request = createReservationRequest(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1);
 
-        // then
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .assertThat().statusCode(HttpStatus.CREATED.value());
+    }
+
+    @DisplayName("멤버만을 이용하여 예약을 조회한다.")
+    @ParameterizedTest(name = "멤버 ID={0}로 조회 시 {1}개의 예약이 조회된다.")
+    @CsvSource(value = {"1/3", "2/4"}, delimiter = '/')
+    @Sql("/test_search_data.sql")
+    void searchByMember(String memberId, int expectedCount) {
+        RestAssured.given().log().all()
+                .param("themeId", "")
+                .param("memberId", memberId)
+                .param("dateFrom", "")
+                .param("dateTo", "")
+                .header("cookie", getAdminWithToken())
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("count", is(expectedCount));
+    }
+
+    @DisplayName("테마만을 이용하여 예약을 조회한다.")
+    @ParameterizedTest(name = "테마 ID={0}로 조회 시 {1}개의 예약이 조회된다.")
+    @CsvSource(value = {"1/4", "2/3"}, delimiter = '/')
+    @Sql("/test_search_data.sql")
+    void searchByTheme(String themeId, int expectedCount) {
+        RestAssured.given().log().all()
+                .param("themeId", themeId)
+                .param("memberId", "")
+                .param("dateFrom", "")
+                .param("dateTo", "")
+                .header("cookie", getAdminWithToken())
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("count", is(expectedCount));
+    }
+
+    @DisplayName("시작 날짜만을 이용하여 예약을 조회한다.")
+    @ParameterizedTest(name = "오늘 날짜보다 {0}일 전인 날짜를 시작 날짜로 조회 시 {1}개의 예약이 조회된다.")
+    @CsvSource(value = {"1/1", "7/7"}, delimiter = '/')
+    @Sql("/test_search_data.sql")
+    void searchByFromDate(int minusDays, int expectedCount) {
+        RestAssured.given().log().all()
+                .param("themeId", "")
+                .param("memberId", "")
+                .param("dateFrom", LocalDate.now().minusDays(minusDays).toString())
+                .param("dateTo", "")
+                .header("cookie", getAdminWithToken())
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("count", is(expectedCount));
+    }
+
+    @DisplayName("종료 날짜만을 이용하여 예약을 조회한다..")
+    @ParameterizedTest(name = "오늘 날짜보다 {0}일 전인 날짜를 종료 날짜로 조회 시 {1}개의 예약이 조회된다.")
+    @CsvSource(value = {"1/7", "3/5", "7/1"}, delimiter = '/')
+    @Sql("/test_search_data.sql")
+    void searchByToDate(int minusDays, int expectedCount) {
+        RestAssured.given().log().all()
+                .param("themeId", "")
+                .param("memberId", "")
+                .param("dateFrom", "")
+                .param("dateTo", LocalDate.now().minusDays(minusDays).toString())
+                .header("cookie", getAdminWithToken())
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("count", is(expectedCount));
     }
 
     @DisplayName("예약을 삭제한다.")
@@ -89,12 +116,9 @@ class AdminReservationControllerTest {
         // given
         Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
 
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().delete("/admin/reservations/" + saved.getId())
                 .then().log().all()
                 .assertThat().statusCode(HttpStatus.NO_CONTENT.value());
@@ -106,12 +130,9 @@ class AdminReservationControllerTest {
         // given
         reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
 
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().get("/admin/reservations/waiting")
                 .then().log().all()
                 .body("count", is(1));
@@ -123,19 +144,16 @@ class AdminReservationControllerTest {
         // given
         Reservation waiting = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
 
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
-
         // when
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().post("/admin/reservations/waiting/{id}/approve", waiting.getId())
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
 
         // then
         reservationRepository.findById(waiting.getId())
-                .ifPresentOrElse(r -> assertThat(r.getStatus()).isEqualTo(Status.CONFIRMED), AssertionError::new);
+                .ifPresent(reservation -> assertThat(reservation.getStatus()).isEqualTo(Status.CONFIRMED));
     }
 
     @DisplayName("대기 중인 예약을 거절한다.")
@@ -143,12 +161,10 @@ class AdminReservationControllerTest {
     void denyWaiting() {
         // given
         Reservation waiting = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
-        memberRepository.save(ADMIN);
-        String accessToken = TestFixture.getTokenAfterLogin(ADMIN_LOGIN_REQUEST);
 
         // when
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getAdminWithToken())
                 .when().post("/admin/reservations/waiting/{id}/deny", waiting.getId())
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
