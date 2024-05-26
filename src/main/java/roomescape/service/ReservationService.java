@@ -24,6 +24,7 @@ import roomescape.system.exception.RoomescapeException;
 public class ReservationService {
 
     public static final int EXCLUDE_CURRENT_RESERVATION = 1;
+    public static final int DEFAULT_RANK = 0;
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -125,7 +126,7 @@ public class ReservationService {
                 reservation.getTime(),
                 reservation.getTheme(),
                 reservation.getStatus(),
-                reservation.isWaiting() ? rankCalculator.calculate(reservation) : 0
+                reservation.isWaiting() ? rankCalculator.calculate(reservation) : DEFAULT_RANK
             ))
             .toList();
     }
