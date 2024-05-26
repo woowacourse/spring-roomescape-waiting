@@ -1,6 +1,7 @@
 package roomescape.model;
 
 import static roomescape.model.ReservationStatus.ACCEPT;
+import static roomescape.model.ReservationStatus.CANCEL;
 import static roomescape.model.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
@@ -68,6 +69,18 @@ public class Reservation {
         return new Reservation(id, date, ACCEPT, LocalDateTime.now(), time, theme, member);
     }
 
+    public void confirmReservation() {
+        this.status = ACCEPT;
+    }
+
+    public void cancel() {
+        this.status = CANCEL;
+    }
+
+    public boolean isAcceptReservation() {
+        return status == ACCEPT;
+    }
+
     public long getId() {
         return id;
     }
@@ -94,14 +107,6 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public void confirmReservation() {
-        this.status = ACCEPT;
-    }
-
-    public boolean isAcceptReservation() {
-        return status == ACCEPT;
     }
 
     @Override

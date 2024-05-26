@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import static roomescape.model.ReservationStatus.ACCEPT;
+import static roomescape.model.ReservationStatus.CANCEL;
 import static roomescape.model.ReservationStatus.WAITING;
 import static roomescape.service.fixture.TestMemberFactory.createAdmin;
 import static roomescape.service.fixture.TestMemberFactory.createMember;
@@ -191,7 +192,7 @@ class ReservationServiceTest {
                 .hasMessage("[ERROR] 아이디가 1인 사용자가 존재하지 않습니다.");
     }
 
-    @DisplayName("예약 시간을 삭제한다")
+    @DisplayName("예약을 취소한다.")
     @Test
     void should_remove_reservation_times() {
         Theme theme1 = themeRepository.save(createTheme(1L));
@@ -204,7 +205,10 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
-        assertThat(reservations).hasSize(1);
+        SoftAssertions.assertSoftly(assertions -> {
+            assertions.assertThat(reservations).hasSize(2);
+            assertions.assertThat(reservations).extracting("status").containsExactly(CANCEL, ACCEPT);
+        });
     }
 
     @DisplayName("존재하지 않는 예약을 삭제하면 예외가 발생한다.")
@@ -215,7 +219,7 @@ class ReservationServiceTest {
                 .hasMessage("[ERROR] 해당 id:[1000000] 값으로 예약된 내역이 존재하지 않습니다.");
     }
 
-    @DisplayName("승인된 예약을 삭제하면 제일 먼저 예약된 대기가 승인으로 바뀐다.")
+    @DisplayName("승인된 예약을 취소하면 제일 먼저 예약된 대기가 승인으로 바뀐다.")
     @Test
     void should_confirm_first_waiting_reservation_when_delete_waiting_reservation() {
         Theme theme = themeRepository.save(createTheme(1L));
@@ -232,15 +236,15 @@ class ReservationServiceTest {
 
         List<Reservation> reservations = reservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
-            assertions.assertThat(reservations).hasSize(2);
-            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
-            assertions.assertThat(reservations).extracting("id").containsExactly(2L, 3L);
+            assertions.assertThat(reservations).hasSize(3);
+            assertions.assertThat(reservations).extracting("status").containsExactly(CANCEL, ACCEPT, WAITING);
+            assertions.assertThat(reservations).extracting("id").containsExactly(1L, 2L, 3L);
         });
     }
 
-    @DisplayName("승인된 예약을 삭제하고 이후 대기가 없으면 단순히 삭제만 한다.")
+    @DisplayName("승인된 예약을 취소하고 이후 대기가 없으면 단순히 취소만 한다.")
     @Test
-    void should_only_remove_reservation_when_no_waiting_reservations() {
+    void should_only_cancel_reservation_when_no_waiting_reservations() {
         Theme theme = themeRepository.save(createTheme(1L));
         ReservationTime time = reservationTimeRepository.save(createReservationTime(1L, "10:00"));
         Member member = memberRepository.save(createMember(1L));
@@ -249,13 +253,16 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
-        assertThat(reservations).isEmpty();
+        SoftAssertions.assertSoftly(assertions -> {
+            assertions.assertThat(reservations).hasSize(1);
+            assertions.assertThat(reservations).extracting("status").containsExactly(CANCEL);
+        });
     }
 
 
-    @DisplayName("예약 대기를 삭제할 때는 단순히 예약 대기만 삭제한다.")
+    @DisplayName("예약 대기를 취소할 때는 단순히 예약 대기를 취소 상태로 변경한다.")
     @Test
-    void should_remove_reservation_with_no_change_when_delete_waiting_reservation() {
+    void should_cancel_reservation_with_no_change_when_delete_waiting_reservation() {
         Theme theme = themeRepository.save(createTheme(1L));
         ReservationTime time = reservationTimeRepository.save(createReservationTime(1L, "10:00"));
         Member member1 = memberRepository.save(createMember(1L));
@@ -269,9 +276,8 @@ class ReservationServiceTest {
 
         List<Reservation> reservations = reservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
-            assertions.assertThat(reservations).hasSize(2);
-            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
-            assertions.assertThat(reservations).extracting("id").containsExactly(1L, 3L);
+            assertions.assertThat(reservations).hasSize(3);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, CANCEL, WAITING);
         });
     }
 

@@ -100,7 +100,7 @@ public class ReservationService {
             List<Reservation> waitingReservations = findWaitingReservation(reservation);
             confirmReservation(waitingReservations);
         }
-        reservationRepository.deleteById(id);
+        reservation.cancel();
     }
 
     private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {
