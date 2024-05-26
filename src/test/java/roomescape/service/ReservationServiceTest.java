@@ -1,12 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
-
-import java.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +17,15 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.fixture.MemberFixture.DEFAULT_ADMIN;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 @SpringBootTest
 class ReservationServiceTest {
@@ -111,8 +113,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("중복 예약 시도시 status가 PENDING 인지 확인")
-    void saveDuplicateReservationPending() {
+    @DisplayName("동일한 회원이 중복 예약 시도시 실패하는지 확인")
+    void saveFailDuplicateReservationBySameMember() {
         Member member = memberRepository.save(DEFAULT_MEMBER);
         ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
         Theme theme = themeRepository.save(DEFAULT_THEME);
@@ -120,9 +122,27 @@ class ReservationServiceTest {
 
         ReservationRequest reservationRequest = new ReservationRequest(date, member.getId(), time.getId(), theme.getId());
         reservationService.save(reservationRequest);
-        ReservationResponse duplicateReservationResponse = reservationService.save(reservationRequest);
+        assertThatThrownBy(() -> reservationService.save(reservationRequest))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ExceptionType.DUPLICATE_RESERVATION.getMessage());
+    }
 
-        assertThat(duplicateReservationResponse.status()).isEqualTo(ReservationStatus.PENDING);
+    @Test
+    @DisplayName("서로 다른 회원이 동일한 날짜/시간/테마에 예약 시도시 status가 PENDING 인지 확인")
+    void saveDuplicateReservationPending() {
+        Member member1 = memberRepository.save(DEFAULT_MEMBER);
+        Member member2 = memberRepository.save(DEFAULT_ADMIN);
+
+        ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
+        Theme theme = themeRepository.save(DEFAULT_THEME);
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        ReservationRequest reservationRequestByMember1 = new ReservationRequest(date, member1.getId(), time.getId(), theme.getId());
+        ReservationRequest reservationRequestByMember2 = new ReservationRequest(date, member2.getId(), time.getId(), theme.getId());
+        reservationService.save(reservationRequestByMember1);
+        ReservationResponse reservationResponse = reservationService.save(reservationRequestByMember2);
+
+        assertThat(reservationResponse.status()).isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test
