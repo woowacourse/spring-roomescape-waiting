@@ -10,9 +10,7 @@ import roomescape.common.ServiceTest;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.application.MemberService;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -145,5 +143,40 @@ class ReservationServiceTest extends ServiceTest {
 
         // then
         assertThat(reservations).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("예약 삭제 시 예약 대기가 있다면 첫번째 예약 대기 순서가 예약 확정된다.")
+    void changeWaitingToBooking() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        Reservation miaReservation = reservationService.createReservation(new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.BOOKING));
+        reservationService.createWaitingReservation(new Reservation(tommy, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING));
+
+        reservationService.deleteReservation(miaReservation.getId());
+        Reservation reservation = reservationService.findAllByMember(tommy).get(0);
+
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.BOOKING);
+    }
+
+    @Test
+    @DisplayName("이미 예약이 된 테마를 예약 대기를 신청하면 예외가 발생한다.")
+    void invalidWaitingReservation1() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        final Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme);
+        reservationService.createReservation(reservation);
+
+        assertThatThrownBy(() -> reservationService.createWaitingReservation(reservation))
+                .isInstanceOf(ViolationException.class);
+    }
+
+    @Test
+    @DisplayName("이미 예약 대기 신청이 된 테마를 다시 예약 대기를 신청하면 예외가 발생한다.")
+    void invalidWaitingReservation2() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        final Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        reservationService.createWaitingReservation(reservation);
+
+        assertThatThrownBy(() -> reservationService.createWaitingReservation(reservation))
+                .isInstanceOf(ViolationException.class);
     }
 }
