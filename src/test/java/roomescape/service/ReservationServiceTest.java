@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -213,6 +214,10 @@ class ReservationServiceTest extends DBTest {
         assertThat(responses).hasSize(6);
         assertThat(responses).extracting(ReservationResponse::id)
                 .containsExactly(r3.getId(), r4.getId(), r5.getId(), r1.getId(), r6.getId(), r2.getId());
+        assertThat(responses).isSortedAccordingTo(Comparator.comparing(ReservationResponse::date)
+                .thenComparing(response -> response.time().startAt())
+                .thenComparing(response -> response.theme().name())
+                .thenComparing(ReservationResponse::id));
     }
 
     @DisplayName("날짜로 예약을 조회할 때 종료 날짜가 시작 날짜보다 빠르면 예외가 발생한다.")

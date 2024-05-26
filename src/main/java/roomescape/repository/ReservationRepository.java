@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWithWaitingOrder;
+import roomescape.domain.Status;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
@@ -26,8 +27,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                         ELSE null
                     END as waitingOrder
                 )
-                FROM Reservation r
-                WHERE r.member.id = :memberId
+            FROM Reservation r
+            WHERE r.member.id = :memberId
             """)
     List<ReservationWithWaitingOrder> findMyReservations(Long memberId);
+
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            WHERE r.status = :status
+            ORDER BY r.date, r.time.startAt, r.theme.name, r.id
+            """)
+    List<Reservation> findAllByStatus(Status status);
 }

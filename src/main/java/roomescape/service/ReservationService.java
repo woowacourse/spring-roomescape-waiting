@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -63,7 +62,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ListResponse<ReservationResponse> findAll() {
-        List<ReservationResponse> responses = findAllByStatus(Status.CONFIRMED).stream()
+        List<ReservationResponse> responses = reservationRepository.findAllByStatus(Status.CONFIRMED).stream()
                 .map(ReservationResponse::from)
                 .toList();
 
@@ -72,9 +71,8 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ListResponse<ReservationResponse> findAllWaiting() {
-        List<ReservationResponse> responses = findAllByStatus(Status.WAITING).stream()
+        List<ReservationResponse> responses = reservationRepository.findAllByStatus(Status.WAITING).stream()
                 .map(ReservationResponse::from)
-                .sorted(getWaitingComparator())
                 .toList();
 
         return new ListResponse<>(responses);
@@ -112,7 +110,7 @@ public class ReservationService {
     }
 
     public void approveWaiting(Long id) {
-        Reservation reservation = findAllByStatus(Status.WAITING).stream()
+        Reservation reservation = reservationRepository.findAllByStatus(Status.WAITING).stream()
                 .filter(r -> r.getId().equals(id))
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("대기중인 예약을 찾을 수 없습니다. id = " + id));
@@ -121,21 +119,6 @@ public class ReservationService {
                 reservation.getDate());
 
         reservation.updateStatus(Status.CONFIRMED);
-    }
-
-    private List<Reservation> findAllByStatus(Status status) {
-        Specification<Reservation> spec = new ReservationSearchSpecification()
-                .sameStatus(status)
-                .build();
-
-        return reservationRepository.findAll(spec);
-    }
-
-    private Comparator<ReservationResponse> getWaitingComparator() {
-        return Comparator.comparing(ReservationResponse::date)
-                .thenComparing(response -> response.time().startAt())
-                .thenComparing(response -> response.theme().name())
-                .thenComparing(ReservationResponse::id);
     }
 
     private Reservation getReservationForSave(ReservationCreateRequest request, Status status) {
