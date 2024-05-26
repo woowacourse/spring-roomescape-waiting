@@ -17,8 +17,11 @@ public abstract class ReservationManageService {
     }
 
     abstract protected void scheduleForCreating(boolean existInSameTime, Reservation reservation);
+
     abstract protected void scheduleForDeleting(Reservation deletedReservation);
+
     abstract protected void validateReservationStatus(Reservation reservation);
+
     abstract protected void validatePermissionForDeleting(Reservation reservation, Member agent);
 
     @Transactional
