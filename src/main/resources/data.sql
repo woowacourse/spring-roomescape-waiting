@@ -79,7 +79,18 @@ VALUES (CURRENT_DATE + INTERVAL '-1' DAY, 1, 1, 1),
        (CURRENT_DATE + INTERVAL '-3' DAY, 3, 3, 11),
        (CURRENT_DATE + INTERVAL '-4' DAY, 4, 4, 12);
 
+INSERT INTO reservation (date, member_id, time_id, theme_id)
+VALUES (CURRENT_DATE + INTERVAL '1' DAY, 1, 1, 1);
+INSERT INTO reservation (date, member_id, time_id, theme_id)
+VALUES (CURRENT_DATE + INTERVAL '1' DAY, 2, 2, 1);
+INSERT INTO reservation (date, member_id, time_id, theme_id)
+VALUES (CURRENT_DATE + INTERVAL '1' DAY, 2, 2, 2);
+
 INSERT INTO reservation_wait (member_id, date, time_id, theme_id, status)
 VALUES (2, CURRENT_DATE + INTERVAL '1' DAY, 1, 1, 'WAITING');
 INSERT INTO reservation_wait (member_id, date, time_id, theme_id, status)
 VALUES (3, CURRENT_DATE + INTERVAL '1' DAY, 1, 1, 'WAITING');
+INSERT INTO reservation_wait (member_id, date, time_id, theme_id, status)
+VALUES (1, CURRENT_DATE + INTERVAL '1' DAY, 2, 1, 'WAITING');
+INSERT INTO reservation_wait (member_id, date, time_id, theme_id, status)
+VALUES (1, CURRENT_DATE + INTERVAL '1' DAY, 2, 2, 'WAITING');
