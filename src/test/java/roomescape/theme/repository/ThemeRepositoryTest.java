@@ -30,17 +30,17 @@ class ThemeRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Test
-    @DisplayName("성공 : 테마 정보가 DB에 정상적으로 저장되는지 확인한다.")
+    @DisplayName("성공 : 테마 정보를 DB에 저장할 수 있다.")
     void save() {
         Theme theme = new Theme("포레스트", "공포 테마", "thumbnail");
         Theme actual = themeRepository.save(theme);
 
         List<Theme> expected = themeRepository.findAll();
-        assertThat(actual).isEqualTo(expected.iterator().next());
+        assertThat(actual).isEqualTo(expected.get(0));
     }
 
     @Test
-    @DisplayName("성공 : 테마 정보들을 정상적으로 가져오는지 확인한다.")
+    @DisplayName("성공 : 테마 정보들을 조회할 수 있다.")
     void findAll() {
         entityManager.persist(new Theme("테마1", "설명1", "image.png"));
         entityManager.persist(new Theme("테마2", "설명2", "image.png"));
@@ -56,7 +56,7 @@ class ThemeRepositoryTest {
     }
 
     @Test
-    @DisplayName("성공 : 테마 정보들이 정상적으로 제거되었는지 확인한다.")
+    @DisplayName("성공 : 테마 정보를 삭제할 수 있다.")
     void deleteById() {
         entityManager.persist(new Theme("테마1", "설명1", "image.png"));
 
@@ -66,7 +66,7 @@ class ThemeRepositoryTest {
     }
 
     @Test
-    @DisplayName("성공 : 지난 7일 기준 예약이 많은 테마 순으로 조회한다.")
+    @DisplayName("성공 : 지난 7일 기준 예약이 많은 테마 순으로 조회할 수 있다.")
     void getTopReservationThemes() {
         // Given
         LocalDate reservationStartDate = LocalDate.now().minusDays(6);

@@ -44,14 +44,21 @@ class MemberControllerTest {
     @Test
     @DisplayName("성공 : 유저인 회원 정보를 얻을 수 있다.")
     void findMembers() {
+        // Given
+        Member member = new Member(1L, "member", "aa@naver.com", "1111", MemberRole.USER);
+        Member admin = new Member(2L, "admin", "admin@naver.com", "1234", MemberRole.ADMIN);
+        memberRepository.save(member);
+        memberRepository.save(admin);
+
+        // When
         int actualSize = RestAssured
                 .when().get("/members")
                 .then()
                 .statusCode(200).extract()
                 .jsonPath().getInt("size()");
 
+        // Then
         List<Member> expected = memberRepository.findAllByRole(MemberRole.USER);
-
         assertThat(actualSize).isEqualTo(expected.size());
     }
 
@@ -60,17 +67,16 @@ class MemberControllerTest {
     void createMember() {
         MemberCreateRequest params = new MemberCreateRequest("호돌", "bbb@naver.com", "2222");
 
-        int actualSize = RestAssured.given()
+        RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/members")
                 .then()
                 .statusCode(201)
-                .header("Location", "/members/1").extract()
-                .jsonPath().getInt("size()");
+                .header("Location", "/members/1");
 
-        List<Member> expected = memberRepository.findAll();
+        List<Member> actual = memberRepository.findAll();
 
-        assertThat(actualSize).isEqualTo(expected.size());
+        assertThat(actual).hasSize(1);
     }
 }
