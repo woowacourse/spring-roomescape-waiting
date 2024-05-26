@@ -18,17 +18,14 @@ import java.util.List;
 @RequestMapping("/times")
 public class ReservationTimeController {
     private final ReservationTimeService reservationTimeService;
-    private final AuthService authService;
 
-    public ReservationTimeController(ReservationTimeService reservationTimeService, AuthService authService) {
+    public ReservationTimeController(ReservationTimeService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
-        this.authService = authService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> createReservationTime(
             @RequestBody @Valid ReservationTimeCreateRequest reservationTimeCreateRequest, @LoginMemberId long memberId) {
-        authService.validateAdmin(memberId);
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(reservationTimeCreateRequest);
         return ResponseEntity.created(URI.create("/times/" + reservationTimeResponse.id()))
                 .body(reservationTimeResponse);
@@ -46,8 +43,7 @@ public class ReservationTimeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationTimeById(@PathVariable("id") long timeId, @LoginMemberId long memberId) {
-        authService.validateAdmin(memberId);
+    public ResponseEntity<Void> deleteReservationTimeById(@PathVariable("id") long timeId) {
         reservationTimeService.deleteById(timeId);
         return ResponseEntity.noContent().build();
     }

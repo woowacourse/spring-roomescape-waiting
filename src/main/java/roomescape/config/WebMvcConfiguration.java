@@ -23,17 +23,20 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         this.memberService = memberService;
     }
 
-    //TODO: time, theme, waiting
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new MemberHandlerInterceptor(tokenProvider, memberService))
                 .addPathPatterns("/reservations/**")
                 .addPathPatterns("/reservation/**")
                 .addPathPatterns("/members/reservations")
-                .addPathPatterns("/logout");
+                .addPathPatterns("/logout")
+                .addPathPatterns("/waitings/**");
         registry.addInterceptor(new AdminRoleHandlerInterceptor(tokenProvider, memberService))
                 .addPathPatterns("/admin/**")
-                .addPathPatterns("/members");
+                .addPathPatterns("/members")
+                .addPathPatterns("/reservations/{id}")
+                .addPathPatterns("/times/**")
+                .excludePathPatterns("/times/available");
     }
 
     @Override

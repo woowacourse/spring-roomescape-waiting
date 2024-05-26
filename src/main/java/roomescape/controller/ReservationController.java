@@ -18,12 +18,10 @@ import java.util.List;
 public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationCreateService reservationCreateService;
-    private final AuthService authService;
 
-    public ReservationController(ReservationService reservationService, ReservationCreateService reservationCreateService, AuthService authService) {
+    public ReservationController(ReservationService reservationService, ReservationCreateService reservationCreateService) {
         this.reservationService = reservationService;
         this.reservationCreateService = reservationCreateService;
-        this.authService = authService;
     }
 
     @GetMapping
@@ -41,8 +39,7 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") long reservationId, @LoginMemberId long memberId) {
-        authService.validateAdmin(memberId);
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") long reservationId) {
         reservationService.deleteById(reservationId);
         return ResponseEntity.noContent().build();
     }

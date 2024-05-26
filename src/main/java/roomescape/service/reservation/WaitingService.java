@@ -31,20 +31,22 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaitingById(long reservationId, long memberId) {
+        memberRepository.findById(memberId);
         reservationRepository.findById(reservationId)
                 .ifPresent(reservation -> {
                     validateAuthority(reservation, memberId);
                     validateStatus(reservation);
+                    reservationRepository.deleteById(reservationId);
                 });
-        reservationRepository.deleteById(reservationId);
     }
 
     private void validateAuthority(Reservation reservation, long memberId) {
-        memberRepository.findById(memberId).ifPresent(member -> {
-            if (member.isGuest() && !reservation.isReservationOf(memberId)) {
-                throw new ForbiddenException("예약 대기를 삭제할 권한이 없습니다.");
-            }
-        });
+        memberRepository.findById(memberId)
+                .ifPresentOrElse(member -> {
+                    if (member.isGuest() && !reservation.isReservationOf(memberId)) {
+                        throw new ForbiddenException("예약 대기를 삭제할 권한이 없습니다.");
+                    }
+                }, ForbiddenException::new);
     }
 
     private void validateStatus(Reservation reservation) {

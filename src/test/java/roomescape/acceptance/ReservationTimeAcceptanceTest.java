@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
-@SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("/truncate-with-admin-and-guest.sql")
 class ReservationTimeAcceptanceTest extends AcceptanceTest {
     private String adminToken;
@@ -99,6 +98,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("모든 시간 내역을 조회한다.", () -> {
                     RestAssured.given().log().all()
+                            .cookie("token", adminToken)
                             .when().get("/times")
                             .then().log().all().statusCode(200).body("size()", is(1));
                 })
@@ -128,6 +128,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("모든 시간 내역을 조회하면 남은 시간은 0개이다.", () -> {
                     RestAssured.given().log().all()
+                            .cookie("token", adminToken)
                             .when().get("/times")
                             .then().log().all().statusCode(200).body("size()", is(0));
                 })
@@ -184,7 +185,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
 
     @DisplayName("예약 가능한 시간 조회 테스트 - 10:00: 예약 존재, (11:00,12:00): 예약 미존재.")
     @Test
-    @Sql("/insert-time-with-reservation.sql")
+    @Sql({"/truncate.sql", "/insert-time-with-reservation.sql"})
     void findAvailableTime() {
         //given
         long themeId = 1;
