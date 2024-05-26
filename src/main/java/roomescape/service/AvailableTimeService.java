@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
-@Transactional
 public class AvailableTimeService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -33,6 +32,7 @@ public class AvailableTimeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableTimeResponse> findByThemeAndDate(LocalDate date, long themeId) {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_THEME));
