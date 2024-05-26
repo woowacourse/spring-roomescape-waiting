@@ -117,11 +117,12 @@ VALUES (13, 6);
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (13, 7);
 
-INSERT INTO Waiting(reservation_id, member_id)
-VALUES (15, 1);
+
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (15, 2);
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (15, 3);
+INSERT INTO Waiting(reservation_id, member_id)
+VALUES (15, 4);
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (15, 6);
