@@ -204,18 +204,4 @@ class ReservationRepositoryTest extends RepositoryTest {
         Long actualReservationId = foundReservation.get().getId();
         assertThat(actualReservationId).isEqualTo(expectedReservationId);
     }
-
-    @Test
-    @DisplayName("동일 시간대의 예약이 존재하는지 조회한다.")
-    void existByDateAndTimeIdAndThemeId() {
-        // given
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
-
-        // when
-        boolean existByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeAndTheme(
-                MIA_RESERVATION_DATE, reservationTime, wootecoTheme);
-
-        // then
-        assertThat(existByDateAndTimeIdAndThemeId).isTrue();
-    }
 }

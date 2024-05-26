@@ -73,14 +73,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "10000")})
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "10000")})
-    boolean existsByDateAndTimeAndThemeAndStatus(LocalDate date, ReservationTime time, Theme theme, ReservationStatus status);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "10000")})
     List<Reservation> findAllByDateAndTimeAndThemeAndStatus(LocalDate date, ReservationTime time, Theme theme, ReservationStatus status);
 
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
