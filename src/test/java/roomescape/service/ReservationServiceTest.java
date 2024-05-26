@@ -177,7 +177,7 @@ class ReservationServiceTest extends ServiceTest {
         }
 
         @Test
-        void 예약을_삭제할_수_있다() {
+        void 예약_id로_예약_대기가_존재하지_않는_예약을_삭제할_수_있다() { // TODO: 테스트 메서드들 이름 형식 통일하기
             reservationService.deleteReservation(reservation.getId());
 
             List<Reservation> reservations = reservationFixture.findAllReservation();
@@ -186,7 +186,7 @@ class ReservationServiceTest extends ServiceTest {
         }
 
         @Test
-        void 존재하지_않는_예약은_삭제할_수_없다() {
+        void 존재하지_않는_예약_id로_예약_삭제_시_예외가_발생한다() {
             assertThatThrownBy(() -> reservationService.deleteReservation(10L))
                     .isInstanceOf(NotFoundReservationException.class);
         }

@@ -113,7 +113,7 @@ public class ReservationService {
         reservationRepository.delete(reservation);
     }
 
-    private Reservation findReservationById(long id) {
+    private Reservation findReservationById(long id) { // TODO: optional 다루는 함수들 전부 분리됐는지 확인하고, 순서 재배열하기
         return reservationRepository.findById(id)
                 .orElseThrow(NotFoundReservationException::new);
     }
