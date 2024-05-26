@@ -13,6 +13,7 @@ public class DatabaseCleaner {
 
     public void cleanUp() {
         clearReservation();
+        clearWaiting();
         clearTime();
         clearTheme();
         clearMember();
@@ -36,5 +37,10 @@ public class DatabaseCleaner {
     private void clearMember() {
         jdbcTemplate.update("delete from member");
         jdbcTemplate.update("alter table member alter column id restart with 1");
+    }
+
+    private void clearWaiting() {
+        jdbcTemplate.update("delete from waiting");
+        jdbcTemplate.update("alter table waiting alter column id restart with 1");
     }
 }

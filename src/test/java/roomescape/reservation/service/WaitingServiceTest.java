@@ -6,11 +6,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
@@ -27,9 +28,11 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
-@SpringBootTest
-@Sql("/delete.sql")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class WaitingServiceTest {
+
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -48,6 +51,11 @@ class WaitingServiceTest {
 
     @Autowired
     private WaitingService waitingService;
+
+    @AfterEach
+    void init() {
+        databaseCleaner.cleanUp();
+    }
 
     @Test
     @DisplayName("같은 테마, 날짜, 시간에 예약이 있을 때 예약 대기를 저장한다.")
@@ -148,7 +156,7 @@ class WaitingServiceTest {
         final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
         final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
         final Member member = memberRepository.save(new Member(null, Role.MEMBER, "마크", "mark@woowa.com", "asd"));
-        final Member member2 = memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
+        memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
         waitingRepository.save(new Waiting(member, date, theme, reservationTime));
 
         assertThatThrownBy(() -> waitingService.findAll(new LoginMemberInToken(member.getId(), member.getRole(), member.getName(), member.getEmail())))
@@ -204,7 +212,7 @@ class WaitingServiceTest {
         final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
         final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
         final Member admin = memberRepository.save(new Member(null, Role.ADMIN, "마크", "mark@woowa.com", "asd"));
-        final Member member2 = memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
+        memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
         final Waiting waiting = waitingRepository.save(new Waiting(admin, date, theme, reservationTime));
         final LoginMemberInToken loginMember = new LoginMemberInToken(admin.getId(), admin.getRole(), admin.getName(), admin.getEmail());
 

@@ -22,11 +22,9 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchRequest;
-import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
-import roomescape.reservation.vo.WaitingWithRank;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ReservationServiceTest {
