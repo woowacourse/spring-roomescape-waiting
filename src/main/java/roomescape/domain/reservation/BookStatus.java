@@ -6,4 +6,12 @@ public enum BookStatus {
     WAITING_CANCELLED,
     BOOKING_CANCELLED,
     ;
+
+    public boolean isNotBooked() {
+        return this != BOOKED;
+    }
+
+    public boolean isNotWaiting() {
+        return this != WAITING;
+    }
 }

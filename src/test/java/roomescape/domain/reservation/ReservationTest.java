@@ -68,4 +68,56 @@ class ReservationTest {
         boolean hasNoPermission = reservation.isNotModifiableBy(other);
         assertThat(hasNoPermission).isTrue();
     }
+
+    @Test
+    @DisplayName("확정되지 않은 예약을 취소할 수 없다.")
+    void cancelOnNotBookedReservation() {
+        Reservation reservation = new Reservation(
+                MEMBER_ARU.create(),
+                LocalDate.now(),
+                TEN_AM.create(),
+                TEST_THEME.create(),
+                LocalDateTime.now().minusDays(1),
+                BookStatus.WAITING
+        );
+
+        assertThatCode(reservation::cancelBooking)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("확정된 예약이 아닙니다.");
+    }
+
+
+    @Test
+    @DisplayName("예약 대기중이 아닌 예약을 대기취소할 수 없다.")
+    void cancelOnNotWaitingReservation() {
+        Reservation reservation = new Reservation(
+                MEMBER_ARU.create(),
+                LocalDate.now(),
+                TEN_AM.create(),
+                TEST_THEME.create(),
+                LocalDateTime.now().minusDays(1),
+                BookStatus.BOOKED
+        );
+
+        assertThatCode(reservation::cancelWaiting)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("대기 중인 예약이 아닙니다.");
+    }
+
+    @Test
+    @DisplayName("대기 중이 아닌 예약을 확정할 수 없다.")
+    void bookOnNotWaitingReservation() {
+        Reservation reservation = new Reservation(
+                MEMBER_ARU.create(),
+                LocalDate.now(),
+                TEN_AM.create(),
+                TEST_THEME.create(),
+                LocalDateTime.now().minusDays(1),
+                BookStatus.BOOKED
+        );
+
+        assertThatCode(reservation::book)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("대기 중인 예약이 아닙니다.");
+    }
 }

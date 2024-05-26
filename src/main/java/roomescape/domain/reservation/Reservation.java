@@ -81,19 +81,28 @@ public class Reservation {
         return !member.equals(this.member);
     }
 
-    public void book() {
-        this.status = BookStatus.BOOKED;
-    }
-
     public boolean isBooked() {
         return status == BookStatus.BOOKED;
     }
 
+    public void book() {
+        if (status.isNotWaiting()) {
+            throw new IllegalStateException("대기 중인 예약이 아닙니다.");
+        }
+        this.status = BookStatus.BOOKED;
+    }
+
     public void cancelWaiting() {
+        if (status.isNotWaiting()) {
+            throw new IllegalStateException("대기 중인 예약이 아닙니다.");
+        }
         status = BookStatus.WAITING_CANCELLED;
     }
 
     public void cancelBooking() {
+        if (status.isNotBooked()) {
+            throw new IllegalStateException("확정된 예약이 아닙니다.");
+        }
         status = BookStatus.BOOKING_CANCELLED;
     }
 
