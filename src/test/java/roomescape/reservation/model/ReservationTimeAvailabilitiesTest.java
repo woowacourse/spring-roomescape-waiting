@@ -2,6 +2,7 @@ package roomescape.reservation.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
 
@@ -18,7 +19,6 @@ class ReservationTimeAvailabilitiesTest {
     @Test
     void checkIsAlreadyBookedTest() {
         // Given
-        final ReservationStatus reservationStatus = ReservationStatus.RESERVATION;
         final ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(1, 30));
         final ReservationTime reservationTime2 = new ReservationTime(2L, LocalTime.of(2, 30));
         final ReservationTime reservationTime3 = new ReservationTime(3L, LocalTime.of(4, 30));
@@ -29,9 +29,9 @@ class ReservationTimeAvailabilitiesTest {
 
         final LocalDate date = LocalDate.now().plusDays(3);
         final List<Reservation> reservations = List.of(
-                Reservation.of(1L, reservationStatus, date, reservationTime1, theme, member),
-                Reservation.of(2L, reservationStatus, date, reservationTime2, theme, member),
-                Reservation.of(3L, reservationStatus, date, reservationTime3, theme, member)
+                Reservation.of(1L, date, reservationTime1, theme, member),
+                Reservation.of(2L, date, reservationTime2, theme, member),
+                Reservation.of(3L, date, reservationTime3, theme, member)
         );
 
 

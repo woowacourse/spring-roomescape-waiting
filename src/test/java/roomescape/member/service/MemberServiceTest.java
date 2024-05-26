@@ -32,7 +32,7 @@ class MemberServiceTest {
         final List<Member> members = memberService.getMembers();
 
         // Then
-        assertThat(members.size()).isEqualTo(5);
+        assertThat(members.size()).isEqualTo(7);
     }
     
     @DisplayName("회원 정보를 저장한다.")
@@ -50,7 +50,7 @@ class MemberServiceTest {
 
         // Then
         assertAll(
-                () -> assertThat(savedMember.getId()).isEqualTo(6L),
+                () -> assertThat(savedMember.getId()).isEqualTo(8L),
                 () -> assertThat(savedMember.getEmail().getValue()).isEqualTo(email),
                 () -> assertThat(savedMember.getEmail().getValue()).isEqualTo(email),
                 () -> assertThat(savedMember.getRole()).isEqualTo(role),
