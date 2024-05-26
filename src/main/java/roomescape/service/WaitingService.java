@@ -74,9 +74,14 @@ public class WaitingService {
     }
 
     private void validateDuplication(LocalDate date, long timeId, long themeId, long memberId) {
-        boolean isExist = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
-        if (isExist) {
-            throw new DuplicatedException("[ERROR] 중복되는 예약 대기는 추가할 수 없습니다.");
+        boolean isExistWaiting = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
+        if (isExistWaiting) {
+            throw new DuplicatedException("[ERROR] 이미 예약 대기 이력이 존재합니다.");
+        }
+
+        boolean isExistReservation = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
+        if (isExistReservation) {
+            throw new DuplicatedException("[ERROR] 본인의 예약에는 대기를 할 수 없습니다..");
         }
     }
 
@@ -86,14 +91,6 @@ public class WaitingService {
         if (reservations.isEmpty()) {
             throw new BadRequestException("[ERROR] 예약이 존재하지 않아 예약 대기가 불가합니다.");
         }
-        Reservation reservation = reservations.get(0);
-        if (isMembersReservation(reservation, memberId)) {
-            throw new BadRequestException("[ERROR] 이미 예약이 존재합니다.");
-        }
-    }
-
-    private boolean isMembersReservation(Reservation reservation, long memberId) {
-        return reservation.getMember().hasId(memberId);
     }
 
     private void validateExistence(long id) {

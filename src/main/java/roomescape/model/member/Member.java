@@ -74,10 +74,6 @@ public class Member {
         return reservations;
     }
 
-    public boolean hasId(long memberId) {
-        return id == memberId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
