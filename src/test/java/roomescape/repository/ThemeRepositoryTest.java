@@ -70,7 +70,7 @@ class ThemeRepositoryTest {
     @DisplayName("id가 존재하지 않는다면 예외가 발생한다.")
     @Test
     void getThemeByIdWhenNotExist() {
-        assertThatThrownBy(() -> themeRepository.getThemeById(1L))
+        assertThatThrownBy(() -> themeRepository.getThemeById(-1L))
                 .isInstanceOf(InvalidDataAccessApiUsageException.class)
                 .hasCauseInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재하지 않는 테마 입니다");

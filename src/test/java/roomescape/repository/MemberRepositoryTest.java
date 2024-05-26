@@ -22,7 +22,7 @@ class MemberRepositoryTest {
     @DisplayName("이메일과 비밀번호로 회원 정보를 조회한다.")
     @Test
     void findByEmailAndPassword() {
-        String email = "test@email.com";
+        String email = "daon@email.com";
         String password = "1234";
         Member daon = MemberFixtures.createAdminMemberDaon(email, password);
         memberRepository.save(daon);
@@ -36,7 +36,7 @@ class MemberRepositoryTest {
     @DisplayName("이메일과 비밀번호와 동일한 회원 정보가 존재하지 않으면 비어있다.")
     @Test
     void findByEmailAndPasswordWhenNotExist() {
-        String email = "test@email.com";
+        String email = "daon@email.com";
         String password = "1234";
 
         Optional<Member> result = memberRepository.findByEmailAndPassword(email, password);
@@ -48,7 +48,7 @@ class MemberRepositoryTest {
     @DisplayName("이메일과 동일한 회원 정보를 조회한다.")
     @Test
     void findByEmail() {
-        String email = "test@email.com";
+        String email = "daon@email.com";
         Member daon1 = MemberFixtures.createAdminMemberDaon(email);
         memberRepository.save(daon1);
 
@@ -61,7 +61,7 @@ class MemberRepositoryTest {
     @DisplayName("이메일과 동일한 회원 정보가 존재하지 않으면 비어있다.")
     @Test
     void findByEmailWhenNotExist() {
-        String email = "test@email.com";
+        String email = "daon@email.com";
 
         Optional<Member> result = memberRepository.findByEmail(email);
         assertAll(
@@ -72,7 +72,7 @@ class MemberRepositoryTest {
     @DisplayName("id로 회원 정보를 조회한다.")
     @Test
     void getMemberById() {
-        String email = "test@email.com";
+        String email = "daon@email.com";
         Member daon = MemberFixtures.createAdminMemberDaon(email);
         Member savedMember = memberRepository.save(daon);
 
@@ -83,7 +83,7 @@ class MemberRepositoryTest {
     @DisplayName("id가 존재하지 않는다면 예외가 발생한다.")
     @Test
     void getMemberByIdWhenNotExist() {
-        assertThatThrownBy(() -> memberRepository.getMemberById(1L))
+        assertThatThrownBy(() -> memberRepository.getMemberById(-1L))
                 .isInstanceOf(InvalidDataAccessApiUsageException.class)
                 .hasCauseInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재하지 않는 회원 입니다");

@@ -44,7 +44,7 @@ class TimeSlotRepositoryTest {
     @DisplayName("id가 존재하지 않는다면 예외가 발생한다.")
     @Test
     void getTimeByIdWhenNotExist() {
-        assertThatThrownBy(() -> timeSlotRepository.getTimeSlotById(1L))
+        assertThatThrownBy(() -> timeSlotRepository.getTimeSlotById(-1L))
                 .isInstanceOf(InvalidDataAccessApiUsageException.class)
                 .hasCauseInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재하지 않는 시간 입니다");

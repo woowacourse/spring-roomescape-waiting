@@ -264,7 +264,7 @@ class ReservationRepositoryTest {
     @DisplayName("id가 존재하지 않는다면 예외가 발생한다.")
     @Test
     void getReservationByIdWhenNotExist() {
-        assertThatThrownBy(() -> reservationRepository.getReservationBy(1L))
+        assertThatThrownBy(() -> reservationRepository.getReservationBy(-1L))
                 .isInstanceOf(InvalidDataAccessApiUsageException.class)
                 .hasCauseInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재하지 않는 예약 입니다");
