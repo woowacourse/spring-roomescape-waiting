@@ -32,18 +32,11 @@ public class Waiting {
 
     public Waiting(final Long id, final Member member, final LocalDate date, final Theme theme,
             final ReservationTime reservationTime) {
-        validateLastDate(date);
         this.id = id;
         this.member = member;
         this.date = date;
         this.theme = theme;
         this.reservationTime = reservationTime;
-    }
-
-    private void validateLastDate(LocalDate date) {
-        if (date.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("지난 날짜는 예약할 수 없습니다.");
-        }
     }
 
     public Long getId() {

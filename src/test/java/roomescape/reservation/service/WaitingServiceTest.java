@@ -60,8 +60,8 @@ class WaitingServiceTest {
     @Test
     @DisplayName("같은 테마, 날짜, 시간에 예약이 있을 때 예약 대기를 저장한다.")
     void saveTest() {
+        final LocalDate date = LocalDate.now().plusDays(1);
         final LocalTime time = LocalTime.now();
-        final LocalDate date = LocalDate.now();
         final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
         final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
         final Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));
@@ -82,8 +82,8 @@ class WaitingServiceTest {
     @Test
     @DisplayName("같은 테마, 날짜, 시간에 예약이 없을 때 예약 대기를 저장하면 예외가 발생한다.")
     void saveTest_Fail1() {
+        final LocalDate date = LocalDate.now().plusDays(1);
         final LocalTime time = LocalTime.now();
-        final LocalDate date = LocalDate.now();
         final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
         final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
         final Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));
@@ -97,8 +97,8 @@ class WaitingServiceTest {
     @Test
     @DisplayName("같은 테마, 날짜, 시간에 자신이 예약을 했을 때 예약 대기를 저장하면 예외가 발생한다.")
     void saveTest_Fail2() {
+        final LocalDate date = LocalDate.now().plusDays(1);
         final LocalTime time = LocalTime.now();
-        final LocalDate date = LocalDate.now();
         final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
         final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
         final Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));
@@ -113,19 +113,53 @@ class WaitingServiceTest {
     @Test
     @DisplayName("같은 테마, 날짜, 시간에 내가 예약 대기 중일 때 예약 대기를 저장하면 예외가 발생한다.")
     void saveTest_Fail3() {
+        final LocalDate date = LocalDate.now().plusDays(1);
         final LocalTime time = LocalTime.now();
+        final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
+        final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
+        final Member waitingMember = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));
+        final Member reservationMember = memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
+        reservationRepository.save(new Reservation(reservationMember, date, theme, reservationTime));
+        final LoginMemberInToken loginMember = new LoginMemberInToken(waitingMember.getId(), waitingMember.getRole(), waitingMember.getName(), waitingMember.getEmail());
+        waitingService.save(new WaitingCreateRequest(date, theme.getId(), reservationTime.getId()), loginMember);
+
+        assertThatThrownBy(() -> waitingService.save(new WaitingCreateRequest(date, theme.getId(), reservationTime.getId()), loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 예약 대기 중 입니다.");
+    }
+
+    @Test
+    @DisplayName("지나간 날짜에 대한 예약 대기를 저장하면 예외가 발생한다.")
+    void saveTest_Fail4() {
+        final LocalDate date = LocalDate.now().minusDays(1);
+        final LocalTime time = LocalTime.now();
+        final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
+        final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
+        final Member waitingMember = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));
+        final Member reservationMember = memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
+        reservationRepository.save(new Reservation(reservationMember, date, theme, reservationTime));
+        final LoginMemberInToken loginMember = new LoginMemberInToken(waitingMember.getId(), waitingMember.getRole(), waitingMember.getName(), waitingMember.getEmail());
+
+        assertThatThrownBy(() -> waitingService.save(new WaitingCreateRequest(date, theme.getId(), reservationTime.getId()), loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("지나간 날짜에 대한 예약 대기는 할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("같은 날짜, 지나간 시간에 대한 예약 대기를 저장하면 예외가 발생한다.")
+    void saveTest_Fail5() {
         final LocalDate date = LocalDate.now();
+        final LocalTime time = LocalTime.now().minusHours(1);
         final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
         final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
         final Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));
         final Member member2 = memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
         reservationRepository.save(new Reservation(member2, date, theme, reservationTime));
-        waitingService.save(new WaitingCreateRequest(date, theme.getId(), reservationTime.getId()), new LoginMemberInToken(member.getId(), member.getRole(), member.getName(), member.getEmail()));
         final LoginMemberInToken loginMember = new LoginMemberInToken(member.getId(), member.getRole(), member.getName(), member.getEmail());
 
         assertThatThrownBy(() -> waitingService.save(new WaitingCreateRequest(date, theme.getId(), reservationTime.getId()), loginMember))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 예약 대기 중 입니다.");
+                .hasMessage("지나간 시간에 대한 예약 대기는 할 수 없습니다.");
     }
 
     @Test

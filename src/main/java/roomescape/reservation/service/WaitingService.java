@@ -1,5 +1,7 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -64,8 +66,22 @@ public class WaitingService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         final Waiting waiting = request.toWaiting(member, theme, reservationTime);
+        validateDateTime(waiting.getDate(), waiting.getReservationTime().getStartAt());
         validateWaiting(waiting);
         return waiting;
+    }
+
+    private void validateDateTime(LocalDate date, LocalTime time) {
+        final LocalDate today = LocalDate.now();
+        final LocalTime now = LocalTime.now();
+
+        if (date.isBefore(today)) {
+            throw new IllegalArgumentException("지나간 날짜에 대한 예약 대기는 할 수 없습니다.");
+        }
+
+        if (date.isEqual(today) && time.isBefore(now)) {
+            throw new IllegalArgumentException("지나간 시간에 대한 예약 대기는 할 수 없습니다.");
+        }
     }
 
     private void validateWaiting(final Waiting waiting) {
