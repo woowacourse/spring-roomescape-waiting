@@ -25,11 +25,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.dto.MemberCreateRequest;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class MemberControllerTest {
-
     @LocalServerPort
     private int port;
 
@@ -56,16 +56,21 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("설공 : 회원 정보를 만들 수 있다.")
+    @DisplayName("성공 : 회원 정보를 만들 수 있다.")
     void createMember() {
         MemberCreateRequest params = new MemberCreateRequest("호돌", "bbb@naver.com", "2222");
 
-        RestAssured.given()
+        int actualSize = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/members")
                 .then()
                 .statusCode(201)
-                .header("Location", "/members/1");
+                .header("Location", "/members/1").extract()
+                .jsonPath().getInt("size()");
+
+        List<Member> expected = memberRepository.findAll();
+
+        assertThat(actualSize).isEqualTo(expected.size());
     }
 }
