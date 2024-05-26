@@ -68,7 +68,7 @@ class AdminReservationControllerTest {
             .cookie("token", adminToken)
             .when().get("/admin/reservations")
             .then().log().all()
-            .body("id", contains(1, 2, 4, 5));
+            .body("id", contains(1, 2, 4, 5, 6));
     }
 
     @DisplayName("실패: 일반 유저가 예약 삭제 -> 401")
@@ -89,7 +89,7 @@ class AdminReservationControllerTest {
             .when().get("/admin/reservations")
             .then().log().all()
             .statusCode(200)
-            .body("id", contains(1, 2, 3, 4, 5));
+            .body("id", contains(1, 2, 3, 4, 5, 6));
     }
 
     @DisplayName("실패: 일반 유저가 전체 예약 조회 -> 401")

@@ -17,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.system.exception.RoomescapeException;
 
@@ -38,7 +39,7 @@ class ReservationServiceTest {
     @Test
     void save() {
         Reservation saved = reservationService.save(memberId, rawDate, timeId, themeId);
-        assertThat(saved.getId()).isEqualTo(6L);
+        assertThat(saved.getId()).isEqualTo(7L);
     }
 
     @DisplayName("실패: 존재하지 않는 멤버 ID 입력 시 예외가 발생한다.")
@@ -109,8 +110,8 @@ class ReservationServiceTest {
     @DisplayName("성공: 주어진 멤버가 예약한 예약 목록 조회")
     @Test
     void findMyReservations() {
-        List<Reservation> reservations = reservationService.findMyReservations(1L);
-        assertThat(reservations).hasSize(2);
+        List<ReservationWithRank> reservations = reservationService.findMyReservations(1L);
+        assertThat(reservations).hasSize(3);
     }
 
     // TODO: TestFixture 만들기
@@ -120,7 +121,7 @@ class ReservationServiceTest {
         // when
         Reservation saved = reservationService.saveWaiting(memberId, rawDate, timeId, themeId);
         //then
-        assertThat(saved.getId()).isEqualTo(6L);
+        assertThat(saved.getId()).isEqualTo(7L);
     }
 
     @DisplayName("실패: 동일한 멤버가 2개 이상의 예약 대기를 생성 시도시 예외 발생.")
@@ -140,9 +141,9 @@ class ReservationServiceTest {
     void deleteWaiting() {
         // given
         // when
-        reservationService.deleteWaiting(2L, 5L);
+        reservationService.deleteWaiting(2L, 6L);
         //then
-        assertThat(reservationService.findAll()).hasSize(4);
+        assertThat(reservationService.findAll()).hasSize(5);
     }
 
     @DisplayName("실패: 대기가 아닌 예약을 삭제 시도시 예외 발생.")
@@ -158,7 +159,7 @@ class ReservationServiceTest {
     @Test
     void deleteWaiting_NotMine() {
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteWaiting(1L, 5L))
+        assertThatThrownBy(() -> reservationService.deleteWaiting(1L, 6L))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("다른 유저의 예약 대기는 삭제할 수 없습니다.");
     }
