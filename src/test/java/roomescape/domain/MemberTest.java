@@ -49,4 +49,13 @@ class MemberTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("비밀번호에 빈값을 입력할 수 없습니다.");
     }
+
+    @DisplayName("역할에 null이 들어가면 예외를 발생시킨다.")
+    @ParameterizedTest
+    @NullSource
+    void nullRole(Role value) {
+        Assertions.assertThatThrownBy(() -> new Member(ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD, value))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("역할에 빈값을 입력할 수 없습니다.");
+    }
 }

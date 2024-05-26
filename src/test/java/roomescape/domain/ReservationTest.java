@@ -55,4 +55,12 @@ class ReservationTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("상태에 빈값을 입력할 수 없습니다.");
     }
+
+    @DisplayName("예약 상태를 변경할때 null이 들어가면 예외를 발생시킨다.")
+    @Test
+    void updateStatusWithNull() {
+        Assertions.assertThatThrownBy(() -> new Reservation().updateStatus(null))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("예약 상태가 입력되지 않았습니다.");
+    }
 }
