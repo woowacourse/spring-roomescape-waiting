@@ -39,10 +39,6 @@ public class Theme {
         return new Theme(name, description, thumbnail);
     }
 
-    public static Theme from(long id) {
-        return new Theme(id, null, null, null);
-    }
-
     public long getId() {
         return id;
     }
