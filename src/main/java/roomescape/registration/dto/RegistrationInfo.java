@@ -7,15 +7,6 @@ import roomescape.registration.domain.reservation.dto.ReservationResponse;
 import roomescape.registration.domain.waiting.domain.Waiting;
 import roomescape.registration.domain.waiting.domain.WaitingWithRank;
 
-/**
- * todo: 상태를 어디서 지정할까?
- * 현재 Reservation과 Waiting은 분리되어 있다.
- * 그리고 status는 Reservation에 없다.
- * status 계산은 예약자가 자신의 정보를 볼 때만 사용한다.(추가로 4단계 - 예약 대기 관리에서 사용)
- * 결론: 예약 페이지와 예약 대기 페이지는 따로 관리된다.
- * 그럼 예약 대기와 예약을 모두 포함하는 네이밍이 좋겠지.
- * 이 dto는  예약, 예약 대기 모두가 쓸 수 있는 dto로 사용.
- **/
 public record RegistrationInfo(long id, String themeName, LocalDate date, LocalTime time, String status) {
 
     public static RegistrationInfo from(WaitingWithRank waitingWithRank) {

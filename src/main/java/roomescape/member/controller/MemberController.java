@@ -11,8 +11,7 @@ import roomescape.registration.dto.RegistrationInfo;
 import roomescape.registration.domain.reservation.service.ReservationService;
 import roomescape.registration.domain.waiting.service.WaitingService;
 
-// todo : 멤버별 예약은 멤버에 있는게 맞을까 예약에 있는게 맞을까...흠
-// 예약 컨트롤러에 있는게 맞는것 같은데 그럼 RegistrationController만든담에 reservationService, waitingService 필드로 갖게 해야됨.
+// todo : 멤버별 예약은 멤버에 있는게 맞을까 예약에 있는게 맞을까
 @RestController
 public class MemberController {
 
@@ -32,7 +31,7 @@ public class MemberController {
         return memberService.findMembersId();
     }
 
-    // todo: 정렬을 등록 순으로 하려면... 큰일낫넹 / 정렬 기준 내 맘대로 할까
+    // todo: 정렬 어떻게 할지 생각
     @GetMapping("/member/registrations")
     public List<RegistrationInfo> memberReservationList(@LoginMemberId long memberId) {
         List<RegistrationInfo> reservationsOfMember = reservationService.findMemberReservations(memberId)
