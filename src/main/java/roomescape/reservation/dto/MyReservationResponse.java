@@ -7,11 +7,13 @@ import roomescape.reservation.model.WaitingWithRank;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public record MyReservationResponse(
         Long id,
         String theme,
         LocalDate date,
-        LocalTime time,
+        @JsonFormat(pattern = "HH:mm") LocalTime time,
         String status
 ) {
     public static MyReservationResponse from(final Reservation reservation) {
