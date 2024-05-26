@@ -134,7 +134,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("동시 요청으로 동일한 시간대에 예약을 추가한다.")
     void createDuplicatedReservationInMultiThread() throws InterruptedException {
         // given
-        int threadCount = 2;
+        int threadCount = 5;
         List<Cookie> cookies = createCookies(threadCount);
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();

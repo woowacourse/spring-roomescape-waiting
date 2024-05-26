@@ -80,9 +80,6 @@ class MemberRepositoryTest extends RepositoryTest {
         List<Member> members = memberRepository.findAll();
 
         // then
-//        assertThat(members).hasSize(2);
-        for (Member member : members) {
-            System.out.println(member.getName());
-        }
+        assertThat(members).hasSize(2);
     }
 }

@@ -85,7 +85,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @Sql({"/test-schema.sql", "/past-reservation-data.sql"})
+    @Sql("/past-reservation-data.sql")
     @DisplayName("인기 테마 목록을 조회한다.")
     void findAllPopularThemes() {
         // given

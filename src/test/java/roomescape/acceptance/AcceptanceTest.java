@@ -6,13 +6,15 @@ import io.restassured.http.Cookie;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.assertj.core.api.StandardSoftAssertionsProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.request.LoginRequest;
+import roomescape.common.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.request.MemberJoinRequest;
 import roomescape.member.dto.response.MemberResponse;
@@ -29,7 +31,6 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.ADMIN_EMAIL;
 import static roomescape.TestFixture.ADMIN_NAME;
-import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TEST_PASSWORD;
 import static roomescape.TestFixture.THEME_THUMBNAIL;
@@ -38,16 +39,23 @@ import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 import static roomescape.member.domain.Role.ADMIN;
 import static roomescape.member.domain.Role.USER;
 
-@Sql("/test-schema.sql")
 @ActiveProfiles(value = "test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AcceptanceTest {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    @AfterEach
+    void tearDown() {
+        databaseCleaner.clear();
     }
 
     protected Long createTestTheme() {
