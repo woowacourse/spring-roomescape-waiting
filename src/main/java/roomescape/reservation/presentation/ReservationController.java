@@ -56,13 +56,15 @@ public class ReservationController {
                                                                  Member loginMember) {
         Reservation newReservation = toNewReservation(request, loginMember);
         if (newReservation.isBooking()) {
-            Reservation createdReservation = bookingScheduler.create(newReservation);
+            Reservation createdReservation= bookingScheduler.create(newReservation);
+            Reservation scheduledReservation = bookingScheduler.scheduleRecentReservation(createdReservation);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ReservationResponse.from(createdReservation));
+                    .body(ReservationResponse.from(scheduledReservation));
         }
         Reservation createdReservation = waitingScheduler.create(newReservation);
+        Reservation scheduledReservation = waitingScheduler.scheduleRecentReservation(createdReservation);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationResponse.from(createdReservation));
+                .body(ReservationResponse.from(scheduledReservation));
     }
 
     private Reservation toNewReservation(ReservationSaveRequest request, Member loginMember) {

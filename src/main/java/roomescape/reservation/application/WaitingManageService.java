@@ -13,14 +13,14 @@ public class WaitingManageService extends ReservationManageService {
     }
 
     @Override
-    protected void scheduleForCreating(boolean existInSameTime, Reservation reservation) {
-        if (!existInSameTime && reservation.isWaiting()) {
+    protected void correctReservationStatus(int bookingCount, Reservation reservation) {
+        if (bookingCount < MAX_RESERVATION_NUMBER_IN_TIME_SLOT) {
             reservation.changeToBooking();
         }
     }
 
     @Override
-    protected void scheduleForDeleting(Reservation deletedReservation) {
+    protected void scheduleAfterDeleting(Reservation deletedReservation) {
     }
 
     @Override

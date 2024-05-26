@@ -1,9 +1,11 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,18 +25,18 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "member_id")
+    @JoinColumn(nullable = false, name = "member_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
     @Column(nullable = false, name = "date")
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "time_id")
+    @JoinColumn(nullable = false, name = "time_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "theme_id")
+    @JoinColumn(nullable = false, name = "theme_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Theme theme;
 
     @Column(nullable = false, name = "status")

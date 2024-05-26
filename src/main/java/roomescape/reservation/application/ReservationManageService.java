@@ -1,24 +1,27 @@
 package roomescape.reservation.application;
 
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public abstract class ReservationManageService {
+    protected static final int MAX_RESERVATION_NUMBER_IN_TIME_SLOT = 1;
+
     protected final ReservationRepository reservationRepository;
 
     public ReservationManageService(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 
-    abstract protected void scheduleForCreating(boolean existInSameTime, Reservation reservation);
+    abstract protected void correctReservationStatus(int bookingCount, Reservation reservation);
 
-    abstract protected void scheduleForDeleting(Reservation deletedReservation);
+    abstract protected void scheduleAfterDeleting(Reservation deletedReservation);
 
     abstract protected void validateReservationStatus(Reservation reservation);
 
@@ -27,9 +30,6 @@ public abstract class ReservationManageService {
     @Transactional
     public Reservation create(Reservation reservation) {
         validateReservationDate(reservation);
-        boolean existInSameTime = reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(), reservation.getTime(), reservation.getTheme());
-        scheduleForCreating(existInSameTime, reservation);
         validateDuplicatedReservation(reservation);
         return reservationRepository.save(reservation);
     }
@@ -49,13 +49,21 @@ public abstract class ReservationManageService {
         }
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
+    public Reservation scheduleRecentReservation(Reservation reservation) {
+        List<Reservation> bookings = reservationRepository.findAllByDateAndTimeAndThemeAndStatus(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.BOOKING);
+        correctReservationStatus(bookings.size(), reservation);
+        return reservation;
+    }
+
+    @Transactional
     public void delete(Long id, Member agent) {
         reservationRepository.findById(id).ifPresent(reservation -> {
             validateReservationStatus(reservation);
             validatePermissionForDeleting(reservation, agent);
             reservationRepository.delete(reservation);
-            scheduleForDeleting(reservation);
+            scheduleAfterDeleting(reservation);
         });
     }
 }

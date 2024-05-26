@@ -16,14 +16,14 @@ public class BookingManageService extends ReservationManageService {
     }
 
     @Override
-    protected void scheduleForCreating(boolean existInSameTime, Reservation reservation) {
-        if (existInSameTime && reservation.isBooking()) {
+    protected void correctReservationStatus(int bookingCount, Reservation reservation) {
+        if (bookingCount > MAX_RESERVATION_NUMBER_IN_TIME_SLOT) {
             reservation.changeToWaiting();
         }
     }
 
     @Override
-    protected void scheduleForDeleting(Reservation deletedReservation) {
+    protected void scheduleAfterDeleting(Reservation deletedReservation) {
         Optional<Reservation> firstWaitingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatusOrderById(
                 deletedReservation.getDate(), deletedReservation.getTime(),
                 deletedReservation.getTheme(), ReservationStatus.WAITING);

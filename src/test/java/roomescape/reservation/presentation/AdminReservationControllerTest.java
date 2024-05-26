@@ -84,7 +84,7 @@ class AdminReservationControllerTest extends ControllerTest {
                 .willReturn(expectedTheme);
         BDDMockito.given(memberService.findById(anyLong()))
                 .willReturn(USER_MIA(1L));
-        BDDMockito.given(bookingScheduler.create(any()))
+        BDDMockito.given(bookingScheduler.scheduleRecentReservation(any()))
                 .willReturn(expectedReservation);
 
         // when

@@ -164,7 +164,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(reservationResponses).hasSize(1);
-            softly.assertThat(waitingResponses).hasSize(0);
+            softly.assertThat(waitingResponses).hasSize(4);
         });
     }
 

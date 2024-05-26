@@ -10,11 +10,11 @@ public class DummyReservationManageService extends ReservationManageService {
     }
 
     @Override
-    protected void scheduleForCreating(boolean existInSameTime, Reservation reservation) {
+    protected void correctReservationStatus(int bookingCount, Reservation reservation) {
     }
 
     @Override
-    protected void scheduleForDeleting(Reservation deletedReservation) {
+    protected void scheduleAfterDeleting(Reservation deletedReservation) {
     }
 
     @Override

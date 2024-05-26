@@ -55,8 +55,9 @@ public class AdminReservationController {
         Member member = memberService.findById(request.memberId());
         Reservation newReservation = request.toModel(theme, reservationTime, member);
         Reservation createdReservation = bookingScheduler.create(newReservation);
+        Reservation schduledReservation = bookingScheduler.scheduleRecentReservation(createdReservation);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationResponse.from(createdReservation));
+                .body(ReservationResponse.from(schduledReservation));
     }
 
     @GetMapping

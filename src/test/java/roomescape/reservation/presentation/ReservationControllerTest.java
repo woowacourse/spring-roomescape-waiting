@@ -95,7 +95,7 @@ class ReservationControllerTest extends ControllerTest {
         Theme expectedTheme = WOOTECO_THEME(1L);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), BOOKING);
 
-        BDDMockito.given(bookingManageService.create(any()))
+        BDDMockito.given(bookingManageService.scheduleRecentReservation(any()))
                 .willReturn(expectedReservation);
         BDDMockito.given(reservationTimeService.findById(anyLong()))
                 .willReturn(expectedTime);
@@ -198,7 +198,7 @@ class ReservationControllerTest extends ControllerTest {
         Theme expectedTheme = WOOTECO_THEME(1L);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), BOOKING);
 
-        BDDMockito.given(bookingManageService.create(any()))
+        BDDMockito.given(bookingManageService.scheduleRecentReservation(any()))
                 .willReturn(expectedReservation);
         BDDMockito.given(reservationTimeService.findById(anyLong()))
                 .willReturn(expectedTime);
@@ -230,7 +230,7 @@ class ReservationControllerTest extends ControllerTest {
                 .willReturn(new ReservationTime(1L, MIA_RESERVATION_TIME));
         BDDMockito.willThrow(new ViolationException(TEST_ERROR_MESSAGE))
                 .given(bookingManageService)
-                .create(any());
+                .scheduleRecentReservation(any());
 
         // when & then
         mockMvc.perform(post("/reservations")
