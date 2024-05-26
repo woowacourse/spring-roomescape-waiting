@@ -86,6 +86,7 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 아이디 입니다."));
         if (member.getRole() == Role.MEMBER) {
             validateIsOwnReservation(member, deleteReservation);
+            validateIsWaiting(deleteReservation);
         }
         reservationRepository.deleteById(id);
 
@@ -99,6 +100,12 @@ public class ReservationService {
     private void validateIsOwnReservation(Member member, Reservation deleteReservation) {
         if (deleteReservation.isNotOwnedBy(member)) {
             throw new AuthenticationException("본인의 예약만 삭제할 수 있습니다.");
+        }
+    }
+
+    private void validateIsWaiting(Reservation reservation) {
+        if(reservation.isReserved()) {
+            throw new AuthenticationException("예약 취소는 관리자에게 문의해주세요.");
         }
     }
 }
