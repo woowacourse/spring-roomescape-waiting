@@ -1,7 +1,10 @@
 package roomescape.service.dto.response;
 
+import static roomescape.domain.ReservationStatus.BOOKED;
+
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Waiting;
 
 public class ReservationMineResponse {
@@ -9,11 +12,11 @@ public class ReservationMineResponse {
     private final ThemeResponse theme;
     private final LocalDate date;
     private final ReservationTimeResponse time;
-    private final String status;
+    private final ReservationStatus status;
     private final Long rank;
 
     public ReservationMineResponse(Long id, ThemeResponse theme, LocalDate date, ReservationTimeResponse time,
-                                   String status, Long rank) {
+                                   ReservationStatus status, Long rank) {
         this.id = id;
         this.theme = theme;
         this.date = date;
@@ -27,7 +30,7 @@ public class ReservationMineResponse {
                 new ThemeResponse(reservation.getTheme()),
                 reservation.getDate(),
                 new ReservationTimeResponse(reservation.getTime()),
-                reservation.getStatus().getDescription(),
+                BOOKED,
                 0L
         );
     }
@@ -37,7 +40,7 @@ public class ReservationMineResponse {
                 new ThemeResponse(waiting.getTheme()),
                 waiting.getDate(),
                 new ReservationTimeResponse(waiting.getTime()),
-                waiting.getStatus().getDescription(),
+                waiting.getStatus(),
                 rank
         );
     }
@@ -59,7 +62,7 @@ public class ReservationMineResponse {
     }
 
     public String getStatus() {
-        return status;
+        return status.getDescription();
     }
 
     public Long getRank() {

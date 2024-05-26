@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -70,6 +72,8 @@ public class ReservationService {
             responses.add(new ReservationMineResponse(waitingWithRank.getWaiting(), rank + 1));
         }
 
+        responses.sort(Comparator.comparing(ReservationMineResponse::getDate).thenComparing(o -> o.getTime().getStartAt()));
+
         return responses;
     }
 
@@ -104,7 +108,10 @@ public class ReservationService {
     public void deleteReservation(long id) {
         Reservation reservation = findReservationById(id);
         reservationRepository.delete(reservation);
+        makeWaitingToReservation(reservation);
+    }
 
+    private void makeWaitingToReservation(Reservation reservation) {
         Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(
                 reservation.getDate(),
                 reservation.getTime().getId(),

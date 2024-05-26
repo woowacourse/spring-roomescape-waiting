@@ -16,10 +16,10 @@ INSERT INTO reservation_time (start_at) VALUES ('15:00');
 INSERT INTO reservation_time (start_at) VALUES ('17:00');
 INSERT INTO reservation_time (start_at) VALUES ('18:00');
 
-INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '1', '1', 'BOOKED');
-INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '2', '1', 'BOOKED');
-INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '3', '1', 'BOOKED');
-INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '4', '1', 'BOOKED');
+INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '1', '1');
+INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '2', '1');
+INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '3', '1');
+INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES (DATEADD(DAY, 5, CURDATE()), '1', '4', '1');
 
 INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, 5, CURDATE()), '2', '1', '1', 'DENY');
 INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, 5, CURDATE()), '2', '2', '1', 'WAITING');
