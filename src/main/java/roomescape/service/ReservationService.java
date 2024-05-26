@@ -91,8 +91,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 condition.memberId(), condition.themeId(), condition.start(), condition.end());
 
-        return reservations
-                .stream()
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -101,6 +100,13 @@ public class ReservationService {
         return reservationRepository.findAllWithRankByMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> findByStatus(ReservationStatus status) {
+        return reservationRepository.findAllByStatus(status)
+                .stream()
+                .map(ReservationResponse::from)
                 .toList();
     }
 

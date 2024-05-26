@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.ReservationSearchCondition;
+import roomescape.domain.ReservationStatus;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
@@ -35,5 +36,10 @@ public class AdminController {
     @GetMapping("/reservations")
     public List<ReservationResponse> search(@ModelAttribute ReservationSearchCondition condition) {
         return reservationService.findByMemberAndThemeBetweenDates(condition);
+    }
+
+    @GetMapping("/reservations/waiting")
+    public List<ReservationResponse> findAllWaitingReservations() {
+        return reservationService.findByStatus(ReservationStatus.PENDING);
     }
 }
