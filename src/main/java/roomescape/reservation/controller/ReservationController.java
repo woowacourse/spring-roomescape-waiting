@@ -16,22 +16,22 @@ import roomescape.auth.dto.LoggedInMember;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.service.ReservationCreateService;
 import roomescape.reservation.service.ReservationDeleteService;
 import roomescape.reservation.service.ReservationFindMineService;
 import roomescape.reservation.service.ReservationFindService;
-import roomescape.reservation.service.ReservationUpdateService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationFindService findService;
     private final ReservationFindMineService findMineService;
-    private final ReservationUpdateService updateService;
+    private final ReservationCreateService updateService;
     private final ReservationDeleteService deleteService;
 
     public ReservationController(ReservationFindService findService,
                                  ReservationFindMineService findMineService,
-                                 ReservationUpdateService updateService,
+                                 ReservationCreateService updateService,
                                  ReservationDeleteService deleteService) {
         this.findService = findService;
         this.findMineService = findMineService;

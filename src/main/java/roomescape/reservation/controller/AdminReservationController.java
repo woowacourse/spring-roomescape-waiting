@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
+import roomescape.reservation.service.ReservationCreateService;
 import roomescape.reservation.service.ReservationFindService;
-import roomescape.reservation.service.ReservationUpdateService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationFindService findService;
-    private final ReservationUpdateService updateService;
+    private final ReservationCreateService updateService;
 
-    public AdminReservationController(ReservationFindService findService, ReservationUpdateService updateService) {
+    public AdminReservationController(ReservationFindService findService, ReservationCreateService updateService) {
         this.findService = findService;
         this.updateService = updateService;
     }

@@ -16,13 +16,13 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.TimeRepository;
 
 @Service
-public class ReservationUpdateService {
+public class ReservationCreateService {
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationUpdateService(ReservationRepository reservationRepository,
+    public ReservationCreateService(ReservationRepository reservationRepository,
                                     MemberRepository memberRepository,
                                     TimeRepository timeRepository,
                                     ThemeRepository themeRepository) {

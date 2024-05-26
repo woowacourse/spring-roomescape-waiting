@@ -30,7 +30,7 @@ import roomescape.time.dto.TimeResponse;
 import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
-class ReservationUpdateServiceTest {
+class ReservationCreateServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
@@ -40,7 +40,7 @@ class ReservationUpdateServiceTest {
     @Mock
     private ThemeRepository themeRepository;
     @InjectMocks
-    private ReservationUpdateService reservationUpdateService;
+    private ReservationCreateService reservationCreateService;
 
     @DisplayName("에약을 생성할 수 있다.")
     @Test
@@ -63,7 +63,7 @@ class ReservationUpdateServiceTest {
                 new TimeResponse(1L, LocalTime.of(19, 0)),
                 new ThemeResponse(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg"));
 
-        ReservationResponse actual = reservationUpdateService.createReservation(request);
+        ReservationResponse actual = reservationCreateService.createReservation(request);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -75,7 +75,7 @@ class ReservationUpdateServiceTest {
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
         given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationUpdateService.createReservation(request))
+        assertThatThrownBy(() -> reservationCreateService.createReservation(request))
                 .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("해당 멤버가 존재하지 않습니다.");
     }
@@ -89,7 +89,7 @@ class ReservationUpdateServiceTest {
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationUpdateService.createReservation(request))
+        assertThatThrownBy(() -> reservationCreateService.createReservation(request))
                 .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("해당 예약 시간이 존재하지 않습니다.");
     }
@@ -105,7 +105,7 @@ class ReservationUpdateServiceTest {
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
         given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationUpdateService.createReservation(request))
+        assertThatThrownBy(() -> reservationCreateService.createReservation(request))
                 .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("해당 테마가 존재하지 않습니다.");
     }
@@ -122,7 +122,7 @@ class ReservationUpdateServiceTest {
         given(themeRepository.findById(1L))
                 .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
 
-        assertThatThrownBy(() -> reservationUpdateService.createReservation(request))
+        assertThatThrownBy(() -> reservationCreateService.createReservation(request))
                 .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("예약은 현재 시간 이후여야 합니다.");
     }
