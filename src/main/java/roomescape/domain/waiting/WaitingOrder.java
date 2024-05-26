@@ -7,7 +7,7 @@ public class WaitingOrder {
 
     private int waitingOrder;
 
-    public WaitingOrder() {
+    protected WaitingOrder() {
     }
 
     public WaitingOrder(int waitingOrder) {

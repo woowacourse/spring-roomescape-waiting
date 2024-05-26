@@ -2,6 +2,7 @@ package roomescape.domain.waiting;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +22,7 @@ public class Waiting {
     @Embedded
     private WaitingOrder waitingOrder;
 
-    public Waiting() {
+    protected Waiting() {
     }
 
     public Waiting(Reservation reservation, int waitingOrder) {

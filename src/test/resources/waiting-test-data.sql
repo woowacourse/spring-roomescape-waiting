@@ -9,7 +9,8 @@ SET REFERENTIAL_INTEGRITY TRUE;
 INSERT INTO member(name, email, password, role)
 VALUES ('테드', 'test1@email.com', '1450575459', 'USER'),
        ('아톰', 'test2@email.com', '1450575459', 'USER'),
-       ('종이', 'test3@email.com', '1450575459', 'USER');
+       ('종이', 'test3@email.com', '1450575459', 'USER'),
+       ('오리', 'test4@email.com', '1450575459', 'USER');
 
 INSERT INTO theme (theme_name, description, thumbnail)
 VALUES ('테마1', '테마1 설명 설명 설명', 'thumbnail1.jpg');

@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
+import roomescape.repository.WaitingRepository;
 
 @Sql("/all-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -31,6 +33,9 @@ class ReservationServiceTest {
 
     @Autowired
     ThemeService themeService;
+
+    @Autowired
+    WaitingRepository waitingRepository;
 
     @Test
     void 잘못된_예약_시간대_id로_예약을_추가할_경우_예외_발생() {
@@ -147,5 +152,45 @@ class ReservationServiceTest {
                 (r.date().isEqual(startDate) || r.date().isAfter(startDate)) &&
                 (r.date().isEqual(endDate) || r.date().isBefore(endDate))
         );
+    }
+
+    @Sql("/waiting-test-data.sql")
+    @Test
+    void 대기_상태의_예약_생성시_자동으로_대기_순번을_지정() {
+        //given
+        ReservationRequest reservationRequest = new ReservationRequest(
+                LocalDate.now().plusDays(1), 1L, 1L, 4L);
+
+        //when
+        Long savedReservationId = reservationService.addReservationWaiting(reservationRequest);
+
+        //then
+        Waiting waiting = waitingRepository.findByReservationId(savedReservationId).orElseThrow();
+
+        assertThat(waiting.getWaitingOrderValue()).isEqualTo(3);
+    }
+
+    @Sql("/waiting-test-data.sql")
+    @Test
+    void 대기_상태의_예약_생성시_지나간_날짜로_생성할_경우_예외_발생() {
+        //given
+        ReservationRequest reservationRequest = new ReservationRequest(
+                LocalDate.now().minusDays(1), 1L, 1L, 4L);
+
+        //when, then
+        assertThatThrownBy(() -> reservationService.addReservationWaiting(reservationRequest))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Sql("/waiting-test-data.sql")
+    @Test
+    void 대기_상태의_예약_생성시_사용자에게_이미_동일한_예약이_있을_경우_예외_발생() {
+        //given
+        ReservationRequest reservationRequest = new ReservationRequest(
+                LocalDate.now().plusDays(1), 1L, 1L, 2L);
+
+        //when, then
+        assertThatThrownBy(() -> reservationService.addReservationWaiting(reservationRequest))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
