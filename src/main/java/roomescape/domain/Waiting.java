@@ -68,6 +68,10 @@ public class Waiting {
         }
     }
 
+    public void reject() {
+        this.status = WaitingStatus.REJECTED;
+    }
+
     public Long getId() {
         return id;
     }
@@ -90,10 +94,6 @@ public class Waiting {
 
     public WaitingStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(WaitingStatus status) {
-        this.status = status;
     }
 
     @Override
