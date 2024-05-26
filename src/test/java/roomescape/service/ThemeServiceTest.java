@@ -83,8 +83,8 @@ class ThemeServiceTest extends ServiceTest {
             themeService.deleteTheme(theme.getId());
 
             List<Theme> themes = themeFixture.findAllTheme();
-            assertThat(themes.size())
-                    .isEqualTo(0);
+            assertThat(themes)
+                    .isEmpty();
         }
 
         @Test

@@ -180,12 +180,12 @@ class ReservationServiceTest extends ServiceTest {
         }
 
         @Test
-        void 예약_id와_예약자_id로_예약_대기가_존재하지_않는_예약을_삭제할_수_있다() { // TODO: 테스트 메서드들 이름 형식 통일하기
+        void 예약_id와_예약자_id로_예약_대기가_존재하지_않는_예약을_삭제할_수_있다() {
             reservationService.deleteReservation(reservation.getId(), member.getId());
 
             List<Reservation> reservations = reservationFixture.findAllReservation();
-            assertThat(reservations.size())
-                    .isEqualTo(0);
+            assertThat(reservations)
+                    .isEmpty();
         }
 
         @Test
@@ -221,7 +221,7 @@ class ReservationServiceTest extends ServiceTest {
                         assertThat(reservation.getMember()).isEqualTo(otherMember);
                     });
             assertThat(waitings)
-                    .isEmpty(); // TODO: 테스트 메서드들 empty 검증 형식 통일하기
+                    .isEmpty();
         }
     }
 }

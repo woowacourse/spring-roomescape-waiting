@@ -138,8 +138,8 @@ public class ReservationWaitingServiceTest extends ServiceTest {
             reservationWaitingService.deleteReservationWaiting(reservation.getId(), user);
 
             List<ReservationWaiting> waitings = waitingFixture.findAllWaiting();
-            assertThat(waitings.size())
-                    .isEqualTo(0);
+            assertThat(waitings)
+                    .isEmpty();
         }
 
         @Test
@@ -176,8 +176,8 @@ public class ReservationWaitingServiceTest extends ServiceTest {
             reservationWaitingService.deleteAdminReservationWaiting(waiting.getId());
 
             List<ReservationWaiting> waitings = waitingFixture.findAllWaiting();
-            assertThat(waitings.size())
-                    .isEqualTo(0);
+            assertThat(waitings)
+                    .isEmpty();
         }
 
         @Test

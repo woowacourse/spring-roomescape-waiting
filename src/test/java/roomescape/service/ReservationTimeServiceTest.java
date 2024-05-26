@@ -119,8 +119,8 @@ class ReservationTimeServiceTest extends ServiceTest {
             reservationTimeService.deleteReservationTime(1L);
 
             List<ReservationTime> times = timeFixture.findAllTime();
-            assertThat(times.size())
-                    .isEqualTo(0);
+            assertThat(times)
+                    .isEmpty();
         }
 
         @Test
