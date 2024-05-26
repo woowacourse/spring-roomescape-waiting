@@ -70,10 +70,6 @@ class ReservationServiceTest {
     @Test
     @DisplayName("상태가 대기인 예약 목록만을 가져온다.")
     void getWaitingReservation() {
-        Reservation waiting = reservationService.addWaitingReservation(
-                new ReservationAddRequest(LocalDate.now().plusDays(1), TIME_MOCK_DATA, THEME_MOCK_DATA,
-                        MEMBER_MOCK_DATA), 1);
-
         List<Reservation> waitings = reservationService.findWaitings();
         Reservation topWaiting = waitings.get(0);
 

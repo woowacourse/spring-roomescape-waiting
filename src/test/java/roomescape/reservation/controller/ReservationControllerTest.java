@@ -57,7 +57,6 @@ class ReservationControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$[0].memberName").value(reservation.getMember().getName()))
                 .andExpect(jsonPath("$[0].startAt").value(expectedStartAt))
                 .andExpect(jsonPath("$[0].themeName").value(reservation.getTheme().getName()));
-        ;
     }
 
     @Test
