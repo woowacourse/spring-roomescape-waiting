@@ -34,9 +34,7 @@ public class WaitingService {
     public void deleteWaitingById(long reservationId, long memberId) {
         Member member = memberRepository.getById(memberId);
         reservationRepository.findById(reservationId)
-                .ifPresent(reservation -> {
-                    deleteIfAvailable(member, reservation);
-                });
+                .ifPresent(reservation -> deleteIfAvailable(member, reservation));
     }
 
     private void deleteIfAvailable(Member member, Reservation reservation) {
