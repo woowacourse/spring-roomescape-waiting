@@ -51,12 +51,6 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    private ReservationTime findReservationTime(ReservationDto reservationDto) {
-        long timeId = reservationDto.getTimeId();
-        Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
-        return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
-    }
-
     public void deleteReservation(long id) {
         reservationRepository.findById(id).ifPresentOrElse(
                 reservation -> {
@@ -81,6 +75,12 @@ public class ReservationService {
 
     public List<Reservation> findReservationsByMember(LoginMember member) {
         return reservationRepository.findByMemberId(member.getId());
+    }
+
+    private ReservationTime findReservationTime(ReservationDto reservationDto) {
+        long timeId = reservationDto.getTimeId();
+        Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
+        return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
     private void validateIsFuture(LocalDate date, LocalTime time) {
