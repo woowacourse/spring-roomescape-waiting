@@ -37,6 +37,9 @@ public class Date {
     }
 
     public boolean isAfterCancelDate(LocalDate now) {
+        if (date.isBefore(now)) {
+            return false;
+        }
         return now.isAfter(date.minusDays(CANCEL_MIN_DATE));
     }
 
