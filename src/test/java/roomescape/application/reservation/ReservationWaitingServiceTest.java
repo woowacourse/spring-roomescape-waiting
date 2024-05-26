@@ -67,28 +67,6 @@ class ReservationWaitingServiceTest {
                 .isEqualTo(member);
     }
 
-    @Test
-    @DisplayName("예약 대기를 취소하면, 다음 대기자가 예약이 확정된다.")
-    void cancelWaitList() {
-        Theme theme = themeRepository.save(TEST_THEME.create());
-        LocalDate date = LocalDate.parse("2023-01-01");
-        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
-        Member aru = memberRepository.save(MEMBER_ARU.create());
-        Member pk = memberRepository.save(MEMBER_PK.create());
-        LocalDateTime createdAt = LocalDateTime.parse("1999-01-01T00:00:00");
-        long firstId = reservationRepository.save(
-                new Reservation(aru, date, time, theme, createdAt, BookStatus.WAITING)
-        ).getId();
-        long secondId = reservationRepository.save(
-                new Reservation(pk, date, time, theme, createdAt.plusDays(1), BookStatus.WAITING)
-        ).getId();
-
-        reservationService.cancelWaitingList(aru.getId(), firstId);
-
-        Reservation reservation = reservationRepository.getById(secondId);
-        assertThat(reservation.isBooked()).isTrue();
-    }
-
     @ParameterizedTest
     @EnumSource(value = BookStatus.class, names = {"BOOKED", "WAITING"})
     @DisplayName("이미 예약된 항목의 경우, 예약 대기를 시도할 경우 예외가 발생한다.")

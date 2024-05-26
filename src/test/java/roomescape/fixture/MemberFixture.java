@@ -10,6 +10,7 @@ public enum MemberFixture {
 
     MEMBER_ARU("아루", "member@test.com", "12341234", Role.MEMBER),
     MEMBER_PK("피케이", "pk@test.com", "12341234", Role.MEMBER),
+    MEMBER_SEESAW("시소", "seesaw@test.com", "12341234", Role.MEMBER),
     ADMIN_PK("피케이", "admin@test.com", "12341234", Role.ADMIN),
     ;
 

@@ -2,13 +2,18 @@ package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
+import static roomescape.fixture.MemberFixture.MEMBER_PK;
+import static roomescape.fixture.MemberFixture.MEMBER_SEESAW;
 import static roomescape.fixture.ThemeFixture.TEST_THEME;
 import static roomescape.fixture.TimeFixture.TWELVE_PM;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +21,7 @@ import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -108,5 +114,33 @@ class ReservationServiceTest {
         assertThatCode(() -> reservationService.bookReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("현재 시간보다 과거로 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("예약 대기를 취소하더라도, 현재 확정된 예약이 변경되지 않는다.")
+    void remainsSameBookStatusOnWaitingCancellation() {
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
+        Theme theme = themeRepository.save(TEST_THEME.create());
+        Member aru = memberRepository.save(MEMBER_ARU.create());
+        Member pk = memberRepository.save(MEMBER_PK.create());
+        Member seesaw = memberRepository.save(MEMBER_SEESAW.create());
+        LocalDate date = LocalDate.of(2024, 1, 1);
+        LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
+
+        List<Reservation> reservations = Stream.of(
+                        new Reservation(aru, date, time, theme, createdAt, BookStatus.BOOKED),
+                        new Reservation(pk, date, time, theme, createdAt.plusHours(1), BookStatus.WAITING),
+                        new Reservation(seesaw, date, time, theme, createdAt.plusHours(2), BookStatus.WAITING))
+                .map(reservationRepository::save)
+                .toList();
+
+        reservationService.cancelWaitingList(pk.getId(), reservations.get(1).getId());
+
+        List<Reservation> waiting = reservationRepository.findAllWaitingReservations();
+        List<Reservation> booked = reservationRepository.findAllBookedReservations();
+        assertAll(
+                () -> assertThat(waiting).hasSize(1),
+                () -> assertThat(booked).hasSize(1)
+        );
     }
 }

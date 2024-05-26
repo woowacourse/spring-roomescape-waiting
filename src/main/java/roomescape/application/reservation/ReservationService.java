@@ -104,8 +104,5 @@ public class ReservationService {
             throw new UnAuthorizedException();
         }
         reservation.cancelWaiting();
-        reservationRepository.findFirstWaiting(
-                reservation.getTheme(), reservation.getDate(), reservation.getTime()
-        ).ifPresent(Reservation::book);
     }
 }
