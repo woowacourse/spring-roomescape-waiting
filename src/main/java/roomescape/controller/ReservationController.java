@@ -60,8 +60,8 @@ public class ReservationController {
     }
 
     @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> cancelWaiting(@PathVariable Long id) {
-        reservationService.deleteById(id);
+    public ResponseEntity<Void> cancelWaiting(@PathVariable(name = "id") Long reservationId) {
+        reservationService.deleteById(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
