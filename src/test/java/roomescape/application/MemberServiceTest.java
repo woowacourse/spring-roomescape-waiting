@@ -17,6 +17,15 @@ class MemberServiceTest extends BasicAcceptanceTest {
     @Autowired
     private MemberService memberService;
 
+    @DisplayName("요청으로 들어온 회원 정보가 예외 조건에 해당되지 않을 때 해당 회원의 정보를 저장한다.")
+    @Test
+    void save() {
+        memberService.save(TestFixtures.MEMBER_SIGN_UP_REQUEST);
+        List<MemberResponse> memberResponses = memberService.findAll();
+
+        assertThat(memberResponses).isEqualTo(TestFixtures.MEMBER_RESPONSES_2);
+    }
+
     @DisplayName("이미 존재하는 이메일을 저장할 시 예외를 발생시킨다")
     @Test
     void duplicateEmail() {
@@ -32,6 +41,6 @@ class MemberServiceTest extends BasicAcceptanceTest {
     void findAll() {
         List<MemberResponse> memberResponses = memberService.findAll();
 
-        assertThat(memberResponses).isEqualTo(TestFixtures.MEMBER_RESPONSES);
+        assertThat(memberResponses).isEqualTo(TestFixtures.MEMBER_RESPONSES_1);
     }
 }

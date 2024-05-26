@@ -14,6 +14,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
+import roomescape.dto.ReservationTimeResponse;
 import roomescape.exception.RoomescapeException;
 
 class ReservationTimeServiceTest extends BasicAcceptanceTest {
@@ -22,6 +23,15 @@ class ReservationTimeServiceTest extends BasicAcceptanceTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
+    @DisplayName("요청으로 들어온 예약 시간이 예외 조건에 해당되지 않을 때 해당 예약 시간을 저장한다.")
+    @Test
+    void save() {
+        reservationTimeService.save(TestFixtures.RESERVATION_TIME_REQUEST);
+        List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.findAll();
+
+        assertThat(reservationTimeResponses).isEqualTo(TestFixtures.RESERVATION_TIME_RESPONSES_1);
+    }
 
     @DisplayName("이미 존재하는 예약 시간을 생성 요청하면 예외가 발생한다.")
     @Test
@@ -32,6 +42,15 @@ class ReservationTimeServiceTest extends BasicAcceptanceTest {
         assertThatThrownBy(() -> reservationTimeService.save(reservationTimeRequest))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(String.format("중복된 예약 시간입니다. 요청 예약 시간:%s", reservationTimeRequest.startAt()));
+    }
+
+    @DisplayName("해당 id의 예약 시간을 삭제한다.")
+    @Test
+    void deleteById() {
+        reservationTimeService.deleteById(4L);
+        List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.findAll();
+
+        assertThat(reservationTimeResponses).isEqualTo(TestFixtures.RESERVATION_TIME_RESPONSES_2);
     }
 
     @DisplayName("예약에 사용된 예약 시간을 삭제 요청하면, 예외가 발생한다.")

@@ -16,18 +16,18 @@ values ('찰리', 'gomding@wooteco.com', 'wootecoCrew6!', 'BASIC'),
        ('운영자', 'admin@wooteco.com', 'wootecoCrew6!', 'ADMIN');
 
 insert into reservation_time (start_at)
-values ('12:00'),
-       ('13:00'),
-       ('14:00'),
-       ('15:00');
+values ('10:00'),
+       ('11:00'),
+       ('12:00'),
+       ('13:00');
 
 insert into theme (name, description, thumbnail)
-values ('테마1', '테마1 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
-       ('테마2', '테마2 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
-       ('테마3', '테마3 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
-       ('테마4', '테마4 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
-       ('테마5', '테마5 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
-       ('테마6', '테마6 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png');
+values ('name1', 'description1', 'thumbnail1'),
+       ('name2', 'description2', 'thumbnail2'),
+       ('name3', 'description3', 'thumbnail3'),
+       ('name4', 'description4', 'thumbnail4'),
+       ('name5', 'description5', 'thumbnail5'),
+       ('name6', 'description6', 'thumbnail6');
 
 insert into reservation (date, member_id, time_id, theme_id, status)
 values ('2099-04-29', 2, 1, 1, 'RESERVATION'),

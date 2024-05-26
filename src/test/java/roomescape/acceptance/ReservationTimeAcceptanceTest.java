@@ -32,8 +32,8 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
     @DisplayName("동일한 예약 시간을 두번 추가하면, 예외가 발생한다")
     Stream<DynamicTest> duplicateReservationTest() {
         return Stream.of(
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 201)),
-                dynamicTest("동일한 예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 409))
+                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "01:00", 201)),
+                dynamicTest("동일한 예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "01:00", 409))
         );
     }
 
@@ -41,9 +41,9 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
     @DisplayName("3개의 예약 시간을 추가한다")
     Stream<DynamicTest> reservationPostTest() {
         return Stream.of(
-                dynamicTest("예약 시간을 추가한다 (09:00)", () -> postReservationTime(adminToken, "09:00", 201)),
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 201)),
-                dynamicTest("예약 시간을 추가한다 (11:00)", () -> postReservationTime(adminToken, "11:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (09:00)", () -> postReservationTime(adminToken, "01:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "02:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (11:00)", () -> postReservationTime(adminToken, "03:00", 201)),
                 dynamicTest("모든 예약 시간을 조회한다 (총 7개)", () -> getReservationTimes(200, 7))
         );
     }
@@ -54,9 +54,9 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
         AtomicLong reservationTimeId = new AtomicLong();
 
         return Stream.of(
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> reservationTimeId.set(postReservationTime(adminToken, "10:00", 201))),
-                dynamicTest("예약 시간을 삭제한다 (10:00)", () -> deleteReservationTime(adminToken, reservationTimeId.longValue(), 204)),
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (01:00)", () -> reservationTimeId.set(postReservationTime(adminToken, "01:00", 201))),
+                dynamicTest("예약 시간을 삭제한다 (01:00)", () -> deleteReservationTime(adminToken, reservationTimeId.longValue(), 204)),
+                dynamicTest("예약 시간을 추가한다 (01:00)", () -> postReservationTime(adminToken, "01:00", 201)),
                 dynamicTest("모든 예약 시간을 조회한다 (총 5개)", () -> getReservationTimes(200, 5))
         );
     }
