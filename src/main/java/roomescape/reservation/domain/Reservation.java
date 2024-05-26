@@ -3,8 +3,6 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,7 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -40,62 +40,46 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private Status status;
-
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
+    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
-        this.date = new ReservationDate(date);
+        this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
+    }
+
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(id, member, new ReservationDate(date), time, theme);
+    }
+
+    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme);
+    }
+
+    public static Reservation createNewReservation(Member member, ReservationDate date, ReservationTime time,
+                                                   Theme theme) {
+        if (date.isPast()) {
+            throw new IllegalRequestException("예약 날짜는 과거일 수 없습니다");
+        }
+        return new Reservation(member, date, time, theme);
     }
 
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, member, date, time, theme, Status.RESERVED);
-    }
-
-    public Reservation(Long id, Reservation reservation) {
-        this(
-                id,
-                reservation.getMember(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                Status.RESERVED
-        );
-    }
-
-    public boolean isPast() {
-        return date.isPast();
+    public boolean isReservedBy(Long memberId) {
+        return member.getId().equals(memberId);
     }
 
     public Long getId() {
         return id;
     }
 
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
     public Member getMember() {
         return member;
     }
 
-    public String getName() {
+    public String getMemberName() {
         return member.getName();
     }
 
@@ -107,12 +91,24 @@ public class Reservation {
         return time;
     }
 
+    public Long getTimeId() {
+        return time.getId();
+    }
+
+    public LocalTime getStartAt() {
+        return time.getStartAt();
+    }
+
     public Theme getTheme() {
         return theme;
     }
 
-    public Status getStatus() {
-        return status;
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     @Override
@@ -126,11 +122,11 @@ public class Reservation {
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id) && Objects.equals(member, that.member)
                 && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme) && Objects.equals(status, that.status);
+                && Objects.equals(theme, that.theme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme, status);
+        return Objects.hash(id, member, date, time, theme);
     }
 }

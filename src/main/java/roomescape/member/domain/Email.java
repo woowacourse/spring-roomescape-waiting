@@ -2,7 +2,7 @@ package roomescape.member.domain;
 
 import jakarta.persistence.Column;
 import java.util.Objects;
-import roomescape.global.exception.DomainValidationException;
+import roomescape.global.exception.IllegalRequestException;
 
 public class Email {
 
@@ -27,19 +27,19 @@ public class Email {
 
     private void validateNotNull(String value) {
         if (value == null) {
-            throw new DomainValidationException("이메일은 비어있을 수 없습니다");
+            throw new IllegalRequestException("이메일은 비어있을 수 없습니다");
         }
     }
 
     private void validateNotBlank(String value) {
         if (value.isBlank()) {
-            throw new DomainValidationException("이메일은 공백문자로만 이루어질 수 없습니다");
+            throw new IllegalRequestException("이메일은 공백문자로만 이루어질 수 없습니다");
         }
     }
 
     private void validateEmailFormat(String value) {
         if (!value.matches(EMAIL_FORMAT)) {
-            throw new DomainValidationException(value + "은 유효하지 않은 이메일입니다");
+            throw new IllegalRequestException(value + "은 유효하지 않은 이메일입니다");
         }
     }
 

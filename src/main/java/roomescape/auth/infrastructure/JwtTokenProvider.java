@@ -7,7 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.global.exception.auth.AuthenticationException;
+import roomescape.global.exception.AuthenticationException;
 import roomescape.member.domain.Member;
 
 @Component

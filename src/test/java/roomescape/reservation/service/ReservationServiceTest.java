@@ -4,32 +4,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static roomescape.reservation.fixture.ReservationFixture.MEMBER_ID_1_RESERVATION;
 import static roomescape.reservation.fixture.ReservationFixture.PAST_DATE_RESERVATION_REQUEST;
 import static roomescape.reservation.fixture.ReservationFixture.RESERVATION_REQUEST_1;
-import static roomescape.reservation.fixture.ReservationFixture.SAVED_RESERVATION_1;
 import static roomescape.reservation.fixture.ReservationFixture.SAVED_RESERVATION_2;
 import static roomescape.theme.fixture.ThemeFixture.THEME_1;
-import static roomescape.time.fixture.DateTimeFixture.TOMORROW;
 import static roomescape.time.fixture.ReservationTimeFixture.RESERVATION_TIME_10_00_ID_1;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.global.exception.DomainValidationException;
-import roomescape.global.exception.DuplicateSaveException;
-import roomescape.global.exception.NoSuchRecordException;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.fixture.MemberFixture;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.dto.MemberReservation;
+import roomescape.reservation.domain.ReservationWithWaiting;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.theme.domain.ThemeRepository;
-import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.theme.service.ThemeService;
+import roomescape.time.service.ReservationTimeService;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -38,86 +37,69 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Mock
+    private MemberService memberService;
+
+    @Mock
+    private ReservationTimeService reservationTimeService;
+
+    @Mock
+    private ThemeService themeService;
+
+    @Mock
     private ReservationRepository reservationRepository;
-
-    @Mock
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Mock
-    private ThemeRepository themeRepository;
-
 
     @DisplayName("전체 예약을 조회하고 응답 형태로 반환할 수 있다")
     @Test
     void should_return_response_when_requested_all() {
-        when(reservationRepository.findAll()).thenReturn(List.of(SAVED_RESERVATION_1, SAVED_RESERVATION_2));
+        when(reservationRepository.findAll()).thenReturn(List.of(MEMBER_ID_1_RESERVATION, SAVED_RESERVATION_2));
 
         assertThat(reservationService.findAllReservation())
-                .contains(new ReservationResponse(SAVED_RESERVATION_1), new ReservationResponse(SAVED_RESERVATION_2));
+                .contains(new ReservationResponse(MEMBER_ID_1_RESERVATION),
+                        new ReservationResponse(SAVED_RESERVATION_2));
     }
 
     @DisplayName("특정 유저의 예약 목록을 읽는 요청을 처리할 수 있다")
     @Test
     void should_return_response_when_my_reservations_requested_all() {
-        when(reservationRepository.findByMember_Id(1L)).thenReturn(List.of(SAVED_RESERVATION_1));
+        when(reservationRepository.findByMemberIdWithWaitingStatus(1L))
+                .thenReturn(List.of(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 0)));
 
-        assertThat(reservationService.findAllByMemberWithStatus(1L))
-                .containsExactly(new MemberReservation(SAVED_RESERVATION_1));
+        assertThat(reservationService.findMemberReservationWithWaitingStatus(1L))
+                .containsExactly(new MemberReservationResponse(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 0)));
     }
 
     @DisplayName("예약을 추가하고 응답을 반환할 수 있다")
     @Test
     void should_save_reservation_when_requested() {
-        when(reservationRepository.save(any(Reservation.class))).thenReturn(SAVED_RESERVATION_1);
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(RESERVATION_TIME_10_00_ID_1));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(THEME_1));
+        when(memberService.findById(any(Long.class))).thenReturn(MemberFixture.MEMBER_ID_1);
+        when(reservationTimeService.findById(1L)).thenReturn(RESERVATION_TIME_10_00_ID_1);
+        when(themeService.findById(1L)).thenReturn(THEME_1);
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(MEMBER_ID_1_RESERVATION);
 
-        ReservationResponse savedReservation = reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1,
-                RESERVATION_REQUEST_1);
+        ReservationResponse savedReservation = reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1);
 
-        assertThat(savedReservation).isEqualTo(new ReservationResponse(SAVED_RESERVATION_1));
-    }
-
-    @DisplayName("존재하지 않는 예약시각으로 예약 시 예외가 발생한다")
-    @Test
-    void should_throw_exception_when_request_with_non_exist_time() {
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1, RESERVATION_REQUEST_1))
-                .isInstanceOf(NoSuchRecordException.class);
-    }
-
-    @DisplayName("존재하지 않은 테마로 예약 시 예외가 발생한다")
-    @Test
-    void should_throw_exception_when_request_with_non_exist_theme() {
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(RESERVATION_TIME_10_00_ID_1));
-        when(themeRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1, RESERVATION_REQUEST_1))
-                .isInstanceOf(NoSuchRecordException.class);
+        assertThat(savedReservation).isEqualTo(new ReservationResponse(MEMBER_ID_1_RESERVATION));
     }
 
     @DisplayName("현재보다 이전날짜로 예약 시 예외가 발생한다")
     @Test
     void should_throw_exception_when_request_with_past_date() {
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(RESERVATION_TIME_10_00_ID_1));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(THEME_1));
+        when(memberService.findById(any(Long.class))).thenReturn(MemberFixture.MEMBER_ID_1);
+        when(reservationTimeService.findById(1L)).thenReturn(RESERVATION_TIME_10_00_ID_1);
+        when(themeService.findById(1L)).thenReturn(THEME_1);
 
-        assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1,
-                        PAST_DATE_RESERVATION_REQUEST))
-                .isInstanceOf(DomainValidationException.class);
+        assertThatThrownBy(() -> reservationService.saveMemberReservation(1L, PAST_DATE_RESERVATION_REQUEST))
+                .isInstanceOf(IllegalRequestException.class);
     }
 
-    @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약이 미리 존재하는 경우 예외가 발생한다")
+    @DisplayName("내 이름으로 진행되고 있는 예약이 이미 존재하는 경우 예약 대기를 할 수 없다")
     @Test
-    void should_throw_exception_when_reserve_date_and_time_and_theme_duplicated() {
-        when(reservationRepository.existsByDateValueAndTime_IdAndTheme_Id(TOMORROW, 1L, 1L)).thenReturn(true);
+    void should_not_wait_when_my_reservation_is_exist() {
+        when(reservationRepository.findByDateAndTimeAndTheme(any(LocalDate.class), any(Long.class),
+                any(Long.class))).thenReturn(List.of(
+                MEMBER_ID_1_RESERVATION));
 
-        assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1, RESERVATION_REQUEST_1))
-                .isInstanceOf(DuplicateSaveException.class);
+        assertThatThrownBy(() -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
+                .isInstanceOf(IllegalRequestException.class);
     }
 }

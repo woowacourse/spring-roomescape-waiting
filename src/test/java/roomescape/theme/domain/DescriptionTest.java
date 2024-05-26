@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.global.exception.DomainValidationException;
+import roomescape.global.exception.IllegalRequestException;
 
 class DescriptionTest {
 
@@ -15,7 +15,7 @@ class DescriptionTest {
     @Test
     void should_throw_exception_when_theme_description_is_null() {
         assertThatThrownBy(() -> new Description(null))
-                .isInstanceOf(DomainValidationException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("테마 설명이 공백 문자로만 이루어져 있는 경우 예외가 발생한다")
@@ -23,7 +23,7 @@ class DescriptionTest {
     @ValueSource(strings = {"", "   ", "        "})
     void should_throw_exception_when_theme_description_is_blank(String description) {
         assertThatThrownBy(() -> new Description(description))
-                .isInstanceOf(DomainValidationException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("올바른 테마 설명 생성 시 예외가 발생하지 않는다")

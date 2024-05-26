@@ -10,7 +10,8 @@ import org.springframework.data.repository.query.Param;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
-            SELECT th FROM Theme AS th
+            SELECT th
+            FROM Theme AS th
             JOIN Reservation AS r ON th.id = r.theme.id
             WHERE r.date.value BETWEEN :start AND :end
             GROUP BY th.id

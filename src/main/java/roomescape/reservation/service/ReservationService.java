@@ -3,94 +3,93 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.DomainValidationException;
-import roomescape.global.exception.DuplicateSaveException;
-import roomescape.global.exception.NoSuchRecordException;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.IllegalRequestException;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.dto.MemberReservation;
+import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.dto.MemberReservationAddRequest;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.reservation.dto.WaitingResponse;
+import roomescape.theme.service.ThemeService;
+import roomescape.time.service.ReservationTimeService;
 
 @Service
 public class ReservationService {
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+    private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
 
-    public ReservationService(MemberRepository memberRepository,
-                              ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository) {
-        this.memberRepository = memberRepository;
+    public ReservationService(MemberService memberService, ReservationTimeService reservationTimeService,
+                              ThemeService themeService, ReservationRepository reservationRepository) {
+        this.memberService = memberService;
+        this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllReservation() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(Long memberId, Long themeId, LocalDate dateFrom,
                                                                       LocalDate dateTo) {
-        return reservationRepository.findByMemberAndThemeAndPeriod(memberId, themeId,
-                        dateFrom, dateTo).stream()
+        return reservationRepository.findByMemberAndThemeAndPeriod(memberId, themeId, dateFrom, dateTo).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
-    public List<MemberReservation> findAllByMemberWithStatus(Long memberId) {
-        return reservationRepository.findByMember_Id(memberId)
-                .stream()
-                .map(MemberReservation::new)
+    @Transactional(readOnly = true)
+    public List<MemberReservationResponse> findMemberReservationWithWaitingStatus(Long memberId) {
+        return reservationRepository.findByMemberIdWithWaitingStatus(memberId).stream()
+                .map(MemberReservationResponse::new)
                 .toList();
     }
 
-    public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
-
-        return saveMemberReservation(member, request);
+    @Transactional(readOnly = true)
+    public List<WaitingResponse> findReservationsOnWaiting() {
+        return reservationRepository.findReservationOnWaiting().stream()
+                .map(WaitingResponse::new)
+                .toList();
     }
 
-    public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
-        if (reservationRepository.existsByDateValueAndTime_IdAndTheme_Id(request.date(), request.timeId(),
-                request.themeId())) {
-            throw new DuplicateSaveException("중복되는 예약이 존재합니다");
-        }
+    @Transactional
+    public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
+        validateMemberReservationNotExistInSlot(memberId, request);
 
-        ReservationTime reservationTime = getReservationTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
+        Reservation newReservation = Reservation.createNewReservation(
+                memberService.findById(memberId),
+                new ReservationDate(request.date()),
+                reservationTimeService.findById(request.timeId()),
+                themeService.findById(request.themeId())
+        );
 
-        Reservation reservation = request.toReservation(member, reservationTime, theme);
-        if (reservation.isPast()) {
-            throw new DomainValidationException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
-        }
-        Reservation saved = reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(newReservation);
         return new ReservationResponse(saved);
     }
 
-    private ReservationTime getReservationTime(long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchRecordException("해당하는 예약시간이 존재하지 않습니다 ID: " + timeId));
+    private void validateMemberReservationNotExistInSlot(Long memberId, MemberReservationAddRequest request) {
+        Reservations sameSlotReservations = new Reservations(reservationRepository.findByDateAndTimeAndTheme(
+                request.date(),
+                request.timeId(),
+                request.themeId()
+        ));
+
+        if (sameSlotReservations.hasReservationMadeBy(memberId)) {
+            throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
+        }
     }
 
-    private Theme getTheme(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchRecordException("해당하는 테마가 존재하지 않습니다 ID: " + themeId));
-    }
-
+    @Transactional
     public void removeReservation(long id) {
         reservationRepository.deleteById(id);
     }
