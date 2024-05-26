@@ -78,6 +78,23 @@ class WaitingReservationControllerTest {
     }
 
     @Test
+    @DisplayName("성공 : 예약 정보를 얻을 수 있다.")
+    void findReservations() {
+        waiting = waitingRepository.save(waiting);
+
+        int actualSize = RestAssured.given()
+                .cookie("token", cookie)
+                .when()
+                .get("/waiting-reservations")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getInt("size()");
+
+        assertThat(actualSize).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("성공 : 예약 대기를 만들 수 있다.")
     void createWaitingReservation() {
         ReservationCreateRequest params = new ReservationCreateRequest(
