@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
 import roomescape.domain.reservation.domain.Reservation;
-import roomescape.domain.reservation.domain.Status;
+import roomescape.domain.reservation.domain.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
 import roomescape.domain.reservation.dto.ReservationWaitAddRequest;
 import roomescape.domain.time.dto.BookableTimeResponse;
@@ -144,7 +144,7 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("(날짜, 테마, 시각)이 동일한 예약이 있는 경우, 예약 승인을 하지 못합니다.")
     @Test
     void should_throw_DataConflictException_when_reserve_date_and_time_and_theme_and_status_approve_duplicated() {
-        assertThatThrownBy(() -> reservationService.updateReservationStatus(20L, Status.RESERVATION))
+        assertThatThrownBy(() -> reservationService.updateReservationStatus(20L, ReservationStatus.RESERVATION))
                 .isInstanceOf(DataConflictException.class)
                 .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약 승인을 할 수 없습니다.");
     }
@@ -154,7 +154,7 @@ class ReservationServiceTest extends ServiceTest {
     void can_approve_when_reserve_date_and_time_and_theme_and_status_not_duplicated() {
         reservationService.removeReservation(8L);
 
-        assertThatCode(() -> reservationService.updateReservationStatus(20L, Status.RESERVATION))
+        assertThatCode(() -> reservationService.updateReservationStatus(20L, ReservationStatus.RESERVATION))
                 .doesNotThrowAnyException();
     }
 }

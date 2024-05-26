@@ -20,7 +20,7 @@ public class Reservation {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status;
+    private ReservationStatus status;
 
     @ManyToOne
     @JoinColumn(name = "time_id")
@@ -38,7 +38,7 @@ public class Reservation {
 
     }
 
-    public Reservation(Long id, LocalDate date, Status status, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id, LocalDate date, ReservationStatus status, ReservationTime time, Theme theme, Member member) {
         this.id = id;
         this.date = date;
         this.status = status;
@@ -59,7 +59,7 @@ public class Reservation {
         return date;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 

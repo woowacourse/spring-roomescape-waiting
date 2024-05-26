@@ -1,11 +1,11 @@
 package roomescape.domain.reservation.domain;
 
-public enum Status {
+public enum ReservationStatus {
     RESERVATION("예약"), RESERVATION_WAIT("예약대기");
 
     private final String value;
 
-    Status(String value) {
+    ReservationStatus(String value) {
         this.value = value;
     }
 

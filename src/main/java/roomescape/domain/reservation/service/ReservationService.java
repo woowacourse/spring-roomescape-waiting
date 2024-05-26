@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.repository.MemberRepository;
 import roomescape.domain.reservation.domain.Reservation;
-import roomescape.domain.reservation.domain.Status;
+import roomescape.domain.reservation.domain.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
 import roomescape.domain.reservation.dto.ReservationMineResponse;
 import roomescape.domain.reservation.dto.ReservationWaitAddRequest;
@@ -42,7 +42,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> findReservationByStatuses(List<Status> statuses) {
+    public List<Reservation> findReservationByStatuses(List<ReservationStatus> statuses) {
         return reservationRepository.findByStatusIn(statuses);
     }
 
@@ -108,7 +108,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public Reservation updateReservationStatus(Long id, Status status) {
+    public Reservation updateReservationStatus(Long id, ReservationStatus status) {
         Reservation reservation = findReservationById(id);
 
         validateUpdateReservation(reservation);
@@ -129,14 +129,14 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 id를 가진 예약이 존재하지 않습니다."));
     }
 
-    private Reservation updateStatus(Reservation reservation, Status status) {
+    private Reservation updateStatus(Reservation reservation, ReservationStatus status) {
         return new Reservation(reservation.getId(), reservation.getDate(), status,
                 reservation.getTime(), reservation.getTheme(), reservation.getMember());
     }
 
     private void validateAddReservation(ReservationAddRequest reservationAddRequest) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservationAddRequest.date(),
-                reservationAddRequest.timeId(), reservationAddRequest.themeId(), Status.RESERVATION)) {
+                reservationAddRequest.timeId(), reservationAddRequest.themeId(), ReservationStatus.RESERVATION)) {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약을 할 수 없습니다.");
         }
 
@@ -148,7 +148,7 @@ public class ReservationService {
 
     private void validateAddReservationWait(ReservationWaitAddRequest reservationWaitAddRequest) {
         if (!reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservationWaitAddRequest.date(),
-                reservationWaitAddRequest.timeId(), reservationWaitAddRequest.themeId(), Status.RESERVATION)) {
+                reservationWaitAddRequest.timeId(), reservationWaitAddRequest.themeId(), ReservationStatus.RESERVATION)) {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 없으면 예약대기를 할 수 없습니다.");
         }
 
@@ -160,7 +160,7 @@ public class ReservationService {
 
     private void validateUpdateReservation(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservation.getDate(),
-                reservation.getTime().getId(), reservation.getTheme().getId(), Status.RESERVATION)) {
+                reservation.getTime().getId(), reservation.getTheme().getId(), ReservationStatus.RESERVATION)) {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약 승인을 할 수 없습니다.");
         }
     }

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.domain.login.controller.MemberResolver;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.Reservation;
-import roomescape.domain.reservation.domain.Status;
+import roomescape.domain.reservation.domain.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.service.ReservationService;
@@ -47,14 +47,14 @@ public class AdminReservationController {
 
     @GetMapping("/admin/reservations/wait")
     public ResponseEntity<List<ReservationResponse>> getReservationWaitList() {
-        List<Reservation> reservations = reservationService.findReservationByStatuses(List.of(Status.RESERVATION_WAIT));
+        List<Reservation> reservations = reservationService.findReservationByStatuses(List.of(ReservationStatus.RESERVATION_WAIT));
         List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
         return ResponseEntity.ok(reservationResponses);
     }
 
     @PatchMapping("/admin/reservations/wait/{id}")
     public ResponseEntity<ReservationResponse> approveReservation(@PathVariable("id") Long id) {
-        Reservation reservation = reservationService.updateReservationStatus(id, Status.RESERVATION);
+        Reservation reservation = reservationService.updateReservationStatus(id, ReservationStatus.RESERVATION);
         ReservationResponse reservationResponse = ReservationResponse.from(reservation);
         return ResponseEntity.ok(reservationResponse);
     }

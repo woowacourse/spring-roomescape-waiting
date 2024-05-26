@@ -2,7 +2,7 @@ package roomescape.domain.reservation.dto;
 
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.Reservation;
-import roomescape.domain.reservation.domain.Status;
+import roomescape.domain.reservation.domain.ReservationStatus;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.time.domain.ReservationTime;
 
@@ -17,6 +17,6 @@ public record ReservationAddRequest(LocalDate date, Long timeId, Long themeId, L
     }
 
     public Reservation toEntity(ReservationTime reservationTime, Theme theme, Member member) {
-        return new Reservation(null, date, Status.RESERVATION, reservationTime, theme, member);
+        return new Reservation(null, date, ReservationStatus.RESERVATION, reservationTime, theme, member);
     }
 }
