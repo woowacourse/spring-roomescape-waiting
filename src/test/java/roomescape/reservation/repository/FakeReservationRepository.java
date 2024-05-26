@@ -33,7 +33,7 @@ public class FakeReservationRepository implements ReservationRepository {
         long reservationId = id.incrementAndGet();
         reservations.put(reservationId, makeReservation(
                 Reservation.of(LocalDate.now().plusDays(1), TIME_MOCK_DATA, THEME_MOCK_DATA, MEMBER_MOCK_DATA,
-                        ReservationStatus.RESERVED), reservationId));
+                        ReservationStatus.WAITING), reservationId));
     }
 
     @Override

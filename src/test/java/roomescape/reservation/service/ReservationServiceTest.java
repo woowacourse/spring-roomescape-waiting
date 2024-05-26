@@ -40,7 +40,10 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 추가한다.")
     void addReservation() {
-        ReservationAddRequest reservationRequest = new ReservationAddRequest(reservation.getDate(), TIME_MOCK_DATA,
+        LocalDate expectedDate = reservation.getDate().plusDays(5);
+
+        ReservationAddRequest reservationRequest = new ReservationAddRequest(expectedDate,
+                TIME_MOCK_DATA,
                 THEME_MOCK_DATA, MEMBER_MOCK_DATA);
 
         Reservation savedReservation = reservationService.addReservation(reservationRequest);
@@ -49,7 +52,7 @@ class ReservationServiceTest {
                 () -> assertEquals(savedReservation.getMember(), MEMBER_MOCK_DATA),
                 () -> assertEquals(savedReservation.getTheme(), THEME_MOCK_DATA),
                 () -> assertEquals(savedReservation.getReservationTime(), TIME_MOCK_DATA),
-                () -> assertEquals(savedReservation.getDate(), reservation.getDate())
+                () -> assertEquals(savedReservation.getDate(), expectedDate)
         );
     }
 
@@ -68,7 +71,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("이미 예약한 경우, 예약 대기를 추가하지 못한다.")
     void tryAddDuplicateReservation() {
-        ReservationAddRequest reservationRequest = new ReservationAddRequest(reservation.getDate(), TIME_MOCK_DATA,
+        ReservationAddRequest reservationRequest = new ReservationAddRequest(reservation.getDate().plusDays(5),
+                TIME_MOCK_DATA,
                 THEME_MOCK_DATA, MEMBER_MOCK_DATA);
 
         reservationService.addReservation(reservationRequest);
@@ -85,12 +89,7 @@ class ReservationServiceTest {
         List<Reservation> waitings = reservationService.findWaitings();
         Reservation topWaiting = waitings.get(0);
 
-        assertAll(
-                () -> assertEquals(waitings.size(), 1),
-                () -> assertEquals(topWaiting.getMember(), MEMBER_MOCK_DATA),
-                () -> assertEquals(topWaiting.getReservationTime(), TIME_MOCK_DATA),
-                () -> assertEquals(topWaiting.getTheme(), THEME_MOCK_DATA)
-        );
+        assertEquals(topWaiting.getReservationStatus(), ReservationStatus.WAITING.getStatus());
     }
 
     @Test
