@@ -57,11 +57,11 @@ public class WaitingReservationService {
     public void deleteMemberReservation(AuthInfo authInfo, Long memberReservationId) {
         Reservation memberReservation = commonFindService.getMemberReservation(memberReservationId);
         Member member = commonFindService.getMember(authInfo.getId());
-        if (!member.isAdmin() && !memberReservation.isMember(member)) {
+        if (!member.isAdmin() && !memberReservation.isBookedBy(member)) {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
         reservationRepository.deleteById(memberReservationId);
         reservationRepository.findFirstByReservationSlotOrderByCreatedAt(memberReservation.getReservationSlot())
-                        .ifPresent(Reservation::confirmReservation);
+                        .ifPresent(Reservation::bookReservation);
     }
 }

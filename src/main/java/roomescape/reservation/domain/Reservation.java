@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 import roomescape.member.domain.Member;
 
 @Entity
@@ -52,11 +51,11 @@ public class Reservation {
         this.status = ReservationStatus.BOOKED;
     }
 
-    public boolean isMember(Member member) {
+    public boolean isBookedBy(Member member) {
         return this.member.equals(member);
     }
 
-    public void confirmReservation() {
+    public void bookReservation() {
         this.status = ReservationStatus.BOOKED;
     }
 

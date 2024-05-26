@@ -83,9 +83,9 @@ public class ReservationService {
     }
 
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
-        Reservation memberReservation = commonFindService.getMemberReservation(memberReservationId);
+        Reservation reservation = commonFindService.getMemberReservation(memberReservationId);
         Member member = commonFindService.getMember(authInfo.getId());
-        if (!member.isAdmin() && !memberReservation.isMember(member)) {
+        if (!member.isAdmin() && !reservation.isBookedBy(member)) {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
         reservationRepository.deleteById(memberReservationId);
