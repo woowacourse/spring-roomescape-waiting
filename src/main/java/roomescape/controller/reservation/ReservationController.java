@@ -68,7 +68,7 @@ public class ReservationController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @DeleteMapping("/reservations/{reservationId}") // TODO: admin 용 api들 엔드포인트 통일할지 고민하기
+    @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId,
                                                   @RequestParam Long memberId) {
         reservationService.deleteReservation(reservationId, memberId);
