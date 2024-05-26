@@ -16,7 +16,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRank;
+import roomescape.dto.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
@@ -78,8 +78,8 @@ class ReservationRepositoryTest {
                 reservationRepository.findReservationRanksWithMember(member);
 
         List<Long> pendingRanks = reservationRanksWithMember.stream()
-                .filter(reservationRank -> reservationRank.getReservation().getStatus().isPending())
-                .map(ReservationRank::getRank)
+                .filter(reservationRank -> reservationRank.reservation().getStatus().isPending())
+                .map(ReservationRank::rank)
                 .toList();
 
         assertAll(

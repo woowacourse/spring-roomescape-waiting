@@ -2,15 +2,15 @@ package roomescape.dto.response;
 
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRank;
+import roomescape.dto.ReservationRank;
 
 public record ReservationPendingResponse(Long id, MemberResponse member, LocalDate date,
                                          TimeSlotResponse time, ThemeResponse theme) {
 
     public static ReservationPendingResponse from(ReservationRank reservationRank) {
-        Reservation reservation = reservationRank.getReservation();
+        Reservation reservation = reservationRank.reservation();
         return new ReservationPendingResponse(
-                reservationRank.getRank(),
+                reservationRank.rank(),
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
                 TimeSlotResponse.from(reservation.getTime()),

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRank;
+import roomescape.dto.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
@@ -19,7 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
 
     @Query("""
-            SELECT new roomescape.domain.ReservationRank(
+            SELECT new roomescape.dto.ReservationRank(
             r,
             (SELECT COUNT(r2)
             FROM Reservation r2
@@ -34,7 +34,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<ReservationRank> findReservationRanksWithMember(Member member);
 
     @Query("""
-            SELECT new roomescape.domain.ReservationRank(
+            SELECT new roomescape.dto.ReservationRank(
             r,
             (SELECT COUNT(r2)
             FROM Reservation r2

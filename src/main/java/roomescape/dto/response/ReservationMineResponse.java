@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRank;
+import roomescape.dto.ReservationRank;
 
 public record ReservationMineResponse(long id,
                                       String theme,
@@ -14,14 +14,14 @@ public record ReservationMineResponse(long id,
                                       long rank) {
 
     public static ReservationMineResponse from(ReservationRank reservationRank) {
-        Reservation reservation = reservationRank.getReservation();
+        Reservation reservation = reservationRank.reservation();
         return new ReservationMineResponse(
                 reservation.getId(),
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
                 reservation.getStatusName(),
-                reservationRank.getRank()
+                reservationRank.rank()
         );
     }
 }
