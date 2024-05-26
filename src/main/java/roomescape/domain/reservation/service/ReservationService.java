@@ -42,8 +42,8 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> findReservationByStatus(Status status) {
-        return reservationRepository.findByStatus(status);
+    public List<Reservation> findReservationByStatuses(List<Status> statuses) {
+        return reservationRepository.findByStatusIn(statuses);
     }
 
     public List<Reservation> findFilteredReservationList(Long themeId, Long memberId,

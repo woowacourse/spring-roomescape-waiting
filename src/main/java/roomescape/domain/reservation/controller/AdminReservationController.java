@@ -47,7 +47,7 @@ public class AdminReservationController {
 
     @GetMapping("/admin/reservations/wait")
     public ResponseEntity<List<ReservationResponse>> getReservationWaitList() {
-        List<Reservation> reservations = reservationService.findReservationByStatus(Status.RESERVATION_WAIT);
+        List<Reservation> reservations = reservationService.findReservationByStatuses(List.of(Status.RESERVATION_WAIT));
         List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
         return ResponseEntity.ok(reservationResponses);
     }
