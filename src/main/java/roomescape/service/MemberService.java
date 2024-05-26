@@ -19,14 +19,8 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public Member findMemberByEmailAndPassword(MemberLoginRequest request) {
-        return memberRepository.findByEmailAndPassword(request.email(), request.password())
-                .orElseThrow(() -> new AuthenticationException(
-                        "사용자(email: %s, password: %s)가 존재하지 않습니다.".formatted(request.email(), request.password())));
-    }
-
-    public String findMemberNameById(Long id) {
-        return findMemberById(id).getName();
+    public List<Member> findAllMembers() {
+        return memberRepository.findAll();
     }
 
     public Member findMemberById(Long id) {
@@ -34,7 +28,13 @@ public class MemberService {
                 .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다."));
     }
 
-    public List<Member> findAllMembers() {
-        return memberRepository.findAll();
+    public String findMemberNameById(Long id) {
+        return findMemberById(id).getName();
+    }
+
+    public Member findMemberByEmailAndPassword(MemberLoginRequest request) {
+        return memberRepository.findByEmailAndPassword(request.email(), request.password())
+                .orElseThrow(() -> new AuthenticationException(
+                        "사용자(email: %s, password: %s)가 존재하지 않습니다.".formatted(request.email(), request.password())));
     }
 }

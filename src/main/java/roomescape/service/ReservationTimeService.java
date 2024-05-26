@@ -34,23 +34,16 @@ public class ReservationTimeService {
         return reservationTimeRepository.findAll();
     }
 
+    public ReservationTime findReservationTime(long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
+    }
+
     public ReservationTime addReservationTime(ReservationTimeRequest request) {
         LocalTime startAt = request.startAt();
         validateExistTime(startAt);
         ReservationTime reservationTime = new ReservationTime(startAt);
         return reservationTimeRepository.save(reservationTime);
-    }
-
-    private void validateExistTime(LocalTime startAt) {
-        long countReservationTimeByStartAt = reservationTimeRepository.countByStartAt(startAt);
-        if (countReservationTimeByStartAt > 0) {
-            throw new DuplicatedException("이미 존재하는 시간입니다.");
-        }
-    }
-
-    public ReservationTime findReservationTime(long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
     }
 
     public List<IsReservedTimeResponse> getIsReservedTime(LocalDate date, long themeId) {
@@ -66,6 +59,13 @@ public class ReservationTimeService {
         validateNotExistReservationTime(id);
         validateReservedTime(id);
         reservationTimeRepository.deleteById(id);
+    }
+
+    private void validateExistTime(LocalTime startAt) {
+        long countReservationTimeByStartAt = reservationTimeRepository.countByStartAt(startAt);
+        if (countReservationTimeByStartAt > 0) {
+            throw new DuplicatedException("이미 존재하는 시간입니다.");
+        }
     }
 
     private void validateReservedTime(long id) {

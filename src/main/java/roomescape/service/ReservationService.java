@@ -66,14 +66,6 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public Reservation addWaitingReservation(ReservationRequest request, Member member) {
-        validateDuplicatedWaitingReservation(request.date(), request.timeId(), request.themeId(), member.getId());
-        ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
-        Theme theme = findThemeById(request.themeId());
-        Reservation reservation = createWaiting(request.date(), reservationTime, theme, member);
-        return reservationRepository.save(reservation);
-    }
-
     public Reservation addReservation(AdminReservationRequest request) {
         validateDuplicatedReservation(request.date(), request.timeId(), request.themeId());
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
@@ -83,42 +75,21 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    public Reservation addWaitingReservation(ReservationRequest request, Member member) {
+        validateDuplicatedWaitingReservation(request.date(), request.timeId(), request.themeId(), member.getId());
+        ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
+        Theme theme = findThemeById(request.themeId());
+        Reservation reservation = createWaiting(request.date(), reservationTime, theme, member);
+        return reservationRepository.save(reservation);
+    }
+
+
     public List<MemberReservation> findMemberReservations(Member member) {
         return reservationRepository.findMemberReservation(member.getId());
     }
 
     public List<Reservation> findWaitingReservations() {
         return reservationRepository.findAllReservationByStatus(WAITING);
-    }
-
-    private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
-        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        if (reservationDateTime.isBefore(now)) {
-            throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(now));
-        }
-    }
-
-    private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
-        Theme theme = findThemeById(themeId);
-        long countReservation = reservationRepository.countByDateAndTimeAndTheme(date, reservationTime, theme);
-        if (countReservation > 0) {
-            throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");
-        }
-    }
-
-    private void validateDuplicatedWaitingReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
-        Theme theme = findThemeById(themeId);
-        Member member = findMemberById(memberId);
-        long countReservation = reservationRepository
-                .countByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member);
-        if (countReservation > 0) {
-            throw new DuplicatedException("이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
-        }
     }
 
     @Transactional
@@ -130,6 +101,34 @@ public class ReservationService {
             confirmReservation(waitingReservations);
         }
         reservationRepository.deleteById(id);
+    }
+
+    private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        if (reservationDateTime.isBefore(now)) {
+            throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(now));
+        }
+    }
+
+    private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
+        ReservationTime reservationTime = findReservationTimeById(timeId);
+        Theme theme = findThemeById(themeId);
+        long countReservation = reservationRepository.countByDateAndTimeAndTheme(date, reservationTime, theme);
+        if (countReservation > 0) {
+            throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");
+        }
+    }
+
+    private void validateDuplicatedWaitingReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
+        ReservationTime reservationTime = findReservationTimeById(timeId);
+        Theme theme = findThemeById(themeId);
+        Member member = findMemberById(memberId);
+        long countReservation = reservationRepository
+                .countByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member);
+        if (countReservation > 0) {
+            throw new DuplicatedException("이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
+        }
     }
 
     private Reservation findReservationById(long id) {
@@ -150,11 +149,9 @@ public class ReservationService {
                 .ifPresent(Reservation::confirmReservation);
     }
 
-    private void validateExistReservation(long id) {
-        long count = reservationRepository.countById(id);
-        if (count <= 0) {
-            throw new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id));
-        }
+    private ReservationTime findReservationTimeById(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
     }
 
     private ReservationTime findReservationTime(LocalDate date, long timeId) {
@@ -162,6 +159,13 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
         validateReservationDateTimeBeforeNow(date, reservationTime.getStartAt());
         return reservationTime;
+    }
+
+    private void validateExistReservation(long id) {
+        long count = reservationRepository.countById(id);
+        if (count <= 0) {
+            throw new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id));
+        }
     }
 
     private Theme findThemeById(Long themeId) {

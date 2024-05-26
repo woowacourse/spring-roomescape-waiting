@@ -22,6 +22,16 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
+    public List<Theme> findPopularThemes(int count) {
+        LocalDate before = LocalDate.now().minusDays(8);
+        LocalDate after = before.plusDays(7);
+        List<Theme> themes = themeRepository.findByDateBetweenOrderByTheme(before, after);
+        if (themes.size() < count) {
+            count = themes.size();
+        }
+        return themes.subList(0, count);
+    }
+
     public Theme addTheme(ThemeRequest themeRequest) {
         Theme theme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
         return themeRepository.save(theme);
@@ -30,15 +40,4 @@ public class ThemeService {
     public void deleteTheme(long id) {
         themeRepository.deleteById(id);
     }
-
-    public List<Theme> findPopularThemes(int count) {
-        LocalDate before = LocalDate.now().minusDays(8);
-        LocalDate after = LocalDate.now().minusDays(1);
-        List<Theme> themes = themeRepository.findByDateBetweenOrderByTheme(before, after);
-        if (themes.size() < count) {
-            count = themes.size();
-        }
-        return themes.subList(0, count);
-    }
-
 }
