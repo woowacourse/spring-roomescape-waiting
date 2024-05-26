@@ -414,7 +414,7 @@ class MemberReservationTest {
                 .statusCode(200)
                 .body("size()", is(11))
                 .body("findAll { it.status == '예약' }.size()", is(8))
-                .body("findAll { it.status == '1번째 예약' }.size()", is(3));
+                .body("findAll { it.status == '1번째 예약 대기' }.size()", is(3));
     }
 
     @DisplayName("과거의 예약과 예약 대기는 조회되지 않는다")
@@ -431,7 +431,7 @@ class MemberReservationTest {
                 .statusCode(200)
                 .body("size()", is(11))
                 .body("findAll { it.status == '예약' }.size()", is(8))
-                .body("findAll { it.status == '1번째 예약' }.size()", is(3));
+                .body("findAll { it.status == '1번째 예약 대기' }.size()", is(3));
     }
 
     @DisplayName("내 예약 대기가 존재하는 경우에, 예약 대기 삭제 요청을 하면, 삭제된다")

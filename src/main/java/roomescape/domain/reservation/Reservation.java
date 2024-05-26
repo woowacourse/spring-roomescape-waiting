@@ -86,7 +86,11 @@ public class Reservation {
         return this.status == Status.RESERVED;
     }
 
-    public boolean isCanceled() {
+    public boolean isWaiting() {
+        return this.status == Status.WAITING;
+    }
+
+    private boolean isCanceled() {
         return this.status == Status.CANCELED;
     }
 }

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.dto.ReservationWithRank;
 import roomescape.domain.reservation.Reservation;
 
 public record UserReservationResponse(
@@ -13,19 +14,23 @@ public record UserReservationResponse(
         @NotNull(message = "예약 시간은 빈값이 올 수 없습니다.") LocalTime time,
         @NotBlank(message = "예약 상태는 빈값이 올 수 없습니다.") String status
 ) {
-    public static UserReservationResponse of(Reservation reservation, Long rank) {
+    public static UserReservationResponse from(Reservation reservation) {
         return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getDetail().getTheme().getName(),
                 reservation.getDetail().getDate(),
                 reservation.getDetail().getTime().getStartAt(),
-                getStatus(reservation, rank));
+                "예약");
     }
 
-    private static String getStatus(Reservation reservation, Long rank) {
-        if (reservation.isReserved()) {
-            return "예약";
-        }
-        return rank + "번째 예약";
+    public static UserReservationResponse from(ReservationWithRank reservationWithRank) {
+        Reservation reservation = reservationWithRank.reservation();
+        long rank = reservationWithRank.rank();
+        return new UserReservationResponse(
+                reservation.getId(),
+                reservation.getDetail().getTheme().getName(),
+                reservation.getDetail().getDate(),
+                reservation.getDetail().getTime().getStartAt(),
+                String.format("%d번째 예약 대기", rank));
     }
 }
