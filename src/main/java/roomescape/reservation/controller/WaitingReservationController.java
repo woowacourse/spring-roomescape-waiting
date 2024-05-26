@@ -34,7 +34,6 @@ public class WaitingReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
         List<ReservationResponse> response = waitingService.findReservationWaitings();
-
         return ResponseEntity.ok(response);
     }
 

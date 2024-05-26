@@ -102,6 +102,10 @@ public class ReservationWaiting {
         return detail.getThemeId();
     }
 
+    public LocalDateTime getCreateAt() {
+        return createAt;
+    }
+
     public String getStatus() {
         return status;
     }

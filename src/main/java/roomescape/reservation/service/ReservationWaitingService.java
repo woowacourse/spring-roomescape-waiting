@@ -1,6 +1,9 @@
 package roomescape.reservation.service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
@@ -78,8 +81,10 @@ public class ReservationWaitingService {
     public List<ReservationResponse> findReservationWaitings() {
         List<ReservationWaiting> reservations = waitingRepository.findAllByOrderByDetailDateAsc();
 
+        AtomicLong index = new AtomicLong(1);
         return reservations.stream()
-                .map(ReservationResponse::from)
+                .sorted(Comparator.comparing(ReservationWaiting::getCreateAt))
+                .map(r -> ReservationResponse.from(r, index.getAndIncrement()))
                 .toList();
     }
 }

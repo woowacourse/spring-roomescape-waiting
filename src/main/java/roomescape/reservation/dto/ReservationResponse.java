@@ -16,7 +16,16 @@ public record ReservationResponse(
     }
 
     public static ReservationResponse from(ReservationWaiting reservation) {
-        return new ReservationResponse(reservation.getId(),
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getMemberName(),
+                ReservationDetailResponse.from(reservation.getDetail())
+        );
+    }
+
+    public static ReservationResponse from(ReservationWaiting reservation, Long index) {
+        return new ReservationResponse(
+                index,
                 reservation.getMemberName(),
                 ReservationDetailResponse.from(reservation.getDetail())
         );
