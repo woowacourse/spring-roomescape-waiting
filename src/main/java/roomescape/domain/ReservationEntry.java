@@ -46,9 +46,9 @@ public class ReservationEntry {
             ReservationEntry reservationEntry = new ReservationEntry(
                     reservation.getId(),
                     reservation.getMember(),
-                    reservation.getSchedule().getDate(),
-                    reservation.getSchedule().getTime(),
-                    reservation.getSchedule().getTheme(),
+                    reservation.getDate(),
+                    reservation.getTime(),
+                    reservation.getTheme(),
                     ReservationStatus.RESERVATION,
                     0L
             );
@@ -65,9 +65,9 @@ public class ReservationEntry {
             ReservationEntry reservationEntry = new ReservationEntry(
                     waitingWithRank.getWaiting().getId(),
                     waitingWithRank.getWaiting().getMember(),
-                    waitingWithRank.getWaiting().getReservation().getSchedule().getDate(),
-                    waitingWithRank.getWaiting().getReservation().getSchedule().getTime(),
-                    waitingWithRank.getWaiting().getReservation().getSchedule().getTheme(),
+                    waitingWithRank.getWaiting().getReservation().getDate(),
+                    waitingWithRank.getWaiting().getReservation().getTime(),
+                    waitingWithRank.getWaiting().getReservation().getTheme(),
                     ReservationStatus.WAITING,
                     waitingWithRank.getRank()
             );

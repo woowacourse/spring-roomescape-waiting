@@ -8,10 +8,10 @@ import roomescape.entity.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query("""
-            SELECT r.schedule.theme
+            SELECT r.theme
             FROM Reservation r
-            WHERE r.schedule.date BETWEEN :start AND :end
-            GROUP BY r.schedule.theme
+            WHERE r.date BETWEEN :start AND :end
+            GROUP BY r.theme
             ORDER BY COUNT(r) DESC
             LIMIT :limit
             """)

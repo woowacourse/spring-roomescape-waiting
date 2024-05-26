@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Role;
-import roomescape.domain.Schedule;
 import roomescape.domain.WaitingWithRank;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
@@ -65,27 +64,27 @@ class WaitingServiceTest {
         member = memberRepository.save(new Member("sudal", "sudal@email.com", "sudal", Role.USER));
         otherMember = memberRepository.save(new Member("runnerDuck", "runnerDuck@email.com", "runnerDuck", Role.USER));
         reservation1 = reservationRepository.save(
-                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 31), reservationTime, theme)));
+                new Reservation(member, LocalDate.of(2999, 12, 31), reservationTime, theme));
         reservation2 = reservationRepository.save(
-                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 30), reservationTime, theme)));
+                new Reservation(member, LocalDate.of(2999, 12, 30), reservationTime, theme));
     }
 
     @DisplayName("예약 대기 생성 테스트")
     @Test
     void createWaiting() {
         ReservationRequest reservationRequest = new ReservationRequest(
-                reservation1.getSchedule().getDate(),
-                reservation1.getSchedule().getTime().getId(),
-                reservation1.getSchedule().getTheme().getId(),
+                reservation1.getDate(),
+                reservation1.getTime().getId(),
+                reservation1.getTheme().getId(),
                 otherMember.getId());
 
         WaitingResponse waitingResponse = waitingService.createWaiting(reservationRequest, reservationRequest.memberId());
 
         assertAll(
                 () -> assertThat(waitingResponse.name()).isEqualTo(otherMember.getName()),
-                () -> assertThat(waitingResponse.date()).isEqualTo(reservation1.getSchedule().getDate()),
-                () -> assertThat(waitingResponse.time()).isEqualTo(reservation1.getSchedule().getTime().getStartAt()),
-                () -> assertThat(waitingResponse.theme()).isEqualTo(reservation1.getSchedule().getTheme().getName())
+                () -> assertThat(waitingResponse.date()).isEqualTo(reservation1.getDate()),
+                () -> assertThat(waitingResponse.time()).isEqualTo(reservation1.getTime().getStartAt()),
+                () -> assertThat(waitingResponse.theme()).isEqualTo(reservation1.getTheme().getName())
         );
     }
 

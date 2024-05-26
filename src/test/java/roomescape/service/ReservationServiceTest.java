@@ -14,11 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Role;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Schedule;
 import roomescape.entity.Theme;
 import roomescape.entity.Waiting;
 import roomescape.handler.exception.CustomException;
@@ -118,8 +117,8 @@ class ReservationServiceTest {
     @Test
     void findAllReservations() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
-                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
+                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
+                new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
 
         reservationRepository.saveAll(reservations);
 
@@ -132,7 +131,7 @@ class ReservationServiceTest {
     @Test
     void deleteReservation() {
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
+                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
 
         reservationService.deleteReservation(reservation.getId());
 
@@ -145,13 +144,9 @@ class ReservationServiceTest {
     void convertFirstWaitingToReservation() {
         Member otherMember = memberRepository.save(new Member("deock", "deock@email.com", "deock", Role.USER));
 
-        Reservation reservation1 = new Reservation(member,
-                new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme));
-        Reservation reservation2 = new Reservation(otherMember,
-                new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme));
-        List<Reservation> reservations = List.of(
-                reservation1,
-                reservation2);
+        Reservation reservation1 = new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme);
+        Reservation reservation2 = new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme);
+        List<Reservation> reservations = List.of(reservation1, reservation2);
 
         List<Waiting> waitings = List.of(
                 new Waiting(otherMember, reservation1),
@@ -184,8 +179,8 @@ class ReservationServiceTest {
         Member member2 = memberRepository.save(
                 new Member("rush", "rush@email.com", "rush", Role.ADMIN));
 
-        reservationRepository.save(new Reservation(member1,new Schedule( LocalDate.of(2030, 12, 12), reservationTime1, theme)));
-        reservationRepository.save(new Reservation(member2,new Schedule( LocalDate.of(2030, 12, 12), reservationTime2, theme)));
+        reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12), reservationTime1, theme));
+        reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12), reservationTime2, theme));
 
         List<MyReservationEntryResponse> reservations = reservationService.findAllByMemberId(member1.getId());
 

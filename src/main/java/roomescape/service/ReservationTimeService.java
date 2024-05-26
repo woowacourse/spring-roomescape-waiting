@@ -49,7 +49,7 @@ public class ReservationTimeService {
         Theme findTheme = themeRepository.findById(availableTimeRequest.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        List<Reservation> reservations = reservationRepository.findAllBySchedule_DateAndSchedule_Theme(
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTheme(
                 availableTimeRequest.date(),
                 findTheme
         );

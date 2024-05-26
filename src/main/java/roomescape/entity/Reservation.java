@@ -1,6 +1,6 @@
 package roomescape.entity;
 
-import jakarta.persistence.Embedded;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import roomescape.domain.Schedule;
+import java.time.LocalDate;
 
 @Entity
 public class Reservation {
@@ -21,19 +21,30 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Member member;
 
-    @Embedded
-    private Schedule schedule;
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private ReservationTime time;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Theme theme;
 
     protected Reservation() {
     }
 
-    public Reservation(final Member member, final Schedule schedule) {
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this.id = null;
         this.member = member;
-        this.schedule = schedule;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
 
     public boolean isSameTime(ReservationTime reservationTime) {
-        return schedule.isSameTime(reservationTime);
+        return time.equals(reservationTime);
     }
 
     public Long getId() {
@@ -44,8 +55,16 @@ public class Reservation {
         return member;
     }
 
-    public Schedule getSchedule() {
-        return schedule;
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public ReservationTime getTime() {
+        return time;
+    }
+
+    public Theme getTheme() {
+        return theme;
     }
 
     public void setMember(final Member member) {

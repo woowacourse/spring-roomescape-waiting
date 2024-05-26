@@ -24,7 +24,7 @@ class ReservationEntryTest {
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         Theme theme = new Theme("happy", "hi", "abcd.html");
 
-        Reservation reservation1 = new Reservation(member, new Schedule(date, time, theme));
+        Reservation reservation1 = new Reservation(member, date, time, theme);
         List<Reservation> reservations = List.of(reservation1);
         List<WaitingWithRank> waitingWithRanks = List.of(new WaitingWithRank(new Waiting(member, reservation1), 1L));
         List<ReservationEntry> reservationEntries = ReservationEntry.createEntries(reservations, waitingWithRanks);
