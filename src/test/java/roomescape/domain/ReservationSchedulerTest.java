@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -82,10 +83,12 @@ class ReservationSchedulerTest {
         Reservation replacedWaiting = reservationQueryRepository.findByDateAndTimeAndTheme(reservationDate, time, theme)
                 .orElseThrow();
 
-        assertThat(waitingQueryRepository.findById(waiting.getId())).isEmpty();
-        assertThat(replacedWaiting.getMember()).isEqualTo(waiting.getMember());
-        assertThat(replacedWaiting.getDate()).isEqualTo(waiting.getDate());
-        assertThat(replacedWaiting.getTime()).isEqualTo(waiting.getTime());
-        assertThat(replacedWaiting.getTheme()).isEqualTo(waiting.getTheme());
+        assertAll(
+                () -> assertThat(waitingQueryRepository.findById(waiting.getId())).isEmpty(),
+                () -> assertThat(replacedWaiting.getMember()).isEqualTo(waiting.getMember()),
+                () -> assertThat(replacedWaiting.getDate()).isEqualTo(waiting.getDate()),
+                () -> assertThat(replacedWaiting.getTime()).isEqualTo(waiting.getTime()),
+                () -> assertThat(replacedWaiting.getTheme()).isEqualTo(waiting.getTheme())
+        );
     }
 }

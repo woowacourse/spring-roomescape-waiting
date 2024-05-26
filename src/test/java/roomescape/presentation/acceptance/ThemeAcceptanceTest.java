@@ -2,6 +2,7 @@ package roomescape.presentation.acceptance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -35,9 +36,11 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                 .extract()
                 .as(ThemeResponse.class);
 
-        assertThat(response.name()).isEqualTo("이름");
-        assertThat(response.description()).isEqualTo("설명");
-        assertThat(response.thumbnail()).isEqualTo("url");
+        assertAll(
+                () -> assertThat(response.name()).isEqualTo("이름"),
+                () -> assertThat(response.description()).isEqualTo("설명"),
+                () -> assertThat(response.thumbnail()).isEqualTo("url")
+        );
     }
 
     @DisplayName("인기 테마를 조회한다.")

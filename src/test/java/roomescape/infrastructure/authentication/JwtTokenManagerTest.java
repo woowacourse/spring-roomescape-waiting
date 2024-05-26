@@ -2,6 +2,7 @@ package roomescape.infrastructure.authentication;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.verify;
 
 import jakarta.servlet.http.Cookie;
@@ -84,7 +85,9 @@ class JwtTokenManagerTest {
 
         Cookie cookie = cookieArgumentCaptor.getValue();
 
-        assertThat(cookie.getName()).isEqualTo("token");
-        assertThat(cookie.getValue()).isEqualTo("accessToken");
+        assertAll(
+                () -> assertThat(cookie.getName()).isEqualTo("token"),
+                () -> assertThat(cookie.getValue()).isEqualTo("accessToken")
+        );
     }
 }

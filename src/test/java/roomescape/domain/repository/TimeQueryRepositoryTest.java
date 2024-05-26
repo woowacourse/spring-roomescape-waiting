@@ -23,5 +23,4 @@ class TimeQueryRepositoryTest {
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.NOT_FOUND_TIME);
     }
-
 }

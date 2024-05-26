@@ -2,6 +2,7 @@ package roomescape.presentation.acceptance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -36,8 +37,10 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .extract()
                 .as(ReservationResponse.class);
 
-        assertThat(response.member().name()).isEqualTo("회원");
-        assertThat(response.date()).isEqualTo(LocalDate.of(2024, 12, 1));
+        assertAll(
+                () -> assertThat(response.member().name()).isEqualTo("회원"),
+                () -> assertThat(response.date()).isEqualTo(LocalDate.of(2024, 12, 1))
+        );
     }
 
     @DisplayName("존재하지 않는 테마로 예약을 추가 요청하면 에러가 발생한다.")
