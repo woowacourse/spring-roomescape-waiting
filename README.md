@@ -1,5 +1,5 @@
 ## ERD
-![diagram.png](diagram.png)
+![img.png](img.png)
 ## 1 단계
 - [x] JPA를 활용하여 데이터베이스에 접근하도록 수정한다.
 
