@@ -28,6 +28,7 @@ import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
+import roomescape.exception.reservation.ThemeNotFoundException;
 import roomescape.exception.reservation.TimeNotFoundException;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.MemberRepository;
@@ -35,7 +36,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationRankResponse;
-import roomescape.repository.exception.ThemeNotFoundException;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 
