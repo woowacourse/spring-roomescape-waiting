@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.request.ReservationAdminSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.WaitingResponse;
@@ -49,7 +50,7 @@ public class AdminReservationApiController {
 
     @GetMapping("/waiting-list")
     public ResponseEntity<List<WaitingResponse>> getWaiting(@AuthenticatedMember Member member) {
-        List<Reservation> waitings = reservationService.findWaitings();
+        List<Reservation> waitings = reservationService.findByReservationStatus(ReservationStatus.WAITING);
         return ResponseEntity.ok(
                 waitings.stream()
                         .map(WaitingResponse::new)

@@ -76,8 +76,8 @@ public class ReservationService {
         return reservationRepository.findReservationWaitingWithRankByMemberId(memberId);
     }
 
-    public List<Reservation> findWaitings() {
-        return reservationRepository.findByReservationStatus(ReservationStatus.WAITING);
+    public List<Reservation> findByReservationStatus(ReservationStatus reservationStatus) {
+        return reservationRepository.findByReservationStatus(reservationStatus);
     }
 
     @Transactional
