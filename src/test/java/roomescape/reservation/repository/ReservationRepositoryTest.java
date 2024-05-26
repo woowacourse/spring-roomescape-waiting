@@ -2,7 +2,6 @@ package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.reservation.fixture.ReservationFixture.THIRD_ORDER_RESERVATION;
 import static roomescape.time.fixture.DateTimeFixture.TODAY;
 import static roomescape.time.fixture.DateTimeFixture.TOMORROW;
 import static roomescape.time.fixture.DateTimeFixture.YESTERDAY;
@@ -16,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationWithWaiting;
 
 // 예약: 멤버 1번, 내일, 첫번째 시간, 테마 1번, 예약 완료);
 // 예약: 멤버 2번, 내일, 두번째 시간, 테마 2번, 예약 완료);
@@ -37,25 +37,12 @@ class ReservationRepositoryTest {
         assertThat(reservations).hasSize(1);
     }
 
-    @DisplayName("멤버 ID를 조건으로 예약을 조회할 수 있다")
-    @Test
-    void should_find_reservations_by_member_id() {
-        List<Reservation> reservations = reservationRepository.findByMemberId(1L);
-        assertThat(reservations).hasSize(1);
-    }
 
-    @DisplayName("특정 예약보다 먼저 진행된 예약이 몇개인지 조회할 수 있다")
+    @DisplayName("특정 멤버의 예약을 조회할 수 있다")
     @Test
-    void should_count_earlier_reservations() {
-        Reservation reservation = THIRD_ORDER_RESERVATION;
-        int earlierReservationCount = reservationRepository.countEarlierReservationOnSlot(
-                reservation.getId(),
-                reservation.getTimeId(),
-                reservation.getThemeId(),
-                reservation.getDate()
-        );
-
-        assertThat(earlierReservationCount).isEqualTo(2);
+    void should_find_member_reservation_with_waiting_status() {
+        List<ReservationWithWaiting> memberReservations = reservationRepository.findByMemberIdWithWaitingStatus(1L);
+        assertThat(memberReservations).hasSize(1);
     }
 
     @DisplayName("날짜와 시간, 그리고 테마를 기반으로 예약을 조회할 수 있다")

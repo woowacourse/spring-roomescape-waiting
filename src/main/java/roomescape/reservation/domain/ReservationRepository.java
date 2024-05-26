@@ -20,20 +20,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                     @Param("dateFrom") LocalDate dateFrom,
                                                     @Param("dateTo") LocalDate dateTo);
 
-    List<Reservation> findByMemberId(Long memberId);
-
     @Query("""
-            SELECT COUNT(r)
-            FROM Reservation AS r
-            WHERE r.date.value = :date
-                AND r.theme.id = :themeId
-                AND r.time.id = :timeId
-                AND r.id < :id
+            SELECT new roomescape.reservation.domain.ReservationWithWaiting(r1, COUNT(*))
+            FROM Reservation AS r1
+            INNER JOIN Reservation AS r2 
+                ON r1.date = r2.date
+                AND r1.time = r2.time
+                AND r1.theme = r2.theme
+            JOIN FETCH r1.theme
+            JOIN FETCH r1.time
+            JOIN FETCH r1.member
+            WHERE r1.member.id = :memberId
+                AND r1.id >= r2.id
+            GROUP BY r1
             """)
-    int countEarlierReservationOnSlot(@Param("id") Long id,
-                                      @Param("timeId") Long timeId,
-                                      @Param("themeId") Long themeId,
-                                      @Param("date") LocalDate date);
+    List<ReservationWithWaiting> findByMemberIdWithWaitingStatus(@Param("memberId") Long memberId);
 
     @Query("""
             SELECT r

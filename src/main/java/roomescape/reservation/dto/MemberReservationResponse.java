@@ -22,7 +22,7 @@ public record MemberReservationResponse(
     }
 
     private static String statusMessage(int waitingNumber) {
-        if (waitingNumber > 0) {
+        if (waitingNumber > 1) {
             return waitingNumber + "번째 예약 대기";
         }
         return "예약";
