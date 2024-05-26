@@ -30,8 +30,7 @@ public class ReservationService {
     }
 
     public Reservation createReservation(ReservationSaveRequest request,
-                                         Member member,
-                                         ReservationStatus reservationStatus) {
+                                         Member member) {
         ReservationTime reservationTime =
                 reservationCreateValidator.getValidReservationTime(request.timeId());
         reservationCreateValidator.validateDateIsFuture(request.date(), reservationTime);
@@ -40,7 +39,7 @@ public class ReservationService {
                 request.date(),
                 request.timeId(),
                 request.themeId(),
-                reservationStatus
+                request.reservationStatus()
         );
         reservationCreateValidator.validateOwnReservationExist(
                 member,
@@ -52,8 +51,7 @@ public class ReservationService {
         Reservation reservation = request.toEntity(
                 reservationTime,
                 theme,
-                member,
-                reservationStatus
+                member
         );
         return reservationRepository.save(reservation);
     }

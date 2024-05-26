@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationWaitingWithRank;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.MemberReservationResponse;
@@ -57,8 +56,7 @@ public class ReservationApiController {
                                                                       @AuthenticatedMember Member member) {
         Reservation newReservation = reservationService.createReservation(
                 request,
-                member,
-                ReservationStatus.RESERVED
+                member
         );
         return ResponseEntity.created(URI.create("/api/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));

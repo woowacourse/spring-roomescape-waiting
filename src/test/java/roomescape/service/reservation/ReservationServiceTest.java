@@ -31,13 +31,12 @@ class ReservationServiceTest {
     @DisplayName("예약 가능한 시간인 경우 성공한다.")
     void checkDuplicateReservationTime_Success() {
         ReservationSaveRequest request = new ReservationSaveRequest(
-                LocalDate.now().plusDays(1L), 2L, 2L);
+                LocalDate.now().plusDays(1L), 2L, 2L, ReservationStatus.RESERVED);
         Member member = new Member(1L, "capy", "test@naver.com", "1234", Role.MEMBER);
 
         assertThatCode(() -> reservationService.createReservation(
                         request,
-                        member,
-                        ReservationStatus.RESERVED
+                        member
                 )
         )
                 .doesNotThrowAnyException();
@@ -47,13 +46,12 @@ class ReservationServiceTest {
     @DisplayName("이미 예약된 시간인 경우 예외가 발생한다.")
     void checkDuplicateReservationTime_Failure() {
         ReservationSaveRequest request = new ReservationSaveRequest(
-                LocalDate.now().plusDays(1L), 1L, 1L);
+                LocalDate.now().plusDays(1L), 1L, 1L, ReservationStatus.RESERVED);
         Member member = new Member("capy", "abc@gmail.com", "1234", Role.MEMBER);
 
         assertThatThrownBy(() -> reservationService.createReservation(
                         request,
-                        member,
-                        ReservationStatus.RESERVED
+                        member
                 )
         )
                 .isInstanceOf(IllegalArgumentException.class)
@@ -64,13 +62,12 @@ class ReservationServiceTest {
     @DisplayName("지나간 날짜와 시간에 대한 예약 생성시 예외가 발생한다.")
     void checkReservationDateTimeIsFuture_Failure() {
         ReservationSaveRequest request = new ReservationSaveRequest(
-                LocalDate.now().minusDays(1L), 2L, 2L);
+                LocalDate.now().minusDays(1L), 2L, 2L, ReservationStatus.RESERVED);
         Member member = new Member("capy", "abc@gmail.com", "1234", Role.MEMBER);
 
         assertThatThrownBy(() -> reservationService.createReservation(
                         request,
-                        member,
-                        ReservationStatus.RESERVED
+                        member
                 )
         )
                 .isInstanceOf(IllegalArgumentException.class)

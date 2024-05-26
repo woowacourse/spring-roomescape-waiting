@@ -149,6 +149,7 @@ function onReservationButtonClick() {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
+            reservationStatus: "RESERVED"
         };
 
         fetch('/api/reservations', {
@@ -184,10 +185,11 @@ function onWaitButtonClick() {
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
-            timeId: selectedTimeId
+            timeId: selectedTimeId,
+            reservationStatus: "WAITING"
         };
 
-        fetch('/api/waitings', {
+        fetch('/api/reservations', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

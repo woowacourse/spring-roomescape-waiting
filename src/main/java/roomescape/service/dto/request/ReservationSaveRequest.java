@@ -11,12 +11,12 @@ import java.time.LocalDate;
 
 public record ReservationSaveRequest(@NotNull(message = "예약 날짜를 입력해주세요.") LocalDate date,
                                      @NotNull(message = "예약 시간을 입력해주세요.") Long timeId,
-                                     @NotNull(message = "예약 테마를 입력해주세요.") Long themeId) {
+                                     @NotNull(message = "예약 테마를 입력해주세요.") Long themeId,
+                                     @NotNull(message = "예약 상태를 입력해주세요.") ReservationStatus reservationStatus) {
 
     public Reservation toEntity(ReservationTime reservationTime,
                                 Theme theme,
-                                Member member,
-                                ReservationStatus reservationStatus) {
+                                Member member) {
         return new Reservation(
                 member,
                 date,
