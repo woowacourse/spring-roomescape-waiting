@@ -17,6 +17,7 @@ import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.presentation.auth.LoginMemberId;
+import roomescape.presentation.auth.PermissionRequired;
 
 @RestController
 @RequestMapping("/reservations")
@@ -31,6 +32,7 @@ public class ReservationController {
     }
 
     @GetMapping
+    @PermissionRequired
     public ResponseEntity<List<ReservationResponse>> findBookedReservations() {
         List<ReservationResponse> responses = reservationLookupService.findAllBookedReservations();
         return ResponseEntity.ok(responses);
