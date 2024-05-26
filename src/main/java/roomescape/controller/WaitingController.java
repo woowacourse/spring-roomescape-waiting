@@ -30,6 +30,15 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<WaitingResponse>> getWaitings() {
+        List<Waiting> waitings = waitingService.findAllWaitings();
+        List<WaitingResponse> response = waitings.stream()
+                .map(WaitingResponse::new)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody ReservationRequest request,
                                                       LoginMember member) {

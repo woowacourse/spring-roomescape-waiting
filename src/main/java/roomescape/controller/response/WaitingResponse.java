@@ -35,4 +35,24 @@ public class WaitingResponse {
     public long getId() {
         return id;
     }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public LocalDateTime getCreated_at() {
+        return created_at;
+    }
+
+    public ReservationTimeResponse getTime() {
+        return time;
+    }
+
+    public ThemeResponse getTheme() {
+        return theme;
+    }
+
+    public MemberResponse getMember() {
+        return member;
+    }
 }

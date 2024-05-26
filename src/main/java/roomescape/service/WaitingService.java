@@ -34,6 +34,10 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    public List<Waiting> findAllWaitings() {
+        return waitingRepository.findAll();
+    }
+
     public Waiting saveWaiting(ReservationDto reservationDto) {
         ReservationTime time = findReservationTime(reservationDto);
 
