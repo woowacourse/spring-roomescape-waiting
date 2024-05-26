@@ -77,8 +77,26 @@ class ReservationJpaRepositoryTest {
         Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
         entityManager.persist(reservation);
 
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                reservation.getDate(), time.getId(), theme.getId()
+        boolean exists = reservationRepository.existsActiveReservation(
+                theme.getId(), reservation.getDate(), time.getId()
+        );
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @DisplayName("예약 취소는 저장된 예약에 영향을 주지 않는다.")
+    void findActiveReservationOnCancelled() {
+        Member member = memberRepository.save(MEMBER_ARU.create());
+        Theme theme = themeRepository.save(TEST_THEME.create());
+        LocalDate date = LocalDate.of(2024, 12, 25);
+        ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
+        LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
+
+        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
+        entityManager.persist(reservation);
+
+        boolean exists = reservationRepository.existsActiveReservation(
+                theme.getId(), reservation.getDate(), time.getId()
         );
         assertThat(exists).isTrue();
     }

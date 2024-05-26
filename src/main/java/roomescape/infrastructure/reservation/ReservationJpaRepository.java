@@ -30,7 +30,13 @@ public interface ReservationJpaRepository extends
     boolean existsByThemeId(long themeId);
 
     @Override
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    default boolean existsActiveReservation(long themeId, LocalDate date, long timeId) {
+        return existsByThemeIdAndDateAndTimeIdAndStatusIn(themeId, date, timeId, NON_CANCELLED_STATUSES);
+    }
+
+    boolean existsByThemeIdAndDateAndTimeIdAndStatusIn(
+            long themeId, LocalDate date, long timeId, List<BookStatus> statuses
+    );
 
     @Override
     default Reservation getById(long id) {

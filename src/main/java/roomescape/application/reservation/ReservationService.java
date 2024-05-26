@@ -45,8 +45,8 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse bookReservation(ReservationRequest request) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId())
+        if (reservationRepository.existsActiveReservation(
+                request.themeId(), request.date(), request.timeId())
         ) {
             throw new AlreadyBookedException(request.date(), request.timeId(), request.themeId());
         }
