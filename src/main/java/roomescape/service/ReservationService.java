@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static roomescape.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -86,5 +87,19 @@ public class ReservationService {
 
     public List<Reservation> findMyReservations(Long memberId) {
         return reservationRepository.findAllByMemberId(memberId);
+    }
+
+    public Reservation saveWaiting(Long memberId, String date, Long timeId, Long themeId) {
+        Member member = findMember(memberId);
+        ReservationTime time = findTime(timeId);
+        Theme theme = findTheme(themeId);
+
+        if (reservationRepository.existsByMemberIdAndTimeIdAndThemeIdAndDate(memberId, timeId, themeId, new Date(date))) {
+            throw new RoomescapeException("동일한 멤버가 다수의 예약을 생성할 수 없습니다.");
+        }
+
+        Reservation reservation = new Reservation(member, date, time, theme, WAITING);
+
+        return reservationRepository.save(reservation);
     }
 }

@@ -50,4 +50,19 @@ public class UserReservationController {
             .toList();
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<CreateReservationResponse> saveReservationWaiting(
+        @Valid @RequestBody CreateUserReservationRequest request,
+        @AuthenticationPrincipal Member member) {
+        Reservation reservation = reservationService.saveWaiting(
+            member.getId(),
+            request.date(),
+            request.timeId(),
+            request.themeId()
+        );
+
+        return ResponseEntity.created(URI.create("/reservations/waiting/" + reservation.getId()))
+            .body(CreateReservationResponse.from(reservation));
+    }
 }

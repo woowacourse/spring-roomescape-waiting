@@ -112,4 +112,26 @@ class ReservationServiceTest {
         List<Reservation> reservations = reservationService.findMyReservations(1L);
         assertThat(reservations).hasSize(2);
     }
+
+    // TODO: TestFixture 만들기
+    @DisplayName("성공: 예약 대기 생성")
+    @Test
+    void saveWaiting() {
+        // when
+        Reservation saved = reservationService.saveWaiting(memberId, rawDate, timeId, themeId);
+        //then
+        assertThat(saved.getId()).isEqualTo(5L);
+    }
+
+    @DisplayName("실패: 동일한 멤버가 2개 이상의 예약 대기를 생성 시도시 예외 발생.")
+    @Test
+    void saveWaiting_MemberDuplication() {
+        // given 
+        Reservation saved = reservationService.saveWaiting(memberId, rawDate, timeId, themeId);
+        // when & then
+        assertThatThrownBy(
+            () -> reservationService.saveWaiting(memberId, rawDate, timeId, themeId)
+        ).isInstanceOf(RoomescapeException.class)
+            .hasMessage("동일한 멤버가 다수의 예약을 생성할 수 없습니다.");
+    }
 }

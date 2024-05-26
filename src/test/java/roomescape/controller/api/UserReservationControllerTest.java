@@ -132,4 +132,23 @@ class UserReservationControllerTest {
             .statusCode(200)
             .body("reservationId", contains(2, 4));
     }
+
+    @DisplayName("성공: 예약 대기 요청 -> 200")
+    @Test
+    void saveWaiting() {
+        CreateReservationRequest request = ReservationRequestFixture.create();
+
+        RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .cookie("token", userToken)
+            .body(request)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(201)
+            .body("id", is(5))
+            .body("memberName", is("사용자"))
+            .body("date", is("2060-01-01"))
+            .body("time", is("10:00"))
+            .body("themeName", is("theme1"));
+    }
 }
