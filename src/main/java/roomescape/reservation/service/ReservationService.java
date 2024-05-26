@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.dto.MemberReservationAddRequest;
@@ -59,14 +60,14 @@ public class ReservationService {
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
         validateMemberReservationNotExistInSlot(memberId, request);
 
-        Reservation reservation = new Reservation(
+        Reservation newReservation = Reservation.createNewReservation(
                 memberService.findById(memberId),
-                request.date(),
+                new ReservationDate(request.date()),
                 reservationTimeService.findById(request.timeId()),
                 themeService.findById(request.themeId())
         );
 
-        Reservation saved = reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(newReservation);
         return new ReservationResponse(saved);
     }
 

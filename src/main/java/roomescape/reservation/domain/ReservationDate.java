@@ -20,7 +20,6 @@ public class ReservationDate {
 
     private void validate(LocalDate value) {
         validateNotNull(value);
-        validateNotPast(value);
     }
 
     public void validateNotNull(LocalDate value) {
@@ -29,10 +28,8 @@ public class ReservationDate {
         }
     }
 
-    public void validateNotPast(LocalDate value) {
-        if (value.isBefore(LocalDate.now())) {
-            throw new IllegalRequestException("예약 날짜는 과거일 수 없습니다");
-        }
+    public boolean isPast() {
+        return value.isBefore(LocalDate.now());
     }
 
     public LocalDate getValue() {

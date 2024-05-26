@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -51,18 +52,16 @@ public class Reservation {
         this(id, member, new ReservationDate(date), time, theme);
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, new ReservationDate(date), time, theme);
+    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme);
     }
 
-    public Reservation(Long id, Reservation reservation) {
-        this(
-                id,
-                reservation.getMember(),
-                new ReservationDate(reservation.getDate()),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
+    public static Reservation createNewReservation(Member member, ReservationDate date, ReservationTime time,
+                                                   Theme theme) {
+        if (date.isPast()) {
+            throw new IllegalRequestException("예약 날짜는 과거일 수 없습니다");
+        }
+        return new Reservation(member, date, time, theme);
     }
 
     protected Reservation() {
