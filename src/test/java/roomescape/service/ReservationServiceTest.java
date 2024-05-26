@@ -8,6 +8,9 @@ import java.util.Comparator;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import roomescape.DBTest;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
@@ -17,10 +20,17 @@ import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationCreateRequest;
 import roomescape.service.dto.response.ReservationResponse;
 
 class ReservationServiceTest extends DBTest {
+
+    @Autowired
+    private ReservationService reservationService;
 
     @DisplayName("예약을 추가한다.")
     @Test
@@ -308,7 +318,7 @@ class ReservationServiceTest extends DBTest {
         // then
         assertThat(reservationRepository.findById(waiting.getId())).isEmpty();
     }
-    
+
     @DisplayName("예약 대기를 취소할 때, 대기 중인 예약이 없으면 예외가 발생한다.")
     @Test
     void isWaitingReservationExist_WhenCancelWaiting() {
@@ -325,5 +335,17 @@ class ReservationServiceTest extends DBTest {
         assertThatThrownBy(() -> reservationService.cancelWaiting(waiting.getId() + 1))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("대기중인 예약을 찾을 수 없습니다. id = " + (waiting.getId() + 1));
+    }
+
+    @TestConfiguration
+    static class ReservationServiceTestConfig {
+
+        @Bean
+        public ReservationService reservationService(ReservationRepository reservationRepository,
+                                                     ReservationTimeRepository timeRepository,
+                                                     ThemeRepository themeRepository,
+                                                     MemberRepository memberRepository) {
+            return new ReservationService(reservationRepository, timeRepository, themeRepository, memberRepository);
+        }
     }
 }

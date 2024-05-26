@@ -6,13 +6,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import roomescape.DBTest;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.request.LoginRequest;
 
-@Import(JwtConfig.class)
 class AuthServiceTest extends DBTest {
 
     @Autowired
@@ -32,9 +32,10 @@ class AuthServiceTest extends DBTest {
     }
 
     @TestConfiguration
+    @Import(JwtConfig.class)
     static class AuthServiceTestConfig {
 
-        @Autowired
+        @Bean
         public AuthService authService(MemberRepository memberRepository, JwtTokenManager jwtTokenManager,
                                        TokenCookieManager tokenCookieManager) {
             return new AuthService(memberRepository, jwtTokenManager, tokenCookieManager);

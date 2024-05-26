@@ -6,6 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import roomescape.DBTest;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
@@ -14,11 +17,16 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationAvailabilityTimeRequest;
 import roomescape.service.dto.request.ReservationTimeRequest;
 import roomescape.service.dto.response.ReservationAvailabilityTimeResponse;
 
 class ReservationTimeServiceTest extends DBTest {
+
+    @Autowired
+    private ReservationTimeService timeService;
 
     @DisplayName("중복된 예약 시간을 저장하려 하면 예외가 발생한다.")
     @Test
@@ -54,5 +62,15 @@ class ReservationTimeServiceTest extends DBTest {
         // then
         assertThat(timeResponses).extracting("booked").contains(false, true);
         assertThat(timeResponses).extracting("id").containsExactly(time1.getId(), time2.getId());
+    }
+
+    @TestConfiguration
+    static class ReservationTimeServiceTestConfig {
+
+        @Bean
+        public ReservationTimeService timeService(ReservationTimeRepository timeRepository,
+                                                  ReservationRepository reservationRepository) {
+            return new ReservationTimeService(timeRepository, reservationRepository);
+        }
     }
 }
