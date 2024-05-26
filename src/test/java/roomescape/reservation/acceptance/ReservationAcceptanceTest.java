@@ -68,11 +68,15 @@ public class ReservationAcceptanceTest {
                             () -> assertEquals(reservationResponse.id(), reservationId + 2)
                     );
                 }),
-                dynamicTest("예약을 삭제한다.", () -> {
+                dynamicTest("예약을 삭제상태로 변경한다.", () -> {
                     reservationService.removeReservation(reservationId + 1);
 
                     Optional<Reservation> reservation = reservationRepository.findById(reservationId + 1);
-                    assertTrue(reservation.isEmpty());
+                    assertAll(
+                            () -> assertTrue(reservation.isPresent()),
+                            () -> assertEquals(reservation.get().getReservationStatus(),
+                                    ReservationStatus.CANCEL.getStatus())
+                    );
                 }),
                 dynamicTest("첫번째 대기자가 자동으로 예약 상태가 된다.", () -> {
                     Reservation reservation = reservationRepository.findById(reservationId + 2).get();

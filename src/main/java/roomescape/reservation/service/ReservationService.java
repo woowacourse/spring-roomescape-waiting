@@ -120,7 +120,7 @@ public class ReservationService {
             throw new RoomEscapeException(ReservationExceptionCode.CAN_NOT_CANCEL_AFTER_MIN_CANCEL_DATE);
         }
 
-        reservationRepository.deleteById(reservationId);
+        reservation.setReservationStatus(ReservationStatus.CANCEL);
         waitingToReservation(reservation);
     }
 
@@ -144,9 +144,10 @@ public class ReservationService {
         }
     }
 
-    private void waitingToReservation(Reservation reservation) {
-        Optional<Reservation> topWaiting = reservationRepository.findFirstByDateAndThemeAndTime(
-                Date.dateFrom(reservation.getDate()), reservation.getTheme(), reservation.getReservationTime());
+    public void waitingToReservation(Reservation reservation) {
+        Optional<Reservation> topWaiting = reservationRepository.findFirstByDateAndThemeAndTimeAndReservationStatus(
+                Date.dateFrom(reservation.getDate()), reservation.getTheme(), reservation.getReservationTime(),
+                ReservationStatus.WAITING);
 
         if (topWaiting.isPresent()) {
             Reservation nextReservation = topWaiting.get();

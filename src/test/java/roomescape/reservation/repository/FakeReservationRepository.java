@@ -117,11 +117,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findFirstByDateAndThemeAndTime(Date date, Theme theme, Time time) {
+    public Optional<Reservation> findFirstByDateAndThemeAndTimeAndReservationStatus(Date date, Theme theme, Time time,
+                                                                                    ReservationStatus reservationStatus) {
         return reservations.values().stream()
                 .filter(reservation -> isSameDate(date, reservation))
                 .filter(reservation -> isSameTimeId(time.getId(), reservation))
                 .filter(reservation -> isSameThemeId(theme.getId(), reservation))
+                .filter(reservation -> isSameStatus(reservationStatus, reservation))
                 .findFirst();
     }
 
