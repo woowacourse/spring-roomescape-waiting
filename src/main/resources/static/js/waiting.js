@@ -59,7 +59,10 @@ function approve(event) {
         method: 'PATCH'
     }).then(response => {
         if (response.status === 204) return;
-        throw new Error('Patch failed');
+        response.text().then(text => {
+            alert('ERROR! ' + text);
+            throw new Error('Patch failed');
+        });
     }).then(() => location.reload());
 }
 
