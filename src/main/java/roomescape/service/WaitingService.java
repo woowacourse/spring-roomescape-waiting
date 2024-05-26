@@ -55,7 +55,7 @@ public class WaitingService {
     }
 
     public void deleteWaiting(long id) {
-        validateExistence(id);
+        validateExist(id);
         waitingRepository.deleteById(id);
     }
 
@@ -93,7 +93,7 @@ public class WaitingService {
         }
     }
 
-    private void validateExistence(long id) {
+    private void validateExist(long id) {
         boolean isNotExist = !waitingRepository.existsById(id);
         if (isNotExist) {
             throw new NotFoundException("[ERROR] 존재하지 않는 예약입니다.");
