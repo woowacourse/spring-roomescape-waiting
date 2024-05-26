@@ -53,14 +53,14 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations-waiting")
-    public ResponseEntity<WaitingResponse> saveWaiting(
-            @RequestBody final WaitingRequest request,
+    public ResponseEntity<SaveWaitingResponse> saveWaiting(
+            @RequestBody final SaveWaitingRequest request,
             @Authenticated final AuthenticatedMember authenticatedMember
     ) {
         Waiting savedWaiting = waitingService.saveWaiting(request, authenticatedMember.id());
 
         return ResponseEntity.created(URI.create("/reservations-waiting/" + savedWaiting.getId()))
-                .body(WaitingResponse.from(savedWaiting));
+                .body(SaveWaitingResponse.from(savedWaiting));
     }
 
     @DeleteMapping("/reservations-mine/{waiting-id}")

@@ -2,9 +2,9 @@ package roomescape.reservation.dto;
 
 import roomescape.reservation.model.Waiting;
 
-public record WaitingResponse(Long reservationId, Long memberId) {
-    public static WaitingResponse from(Waiting savedWaiting) {
-        return new WaitingResponse(
+public record SaveWaitingResponse(Long reservationId, Long memberId) {
+    public static SaveWaitingResponse from(Waiting savedWaiting) {
+        return new SaveWaitingResponse(
                 savedWaiting.getReservation().getId(),
                 savedWaiting.getMember().getId()
         );
