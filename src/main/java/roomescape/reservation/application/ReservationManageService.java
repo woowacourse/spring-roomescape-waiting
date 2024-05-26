@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
@@ -45,7 +46,7 @@ public abstract class ReservationManageService {
         }
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(Long id, Member agent) {
         reservationRepository.findById(id).ifPresent(reservation -> {
             validateReservationStatus(reservation);

@@ -1,3 +1,14 @@
+## 어플리케이션 실행 방법
+1. 도커를 실행한다.
+```
+docker-compose -p rooescape up -d
+```
+2. 어플리케이션을 실행한다.
+3. 도커를 종료한다.
+```
+docker-compose -p chess down
+```
+
 ## 기능 요구 사항
 ### 사용자 예약 조회하기
 - Request

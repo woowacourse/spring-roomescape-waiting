@@ -15,6 +15,7 @@ import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -131,35 +132,51 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
     @Test
     @DisplayName("동시 요청으로 동일한 시간대에 예약을 추가한다.")
-    void createDuplicatedReservationInMultiThread() {
+    void createDuplicatedReservationInMultiThread() throws InterruptedException {
         // given
-        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
-        String token = createTestToken(member.getEmail().getValue());
+        int threadCount = 2;
+        List<Cookie> cookies = createCookies(threadCount);
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
-
         ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, BOOKING.getIdentifier());
-        Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < threadCount; i++) {
+            int threadIndex = i;
             new Thread(() -> RestAssured.given()
                     .contentType(ContentType.JSON)
-                    .cookie(cookie)
-                    .body(request)
+                    .cookie(cookies.get(threadIndex))
+                    .body(request).log().all()
                     .when().post("/reservations")
+                    .then().log().all()
             ).start();
         }
 
         // then
+        Thread.sleep(1000);
         Member admin = createTestAdmin();
         String adminToken = createTestToken(admin.getEmail().getValue());
         Cookie adminCookie = new Cookie.Builder("token", adminToken).build();
 
         List<ReservationResponse> reservationResponses = findAllReservations(adminCookie);
-        assertThat(reservationResponses).hasSize(1);
+        List<ReservationResponse> waitingResponses = findAllWaitingReservations(adminCookie);
+
+        assertSoftly(softly -> {
+            softly.assertThat(reservationResponses).hasSize(1);
+            softly.assertThat(waitingResponses).hasSize(0);
+        });
+    }
+
+    private List<Cookie> createCookies(int count) {
+        List<Cookie> cookies = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Member member = createTestMember(i + MIA_EMAIL, i + MIA_NAME);
+            String token = createTestToken(member.getEmail().getValue());
+            Cookie cookie = new Cookie.Builder("token", token).build();
+            cookies.add(cookie);
+        }
+        return cookies;
     }
 
     @Test
@@ -201,10 +218,12 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Thread.sleep(1000);
         List<ReservationResponse> waitings = findAllWaitingReservations(adminCookie);
         List<ReservationResponse> bookings = findAllReservations(adminCookie);
-        assertThat(waitings).hasSize(0);
-        assertThat(bookings).hasSize(1)
-                .extracting(ReservationResponse::memberName)
-                .contains(MIA_NAME);
+        assertSoftly(softly -> {
+            softly.assertThat(waitings).hasSize(0);
+            softly.assertThat(bookings).hasSize(1)
+                    .extracting(ReservationResponse::memberName)
+                    .contains(MIA_NAME);
+        });
     }
 
     private List<ReservationResponse> findAllReservations(Cookie adminCookie) {
@@ -216,7 +235,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .toList();
     }
 
-    private  List<ReservationResponse> findAllWaitingReservations(Cookie adminCookie) {
+    private List<ReservationResponse> findAllWaitingReservations(Cookie adminCookie) {
         ExtractableResponse<Response> response = RestAssured.given()
                 .cookie(adminCookie)
                 .when().get("/admin/reservations/waiting")
