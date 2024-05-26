@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.reservation.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
+
     @Query("""
             SELECT r.schedule.theme
             FROM Reservation r
@@ -16,5 +17,4 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             LIMIT :limit
             """)
     List<Theme> findTopReservedThemesByDateRangeAndLimit(LocalDate start, LocalDate end, int limit);
-
 }

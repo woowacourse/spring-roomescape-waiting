@@ -5,6 +5,7 @@ import java.util.Objects;
 
 @Embeddable
 public class Password {
+
     private static final int MIN_PASSWORD_LENGTH = 8;
 
     private String value;

@@ -22,6 +22,6 @@ class PasswordTest {
     @ParameterizedTest
     void invalidPasswordLength(String password) {
         Assertions.assertThatThrownBy(() -> new Password(password))
-                .isInstanceOf(IllegalArgumentException.class);    }
-
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

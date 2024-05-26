@@ -33,10 +33,13 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeService reservationTimeService;
+
     @Autowired
     private ThemeRepository themeRepository;
+
     @Autowired
     private ReservationRepository reservationRepository;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 

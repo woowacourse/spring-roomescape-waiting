@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
-import roomescape.infrastructure.MemberId;
+import roomescape.global.config.MemberId;
 import roomescape.service.reservation.WaitingService;
 import roomescape.service.reservation.dto.request.WaitingRequest;
 import roomescape.service.reservation.dto.response.WaitingResponse;

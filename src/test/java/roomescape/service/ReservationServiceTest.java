@@ -106,7 +106,6 @@ class ReservationServiceTest {
                 .isInstanceOf(ValidationException.class);
     }
 
-
     @DisplayName("모든 예약 조회 테스트")
     @Test
     void findAllReservations() {

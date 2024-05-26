@@ -32,10 +32,13 @@ class ThemeServiceTest {
 
     @Autowired
     private ThemeService themeService;
+
     @Autowired
     private ThemeRepository themeRepository;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     private ReservationRepository reservationRepository;
 

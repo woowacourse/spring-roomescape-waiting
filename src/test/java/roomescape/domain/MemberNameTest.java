@@ -26,7 +26,6 @@ class MemberNameTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-
     @DisplayName("예약자명은 한글 또는 영어이다.")
     @ValueSource(strings = {"러쉬!", "rush1", "1수달", "1", "!@", "수1달"})
     @ParameterizedTest
@@ -34,6 +33,4 @@ class MemberNameTest {
         assertThatThrownBy(() -> new MemberName(name))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-
-
 }

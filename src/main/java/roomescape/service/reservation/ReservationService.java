@@ -82,7 +82,7 @@ public class ReservationService {
 
     private void validateMemberWaitingAlreadyExist(LocalDate date, Theme theme, Member member) {
         if (waitingRepository.existsBySchedule_DateAndSchedule_ThemeAndMember(date, theme, member)) {
-            throw new ValidationException(String.format("해당 (날짜: %s / 테마: %s)에 회원님에 대한 예약대기가 이미 존재합니다.",
+            throw new ValidationException(String.format("해당 (날짜: %s / 테마: %s)에 회원님에 대한 예약대기가 이미 존재하여 예약할 수 없습니다.",
                     date.toString(), theme.getName()));
         }
     }

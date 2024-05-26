@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Role;
-import roomescape.infrastructure.TokenProvider;
+import roomescape.service.auth.TokenProvider;
 
 @Component
 public class CheckAdminInterceptor implements HandlerInterceptor {

@@ -59,7 +59,6 @@ class WaitingServiceTest {
     private Theme theme;
     private Member member;
 
-
     @BeforeEach
     void insertReservation() {
         reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));

@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 @Embeddable
 public class MemberName {
+
     private static final int MAX_NAME_LENGTH = 10;
     private static final String REGEX = "^[가-힣a-zA-Z]+$";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
