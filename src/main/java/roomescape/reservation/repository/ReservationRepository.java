@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,10 +33,32 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
            join fetch ReservationTime rt on rt.id = r.time.id
            join fetch Theme t on t.id = r.theme.id
            join fetch Member m on m.id = r.member.id
-           where m.id = :memberId and r.date >= :date
+           where m.id = :memberId
+           and r.date >= :date
            order by r.date, rt.startAt, r.createdAt
             """)
     List<Reservation> findAllByMemberIdFromDateOrderByDateAscTimeStartAtAscCreatedAtAsc(Long memberId, LocalDate date);
+
+    @Query("""
+            select count(r) from Reservation r
+            where r.date = :date
+            and r.status = 'WAIT'
+            and r.time.id = :timeId
+            and r.theme.id = :themeId
+            and r.createdAt <= :createdAt
+            """)
+    int countWaitingRankBy(LocalDate date, Long timeId, Long themeId, LocalDateTime createdAt);
+
+    @Query("""
+            select r from Reservation r
+            where r.date = :date
+            and r.status = 'WAIT'
+            and r.time.id = :timeId
+            and r.theme.id = :themeId
+            order by r.createdAt
+            limit 1
+            """)
+    Optional<Reservation> findFirstWaitingReservationBy(LocalDate date, Long timeId, Long themeId);
 
     @EntityGraph(attributePaths = {"member", "theme", "time"})
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscTimeStartAtAscCreatedAtAsc(

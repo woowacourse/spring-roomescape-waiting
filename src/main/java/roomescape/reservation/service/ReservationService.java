@@ -11,7 +11,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.Waitings;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
@@ -124,13 +123,17 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        List<Reservation> waitingReservations = reservationRepository.findAllByStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
-        Waitings waitings = new Waitings(waitingReservations);
+        List<Reservation> memberReservations = reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeStartAtAscCreatedAtAsc(loginMember.id(), LocalDate.now());
 
-        return reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeStartAtAscCreatedAtAsc(loginMember.id(), LocalDate.now()).stream()
+        return memberReservations.stream()
                 .map(reservation -> MemberReservationResponse.toResponse(
                         reservation,
-                        waitings.findMemberRank(reservation, loginMember.id())
+                        reservationRepository.countWaitingRankBy(
+                                reservation.getDate(),
+                                reservation.getTime().getId(),
+                                reservation.getTheme().getId(),
+                                reservation.getCreatedAt()
+                        )
                 )).toList();
     }
 
@@ -177,10 +180,10 @@ public class ReservationService {
     }
 
     private void updateFirstWaitingReservation(Reservation canceledReservation) {
-        List<Reservation> waitingReservations = reservationRepository.findAllByStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
-        Waitings waitings = new Waitings(waitingReservations);
-
-        waitings.findFirstWaitingReservationByCanceledReservation(canceledReservation)
-                .ifPresent(reservation -> reservation.updateStatus(ReservationStatus.SUCCESS));
+        reservationRepository.findFirstWaitingReservationBy(
+                canceledReservation.getDate(),
+                canceledReservation.getTime().getId(),
+                canceledReservation.getTheme().getId()
+        ).ifPresent(reservation -> reservation.updateStatus(ReservationStatus.SUCCESS));
     }
 }

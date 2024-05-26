@@ -115,6 +115,54 @@ public class ReservationRepositoryTest {
         assertThat(findReservation.getMember().getEmail()).isEqualTo(savedReservation.getMember().getEmail());
     }
 
+    @DisplayName("예약 대기 순서를 반환한다.")
+    @Test
+    void countWaitingRankBy() {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
+
+        Theme theme = themeRepository.save(
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
+
+        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+
+        reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, ReservationStatus.WAIT));
+        Reservation jojoReservation = reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, ReservationStatus.WAIT));
+
+        int jojoRank = reservationRepository.countWaitingRankBy(TODAY, theme.getId(), reservationTime.getId(), jojoReservation.getCreatedAt());
+
+        assertThat(jojoRank).isEqualTo(2);
+    }
+
+    @DisplayName("예약 대기 상태인 첫 번째 예약을 반환한다.")
+    @Test
+    void findFirstWaitingReservationBy() {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
+
+        Theme theme = themeRepository.save(
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
+
+        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+
+        Reservation kakiReservation = reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, ReservationStatus.WAIT));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, ReservationStatus.WAIT));
+
+        Reservation firstWaitingReservation = reservationRepository.findFirstWaitingReservationBy(TODAY, reservationTime.getId(), theme.getId()).get();
+
+        assertThat(firstWaitingReservation.getId()).isEqualTo(kakiReservation.getId());
+    }
+
     @DisplayName("날짜와 테마 아이디로 예약 시간 아이디들을 조회한다.")
     @Test
     void findTimeIdsByDateAndThemeIdTest() {
@@ -128,11 +176,14 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
-        List<Long> timeIds = reservationRepository.findTimeIdsByDateAndThemeId(savedReservation.getDate(), theme.getId());
+        List<Long> timeIds = reservationRepository.findTimeIdsByDateAndThemeId(savedReservation.getDate(),
+                theme.getId());
 
         assertThat(timeIds).containsExactly(reservationTime.getId());
     }

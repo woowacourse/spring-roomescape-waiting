@@ -34,7 +34,7 @@ Content-Type: application/json
 
 ### 예약 취소 API
 
-POST http://localhost:8080/reservations/14
+PATCH http://localhost:8080/reservations/29
 
 ### 관리자 예약 추가 API
 
