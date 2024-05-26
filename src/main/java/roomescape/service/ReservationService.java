@@ -4,7 +4,9 @@ import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -117,10 +119,12 @@ public class ReservationService {
         return new ReservationResponse(savedReservation);
     }
 
+    // TODO: Transactional 필요성 확인
     public void deleteReservation(long id) {
         if (!reservationRepository.existsById(id)) {
             throw new ReservationNotFoundException();
         }
+        approveWaiting(id);
         reservationRepository.deleteById(id);
     }
 
@@ -134,5 +138,27 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
             throw new ReservationConflictException();
         }
+    }
+
+    private void approveWaiting(long reservationId) {
+        List<Waiting> waitings = waitingRepository.findByReservationId(reservationId);
+        Optional<Waiting> primaryWaitingOptional = waitings.stream()
+                .min(Comparator.comparing(Waiting::getCreatedAt));
+        if (primaryWaitingOptional.isEmpty()) {
+            return;
+        }
+
+        Waiting primaryWaiting = primaryWaitingOptional.get();
+        Reservation oldReservation = primaryWaiting.getReservation();
+        Reservation newReservation = reservationRepository.save(new Reservation(
+                primaryWaiting.getMember(),
+                oldReservation.getTheme(),
+                oldReservation.getDate(),
+                oldReservation.getTime()));
+
+        waitingRepository.saveAll(waitings.stream()
+                .map(waiting -> new Waiting(waiting, newReservation))
+                .toList());
+        waitingRepository.deleteById(primaryWaiting.getId());
     }
 }

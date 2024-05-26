@@ -33,7 +33,12 @@ public class Waiting {
         this.createdAt = createdAt;
     }
 
-    public Waiting() {
+    public Waiting(Waiting waiting, Reservation reservation) {
+        this(reservation, waiting.getMember(), waiting.getCreatedAt());
+        this.id = waiting.id;
+    }
+
+    protected Waiting() {
     }
 
     public Long getId() {
