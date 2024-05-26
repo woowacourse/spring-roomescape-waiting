@@ -9,11 +9,12 @@ const membersOptions = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
-  document.getElementById('filter-form').addEventListener('submit', applyFilter);
+  document.getElementById('filter-form').addEventListener('submit',
+      applyFilter);
 
   requestRead(RESERVATION_API_ENDPOINT)
-      .then(render)
-      .catch(error => console.error('Error fetching reservations:', error));
+  .then(render)
+  .catch(error => console.error('Error fetching reservations:', error));
 
   fetchTimes();
   fetchThemes();
@@ -40,28 +41,28 @@ function render(data) {
 
 function fetchTimes() {
   requestRead(TIME_API_ENDPOINT)
-      .then(data => {
-        timesOptions.push(...data);
-      })
-      .catch(error => console.error('Error fetching time:', error));
+  .then(data => {
+    timesOptions.push(...data);
+  })
+  .catch(error => console.error('Error fetching time:', error));
 }
 
 function fetchThemes() {
   requestRead(THEME_API_ENDPOINT)
-      .then(data => {
-        themesOptions.push(...data);
-        populateSelect('theme', themesOptions, 'name');
-      })
-      .catch(error => console.error('Error fetching theme:', error));
+  .then(data => {
+    themesOptions.push(...data);
+    populateSelect('theme', themesOptions, 'name');
+  })
+  .catch(error => console.error('Error fetching theme:', error));
 }
 
 function fetchMembers() {
   requestRead(MEMBER_API_ENDPOINT)
-      .then(data => {
-        membersOptions.push(...data);
-        populateSelect('member', membersOptions, 'name');
-      })
-      .catch(error => console.error('Error fetching member:', error));
+  .then(data => {
+    membersOptions.push(...data);
+    populateSelect('member', membersOptions, 'name');
+  })
+  .catch(error => console.error('Error fetching member:', error));
 }
 
 function populateSelect(selectId, options, textProperty) {
@@ -104,18 +105,24 @@ function createActionButton(label, className, eventListener) {
 }
 
 function addInputRow() {
-  if (isEditing) return;  // 이미 편집 중인 경우 추가하지 않음
+  if (isEditing) {
+    return;
+  }  // 이미 편집 중인 경우 추가하지 않음
 
   const tableBody = document.getElementById('table-body');
   const row = tableBody.insertRow();
   isEditing = true;
 
   const dateInput = createInput('date');
-  const timeDropdown = createSelect(timesOptions, "시간 선택", 'time-select', 'startAt');
-  const themeDropdown = createSelect(themesOptions, "테마 선택", 'theme-select', 'name');
-  const memberDropdown = createSelect(membersOptions, "멤버 선택", 'member-select', 'name');
+  const timeDropdown = createSelect(timesOptions, "시간 선택", 'time-select',
+      'startAt');
+  const themeDropdown = createSelect(themesOptions, "테마 선택", 'theme-select',
+      'name');
+  const memberDropdown = createSelect(membersOptions, "멤버 선택", 'member-select',
+      'name');
 
-  const cellFieldsToCreate = ['', memberDropdown, themeDropdown, dateInput, timeDropdown];
+  const cellFieldsToCreate = ['', memberDropdown, themeDropdown, dateInput,
+    timeDropdown];
 
   cellFieldsToCreate.forEach((field, index) => {
     const cell = row.insertCell(index);
@@ -159,10 +166,10 @@ function saveRow(event) {
   };
 
   requestCreate(reservation)
-      .then(() => {
-        location.reload();
-      })
-      .catch(error => console.error('Error:', error));
+  .then(() => {
+    location.reload();
+  })
+  .catch(error => console.error('Error:', error));
 
   isEditing = false;  // isEditing 값을 false로 설정
 }
@@ -172,8 +179,8 @@ function deleteRow(event) {
   const reservationId = row.cells[0].textContent;
 
   requestDelete(reservationId)
-      .then(() => row.remove())
-      .catch(error => console.error('Error:', error));
+  .then(() => window.location.reload())
+  .catch(error => console.error('Error:', error));
 }
 
 function applyFilter(event) {
@@ -193,10 +200,12 @@ function applyFilter(event) {
       'Content-Type': 'application/json'
     },
   }).then(response => {
-    if (response.status === 200) return response.json();
+    if (response.status === 200) {
+      return response.json();
+    }
     throw new Error('Read failed');
   }).then(render)
-      .catch(error => console.error("Error fetching available times:", error));
+  .catch(error => console.error("Error fetching available times:", error));
 }
 
 function requestCreate(reservation) {
@@ -207,10 +216,12 @@ function requestCreate(reservation) {
   };
 
   return fetch('/admin/reservations', requestOptions)
-      .then(response => {
-        if (response.status === 201) return response.json();
-        throw new Error('Create failed');
-      });
+  .then(response => {
+    if (response.status === 201) {
+      return response.json();
+    }
+    throw new Error('Create failed');
+  });
 }
 
 function requestDelete(id) {
@@ -219,15 +230,19 @@ function requestDelete(id) {
   };
 
   return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
-      .then(response => {
-        if (response.status !== 204) throw new Error('Delete failed');
-      });
+  .then(response => {
+    if (response.status !== 204) {
+      throw new Error('Delete failed');
+    }
+  });
 }
 
 function requestRead(endpoint) {
   return fetch(endpoint)
-      .then(response => {
-        if (response.status === 200) return response.json();
-        throw new Error('Read failed');
-      });
+  .then(response => {
+    if (response.status === 200) {
+      return response.json();
+    }
+    throw new Error('Read failed');
+  });
 }

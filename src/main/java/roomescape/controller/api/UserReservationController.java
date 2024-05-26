@@ -51,6 +51,7 @@ public class UserReservationController {
         List<FindMyReservationResponse> response = reservationWithRanks.stream()
             .map(FindMyReservationResponse::from)
             .toList();
+
         return ResponseEntity.ok(response);
     }
 

@@ -83,7 +83,7 @@ public class Reservation {
         }
     }
 
-    private boolean isNotWaiting() {
+    public boolean isNotWaiting() {
         return !status.isWaiting();
     }
 
@@ -127,6 +127,10 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public void setStatus(ReservationStatus status) {
+        this.status = status;
     }
 
     @Override

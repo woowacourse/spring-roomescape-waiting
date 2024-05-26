@@ -4,6 +4,7 @@ import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
@@ -72,11 +73,30 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
-        reservationRepository.deleteById(id);
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new RoomescapeException("ID에 해당하는 예약이 존재하지 않습니다."));
+
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTimeIdAndThemeId(
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId());
+
+        reservations.stream()
+            .sorted(Comparator.comparingLong(Reservation::getId))
+            .skip(1)
+            .findFirst()
+            .ifPresentOrElse(
+                waiting -> {
+                    waiting.setStatus(RESERVED);
+                    reservationRepository.save(waiting);
+                    reservationRepository.deleteById(id);
+                },
+                () -> reservationRepository.deleteById(id)
+            );
     }
 
     public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+        return reservationRepository.findAll().stream().filter(reservation -> reservation.isNotWaiting()).toList();
     }
 
     public List<Reservation> findAllBy(
