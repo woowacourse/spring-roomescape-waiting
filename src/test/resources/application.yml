@@ -1,13 +1,12 @@
 spring:
+  profiles:
+    active: test
   main:
     allow-bean-definition-overriding: true
   h2:
     console:
       enabled: true
       path: /h2-console
-  sql:
-    init:
-      data-locations:
   jpa:
     show-sql: true
     properties:

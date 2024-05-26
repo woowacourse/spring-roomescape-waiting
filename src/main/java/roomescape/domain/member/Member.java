@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import roomescape.domain.exception.DomainValidationException;
 
 @Entity
 public class Member {
@@ -59,55 +60,55 @@ public class Member {
 
     private void validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 필수 값입니다.");
+            throw new DomainValidationException("이메일은 필수 값입니다.");
         }
 
         if (email.length() > EMAIL_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("이메일은 %d자를 넘을 수 없습니다.", EMAIL_MAX_LENGTH));
+            throw new DomainValidationException(String.format("이메일은 %d자를 넘을 수 없습니다.", EMAIL_MAX_LENGTH));
         }
     }
 
     private void validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 필수 값입니다.");
+            throw new DomainValidationException("비밀번호는 필수 값입니다.");
         }
 
         if (password.length() > PASSWORD_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("비밀번호는 %d자를 넘을 수 없습니다.", PASSWORD_MAX_LENGTH));
+            throw new DomainValidationException(String.format("비밀번호는 %d자를 넘을 수 없습니다.", PASSWORD_MAX_LENGTH));
         }
     }
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 필수 값입니다.");
+            throw new DomainValidationException("이름은 필수 값입니다.");
         }
 
         if (name.length() > NAME_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("이름은 %d자를 넘을 수 없습니다.", NAME_MAX_LENGTH));
+            throw new DomainValidationException(String.format("이름은 %d자를 넘을 수 없습니다.", NAME_MAX_LENGTH));
         }
     }
 
     private void validateRole(Role role) {
         if (role == null) {
-            throw new IllegalArgumentException("역할은 필수 값입니다.");
+            throw new DomainValidationException("역할은 필수 값입니다.");
         }
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Member member)) {
             return false;
         }
-        Member member = (Member) o;
-        return Objects.equals(id, member.id);
+
+        return this.getId() != null && Objects.equals(getId(), member.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getId());
     }
 
     public Long getId() {

@@ -2,38 +2,32 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.exception.DomainNotFoundException;
+import roomescape.domain.reservation.detail.ReservationDetail;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
 
-    @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN FETCH r.member m
-            JOIN FETCH r.time t
-            JOIN FETCH r.theme th
-            WHERE m.id = :id
-            """)
-    List<Reservation> findAllByMemberId(long id);
+    List<Reservation> findByMemberId(long memberId);
 
-    boolean existsByTimeId(long id);
+    boolean existsByDetail_TimeId(long timeId);
 
-    boolean existsByThemeId(long id);
+    boolean existsByDetail_ThemeId(long id);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    boolean existsByDetail(ReservationDetail detail);
+
+    boolean existsByDetailAndMemberId(ReservationDetail detail, long memberId);
 
     @Query("""
                 SELECT r
                 FROM Reservation r
-                JOIN FETCH r.member m
-                JOIN FETCH r.time t
-                JOIN FETCH r.theme th
+                JOIN FETCH r.detail
                 WHERE (:memberId IS NULL OR r.member.id = :memberId)
-                AND (:themeId IS NULL OR r.theme.id = :themeId)
-                AND (:dateFrom IS NULL OR r.date >= :dateFrom)
-                AND (:dateTo IS NULL OR r.date <= :dateTo)
+                AND (:themeId IS NULL OR r.detail.theme.id = :themeId)
+                AND (:dateFrom IS NULL OR r.detail.date >= :dateFrom)
+                AND (:dateTo IS NULL OR r.detail.date <= :dateTo)
             """)
     List<Reservation> findAllByConditions(
             @Param("memberId") Long memberId,
@@ -42,7 +36,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("dateTo") LocalDate dateTo
     );
 
-    default boolean existsByReservation(LocalDate date, long timeId, long themeId) {
-        return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    default Reservation getById(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new DomainNotFoundException(String.format("해당 id의 예약이 존재하지 않습니다. (id: %d)", id)));
     }
 }

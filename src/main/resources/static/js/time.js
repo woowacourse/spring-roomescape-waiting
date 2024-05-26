@@ -1,5 +1,4 @@
 let isEditing = false;
-const API_ENDPOINT = '/times';
 const cellFields = ['id', 'startAt'];
 const createCellFields = ['', createInput()];
 function createBody(inputs) {
@@ -107,7 +106,7 @@ function requestCreate(data) {
     body: JSON.stringify(data)
   };
 
-  return fetch(API_ENDPOINT, requestOptions)
+  return fetch('/admin/times', requestOptions)
       .then(response => {
         if (response.status === 201) return response.json();
         throw new Error('Create failed');
@@ -115,7 +114,7 @@ function requestCreate(data) {
 }
 
 function requestRead() {
-  return fetch(API_ENDPOINT)
+  return fetch('/times')
       .then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
@@ -127,7 +126,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${API_ENDPOINT}/${id}`, requestOptions)
+  return fetch(`/admin/times/${id}`, requestOptions)
       .then(response => {
         if (response.status !== 204) throw new Error('Delete failed');
       });

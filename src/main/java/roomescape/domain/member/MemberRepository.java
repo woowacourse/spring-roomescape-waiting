@@ -1,22 +1,24 @@
 package roomescape.domain.member;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.ListCrudRepository;
+import roomescape.domain.exception.DomainNotFoundException;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends ListCrudRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
-    default Member getByIdentifier(long id) {
+    default Member getById(Long id) {
         return findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException("해당 id의 회원이 존재하지 않습니다."));
     }
 
     default Member getByEmail(String email) {
+        String message = String.format("해당 이메일의 회원이 존재하지 않습니다. (email: %s)", email);
+
         return findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException("해당 이메일의 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException(message));
     }
 }
