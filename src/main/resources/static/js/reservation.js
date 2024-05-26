@@ -164,7 +164,7 @@ function requestDelete(id) {
         method: 'DELETE',
     };
 
-    return fetch(`/api/admin/reservations/${id}`, requestOptions)
+    return fetch(`/api/reservations/${id}`, requestOptions)
         .then(response => {
             if (response.status !== 204) throw new Error('Delete failed');
         });

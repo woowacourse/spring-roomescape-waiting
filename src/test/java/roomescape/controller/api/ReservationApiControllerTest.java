@@ -78,7 +78,7 @@ public class ReservationApiControllerTest {
     void deleteReservation_InDatabase_Success() {
         RestAssured.given().log().all()
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().delete("/api/admin/reservations/1")
+                .when().delete("/api/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
