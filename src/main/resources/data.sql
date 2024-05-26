@@ -10,3 +10,7 @@ INSERT INTO member (name, email, password, role) VALUES ('관리자', 'admin@gma
 
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-08', 1, 1, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-08', 2, 2, 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-12-20', 1, 1, 1);
+
+INSERT INTO waiting (date, time_id, theme_id, member_id, created_at) VALUES ('2024-12-20', 1, 1, 2, '2024-05-26 17:00:00');
+INSERT INTO waiting (date, time_id, theme_id, member_id, created_at) VALUES ('2024-12-20', 1, 1, 3, '2024-05-26 17:00:01');
