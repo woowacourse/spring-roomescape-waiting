@@ -8,7 +8,9 @@ public record MyReservationResponse(Long id,
                                     LocalDate date,
                                     ReservationTimeResponse time,
                                     ThemeResponse theme,
-                                    String status) {
+                                    long waitingCount) {
+
+    public static final int DEFAULT_WAITING_COUNT = 1;
 
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
@@ -16,7 +18,7 @@ public record MyReservationResponse(Long id,
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                "예약"
+                0
         );
     }
 
@@ -26,7 +28,7 @@ public record MyReservationResponse(Long id,
                 waiting.getWaiting().getDate(),
                 ReservationTimeResponse.from(waiting.getWaiting().getTime()),
                 ThemeResponse.from(waiting.getWaiting().getTheme()),
-                String.format("%d번째 예약대기", waiting.getRank() + 1)
+                waiting.getRank() + DEFAULT_WAITING_COUNT
         );
     }
 }

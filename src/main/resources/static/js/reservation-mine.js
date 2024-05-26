@@ -18,14 +18,16 @@ function render(data) {
         const theme = item.theme.name;
         const date = item.date;
         const time = item.time.startAt;
-        const status = item.status;
+        const reservation_status = '예약';
+        const waiting_message = '번째 예약 대기';
+        const status = item.waitingCount === 0 ? reservation_status : item.waitingCount + waiting_message;
 
         row.insertCell(0).textContent = theme
         row.insertCell(1).textContent = date
         row.insertCell(2).textContent = time
         row.insertCell(3).textContent = status;
 
-        if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+        if (status !== reservation_status) { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '취소';
