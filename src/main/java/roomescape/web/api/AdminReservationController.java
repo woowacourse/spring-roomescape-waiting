@@ -41,7 +41,7 @@ public class AdminReservationController {
 
     @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> findAllReservations() {
-        List<ReservationResponse> response = reservationService.findAllReservationWithoutCancel();
+        List<ReservationResponse> response = reservationService.findAllReservationsWithoutCancel();
         return ResponseEntity.ok().body(response);
     }
 

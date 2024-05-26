@@ -136,7 +136,7 @@ class AdminReservationTest {
                 .then().log().all()
                 .assertThat()
                 .statusCode(200)
-                .body("size()", equalTo(14));
+                .body("size()", equalTo(8));
     }
 
     @DisplayName("멤버가 예약한 상태에서, 어드민이 취소하면 요청을 보내면, 예약은 취소된다")
@@ -270,6 +270,6 @@ class AdminReservationTest {
                 .then().log().all()
                 .assertThat()
                 .statusCode(200)
-                .body("size()", equalTo(13));
+                .body("size()", equalTo(7));
     }
 }

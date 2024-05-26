@@ -20,8 +20,6 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByStatusNot(Status status);
-
     List<Reservation> findAllByStatus(Status status);
 
     List<Reservation> findByPeriodAndThemeAndMember(LocalDate start, LocalDate end, Long memberId, Long themeId);

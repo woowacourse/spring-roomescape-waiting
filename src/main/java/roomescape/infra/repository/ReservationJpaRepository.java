@@ -27,9 +27,6 @@ public interface ReservationJpaRepository extends
     List<Reservation> findAll();
 
     @Override
-    List<Reservation> findAllByStatusNot(Status status);
-
-    @Override
     List<Reservation> findAllByStatus(Status status);
 
     @Override
@@ -63,8 +60,7 @@ public interface ReservationJpaRepository extends
                 (select count(r) from Reservation r
                 where r.createdAt < mine.createdAt
                 and r.detail = mine.detail
-                and r.status in (roomescape.domain.reservation.Status.RESERVED,
-                                    roomescape.domain.reservation.Status.WAITING)))
+                and r.status = roomescape.domain.reservation.Status.WAITING))
             from Reservation mine
             where mine.member.id = :memberId
             and mine.status in (roomescape.domain.reservation.Status.RESERVED,
