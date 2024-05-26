@@ -23,6 +23,26 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
             "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(long memberId);
 
+    Waiting findByDateAndThemeIdAndReservationTimeIdAndMemberId(
+            LocalDate date,
+            long themeId,
+            long reservationTimeId,
+            long memberId
+    );
+
+    @Query("SELECT COUNT(w) "
+            + "FROM Waiting w "
+            + "WHERE w.date = :date "
+            + "AND w.theme.id = :themeId "
+            + "AND w.reservationTime.id = :reservationTimeId "
+            + "AND w.id < :id")
+    long countWaitingRankByDateAndThemeIdAndReservationTimeId(
+            long id,
+            LocalDate date,
+            long themeId,
+            long reservationTimeId
+    );
+
     void deleteById(long id);
 
     boolean existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
