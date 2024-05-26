@@ -51,11 +51,9 @@ public class TestFixture {
     // 토큰 정보 추출
     public static String getTokenAfterLogin(LoginRequest request) {
         return RestAssured.given().log().all()
-                .body(request)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .body(request)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
-
     }
 }
