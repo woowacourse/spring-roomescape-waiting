@@ -80,9 +80,9 @@ class ReservationTimeServiceTest {
     @DisplayName("이미 해당 시간으로 예약 되있을 경우 삭제 시 예외가 발생한다.")
     void deleteExceptionTest() {
         Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member(1L, Role.MEMBER, "카키", "kaki@email.com", "1234"));
-        Reservation reservation = new Reservation(member, LocalDate.now(), theme, reservationTime);
+        Reservation reservation = new Reservation(member, LocalDate.now().plusDays(1), theme, reservationTime);
         reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> reservationTimeService.delete(reservationTime.getId()))
