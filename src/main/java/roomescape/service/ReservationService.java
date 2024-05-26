@@ -50,14 +50,13 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_MEMBER));
         LocalDate date = reservationRequest.date();
 
-        validateDuplicateReservation(date, time, theme, member);
         validatePastTimeReservation(date, time);
+        validateDuplicateReservation(date, time, theme, member);
 
         ReservationStatus status = determineStatus(time, theme, date);
-        Reservation beforeSave = new Reservation(member, date, time, theme, status);
-        Reservation saved = reservationRepository.save(beforeSave);
+        Reservation reservation = reservationRepository.save(new Reservation(member, date, time, theme, status));
 
-        return ReservationResponse.from(saved);
+        return ReservationResponse.from(reservation);
     }
 
     private void validateDuplicateReservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -119,11 +118,15 @@ public class ReservationService {
 
         if (member.isAdmin() || reservation.isAuthor(member)) {
             reservationRepository.deleteById(reservationId);
-            reservationRepository.findFirstByDateAndAndTimeAndTheme(
-                    reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())
-                    .ifPresent(firstReservation -> firstReservation.approve());
+            approveNextReservationAutomatically(reservation);
             return;
         }
         throw new RoomescapeException(ExceptionType.NO_AUTHORITY);
+    }
+
+    private void approveNextReservationAutomatically(Reservation reservation) {
+        reservationRepository.findFirstByDateAndAndTimeAndTheme(
+                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())
+                .ifPresent(firstReservation -> firstReservation.approve());
     }
 }

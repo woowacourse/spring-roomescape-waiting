@@ -62,6 +62,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<ReservationWithRank> findAllWithRankByMemberId(long memberId);
 
+    List<Reservation> findAllByStatus(ReservationStatus status);
+
     Optional<Reservation> findFirstByDateAndAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
@@ -72,6 +74,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTime(ReservationTime reservationTime);
 
     boolean existsByTheme(Theme theme);
-
-    List<Reservation> findAllByStatus(ReservationStatus status);
 }
