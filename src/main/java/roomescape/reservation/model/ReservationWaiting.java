@@ -70,10 +70,6 @@ public class ReservationWaiting {
     protected ReservationWaiting() {
     }
 
-    public boolean equalsMemberId(final Long memberId) {
-        return Objects.equals(this.member.getId(), memberId);
-    }
-
     public ReservationDate getDate() {
         return date;
     }
