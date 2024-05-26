@@ -48,6 +48,16 @@ public interface ReservationJpaRepository extends
     );
 
     @Override
+    @Query("""
+            select r from Reservation r
+            where r.detail = :detail
+            and r.status = 'WAITING'
+            order by r.createdAt
+            limit 1
+            """)
+    Optional<Reservation> findNextWaitingReservation(@Param("detail") ReservationDetail detail);
+
+    @Override
     @Query(""" 
             select new roomescape.domain.dto.ReservationWithRank(mine,
                 (select count(r) from Reservation r
