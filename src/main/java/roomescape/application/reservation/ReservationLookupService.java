@@ -51,9 +51,9 @@ public class ReservationLookupService {
     public List<ReservationStatusResponse> getReservationStatusesByMemberId(long memberId) {
         return reservationRepository.findActiveReservationByMemberId(memberId)
                 .stream()
-                .map(reservation -> {
-                    long waitingCount = reservationRepository.getWaitingCount(reservation);
-                    return ReservationStatusResponse.of(reservation, waitingCount);
-                }).toList();
+                .map(reservation -> ReservationStatusResponse.of(
+                        reservation,
+                        reservationRepository.getWaitingCount(reservation))
+                ).toList();
     }
 }

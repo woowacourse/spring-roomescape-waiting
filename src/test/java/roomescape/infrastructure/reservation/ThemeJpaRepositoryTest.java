@@ -1,6 +1,8 @@
 package roomescape.infrastructure.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.domain.reservation.BookStatus.BOOKED;
+import static roomescape.domain.reservation.BookStatus.BOOKING_CANCELLED;
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
 import static roomescape.fixture.ThemeFixture.FANTASY_THEME;
 import static roomescape.fixture.ThemeFixture.SCHOOL_THEME;
@@ -20,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
@@ -49,19 +50,19 @@ class ThemeJpaRepositoryTest {
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
         Stream.of(
-                new Reservation(member, themes.get(0), date.plusDays(0), times.get(0), createdAt, BookStatus.BOOKED),
-                new Reservation(member, themes.get(1), date.plusDays(1), times.get(1), createdAt, BookStatus.BOOKED),
-                new Reservation(member, themes.get(1), date.plusDays(1), times.get(0), createdAt, BookStatus.BOOKED),
-                new Reservation(member, themes.get(2), date.plusDays(1), times.get(0), createdAt, BookStatus.BOOKED),
-                new Reservation(member, themes.get(2), date.plusDays(2), times.get(1), createdAt, BookStatus.BOOKED),
-                new Reservation(member, themes.get(2), date.plusDays(2), times.get(2), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(0), date.plusDays(0), times.get(0), createdAt, BOOKED),
+                new Reservation(member, themes.get(1), date.plusDays(1), times.get(1), createdAt, BOOKED),
+                new Reservation(member, themes.get(1), date.plusDays(1), times.get(0), createdAt, BOOKED),
+                new Reservation(member, themes.get(2), date.plusDays(1), times.get(0), createdAt, BOOKED),
+                new Reservation(member, themes.get(2), date.plusDays(2), times.get(1), createdAt, BOOKED),
+                new Reservation(member, themes.get(2), date.plusDays(2), times.get(2), createdAt, BOOKED),
 
-                new Reservation(member, themes.get(0), date.plusDays(2), times.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
-                new Reservation(member, themes.get(0), date.plusDays(2), times.get(1), createdAt, BookStatus.BOOKING_CANCELLED),
-                new Reservation(member, themes.get(0), date.plusDays(2), times.get(2), createdAt, BookStatus.BOOKING_CANCELLED),
-                new Reservation(member, themes.get(0), date.plusDays(3), times.get(0), createdAt, BookStatus.BOOKED),
-                new Reservation(member, themes.get(0), date.plusDays(3), times.get(1), createdAt, BookStatus.BOOKED),
-                new Reservation(member, themes.get(0), date.plusDays(3), times.get(0), createdAt, BookStatus.BOOKED)
+                new Reservation(member, themes.get(0), date.plusDays(2), times.get(0), createdAt, BOOKING_CANCELLED),
+                new Reservation(member, themes.get(0), date.plusDays(2), times.get(1), createdAt, BOOKING_CANCELLED),
+                new Reservation(member, themes.get(0), date.plusDays(2), times.get(2), createdAt, BOOKING_CANCELLED),
+                new Reservation(member, themes.get(0), date.plusDays(3), times.get(0), createdAt, BOOKED),
+                new Reservation(member, themes.get(0), date.plusDays(3), times.get(1), createdAt, BOOKED),
+                new Reservation(member, themes.get(0), date.plusDays(3), times.get(0), createdAt, BOOKED)
         ).forEach(entityManager::persist);
 
         int limit = 3;

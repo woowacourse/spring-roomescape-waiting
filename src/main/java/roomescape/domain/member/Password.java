@@ -33,7 +33,6 @@ public class Password {
         }
     }
 
-
     public boolean matches(String other) {
         return password.equals(other);
     }

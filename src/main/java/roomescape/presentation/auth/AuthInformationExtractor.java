@@ -17,9 +17,14 @@ public class AuthInformationExtractor {
             throw new AuthenticationInformationNotFoundException();
         }
         Cookie cookieWithProperty = Arrays.stream(cookies)
-                .filter(cookie -> cookie.getName().equals(COOKIE_NAME))
+                .filter(AuthInformationExtractor::hasCookieName)
                 .findFirst()
                 .orElseThrow(AuthenticationInformationNotFoundException::new);
         return cookieWithProperty.getValue();
+    }
+
+    private static boolean hasCookieName(Cookie cookie) {
+        String name = cookie.getName();
+        return name.equals(COOKIE_NAME);
     }
 }
