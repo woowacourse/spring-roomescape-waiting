@@ -80,7 +80,6 @@ public class ReservationService {
         });
     }
 
-    // TODO: 테스트 코드 작성
     public List<ReservationResponse> findReservationsByMemberEmail(String email) {
         Stream<ReservationResponse> reservationsConfirm = reservationRepository.findAllByMemberEmail(email).stream()
                 .map(ReservationResponse::new);
@@ -119,7 +118,6 @@ public class ReservationService {
         return new ReservationResponse(savedReservation);
     }
 
-    // TODO: Transactional 필요성 확인
     public void deleteReservation(long id) {
         if (!reservationRepository.existsById(id)) {
             throw new ReservationNotFoundException();
