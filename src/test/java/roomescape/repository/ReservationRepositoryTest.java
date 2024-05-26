@@ -57,7 +57,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 theme에 예약이 존재하면 true를 반환한다.")
     @Test
     void existsByTheme_isTrue() {
-        //given, when
+        //when
         boolean isReservationExistsAtThemeOne = reservationRepository.existsByTheme(THEME_ONE);
 
         //then
@@ -67,7 +67,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 theme에 예약이 존재하지 않으면 false를 반환한다.")
     @Test
     void existsByTheme_isFalse() {
-        //given, when
+        //when
         boolean isReservationExistsAtThemeTwo = reservationRepository.existsByTheme(THEME_TWO);
 
         //then
@@ -77,7 +77,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 time에 예약이 존재하면 true를 반환한다.")
     @Test
     void existsByTime_isTrue() {
-        //given, when
+        //when
         boolean isReservationExistsAtTimeOne = reservationRepository.existsByTime(TIME_ONE);
 
         //then
@@ -87,7 +87,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 time에 예약이 존재하지 않으면 false를 반환한다.")
     @Test
     void existsByTime_isFalse() {
-        //given, when
+        //when
         boolean isReservationExistsAtTimeTwo = reservationRepository.existsByTime(TIME_TWO);
 
         //then
@@ -97,7 +97,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 date와 member와 time에 해당하는 예약이 존재하면 true를 반환한다.")
     @Test
     void existsByDateAndTimeAndMember_isTrue() {
-        //given, when
+        //when
         boolean isReservationExists_true = reservationRepository
                 .existsByDateAndTimeAndMember(FROM_DATE, TIME_ONE, ADMIN_MEMBER);
 
@@ -108,7 +108,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 date와 member와 time에 해당하는 예약이 존재하지 않으면 false를 반환한다.")
     @Test
     void existsByDateAndTimeAndMember_isFalse() {
-        //given, when
+        //when
        boolean isReservationExists_false = reservationRepository
                 .existsByDateAndTimeAndMember(FROM_DATE, TIME_TWO, USER_MEMBER);
 
@@ -119,7 +119,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 date와 theme와 time과 member에 해당하는 예약이 존재하면 true를 반환한다.")
     @Test
     void existsByDateAndTimeAndThemeAndMember_isTrue() {
-        //given, when
+        //when
         boolean isReservationExists_true = reservationRepository
                 .existsByDateAndTimeAndThemeAndMember(FROM_DATE, TIME_ONE, THEME_ONE, ADMIN_MEMBER);
 
@@ -130,7 +130,7 @@ class ReservationRepositoryTest {
     @DisplayName("해당 date와 theme와 time과 member에 해당하는 예약이 존재하지 않으면 false를 반환한다.")
     @Test
     void existsByDateAndTimeAndThemeAndMember_isFalse() {
-        //given, when
+        //when
         boolean isReservationExists_false = reservationRepository
                 .existsByDateAndTimeAndThemeAndMember(FROM_DATE, TIME_TWO, THEME_TWO, USER_MEMBER);
 

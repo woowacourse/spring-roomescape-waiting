@@ -29,7 +29,6 @@ class WaitingControllerTest {
     private int port;
     private String accessToken;
 
-
     @BeforeEach
     void setUp() {
         RestAssured.port = port;

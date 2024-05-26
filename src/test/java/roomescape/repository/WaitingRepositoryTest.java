@@ -50,7 +50,7 @@ class WaitingRepositoryTest {
     @DisplayName("해당 date와 theme와 time과 member에 해당하는 예약 대기가 존재하면 true를 반환한다.")
     @Test
     void existsByDateAndTimeAndThemeAndMember_isTrue() {
-        //given, when
+        //when
         boolean isReservationExists_true = waitingRepository
                 .existsByDateAndTimeAndThemeAndMember(FROM_DATE, TIME_ONE, THEME_ONE, USER_MEMBER);
 
@@ -61,7 +61,7 @@ class WaitingRepositoryTest {
     @DisplayName("해당 date와 theme와 time과 member에 해당하는 예약 대기가 존재하지 않으면 false를 반환한다.")
     @Test
     void existsByDateAndTimeAndThemeAndMember_isFalse() {
-        //given, when
+        //when
         boolean isReservationExists_false = waitingRepository
                 .existsByDateAndTimeAndThemeAndMember(FROM_DATE, TIME_TWO, THEME_TWO, ADMIN_MEMBER);
 
