@@ -16,6 +16,20 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
     Optional<Reservation> findById(Long id);
 
     @Query("""
+               SELECT r
+               FROM Reservation r
+               JOIN FETCH r.member
+               JOIN FETCH r.theme
+               JOIN FETCH r.time
+               WHERE
+                   r.date = :date AND
+                   r.time.id = :timeId AND
+                   r.theme.id = :themeId
+            """
+    )
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    @Query("""
               SELECT r.theme.id
               FROM Reservation r
               WHERE r.date BETWEEN :startDate AND :endDate
@@ -29,6 +43,7 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
     List<Reservation> findAll();
 
     @Query("SELECT r from Reservation r WHERE r.date = :date AND r.theme.id = :themeId")
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
     @EntityGraph(attributePaths = {"member", "theme", "time"})
@@ -40,7 +55,17 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
     @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.theme.id = :id)")
     boolean existsByThemeId(Long id);
 
-    @Query("SELECT EXISTS " +
-           "(SELECT 1 from Reservation r WHERE r.date = :date AND r.time.id = :timeId AND r.theme.id = :themeId)")
+    @Query("""
+            SELECT EXISTS
+                (
+                 SELECT 1
+                 FROM Reservation r
+                 WHERE
+                     r.date = :date AND
+                     r.time.id = :timeId AND
+                     r.theme.id = :themeId
+                 )
+            """
+    )
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

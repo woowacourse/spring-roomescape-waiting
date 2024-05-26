@@ -26,7 +26,6 @@ import roomescape.util.DateUtil;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class JwtProviderTest {
 
-
     @Autowired
     JwtProvider jwtProvider;
 

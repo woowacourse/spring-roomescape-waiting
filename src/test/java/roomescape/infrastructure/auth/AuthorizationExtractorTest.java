@@ -28,5 +28,4 @@ class AuthorizationExtractorTest {
         //then
         assertThat(token).isEqualTo("expectedToken");
     }
-
 }

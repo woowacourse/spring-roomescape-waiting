@@ -4,11 +4,13 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static roomescape.LoginTestSetting.getCookieByLogin;
 
+import java.util.List;
 import io.restassured.http.Cookie;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -49,27 +51,33 @@ class UserPageApiTest {
                 .header("Location", containsString("/login"));
     }
 
-    @Test
-    void 로그인_계정의_권한이_사용자가_아닐때_사용자_예약_페이지_진입시_권한없음_응답() {
+    @ParameterizedTest
+    @MethodSource("provideUrls")
+    void 로그인_계정의_권한이_사용자가_아닐때_사용자_예약_페이지_진입시_권한없음_응답(String url) {
         Cookie cookieByLogin = getCookieByLogin(port, ADMIN_EMAIL, ADMIN_PASSWORD);
 
         given().log().all()
                 .port(port)
                 .cookie(cookieByLogin)
-                .when().get("/reservation")
+                .when().get(url)
                 .then().log().all()
                 .statusCode(401);
     }
 
-    @Test
-    void 로그인_계정의_권한이_사용자이면_사용자_페이지_정상_진입() {
+    @ParameterizedTest
+    @MethodSource("provideUrls")
+    void 로그인_계정의_권한이_사용자이면_사용자_페이지_정상_진입(String url) {
         Cookie cookieByLogin = getCookieByLogin(port, USER_EMAIL, USER_PASSWORD);
 
         given().log().all()
                 .port(port)
                 .cookie(cookieByLogin)
-                .when().get("/reservation")
+                .when().get(url)
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    static List<String> provideUrls() {
+        return List.of("/reservation", "/reservation-mine");
     }
 }

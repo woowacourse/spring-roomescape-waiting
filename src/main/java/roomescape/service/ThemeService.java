@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.dto.theme.ThemeRequest;
@@ -11,6 +12,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.util.DateUtil;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -21,47 +23,13 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public Long addTheme(ThemeRequest themeRequest) {
         ThemeName name = new ThemeName(themeRequest.name());
         validateNameDuplicate(name);
         Theme theme = themeRequest.toEntity();
 
         return themeRepository.save(theme).getId();
-    }
-
-    public List<ThemeResponse> getAllTheme() {
-        List<Theme> themes = themeRepository.findAll();
-        return themes.stream()
-                .map(ThemeResponse::from)
-                .toList();
-    }
-
-    public ThemeResponse getTheme(Long id) {
-        Theme theme = findThemeById(id);
-        return ThemeResponse.from(theme);
-    }
-
-    public List<ThemeResponse> getPopularThemes() {
-        List<Long> popularThemeIds = reservationRepository.findThemeReservationCountsForDate(
-                DateUtil.A_WEEK_AGO, DateUtil.YESTERDAY);
-
-        return themeRepository.findAllById(popularThemeIds)
-                .stream().map(ThemeResponse::from)
-                .toList();
-    }
-
-    public void deleteTheme(Long id) {
-        Theme theme = findThemeById(id);
-        validateDeletable(theme);
-        themeRepository.deleteById(id);
-    }
-
-    private Theme findThemeById(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 테마 정보 입니다.",
-                        new Throwable("theme_id : " + themeId)
-                ));
     }
 
     public void validateNameDuplicate(ThemeName name) {
@@ -73,6 +41,13 @@ public class ThemeService {
         }
     }
 
+    @Transactional
+    public void deleteTheme(Long id) {
+        Theme theme = themeRepository.getById(id);
+        validateDeletable(theme);
+        themeRepository.deleteById(id);
+    }
+
     private void validateDeletable(Theme theme) {
         if (reservationRepository.existsByThemeId(theme.getId())) {
             throw new IllegalArgumentException(
@@ -80,5 +55,30 @@ public class ThemeService {
                     new Throwable("theme_id : " + theme.getId())
             );
         }
+    }
+
+    public List<ThemeResponse> getAllTheme() {
+        List<Theme> themes = themeRepository.findAll();
+
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
+    }
+
+    public ThemeResponse getTheme(Long id) {
+        Theme theme = themeRepository.getById(id);
+
+        return ThemeResponse.from(theme);
+    }
+
+    public List<ThemeResponse> getPopularThemes() {
+        List<Long> popularThemeIds = reservationRepository.findThemeReservationCountsForDate(
+                DateUtil.aWeekAgo(),
+                DateUtil.yesterday()
+        );
+
+        return themeRepository.findAllById(popularThemeIds)
+                .stream().map(ThemeResponse::from)
+                .toList();
     }
 }

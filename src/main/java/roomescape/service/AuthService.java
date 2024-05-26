@@ -2,6 +2,7 @@ package roomescape.service;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
@@ -14,6 +15,7 @@ import roomescape.infrastructure.auth.PasswordEncoder;
 import roomescape.repository.MemberRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final MemberRepository memberRepository;
@@ -33,16 +35,6 @@ public class AuthService {
         return new TokenDto(token);
     }
 
-    public boolean isValidateToken(TokenDto tokenDto) {
-        String token = tokenDto.accessToken();
-        return token != null && jwtProvider.isValidateToken(token);
-    }
-
-    public LoginMember extractLoginMemberByToken(TokenDto tokenDto) throws Exception {
-        String token = tokenDto.accessToken();
-        return createLoginMemberByToken(token);
-    }
-
     private Member authenticateUser(LoginRequest request) {
         Email email = new Email(request.email());
         Member member = getMemberByEmail(email);
@@ -58,6 +50,22 @@ public class AuthService {
                 ));
     }
 
+    private void validatePassword(LoginRequest request, Member memberToLogin) {
+        if (!passwordEncoder.matches(request.password(), memberToLogin.getPassword())) {
+            throw new IllegalArgumentException("[ERROR] 잘못된 비밀번호 입니다.");
+        }
+    }
+
+    public boolean isValidateToken(TokenDto tokenDto) {
+        String token = tokenDto.accessToken();
+        return token != null && jwtProvider.isValidateToken(token);
+    }
+
+    public LoginMember extractLoginMemberByToken(TokenDto tokenDto) throws Exception {
+        String token = tokenDto.accessToken();
+        return createLoginMemberByToken(token);
+    }
+
     private LoginMember createLoginMemberByToken(String token) throws Exception {
         try {
             Claims claims = jwtProvider.getClaims(token);
@@ -68,12 +76,6 @@ public class AuthService {
             return new LoginMember(userId, userName, userEmail, userRole);
         } catch (Exception e) {
             throw new Exception("검증되지 않은 토큰입니다. 먼저 토큰 검증을 해주세요.");
-        }
-    }
-
-    private void validatePassword(LoginRequest request, Member memberToLogin) {
-        if (!passwordEncoder.matches(request.password(), memberToLogin.getPassword())) {
-            throw new IllegalArgumentException("[ERROR] 잘못된 비밀번호 입니다.");
         }
     }
 }

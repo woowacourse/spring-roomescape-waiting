@@ -12,10 +12,6 @@ public class Description {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     private void validateDescription(String description) {
         if (description.length() < 10) {
             throw new IllegalArgumentException(
@@ -23,5 +19,9 @@ public class Description {
                     new Throwable(" theme_description : " + description)
             );
         }
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

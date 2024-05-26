@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,13 @@ class ThemeServiceTest {
     ThemeService themeService;
 
     @Autowired
-    ReservationService reservationService;
+    ReservationQueryService reservationQueryService;
+
+    @Autowired
+    CancelReservationService cancelReservationService;
+
+    @Autowired
+    CreateReservationService createReservationService;
 
     @Test
     void 동일한_이름의_테마를_추가할_경우_예외_발생() {
@@ -45,13 +52,13 @@ class ThemeServiceTest {
         Long notExistIdToFind = allTheme.size() + 1L;
 
         //when, then
-        assertThatThrownBy(() -> themeService.getTheme(notExistIdToFind)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> themeService.getTheme(notExistIdToFind)).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
     void 예약_되어있는_테마를_삭제할_경우_예외_발생() {
         //given
-        ReservationResponse reservationResponse = reservationService.getReservation(1L);
+        ReservationResponse reservationResponse = reservationQueryService.getReservation(1L);
         ThemeResponse themeResponse = reservationResponse.theme();
         Long themeId = themeResponse.id();
 
@@ -87,7 +94,7 @@ class ThemeServiceTest {
     }
 
     void deleteAllReservation() {
-        List<ReservationResponse> reservationResponses = reservationService.getAllReservations();
-        reservationResponses.forEach(reservation -> reservationService.deleteReservation(reservation.id()));
+        List<ReservationResponse> reservationResponses = reservationQueryService.getAllReservations();
+        reservationResponses.forEach(reservation -> cancelReservationService.deleteReservation(reservation.id()));
     }
 }

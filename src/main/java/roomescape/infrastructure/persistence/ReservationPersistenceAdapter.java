@@ -39,6 +39,11 @@ class ReservationPersistenceAdapter implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return repository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
     public List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate) {
         PageRequest limitTen = PageRequest.of(0, 10);
         return repository.findThemeReservationCountsForDate(startDate, endDate, limitTen);

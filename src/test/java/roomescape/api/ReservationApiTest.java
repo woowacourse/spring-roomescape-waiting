@@ -1,5 +1,6 @@
 package roomescape.api;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.UserReservationRequest;
+import roomescape.dto.waiting.UserWaitingRequest;
 import roomescape.infrastructure.auth.JwtProvider;
 
 @Sql("/reservation-api-test-data.sql")
@@ -59,7 +61,7 @@ class ReservationApiTest {
     @Test
     void 관리자_예약_추가() {
         Cookie cookieByAdminLogin = getCookieByLogin(port, "admin@email.com", "123456");
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
 
         RestAssured.given().log().all()
                 .port(port)
@@ -79,7 +81,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_단일_조회() {
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -96,7 +98,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_전체_조회() {
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -109,8 +111,8 @@ class ReservationApiTest {
 
     @Test
     void 사용자_예약_전체_조회() {
-        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L);
-        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L);
+        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L, 1L);
+        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L, 1L);
         addReservation(otherUserReservationRequest);
         addReservation(userReservationRequest);
 
@@ -123,6 +125,28 @@ class ReservationApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @Test
+    void 사용자_예약_및_예약_대기_전체_조회() {
+        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L, 1L);
+        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L, 1L);
+        UserWaitingRequest userWaitingRequest = createUserWaitingRequest(1L, 1L);
+
+        addReservation(otherUserReservationRequest);
+        addReservation(userReservationRequest);
+        addWaiting(userWaitingRequest);
+
+        Cookie cookieByUserLogin = getCookieByLogin(port, "atom@email.com", "123456");
+
+        RestAssured.given().log().all()
+                .port(port)
+                .cookie(cookieByUserLogin)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("status", contains("예약", "1번째 예약 대기"));
     }
 
     @Sql("/reservation-filter-api-test-data.sql")
@@ -139,7 +163,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_삭제() {
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -153,17 +177,35 @@ class ReservationApiTest {
         return new UserReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
     }
 
-    private ReservationRequest createReservationRequest(Long memberId, Long timeId) {
-        return new ReservationRequest(LocalDate.now().plusDays(1), timeId, 1L, memberId);
+    private ReservationRequest createReservationRequest(Long memberId, Long timeId, Long themeId) {
+        return new ReservationRequest(LocalDate.now().plusDays(1), timeId, themeId, memberId);
+    }
+
+    private UserWaitingRequest createUserWaitingRequest(Long timeId, Long themeId) {
+        return new UserWaitingRequest(LocalDate.now().plusDays(1), timeId, themeId);
     }
 
     private void addReservation(ReservationRequest reservationRequest) {
         Cookie cookieByAdminLogin = getCookieByLogin(port, "admin@email.com", "123456");
+
         RestAssured.given().log().all()
                 .port(port)
                 .cookie(cookieByAdminLogin)
                 .contentType(ContentType.JSON)
                 .body(reservationRequest)
                 .when().post("/admin/reservations");
+    }
+
+    private void addWaiting(UserWaitingRequest waitingRequest) {
+        Cookie cookieByUserLogin = getCookieByLogin(port, "atom@email.com", "123456");
+
+        RestAssured.given().log().all()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .cookie(cookieByUserLogin)
+                .body(waitingRequest)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201);
     }
 }

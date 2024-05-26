@@ -1,4 +1,4 @@
-package roomescape.web.argumentresolver;
+package roomescape.web.search;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;

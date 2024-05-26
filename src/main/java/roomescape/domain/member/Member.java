@@ -1,5 +1,6 @@
 package roomescape.domain.member;
 
+import java.util.Objects;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,11 +32,6 @@ public class Member {
     }
 
     public Member(String name, String email, String password, Role role) {
-        this(null, name, email, password, role);
-    }
-
-    public Member(Long id, String name, String email, String password, Role role) {
-        this.id = id;
         this.name = new Name(name);
         this.email = new Email(email);
         this.password = new Password(password);
@@ -60,5 +56,22 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Member member)) {
+            return false;
+        }
+
+        return this.getId() != null & Objects.equals(getId(), member.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

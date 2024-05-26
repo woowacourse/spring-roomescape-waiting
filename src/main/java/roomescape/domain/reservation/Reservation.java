@@ -2,8 +2,6 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
+import roomescape.util.DateUtil;
 
 @Entity
 public class Reservation {
@@ -31,30 +30,37 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @Enumerated(EnumType.STRING)
-    private ReservationState state;
-
     protected Reservation() {
     }
 
     public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
-        this(null, date, reservationTime, theme, member, ReservationState.RESERVED);
-    }
+        validateDateTime(date, reservationTime);
 
-    public Reservation(
-            Long id,
-            LocalDate date,
-            ReservationTime reservationTime,
-            Theme theme,
-            Member member,
-            ReservationState state
-    ) {
-        this.id = id;
         this.date = date;
         this.time = reservationTime;
         this.theme = theme;
         this.member = member;
-        this.state = state;
+    }
+
+    private void validateDateTime(LocalDate date, ReservationTime reservationTime) {
+        if (DateUtil.isPastDateTime(date, reservationTime.getStartAt())) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
+                    new Throwable("생성 예약 시간 : " + date + " " + reservationTime.getStartAt())
+            );
+        }
+    }
+
+    public void changeOwner(Member member) {
+        this.member = member;
+    }
+
+    public boolean isOwner(Member member) {
+        return this.member.equals(member);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Long getTimeId() {
@@ -63,10 +69,6 @@ public class Reservation {
 
     public Long getThemeId() {
         return theme.getId();
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public LocalDate getDate() {
@@ -83,9 +85,5 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    public ReservationState getState() {
-        return state;
     }
 }

@@ -1,5 +1,6 @@
 package roomescape.api;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
@@ -78,7 +79,8 @@ class ReservationTimeApiTest {
                 .when().get("/times/available?date=" + targetDay + "&themeId=1")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(5))
+                .body("alreadyBooked", contains(true, true, false, true, false));
     }
 
     @Test

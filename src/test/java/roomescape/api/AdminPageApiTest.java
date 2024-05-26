@@ -29,10 +29,6 @@ class AdminPageApiTest {
     @LocalServerPort
     int port;
 
-    static List<String> provideUrls() {
-        return List.of("/admin", "/admin/reservation", "/admin/time", "admin/theme");
-    }
-
     @ParameterizedTest
     @MethodSource("provideUrls")
     void 로그인이_되어있지_않은_경우_어드민_페이지_진입시_로그인_페이지로_이동(String url) {
@@ -68,5 +64,9 @@ class AdminPageApiTest {
                 .when().get(url)
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    static List<String> provideUrls() {
+        return List.of("/admin", "/admin/reservation", "/admin/time", "/admin/theme", "/admin/waiting");
     }
 }

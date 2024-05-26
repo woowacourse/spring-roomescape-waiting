@@ -12,10 +12,6 @@ public class ThemeName {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     private void validateName(String name) {
         if (name.isEmpty() || name.length() > 20) {
             throw new IllegalArgumentException(
@@ -23,5 +19,9 @@ public class ThemeName {
                     new Throwable("theme_name : " + name)
             );
         }
+    }
+
+    public String getName() {
+        return name;
     }
 }

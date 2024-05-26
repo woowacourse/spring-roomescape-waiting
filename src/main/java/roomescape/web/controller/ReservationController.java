@@ -15,63 +15,76 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.UserReservationRequest;
 import roomescape.dto.reservation.UserReservationResponse;
-import roomescape.service.ReservationService;
+import roomescape.service.CancelReservationService;
+import roomescape.service.CreateReservationService;
+import roomescape.service.ReservationQueryService;
 
 @RestController
 class ReservationController {
 
-    private final ReservationService reservationService;
+    private final CreateReservationService createReservationService;
+    private final ReservationQueryService reservationQueryService;
+    private final CancelReservationService cancelReservationService;
 
-    public ReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public ReservationController(
+            CreateReservationService createReservationService,
+            ReservationQueryService reservationQueryService,
+            CancelReservationService cancelReservationService
+    ) {
+        this.createReservationService = createReservationService;
+        this.reservationQueryService = reservationQueryService;
+        this.cancelReservationService = cancelReservationService;
     }
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> addReservationByAdmin(
-            @RequestBody ReservationRequest reservationRequest) {
-        Long savedId = reservationService.addReservation(reservationRequest);
-        ReservationResponse reservationResponse = reservationService.getReservation(savedId);
+            @RequestBody ReservationRequest reservationRequest
+    ) {
+        Long savedId = createReservationService.addReservation(reservationRequest);
+        ReservationResponse reservationResponse = reservationQueryService.getReservation(savedId);
         return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservationByUser(
             @RequestBody UserReservationRequest userReservationRequest,
-            LoginMember loginMember) {
+            LoginMember loginMember
+    ) {
         ReservationRequest reservationRequest = ReservationRequest.from(userReservationRequest, loginMember.id());
-        Long savedId = reservationService.addReservation(reservationRequest);
-        ReservationResponse reservationResponse = reservationService.getReservation(savedId);
+        Long savedId = createReservationService.addReservation(reservationRequest);
+        ReservationResponse reservationResponse = reservationQueryService.getReservation(savedId);
         return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
+    }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+        cancelReservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getAllReservations(ReservationFilter reservationFilter) {
         if (reservationFilter.existFilter()) {
-            List<ReservationResponse> reservationResponses = reservationService.getReservationsByFilter(
-                    reservationFilter);
+            List<ReservationResponse> reservationResponses =
+                    reservationQueryService.getReservationsByFilter(reservationFilter);
             return ResponseEntity.ok(reservationResponses);
         }
-        List<ReservationResponse> reservationResponses = reservationService.getAllReservations();
+
+        List<ReservationResponse> reservationResponses = reservationQueryService.getAllReservations();
         return ResponseEntity.ok(reservationResponses);
     }
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<UserReservationResponse>> getReservationsMine(LoginMember loginMember) {
-        List<UserReservationResponse> userReservationResponses = reservationService.getReservationByMemberId(
-                loginMember.id());
+        List<UserReservationResponse> userReservationResponses =
+                reservationQueryService.getReservationByMemberId(loginMember.id());
 
         return ResponseEntity.ok(userReservationResponses);
     }
 
     @GetMapping("/reservations/{id}")
     public ResponseEntity<ReservationResponse> getReservation(@PathVariable Long id) {
-        ReservationResponse reservationResponse = reservationService.getReservation(id);
+        ReservationResponse reservationResponse = reservationQueryService.getReservation(id);
         return ResponseEntity.ok(reservationResponse);
-    }
-
-    @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
     }
 }

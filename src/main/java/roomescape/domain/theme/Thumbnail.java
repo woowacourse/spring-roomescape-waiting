@@ -12,10 +12,6 @@ public class Thumbnail {
         this.thumbnail = thumbnail;
     }
 
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
     private void validateThumbnail(String thumbnail) {
         if (thumbnail.isEmpty()) {
             throw new IllegalArgumentException(
@@ -23,5 +19,9 @@ public class Thumbnail {
                     new Throwable("theme_thumbnail : " + thumbnail)
             );
         }
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
     }
 }
