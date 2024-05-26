@@ -10,14 +10,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import org.hibernate.annotations.DynamicInsert;
 import roomescape.domain.member.Member;
 import roomescape.exception.reservation.DateTimePassedException;
 
 @Entity
+@DynamicInsert
 public class Reservation {
 
     @Id
@@ -42,7 +44,7 @@ public class Reservation {
     private ReservationStatus status;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time, ReservationStatus status) {
         validateDateTimeHasPassed(date, time);
@@ -60,11 +62,6 @@ public class Reservation {
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new DateTimePassedException();
         }
-    }
-
-    @PrePersist
-    private void onCreate() {
-        createdAt = LocalDateTime.now();
     }
 
     public void updateStatus(ReservationStatus reservationStatus) {

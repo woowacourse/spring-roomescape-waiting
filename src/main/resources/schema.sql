@@ -32,7 +32,7 @@ CREATE TABLE reservation
     date                VARCHAR(255) NOT NULL,
     reservation_time_id BIGINT       NOT NULL,
     status              VARCHAR(255) NOT NULL,
-    created_at          DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
