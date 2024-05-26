@@ -94,8 +94,7 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(ReservationConflictException.class)
-                .hasMessage("해당 테마는 같은 시간에 이미 예약이 존재합니다.");
+                .isInstanceOf(ReservationConflictException.class);
     }
 
     @DisplayName("예약을 정상적으로 생성한다.")

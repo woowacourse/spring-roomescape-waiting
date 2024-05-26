@@ -53,8 +53,8 @@ public class ReservationRestController {
     public ResponseEntity<WaitingResponse> createWaiting(@AuthenticationPrincipal LoginMember loginMember,
                                                          @Valid @RequestBody MemberReservationRequest request) {
         WaitingResponse response = waitingService.createWaiting(new ReservationCreate(loginMember, request));
-        URI uri = UriComponentsBuilder.fromPath("/reservations/{reservationId}")
-                .build(response.reservationId());
+        URI uri = UriComponentsBuilder.fromPath("/reservations/waitings/{id}")
+                .build(response.id());
 
         return ResponseEntity.created(uri).body(response);
     }
@@ -86,5 +86,10 @@ public class ReservationRestController {
     @DeleteMapping("/admin/reservations/{id}")
     public void deleteReservation(@PathVariable long id) {
         reservationService.deleteReservation(id);
+    }
+
+    @GetMapping("/admin/reservations/waitings")
+    public List<WaitingResponse> findWaitings() {
+        return waitingService.findAll();
     }
 }

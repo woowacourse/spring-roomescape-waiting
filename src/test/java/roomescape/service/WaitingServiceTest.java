@@ -54,17 +54,20 @@ class WaitingServiceTest {
     void createWaiting() {
         // given
         Member member = memberRepository.save(sampleMember);
+        Member member2 = memberRepository.save(new Member("t2@t2.com", "123", "양새", "MEMBER"));
         ReservationTime time = reservationTimeRepository.save(sampleTime);
         Theme theme = themeRepository.save(sampleTheme);
         Reservation reservation = reservationRepository.save(new Reservation(member, theme, sampleDate, time));
 
         // when
         WaitingResponse actual = waitingService.createWaiting(new ReservationCreate(
-                member.getEmail(), theme.getId(), reservation.getDate().toString(), time.getId()
+                member2.getEmail(), theme.getId(), reservation.getDate().toString(), time.getId()
         ));
+        WaitingResponse expected = new WaitingResponse(actual.id(), member2.getName(), theme.getName(),
+                reservation.getDate().toString(), time.getStartAt().toString());
 
         // then
-        assertThat(actual.reservationId()).isEqualTo(reservation.getId());
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

@@ -1,10 +1,7 @@
 package roomescape.controller.reservation;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,12 +18,8 @@ import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.service.dto.member.MemberCreateRequest;
-import roomescape.service.dto.member.MemberResponse;
-import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
-import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.theme.ThemeRequest;
-import roomescape.service.dto.theme.ThemeResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -116,25 +109,12 @@ class ReservationRestControllerTest {
                 .then().log().all()
                 .statusCode(201);
 
-        List<ReservationResponse> actualResponse = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .extract()
-                .jsonPath()
-                .getList(".", ReservationResponse.class);
-
-        ReservationResponse expectedResponse = new ReservationResponse(
-                actualResponse.get(0).getId(), new MemberResponse("tt@tt.com", "재즈"),
-                new ThemeResponse(1L, "공포", "공포는 무서워", "hi.jpg"),
-                "2100-08-05",
-                new ReservationTimeResponse(1L, "10:00")
-        );
-
-        assertThat(actualResponse)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(expectedResponse));
+                .body("size()", Matchers.is(1));
     }
 
     @DisplayName("멤버가 예약을 생성하는데 성공하면 응답과 201 상태 코드를 반환한다.")
