@@ -143,14 +143,19 @@ class ReservationServiceTest {
     @DisplayName("예약이 삭제되면 첫번째 예약 대기는 예약으로 전환된다.")
     @Test
     void convertFirstWaitingToReservation() {
+        Member otherMember = memberRepository.save(new Member("deock", "deock@email.com", "deock", Role.USER));
+
+        Reservation reservation1 = new Reservation(member,
+                new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme));
+        Reservation reservation2 = new Reservation(otherMember,
+                new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme));
         List<Reservation> reservations = List.of(
-                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
-                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
+                reservation1,
+                reservation2);
 
         List<Waiting> waitings = List.of(
-                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 11), reservationTime, theme)),
-                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
-                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
+                new Waiting(otherMember, reservation1),
+                new Waiting(member, reservation2));
 
         reservationRepository.saveAll(reservations);
         waitingRepository.saveAll(waitings);
@@ -161,8 +166,8 @@ class ReservationServiceTest {
         List<Waiting> allWaitings = waitingRepository.findAll();
 
         assertAll(
-                () -> assertThat(allReservations.get(1).getSchedule().getDate()).isEqualTo(LocalDate.of(2999, 12, 12)),
-                () -> assertThat(allWaitings.get(1).getSchedule().getDate()).isNotEqualTo(LocalDate.of(2999, 12, 12))
+                () -> assertThat(allReservations.get(0).getMember()).isEqualTo(otherMember),
+                () -> assertThat(allWaitings.get(0).getMember()).isNotEqualTo(otherMember)
         );
     }
 

@@ -47,10 +47,17 @@
 
 
 ## 리팩토링 목록
-- [ ] 중복 필드 제거 base entity
-- [ ] 회원가입 기능
-- [ ] 만약 누락이 된다면, 중간에 끼워넣을 수 없다.
-- [ ] 쿼리 확인 순번 관련
+- [ㅇ] 예약, 대기 비정규화 문제
+  - 예약이 삭제되면, 해당된 예약 대기가 있는지 보고,
+  - [x] 대기 있으면: 대기의 멤버로 예약의 멤버를 업데이트
+  - [ ] 대기 없으면: 예약 삭제
+  - createWaiting: reservation을 찾아서 member, reservation으로 만들어줘야겠네.
+
+- [ ] schedule 없애기
+- [ ] 커스텀 예외 수정
+- [ ] tokenProvider 리팩토링 및 테스트 추가 
+-----
 - [ ] delete and deleteById
-- [ ] tokenProvider 테스트 추가
+- [ ] 만약 누락이 된다면, 중간에 끼워넣을 수 없다.
 - [ ] schecdule 추가로 repository 메서드명 복잡해진 부분 jpql로 바꾸기
+- [ ] 회원가입 기능

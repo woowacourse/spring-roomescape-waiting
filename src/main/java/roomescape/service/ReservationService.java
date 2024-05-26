@@ -4,18 +4,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.ReservationEntry;
+import roomescape.domain.WaitingWithRank;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
-import roomescape.domain.ReservationEntry;
 import roomescape.entity.Theme;
-import roomescape.domain.WaitingWithRank;
+import roomescape.entity.Waiting;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.response.MyReservationEntryResponse;
@@ -28,17 +30,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
     private final WaitingService waitingService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
-                              MemberRepository memberRepository, final WaitingService waitingService
+                              MemberRepository memberRepository, final WaitingRepository waitingRepository,
+                              final WaitingService waitingService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
         this.waitingService = waitingService;
     }
 
@@ -99,8 +104,15 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
 
-        reservationRepository.deleteById(id);
-        waitingService.convertFirstWaitingToReservation(reservation);
+        if (!waitingRepository.existsByReservation(reservation)) {
+            reservationRepository.deleteById(id);
+        }
+        if (waitingRepository.existsByReservation(reservation)) {
+            Waiting waiting = waitingRepository.findFirstByReservation(reservation)
+                    .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_WAITING));
+            reservation.setMember(waiting.getMember());
+            waitingRepository.delete(waiting);
+        }
     }
 
     private Theme getTheme(Long id) {

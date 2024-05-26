@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.entity.Member;
@@ -15,6 +16,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAll();
 
     List<Reservation> findAllBySchedule_DateAndSchedule_Theme(LocalDate date, Theme theme);
+
+    Optional<Reservation> findBySchedule_DateAndSchedule_TimeAndSchedule_Theme(LocalDate date, ReservationTime reservationTime, Theme theme);
 
     boolean existsBySchedule_DateAndSchedule_Time(LocalDate date, ReservationTime reservationTime);
 

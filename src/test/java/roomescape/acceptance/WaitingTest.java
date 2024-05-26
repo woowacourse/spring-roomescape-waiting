@@ -29,6 +29,9 @@ class WaitingTest extends AcceptanceTest {
     @Autowired
     WaitingRepository waitingRepository;
 
+    private UserReservationRequest userReservationRequest = new UserReservationRequest(
+            LocalDate.of(2099, 12, 12), 1L, 1L);
+
     @BeforeEach
     void insert() {
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(10, 0));
@@ -52,6 +55,16 @@ class WaitingTest extends AcceptanceTest {
     @TestFactory
     Stream<DynamicTest> waitingByUser() {
         return Stream.of(
+                dynamicTest("사용자 qwe가 예약을 추가한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", otherUserToken)
+                            .body(userReservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(201);
+                }),
+
                 dynamicTest("사용자 asd가 예약 대기를 추가한다.", () -> {
                     UserReservationRequest userReservationRequest = new UserReservationRequest(
                             LocalDate.of(2099, 12, 12), 1L, 1L);
@@ -96,10 +109,17 @@ class WaitingTest extends AcceptanceTest {
     @DisplayName("USER 예약 대기 번호 자동 변경 테스트")
     @TestFactory
     Stream<DynamicTest> waitingNumberChangeByUser() {
-        UserReservationRequest userReservationRequest = new UserReservationRequest(
-                LocalDate.of(2099, 12, 12), 1L, 1L);
-
         return Stream.of(
+                dynamicTest("관리자가 예약을 추가한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", adminToken)
+                            .body(userReservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(201);
+                }),
+
                 dynamicTest("사용자 qwe가 예약 대기를 추가한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
@@ -146,9 +166,6 @@ class WaitingTest extends AcceptanceTest {
     @DisplayName("USER 예약 대기 자동 승인 테스트")
     @TestFactory
     Stream<DynamicTest> waitingAutoConvertToReservationByUser() {
-        UserReservationRequest userReservationRequest = new UserReservationRequest(
-                LocalDate.of(2099, 12, 12), 1L, 1L);
-
         return Stream.of(
                 dynamicTest("사용자 qwe가 예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
@@ -187,7 +204,7 @@ class WaitingTest extends AcceptanceTest {
                             .jsonPath().getList(".", MyReservationEntryResponse.class);
 
                     assertThat(myReservationEntryRespons).contains(
-                            new MyReservationEntryResponse(2L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
+                            new MyReservationEntryResponse(1L, LocalDate.of(2099, 12, 12), LocalTime.of(10, 0), "hi",
                                     "예약"));
                 })
         );
@@ -197,7 +214,17 @@ class WaitingTest extends AcceptanceTest {
     @TestFactory
     Stream<DynamicTest> waitingByAdmin() {
         return Stream.of(
-                dynamicTest("사용자가 예약 대기를 추가한다.", () -> {
+                dynamicTest("사용자 qwe가 예약을 추가한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", otherUserToken)
+                            .body(userReservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(201);
+                }),
+
+                dynamicTest("사용자 asd가 예약 대기를 추가한다.", () -> {
                     UserReservationRequest userReservationRequest = new UserReservationRequest(
                             LocalDate.of(2099, 12, 12), 1L, 1L);
 
@@ -234,10 +261,7 @@ class WaitingTest extends AcceptanceTest {
     @DisplayName("예약 후, 동일한 날짜, 시간, 테마에 예약 대기를 하려고 하면 예외를 발생한다. ")
     @TestFactory
     Stream<DynamicTest> duplicateWaitingWithReservation() {
-        UserReservationRequest userReservationRequest = new UserReservationRequest(
-                LocalDate.of(2099, 12, 12), 1L, 1L);
-
-        return Stream.of(
+  return Stream.of(
                 dynamicTest("예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
@@ -263,16 +287,13 @@ class WaitingTest extends AcceptanceTest {
     @DisplayName("예약 대기 후, 동일한 날짜, 시간, 테마에 예약 대기를 하려고 하면 예외를 발생한다. ")
     @TestFactory
     Stream<DynamicTest> duplicateWaiting() {
-        UserReservationRequest userReservationRequest = new UserReservationRequest(
-                LocalDate.of(2099, 12, 12), 1L, 1L);
-
         return Stream.of(
                 dynamicTest("예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookies("token", userToken)
                             .body(userReservationRequest)
-                            .when().post("/waitings")
+                            .when().post("/reservations")
                             .then().log().all()
                             .statusCode(201);
                 }),

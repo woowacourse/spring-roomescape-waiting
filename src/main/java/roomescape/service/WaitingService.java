@@ -4,13 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.WaitingWithRank;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
-import roomescape.domain.Schedule;
 import roomescape.entity.Theme;
 import roomescape.entity.Waiting;
-import roomescape.domain.WaitingWithRank;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
@@ -44,23 +43,25 @@ public class WaitingService {
     public WaitingResponse createWaiting(final ReservationRequest reservationRequest, final Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
-        ReservationTime reservationTime = reservationTimeRepository.findById(reservationRequest.timeId())
+        ReservationTime time = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION_TIME));
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_THEME));
 
-        if (waitingRepository.existsByMemberAndSchedule_DateAndSchedule_TimeAndSchedule_Theme(member, reservationRequest.date(), reservationTime,
-                theme)) {
-            throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
-        }
-        if (reservationRepository.existsByMemberAndSchedule_TimeAndSchedule_Date(member, reservationTime, reservationRequest.date())) {
-            throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
-        }
-        validateIsPastTime(reservationRequest.date(), reservationTime);
+        Reservation reservation = reservationRepository.findByDateAndTimeAndTheme(reservationRequest.date(), time,
+                        theme)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
+        Waiting waiting = new Waiting(member, reservation);
 
-        Waiting waiting = reservationRequest.toWaiting(member, reservationTime, theme);
+        if (waitingRepository.existsByReservationAndMember(reservation, member)) {
+            throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
+        }
+        if (reservationRepository.existsByMemberAndTimeAndDate(member, time, reservationRequest.date())) {
+            throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
+        }
+        validateIsPastTime(reservationRequest.date(), time);
+
         Waiting savedWaiting = waitingRepository.save(waiting);
-
         return WaitingResponse.from(savedWaiting);
     }
 
@@ -89,28 +90,10 @@ public class WaitingService {
 
         return waitings.stream()
                 .map(waiting -> {
-                    Long rank = waitingRepository.countAllBySchedule_DateAndSchedule_TimeAndSchedule_ThemeAndIdLessThanEqual(
-                            waiting.getSchedule().getDate(),
-                            waiting.getSchedule().getTime(),
-                            waiting.getSchedule().getTheme(),
+                    Long rank = waitingRepository.countAllByReservationAndIdLessThanEqual(waiting.getReservation(),
                             waiting.getId());
                     return new WaitingWithRank(waiting, rank);
                 })
                 .toList();
-    }
-
-    public void convertFirstWaitingToReservation(final Reservation reservation) {
-        if (waitingRepository.existsBySchedule_DateAndSchedule_TimeAndSchedule_Theme(reservation.getSchedule().getDate(), reservation.getSchedule().getTime(), reservation.getSchedule().getTheme())) {
-            Waiting waiting = waitingRepository.findFirstBySchedule_DateAndSchedule_TimeAndSchedule_Theme(
-                            reservation.getSchedule().getDate(),
-                            reservation.getSchedule().getTime(),
-                            reservation.getSchedule().getTheme())
-                    .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
-
-            waitingRepository.delete(waiting);
-            reservationRepository.save(
-                    new Reservation(waiting.getMember(), new Schedule(waiting.getSchedule().getDate(), waiting.getSchedule().getTime(), waiting.getSchedule().getTheme()))
-            );
-        }
     }
 }

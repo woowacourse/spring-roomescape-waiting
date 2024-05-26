@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
@@ -14,16 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Role;
+import roomescape.domain.Schedule;
+import roomescape.domain.WaitingWithRank;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Schedule;
 import roomescape.entity.Theme;
 import roomescape.entity.Waiting;
-import roomescape.domain.WaitingWithRank;
-import roomescape.handler.exception.CustomException;
-import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -57,53 +54,45 @@ class WaitingServiceTest {
     private ReservationTime reservationTime;
     private Theme theme;
     private Member member;
+    private Member otherMember;
+    private Reservation reservation1;
+    private Reservation reservation2;
 
     @BeforeEach
     void insertReservation() {
         reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         theme = themeRepository.save(new Theme("happy", "hi", "abcd.html"));
         member = memberRepository.save(new Member("sudal", "sudal@email.com", "sudal", Role.USER));
+        otherMember = memberRepository.save(new Member("runnerDuck", "runnerDuck@email.com", "runnerDuck", Role.USER));
+        reservation1 = reservationRepository.save(
+                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 31), reservationTime, theme)));
+        reservation2 = reservationRepository.save(
+                new Reservation(member, new Schedule(LocalDate.of(2999, 12, 30), reservationTime, theme)));
     }
 
     @DisplayName("예약 대기 생성 테스트")
     @Test
     void createWaiting() {
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12),
-                reservationTime.getId(), theme.getId(), member.getId());
+        ReservationRequest reservationRequest = new ReservationRequest(
+                reservation1.getSchedule().getDate(),
+                reservation1.getSchedule().getTime().getId(),
+                reservation1.getSchedule().getTheme().getId(),
+                otherMember.getId());
 
-        WaitingResponse waitingResponse = waitingService.createWaiting(reservationRequest,
-                reservationRequest.memberId());
+        WaitingResponse waitingResponse = waitingService.createWaiting(reservationRequest, reservationRequest.memberId());
 
         assertAll(
-                () -> assertThat(waitingResponse.name()).isEqualTo(member.getName()),
-                () -> assertThat(waitingResponse.date()).isEqualTo(LocalDate.of(2030, 12, 12)),
-                () -> assertThat(waitingResponse.time()).isEqualTo(reservationTime.getStartAt()),
-                () -> assertThat(waitingResponse.theme()).isEqualTo(theme.getName())
+                () -> assertThat(waitingResponse.name()).isEqualTo(otherMember.getName()),
+                () -> assertThat(waitingResponse.date()).isEqualTo(reservation1.getSchedule().getDate()),
+                () -> assertThat(waitingResponse.time()).isEqualTo(reservation1.getSchedule().getTime().getStartAt()),
+                () -> assertThat(waitingResponse.theme()).isEqualTo(reservation1.getSchedule().getTheme().getName())
         );
-    }
-
-    @DisplayName("과거 시간을 예약 대기하는 경우 예외가 발생한다.")
-    @Test
-    void validatePastTime() {
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                new ReservationTime(LocalTime.of(10, 0)));
-
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(1999, 12, 12),
-                reservationTime.getId(),
-                theme.getId(), 1L);
-
-        assertThatThrownBy(
-                () -> waitingService.createWaiting(reservationRequest, reservationRequest.memberId()))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ExceptionCode.PAST_TIME_SLOT_WAITING.getErrorMessage());
     }
 
     @DisplayName("모든 예약 대기 조회 테스트")
     @Test
     void findAllWaitings() {
-        List<Waiting> waitings = List.of(
-                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
-                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 13), reservationTime, theme)));
+        List<Waiting> waitings = List.of(new Waiting(member, reservation1), new Waiting(member, reservation2));
 
         waitingRepository.saveAll(waitings);
 
@@ -115,8 +104,7 @@ class WaitingServiceTest {
     @DisplayName("예약 대기 삭제 테스트")
     @Test
     void deleteWaiting() {
-        Waiting waiting = waitingRepository.save(
-                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
+        Waiting waiting = waitingRepository.save(new Waiting(member, reservation1));
 
         waitingService.deleteWaiting(waiting.getId());
 
@@ -127,11 +115,10 @@ class WaitingServiceTest {
     @DisplayName("순번을 포함한 예약 대기 조회 테스트")
     @Test
     void findAllWithRankByMember() {
-        Member otherMember = memberRepository.save(new Member("runnerDuck", "runnerDuck@email.com", "runnerDuck", Role.USER));
         List<Waiting> waitings = List.of(
-                new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)),
-                new Waiting(otherMember, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme))
-                );
+                new Waiting(member, reservation1),
+                new Waiting(otherMember, reservation1)
+        );
 
         waitingRepository.saveAll(waitings);
 
@@ -141,22 +128,6 @@ class WaitingServiceTest {
         assertAll(
                 () -> assertThat(waitingWithRank.getWaiting().getMember()).isEqualTo(otherMember),
                 () -> assertThat(waitingWithRank.getRank()).isEqualTo(2L)
-        );
-    }
-
-    @DisplayName("주어진 예약과 동일한 날짜, 시간, 테마의 예약 대기가 있다면 예약으로 전환한다.")
-    @Test
-    void convertFirstWaitingToReservation() {
-        waitingRepository.save(new Waiting(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
-        Reservation reservation = reservationRepository.save(new Reservation(member, new Schedule(LocalDate.of(2999, 12, 12), reservationTime, theme)));
-
-        waitingService.convertFirstWaitingToReservation(reservation);
-
-        List<Waiting> allWaitings = waitingRepository.findAll();
-        List<Reservation> allReservations = reservationRepository.findAll();
-        assertAll(
-                () -> assertThat(allWaitings.isEmpty()),
-                () -> assertThat(allReservations.get(0).getMember()).isEqualTo(member)
         );
     }
 }
