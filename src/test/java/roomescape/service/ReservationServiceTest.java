@@ -11,16 +11,11 @@ import static roomescape.TestFixture.THEME2;
 import static roomescape.TestFixture.THE_DAY_AFTER_TOMORROW;
 import static roomescape.TestFixture.TOMORROW;
 
-import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import roomescape.DBTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -28,41 +23,26 @@ import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationCreateRequest;
 import roomescape.service.dto.response.ReservationResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ReservationServiceTest {
+class ReservationServiceTest extends DBTest {
 
-    @Autowired
-    private ReservationService reservationService;
-    @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
+    @DisplayName("예약을 추가한다.")
+    @Test
+    void save() {
+        // given
+        Theme theme = themeRepository.save(THEME1);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
 
-    @LocalServerPort
-    private int port;
+        // when
+        Member member2 = memberRepository.save(MEMBER2);
+        ReservationCreateRequest request = new ReservationCreateRequest(member2.getId(), TOMORROW, time.getId(),
+                theme.getId());
+        ReservationResponse saved = reservationService.save(request);
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAllInBatch();
-        reservationTimeRepository.deleteAllInBatch();
-        themeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
+        // then
+        assertThat(reservationRepository.findById(saved.id())).isPresent();
     }
 
     @DisplayName("예약을 추가할 때 같은 날짜, 시간, 테마에 대한 예약이 존재하는 경우 예외가 발생한다.")
@@ -72,7 +52,7 @@ class ReservationServiceTest {
         Member member1 = memberRepository.save(MEMBER1);
         Theme theme = themeRepository.save(THEME1);
         LocalDate date = LocalDate.now();
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
 
         reservationRepository.save(new Reservation(member1, date, time, theme, Status.CONFIRMED));
 
@@ -91,7 +71,7 @@ class ReservationServiceTest {
     @Test
     void isTimeNotExist() {
         // given
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Member member = memberRepository.save(MEMBER1);
         LocalDate date = LocalDate.now();
         Theme theme = themeRepository.save(THEME1);
@@ -111,7 +91,7 @@ class ReservationServiceTest {
     @Test
     void isMemberNotExist() {
         // given
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Member member = memberRepository.save(MEMBER1);
         LocalDate date = LocalDate.now().plusDays(1);
         Theme theme = themeRepository.save(THEME1);
@@ -131,7 +111,7 @@ class ReservationServiceTest {
     @Test
     void isThemeNotExist() {
         // given
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Member member = memberRepository.save(MEMBER1);
         LocalDate date = LocalDate.now().plusDays(1);
         Theme theme = themeRepository.save(THEME1);
@@ -150,7 +130,7 @@ class ReservationServiceTest {
     @Test
     void cantSaveReservationForPastDate() {
         // given
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Member member = memberRepository.save(MEMBER1);
         LocalDate date = LocalDate.now().minusDays(1);
         Theme theme = themeRepository.save(THEME1);
@@ -172,7 +152,7 @@ class ReservationServiceTest {
     @Test
     void cantSaveWaitingIfReserved() {
         // given
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Member member = memberRepository.save(MEMBER1);
         LocalDate date = LocalDate.now().plusDays(1);
         Theme theme = themeRepository.save(THEME1);
@@ -193,7 +173,7 @@ class ReservationServiceTest {
     void findAllReservations() {
         // given
         Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Theme theme = themeRepository.save(THEME1);
 
         reservationRepository.save(new Reservation(member, TOMORROW, time, theme, Status.CONFIRMED));
@@ -212,8 +192,8 @@ class ReservationServiceTest {
     void findAllWaiting() {
         // given
         Member member = memberRepository.save(MEMBER1);
-        ReservationTime time1 = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        ReservationTime time2 = reservationTimeRepository.save(RESERVATION_TIME_11AM);
+        ReservationTime time1 = timeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time2 = timeRepository.save(RESERVATION_TIME_11AM);
         Theme theme1 = themeRepository.save(THEME1);
         Theme theme2 = themeRepository.save(THEME2);
 
@@ -258,7 +238,7 @@ class ReservationServiceTest {
     void isWaitingReservationExist() {
         // given
         Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Theme theme = themeRepository.save(THEME1);
 
         // when
@@ -276,7 +256,7 @@ class ReservationServiceTest {
     void isReservationExist_WhenApproveWaiting() {
         // given
         Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Theme theme = themeRepository.save(THEME1);
 
         // when
@@ -297,7 +277,7 @@ class ReservationServiceTest {
     void approveWaiting() {
         // given
         Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
         Theme theme = themeRepository.save(THEME1);
 
         Reservation waiting = reservationRepository.save(
