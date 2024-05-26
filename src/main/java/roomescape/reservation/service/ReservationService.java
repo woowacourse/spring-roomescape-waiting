@@ -4,17 +4,17 @@ import org.springframework.stereotype.Service;
 
 import roomescape.member.model.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.SaveReservationRequest;
 import roomescape.reservation.dto.SearchReservationsRequest;
-import roomescape.reservation.model.Reservation;
-import roomescape.reservation.model.ReservationDate;
-import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.model.Theme;
+import roomescape.reservation.model.*;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -25,17 +25,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<Reservation> getReservations() {
@@ -87,7 +90,23 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    public List<Reservation> getMyReservations(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId);
+    public List<MyReservationResponse> getMyReservations(final Long memberId) {
+
+        List<Waiting> waitings = waitingRepository.findAllByMemberId(memberId);
+//        List<WaitingWithRank> waitingsWithRank = waitings.stream()
+//                .map(waiting -> new WaitingWithRank(waiting, waitingRepository.findRank(waiting.getMember().getId())))
+//                .toList();
+        List<WaitingWithRank> waitingsWithRank = waitingRepository.findWaitingsWithRank(memberId);
+        List<MyReservationResponse> myWaitings = waitingsWithRank.stream()
+                .map(MyReservationResponse::from)
+                .toList();
+        List<MyReservationResponse> myReservedReservations = reservationRepository.findAllByMemberId(memberId).stream()
+                .map(MyReservationResponse::from)
+                .toList();
+        List<MyReservationResponse> myReservations = new ArrayList<>(myReservedReservations);
+
+        myReservations.addAll(myWaitings);
+        return myReservations;
     }
+
 }

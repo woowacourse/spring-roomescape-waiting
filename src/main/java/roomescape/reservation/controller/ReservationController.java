@@ -53,6 +53,13 @@ public class ReservationController {
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
+        return reservationService.getMyReservations(authenticatedMember.id());
+//        return reservationService.getMyReservations(authenticatedMember.id())
+//                .stream()
+//                .map(MyReservationResponse::from)
+//                .toList();
+    }
+
     @PostMapping("/reservations-waiting")
     public ResponseEntity<WaitingResponse> saveWaiting(
             @RequestBody final WaitingRequest request,

@@ -1,12 +1,14 @@
 package roomescape.reservation.dto;
 
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.Waiting;
+import roomescape.reservation.model.WaitingWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record MyReservationResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         LocalTime time,
@@ -18,7 +20,17 @@ public record MyReservationResponse(
                 reservation.getTheme().getName().getValue(),
                 reservation.getDate().getValue(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getDescription()
+                "예약"
+        );
+    }
+
+    public static MyReservationResponse from(final WaitingWithRank waitingWithRank) {
+        return new MyReservationResponse(
+                waitingWithRank.getWaiting().getId(),
+                waitingWithRank.getWaiting().getReservation().getTheme().getName().getValue(),
+                waitingWithRank.getWaiting().getReservation().getDate().getValue(),
+                waitingWithRank.getWaiting().getReservation().getTime().getStartAt(),
+                waitingWithRank.getRank() + "번째 예약대기"
         );
     }
 }
