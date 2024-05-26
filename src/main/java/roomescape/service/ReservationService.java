@@ -88,7 +88,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         List<WaitingWithRank> waitingWithRanks = waitingService.findAllWithRankByMember(member);
 
-        List<ReservationEntry> reservationEntries = ReservationEntry.of(reservations, waitingWithRanks);
+        List<ReservationEntry> reservationEntries = ReservationEntry.createEntries(reservations, waitingWithRanks);
 
         return reservationEntries.stream()
                 .map(MyReservationEntryResponse::from)

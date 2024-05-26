@@ -25,8 +25,8 @@ public class ReservationEntry {
         this.rank = rank;
     }
 
-    public static List<ReservationEntry> of(final List<Reservation> reservations,
-                                            final List<WaitingWithRank> waitingWithRanks) {
+    public static List<ReservationEntry> createEntries(final List<Reservation> reservations,
+                                                       final List<WaitingWithRank> waitingWithRanks) {
         List<ReservationEntry> reservationEntries = new ArrayList<>();
 
         reservationEntries.addAll(fromReservations(reservations));
