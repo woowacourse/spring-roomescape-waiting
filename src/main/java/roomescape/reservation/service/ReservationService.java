@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
@@ -32,12 +33,14 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllReservation() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(Long memberId, Long themeId, LocalDate dateFrom,
                                                                       LocalDate dateTo) {
         return reservationRepository.findByMemberAndThemeAndPeriod(memberId, themeId, dateFrom, dateTo).stream()
@@ -45,18 +48,21 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findMemberReservationWithWaitingStatus(Long memberId) {
         return reservationRepository.findByMemberIdWithWaitingStatus(memberId).stream()
                 .map(MemberReservationResponse::new)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> findReservationsOnWaiting() {
         return reservationRepository.findReservationOnWaiting().stream()
                 .map(WaitingResponse::new)
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
         validateMemberReservationNotExistInSlot(memberId, request);
 
@@ -83,6 +89,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void removeReservation(long id) {
         reservationRepository.deleteById(id);
     }

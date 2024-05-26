@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
@@ -23,11 +24,13 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Member findById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalRequestException("id: " + id + " 해당하는 회원을 찾을 수 없습니다"));
     }
 
+    @Transactional
     public MemberResponse joinMember(JoinRequest joinRequest) {
         Email joinEmail = new Email(joinRequest.email());
         if (memberRepository.existsByEmail(joinEmail)) {

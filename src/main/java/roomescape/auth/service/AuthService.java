@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.Accessor;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
@@ -22,6 +23,7 @@ public class AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    @Transactional(readOnly = true)
     public Token login(LoginRequest loginRequest) {
         Email loginEmail = new Email(loginRequest.email());
         Member findMember = memberRepository.findByEmail(loginEmail)
@@ -34,6 +36,7 @@ public class AuthService {
         return jwtTokenProvider.createToken(findMember);
     }
 
+    @Transactional(readOnly = true)
     public LoginCheckResponse checkLogin(Accessor accessor) {
         Member findMember = memberRepository.findById(accessor.id())
                 .orElseThrow(() -> new AuthenticationException("id: " + accessor.id() + " 해당하는 회원을 찾을 수 없습니다"));
