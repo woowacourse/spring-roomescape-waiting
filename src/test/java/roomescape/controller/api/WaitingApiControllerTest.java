@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.ReservationStatus;
+import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.util.TokenGenerator;
+
+import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.is;
 

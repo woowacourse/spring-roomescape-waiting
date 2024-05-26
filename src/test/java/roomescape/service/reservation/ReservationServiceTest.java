@@ -95,7 +95,7 @@ class ReservationServiceTest {
         Reservation beforeUpdatedReservation = reservationRepository.findById(2L).get();
         assertThat(beforeUpdatedReservation.isReserved()).isFalse();
 
-        Member member = new Member(1L, "testUser", "user@naver.com", "1234", Role.MEMBER);
+        Member member = new Member(1L, "testUser", "user@naver.com", "1234", Role.ADMIN);
         reservationService.deleteReservation(1L, member);
         Reservation updatedReservation = reservationRepository.findById(2L).get();
         assertThat(updatedReservation.isReserved()).isTrue();
