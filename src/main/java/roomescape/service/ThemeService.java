@@ -48,7 +48,6 @@ public class ThemeService {
                 .toList();
     }
 
-    @Transactional
     public void delete(long themeId) {
         if (isUsedTheme(themeId)) {
             throw new RoomescapeException(DELETE_USED_THEME);
