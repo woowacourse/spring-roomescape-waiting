@@ -21,7 +21,6 @@ class ReservationTest {
 
     private static final LocalTime TIME = LocalTime.of(9, 0);
     private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
-    private static final LocalDate BEFORE = LocalDate.now().minusDays(1);
 
     @Test
     @DisplayName("전달 받은 데이터로 Reservation 객체를 정상적으로 생성한다.")
@@ -43,25 +42,5 @@ class ReservationTest {
                 () -> assertEquals("polla", reservation.getMember().getName()),
                 () -> assertEquals(TOMORROW, reservation.getDate())
         );
-    }
-
-    @Test
-    @DisplayName("과거의 날짜를 예약하려고 시도하는 경우 에러를 발생한다.")
-    void validation_ShouldThrowException_WhenReservationDateIsPast() {
-        ReservationTime time = new ReservationTime(1, TIME);
-        Theme theme = new Theme(1, new Name("미르"), "미르 방탈출", "썸네일 Url");
-        Member member = new Member(
-                1,
-                new Name("polla"),
-                "polla@gmail.com",
-                "polla99",
-                MemberRole.ADMIN
-        );
-
-        Throwable pastDateReservation = assertThrows(RoomEscapeException.class,
-                () -> new Reservation(BEFORE, time, theme, member));
-
-        assertEquals(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION.getMessage(),
-                pastDateReservation.getMessage());
     }
 }

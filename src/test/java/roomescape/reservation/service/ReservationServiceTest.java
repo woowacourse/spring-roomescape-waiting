@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -16,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.RoomEscapeException;
+import roomescape.exception.model.ReservationExceptionCode;
 import roomescape.registration.domain.reservation.service.ReservationService;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -32,6 +36,9 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
+
+    private static final LocalDate BEFORE = LocalDate.now().minusDays(1);
+    private static final LocalTime TIME = LocalTime.of(9, 0);
 
     private final Reservation reservation = new Reservation(
             1L,
@@ -99,5 +106,24 @@ class ReservationServiceTest {
                 .deleteById(reservation.getId());
 
         assertDoesNotThrow(() -> reservationService.removeReservation(reservation.getId()));
+    }
+
+    @Test
+    @DisplayName("과거의 날짜를 예약하려고 시도하는 경우 에러를 발생한다.")
+    void validation_ShouldThrowException_WhenReservationDateIsPast() {
+        when(themeRepository.findById(1L))
+                .thenReturn(Optional.of(new Theme(1L, new Name("레모네 테마"), "무서워용", "공포.jpg")));
+        when(reservationTimeRepository.findById(1L))
+                .thenReturn(Optional.of(new ReservationTime(1L, TIME)));
+        when(memberRepository.findMemberById(1L))
+                .thenReturn(Optional.of(new Member(1L, new Name("폴라"), "polla@naver.com", "polla12", MemberRole.MEMBER)));
+
+        ReservationRequest reservationRequest = new ReservationRequest(BEFORE, 1L, 1L);
+
+        Throwable pastDateReservation = assertThrows(RoomEscapeException.class,
+                () -> reservationService.addReservation(reservationRequest, 1L));
+
+        assertEquals(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION.getMessage(),
+                pastDateReservation.getMessage());
     }
 }
