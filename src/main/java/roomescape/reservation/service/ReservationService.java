@@ -43,8 +43,12 @@ public class ReservationService {
         Theme theme = themeService.getById(saveRequest.themeId());
         Status status = determineStatus(saveRequest);
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, status);
+        return ReservationResponse.from(saveIfNotDuplicate(reservation));
+    }
+
+    private Reservation saveIfNotDuplicate(Reservation reservation) {
         try {
-            return ReservationResponse.from(reservationRepository.save(reservation));
+            return reservationRepository.save(reservation);
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("[ERROR] 중복 예약은 불가능합니다.");
         }
