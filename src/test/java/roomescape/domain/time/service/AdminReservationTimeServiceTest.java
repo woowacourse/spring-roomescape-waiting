@@ -36,7 +36,7 @@ class AdminReservationTimeServiceTest extends ServiceTest {
 
         ReservationTime expectedReservationTime = new ReservationTime(6L, LocalTime.of(10, 0));
 
-        assertThat(actualReservationTime).isEqualTo(expectedReservationTime);
+        assertThat(actualReservationTime.getId()).isEqualTo(expectedReservationTime.getId());
     }
 
     @DisplayName("중복되는 예약 시각을 추가할 경우 예외가 발생합니다.")

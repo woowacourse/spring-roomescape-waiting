@@ -29,7 +29,7 @@ class MemberServiceTest extends ServiceTest {
     void should_find_member_by_id() {
         Member actualMember = memberService.findMemberById(1L);
 
-        assertThat(actualMember).isEqualTo(ADMIN_MEMBER);
+        assertThat(actualMember.getId()).isEqualTo(ADMIN_MEMBER.getId());
     }
 
     @DisplayName("없는 id의 유저를 찾으면 예외가 발생합니다.")
@@ -45,7 +45,7 @@ class MemberServiceTest extends ServiceTest {
     void should_find_member_by_email_and_password() {
         Member actualMember = memberService.findMemberByEmailAndPassword(ADMIN_MEMBER.getEmail(), ADMIN_MEMBER.getPassword());
 
-        assertThat(actualMember).isEqualTo(ADMIN_MEMBER);
+        assertThat(actualMember.getId()).isEqualTo(ADMIN_MEMBER.getId());
     }
 
     @DisplayName("존재 하지 않는 email로 member를 찾으려 하면, 예외가 발생합니다.")

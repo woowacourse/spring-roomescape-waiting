@@ -42,7 +42,7 @@ class ThemeServiceTest extends ServiceTest {
 
         Theme expectedTheme = new Theme(6L, "테마6", "테마6입니당 ^0^", "url6");
 
-        assertThat(savedTheme).isEqualTo(expectedTheme);
+        assertThat(savedTheme.getId()).isEqualTo(expectedTheme.getId());
     }
 
     @DisplayName("존재하지 않는 테마 삭제 요청시 예외가 발생합니다")

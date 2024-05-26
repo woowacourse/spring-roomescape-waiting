@@ -120,7 +120,8 @@ public class ReservationService {
     }
 
     private boolean isBookedTime(List<ReservationTime> bookedTimes, ReservationTime time) {
-        return bookedTimes.contains(time);
+        return bookedTimes.stream()
+                .anyMatch(bookedTime -> bookedTime.getId().equals(time.getId()));
     }
 
     private Reservation findReservationById(Long id) {
