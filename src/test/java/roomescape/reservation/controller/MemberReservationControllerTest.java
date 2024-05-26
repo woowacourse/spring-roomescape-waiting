@@ -20,6 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.controller.dto.request.LoginRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
+import roomescape.reservation.repository.fixture.ReservationFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -63,7 +64,7 @@ class MemberReservationControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(6));
+                .body("size()", is(ReservationFixture.count() + 1));
     }
 
     @DisplayName("동일한 날짜, 시간, 테마에 예약 내역이 이미 있다면 예약할 수 없다.")
@@ -145,6 +146,6 @@ class MemberReservationControllerTest {
 
         // then
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
-        assertThat(countAfterDelete).isEqualTo(4);
+        assertThat(countAfterDelete).isEqualTo(ReservationFixture.count() - 1);
     }
 }

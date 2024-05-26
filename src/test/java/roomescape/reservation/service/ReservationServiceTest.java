@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.domain.Status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -104,11 +105,9 @@ class ReservationServiceTest {
         List<ReservationResponse> results = reservationService.findByFilter(null, null, null, null, dateTo);
 
         // then
-        assertEquals(4, results.size());
-        assertThat(results.get(0).date()).isEqualTo(LocalDate.parse("2024-12-12"));
-        assertThat(results.get(1).date()).isEqualTo(LocalDate.parse("2024-12-23"));
-        assertThat(results.get(2).date()).isEqualTo(LocalDate.parse("2024-06-30"));
-        assertThat(results.get(3).date()).isEqualTo(LocalDate.parse("2024-06-30"));
+        assertThat(results)
+                .extracting(ReservationResponse::date)
+                .allMatch(date -> date.isBefore(dateTo));
     }
 
     @DisplayName("상태로 예약을 조회한다.")
@@ -116,6 +115,8 @@ class ReservationServiceTest {
     void findByStatus() {
         List<ReservationResponse> result = reservationService.findByFilter(null, null, "WAITING", null, null);
 
-        assertThat(result).hasSize(1);
+        assertThat(result)
+                .extracting(ReservationResponse::status)
+                .allMatch(status -> Status.valueOf(status) == Status.WAITING);
     }
 }

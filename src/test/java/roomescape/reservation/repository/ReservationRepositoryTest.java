@@ -1,9 +1,14 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.reservation.repository.fixture.MemberFixture.MEMBER1;
 import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION1;
 import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION2;
 import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION4;
+import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION5;
+import static roomescape.reservation.repository.fixture.ReservationFixture.RESERVATION6;
+import static roomescape.reservation.repository.fixture.ReservationTimeFixture.TIME1;
+import static roomescape.reservation.repository.fixture.ThemeFixture.THEME1;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -46,7 +51,13 @@ class ReservationRepositoryTest {
     @DisplayName("예약을 생성한다.")
     @Test
     void save() {
-        final var reservation = RESERVATION1.create();
+        final var reservation = Reservation.of(
+                MEMBER1.create(),
+                LocalDate.parse("2024-07-01"),
+                TIME1.create(),
+                THEME1.create(),
+                Status.RESERVATION
+        );
 
         reservationRepository.save(reservation);
 
@@ -113,10 +124,31 @@ class ReservationRepositoryTest {
         );
 
         assertThat(results)
-                .allMatch(result -> result.getDate() == reservation.getDate()
+                .allMatch(result -> result.getDate().equals(reservation.getDate())
                         && result.getTime().getId() == reservation.getTime().getId()
                         && result.getTheme().getId() == reservation.getTheme().getId()
                 );
+    }
+
+    @DisplayName("날짜, 시간 id, 테마 id, 생성 날짜 이전 예약 개수를 조회한다.")
+    @ParameterizedTest
+    @MethodSource("getDateAndTimeIdAndThemeIdAndCreatedAt")
+    void countByDateAndTimeIdAndThemeIdAndCreatedAtBefore(Reservation reservation, int count) {
+        int result = reservationRepository.countByDateAndTimeIdAndThemeIdAndCreatedAtBefore(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getCreatedAt()
+        );
+
+        assertThat(result).isEqualTo(count);
+    }
+
+    private static Stream<Arguments> getDateAndTimeIdAndThemeIdAndCreatedAt() {
+        return Stream.of(
+                Arguments.of(RESERVATION5.create(), 1),
+                Arguments.of(RESERVATION6.create(), 2)
+        );
     }
 
     @DisplayName("날짜, 테마 id를 기준으로 예약의 시간 id를 조회한다.")
@@ -128,7 +160,7 @@ class ReservationRepositoryTest {
         final var results = reservationRepository.findByDateAndThemeId(date, themeId);
 
         assertThat(results)
-                .allMatch(result -> result.getDate() == date && result.getTheme().getId() == themeId);
+                .allMatch(result -> result.getDate().equals(date) && result.getTheme().getId() == themeId);
     }
 
     @DisplayName("테마 id, 멤버 id, 상태, 날짜 사이로 예약을 조회한다.")

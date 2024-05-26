@@ -2,6 +2,7 @@ package roomescape.reservation.repository.fixture;
 
 import static roomescape.reservation.repository.fixture.MemberFixture.MEMBER1;
 import static roomescape.reservation.repository.fixture.MemberFixture.MEMBER2;
+import static roomescape.reservation.repository.fixture.MemberFixture.MEMBER3;
 import static roomescape.reservation.repository.fixture.ReservationTimeFixture.TIME1;
 import static roomescape.reservation.repository.fixture.ReservationTimeFixture.TIME2;
 import static roomescape.reservation.repository.fixture.ReservationTimeFixture.TIME3;
@@ -22,6 +23,7 @@ public enum ReservationFixture {
     RESERVATION3(3L, MEMBER2, "2024-12-25", TIME3, THEME2, Status.RESERVATION, "2024-12-03 00:00:00.000"),
     RESERVATION4(4L, MEMBER1, "2024-06-30", TIME1, THEME2, Status.RESERVATION, "2024-12-04 00:00:00.000"),
     RESERVATION5(5L, MEMBER2, "2024-06-30", TIME1, THEME2, Status.WAITING, "2024-12-05 00:00:00.000"),
+    RESERVATION6(6L, MEMBER3, "2024-06-30", TIME1, THEME2, Status.WAITING, "2024-12-06 00:00:00.000"),
     ;
 
     private final long id;

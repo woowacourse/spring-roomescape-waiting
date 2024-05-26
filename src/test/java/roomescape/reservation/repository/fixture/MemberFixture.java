@@ -10,6 +10,7 @@ public enum MemberFixture {
 
     MEMBER1(1L, "제리", "jerry@gmail.com", "password", Role.ADMIN),
     MEMBER2(2L, "오리", "duck@gmail.com", "password", Role.MEMBER),
+    MEMBER3(3L, "안나", "anna@gmail.com", "password", Role.MEMBER),
     ;
 
     private final long id;
