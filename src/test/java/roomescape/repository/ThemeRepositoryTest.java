@@ -3,12 +3,11 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import static roomescape.model.Member.createMember;
-import static roomescape.model.Reservation.createAcceptReservation;
+import static roomescape.service.fixture.TestReservationFactory.createAcceptReservationAtNow;
+import static roomescape.service.fixture.TestReservationTimeFactory.createReservationTime;
 import static roomescape.service.fixture.TestThemeFactory.createTheme;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
@@ -23,6 +22,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.model.Member;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.service.fixture.TestMemberFactory;
 
 @DataJpaTest
 @Sql("/init-data.sql")
@@ -80,26 +80,24 @@ class ThemeRepositoryTest {
     @DisplayName("특정 기간의 테마를 인기순으로 정렬하여 조회한다.")
     @Test
     void should_find_ranking_theme_by_date() {
-        entityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
-        ReservationTime reservationTime = entityManager.find(ReservationTime.class, 1L);
-        entityManager.persist(createMember("무빈", "movin@email.com", "1234"));
-        Member member = entityManager.find(Member.class, 1L);
+        ReservationTime reservationTime = entityManager.merge(createReservationTime(1L, "10:00"));
+        Member member = entityManager.merge(TestMemberFactory.createMember(1L));
 
         for (int i = 1; i <= 15; i++) {
-            entityManager.persist(new Theme("name" + i, "description" + i, "thumbnail" + i));
+            entityManager.merge(createTheme((long) i));
         }
 
         for (int i = 1; i <= 10; i++) {
             Theme theme = entityManager.find(Theme.class, i);
-            entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme, member));
+            entityManager.merge(createAcceptReservationAtNow((long) i, reservationTime, theme, member));
         }
         Theme theme10 = entityManager.find(Theme.class, 10);
         Theme theme9 = entityManager.find(Theme.class, 9);
-        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme9, member));
-        entityManager.persist(createAcceptReservation(LocalDate.now(), reservationTime, theme9, member));
+        entityManager.merge(createAcceptReservationAtNow(11L, reservationTime, theme10, member));
+        entityManager.merge(createAcceptReservationAtNow(12L, reservationTime, theme10, member));
+        entityManager.merge(createAcceptReservationAtNow(13L, reservationTime, theme10, member));
+        entityManager.merge(createAcceptReservationAtNow(14L, reservationTime, theme9, member));
+        entityManager.merge(createAcceptReservationAtNow(15L, reservationTime, theme9, member));
 
         LocalDate before = LocalDate.now().minusDays(8);
         LocalDate after = LocalDate.now().plusDays(1);
