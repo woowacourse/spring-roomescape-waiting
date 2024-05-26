@@ -14,28 +14,24 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.reservation.ReservationCreateService;
-import roomescape.service.reservation.ReservationDeleteService;
+import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
 
 @RestController
 public class WaitingApiController {
 
-    private final ReservationCreateService reservationCreateService;
-    private final ReservationDeleteService reservationDeleteService;
+    private final ReservationService reservationService;
 
-    public WaitingApiController(ReservationCreateService reservationCreateService,
-                                ReservationDeleteService reservationDeleteService) {
-        this.reservationCreateService = reservationCreateService;
-        this.reservationDeleteService = reservationDeleteService;
+    public WaitingApiController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @PostMapping("/api/waitings")
     public ResponseEntity<ReservationResponse> addWaiting(@AuthenticatedMember Member member,
                                                           @RequestBody @Valid
                                                           ReservationSaveRequest request) {
-        Reservation newReservation = reservationCreateService.createReservation(
+        Reservation newReservation = reservationService.createReservation(
                 request,
                 member,
                 ReservationStatus.WAITING
@@ -49,7 +45,7 @@ public class WaitingApiController {
                                               @PathVariable
                                               @Positive(message = "1 이상의 값만 입력해주세요.")
                                               long id) {
-        reservationDeleteService.deleteReservation(id, member);
+        reservationService.deleteReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }

@@ -11,27 +11,23 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.ReservationTime;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 import roomescape.service.dto.response.ReservationTimeResponse;
-import roomescape.service.reservationtime.ReservationTimeCreateService;
-import roomescape.service.reservationtime.ReservationTimeDeleteService;
+import roomescape.service.reservationtime.ReservationTimeService;
 
 import java.net.URI;
 
 @RestController
 public class AdminReservationTimeApiController {
 
-    private final ReservationTimeCreateService reservationTimeCreateService;
-    private final ReservationTimeDeleteService reservationTimeDeleteService;
+    private final ReservationTimeService reservationTimeService;
 
-    public AdminReservationTimeApiController(ReservationTimeCreateService reservationTimeCreateService,
-                                             ReservationTimeDeleteService reservationTimeDeleteService) {
-        this.reservationTimeCreateService = reservationTimeCreateService;
-        this.reservationTimeDeleteService = reservationTimeDeleteService;
+    public AdminReservationTimeApiController(ReservationTimeService reservationTimeService) {
+        this.reservationTimeService = reservationTimeService;
     }
 
     @PostMapping("/api/admin/times")
     public ResponseEntity<ReservationTimeResponse> addReservationTime(@RequestBody @Valid
                                                                       ReservationTimeSaveRequest request) {
-        ReservationTime reservationTime = reservationTimeCreateService.createReservationTime(request);
+        ReservationTime reservationTime = reservationTimeService.createReservationTime(request);
         return ResponseEntity.created(URI.create("api/times/" + reservationTime.getId()))
                 .body(new ReservationTimeResponse(reservationTime));
     }
@@ -40,7 +36,7 @@ public class AdminReservationTimeApiController {
     public ResponseEntity<Void> deleteReservationTime(@PathVariable
                                                       @Positive(message = "1 이상의 값만 입력해주세요.")
                                                       long id) {
-        reservationTimeDeleteService.deleteReservationTime(id);
+        reservationTimeService.deleteReservationTime(id);
         return ResponseEntity.noContent().build();
     }
 }

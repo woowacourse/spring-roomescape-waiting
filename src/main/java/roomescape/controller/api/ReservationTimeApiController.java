@@ -10,7 +10,7 @@ import roomescape.domain.BookingStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.service.dto.response.BookingStatusResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
-import roomescape.service.reservationtime.ReservationTimeFindService;
+import roomescape.service.reservationtime.ReservationTimeService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,15 +19,15 @@ import java.util.List;
 @RestController
 public class ReservationTimeApiController {
 
-    private final ReservationTimeFindService reservationTimeFindService;
+    private final ReservationTimeService reservationTimeService;
 
-    public ReservationTimeApiController(ReservationTimeFindService reservationTimeFindService) {
-        this.reservationTimeFindService = reservationTimeFindService;
+    public ReservationTimeApiController(ReservationTimeService reservationTimeService) {
+        this.reservationTimeService = reservationTimeService;
     }
 
     @GetMapping("/api/times")
     public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeFindService.findReservationTimes();
+        List<ReservationTime> reservationTimes = reservationTimeService.findReservationTimes();
         return ResponseEntity.ok(
                 reservationTimes.stream()
                         .map(ReservationTimeResponse::new)
@@ -40,7 +40,7 @@ public class ReservationTimeApiController {
                                                                                    @RequestParam
                                                                                    @Positive(message = "1 이상의 값만 입력해주세요.")
                                                                                    long themeId) {
-        BookingStatus bookingStatus = reservationTimeFindService.findTimeSlotsBookingStatus(date, themeId);
+        BookingStatus bookingStatus = reservationTimeService.findTimeSlotsBookingStatus(date, themeId);
         return ResponseEntity.ok(
                 bookingStatus.getReservationStatus()
                         .entrySet()

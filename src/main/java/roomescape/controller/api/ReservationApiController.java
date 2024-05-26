@@ -15,8 +15,7 @@ import roomescape.domain.ReservationWaitingWithRank;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.MemberReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.reservation.ReservationCreateService;
-import roomescape.service.reservation.ReservationFindService;
+import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
 import java.util.List;
@@ -25,18 +24,15 @@ import java.util.List;
 @RestController
 public class ReservationApiController {
 
-    private final ReservationCreateService reservationCreateService;
-    private final ReservationFindService reservationFindService;
+    private final ReservationService reservationService;
 
-    public ReservationApiController(ReservationCreateService reservationCreateService,
-                                    ReservationFindService reservationFindService) {
-        this.reservationCreateService = reservationCreateService;
-        this.reservationFindService = reservationFindService;
+    public ReservationApiController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @GetMapping("/api/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<Reservation> reservations = reservationFindService.findReservations();
+        List<Reservation> reservations = reservationService.findReservations();
         return ResponseEntity.ok(
                 reservations.stream()
                         .map(ReservationResponse::new)
@@ -47,7 +43,7 @@ public class ReservationApiController {
     @GetMapping("/api/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@AuthenticatedMember Member member) {
         List<ReservationWaitingWithRank> reservationWaitingWithRanks =
-                reservationFindService.findMemberReservations(member.getId());
+                reservationService.findMemberReservations(member.getId());
         return ResponseEntity.ok(
                 reservationWaitingWithRanks.stream()
                         .map(MemberReservationResponse::new)
@@ -59,7 +55,7 @@ public class ReservationApiController {
     public ResponseEntity<ReservationResponse> addReservationByMember(@RequestBody @Valid
                                                                       ReservationSaveRequest request,
                                                                       @AuthenticatedMember Member member) {
-        Reservation newReservation = reservationCreateService.createReservation(
+        Reservation newReservation = reservationService.createReservation(
                 request,
                 member,
                 ReservationStatus.RESERVED

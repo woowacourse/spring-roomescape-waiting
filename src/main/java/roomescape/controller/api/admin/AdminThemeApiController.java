@@ -11,27 +11,23 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Theme;
 import roomescape.service.dto.request.ThemeSaveRequest;
 import roomescape.service.dto.response.ThemeResponse;
-import roomescape.service.theme.ThemeCreateService;
-import roomescape.service.theme.ThemeDeleteService;
+import roomescape.service.theme.ThemeService;
 
 import java.net.URI;
 
 @RestController
 public class AdminThemeApiController {
 
-    private final ThemeCreateService themeCreateService;
-    private final ThemeDeleteService themeDeleteService;
+    private final ThemeService themeService;
 
-    public AdminThemeApiController(ThemeCreateService themeCreateService,
-                                   ThemeDeleteService themeDeleteService) {
-        this.themeCreateService = themeCreateService;
-        this.themeDeleteService = themeDeleteService;
+    public AdminThemeApiController(ThemeService themeService) {
+        this.themeService = themeService;
     }
 
     @PostMapping("/api/admin/themes")
     public ResponseEntity<ThemeResponse> addTheme(@RequestBody @Valid
                                                   ThemeSaveRequest request) {
-        Theme theme = themeCreateService.createTheme(request);
+        Theme theme = themeService.createTheme(request);
         return ResponseEntity.created(URI.create("/api/themes/" + theme.getId()))
                 .body(new ThemeResponse(theme));
     }
@@ -40,7 +36,7 @@ public class AdminThemeApiController {
     public ResponseEntity<Void> deleteTheme(@PathVariable
                                             @Positive(message = "1 이상의 값만 입력해주세요.")
                                             long id) {
-        themeDeleteService.deleteTheme(id);
+        themeService.deleteTheme(id);
         return ResponseEntity.noContent().build();
     }
 }

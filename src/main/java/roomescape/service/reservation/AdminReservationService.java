@@ -7,45 +7,42 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.dto.request.ReservationSaveRequest;
+import roomescape.service.dto.request.ReservationAdminSaveRequest;
 
 @Service
-public class ReservationCreateService {
+public class AdminReservationService {
 
-    private final ReservationCreateValidator reservationCreateValidator;
     private final ReservationRepository reservationRepository;
+    private final ReservationCreateValidator reservationCreateValidator;
 
-    public ReservationCreateService(ReservationCreateValidator reservationCreateValidator,
-                                    ReservationRepository reservationRepository) {
-        this.reservationCreateValidator = reservationCreateValidator;
+    public AdminReservationService(ReservationRepository reservationRepository,
+                                   ReservationCreateValidator reservationCreateValidator) {
         this.reservationRepository = reservationRepository;
+        this.reservationCreateValidator = reservationCreateValidator;
     }
 
-    public Reservation createReservation(ReservationSaveRequest request,
-                                         Member member,
-                                         ReservationStatus reservationStatus) {
-        ReservationTime reservationTime =
-                reservationCreateValidator.getValidReservationTime(request.timeId());
+    public Reservation createReservation(ReservationAdminSaveRequest request) {
+        ReservationTime reservationTime = reservationCreateValidator.getValidReservationTime(request.timeId());
         reservationCreateValidator.validateDateIsFuture(request.date(), reservationTime);
         Theme theme = reservationCreateValidator.getValidTheme(request.themeId());
         reservationCreateValidator.validateAlreadyBooked(
                 request.date(),
                 request.timeId(),
                 request.themeId(),
-                reservationStatus
+                ReservationStatus.RESERVED
         );
+        Member member = reservationCreateValidator.getValidMember(request.memberId());
         reservationCreateValidator.validateOwnReservationExist(
                 member,
                 theme,
                 reservationTime,
                 request.date()
         );
-
         Reservation reservation = request.toEntity(
+                request,
                 reservationTime,
                 theme,
-                member,
-                reservationStatus
+                member
         );
         return reservationRepository.save(reservation);
     }

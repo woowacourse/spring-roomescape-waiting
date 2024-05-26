@@ -10,26 +10,22 @@ import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.service.dto.response.WaitingResponse;
-import roomescape.service.reservation.ReservationDeleteService;
-import roomescape.service.reservation.ReservationFindService;
+import roomescape.service.reservation.ReservationService;
 
 import java.util.List;
 
 @RestController
 public class AdminWaitingApiController {
 
-    private final ReservationFindService reservationFindService;
-    private final ReservationDeleteService reservationDeleteService;
+    private final ReservationService reservationService;
 
-    public AdminWaitingApiController(ReservationFindService reservationFindService,
-                                     ReservationDeleteService reservationDeleteService) {
-        this.reservationFindService = reservationFindService;
-        this.reservationDeleteService = reservationDeleteService;
+    public AdminWaitingApiController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @GetMapping("/api/admin/waitings")
     public ResponseEntity<List<WaitingResponse>> getWaiting(@AuthenticatedMember Member member) {
-        List<Reservation> waitings = reservationFindService.findWaitings();
+        List<Reservation> waitings = reservationService.findWaitings();
         return ResponseEntity.ok(
                 waitings.stream()
                         .map(WaitingResponse::new)
@@ -41,7 +37,7 @@ public class AdminWaitingApiController {
     public ResponseEntity<Void> deleteReservation(@AuthenticatedMember Member member,
                                                   @PathVariable
                                                   @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
-        reservationDeleteService.deleteReservation(id, member);
+        reservationService.deleteReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }

@@ -15,9 +15,8 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.service.dto.request.ReservationAdminSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.reservation.AdminReservationCreateService;
-import roomescape.service.reservation.ReservationDeleteService;
-import roomescape.service.reservation.ReservationFindService;
+import roomescape.service.reservation.AdminReservationService;
+import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -26,16 +25,13 @@ import java.util.List;
 @RestController
 public class AdminReservationApiController {
 
-    private final AdminReservationCreateService adminReservationCreateService;
-    private final ReservationFindService reservationFindService;
-    private final ReservationDeleteService reservationDeleteService;
+    private final AdminReservationService adminReservationService;
+    private final ReservationService reservationService;
 
-    public AdminReservationApiController(AdminReservationCreateService adminReservationCreateService,
-                                         ReservationFindService reservationFindService,
-                                         ReservationDeleteService reservationDeleteService) {
-        this.adminReservationCreateService = adminReservationCreateService;
-        this.reservationFindService = reservationFindService;
-        this.reservationDeleteService = reservationDeleteService;
+    public AdminReservationApiController(AdminReservationService adminReservationService,
+                                         ReservationService reservationService) {
+        this.adminReservationService = adminReservationService;
+        this.reservationService = reservationService;
     }
 
     @GetMapping("/api/admin/reservations/search")
@@ -43,7 +39,7 @@ public class AdminReservationApiController {
                                                                               @RequestParam long themeId,
                                                                               @RequestParam LocalDate dateFrom,
                                                                               @RequestParam LocalDate dateTo) {
-        List<Reservation> reservations = reservationFindService.searchReservations(memberId, themeId, dateFrom, dateTo);
+        List<Reservation> reservations = reservationService.searchReservations(memberId, themeId, dateFrom, dateTo);
         return ResponseEntity.ok(
                 reservations.stream()
                         .map(ReservationResponse::new)
@@ -54,7 +50,7 @@ public class AdminReservationApiController {
     @PostMapping("/api/admin/reservations")
     public ResponseEntity<ReservationResponse> addReservationByAdmin(@RequestBody @Valid
                                                                      ReservationAdminSaveRequest request) {
-        Reservation newReservation = adminReservationCreateService.createReservation(request);
+        Reservation newReservation = adminReservationService.createReservation(request);
         return ResponseEntity.created(URI.create("/api/admin/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
@@ -65,7 +61,7 @@ public class AdminReservationApiController {
                                                   @PathVariable
                                                   @Positive(message = "1 이상의 값만 입력해주세요.")
                                                   long id) {
-        reservationDeleteService.deleteReservation(id, member);
+        reservationService.deleteReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }
