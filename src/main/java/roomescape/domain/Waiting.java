@@ -65,4 +65,8 @@ public class Waiting {
     public ReservationStatus getStatus() {
         return status;
     }
+
+    public void denyWaiting() {
+        status = ReservationStatus.DENY;
+    }
 }

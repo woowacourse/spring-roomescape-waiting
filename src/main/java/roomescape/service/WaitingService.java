@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
@@ -41,7 +42,7 @@ public class WaitingService {
     }
 
     public List<WaitingResponse> findAllWaitings() {
-        List<Waiting> waitings = waitingRepository.findAll();
+        List<Waiting> waitings = waitingRepository.findAllByStatus(ReservationStatus.WAITING);
         return waitings.stream()
                 .map(WaitingResponse::new)
                 .toList();
@@ -58,6 +59,13 @@ public class WaitingService {
 
         Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingResponse(savedWaiting);
+    }
+
+    @Transactional
+    public WaitingResponse denyWaiting(Long id) {
+        Waiting waiting = findWaitingById(id);
+        waiting.denyWaiting();
+        return new WaitingResponse(waiting);
     }
 
     @Transactional

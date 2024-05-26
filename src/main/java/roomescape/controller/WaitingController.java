@@ -43,6 +43,13 @@ public class WaitingController {
     }
 
     @RoleAllowed
+    @PostMapping("/waitings/deny/{id}")
+    public ResponseEntity<WaitingResponse> denyWaiting(@PathVariable Long id) {
+        WaitingResponse response = waitingService.denyWaiting(id);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @RoleAllowed
     @DeleteMapping("/waitings/{waitingId}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable Long waitingId) {
         waitingService.delete(waitingId);

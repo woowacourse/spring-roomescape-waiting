@@ -31,7 +31,7 @@ INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DAT
 INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '1', '3', '1', 'BOOKED');
 INSERT INTO reservation (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '1', '4', '1', 'BOOKED');
 
-INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '1', '1', 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '1', '1', 'DENY');
 INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '2', '1', 'WAITING');
 INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '3', '1', 'WAITING');
 INSERT INTO waiting (date, member_id, time_id, theme_id, status) VALUES (DATEADD(DAY, -7, CURDATE()), '2', '4', '1', 'WAITING');

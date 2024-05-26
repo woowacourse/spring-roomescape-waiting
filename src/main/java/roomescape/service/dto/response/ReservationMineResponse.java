@@ -7,34 +7,38 @@ import roomescape.domain.Waiting;
 
 public class ReservationMineResponse {
     private final Long id;
-    private final String theme;
+    private final ThemeResponse theme;
     private final LocalDate date;
-    private final LocalTime time;
+    private final ReservationTimeResponse time;
     private final String status;
+    private final Long rank;
 
-    public ReservationMineResponse(Long id, String theme, LocalDate date, LocalTime time, String status) {
+    public ReservationMineResponse(Long id, ThemeResponse theme, LocalDate date, ReservationTimeResponse time, String status, Long rank) {
         this.id = id;
         this.theme = theme;
         this.date = date;
         this.time = time;
         this.status = status;
+        this.rank = rank;
     }
 
     public ReservationMineResponse(Reservation reservation) {
         this(reservation.getId(),
-                reservation.getTheme().getName(),
+                new ThemeResponse(reservation.getTheme()),
                 reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                reservation.getStatus().getDescription()
+                new ReservationTimeResponse(reservation.getTime()),
+                reservation.getStatus().getDescription(),
+                0L
         );
     }
 
     public ReservationMineResponse(Waiting waiting, Long rank) {
         this(waiting.getId(),
-                waiting.getTheme().getName(),
+                new ThemeResponse(waiting.getTheme()),
                 waiting.getDate(),
-                waiting.getTime().getStartAt(),
-                rank + "번째 " + waiting.getStatus().getDescription()
+                new ReservationTimeResponse(waiting.getTime()),
+                waiting.getStatus().getDescription(),
+                rank
         );
     }
 
@@ -42,7 +46,7 @@ public class ReservationMineResponse {
         return id;
     }
 
-    public String getTheme() {
+    public ThemeResponse getTheme() {
         return theme;
     }
 
@@ -50,11 +54,15 @@ public class ReservationMineResponse {
         return date;
     }
 
-    public LocalTime getTime() {
+    public ReservationTimeResponse getTime() {
         return time;
     }
 
     public String getStatus() {
         return status;
+    }
+
+    public Long getRank() {
+        return rank;
     }
 }

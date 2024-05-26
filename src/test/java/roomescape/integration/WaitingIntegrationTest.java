@@ -115,4 +115,15 @@ class WaitingIntegrationTest extends IntegrationTest {
         }
     }
 
+    @Test
+    void 예약_대기를_거절할_수_있다() {
+        RestAssured.given().log().all()
+                .cookies(cookieProvider.createCookies())
+                .when().post("/waitings/deny/1")
+                .then().log().all()
+                .statusCode(200);
+
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting WHERE STATUS = 'DENY'", Integer.class);
+        assertThat(countAfterDelete).isEqualTo(1);
+    }
 }

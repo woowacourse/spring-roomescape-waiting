@@ -15,17 +15,22 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        const theme = item.theme;
+        const theme = item.theme.name;
         const date = item.date;
-        const time = item.time;
-        const status = item.status;
+        const time = item.time.startAt;
+        let status = item.status;
+        const rank = item.rank;
+
+        if (status === "예약대기") {
+            status = `${rank}번째 예약대기`;
+        }
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
         row.insertCell(3).textContent = status;
 
-        if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+        if (status !== '예약' && status !== '거절됨') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '취소';
