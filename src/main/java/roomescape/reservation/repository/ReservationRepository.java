@@ -13,32 +13,32 @@ import roomescape.reservation.domain.ReservationStatus;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     @Override
-    @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
     List<Reservation> findAll();
 
     @Override
-    @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
     Optional<Reservation> findById(Long id);
 
     @Query("""
-            select r.reservationTime.id from Reservation r 
-            join fetch ReservationTime rt on r.reservationTime.id = rt.id  
+            select r.time.id from Reservation r 
+            join fetch ReservationTime rt on r.time.id = rt.id  
             where r.date = :date and r.theme.id = :themeId
             """)
     List<Long> findTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query("""
            select r from Reservation r
-           join fetch ReservationTime rt on rt.id = r.reservationTime.id
+           join fetch ReservationTime rt on rt.id = r.time.id
            join fetch Theme t on t.id = r.theme.id
            join fetch Member m on m.id = r.member.id
            where m.id = :memberId and r.date >= :date
            order by r.date, rt.startAt, r.createdAt
             """)
-    List<Reservation> findAllByMemberIdFromDateOrderByDateAscTimeAscCreatedAtAsc(Long memberId, LocalDate date);
+    List<Reservation> findAllByMemberIdFromDateOrderByDateAscTimeStartAtAscCreatedAtAsc(Long memberId, LocalDate date);
 
-    @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscReservationTimeAscCreatedAtAsc(
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscTimeStartAtAscCreatedAtAsc(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,
@@ -56,21 +56,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
            select r from Reservation r
-           join fetch ReservationTime rt on rt.id = r.reservationTime.id
+           join fetch ReservationTime rt on rt.id = r.time.id
            join fetch Theme t on t.id = r.theme.id
            join fetch Member m on m.id = r.member.id
-           where r.reservationStatus = :reservationStatus and r.date >= :date
+           where r.status = :status and r.date >= :date
            order by r.date, rt.startAt, r.createdAt
             """)
-    List<Reservation> findAllByReservationStatusFromDate(ReservationStatus reservationStatus, LocalDate date);
+    List<Reservation> findAllByStatusFromDate(ReservationStatus status, LocalDate date);
 
-    @EntityGraph(attributePaths = {"reservationTime"})
-    boolean existsByDateAndReservationTimeStartAtAndReservationStatus(LocalDate date, LocalTime startAt, ReservationStatus reservationStatus);
+    @EntityGraph(attributePaths = {"time"})
+    boolean existsByDateAndTimeStartAtAndStatus(LocalDate date, LocalTime startAt, ReservationStatus status);
 
     @Query("""
-           select r.reservationStatus from Reservation r
-           join ReservationTime rt on r.reservationTime.id = rt.id
+           select r.status from Reservation r
+           join ReservationTime rt on r.time.id = rt.id
            where r.member.id = :memberId and r.date = :date and rt.startAt = :startAt
             """)
-    List<ReservationStatus> findStatusesByMemberIdAndDateAndReservationTimeStartAt(Long memberId, LocalDate date, LocalTime startAt);
+    List<ReservationStatus> findStatusesByMemberIdAndDateAndTimeStartAt(Long memberId, LocalDate date, LocalTime startAt);
 }

@@ -26,7 +26,7 @@ public class Reservation extends AuditedEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private ReservationStatus reservationStatus;
+    private ReservationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -38,27 +38,27 @@ public class Reservation extends AuditedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id", nullable = false)
-    private ReservationTime reservationTime;
+    private ReservationTime time;
 
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, ReservationStatus reservationStatus) {
+    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime time, ReservationStatus status) {
         validateLastDate(date);
         this.member = member;
         this.date = date;
         this.theme = theme;
-        this.reservationTime = reservationTime;
-        this.reservationStatus = reservationStatus;
+        this.time = time;
+        this.status = status;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime, ReservationStatus reservationStatus) {
+    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime time, ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.theme = theme;
-        this.reservationTime = reservationTime;
-        this.reservationStatus = reservationStatus;
+        this.time = time;
+        this.status = status;
     }
 
     private void validateLastDate(LocalDate date) {
@@ -76,11 +76,11 @@ public class Reservation extends AuditedEntity {
     }
 
     public boolean sameTimeId(Long otherTimeId) {
-        return reservationTime.sameTimeId(otherTimeId);
+        return time.sameTimeId(otherTimeId);
     }
 
-    public void updateStatus(ReservationStatus reservationStatus) {
-        this.reservationStatus = reservationStatus;
+    public void updateStatus(ReservationStatus updateStatus) {
+        this.status = updateStatus;
     }
 
     public Long getId() {
@@ -104,18 +104,18 @@ public class Reservation extends AuditedEntity {
     }
 
     public ReservationTime getTime() {
-        return reservationTime;
+        return time;
     }
 
     public LocalTime getStartAt() {
-        return reservationTime.getStartAt();
+        return time.getStartAt();
     }
 
-    public ReservationStatus getReservationsStatus() {
-        return reservationStatus;
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public String getStatusDisplayName() {
-        return reservationStatus.getDisplayName();
+        return status.getDisplayName();
     }
 }

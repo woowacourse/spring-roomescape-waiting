@@ -82,10 +82,10 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservationSuccess(Reservation reservation) {
-        boolean existsReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndReservationStatus(
+        boolean existsReservation = reservationRepository.existsByDateAndTimeStartAtAndStatus(
                 reservation.getDate(),
                 reservation.getStartAt(),
-                reservation.getReservationsStatus()
+                reservation.getStatus()
         );
 
         if (existsReservation) {
@@ -94,7 +94,7 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservationWaiting(Reservation reservation, LoginMember loginMember) {
-        List<ReservationStatus> reservationStatuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
+        List<ReservationStatus> reservationStatuses = reservationRepository.findStatusesByMemberIdAndDateAndTimeStartAt(
                 loginMember.id(),
                 reservation.getDate(),
                 reservation.getStartAt()
@@ -115,7 +115,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByStatus(ReservationStatus reservationStatus) {
-        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(reservationStatus, LocalDate.now());
+        List<Reservation> waitingReservations = reservationRepository.findAllByStatusFromDate(reservationStatus, LocalDate.now());
 
         return waitingReservations.stream()
                 .map(ReservationResponse::toResponse)
@@ -124,10 +124,10 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
+        List<Reservation> waitingReservations = reservationRepository.findAllByStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
         Waitings waitings = new Waitings(waitingReservations);
 
-        return reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeAscCreatedAtAsc(loginMember.id(), LocalDate.now()).stream()
+        return reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeStartAtAscCreatedAtAsc(loginMember.id(), LocalDate.now()).stream()
                 .map(reservation -> MemberReservationResponse.toResponse(
                         reservation,
                         waitings.findMemberRank(reservation, loginMember.id())
@@ -136,7 +136,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationWaitingResponse> findWaitingReservations() {
-        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
+        List<Reservation> waitingReservations = reservationRepository.findAllByStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
 
         return waitingReservations.stream()
                 .map(ReservationWaitingResponse::toResponse)
@@ -145,7 +145,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscReservationTimeAscCreatedAtAsc(
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscTimeStartAtAscCreatedAtAsc(
                         request.themeId(),
                         request.memberId(),
                         request.dateFrom(),
@@ -177,7 +177,7 @@ public class ReservationService {
     }
 
     private void updateFirstWaitingReservation(Reservation canceledReservation) {
-        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
+        List<Reservation> waitingReservations = reservationRepository.findAllByStatusFromDate(ReservationStatus.WAIT, LocalDate.now());
         Waitings waitings = new Waitings(waitingReservations);
 
         waitings.findFirstWaitingReservationByCanceledReservation(canceledReservation)

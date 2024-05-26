@@ -12,7 +12,7 @@ public class Waitings {
     }
 
     public int findMemberRank(Reservation reservation, Long memberId) {
-        if (reservation.getReservationsStatus() == ReservationStatus.SUCCESS) {
+        if (reservation.getStatus() == ReservationStatus.SUCCESS) {
             return 0;
         }
 

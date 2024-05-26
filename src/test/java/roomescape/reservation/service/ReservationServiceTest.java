@@ -245,6 +245,6 @@ class ReservationServiceTest {
         reservationService.cancelById(kaki.getId());
         Reservation jojoReservation = reservationRepository.findById(jojo.getId()).get();
 
-        assertThat(jojoReservation.getReservationsStatus()).isEqualTo(ReservationStatus.SUCCESS);
+        assertThat(jojoReservation.getStatus()).isEqualTo(ReservationStatus.SUCCESS);
     }
 }

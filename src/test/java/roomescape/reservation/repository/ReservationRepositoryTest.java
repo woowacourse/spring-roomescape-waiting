@@ -89,7 +89,7 @@ public class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
         reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
-        List<Reservation> reservations = reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeAscCreatedAtAsc(kaki.getId(), TODAY);
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdFromDateOrderByDateAscTimeStartAtAscCreatedAtAsc(kaki.getId(), TODAY);
 
         assertThat(reservations.size()).isEqualTo(1);
     }
@@ -179,7 +179,7 @@ public class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
         reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.WAIT));
 
-        List<ReservationStatus> reservationStatuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
+        List<ReservationStatus> reservationStatuses = reservationRepository.findStatusesByMemberIdAndDateAndTimeStartAt(
                 member.getId(),
                 TODAY,
                 reservationTime.getStartAt()
@@ -205,13 +205,13 @@ public class ReservationRepositoryTest {
 
         Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
-        boolean success = reservationRepository.existsByDateAndReservationTimeStartAtAndReservationStatus(
+        boolean success = reservationRepository.existsByDateAndTimeStartAtAndStatus(
                 savedReservation.getDate(),
                 savedReservation.getStartAt(),
                 ReservationStatus.SUCCESS
         );
 
-        boolean waiting = reservationRepository.existsByDateAndReservationTimeStartAtAndReservationStatus(
+        boolean waiting = reservationRepository.existsByDateAndTimeStartAtAndStatus(
                 savedReservation.getDate(),
                 savedReservation.getStartAt(),
                 ReservationStatus.WAIT
@@ -250,7 +250,7 @@ public class ReservationRepositoryTest {
                 tomorrow
         );
 
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscReservationTimeAscCreatedAtAsc(
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenOrderByDateAscTimeStartAtAscCreatedAtAsc(
                 request.themeId(),
                 request.memberId(),
                 request.dateFrom(),
