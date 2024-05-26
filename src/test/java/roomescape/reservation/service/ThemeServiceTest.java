@@ -28,6 +28,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
+import roomescape.reservation.domain.Period;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
@@ -82,7 +83,7 @@ class ThemeServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DisplayName("일주일 내에 예약된 상위 n 인기 테마들을 조회한다.")
+    @DisplayName("파라미터로 받은 기간 동안에 예약된 상위 n 인기 테마들을 조회한다.")
     @Test
     void findThemesDescOfLastWeekCountOf() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
@@ -110,9 +111,10 @@ class ThemeServiceTest {
         reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, ReservationStatus.SUCCESS));
         reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, ReservationStatus.SUCCESS));
 
-        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(2);
+        List<PopularThemeResponse> popularThemeResponses = themeService.findPopularThemesBetweenPeriod(Period.DAY,2);
+
         assertAll(
-                () -> assertThat(popularThemeResponses.get(0).name()).isEqualTo("액션"),
+                () -> assertThat(popularThemeResponses.get(0).name()).isEqualTo(theme2.getName()),
                 () -> assertThat(popularThemeResponses).hasSize(2)
         );
     }
@@ -125,8 +127,7 @@ class ThemeServiceTest {
 
         ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
-        Member member = memberRepository.save(
-                Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         reservationRepository.save(new Reservation(member, TODAY, theme, hour10, ReservationStatus.SUCCESS));
 

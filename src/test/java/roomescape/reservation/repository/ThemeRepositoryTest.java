@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
+import static roomescape.util.Fixture.JOJO_EMAIL;
+import static roomescape.util.Fixture.JOJO_NAME;
+import static roomescape.util.Fixture.JOJO_PASSWORD;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
@@ -102,6 +105,42 @@ class ThemeRepositoryTest {
         boolean exist = !themeRepository.findThemesThatReservationReferById(theme.getId()).isEmpty();
 
         assertThat(exist).isTrue();
+    }
+
+    @DisplayName("주어진 기간 사이에 가장 많이 예약된 테마를 n개 조회한다..")
+    @Test
+    void findLimitOfPopularThemesDescBetweenPeriod() {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+
+        Theme theme1 = themeRepository.save(
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
+
+        Theme theme2 = themeRepository.save(
+                new Theme(
+                        new ThemeName("액션"),
+                        new Description("액션 탈출"),
+                        THUMBNAIL
+                )
+        );
+
+        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+
+        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, ReservationStatus.SUCCESS));
+
+        List<Theme> popularThemes = themeRepository.findLimitOfPopularThemesDescBetweenPeriod(TODAY, TODAY, 2);
+
+        assertAll(
+                () -> assertThat(popularThemes.get(0).getName()).isEqualTo(theme2.getName()),
+                () -> assertThat(popularThemes).hasSize(2)
+        );
     }
 
     @DisplayName("id를 받아 삭제한다.")

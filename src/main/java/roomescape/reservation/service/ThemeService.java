@@ -1,25 +1,20 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.PopularThemes;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Period;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.dto.ThemeSaveRequest;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
-    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
-    public ThemeService(ReservationRepository reservationRepository, ThemeRepository themeRepository) {
-        this.reservationRepository = reservationRepository;
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
     }
 
@@ -43,23 +38,14 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
-        List<Theme> themes = themeRepository.findAll();
-
-        return themes.stream()
+        return themeRepository.findAll().stream()
                 .map(ThemeResponse::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<PopularThemeResponse> findThemesDescOfLastWeekTopOf(int limitCount) {
-        LocalDate dateFrom = LocalDate.now().minusWeeks(1);
-        List<Theme> themes = reservationRepository.findReservationsOfLastWeek(dateFrom).stream()
-                .map(Reservation::getTheme)
-                .toList();
-
-        PopularThemes popularThemes = new PopularThemes(themes);
-
-        return popularThemes.findPopularThemesTopOf(limitCount).stream()
+    public List<PopularThemeResponse> findPopularThemesBetweenPeriod(Period period, int limitCount) {
+        return themeRepository.findLimitOfPopularThemesDescBetweenPeriod(period.getStartDate(), period.getEndDate(), limitCount).stream()
                 .map(PopularThemeResponse::toResponse)
                 .toList();
     }

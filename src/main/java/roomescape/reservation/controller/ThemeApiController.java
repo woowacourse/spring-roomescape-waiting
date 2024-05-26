@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.dto.MultipleResponses;
+import roomescape.reservation.domain.Period;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.dto.ThemeSaveRequest;
@@ -28,9 +29,10 @@ public class ThemeApiController {
 
     @GetMapping("/themes/popular")
     public ResponseEntity<MultipleResponses<PopularThemeResponse>> findTopTenThemesOfLastWeek(
+            @RequestParam(name = "period", defaultValue = "WEEK") Period period,
             @RequestParam(name = "limitCount", defaultValue = "10") int limitCount
     ) {
-        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(limitCount);
+        List<PopularThemeResponse> popularThemeResponses = themeService.findPopularThemesBetweenPeriod(period, limitCount);
 
         return ResponseEntity.ok(new MultipleResponses<>(popularThemeResponses));
     }
