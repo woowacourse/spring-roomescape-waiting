@@ -19,7 +19,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     default MemberReservation getById(final Long id) {
         return findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorType.RESERVATION_TIME_NOT_FOUND,
+                .orElseThrow(() -> new NotFoundException(ErrorType.MEMBER_RESERVATION_NOT_FOUND,
                         String.format("회원 예약(MemberReservation) 정보가 존재하지 않습니다. [memberReservationId: %d]", id)));
     }
 
