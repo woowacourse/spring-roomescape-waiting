@@ -235,5 +235,5 @@ public class ReservationService {
         return new MemberReservationsResponse(responses);
     }
 
-    //TODO: 지난 날짜/시간의 예약은 ReservationStatus.FINISH 상태로 변경하는 기능 추가
+    //TODO: 지난 날짜/시간의 예약은 ReservationStatus.FINISH 상태로 변경하는 기능 추가 고려
 }

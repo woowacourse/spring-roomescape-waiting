@@ -32,15 +32,12 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             """)
     List<MemberReservation> findAfterAndEqualDateReservationByMemberOrderByIdAsc(final Member member);
 
-    // TODO: 불필요한 JOIN 문 제거
     @Query("""
             SELECT mr
-            FROM MemberReservation mr JOIN FETCH mr.reservationDetail r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
+            FROM MemberReservation mr JOIN mr.reservationDetail r JOIN r.reservationTime rt JOIN r.theme t
             WHERE mr.member = :member AND rt = :time AND t = :theme AND r.date = :date
             """)
     Optional<MemberReservation> findByMemberAndReservationTimeAndDateAndTheme(Member member, ReservationTime time, LocalDate date, Theme theme);
-
-    Optional<MemberReservation> findByReservationDetailAndMember(ReservationDetail reservationDetail, Member member);
 
     Long countByReservationDetail(ReservationDetail reservationDetail);
 
