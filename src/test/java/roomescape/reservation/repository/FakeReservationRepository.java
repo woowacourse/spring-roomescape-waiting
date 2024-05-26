@@ -26,8 +26,11 @@ public class FakeReservationRepository implements ReservationRepository {
     private final AtomicLong id = new AtomicLong(0);
 
     public FakeReservationRepository() {
-        long reservationId = id.incrementAndGet();
+        reservations.put(0L, makeReservation(
+                Reservation.of(LocalDate.now().plusDays(1), TIME_MOCK_DATA, THEME_MOCK_DATA, MEMBER_MOCK_DATA,
+                        ReservationStatus.RESERVED), 0));
 
+        long reservationId = id.incrementAndGet();
         reservations.put(reservationId, makeReservation(
                 Reservation.of(LocalDate.now().plusDays(1), TIME_MOCK_DATA, THEME_MOCK_DATA, MEMBER_MOCK_DATA,
                         ReservationStatus.RESERVED), reservationId));

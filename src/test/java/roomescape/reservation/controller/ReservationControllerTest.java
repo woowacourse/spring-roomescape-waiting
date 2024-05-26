@@ -22,7 +22,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.facade.ReservationFacadeService;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
@@ -41,7 +41,7 @@ class ReservationControllerTest extends ControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ReservationService reservationService;
+    private ReservationFacadeService reservationService;
 
 
     @Test

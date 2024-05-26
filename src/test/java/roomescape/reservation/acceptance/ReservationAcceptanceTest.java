@@ -1,4 +1,4 @@
-package roomescape.admin.acceptance;
+package roomescape.reservation.acceptance;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,15 +20,15 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.facade.ReservationFacadeService;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.ReservationService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/data-test.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-public class AdminAcceptanceTest {
+public class ReservationAcceptanceTest {
 
     @Autowired
-    private ReservationService reservationService;
+    private ReservationFacadeService reservationService;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -69,7 +69,7 @@ public class AdminAcceptanceTest {
                     );
                 }),
                 dynamicTest("예약을 삭제한다.", () -> {
-                    reservationService.removeReservations(reservationId + 1);
+                    reservationService.removeReservation(reservationId + 1);
 
                     Optional<Reservation> reservation = reservationRepository.findById(reservationId + 1);
                     assertTrue(reservation.isEmpty());
