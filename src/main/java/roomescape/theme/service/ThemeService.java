@@ -48,7 +48,7 @@ public class ThemeService {
         return ThemeResponse.from(savedTheme);
     }
 
-    public void removeTheme(long id) {
+    public void removeTheme(Long id) {
         themeRepository.deleteById(id);
     }
 }
