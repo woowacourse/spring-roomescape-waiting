@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WaitingReservationSlotServiceTest extends ServiceTest {
+class WaitingReservationServiceTest extends ServiceTest {
 
     @Autowired
     ReservationService reservationService;

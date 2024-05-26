@@ -19,13 +19,10 @@ import java.util.List;
 
 import static roomescape.fixture.MemberFixture.getMemberTacan;
 
-class WaitingReservationSlotControllerTest extends ControllerTest {
+class ReservationControllerWaitingTest extends ControllerTest {
 
     @Autowired
     TokenProvider tokenProvider;
-
-    @Autowired
-    ReservationRepository reservationRepository;
 
     String token;
 
@@ -51,7 +48,7 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
                 .body(reservationRequest)
-                .when().post("/reservations/waiting")
+                .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -69,19 +66,19 @@ class WaitingReservationSlotControllerTest extends ControllerTest {
         );
 
 //        when & then
-        RestAssured.given().log().all()
+        String location = RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
                 .body(reservationRequest)
-                .when().post("/reservations/waiting")
+                .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract()
+                .header("Location");
 
-        List<Reservation> all = reservationRepository.findAll();
-        Long addedId = all.get(all.size() - 1).getId();
         RestAssured.given().log().all()
                 .cookie("token", token)
-                .when().delete("/reservations/waiting/" + addedId)
+                .when().delete(location)
                 .then().log().all()
                 .statusCode(204);
     }

@@ -1,40 +1,31 @@
 package roomescape.reservation.controller;
 
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
-import static roomescape.fixture.MemberFixture.getMemberClover;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
-import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.TokenProvider;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.controller.dto.ReservationTimeRequest;
-import roomescape.reservation.controller.dto.ReservationTimeResponse;
-import roomescape.reservation.controller.dto.ThemeRequest;
-import roomescape.reservation.controller.dto.ThemeResponse;
+import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
 import roomescape.util.ControllerTest;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.getMemberClover;
+
 @DisplayName("예약 API 통합 테스트")
-class ReservationSlotControllerTest extends ControllerTest {
+class ReservationControllerTest extends ControllerTest {
     @Autowired
     ReservationService reservationService;
 

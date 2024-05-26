@@ -32,7 +32,7 @@ import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.util.ServiceTest;
 
 @DisplayName("예약 시간 로직 테스트")
-class ReservationSlotTimeServiceTest extends ServiceTest {
+class ReservationTimeServiceTest extends ServiceTest {
     @Autowired
     ReservationSlotRepository reservationSlotRepository;
     @Autowired
