@@ -21,7 +21,6 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
-
     @Transactional
     public void deleteById(long id) {
         reservationRepository.findById(id)

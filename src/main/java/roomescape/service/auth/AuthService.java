@@ -15,8 +15,6 @@ import roomescape.service.auth.dto.LoginResponse;
 import roomescape.service.auth.dto.SignUpRequest;
 import roomescape.service.member.dto.MemberResponse;
 
-import java.util.Optional;
-
 @Service
 public class AuthService {
     private final TokenProvider tokenProvider;
@@ -29,7 +27,7 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
-        Member member = getMemberByEmail(loginRequest.email());
+        Member member = memberRepository.getByEmail(loginRequest.email());
         validatePassword(loginRequest, member);
         String token = tokenProvider.create(member);
         return new LoginResponse(token);
@@ -43,7 +41,7 @@ public class AuthService {
 
     public LoginCheckResponse check(String token) {
         String email = tokenProvider.extractMemberEmail(token);
-        Member member = getMemberByEmail(email);
+        Member member = memberRepository.getByEmail(email);
         return new LoginCheckResponse(member);
     }
 
@@ -60,14 +58,9 @@ public class AuthService {
         }
     }
 
-    private Member getMemberByEmail(String email) {
-        return memberRepository.findByEmail(Email.of(email))
-                .orElseThrow(() -> new InvalidMemberException("이메일 또는 비밀번호가 잘못되었습니다."));
-    }
-
     public void validateAdmin(long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        if (member.isEmpty() || !member.get().isAdmin()) {
+        Member member = memberRepository.getById(memberId);
+        if (!member.isAdmin()) {
             throw new ForbiddenException("권한이 없습니다. 관리자에게 문의해주세요.");
         }
     }
