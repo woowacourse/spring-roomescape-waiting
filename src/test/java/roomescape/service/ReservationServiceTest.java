@@ -141,7 +141,7 @@ class ReservationServiceTest extends ServiceTest {
 
             ReservationResponse response = reservationService.saveReservation(request, member);
 
-            assertThat(response.getName())
+            assertThat(response.getMember().getName())
                     .isEqualTo(member.getName().getName());
         }
 

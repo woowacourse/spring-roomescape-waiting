@@ -182,7 +182,11 @@ Content-Type: application/json
   "reservations": [
     {
       "id": 1,
-      "name": "관리자",
+      "member": {
+        "id": 1,
+        "name": "사용자",
+        "email": "user@gmail.com"
+      },
       "date": "2024-08-05",
       "time": {
         "id": 1,
@@ -251,7 +255,11 @@ Content-Type: application/json
 
 {
   "id": 2,
-  "name": "관리자",
+  "member": {
+    "id": 1,
+    "name": "사용자",
+    "email": "user@gmail.com"
+  },
   "date": "2024-08-06",
   "time": {
     "id": 1,
@@ -291,7 +299,11 @@ Content-Type: application/json
 
 {
   "id": 3,
-  "name": "관리자",
+  "member": {
+    "id": 1,
+    "name": "사용자",
+    "email": "user@gmail.com"
+  },
   "date": "2024-08-07",
   "time": {
     "id": 1,
