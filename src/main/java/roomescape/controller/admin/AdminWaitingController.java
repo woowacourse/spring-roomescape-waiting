@@ -25,7 +25,7 @@ public class AdminWaitingController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<WaitingResponse> patch(@PathVariable Long id) {
+    public ResponseEntity<WaitingResponse> rejectWaiting(@PathVariable Long id) {
         WaitingResponse response = waitingService.rejectedByAdmin(id);
         return ResponseEntity.ok(response);
     }
