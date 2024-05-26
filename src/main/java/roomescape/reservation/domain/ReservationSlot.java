@@ -49,7 +49,7 @@ public class ReservationSlot {
     }
 
     public boolean isPast() {
-        LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/seoul")).toLocalDateTime();
+        LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
         return LocalDateTime.of(this.date, this.time.getStartAt()).isBefore(now);
     }
 

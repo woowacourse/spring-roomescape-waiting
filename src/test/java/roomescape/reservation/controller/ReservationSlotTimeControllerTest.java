@@ -50,7 +50,7 @@ class ReservationSlotTimeControllerTest extends ControllerTest {
                 .statusCode(200);
     }
 
-    @DisplayName("시간 삭제 시, 200을 반환한다.")
+    @DisplayName("시간 삭제 시, 204을 반환한다.")
     @Test
     void delete() {
         //given
@@ -60,7 +60,7 @@ class ReservationSlotTimeControllerTest extends ControllerTest {
         RestAssured.given().log().all()
                 .when().delete("/times/" + timeResponse.id())
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(204);
     }
 
     @DisplayName("시간 생성 시, 잘못된 시간 형식에 대해 400을 반환한다.")
