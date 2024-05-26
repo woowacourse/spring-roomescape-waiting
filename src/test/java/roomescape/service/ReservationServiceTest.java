@@ -290,4 +290,40 @@ class ReservationServiceTest extends DBTest {
         Reservation confirmed = reservationRepository.findById(waiting.getId()).orElseThrow();
         assertThat(confirmed.getStatus()).isEqualTo(Status.CONFIRMED);
     }
+
+    @DisplayName("예약 대기를 취소한다.")
+    @Test
+    void cancelWaiting() {
+        // given
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+
+        Reservation waiting = reservationRepository.save(
+                new Reservation(member, TestFixture.TOMORROW, time, theme, Status.WAITING));
+
+        // when
+        reservationService.cancelWaiting(waiting.getId());
+
+        // then
+        assertThat(reservationRepository.findById(waiting.getId())).isEmpty();
+    }
+    
+    @DisplayName("예약 대기를 취소할 때, 대기 중인 예약이 없으면 예외가 발생한다.")
+    @Test
+    void isWaitingReservationExist_WhenCancelWaiting() {
+        // given
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+
+        // when
+        Reservation waiting = reservationRepository.save(
+                new Reservation(member, TestFixture.TOMORROW, time, theme, Status.WAITING));
+
+        // then
+        assertThatThrownBy(() -> reservationService.cancelWaiting(waiting.getId() + 1))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("대기중인 예약을 찾을 수 없습니다. id = " + (waiting.getId() + 1));
+    }
 }

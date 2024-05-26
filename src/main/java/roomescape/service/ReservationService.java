@@ -109,15 +109,24 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    public void cancelWaiting(Long id) {
+        Reservation reservation = getValidatedWaiting(id);
+        reservationRepository.delete(reservation);
+    }
+
     public void approveWaiting(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .filter(r -> r.getStatus() == Status.WAITING)
-                .orElseThrow(() -> new NotFoundException("대기중인 예약을 찾을 수 없습니다. id = " + id));
+        Reservation reservation = getValidatedWaiting(id);
 
         validateIsReservationExist(reservation.getTheme().getId(), reservation.getTime().getId(),
                 reservation.getDate());
 
         reservation.updateStatus(Status.CONFIRMED);
+    }
+
+    private Reservation getValidatedWaiting(Long id) {
+        return reservationRepository.findById(id)
+                .filter(r -> r.getStatus() == Status.WAITING)
+                .orElseThrow(() -> new NotFoundException("대기중인 예약을 찾을 수 없습니다. id = " + id));
     }
 
     private Reservation getReservationForSave(ReservationCreateRequest request, Status status) {

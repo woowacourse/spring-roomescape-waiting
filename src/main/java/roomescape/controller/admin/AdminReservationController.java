@@ -63,7 +63,7 @@ public class AdminReservationController {
 
     @PostMapping("/waiting/{id}/deny")
     public ResponseEntity<Void> denyWaiting(@PathVariable Long id) {
-        reservationService.deleteById(id);
+        reservationService.cancelWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }

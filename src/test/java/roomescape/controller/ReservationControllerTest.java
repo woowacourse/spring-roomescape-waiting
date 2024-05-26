@@ -165,7 +165,23 @@ class ReservationControllerTest extends BaseControllerTest {
                 .header("cookie", accessToken)
                 .when().delete("/reservations/waiting/{id}", saved.getId())
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
+    }
 
+    @DisplayName("존재하지 않는 예약 대기를 취소하면 404를 응답한다.")
+    @Test
+    void cancelNotExistWaiting() {
+        // given
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.WAITING);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
+
+        // when & then
+        RestAssured.given().log().all()
+                .header("cookie", accessToken)
+                .when().delete("/reservations/waiting/{id}", saved.getId() + 1)
+                .then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
     private Reservation reserveAfterSave(Member member, LocalDate date, ReservationTime time, Theme theme,
