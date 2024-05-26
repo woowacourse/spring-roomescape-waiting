@@ -163,4 +163,13 @@ class ReservationServiceTest {
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("다른 유저의 예약 대기는 삭제할 수 없습니다.");
     }
+
+    @DisplayName("성공: 예약 대기 목록 조회")
+    @Test
+    void findAllWaitingReservations() {
+        // when
+        List<Reservation> reservations = reservationService.findAllWaitingReservations();
+        //then
+        assertThat(reservations).hasSize(1);
+    }
 }

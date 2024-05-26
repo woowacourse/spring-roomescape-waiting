@@ -101,4 +101,15 @@ class AdminReservationControllerTest {
             .then().log().all()
             .statusCode(401);
     }
+
+    @DisplayName("성공: 전체 예약 대기 목록 조회")
+    @Test
+    void findAllWaitingReservations() {
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .when().get("/admin/reservations/waiting")
+            .then().log().all()
+            .statusCode(200)
+            .body("id", contains(6));
+    }
 }

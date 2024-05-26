@@ -130,4 +130,8 @@ public class ReservationService {
 
         reservationRepository.deleteById(id);
     }
+
+    public List<Reservation> findAllWaitingReservations() {
+        return reservationRepository.findAllByStatus(WAITING);
+    }
 }
