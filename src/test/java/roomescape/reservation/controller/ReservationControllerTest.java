@@ -134,7 +134,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .port(port)
                 .header(new Header("Cookie", accessTokenCookie))
-                .when().get("/reservations?status=RESERVED")
+                .when().get("/admin/reservations?status=RESERVED")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.reservations.size()", is(3));

@@ -1,8 +1,10 @@
 let isEditing = false;
 const RESERVATION_API_ENDPOINT = '/reservations';
+const ADMIN_RESERVATION_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
+const ADMIN_MEMBER_API_ENDPOINT = '/admin/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -11,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT + '?status=RESERVED')
+  requestRead(ADMIN_RESERVATION_API_ENDPOINT + '?status=RESERVED')
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -56,7 +58,7 @@ function fetchThemes() {
 }
 
 function fetchMembers() {
-  requestRead(MEMBER_API_ENDPOINT)
+  requestRead(ADMIN_MEMBER_API_ENDPOINT)
       .then(data => {
         membersOptions.push(...data.data.members);
         populateSelect('member', membersOptions, 'name');
@@ -192,7 +194,7 @@ function applyFilter(event) {
   const dateFrom = document.getElementById('date-from').value;
   const dateTo = document.getElementById('date-to').value;
 
-  fetch(`/reservations/search?themeId=${themeId}&memberId=${memberId}&dateFrom=${dateFrom}&dateTo=${dateTo}`, { // 예약 검색 API 호출
+  fetch(`${ADMIN_RESERVATION_API_ENDPOINT}/search?themeId=${themeId}&memberId=${memberId}&dateFrom=${dateFrom}&dateTo=${dateTo}`, { // 예약 검색 API 호출
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -211,7 +213,7 @@ function requestCreate(reservation) {
     body: JSON.stringify(reservation)
   };
 
-  return fetch('/reservations', requestOptions)
+  return fetch(RESERVATION_API_ENDPOINT, requestOptions)
       .then(response => {
         if (response.status === 201) return response.json();
         throw new Error('Create failed');
@@ -223,7 +225,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+  return fetch(`${ADMIN_RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
         if (response.status != 204) throw new Error('Delete failed');
       });

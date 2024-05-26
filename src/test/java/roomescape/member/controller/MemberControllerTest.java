@@ -42,7 +42,7 @@ class MemberControllerTest {
         RestAssured.given().log().all()
                 .port(port)
                 .header(new Header("Cookie", accessTokenCookie))
-                .when().get("/members")
+                .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.members.size()", is(5));

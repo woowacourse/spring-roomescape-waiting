@@ -34,7 +34,7 @@ public class ReservationTimeController {
     }
 
     @Admin
-    @PostMapping("/times")
+    @PostMapping("/admin/times")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ReservationTimeResponse> saveTime(
             @Valid @RequestBody final ReservationTimeRequest reservationTimeRequest,
@@ -47,7 +47,7 @@ public class ReservationTimeController {
     }
 
     @Admin
-    @DeleteMapping("/times/{id}")
+    @DeleteMapping("/admin/times/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeTime(
             @NotNull(message = "timeId는 null 일 수 없습니다.") @PathVariable final Long id

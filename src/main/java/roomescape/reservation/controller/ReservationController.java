@@ -37,7 +37,7 @@ public class ReservationController {
     }
 
     @Admin
-    @GetMapping("/reservations")
+    @GetMapping("/admin/reservations")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationsResponse> getReservationsByStatus(@RequestParam final ReservationStatus status) {
         return ApiResponse.success(reservationService.findReservationsByStatus(status));
@@ -59,7 +59,7 @@ public class ReservationController {
     }
 
     @Admin
-    @GetMapping("/reservations/search")
+    @GetMapping("/admin/reservations/search")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationsResponse> getReservationBySearching(
             @RequestParam(required = false) final Long themeId,
@@ -127,10 +127,10 @@ public class ReservationController {
     }
 
     @Admin
-    @PatchMapping("/reservations/waitings/{memberReservationId}")
+    @PatchMapping("/admin/reservations/waitings/{memberReservationId}")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<Void> approveWaitingReservation(
-            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
+            @NotNull(message = "memberReservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
     ) {
         reservationService.approveWaitingReservation(memberReservationId);
 
@@ -138,7 +138,7 @@ public class ReservationController {
     }
 
     @Admin
-    @GetMapping("/reservations/waitings")
+    @GetMapping("/admin/reservations/waitings")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationsResponse> getFirstOrderWaitingReservations() {
         return ApiResponse.success(reservationService.findFirstOrderWaitingReservations());

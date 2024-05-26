@@ -122,7 +122,7 @@ public class ReservationTimeControllerTest {
         RestAssured.given().log().all()
                 .port(port)
                 .header(new Header("Cookie", adminAccessTokenCookie))
-                .when().delete("/times/1")
+                .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(204);
 

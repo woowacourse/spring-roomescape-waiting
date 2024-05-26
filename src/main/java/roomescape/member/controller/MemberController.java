@@ -18,7 +18,7 @@ public class MemberController {
     }
 
     @Admin
-    @GetMapping("/members")
+    @GetMapping("/admin/members")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<MembersResponse> getAllMembers() {
         return ApiResponse.success(memberService.findAllMembers());

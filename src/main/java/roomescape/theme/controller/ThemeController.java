@@ -44,7 +44,7 @@ public class ThemeController {
     }
 
     @Admin
-    @PostMapping("/themes")
+    @PostMapping("/admin/themes")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ThemeResponse> saveTheme(
             @Valid @RequestBody final ThemeRequest request,
@@ -57,7 +57,7 @@ public class ThemeController {
     }
 
     @Admin
-    @DeleteMapping("/themes/{id}")
+    @DeleteMapping("/admin/themes/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeTheme(
             @NotNull(message = "themeId는 null 일 수 없습니다.") @PathVariable final Long id

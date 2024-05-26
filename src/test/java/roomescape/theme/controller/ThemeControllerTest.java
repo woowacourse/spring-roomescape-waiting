@@ -68,7 +68,7 @@ class ThemeControllerTest {
                 .header(new Header("Cookie", adminAccessTokenCookie))
                 .port(port)
                 .body(params)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201)
                 .body("data.id", is(1))
@@ -93,7 +93,7 @@ class ThemeControllerTest {
                 .header(new Header("Cookie", adminAccessTokenCookie))
                 .port(port)
                 .body(params)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201)
                 .body("data.id", is(1))
@@ -103,7 +103,7 @@ class ThemeControllerTest {
                 .contentType(ContentType.JSON)
                 .header(new Header("Cookie", adminAccessTokenCookie))
                 .port(port)
-                .when().delete("/themes/1")
+                .when().delete("/admin/themes/1")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -119,7 +119,7 @@ class ThemeControllerTest {
                 .contentType(ContentType.JSON)
                 .header(new Header("Cookie", adminAccessTokenCookie))
                 .port(port)
-                .when().delete("/themes/1")
+                .when().delete("/admin/themes/1")
                 .then().log().all()
                 .statusCode(404);
     }
@@ -159,7 +159,7 @@ class ThemeControllerTest {
                 .header(new Header("Cookie", adminAccessTokenCookie))
                 .port(port)
                 .body(invalidRequestBody)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400);
     }
