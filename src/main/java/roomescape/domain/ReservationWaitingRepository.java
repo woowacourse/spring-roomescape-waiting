@@ -1,8 +1,7 @@
 package roomescape.domain;
 
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,5 +31,5 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
             @Param("standard") Long priority);
 
     @EntityGraph(attributePaths = {"reservation"})
-    Page<ReservationWaiting> findFirstByReservationIdOrderByPriorityAsc(Pageable pageable, Long reservationId);
+    Optional<ReservationWaiting> findFirstByReservationIdOrderByPriorityAsc(Long reservationId);
 }

@@ -3,9 +3,6 @@ package roomescape.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -82,11 +79,8 @@ public class ReservationService {
 
     @Transactional
     public void delete(Long id) {
-        Pageable pageable = PageRequest.of(0, 1);
-        Page<ReservationWaiting> page = reservationWaitingRepository.findFirstByReservationIdOrderByPriorityAsc(
-                pageable, id);
-        Optional<ReservationWaiting> nextWaiting = page.getContent().stream()
-                .findFirst();
+        Optional<ReservationWaiting> nextWaiting = reservationWaitingRepository.findFirstByReservationIdOrderByPriorityAsc(
+                id);
         nextWaiting.ifPresentOrElse(reservationWaiting -> {
                     reservationWaiting.approveWaitingMember();
                     reservationWaitingRepository.delete(reservationWaiting);
