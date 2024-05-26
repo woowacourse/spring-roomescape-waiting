@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
+
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -36,4 +37,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByDateAndThemeId(ReservationDate date, Long themeId);
 
     List<Reservation> findAllByMemberId(Long memberId);
+
+    Reservation findByDateAndThemeIdAndTimeId(ReservationDate date, Long themeId, Long timeId);
 }

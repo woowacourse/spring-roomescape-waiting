@@ -1,17 +1,14 @@
 package roomescape.reservation.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import roomescape.auth.principal.AuthenticatedMember;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.SaveReservationRequest;
+import roomescape.reservation.dto.*;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.Waiting;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 import roomescape.resolver.Authenticated;
 
 import java.net.URI;
@@ -23,9 +20,11 @@ import jakarta.validation.Valid;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(final ReservationService reservationService) {
+    public ReservationController(final ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping("/reservations")
@@ -54,5 +53,16 @@ public class ReservationController {
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    @PostMapping("/reservations-waiting")
+    public ResponseEntity<WaitingResponse> saveWaiting(
+            @RequestBody final WaitingRequest request,
+            @Authenticated final AuthenticatedMember authenticatedMember
+    ) {
+        Waiting savedWaiting = waitingService.saveWaiting(request, authenticatedMember.id());
+
+        return ResponseEntity.created(URI.create("/reservations-waiting/" + savedWaiting.getId()))
+                .body(WaitingResponse.from(savedWaiting));
+    }
+
     }
 }

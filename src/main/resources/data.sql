@@ -11,6 +11,10 @@ INSERT INTO member (role, password, name, email)
 VALUES ('USER', 'c7c8DLfgOv4RFWUd7q9VDn1684F5dTghVOXoAzrc1GA=', '테바', 'teva@mail.com');   /** userPw1234! */
 INSERT INTO member (role, password, name, email)
 VALUES ('USER', 'c7c8DLfgOv4RFWUd7q9VDn1684F5dTghVOXoAzrc1GA=', '파랑', 'blue@mail.com');   /** userPw1234! */
+INSERT INTO member (role, password, name, email)
+VALUES ('USER', 'UuoeE5xJuKjqcjQAEOHScO4vVSZAJ5Ds+lDXLgt9pnA=', '폰드', 'pond@mail.com');   /** 123 */
+INSERT INTO member (role, password, name, email)
+VALUES ('ADMIN', 'UuoeE5xJuKjqcjQAEOHScO4vVSZAJ5Ds+lDXLgt9pnA=', 'p관리자', 'padmin@mail.com');   /** 123 */
 
 /**
   theme data
