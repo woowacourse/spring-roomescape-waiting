@@ -5,7 +5,7 @@ import roomescape.domain.theme.Theme;
 
 public class ReservationWithRank extends Reservation {
 
-    int rank;
+    private final int rank;
 
     public ReservationWithRank(Long id, Member Member, String rawDate, ReservationTime time, Theme theme, ReservationStatus status, int rank) {
         super(id, Member, rawDate, time, theme, status);
