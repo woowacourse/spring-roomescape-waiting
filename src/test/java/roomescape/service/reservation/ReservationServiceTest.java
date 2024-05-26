@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -29,14 +27,13 @@ import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
+import roomescape.service.ServiceTestBase;
 import roomescape.service.member.dto.MemberReservationResponse;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql("/truncate.sql")
-class ReservationServiceTest {
+class ReservationServiceTest extends ServiceTestBase {
     @Autowired
     private ReservationService reservationService;
     @Autowired

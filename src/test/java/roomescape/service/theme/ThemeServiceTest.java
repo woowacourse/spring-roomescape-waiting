@@ -8,9 +8,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -24,12 +21,11 @@ import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
+import roomescape.service.ServiceTestBase;
 import roomescape.service.theme.dto.ThemeRequest;
 import roomescape.service.theme.dto.ThemeResponse;
 
-@SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql("/truncate.sql")
-class ThemeServiceTest {
+class ThemeServiceTest extends ServiceTestBase {
     @Autowired
     private ThemeService themeService;
     @Autowired

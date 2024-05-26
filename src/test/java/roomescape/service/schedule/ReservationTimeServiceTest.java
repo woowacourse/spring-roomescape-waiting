@@ -11,9 +11,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -27,14 +24,13 @@ import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
+import roomescape.service.ServiceTestBase;
 import roomescape.service.schedule.dto.AvailableReservationTimeResponse;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.schedule.dto.ReservationTimeReadRequest;
 import roomescape.service.schedule.dto.ReservationTimeResponse;
 
-@SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql("/truncate.sql")
-class ReservationTimeServiceTest {
+class ReservationTimeServiceTest extends ServiceTestBase  {
     @Autowired
     private ReservationTimeService reservationTimeService;
     @Autowired

@@ -10,9 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixture;
 import roomescape.auth.TokenProvider;
 import roomescape.domain.member.Member;
@@ -30,12 +27,11 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.UnauthorizedException;
+import roomescape.service.ServiceTestBase;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationWaitingResponse;
 
-@SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql("/truncate.sql")
-class ReservationWaitingServiceTest {
+class ReservationWaitingServiceTest extends ServiceTestBase {
     @Autowired
     private ReservationWaitingService reservationWaitingService;
     @Autowired
