@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.stream.StreamSupport;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +67,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getAll() {
-        return reservationRepository.findAll().stream()
+        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -103,10 +103,9 @@ public class ReservationService {
         Reservation reservation = getById(id);
         reservationRepository.deleteById(id);
 
-        Optional<Reservation> reservationWithStatusWaiting = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+        reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-        );
-        reservationWithStatusWaiting.ifPresent(value -> value.setStatus(Status.RESERVATION));
+        ).ifPresent(Reservation::setStatus);
     }
 
     private Reservation getById(long id) {
