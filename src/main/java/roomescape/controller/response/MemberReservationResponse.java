@@ -19,6 +19,13 @@ public class MemberReservationResponse {
     private LocalTime time;
     private String status;
 
+    public static List<MemberReservationResponse> of(List<MemberReservation> memberReservations) {
+        return memberReservations.stream()
+                .map(MemberReservationResponse::new)
+                .sorted(comparing(MemberReservationResponse::getDate))
+                .toList();
+    }
+
     public MemberReservationResponse(MemberReservation reservation) {
         this.id = reservation.id();
         this.theme = reservation.theme();
@@ -27,13 +34,12 @@ public class MemberReservationResponse {
         this.status = mapStatus(reservation.order());
     }
 
-    public static List<MemberReservationResponse> of(List<MemberReservation> memberReservations) {
-        return memberReservations.stream()
-                .map(MemberReservationResponse::new)
-                .sorted(comparing(MemberReservationResponse::getDate))
-                .toList();
+    public String mapStatus(Long order) {
+        if (order == 0L) {
+            return "예약";
+        }
+        return "%s번째 예약대기".formatted(order);
     }
-
 
     public Long getId() {
         return id;
@@ -53,12 +59,5 @@ public class MemberReservationResponse {
 
     public String getStatus() {
         return status;
-    }
-
-    public String mapStatus(Long order) {
-        if (order == 0L) {
-            return "예약";
-        }
-        return "%s번째 예약대기".formatted(order);
     }
 }
