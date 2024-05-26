@@ -52,10 +52,10 @@ public class WaitingService {
     public WaitingResponse save(WaitingRequest waitingRequest, Member member) {
         ReservationTime reservationTime = findReservationTimeById(waitingRequest.getTimeId());
         Theme theme = findThemeById(waitingRequest.getThemeId());
-        Waiting waiting = waitingRequest.toWaiting(member, reservationTime, theme);
-
-        validateDuplicateWaiting(waitingRequest, member);
         validateDateTimeWaiting(waitingRequest, reservationTime);
+
+        Waiting waiting = waitingRequest.toWaiting(member, reservationTime, theme);
+        validateDuplicateWaiting(waitingRequest, member);
 
         Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingResponse(savedWaiting);
@@ -75,6 +75,10 @@ public class WaitingService {
     }
 
     private void validateDuplicateWaiting(WaitingRequest request, Member member) {
+        if(reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+                member.getId(), request.getDate(), request.getTimeId(), request.getThemeId())) {
+            throw new DuplicatedReservationException();
+        }
         if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
                 request.getDate(), request.getTimeId(), request.getThemeId(), member.getId())) {
             throw new DuplicatedReservationException();

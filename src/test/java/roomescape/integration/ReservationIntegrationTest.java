@@ -35,7 +35,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().get("/reservations?member-id=1")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(2));
+                    .body("size()", is(1));
         }
 
         @Test
@@ -69,7 +69,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().get("/reservations-mine")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(2));
+                    .body("size()", is(1));
         }
     }
 

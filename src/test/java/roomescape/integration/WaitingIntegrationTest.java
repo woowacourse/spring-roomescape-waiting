@@ -37,7 +37,7 @@ class WaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 로그인한_사용자_이름으로_예약_대기를_추가할_수_있다() {
-            params.put("date", "2023-08-06");
+            params.put("date", "2023-08-05");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -87,6 +87,19 @@ class WaitingIntegrationTest extends IntegrationTest {
                     .when().post("/waitings")
                     .then().log().all()
                     .statusCode(400);
+        }
+
+        @Test
+        void 이미_예약을_한_시간대와_테마에는_예약_대기를_추가할_수_없다() {
+            params.put("date", "2024-08-06");
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waitings")
+                    .then().log().all()
+                    .statusCode(409);
         }
     }
 

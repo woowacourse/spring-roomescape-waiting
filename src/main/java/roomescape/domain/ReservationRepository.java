@@ -45,4 +45,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LIMIT 10
             """)
     List<Theme> findThemeByMostPopularReservation(LocalDate startDate, LocalDate endDate);
+
+    boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 }
