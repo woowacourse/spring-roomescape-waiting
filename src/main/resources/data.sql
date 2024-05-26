@@ -64,5 +64,14 @@ VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 1, 'RESERVED'),
        (DATEADD('DAY', -7, CURRENT_DATE), 3, 11, 4, 'RESERVED'),
        (DATEADD('DAY', -8, CURRENT_DATE), 3, 12, 4, 'RESERVED'),
        (DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 1, 'RESERVED'),
-       (DATEADD('DAY', 1, CURRENT_DATE), 1, 2, 2, 'RESERVED'),
-       (DATEADD('DAY', 1, CURRENT_DATE), 2, 1, 1, 'RESERVED');
+       (DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 2, 'WAITING'),
+       (DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 3, 'WAITING'),
+       (DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 4, 'WAITING'),
+       (DATEADD('DAY', 2, CURRENT_DATE), 1, 1, 1, 'RESERVED'),
+       (DATEADD('DAY', 2, CURRENT_DATE), 1, 1, 2, 'WAITING');
+
+INSERT INTO waiting (reservation_id, waiting_Order) VALUES
+    (18, 1),
+    (19, 2),
+    (20, 3),
+    (22, 1);

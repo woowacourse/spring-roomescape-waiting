@@ -34,6 +34,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findByMemberOrThemeOrDateRange(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
 
+    List<Reservation> findByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId, Status status);
+
     @Query("""
               SELECT r.theme.id
               FROM Reservation r

@@ -49,7 +49,7 @@ public class ReservationService {
         return reservationRepository.save(reservation).getId();
     }
 
-    public Long addReservationWait(ReservationRequest request) {
+    public Long addReservationWaiting(ReservationRequest request) {
         Reservation reservation = convertReservation(request, Status.WAITING);
         validateAddableWaiting(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -110,7 +110,7 @@ public class ReservationService {
         }
 
         Waiting waiting = findWaitingByReservationId(reservation.getId());
-        return UserReservationResponse.createWithWaiting(reservation, waiting);
+        return UserReservationResponse.createByWaiting(waiting);
     }
 
     private void addWaiting(Reservation savedReservation) {
@@ -158,7 +158,7 @@ public class ReservationService {
     private Waiting findWaitingByReservationId(Long reservationId) {
         return waitingRepository.findByReservationId(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 예약 대기 정보가 존재하지 않습니다.",
+                        "[ERROR] 예약 정보와 일치하는 대기 정보가 존재하지 않습니다.",
                         new Throwable("reservation_id : " + reservationId)
                 ));
     }
@@ -203,7 +203,7 @@ public class ReservationService {
                 reservation.getMember().getId())
         ) {
             throw new IllegalArgumentException(
-                    "[ERROR] 이미 대기해놓은 예약이 있습니다..",
+                    "[ERROR] 이미 사용자에게 등록되거나 대기중인 예약이 있습니다..",
                     new Throwable("생성 예약 대기 정보 : " + reservation)
             );
         }

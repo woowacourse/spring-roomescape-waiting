@@ -51,6 +51,10 @@ public class Reservation {
         this.status = status;
     }
 
+    public void changeStatusToReserve() {
+        status = Status.RESERVED;
+    }
+
     public Long getId() {
         return id;
     }

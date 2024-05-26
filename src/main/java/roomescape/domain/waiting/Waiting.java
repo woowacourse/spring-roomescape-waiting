@@ -1,6 +1,5 @@
 package roomescape.domain.waiting;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,6 +29,10 @@ public class Waiting {
         this.waitingOrder = new WaitingOrder(waitingOrder);
     }
 
+    public void decreaseWaitingOrderByOne() {
+        waitingOrder.decreaseWaitingOrderByOne();
+    }
+
     public Long getId() {
         return id;
     }
@@ -38,7 +41,7 @@ public class Waiting {
         return reservation;
     }
 
-    public WaitingOrder getOrder() {
-        return waitingOrder;
+    public int getWaitingOrderValue() {
+        return waitingOrder.getWaitingOrder();
     }
 }

@@ -15,6 +15,10 @@ public class WaitingOrder {
         this.waitingOrder = waitingOrder;
     }
 
+    public void decreaseWaitingOrderByOne() {
+        waitingOrder--;
+    }
+
     private void validateWaitingOrder(int order) {
         if (order == 0) {
             throw new IllegalArgumentException(
