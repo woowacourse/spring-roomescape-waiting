@@ -15,6 +15,7 @@ import roomescape.controller.dto.CreateUserReservationRequest;
 import roomescape.controller.dto.FindMyReservationResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.service.ReservationService;
 import roomescape.system.argumentresolver.AuthenticationPrincipal;
 
@@ -46,8 +47,8 @@ public class UserReservationController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<FindMyReservationResponse>> findMyReservations(
         @AuthenticationPrincipal Member member) {
-        List<Reservation> reservations = reservationService.findMyReservations(member.getId());
-        List<FindMyReservationResponse> response = reservations.stream()
+        List<ReservationWithRank> reservationWithRanks = reservationService.findMyReservations(member.getId());
+        List<FindMyReservationResponse> response = reservationWithRanks.stream()
             .map(FindMyReservationResponse::from)
             .toList();
         return ResponseEntity.ok(response);

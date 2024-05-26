@@ -8,8 +8,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Date;
+import roomescape.domain.reservation.RankCalculator;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -24,16 +26,21 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final RankCalculator rankCalculator;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         ReservationTimeRepository reservationTimeRepository,
-        ThemeRepository themeRepository, MemberRepository memberRepository) {
+        ThemeRepository themeRepository,
+        MemberRepository memberRepository,
+        RankCalculator rankCalculator
+    ) {
 
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.rankCalculator = rankCalculator;
     }
 
     public Reservation save(Long memberId, String date, Long timeId, Long themeId) {
@@ -85,8 +92,20 @@ public class ReservationService {
             new Date(dateFrom.toString()), new Date(dateTo.toString()));
     }
 
-    public List<Reservation> findMyReservations(Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId);
+    public List<ReservationWithRank> findMyReservations(Long memberId) {
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+
+        return reservations.stream()
+            .map(reservation -> new ReservationWithRank(
+                reservation.getId(),
+                reservation.getMember(),
+                reservation.getDate().getValue().toString(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                reservation.getStatus(),
+                reservation.isWaiting() ? rankCalculator.calculate(reservation) : 0
+            ))
+            .toList();
     }
 
     public Reservation saveWaiting(Long memberId, String date, Long timeId, Long themeId) {
