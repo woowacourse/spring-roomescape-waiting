@@ -3,6 +3,10 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import roomescape.entity.Member;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
 
 public class ReservationEntry {
 

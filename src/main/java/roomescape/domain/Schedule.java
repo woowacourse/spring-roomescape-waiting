@@ -5,6 +5,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
 
 public class Schedule {
 
@@ -19,13 +21,13 @@ public class Schedule {
     @JoinColumn(nullable = false)
     private Theme theme;
 
+    protected Schedule() {
+    }
+
     public Schedule(final LocalDate date, final ReservationTime time, final Theme theme) {
         this.date = date;
         this.time = time;
         this.theme = theme;
-    }
-
-    protected Schedule() {
     }
 
     public boolean isSameTime(final ReservationTime reservationTime) {

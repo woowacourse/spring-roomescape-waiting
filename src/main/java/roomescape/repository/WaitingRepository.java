@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.domain.Member;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
+import roomescape.entity.Member;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
+import roomescape.entity.Waiting;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 

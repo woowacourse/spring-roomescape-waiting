@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.entity.Member;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 

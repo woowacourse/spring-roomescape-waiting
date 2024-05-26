@@ -2,12 +2,12 @@ package roomescape.service.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
+import roomescape.entity.Member;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
 import roomescape.domain.Schedule;
-import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
+import roomescape.entity.Theme;
+import roomescape.entity.Waiting;
 
 public record ReservationRequest(
         @NotNull(message = "날짜를 입력해주세요.")

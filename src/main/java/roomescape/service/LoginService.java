@@ -2,7 +2,7 @@ package roomescape.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.infrastructure.TokenProvider;

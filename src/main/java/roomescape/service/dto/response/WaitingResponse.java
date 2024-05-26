@@ -2,7 +2,7 @@ package roomescape.service.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.Waiting;
+import roomescape.entity.Waiting;
 
 public record WaitingResponse(Long id, String name, LocalDate date, LocalTime time, String theme) {
 

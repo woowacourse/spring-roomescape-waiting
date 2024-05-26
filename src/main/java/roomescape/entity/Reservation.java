@@ -1,6 +1,8 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import jakarta.persistence.Entity;
+import roomescape.domain.ReservationBase;
+import roomescape.domain.Schedule;
 
 @Entity
 public class Reservation extends ReservationBase {

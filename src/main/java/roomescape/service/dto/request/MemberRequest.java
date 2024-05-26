@@ -3,7 +3,7 @@ package roomescape.service.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.domain.Role;
 
 public record MemberRequest(
