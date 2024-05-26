@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.Fixture.customerToken;
+import static roomescape.acceptance.Fixture.customer1Token;
 import static roomescape.acceptance.PreInsertedData.*;
 
 class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
@@ -137,7 +137,7 @@ class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
 
     private ValidatableResponse sendPostRequest(MemberReservationRequest requestBody) {
         return RestAssured.given().log().ifValidationFails()
-                .cookie("token", customerToken)
+                .cookie("token", customer1Token)
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when().post("/reservations")

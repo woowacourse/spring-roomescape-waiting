@@ -12,7 +12,7 @@ import roomescape.controller.exception.CustomExceptionResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.Fixture.customerToken;
+import static roomescape.acceptance.Fixture.customer1Token;
 
 class PageAccessAcceptanceTest extends BaseAcceptanceTest {
 
@@ -37,7 +37,7 @@ class PageAccessAcceptanceTest extends BaseAcceptanceTest {
         @ParameterizedTest
         @ValueSource(strings = {ADMIN_MAIN, ADMIN_RESERVATION, ADMIN_TIME, ADMIN_THEME})
         void adminPageAccess_customer_fail(String path) {
-            CustomExceptionResponse response = sendGetRequestWithToken(path, customerToken)
+            CustomExceptionResponse response = sendGetRequestWithToken(path, customer1Token)
                     .statusCode(HttpStatus.FORBIDDEN.value())
                     .extract().as(CustomExceptionResponse.class);
 

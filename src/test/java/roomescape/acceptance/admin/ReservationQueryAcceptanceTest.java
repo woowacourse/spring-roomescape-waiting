@@ -27,7 +27,8 @@ class ReservationQueryAcceptanceTest extends BaseAcceptanceTest {
     );
     List<ReservationResponse> waiting = List.of(
             ReservationResponse.from(RESERVATION_WAITING_CUSTOMER1_THEME3_240502_1200),
-            ReservationResponse.from(RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100)
+            ReservationResponse.from(RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100),
+            ReservationResponse.from(RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100)
     );
 
     @DisplayName("관리자가 예약된 예약 목록을 조회한다.")
