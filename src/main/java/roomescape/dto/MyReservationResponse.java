@@ -15,7 +15,7 @@ public record MyReservationResponse(
 ) {
     public static MyReservationResponse from(ReservationWithRank reservation) {
         ReservationStatus reservationStatus = reservation.getStatus();
-        String statusMessage = reservationStatus.makeStatusMessage(reservationStatus, reservation.getRank());
+        String statusMessage = reservationStatus.makeStatusMessage(reservation.getRank());
 
         return new MyReservationResponse(
                 reservation.getId(),
