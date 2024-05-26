@@ -12,4 +12,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, long timeId, long themeId, long memberId);
 
     List<Waiting> findByMemberId(long id);
+
+    List<Waiting> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 }
