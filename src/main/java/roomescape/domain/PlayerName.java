@@ -7,11 +7,12 @@ import roomescape.exception.RoomescapeException;
 
 @Embeddable
 public class PlayerName {
+
     public static final int NAME_MAX_LENGTH = 20;
 
     private String name;
 
-    public PlayerName() {
+    protected PlayerName() {
     }
 
     public PlayerName(String name) {

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import roomescape.exception.RoomescapeErrorCode;
 
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
+
     @ExceptionHandler
     public ResponseEntity<?> exceptionHandler(RuntimeException exception) {
         logError(exception);

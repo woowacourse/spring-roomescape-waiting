@@ -6,13 +6,16 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.ReservationRequestFixture;
 import roomescape.application.ServiceTest;
 import roomescape.application.dto.ReservationRequest;
+import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @ServiceTest
 class ReservationFactoryTest {
+
     @Autowired
     private ReservationFactory reservationFactory;
 
@@ -24,7 +27,7 @@ class ReservationFactoryTest {
     void shouldReturnIllegalArgumentExceptionWhenNotFoundReservationTime() {
         ReservationRequest request = ReservationRequestFixture.of(99L, 1L);
 
-        assertThatCode(() -> reservationFactory.create(1L, request))
+        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.NOT_FOUND_TIME);
@@ -35,7 +38,7 @@ class ReservationFactoryTest {
     void shouldThrowIllegalArgumentExceptionWhenNotFoundTheme() {
         ReservationRequest request = ReservationRequestFixture.of(1L, 99L);
 
-        assertThatCode(() -> reservationFactory.create(1L, request))
+        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.NOT_FOUND_THEME);
@@ -45,11 +48,11 @@ class ReservationFactoryTest {
     @Test
     void shouldReturnIllegalStateExceptionWhenDuplicatedReservationCreate() {
         Reservation existReservation = reservationQueryRepository.findAll().get(0);
-        ReservationRequest reservationRequest = ReservationRequestFixture.of(existReservation.getDate(),
+        ReservationRequest request = ReservationRequestFixture.of(existReservation.getDate(),
                 existReservation.getTime().getId(),
                 existReservation.getTheme().getId());
 
-        assertThatCode(() -> reservationFactory.create(1L, reservationRequest))
+        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.DUPLICATED_RESERVATION);
@@ -58,9 +61,9 @@ class ReservationFactoryTest {
     @DisplayName("과거 시간을 예약하는 경우 예외를 반환한다.")
     @Test
     void shouldThrowsIllegalArgumentExceptionWhenReservationDateIsBeforeCurrentDate() {
-        ReservationRequest reservationRequest = ReservationRequestFixture.of(LocalDate.of(1999, 1, 1), 1L, 1L);
+        ReservationRequest request = ReservationRequestFixture.of(LocalDate.of(1999, 1, 1), 1L, 1L);
 
-        assertThatCode(() -> reservationFactory.create(1L, reservationRequest))
+        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);

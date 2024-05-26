@@ -138,9 +138,9 @@ function saveRow(event) {
 
 function deleteRow(event) {
     const row = event.target.closest('tr');
-    const reservationId = row.cells[0].textContent;
+    const id = row.cells[0].textContent;
 
-    requestDelete(reservationId)
+    requestDelete(id)
         .then(() => row.remove())
         .catch(error => console.error('Error:', error));
 }

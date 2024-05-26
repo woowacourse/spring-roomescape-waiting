@@ -17,6 +17,7 @@ import roomescape.application.dto.ThemeResponse;
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
+
     private final ThemeService themeService;
 
     public ThemeController(ThemeService themeService) {
@@ -37,7 +38,7 @@ public class ThemeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         themeService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

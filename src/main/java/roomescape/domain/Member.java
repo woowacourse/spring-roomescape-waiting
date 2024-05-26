@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -7,24 +8,30 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Member {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
+
     @Embedded
     private PlayerName name;
+
     @Embedded
     private Email email;
+
     @Embedded
     private Password password;
+
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(PlayerName name, Email email, Password password, Role role) {
@@ -52,10 +59,6 @@ public class Member {
         return this.password.matches(password);
     }
 
-    public Member withId(long id) {
-        return new Member(id, this.name, this.email, this.password, this.role);
-    }
-
     public Long getId() {
         return id;
     }
@@ -74,5 +77,21 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Member member)) {
+            return false;
+        }
+        return Objects.equals(id, member.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

@@ -1,44 +1,79 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Reservation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "reservation_id")
     private Long id;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
+
     private LocalDate date;
-    @ManyToOne
-    private ReservationTime time;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id")
+    private Time time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Member member, LocalDate date, Time time, Theme theme) {
         this(null, member, date, time, theme);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        if (date == null) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 날짜는 필수입니다.");
-        }
+    public Reservation(Long id, Member member, LocalDate date, Time time, Theme theme) {
+        validateNotNull(member, date, time, theme);
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    private void validateNotNull(Member member, LocalDate date, Time time, Theme theme) {
+        if (member == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약자는 필수입니다.");
+        }
+        if (date == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 날짜는 필수입니다.");
+        }
+        if (time == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 시간은 필수입니다.");
+        }
+        if (theme == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "테마는 필수입니다.");
+        }
+    }
+
+    public boolean isSameMember(Member other) {
+        return this.member.equals(other);
+    }
+
+    public boolean isPast(Clock clock) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        return reservationDateTime.isBefore(LocalDateTime.now(clock));
     }
 
     public Long getId() {
@@ -53,16 +88,12 @@ public class Reservation {
         return date;
     }
 
-    public ReservationTime getTime() {
+    public Time getTime() {
         return time;
     }
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public Reservation withId(long id) {
-        return new Reservation(id, member, date, time, theme);
     }
 
     @Override

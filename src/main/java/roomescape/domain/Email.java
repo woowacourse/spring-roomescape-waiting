@@ -7,13 +7,14 @@ import roomescape.exception.RoomescapeException;
 
 @Embeddable
 public class Email {
+    
     private static final Pattern EMAIL_REGEX = Pattern.compile("^(.+)@(\\S+)$");
     private static final int MIN_LENGTH = 11;
     private static final int MAX_LENGTH = 40;
 
     private String email;
 
-    public Email() {
+    protected Email() {
     }
 
     public Email(String email) {

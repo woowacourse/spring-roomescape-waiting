@@ -10,6 +10,7 @@ import roomescape.exception.RoomescapeException;
 
 @ServiceTest
 class ThemeServiceTest {
+
     @Autowired
     private ThemeService themeService;
 

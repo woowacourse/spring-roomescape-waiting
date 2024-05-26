@@ -7,12 +7,13 @@ import roomescape.exception.RoomescapeException;
 
 @Embeddable
 public class Password {
+
     private static final Pattern PASSWORD_REGEX = Pattern.compile(
             "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,20}$", Pattern.CASE_INSENSITIVE);
 
     private String password;
 
-    public Password() {
+    protected Password() {
     }
 
     public Password(String password) {
@@ -26,11 +27,11 @@ public class Password {
         this.password = password;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public boolean matches(String password) {
         return this.password.matches(password);
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

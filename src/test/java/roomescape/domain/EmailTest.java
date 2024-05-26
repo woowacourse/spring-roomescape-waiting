@@ -11,6 +11,7 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 class EmailTest {
+
     @DisplayName("이메일의 길이와 형식이 올바르면 예외가 발생하지 않는다.")
     @Test
     void createEmail() {

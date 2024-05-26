@@ -3,9 +3,11 @@ package roomescape.domain;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import roomescape.domain.repository.ReservationQueryRepository;
 
 @DomainService
 public class PopularThemeFinder {
+
     private static final int START_DAY_TO_SUBTRACT = 8;
     private static final int END_DATE_TO_SUBTRACT = 1;
     private static final int COUNT_OF_LIMIT = 10;

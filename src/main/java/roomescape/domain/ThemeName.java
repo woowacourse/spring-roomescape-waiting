@@ -6,21 +6,18 @@ import roomescape.exception.RoomescapeException;
 
 @Embeddable
 public class ThemeName {
+
     private static final int NAME_MAX_LENGTH = 20;
 
     private String name;
+
+    protected ThemeName() {
+    }
 
     public ThemeName(String name) {
         validateNonBlank(name);
         validateLength(name);
         this.name = name;
-    }
-
-    public ThemeName() {
-    }
-
-    public String asText() {
-        return name;
     }
 
     private void validateNonBlank(String name) {
@@ -34,5 +31,9 @@ public class ThemeName {
             throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST,
                     String.format("테마명은 %d자 이하여야 합니다.", NAME_MAX_LENGTH));
         }
+    }
+
+    public String getName() {
+        return name;
     }
 }

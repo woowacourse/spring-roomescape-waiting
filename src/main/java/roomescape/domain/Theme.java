@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,17 +12,21 @@ import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Theme {
+
     private static final int MAX_DESCRIPTION_LENGTH = 255;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "theme_id")
     private Long id;
+
     @Embedded
     private ThemeName name;
+
     private String description;
+
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(ThemeName name, String description, String thumbnail) {
@@ -31,8 +36,8 @@ public class Theme {
     public Theme(Long id, ThemeName name, String description, String thumbnail) {
         int descriptionLength = description.length();
         if (descriptionLength > MAX_DESCRIPTION_LENGTH) {
-            throw new RoomescapeException(
-                    RoomescapeErrorCode.BAD_REQUEST, String.format("테마 설명은 %s자 이하만 가능합니다.", MAX_DESCRIPTION_LENGTH));
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST,
+                    String.format("테마 설명은 %s자 이하만 가능합니다.", MAX_DESCRIPTION_LENGTH));
         }
         if (thumbnail == null || thumbnail.isBlank()) {
             throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "테마 썸네일은 비어있을 수 없습니다.");
@@ -43,16 +48,12 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme withId(long id) {
-        return new Theme(id, name, description, thumbnail);
-    }
-
     public Long getId() {
         return id;
     }
 
     public String getName() {
-        return name.asText();
+        return name.getName();
     }
 
     public String getDescription() {
