@@ -4,8 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberReservationRequest;
-import roomescape.dto.response.MemberReservationResponse;
 import roomescape.dto.response.MultipleResponse;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
@@ -29,9 +29,9 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<MultipleResponse<MemberReservationResponse>> getMyReservations(Member member) {
-        List<MemberReservationResponse> reservations = memberService.getMyReservations(member);
-        MultipleResponse<MemberReservationResponse> response = new MultipleResponse<>(reservations);
+    public ResponseEntity<MultipleResponse<MyReservationResponse>> getMyReservations(Member member) {
+        List<MyReservationResponse> reservations = memberService.getMyReservations(member);
+        MultipleResponse<MyReservationResponse> response = new MultipleResponse<>(reservations);
 
         return ResponseEntity.ok(response);
     }

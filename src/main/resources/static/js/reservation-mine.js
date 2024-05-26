@@ -17,18 +17,23 @@ function render(data) {
 
         const themeName = item.theme.name;
         const date = item.date;
-        const time = item.time;
-        const status = item.status;
+        const time = item.time.startAt;
+        const status = item.waiting.reservationStatus;
 
         row.insertCell(0).textContent = themeName;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+        if(status === 'RESERVED') {
+            row.insertCell(3).textContent = '예약';
+        }
+        if(status === 'WAITING') {
+            row.insertCell(3).textContent = item.waiting.waitingRank + '번째 예약 대기'; //todo: 예약 대기 요청을 받기위해 형식 수정 후 다시 오기
+        }
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
          */ // todo: 아래 코드 변경
-        if (status !== 'RESERVED') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+        if (status === 'WAITING') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '취소';

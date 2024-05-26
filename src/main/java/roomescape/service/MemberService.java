@@ -1,12 +1,10 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
-import roomescape.domain.ReservationRepository;
+import roomescape.domain.*;
 import roomescape.dto.request.LogInRequest;
 import roomescape.dto.response.MemberPreviewResponse;
-import roomescape.dto.response.MemberReservationResponse;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.service.exception.ResourceNotFoundCustomException;
 import roomescape.util.JwtProvider;
 
@@ -50,9 +48,18 @@ public class MemberService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> getMyReservations(Member member) {
+    public List<MyReservationResponse> getMyReservations(Member member) {
         return reservationRepository.findByMemberId(member.getId()).stream()
-                .map(MemberReservationResponse::from)
+                .map(this::getMyReservationsWithWaitRank)
                 .toList();
+    }
+
+    private MyReservationResponse getMyReservationsWithWaitRank(Reservation reservation) {
+        long waitingRank = 0L;
+        if (reservation.getReservationStatus().isWaiting()) {
+            waitingRank = reservationRepository.countPreviousReservationsWithSameDateThemeTimeAndStatus(reservation.getId(), ReservationStatus.WAITING);
+        }
+        
+        return MyReservationResponse.of(reservation, waitingRank);
     }
 }

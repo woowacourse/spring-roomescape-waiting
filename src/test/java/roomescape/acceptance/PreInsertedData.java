@@ -113,4 +113,22 @@ public class PreInsertedData {
             THEME_3,
             RESERVED
     );
+
+    public static final Reservation RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100 = new Reservation(
+            6L,
+            CUSTOMER_2,
+            LocalDate.parse("2024-05-01"),
+            TIME_11_00,
+            THEME_2,
+            WAITING
+    );
+
+    public static final Reservation RESERVATION__WAITING_CUSTOMER1_THEME3_240502_1200 = new Reservation(
+            7L,
+            CUSTOMER_2,
+            LocalDate.parse("2024-05-02"),
+            TIME_12_00,
+            THEME_3,
+            WAITING
+    );
 }

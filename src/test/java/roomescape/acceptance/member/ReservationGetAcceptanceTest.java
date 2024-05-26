@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.MemberReservationResponse;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.MultipleResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,18 +19,19 @@ class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("고객이 자신의 예약 목록을 조회한다.")
     @Test
     void getMyReservation_success() {
-        TypeRef<MultipleResponse<MemberReservationResponse>> reservationListFormat = new TypeRef<>() {
+        TypeRef<MultipleResponse<MyReservationResponse>> reservationListFormat = new TypeRef<>() {
         };
 
-        MultipleResponse<MemberReservationResponse> response = sendGetRequest()
+        MultipleResponse<MyReservationResponse> response = sendGetRequest()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .as(reservationListFormat);
 
         assertThat(response.items()).containsExactly(
-                MemberReservationResponse.from(RESERVATION_CUSTOMER1_THEME2_240501_1100),
-                MemberReservationResponse.from(RESERVATION_CUSTOMER1_THEME3_240502_1100),
-                MemberReservationResponse.from(RESERVATION_CUSTOMER1_THEME2_240501_1200)
+                MyReservationResponse.of(RESERVATION_CUSTOMER1_THEME2_240501_1100, 0L),
+                MyReservationResponse.of(RESERVATION_CUSTOMER1_THEME3_240502_1100, 0L),
+                MyReservationResponse.of(RESERVATION_CUSTOMER1_THEME2_240501_1200, 0L),
+                MyReservationResponse.of(RESERVATION__WAITING_CUSTOMER1_THEME3_240502_1200, 1L)
         );
     }
 
