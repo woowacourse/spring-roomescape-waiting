@@ -20,6 +20,8 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
             LocalDate toDate
     );
 
+    boolean existsByDateAndThemeIdAndReservationTimeId(LocalDate date, long themeId, long reservationTimeId);
+
     List<Reservation> findByReservationTimeId(long timeId);
 
     List<Reservation> findByThemeId(long themeId);
