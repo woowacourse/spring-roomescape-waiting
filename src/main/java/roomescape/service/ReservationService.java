@@ -67,11 +67,11 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationRankResponse> findAllReservationsByEmail(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        List<ReservationRankResponse> myReservations = reservationRepository.findReservationRankByMember(member);
-        myReservations.sort(Comparator
+        List<ReservationRankResponse> reservations = reservationRepository.findReservationRankByMember(member);
+        reservations.sort(Comparator
                 .comparing(ReservationRankResponse::getDate)
                 .thenComparing(ReservationRankResponse::getTime));
-        return myReservations;
+        return reservations;
     }
 
     @Transactional
