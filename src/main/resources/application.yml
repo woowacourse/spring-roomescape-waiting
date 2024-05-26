@@ -16,8 +16,8 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:mysql://localhost:23306/roomescape?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: root
+    username: dev
+    password: dev
 security:
   jwt:
     token:

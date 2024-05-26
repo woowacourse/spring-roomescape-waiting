@@ -11,3 +11,5 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       TZ: Asia/Seoul
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
