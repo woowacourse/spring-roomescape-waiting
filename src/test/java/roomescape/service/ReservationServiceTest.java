@@ -59,7 +59,7 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-    @DisplayName("모든 예약 시간을 반환한다")
+    @DisplayName("모든 예약을 반환한다")
     @Test
     void should_return_all_reservation_times() {
         Theme theme1 = themeRepository.save(createTheme(1L));
@@ -89,7 +89,7 @@ class ReservationServiceTest {
         assertThat(reservations).hasSize(2);
     }
 
-    @DisplayName("사용자가 예약 시간을 추가한다")
+    @DisplayName("사용자가 예약을 추가한다")
     @Test
     void should_add_reservation_times_when_give_member_request() {
         themeRepository.save(createTheme(1L));
@@ -160,7 +160,7 @@ class ReservationServiceTest {
     }
 
 
-    @DisplayName("관리자가 예약 시간을 추가한다")
+    @DisplayName("관리자가 예약을 추가한다")
     @Test
     void should_add_reservation_times_when_give_admin_request() {
         themeRepository.save(createTheme(1L));
@@ -177,7 +177,7 @@ class ReservationServiceTest {
         assertThat(allReservations).hasSize(1);
     }
 
-    @DisplayName("관리자가 예약 시간을 추가할 때 사용자가 없으면 예외가 발생한다.")
+    @DisplayName("관리자가 예약을 추가할 때 사용자가 없으면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_not_exist_member() {
         themeRepository.save(createTheme(1L));
