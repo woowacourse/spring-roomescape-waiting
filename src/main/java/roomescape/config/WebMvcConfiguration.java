@@ -36,7 +36,9 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/members")
                 .addPathPatterns("/reservations/{id}")
                 .addPathPatterns("/times/**")
-                .excludePathPatterns("/times/available");
+                .excludePathPatterns("/times/available")
+                .addPathPatterns("/themes/{id}")
+                .excludePathPatterns("/themes/popular");
     }
 
     @Override
