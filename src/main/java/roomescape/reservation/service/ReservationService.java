@@ -11,6 +11,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDetail;
+import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationRequest;
@@ -44,6 +45,13 @@ public class ReservationService {
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
+    }
+
+    public ReservationRequest findReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
+
+        return ReservationRequest.from(reservation);
     }
 
     public List<ReservationResponse> findReservationsByConditions(ReservationConditionSearchRequest request) {

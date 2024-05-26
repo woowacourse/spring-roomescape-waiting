@@ -1,9 +1,7 @@
 package roomescape.reservation.service;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -14,7 +12,6 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationDetailRepository;
@@ -34,6 +31,20 @@ public class ReservationWaitingService {
         this.detailRepository = detailRepository;
     }
 
+    public ReservationRequest findReservationWaiting(Long id) {
+        ReservationWaiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
+
+        return ReservationRequest.from(waiting);
+    }
+
+    public Optional<ReservationRequest> findFirstByDetailId(Long detailId) {
+        Optional<ReservationWaiting> waiting = waitingRepository.findFirstByDetail_IdOrderByCreateAtDesc(detailId);
+
+        waiting.ifPresent(reservationWaiting -> waitingRepository.deleteById(reservationWaiting.getId()));
+        return waiting.map(ReservationRequest::from);
+    }
+
     public List<MyReservationResponse> findReservationWaitingByMemberId(Long id) {
         List<ReservationWaiting> reservationsByMember
                 = waitingRepository.findAllByMember_IdOrderByDetailDateAsc(id);
@@ -42,29 +53,20 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    public List<ReservationResponse> findReservationWaitingByConditions(ReservationConditionSearchRequest request) {
-        List<ReservationWaiting> reservations = waitingRepository.findAllByMember_Id(request.memberId());
-
-        return reservations.stream()
-                .filter(reservation -> reservation.isReservedAtPeriod(request.dateFrom(), request.dateTo()))
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
     public ReservationResponse addReservationWaiting(ReservationRequest reservationRequest) {
         Member member = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new BadRequestException("해당 멤버 정보가 존재하지 않습니다."));
         ReservationDetail detail = detailRepository.findById(reservationRequest.detailId())
                 .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
-        validateReservationDetail(detail);
+        validateReservationDetail(member, detail);
 
         ReservationWaiting reservation = reservationRequest.createReservationWaiting(member, detail);
         ReservationWaiting savedReservation = waitingRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateReservationDetail(ReservationDetail detail) {
-        waitingRepository.findByDetail_Id(detail.getId())
+    private void validateReservationDetail(Member member, ReservationDetail detail) {
+        waitingRepository.findByMember_IdAndDetail_Id(member.getId(), detail.getId())
                 .ifPresent(reservation -> {
                     throw new ConflictException(
                             "해당 테마(%s)의 해당 시간(%s)에는 이미 예약 대기가 존재합니다."
@@ -74,17 +76,15 @@ public class ReservationWaitingService {
                 });
     }
 
-    public void removeReservations(long id) {
+    public void removeReservations(Long id) {
         waitingRepository.deleteById(id);
     }
 
     public List<ReservationResponse> findReservationWaitings() {
-        List<ReservationWaiting> reservations = waitingRepository.findAllByOrderByDetailDateAsc();
+        List<ReservationWaiting> reservations = waitingRepository.findAllByOrderById();
 
-        AtomicLong index = new AtomicLong(1);
         return reservations.stream()
-                .sorted(Comparator.comparing(ReservationWaiting::getCreateAt))
-                .map(r -> ReservationResponse.from(r, index.getAndIncrement()))
+                .map(ReservationResponse::from)
                 .toList();
     }
 }

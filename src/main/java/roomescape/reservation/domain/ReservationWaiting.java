@@ -82,6 +82,10 @@ public class ReservationWaiting {
         return detail;
     }
 
+    public Long getDetailId() {
+        return detail.getId();
+    }
+
     public LocalDate getDate() {
         return detail.getDate();
     }
@@ -108,10 +112,6 @@ public class ReservationWaiting {
 
     public String getStatus() {
         return status;
-    }
-
-    public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
-        return detail.isReservedAtPeriod(start, end);
     }
 
     @Override

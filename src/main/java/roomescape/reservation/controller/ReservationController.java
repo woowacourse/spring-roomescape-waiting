@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import roomescape.exception.BadRequestException;
 import roomescape.member.dto.MemberProfileInfo;
+import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationRequest;
@@ -80,7 +83,12 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable long id) {
+        ReservationRequest reservation = reservationService.findReservation(id);
         reservationService.deleteReservation(id);
+
+        Optional<ReservationRequest> newReservation = waitingService.findFirstByDetailId(reservation.detailId());
+        newReservation.ifPresent(reservationService::addReservation);
+
         return ResponseEntity.noContent()
                 .build();
     }

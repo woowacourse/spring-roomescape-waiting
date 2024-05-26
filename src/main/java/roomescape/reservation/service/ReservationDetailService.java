@@ -33,7 +33,10 @@ public class ReservationDetailService {
                 request.themeId(),
                 request.timeId());
 
-        return id.flatMap(Long::describeConstable).orElseGet(() -> addReservationDetail(request).id());
+        if(id.isPresent()) {
+            return id.get();
+        }
+        return addReservationDetail(request).id();
     }
 
     private ReservationDetailResponse addReservationDetail(ReservationCreateRequest reservationRequest) {

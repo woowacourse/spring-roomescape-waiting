@@ -29,4 +29,12 @@ public record ReservationRequest(
                 .reservationDetail(detail)
                 .build();
     }
+
+    public static ReservationRequest from(ReservationWaiting waiting) {
+        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
+    }
+
+    public static ReservationRequest from(Reservation waiting) {
+        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
+    }
 }
