@@ -267,7 +267,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/reservations/" + reservation.getId() + "?memberId=" + wrongMemberId)
                     .then().log().all()
-                    .statusCode(404);
+                    .statusCode(400);
         }
     }
 }

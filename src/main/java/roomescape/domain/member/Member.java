@@ -46,6 +46,10 @@ public class Member {
         return !password.equals(otherPassword);
     }
 
+    public boolean isDifferentId(long otherId) {
+        return !id.equals(otherId);
+    }
+
     public Long getId() {
         return id;
     }

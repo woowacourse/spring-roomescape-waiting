@@ -23,4 +23,13 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
     List<ReservationWaitingWithRank> findAllWaitingWithRankByMemberId(Long memberId);
 
     Optional<ReservationWaiting> findByReservationIdAndMemberId(Long reservationId, Long memberId);
+
+    @Query("""
+            SELECT w
+            FROM ReservationWaiting w
+            WHERE w.reservation = :reservation
+            ORDER BY w.id
+            LIMIT 1
+            """)
+    Optional<ReservationWaiting> findFirstByReservation(Reservation reservation);
 }

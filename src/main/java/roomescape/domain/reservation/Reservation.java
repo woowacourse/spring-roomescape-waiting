@@ -46,6 +46,10 @@ public class Reservation {
         this(null, date, time, theme, member);
     }
 
+    public void updateMember(Member member) {
+        this.member = member;
+    }
+
     public boolean isPast(LocalDateTime now) {
         LocalDateTime dateTime = date.atTime(time.getStartAt());
         return dateTime.isBefore(now);
@@ -53,6 +57,10 @@ public class Reservation {
 
     public boolean isOwnedBy(Member otherMember) {
         return member.equals(otherMember);
+    }
+
+    public boolean isNotOwnedBy(long otherMemberId) {
+        return member.isDifferentId(otherMemberId);
     }
 
     public Long getId() {

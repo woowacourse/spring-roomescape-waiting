@@ -18,6 +18,7 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
+import roomescape.exception.reservation.InvalidReservationMemberException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.dto.ReservationListResponse;
@@ -200,7 +201,7 @@ class ReservationServiceTest extends ServiceTest {
             long wrongMemberId = 10L;
 
             assertThatThrownBy(() -> reservationService.deleteReservation(reservation.getId(), wrongMemberId))
-                    .isInstanceOf(NotFoundReservationMemberException.class);
+                    .isInstanceOf(InvalidReservationMemberException.class);
         }
 
         @Test

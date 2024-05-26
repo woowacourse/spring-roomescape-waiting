@@ -19,12 +19,14 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.domain.reservationwaiting.ReservationWaitingWithRank;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
+import roomescape.exception.reservation.InvalidReservationMemberException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
@@ -108,9 +110,26 @@ public class ReservationService {
         }
     }
 
-    public void deleteReservation(long id) {
-        Reservation reservation = findReservationById(id);
-        reservationRepository.delete(reservation);
+    public void deleteReservation(long reservationId, long memberId) {
+        Reservation reservation = findReservationById(reservationId);
+        validateReservationMember(reservation, memberId);
+
+        reservationWaitingRepository.findFirstByReservation(reservation)
+                .ifPresentOrElse(
+                        waiting -> upgradeWaitingToReservationAndDeleteWaiting(reservation, waiting),
+                        () -> reservationRepository.delete(reservation)
+                );
+    }
+
+    private void validateReservationMember(Reservation reservation, long memberId) {
+        if (reservation.isNotOwnedBy(memberId)) {
+            throw new InvalidReservationMemberException();
+        }
+    }
+
+    private void upgradeWaitingToReservationAndDeleteWaiting(Reservation reservation, ReservationWaiting waiting) {
+        reservation.updateMember(waiting.getMember());
+        reservationWaitingRepository.delete(waiting);
     }
 
     private Reservation findReservationById(long id) { // TODO: optional 다루는 함수들 전부 분리됐는지 확인하고, 순서 재배열하기
