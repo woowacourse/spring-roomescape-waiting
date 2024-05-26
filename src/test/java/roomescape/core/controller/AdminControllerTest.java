@@ -14,10 +14,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.core.domain.Status;
 import roomescape.core.dto.reservation.ReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.dto.theme.ThemeRequest;
 import roomescape.core.utils.e2eTest;
+
+/**
+ * 로그인 정보 (어드민) { "id": 1 "name": 어드민 "email": test@email.com "password": password "role": ADMIN }
+ * <p>
+ * 예약 정보 { "date": '2024-05-07', "member_id": 1, "time_id": 1, "theme_id": 1, "status": 'BOOKED' }
+ **/
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -172,10 +179,17 @@ class AdminControllerTest {
     @Test
     @DisplayName("예약자를 지정해서 예약을 생성할 수 있다.")
     void createReservationAsAdmin() {
-        ReservationRequest request = new ReservationRequest(2L,
-                TOMORROW_DATE, 1L, 1L);
+        ReservationRequest request = new ReservationRequest(
+                2L, TOMORROW_DATE, 1L, 1L, Status.BOOKED.getValue());
 
         ValidatableResponse failResponse = e2eTest.post(request, "/admin/reservations", accessToken);
         failResponse.statusCode(201);
+    }
+
+    @Test
+    @DisplayName("예약 대기 관리 페이지로 이동한다.")
+    void moveToReservationWaitingManagePage() {
+        ValidatableResponse response = e2eTest.get("/admin/waiting", accessToken);
+        response.statusCode(200);
     }
 }

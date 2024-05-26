@@ -18,6 +18,10 @@ import roomescape.core.dto.member.MemberRequest;
 import roomescape.core.dto.member.MemberResponse;
 import roomescape.core.utils.e2eTest;
 
+/**
+ * 로그인 정보 (어드민) { "id": 1 "name": 어드민 "email": test@email.com "password": password "role": ADMIN }
+ */
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})

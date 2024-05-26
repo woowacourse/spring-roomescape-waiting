@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class ReservationTest {
     @DisplayName("예약 날짜를 저장할 때, 문자열을 LocalDate 타입으로 변환한다.")
     void parseDate() {
         final String date = "2022-12-31";
-        final Reservation reservation = new Reservation(member, date, time, theme);
+        final Reservation reservation = new Reservation(member, date, time, theme, Status.BOOKED, LocalDateTime.now());
 
         assertThat(reservation.getDate()).isEqualTo(LocalDate.of(2022, 12, 31));
     }
@@ -27,7 +28,7 @@ class ReservationTest {
     void parseDateWithInvalidFormat() {
         final String date = "2222222222";
 
-        assertThatThrownBy(() -> new Reservation(member, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(member, date, time, theme, Status.BOOKED, LocalDateTime.now()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("날짜 형식이 잘못되었습니다.");
     }
@@ -36,7 +37,7 @@ class ReservationTest {
     @DisplayName("예약 날짜가 현재 날짜보다 이전인지 확인할 수 있다.")
     void isDatePast() {
         final String date = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE);
-        final Reservation reservation = new Reservation(member, date, time, theme);
+        final Reservation reservation = new Reservation(member, date, time, theme, Status.BOOKED, LocalDateTime.now());
 
         assertThatThrownBy(reservation::validateDateAndTime)
                 .isInstanceOf(IllegalArgumentException.class)
@@ -47,10 +48,19 @@ class ReservationTest {
     @DisplayName("예약 날짜가 오늘인지 확인할 수 있다.")
     void isDateToday() {
         final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        final Reservation reservation = new Reservation(member, date, time, theme);
+        final Reservation reservation = new Reservation(member, date, time, theme, Status.BOOKED, LocalDateTime.now());
 
         assertThatThrownBy(reservation::validateDateAndTime)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("지난 시간에는 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("예약의 Status 상태를 변경할 수 있다.")
+    void setReservationStatus() {
+        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+        final Reservation reservation = new Reservation(member, date, time, theme, Status.STANDBY, LocalDateTime.now());
+        reservation.approve();
+        assertThat(reservation.getStatus()).isEqualTo(Status.BOOKED);
     }
 }

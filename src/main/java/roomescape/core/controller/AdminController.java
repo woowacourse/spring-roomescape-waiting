@@ -89,4 +89,9 @@ public class AdminController {
         themeService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/waiting")
+    public String waiting() {
+        return "admin/waiting";
+    }
 }

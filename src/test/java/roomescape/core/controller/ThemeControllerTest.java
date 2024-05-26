@@ -17,9 +17,17 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.core.domain.Status;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.utils.e2eTest;
+
+/**
+ * 로그인 정보 (어드민) { "id": 1 "name": 어드민 "email": test@email.com "password": password "role": ADMIN }
+ * <p>
+ * 테마 정보 { "id": 1, "name": '테마1' } { "id": 2, "name": '테마2' } { "id": 3, "name": '테마3' } { "id": 4, "name": '테마4' } {
+ * "id": 5, "name": '테마5' }
+ **/
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -72,15 +80,13 @@ class ThemeControllerTest {
 
     private void createReservations() {
         MemberReservationRequest firstThemeMemberReservationRequest = new MemberReservationRequest(
-                LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                4L, 2L);
+                LocalDate.now().format(DateTimeFormatter.ISO_DATE), 4L, 2L, Status.BOOKED.getValue());
 
         ValidatableResponse response1 = e2eTest.post(firstThemeMemberReservationRequest, "/reservations", accessToken);
         response1.statusCode(201);
 
         MemberReservationRequest firstThemeMemberReservationRequest2 = new MemberReservationRequest(
-                LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                5L, 2L);
+                LocalDate.now().format(DateTimeFormatter.ISO_DATE), 5L, 2L, Status.BOOKED.getValue());
 
         ValidatableResponse response2 = e2eTest.post(firstThemeMemberReservationRequest2, "/reservations", accessToken);
         response2.statusCode(201);

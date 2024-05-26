@@ -7,12 +7,28 @@ public class MyReservationResponse {
     private String time;
     private String status;
 
-    public MyReservationResponse(Long reservationId, String theme, String date, String time, String status) {
+    private MyReservationResponse(final Long reservationId, final String theme, final String date, final String time,
+                                  final String status) {
         this.reservationId = reservationId;
         this.theme = theme;
         this.date = date;
         this.time = time;
         this.status = status;
+    }
+
+    public static MyReservationResponse ofReservationWaiting(final Long reservationId, final String theme,
+                                                             final String date, final String time,
+                                                             final String status, final Integer rank) {
+        return new MyReservationResponse(reservationId, theme, date, time, waitingRankStatus(status, rank));
+    }
+
+    public static MyReservationResponse ofReservation(final Long reservationId, final String theme,
+                                                      final String date, final String time, final String status) {
+        return new MyReservationResponse(reservationId, theme, date, time, status);
+    }
+
+    private static String waitingRankStatus(final String status, final Integer rank) {
+        return rank + "번째 " + status;
     }
 
     public Long getReservationId() {

@@ -15,13 +15,17 @@ public class MemberReservationRequest {
     @NotNull(message = "테마 ID는 null일 수 없습니다.")
     private Long themeId;
 
+    @NotBlank(message = "status 는 비어있을 수 없습니다.")
+    private String status;
+
     public MemberReservationRequest() {
     }
 
-    public MemberReservationRequest(final String date, final Long timeId, final Long themeId) {
+    public MemberReservationRequest(final String date, final Long timeId, final Long themeId, final String status) {
         this.date = date;
         this.timeId = timeId;
         this.themeId = themeId;
+        this.status = status;
     }
 
     public String getDate() {
@@ -34,5 +38,9 @@ public class MemberReservationRequest {
 
     public Long getThemeId() {
         return themeId;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }

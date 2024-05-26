@@ -30,12 +30,9 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
-            @Valid @RequestBody final MemberReservationRequest memberRequest,
-            final LoginMember member) {
+            @Valid @RequestBody final MemberReservationRequest memberRequest, final LoginMember member) {
         final ReservationRequest request = new ReservationRequest(member.getId(), memberRequest.getDate(),
-                memberRequest.getTimeId(),
-                memberRequest.getThemeId());
-
+                memberRequest.getTimeId(), memberRequest.getThemeId(), memberRequest.getStatus());
         final ReservationResponse result = reservationService.create(request);
         return ResponseEntity.created(URI.create("/reservations/" + result.getId()))
                 .body(result);
@@ -44,6 +41,11 @@ public class ReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAll() {
         return ResponseEntity.ok(reservationService.findAll());
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
+        return ResponseEntity.ok(reservationService.findAllWaiting());
     }
 
     @GetMapping(params = {"memberId", "themeId", "dateFrom", "dateTo"})

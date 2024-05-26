@@ -15,6 +15,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.core.utils.e2eTest;
 
+/**
+ * 예약 정보 { "date": '2024-05-07', "member_id": 1, "time_id": 1, "theme_id": 1, "status": 'BOOKED' }
+ * <p>
+ * 시간 정보 { "id": 1, "start_at": '13:00' } { "id": 2, "start_at": '14:00' } { "id": 3, "start_at": '15:00' }
+ **/
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
