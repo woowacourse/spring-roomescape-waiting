@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 
 public interface ReservationRepository {
 
@@ -21,5 +23,11 @@ public interface ReservationRepository {
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findByMemberId(Long memberId);
+    List<ReservationWithOrderDto> findByMemberId(Long memberId);
+
+    boolean existByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
+
+    List<Reservation> findByStatus(ReservationStatus status);
+
+    Optional<Reservation> findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId);
 }

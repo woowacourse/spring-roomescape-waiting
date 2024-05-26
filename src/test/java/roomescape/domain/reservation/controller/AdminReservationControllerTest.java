@@ -2,6 +2,7 @@ package roomescape.domain.reservation.controller;
 
 import static roomescape.fixture.LocalDateFixture.AFTER_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
+import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ControllerTest;
-import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 
 public class AdminReservationControllerTest extends ControllerTest {
 
@@ -27,8 +28,12 @@ public class AdminReservationControllerTest extends ControllerTest {
                 , "10:00");
         jdbcTemplate.update("insert into theme (name, description, thumbnail )values(?,?,?)"
                 , "테마1", "테마1설명", "url");
-        jdbcTemplate.update("insert into reservation (date, time_id, theme_id, member_id) values(?,?,?,?)"
-                , AFTER_TWO_DAYS_DATE, 1, 1, 1);
+        jdbcTemplate.update(
+                "insert into reservation (date, time_id, theme_id, member_id,  status, created_at) values(?,?,?,?,?,?)"
+                , AFTER_TWO_DAYS_DATE, 1, 1, 1, "RESERVED", TIMESTAMP_BEFORE_ONE_YEAR);
+        jdbcTemplate.update(
+                "insert into reservation (date, time_id, theme_id, member_id,  status, created_at) values(?,?,?,?,?,?)"
+                , AFTER_TWO_DAYS_DATE, 1, 1, 1, "WAITING", TIMESTAMP_BEFORE_ONE_YEAR);
     }
 
     @AfterEach
@@ -42,7 +47,7 @@ public class AdminReservationControllerTest extends ControllerTest {
         String cookie = getAdminCookie();
 
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(
-                AFTER_THREE_DAYS_DATE, 1L, 1L, null);
+                AFTER_THREE_DAYS_DATE, 1L, 1L);
         RestAssured.given().log().all()
                 .header("Cookie", cookie)
                 .contentType(ContentType.JSON)
@@ -50,5 +55,18 @@ public class AdminReservationControllerTest extends ControllerTest {
                 .when().post("admin/reservations")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @DisplayName("어드민은 예약 대기목록을 조회할 수 있다(200 OK)")
+    @Test
+    void should_get_waiting_reservations() {
+        String cookie = getAdminCookie();
+
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .when().get("reservations/waiting")
+                .then().log().all()
+                .statusCode(200);
     }
 }

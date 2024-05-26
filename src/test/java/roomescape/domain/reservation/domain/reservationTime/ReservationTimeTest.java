@@ -1,12 +1,12 @@
-package roomescape.domain.reservation.domain;
+package roomescape.domain.reservation.domain.reservationTime;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.reservation.domain.reservationTime.ReservationTime.RESERVATION_TIME_NULL_ERROR_MESSAGE;
 import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.global.exception.EscapeApplicationException;
 
 class ReservationTimeTest {
@@ -23,6 +23,6 @@ class ReservationTimeTest {
     void should_throw_ClientIllegalArgumentException_when_time_is_null() {
         assertThatThrownBy(() -> new ReservationTime(null, null))
                 .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage("예약 가능 시각은 null일 수 없습니다");
+                .hasMessage(RESERVATION_TIME_NULL_ERROR_MESSAGE);
     }
 }

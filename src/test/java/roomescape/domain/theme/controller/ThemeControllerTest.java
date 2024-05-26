@@ -1,7 +1,6 @@
 package roomescape.domain.theme.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -35,8 +34,6 @@ class ThemeControllerTest extends ControllerTest {
     @DisplayName("전체 테마를 조회할 수 있다 (200 OK)")
     @Test
     void should_get_theme_list() {
-        jdbcTemplate.update("insert into reservation (date, time_id, theme_id, member_id) values(?,?,?,?)"
-                , AFTER_TWO_DAYS_DATE, 1, 1, 1);
         RestAssured.given().log().all()
                 .when().get("/themes")
                 .then().log().all()
@@ -70,7 +67,7 @@ class ThemeControllerTest extends ControllerTest {
     @Test
     void should_response_theme_ranking() {
         RestAssured.given().log().all()
-                .when().get("/theme-ranking")
+                .when().get("/themes/ranking")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(0));

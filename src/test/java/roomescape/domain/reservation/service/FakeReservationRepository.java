@@ -1,18 +1,19 @@
 package roomescape.domain.reservation.service;
 
-import static roomescape.domain.member.domain.Role.MEMBER;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.reservation.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 import roomescape.domain.reservation.repository.reservation.ReservationRepository;
-import roomescape.domain.theme.domain.Theme;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -24,13 +25,6 @@ public class FakeReservationRepository implements ReservationRepository {
 
     public FakeReservationRepository() {
         this.reservations = new HashMap<>();
-    }
-
-    FakeReservationRepository(List<Reservation> reservations) {
-        this.reservations = new HashMap<>();
-        for (int i = 0; i < reservations.size(); i++) {
-            this.reservations.put(reservations.get(i).getId(), reservations.get(i));
-        }
     }
 
     @Override
@@ -62,23 +56,16 @@ public class FakeReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         Long id = reservationAtomicLong.incrementAndGet();
 
-        ReservationTime reservationTime = reservation.getTime();
-        ReservationTime addReservationTime = new ReservationTime(reservationTimeAtomicLong.incrementAndGet(),
-                reservationTime.getStartAt());
+        Reservation addReservation = new Reservation(id, reservation.getDate(), reservation.getTime(),
+                reservation.getTheme(),
+                reservation.getMember(), reservation.getStatus(), reservation.getCreatedAt());
 
-        Theme theme = reservation.getTheme();
-        Theme addTheme = new Theme(themeAtomicLong.incrementAndGet(), theme.getName(), theme.getDescription(),
-                theme.getDescription());
-
-        Member member = reservation.getMember();
-        Member addMember = new Member(memberAtomicLong.incrementAndGet(), member.getName(), member.getEmail(),
-                member.getPassword(), MEMBER);
-
-        Reservation addReservation = new Reservation(id, reservation.getDate(), addReservationTime, addTheme,
-                addMember);
-
-        reservations.put(id, addReservation);
-        return reservation;
+        if (reservations.containsKey(reservation.getId())) {
+            reservations.replace(reservation.getId(), addReservation);
+        } else {
+            reservations.put(id, addReservation);
+        }
+        return addReservation;
     }
 
     @Override
@@ -87,6 +74,40 @@ public class FakeReservationRepository implements ReservationRepository {
                 .anyMatch(reservation -> reservation.getTime().getId().equals(timeId) && reservation.getDate()
                         .equals(date)
                         && reservation.getTheme().getId().equals(themeId));
+    }
+
+    @Override
+    public Optional<Reservation> findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId) {
+        return reservations.values().stream()
+                .filter(reservation -> reservation.getTime().getId().equals(timeId)
+                        && reservation.getDate().equals(date)
+                        && reservation.getTheme().getId().equals(themeId)
+                        && reservation.getStatus() == WAITING)
+                .min(new Comparator<Reservation>() {
+                    @Override
+                    public int compare(Reservation o1, Reservation o2) {
+                        return o1.getCreatedAt().compareTo(o2.getCreatedAt());
+                    }
+                });
+    }
+
+    @Override
+    public boolean existByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        return reservations.values().stream()
+                .anyMatch(reservation ->
+                        reservation.getMember().getId().equals(memberId) &&
+                                reservation.getTime().getId().equals(timeId) &&
+                                reservation.getDate().equals(date) &&
+                                reservation.getTheme().getId().equals(themeId));
+    }
+
+    @Override
+    public List<Reservation> findByStatus(ReservationStatus status) {
+        return reservations.values()
+                .stream()
+                .filter(reservation ->
+                        reservation.getStatus() == status)
+                .toList();
     }
 
     @Override
@@ -104,10 +125,23 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberId(Long memberId) {
-        return reservations.values()
+    public List<ReservationWithOrderDto> findByMemberId(Long memberId) {
+        List<Reservation> memberReservations = reservations.values()
                 .stream()
                 .filter(reservation -> reservation.getMember().getId().equals(memberId))
                 .toList();
+        List<ReservationWithOrderDto> result = new ArrayList<>();
+
+        for (Reservation reservation : memberReservations) {
+            long rank = reservations.values().stream()
+                    .filter(r -> r.getDate().equals(reservation.getDate())
+                            && r.getTheme().getId().equals(reservation.getTheme().getId())
+                            && r.getTime().getId().equals(reservation.getTime().getId())
+                            && r.getCreatedAt().isBefore(reservation.getCreatedAt()))
+                    .count();
+
+            result.add(new ReservationWithOrderDto(reservation, rank));
+        }
+        return result;
     }
 }

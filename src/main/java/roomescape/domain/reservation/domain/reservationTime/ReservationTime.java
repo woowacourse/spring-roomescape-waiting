@@ -11,6 +11,8 @@ import roomescape.global.exception.EscapeApplicationException;
 
 @Entity
 public class ReservationTime {
+    protected static final String RESERVATION_TIME_NULL_ERROR_MESSAGE = "예약 가능 시각은 null일 수 없습니다";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,7 +31,7 @@ public class ReservationTime {
 
     private void validateNonNull(LocalTime startAt) {
         if (startAt == null) {
-            throw new EscapeApplicationException("예약 가능 시각은 null일 수 없습니다");
+            throw new EscapeApplicationException(RESERVATION_TIME_NULL_ERROR_MESSAGE);
         }
     }
 

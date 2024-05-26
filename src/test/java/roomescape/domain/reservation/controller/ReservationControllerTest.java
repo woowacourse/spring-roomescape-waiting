@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.LocalDateFixture.AFTER_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.TODAY;
+import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ControllerTest;
-import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 
 class ReservationControllerTest extends ControllerTest {
 
@@ -27,8 +28,9 @@ class ReservationControllerTest extends ControllerTest {
                 "insert into member (name, email, password, role) values ('도도', 'dodo@gmail.com', '123123', 'MEMBER')");
         jdbcTemplate.update("insert into reservation_time (start_at) values('10:00')");
         jdbcTemplate.update("insert into theme (name, description, thumbnail) values('리비', '리비 설명', 'url')");
-        jdbcTemplate.update("insert into reservation (date, time_id, theme_id, member_id) values(?,?,?,?)"
-                , AFTER_TWO_DAYS_DATE, 1, 1, 1);
+        jdbcTemplate.update(
+                "insert into reservation (date, time_id, theme_id, member_id,  status, created_at) values(?,?,?,?,?,?)"
+                , AFTER_TWO_DAYS_DATE, 1, 1, 1, "RESERVED", TIMESTAMP_BEFORE_ONE_YEAR);
     }
 
     @AfterEach
@@ -66,12 +68,28 @@ class ReservationControllerTest extends ControllerTest {
         String cookie = getMemberCookie();
 
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(
-                AFTER_THREE_DAYS_DATE, 1L, 1L, null);
+                AFTER_THREE_DAYS_DATE, 1L, 1L);
         RestAssured.given().log().all()
                 .header("Cookie", cookie)
                 .contentType(ContentType.JSON)
                 .body(reservationAddRequest)
                 .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @DisplayName("멤버의 예약대기 추가를 성공할 시, 201 ok를 응답한다,")
+    @Test
+    void should_add_waiting_reservation_when_post_request_member_reservations() {
+        String cookie = getMemberCookie();
+
+        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(
+                AFTER_THREE_DAYS_DATE, 1L, 1L);
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .body(reservationAddRequest)
+                .when().post("/reservations?waiting=true")
                 .then().log().all()
                 .statusCode(201);
     }

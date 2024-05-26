@@ -10,6 +10,9 @@ import roomescape.global.exception.ValueNullOrEmptyException;
 public class MemberName {
 
     private static final int NAME_MAX_LENGTH = 10;
+    protected static final String MEMBER_NAME_LENGTH_OVER_ERROR_MSSAGE = "멤버의 이름은 " + NAME_MAX_LENGTH + "을 초과할 수 없습니다.";
+    protected static final String MEMBER_EMPTY_NULL_ERROR_MESSAGE = "멤버이름은 비어있을 수 없습니다.";
+
     @Column(name = "name", nullable = false, length = NAME_MAX_LENGTH)
     private String value;
 
@@ -29,13 +32,13 @@ public class MemberName {
 
     private void validateNullAndBlank(String value) {
         if (value == null || value.isBlank()) {
-            throw new ValueNullOrEmptyException("멤버이름은 비어있을 수 없습니다.");
+            throw new ValueNullOrEmptyException(MEMBER_EMPTY_NULL_ERROR_MESSAGE);
         }
     }
 
     private void validateLength(String value) {
         if (value.length() > 10) {
-            throw new ValueLengthException("멤버의 이름은 " + NAME_MAX_LENGTH + "을 초과할 수 없습니다.");
+            throw new ValueLengthException(MEMBER_NAME_LENGTH_OVER_ERROR_MSSAGE);
         }
     }
 

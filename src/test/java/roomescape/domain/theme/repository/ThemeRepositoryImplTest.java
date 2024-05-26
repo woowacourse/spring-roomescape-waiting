@@ -2,6 +2,7 @@ package roomescape.domain.theme.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.fixture.LocalDateFixture.BEFORE_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.BEFORE_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.BEFORE_TWO_DAYS_DATE;
@@ -12,6 +13,7 @@ import static roomescape.fixture.ReservationTimeFixture.NULL_ID_RESERVATION_TIME
 import static roomescape.fixture.ReservationTimeFixture.TEN_RESERVATION_TIME;
 import static roomescape.fixture.ThemeFixture.DUMMY_THEME;
 import static roomescape.fixture.ThemeFixture.NULL_ID_DUMMY_THEME;
+import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +48,8 @@ class ThemeRepositoryImplTest extends RepositoryTest {
         jpaThemeRepository.save(NULL_ID_DUMMY_THEME);
         jpaReservationTimeRepository.save(NULL_ID_RESERVATION_TIME);
         jpaReservationRepository.save(
-                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER));
+                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
     }
 
     @AfterEach
@@ -59,11 +62,14 @@ class ThemeRepositoryImplTest extends RepositoryTest {
     void should_read_theme_ranking() {
         Theme saveTheme = jpaThemeRepository.save(new Theme(null, "테마2", "테마2설명", "url"));
         jpaReservationRepository.save(
-                new Reservation(null, BEFORE_TWO_DAYS_DATE, TEN_RESERVATION_TIME, saveTheme, ADMIN_MEMBER));
+                new Reservation(null, BEFORE_TWO_DAYS_DATE, TEN_RESERVATION_TIME, saveTheme, ADMIN_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
         jpaReservationRepository.save(
-                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, saveTheme, ADMIN_MEMBER));
+                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, saveTheme, ADMIN_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
         jpaReservationRepository.save(
-                new Reservation(null, BEFORE_THREE_DAYS_DATE, TEN_RESERVATION_TIME, saveTheme, ADMIN_MEMBER));
+                new Reservation(null, BEFORE_THREE_DAYS_DATE, TEN_RESERVATION_TIME, saveTheme, ADMIN_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
 
         List<Theme> themeRaking = themeRepository.findThemeOrderByReservationCount();
 
