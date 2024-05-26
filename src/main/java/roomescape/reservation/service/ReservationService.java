@@ -92,36 +92,21 @@ public class ReservationService {
         return new ReservationTimeInfosResponse(response);
     }
 
-    // TODO: 하나의 API로 통합하기
     @Transactional
-    public void removeMemberReservationById(final Long memberReservationId, final Long requestMemberId) {
+    public void removeMemberReservationById(final Long memberReservationId, final Long requestMemberId, final ReservationStatus status) {
         Member member = memberRepository.getById(requestMemberId);
         MemberReservation memberReservation = memberReservationRepository.getById(memberReservationId);
+        if (status.isWaiting()) {
+            validateIsWaitingStatus(memberReservation);
+        }
 
         Long reservationMemberId = memberReservation.getMember().getId();
-
         if (member.isAdmin() || reservationMemberId.equals(requestMemberId)) {
             memberReservationRepository.deleteById(memberReservation.getId());
         } else {
             throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
                     String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [memberReservationId: %d]"
                             , memberReservationId));
-        }
-    }
-
-    // TODO: 하나의 API로 통합하기
-    @Transactional
-    public void removeWaitingReservationById(final Long memberReservationId, final Long memberId) {
-        Member member = memberRepository.getById(memberId);
-        MemberReservation memberReservation = memberReservationRepository.getById(memberReservationId);
-        validateIsWaitingStatus(memberReservation);
-
-        Long reservationMemberId = memberReservation.getMember().getId();
-        if (member.isAdmin() || reservationMemberId.equals(memberId)) {
-            memberReservationRepository.deleteById(memberReservation.getId());
-        } else {
-            throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
-                    String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [memberReservationId: %d]", memberReservationId));
         }
     }
 

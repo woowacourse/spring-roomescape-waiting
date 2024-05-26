@@ -109,7 +109,7 @@ public class ReservationController {
             @MemberId final Long memberId,
             @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
     ) {
-        reservationService.removeMemberReservationById(memberReservationId, memberId);
+        reservationService.removeMemberReservationById(memberReservationId, memberId, ReservationStatus.RESERVED);
 
         return ApiResponse.success();
     }
@@ -121,7 +121,7 @@ public class ReservationController {
             @MemberId final Long memberId,
             @NotNull(message = "memberReservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
     ) {
-        reservationService.removeWaitingReservationById(memberReservationId, memberId);
+        reservationService.removeMemberReservationById(memberReservationId, memberId, ReservationStatus.WAITING);
 
         return ApiResponse.success();
     }
