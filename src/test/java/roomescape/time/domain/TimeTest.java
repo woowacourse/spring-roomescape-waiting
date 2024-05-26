@@ -1,5 +1,6 @@
 package roomescape.time.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,12 +17,9 @@ class TimeTest {
     @Test
     @DisplayName("시간이 null일 경우 예외가 발생한다.")
     void validation_ShouldThrowException_WhenStartAtIsNull() {
-        assertAll(() -> {
-                    Throwable nullStartAt = assertThrows(
-                            BadRequestException.class, () -> new Time(null));
-                    assertEquals("시간 값이 정의되지 않은 요청입니다.", nullStartAt.getMessage());
-                }
-        );
+            assertThatThrownBy(() -> new Time(null))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("시간 값이 정의되지 않은 요청입니다.");
     }
 
     @Test

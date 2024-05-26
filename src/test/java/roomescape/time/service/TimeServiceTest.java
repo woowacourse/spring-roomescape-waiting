@@ -37,7 +37,7 @@ class TimeServiceTest {
     private TimeRepository timeRepository;
 
     @Test
-    @DisplayName("시간을 추가한다.")
+    @DisplayName("성공 : 시간을 추가한다.")
     void addReservationTime() {
         when(timeRepository.save(any(Time.class)))
                 .thenReturn(time);
@@ -50,7 +50,7 @@ class TimeServiceTest {
     }
 
     @Test
-    @DisplayName("시간을 찾는다.")
+    @DisplayName("성공 : 시간을 찾는다.")
     void findReservationTimes() {
         when(timeRepository.findAllByOrderByStartAtAsc())
                 .thenReturn(List.of(time));
@@ -62,8 +62,8 @@ class TimeServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약 시간 생성 요청시 예외를 던진다.")
-    void validation_ShouldThrowException_WhenStartAtIsDuplicated() {
+    @DisplayName("실패 : 중복된 예약 시간 생성 요청시 예외를 던진다.")
+    void addReservationTime_Exception() {
         when(timeRepository.existsByStartAt(any(LocalTime.class)))
                 .thenReturn(true);
 
@@ -74,7 +74,7 @@ class TimeServiceTest {
     }
 
     @Test
-    @DisplayName("시간을 지운다.")
+    @DisplayName("성공 : 시간을 지운다.")
     void removeReservationTime() {
         Mockito.doNothing()
                 .when(timeRepository)
@@ -85,8 +85,8 @@ class TimeServiceTest {
     }
 
     @Test
-    @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
-    void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
+    @DisplayName("실패 : 예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
+    void removeReservationTime_Exception() {
         when(detailRepository.countReservationsByTime_Id(1L))
                 .thenReturn(1);
 
