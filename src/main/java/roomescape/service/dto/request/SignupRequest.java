@@ -3,16 +3,9 @@ package roomescape.service.dto.request;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 
-public class SignupRequest {
-    private final String email;
-    private final String password;
-    private final String name;
-
-    public SignupRequest(String email, String password, String name) {
+public record SignupRequest(String email, String password, String name) {
+    public SignupRequest {
         validate(email, password, name);
-        this.email = email;
-        this.password = password;
-        this.name = name;
     }
 
     private void validate(String email, String password, String name) {
@@ -23,17 +16,5 @@ public class SignupRequest {
 
     public Member toMember(MemberRole role) {
         return new Member(name, email, password, role);
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getName() {
-        return name;
     }
 }

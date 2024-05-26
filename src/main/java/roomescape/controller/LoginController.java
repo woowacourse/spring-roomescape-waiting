@@ -54,6 +54,6 @@ public class LoginController {
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@RequestBody SignupRequest request) {
         SignupResponse response = loginService.signup(request);
-        return ResponseEntity.created(URI.create("/members/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/members/" + response.id())).body(response);
     }
 }

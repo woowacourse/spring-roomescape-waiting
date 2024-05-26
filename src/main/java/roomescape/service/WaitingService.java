@@ -50,8 +50,8 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse save(WaitingRequest waitingRequest, Member member) {
-        ReservationTime reservationTime = findReservationTimeById(waitingRequest.getTimeId());
-        Theme theme = findThemeById(waitingRequest.getThemeId());
+        ReservationTime reservationTime = findReservationTimeById(waitingRequest.timeId());
+        Theme theme = findThemeById(waitingRequest.themeId());
         validateDateTimeWaiting(waitingRequest, reservationTime);
 
         Waiting waiting = waitingRequest.toWaiting(member, reservationTime, theme);
@@ -76,17 +76,17 @@ public class WaitingService {
 
     private void validateDuplicateWaiting(WaitingRequest request, Member member) {
         if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
-                member.getId(), request.getDate(), request.getTimeId(), request.getThemeId())) {
+                member.getId(), request.date(), request.timeId(), request.themeId())) {
             throw new DuplicatedReservationException();
         }
         if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                request.getDate(), request.getTimeId(), request.getThemeId(), member.getId())) {
+                request.date(), request.timeId(), request.themeId(), member.getId())) {
             throw new DuplicatedReservationException();
         }
     }
 
     private void validateDateTimeWaiting(WaitingRequest request, ReservationTime time) {
-        LocalDateTime localDateTime = request.getDate().atTime(time.getStartAt());
+        LocalDateTime localDateTime = request.date().atTime(time.getStartAt());
         if (localDateTime.isBefore(LocalDateTime.now(clock))) {
             throw new InvalidDateTimeReservationException();
         }

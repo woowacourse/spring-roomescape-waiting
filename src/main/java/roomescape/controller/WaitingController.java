@@ -38,7 +38,7 @@ public class WaitingController {
     public ResponseEntity<WaitingResponse> saveWaiting(@RequestBody WaitingRequest request,
                                                        @LoginMember Member member) {
         WaitingResponse response = waitingService.save(request, member);
-        return ResponseEntity.created(URI.create("/waitings/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/waitings/" + response.id())).body(response);
     }
 
     @RoleAllowed

@@ -49,7 +49,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTimeResponse saveReservationTime(ReservationTimeRequest request) {
-        if (reservationTimeRepository.existsByStartAt(request.getStartAt())) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new DuplicatedTimeException();
         }
         ReservationTime reservationTime = request.toReservationTime();

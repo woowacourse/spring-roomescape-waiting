@@ -55,7 +55,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> saveReservation(@RequestBody ReservationRequest request,
                                                                @LoginMember Member member) {
         ReservationResponse response = reservationService.saveReservation(request, member);
-        return ResponseEntity.created(URI.create("/reservations/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
@@ -64,7 +64,7 @@ public class ReservationController {
         ReservationRequest input = new ReservationRequest(request);
         Member member = memberService.findById(request.getMemberId());
         ReservationResponse response = reservationService.saveReservation(input, member);
-        return ResponseEntity.created(URI.create("/reservations/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @RoleAllowed

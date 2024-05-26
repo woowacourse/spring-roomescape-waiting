@@ -39,7 +39,7 @@ public class ThemeController {
     @PostMapping("/themes")
     public ResponseEntity<ThemeResponse> saveTheme(@RequestBody ThemeRequest request) {
         ThemeResponse response = themeService.saveTheme(request);
-        return ResponseEntity.created(URI.create("/themes/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/themes/" + response.id())).body(response);
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)

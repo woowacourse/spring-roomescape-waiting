@@ -6,13 +6,10 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 
-public class ReservationTimeRequest {
-    private final LocalTime startAt;
-
+public record ReservationTimeRequest(LocalTime startAt) {
     @JsonCreator
-    public ReservationTimeRequest(LocalTime startAt) {
+    public ReservationTimeRequest {
         validate(startAt);
-        this.startAt = startAt;
     }
 
     private void validate(LocalTime startAt) {
@@ -25,8 +22,9 @@ public class ReservationTimeRequest {
         return new ReservationTime(startAt);
     }
 
+    @Override
     @JsonFormat(shape = Shape.STRING, pattern = "HH:mm")
-    public LocalTime getStartAt() {
+    public LocalTime startAt() {
         return startAt;
     }
 }

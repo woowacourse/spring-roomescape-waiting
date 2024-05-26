@@ -1,26 +1,13 @@
 package roomescape.service.dto.request;
 
-public class LoginRequest {
-    private final String email;
-    private final String password;
-
-    public LoginRequest(String email, String password) {
+public record LoginRequest(String email, String password) {
+    public LoginRequest {
         validate(email, password);
-        this.email = email;
-        this.password = password;
     }
 
     private void validate(String email, String password) {
         if (email.isBlank() || password.isBlank()) {
             throw new IllegalArgumentException();
         }
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 }

@@ -7,24 +7,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Waiting;
 
-public class ReservationMineResponse {
-    private final Long id;
-    private final ThemeResponse theme;
-    private final LocalDate date;
-    private final ReservationTimeResponse time;
-    private final ReservationStatus status;
-    private final Long rank;
-
-    public ReservationMineResponse(Long id, ThemeResponse theme, LocalDate date, ReservationTimeResponse time,
-                                   ReservationStatus status, Long rank) {
-        this.id = id;
-        this.theme = theme;
-        this.date = date;
-        this.time = time;
-        this.status = status;
-        this.rank = rank;
-    }
-
+public record ReservationMineResponse(
+        Long id,
+        ThemeResponse theme,
+        LocalDate date,
+        ReservationTimeResponse time,
+        ReservationStatus status,
+        Long rank
+) {
     public ReservationMineResponse(Reservation reservation) {
         this(reservation.getId(),
                 new ThemeResponse(reservation.getTheme()),
@@ -45,27 +35,7 @@ public class ReservationMineResponse {
         );
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public ThemeResponse getTheme() {
-        return theme;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTimeResponse getTime() {
-        return time;
-    }
-
     public String getStatus() {
         return status.getDescription();
-    }
-
-    public Long getRank() {
-        return rank;
     }
 }

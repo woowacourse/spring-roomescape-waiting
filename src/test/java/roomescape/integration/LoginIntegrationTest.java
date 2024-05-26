@@ -51,7 +51,7 @@ class LoginIntegrationTest extends IntegrationTest {
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value()).extract().as(LoginCheckResponse.class);
 
-            assertThat(response.getName()).isEqualTo("어드민");
+            assertThat(response.name()).isEqualTo("어드민");
         }
 
         @Test

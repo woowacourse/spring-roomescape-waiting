@@ -26,9 +26,9 @@ public class LoginService {
     }
 
     public String login(LoginRequest request) {
-        Member member = memberRepository.findByEmail(request.getEmail())
+        Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(UnauthorizedEmailException::new);
-        if (!member.getPassword().equals(request.getPassword())) {
+        if (!member.getPassword().equals(request.password())) {
             throw new UnauthorizedPasswordException();
         }
         return jwtTokenProvider.createToken(member.getEmail(), member.getRole());
