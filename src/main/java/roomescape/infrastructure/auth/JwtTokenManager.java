@@ -4,7 +4,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
@@ -72,24 +71,28 @@ public class JwtTokenManager implements TokenManager {
     }
 
     @Override
-    public void setToken(HttpServletResponse response, String accessToken) {
+    public Cookie addTokenToCookie(String accessToken) {
         Cookie cookie = new Cookie(TOKEN_KEY, accessToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(ONE_MINUTE * 5000000);
-        response.addCookie(cookie);
+        return cookie;
     }
 
     @Override
-    public Date getExpiration(String token) {
+    public void validateExpiration(String token) {
         String secretString = jwtTokenProperties.getSecretKey();
         SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
 
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getBody()
-                .getExpiration();
+        try {
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getExpiration();
+        } catch (ExpiredJwtException e) {
+            throw new RoomescapeException(HttpStatus.UNAUTHORIZED, "인증 유효기간이 만료되었습니다.");
+        }
     }
 }

@@ -2,8 +2,6 @@ package roomescape.application;
 
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Email;
@@ -58,16 +56,12 @@ public class AuthService {
                         String.format("존재하지 않는 회원입니다. 입력한 회원 id:%d", id)));
     }
 
-    public void setToken(HttpServletResponse response, String accessToken) {
-        tokenManager.setToken(response, accessToken);
+    public Cookie addTokenToCookie(String accessToken) {
+        return tokenManager.addTokenToCookie(accessToken);
     }
 
     public void validateToken(Cookie[] cookies) {
         String token = extractToken(cookies);
-        Date expiration = tokenManager.getExpiration(token);
-
-        if (expiration.before(new Date())) {
-            throw new IllegalArgumentException("유효기간이 만료된 토큰입니다");
-        }
+        tokenManager.validateExpiration(token);
     }
 }
