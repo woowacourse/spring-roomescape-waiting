@@ -49,10 +49,6 @@ public class LoginService {
     @Transactional(readOnly = true)
     public Member findMemberByToken(String token) {
         MemberEmail email = jwtTokenProvider.getMemberEmail(token);
-        return findMemberByEmail(email);
-    }
-
-    private Member findMemberByEmail(MemberEmail email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(InvalidTokenException::new);
     }

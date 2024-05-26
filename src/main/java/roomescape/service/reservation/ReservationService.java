@@ -97,6 +97,16 @@ public class ReservationService {
         return new ReservationResponse(savedReservation);
     }
 
+    private ReservationTime findReservationTimeById(long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(NotFoundTimeException::new);
+    }
+
+    private Theme findThemeById(long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(NotFoundThemeException::new);
+    }
+
     private void validateDuplicateReservation(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeAndTheme(
                 reservation.getDate(), reservation.getTime(), reservation.getTheme())) {
@@ -114,11 +124,15 @@ public class ReservationService {
         Reservation reservation = findReservationById(reservationId);
         validateReservationMember(reservation, memberId);
 
-        reservationWaitingRepository.findFirstByReservation(reservation)
-                .ifPresentOrElse(
-                        waiting -> upgradeWaitingToReservationAndDeleteWaiting(reservation, waiting),
-                        () -> reservationRepository.delete(reservation)
-                );
+        reservationWaitingRepository.findFirstByReservation(reservation).ifPresentOrElse(
+                waiting -> upgradeWaitingToReservationAndDeleteWaiting(reservation, waiting),
+                () -> reservationRepository.delete(reservation)
+        );
+    }
+
+    private Reservation findReservationById(long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(NotFoundReservationException::new);
     }
 
     private void validateReservationMember(Reservation reservation, long memberId) {
@@ -130,20 +144,5 @@ public class ReservationService {
     private void upgradeWaitingToReservationAndDeleteWaiting(Reservation reservation, ReservationWaiting waiting) {
         reservation.updateMember(waiting.getMember());
         reservationWaitingRepository.delete(waiting);
-    }
-
-    private Reservation findReservationById(long id) { // TODO: optional 다루는 함수들 전부 분리됐는지 확인하고, 순서 재배열하기
-        return reservationRepository.findById(id)
-                .orElseThrow(NotFoundReservationException::new);
-    }
-
-    private ReservationTime findReservationTimeById(long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(NotFoundTimeException::new);
-    }
-
-    private Theme findThemeById(long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(NotFoundThemeException::new);
     }
 }

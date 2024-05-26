@@ -46,13 +46,22 @@ public class ReservationWaitingService {
     public ReservationWaitingResponse saveReservationWaiting(ReservationWaitingRequest request, Member member) {
         Reservation reservation = findReservationByDateAndTimeIdAndThemeId(
                 request.getDate(), request.getTimeId(), request.getThemeId());
-        validateOwnedReservation(reservation, member);
-        validateDuplicateWaiting(reservation, member);
-        validateDateTimeWaiting(reservation);
+        validateReservationForWaiting(reservation, member);
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(reservation, member);
         ReservationWaiting savedReservationWaiting = reservationWaitingRepository.save(reservationWaiting);
         return new ReservationWaitingResponse(savedReservationWaiting);
+    }
+
+    private Reservation findReservationByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseThrow(NotFoundReservationException::new);
+    }
+
+    private void validateReservationForWaiting(Reservation reservation, Member member) {
+        validateOwnedReservation(reservation, member);
+        validateDuplicateWaiting(reservation, member);
+        validateDateTimeWaiting(reservation);
     }
 
     private void validateOwnedReservation(Reservation reservation, Member member) {
@@ -78,6 +87,11 @@ public class ReservationWaitingService {
         reservationWaitingRepository.delete(waiting);
     }
 
+    private ReservationWaiting findReservationWaitingByReservationIdAndMember(Long reservationId, Long memberId) {
+        return reservationWaitingRepository.findByReservationIdAndMemberId(reservationId, memberId)
+                .orElseThrow(NotFoundReservationWaitingException::new);
+    }
+
     public void deleteAdminReservationWaiting(Long waitingId) {
         ReservationWaiting waiting = findReservationWaitingById(waitingId);
         reservationWaitingRepository.delete(waiting);
@@ -86,15 +100,5 @@ public class ReservationWaitingService {
     private ReservationWaiting findReservationWaitingById(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(NotFoundReservationWaitingException::new);
-    }
-
-    private ReservationWaiting findReservationWaitingByReservationIdAndMember(Long reservationId, Long memberId) {
-        return reservationWaitingRepository.findByReservationIdAndMemberId(reservationId, memberId)
-                .orElseThrow(NotFoundReservationWaitingException::new);
-    }
-
-    private Reservation findReservationByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
-                .orElseThrow(NotFoundReservationException::new);
     }
 }
