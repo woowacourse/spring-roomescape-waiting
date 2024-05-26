@@ -13,7 +13,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationAddRequest;
 import roomescape.reservation.dto.ReservationFilterRequest;
-import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.reservation.exception.model.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -53,15 +52,6 @@ public class ReservationService {
 
         return reservationRepository.save(reservation);
     }
-
-    public void addAdminReservation(ReservationAddRequest reservationAddRequest) {
-        validateExistReservation(reservationAddRequest);
-        Reservation saveReservation = Reservation.of(reservationAddRequest.date(), reservationAddRequest.time(),
-                reservationAddRequest.theme(), reservationAddRequest.member(), ReservationStatus.RESERVED);
-
-        ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
-    }
-
 
     public List<Reservation> findReservationsOrderByDateAndTime() {
         return reservationRepository.findAllByOrderByDateAscTimeAsc();

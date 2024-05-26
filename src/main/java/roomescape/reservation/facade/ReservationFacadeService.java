@@ -53,7 +53,7 @@ public class ReservationFacadeService {
         Theme theme = themeService.findTheme(adminReservationRequest.themeId());
         Member member = memberService.findMember(adminReservationRequest.memberId());
 
-        reservationService.addAdminReservation(
+        reservationService.addReservation(
                 new ReservationAddRequest(adminReservationRequest.date(), time, theme, member));
     }
 
