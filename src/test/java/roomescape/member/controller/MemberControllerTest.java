@@ -48,6 +48,8 @@ class MemberControllerTest {
                 .body("data.members.size()", is(5));
     }
 
+
+    // TEST
     private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
         memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 

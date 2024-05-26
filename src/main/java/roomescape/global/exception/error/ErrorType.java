@@ -22,7 +22,7 @@ public enum ErrorType {
     // 404 Not Found
     MEMBER_NOT_FOUND("회원(Member) 정보가 존재하지 않습니다."),
     MEMBER_RESERVATION_NOT_FOUND("회원 예약(MemberReservation) 정보가 존재하지 않습니다."),
-    RESERVATION_NOT_FOUND("예약(Reservation) 정보가 존재하지 않습니다."),
+    RESERVATION_DETAIL_NOT_FOUND("예약 정보(ReservationDetail)가 존재하지 않습니다."),
     RESERVATION_TIME_NOT_FOUND("예약 시간(ReservationTime) 정보가 존재하지 않습니다."),
     THEME_NOT_FOUND("테마(Theme) 정보가 존재하지 않습니다."),
 

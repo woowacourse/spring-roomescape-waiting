@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.DataDuplicateException;
 import roomescape.global.exception.model.ForbiddenException;
-import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
@@ -14,7 +13,7 @@ import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationDetailRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
@@ -35,18 +34,18 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
-    private final ReservationRepository reservationRepository;
+    private final ReservationDetailRepository reservationDetailRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberReservationRepository memberReservationRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
+    public ReservationService(final ReservationDetailRepository reservationDetailRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
                               final MemberReservationRepository memberReservationRepository,
                               final MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
+        this.reservationDetailRepository = reservationDetailRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberReservationRepository = memberReservationRepository;
@@ -64,7 +63,7 @@ public class ReservationService {
 
     public ReservationsResponse findFirstOrderWaitingReservations() {
         List<MemberReservation> firstOrderWaitingReservations = memberReservationRepository
-                .findFirstOrderMemberReservationByStatus(ReservationStatus.WAITING);
+                .findFirstOrderMemberReservationsByStatus(ReservationStatus.WAITING);
 
         List<ReservationResponse> response = firstOrderWaitingReservations.stream()
                 .map(ReservationResponse::from)
@@ -76,7 +75,7 @@ public class ReservationService {
     public ReservationTimeInfosResponse findReservationsByDateAndThemeId(final LocalDate date, final Long themeId) {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
         Theme theme = themeRepository.getById(themeId);
-        List<ReservationDetail> reservations = reservationRepository.findByDateAndTheme(date, theme);
+        List<ReservationDetail> reservations = reservationDetailRepository.findByDateAndTheme(date, theme);
 
         List<ReservationTimeInfoResponse> response = new ArrayList<>();
         for (ReservationTime time : allTimes) {
@@ -93,6 +92,7 @@ public class ReservationService {
         return new ReservationTimeInfosResponse(response);
     }
 
+    // TODO: 하나의 API로 통합하기
     @Transactional
     public void removeMemberReservationById(final Long memberReservationId, final Long requestMemberId) {
         Member member = memberRepository.getById(requestMemberId);
@@ -104,20 +104,12 @@ public class ReservationService {
             memberReservationRepository.deleteById(memberReservation.getId());
         } else {
             throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
-                    String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [reservationId: %d, memberReservationId: %d]"
-                            , memberReservationId, memberReservation.getId()));
+                    String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [memberReservationId: %d]"
+                            , memberReservationId));
         }
     }
 
-    @Transactional
-    public void approveWaitingReservation(final Long memberReservationId) {
-        MemberReservation waitingMemberReservation = memberReservationRepository.getById(memberReservationId);
-        MemberReservation memberReservation = findMemberReservationByReservationAndMember(waitingMemberReservation.getReservation(), waitingMemberReservation.getMember());
-        validateIsWaitingStatus(memberReservation);
-
-        memberReservation.changeStatusToReserve();
-    }
-
+    // TODO: 하나의 API로 통합하기
     @Transactional
     public void removeWaitingReservationById(final Long memberReservationId, final Long memberId) {
         Member member = memberRepository.getById(memberId);
@@ -127,11 +119,20 @@ public class ReservationService {
         Long reservationMemberId = memberReservation.getMember().getId();
         if (member.isAdmin() || reservationMemberId.equals(memberId)) {
             memberReservationRepository.deleteById(memberReservation.getId());
-            reservationRepository.deleteById(memberReservation.getId());
         } else {
             throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
-                    String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [memberReservationId: %d]", memberReservation.getId()));
+                    String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [memberReservationId: %d]", memberReservationId));
         }
+    }
+
+    @Transactional
+    public void approveWaitingReservation(final Long memberReservationId) {
+        MemberReservation waitingMemberReservation = memberReservationRepository.getById(memberReservationId);
+
+        validateIsWaitingStatus(waitingMemberReservation);
+        validateMemberReservationIsFirstOrder(waitingMemberReservation);
+
+        waitingMemberReservation.changeStatusToReserve();
     }
 
     private void validateIsWaitingStatus(final MemberReservation memberReservation) {
@@ -140,10 +141,20 @@ public class ReservationService {
         }
     }
 
-    private MemberReservation findMemberReservationByReservationAndMember(final ReservationDetail reservation, final Member member) {
-        return memberReservationRepository.findByReservationAndMember(reservation, member)
-                .orElseThrow(() -> new NotFoundException(ErrorType.MEMBER_RESERVATION_NOT_FOUND,
-                        ErrorType.MEMBER_RESERVATION_NOT_FOUND.getDescription()));
+    private void validateMemberReservationIsFirstOrder(final MemberReservation memberReservationToApprove) {
+        int order = 0;
+        List<MemberReservation> memberReservationsOnReservationDetail = memberReservationRepository.findFirstOrderWaitingMemberReservationByReservationDetail(memberReservationToApprove.getReservationDetail());
+        for (MemberReservation memberReservation : memberReservationsOnReservationDetail) {
+            if (memberReservation.getId().equals(memberReservationToApprove.getId())) {
+                break;
+            }
+            order++;
+        }
+
+        if (order != 0) {
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA,
+                    "예약 승인을 요청한 대기 중인 예약이, 1순위 대기 상태가 아니어서 예약 대기 상태를 예약 상태로 변경 수 없습니다.");
+        }
     }
 
     private void validateAlreadyBookedReservationNotExist(final ReservationDetail requestReservation, final Long order) {
@@ -167,9 +178,9 @@ public class ReservationService {
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
         Theme theme = themeRepository.getById(request.themeId());
 
-        Optional<ReservationDetail> requestReservationDetail = reservationRepository.findByReservationTimeAndDateAndTheme(time, request.date(), theme);
+        Optional<ReservationDetail> requestReservationDetail = reservationDetailRepository.findByReservationTimeAndDateAndTheme(time, request.date(), theme);
         return requestReservationDetail.orElseGet(() ->
-                reservationRepository.save(request.toEntity(time, theme)));
+                reservationDetailRepository.save(request.toEntity(time, theme)));
     }
 
     private MemberReservation createMemberReservation(final ReservationDetail requestReservationDetail, final Member requestMember, final ReservationStatus status) {
@@ -179,7 +190,7 @@ public class ReservationService {
 
     private void validateReservation(final ReservationDetail requestReservationDetail, final Member requestMember, final ReservationStatus status) {
         LocalDateTime now = LocalDateTime.now();
-        long alreadyBookedReservationSize = memberReservationRepository.countByReservation(requestReservationDetail);
+        long alreadyBookedReservationSize = memberReservationRepository.countByReservationDetail(requestReservationDetail);
 
         validateDateAndTime(requestReservationDetail, now);
         if (status.isReserved()) {
@@ -190,11 +201,11 @@ public class ReservationService {
         }
     }
 
-    private void validateDateAndTime(final ReservationDetail reservation, final LocalDateTime now) {
-        if (reservation.isPastThen(now)) {
+    private void validateDateAndTime(final ReservationDetail reservationDetail, final LocalDateTime now) {
+        if (reservationDetail.isPastThen(now)) {
             throw new ValidateException(ErrorType.RESERVATION_PERIOD_IN_PAST,
                     String.format("지난 날짜나 시간은 예약 또는 예약대기가 불가능합니다. [now: %s %s | request: %s %s]",
-                            now.toLocalDate(), now.toLocalTime(), reservation.getDate(), reservation.getStartAt()));
+                            now.toLocalDate(), now.toLocalTime(), reservationDetail.getDate(), reservationDetail.getStartAt()));
         }
     }
 

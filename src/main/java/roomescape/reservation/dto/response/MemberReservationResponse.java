@@ -11,7 +11,7 @@ public record MemberReservationResponse(
         Long reservationId, String theme, LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time, String status) {
     public static MemberReservationResponse fromEntity(final MemberReservation memberReservation, final long order) {
-        ReservationDetail reservation = memberReservation.getReservation();
+        ReservationDetail reservation = memberReservation.getReservationDetail();
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getThemeName(),

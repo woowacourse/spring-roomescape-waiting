@@ -21,7 +21,7 @@ import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationDetailRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -43,7 +43,7 @@ import static org.hamcrest.Matchers.is;
 public class ReservationControllerTest {
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationDetailRepository reservationDetailRepository;
     @Autowired
     private ReservationService reservationService;
     @Autowired
@@ -68,7 +68,6 @@ public class ReservationControllerTest {
         themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
 
         Map<String, String> reservationParams = Map.of(
-                "name", "썬",
                 "date", LocalDate.now().plusDays(1L).toString(),
                 "timeId", "1",
                 "themeId", "1",
@@ -123,9 +122,9 @@ public class ReservationControllerTest {
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when
-        ReservationDetail reservation1 = reservationRepository.save(new ReservationDetail(LocalDate.now(), reservationTime, theme));
-        ReservationDetail reservation2 = reservationRepository.save(new ReservationDetail(LocalDate.now().plusDays(1), reservationTime, theme));
-        ReservationDetail reservation3 = reservationRepository.save(new ReservationDetail(LocalDate.now().plusDays(2), reservationTime, theme));
+        ReservationDetail reservation1 = reservationDetailRepository.save(new ReservationDetail(LocalDate.now(), reservationTime, theme));
+        ReservationDetail reservation2 = reservationDetailRepository.save(new ReservationDetail(LocalDate.now().plusDays(1), reservationTime, theme));
+        ReservationDetail reservation3 = reservationDetailRepository.save(new ReservationDetail(LocalDate.now().plusDays(2), reservationTime, theme));
 
         memberReservationRepository.save(new MemberReservation(reservation1, member, ReservationStatus.RESERVED));
         memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.RESERVED));
@@ -182,7 +181,7 @@ public class ReservationControllerTest {
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
-        ReservationDetail reservation = reservationRepository.save(new ReservationDetail(LocalDate.now(), reservationTime, theme));
+        ReservationDetail reservation = reservationDetailRepository.save(new ReservationDetail(LocalDate.now(), reservationTime, theme));
         memberReservationRepository.save(new MemberReservation(reservation, member, ReservationStatus.RESERVED));
 
         // when & then
@@ -205,7 +204,7 @@ public class ReservationControllerTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
 
-        ReservationDetail reservation = reservationRepository.save(new ReservationDetail(LocalDate.now(), reservationTime, theme));
+        ReservationDetail reservation = reservationDetailRepository.save(new ReservationDetail(LocalDate.now(), reservationTime, theme));
         memberReservationRepository.save(new MemberReservation(reservation, anotherMember, ReservationStatus.RESERVED));
 
         // when & then
@@ -436,21 +435,20 @@ public class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("관리자가 회원의 예약 대기를 승인하면 순서가 한칸씩 앞당겨지고, 승인된 예약은 대기 상태에서 예약 상태로 변경된다.")
+    @DisplayName("관리자가 회원의 예약 대기를 승인하면, 승인된 예약은 대기 상태에서 예약 상태로 변경된다.")
     void canApproveMemberWaitingByAdminRole() {
         // given
         String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
-        Member member1 = memberRepository.save(new Member("name", "another1@email.com", "password", Role.MEMBER));
-        Member member2 = memberRepository.save(new Member("name", "another2@email.com", "password", Role.MEMBER));
-        Member member3 = memberRepository.save(new Member("name", "another3@email.com", "password", Role.MEMBER));
+
+        Member reservedMember = memberRepository.save(new Member("name", "another1@email.com", "password", Role.MEMBER));
+        Member waitingMember = memberRepository.save(new Member("name", "another2@email.com", "password", Role.MEMBER));
 
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId(), ReservationStatus.RESERVED);
-        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member2.getId(), ReservationStatus.WAITING);
-        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member3.getId(), ReservationStatus.WAITING);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), reservedMember.getId(), ReservationStatus.RESERVED);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), waitingMember.getId(), ReservationStatus.WAITING);
 
         // when & then
         RestAssured.given().log().all()
@@ -461,12 +459,10 @@ public class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200);
 
-        Optional<MemberReservation> optionalMember2Reservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(member2, time, tomorrow, theme);
-        Optional<MemberReservation> optionalMember3Reservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(member3, time, tomorrow, theme);
+        Optional<MemberReservation> optionalMemberWaitingReservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(waitingMember, time, tomorrow, theme);
 
-        Assertions.assertThat(optionalMember2Reservation).isNotEmpty();
-        Assertions.assertThat(optionalMember3Reservation).isNotEmpty();
-        Assertions.assertThat(optionalMember2Reservation.get().isReservedStatus()).isTrue();
+        Assertions.assertThat(optionalMemberWaitingReservation).isNotEmpty();
+        Assertions.assertThat(optionalMemberWaitingReservation.get().isReservedStatus()).isTrue();
     }
 
     @Test

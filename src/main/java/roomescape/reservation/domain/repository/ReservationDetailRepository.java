@@ -12,18 +12,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReservationRepository extends JpaRepository<ReservationDetail, Long>, JpaSpecificationExecutor<ReservationDetail> {
+public interface ReservationDetailRepository extends JpaRepository<ReservationDetail, Long>, JpaSpecificationExecutor<ReservationDetail> {
 
     default ReservationDetail getById(final Long id) {
         return findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorType.RESERVATION_NOT_FOUND,
-                        String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
+                .orElseThrow(() -> new NotFoundException(ErrorType.RESERVATION_DETAIL_NOT_FOUND,
+                        String.format("예약 정보(ReservationDetail)가 존재하지 않습니다. [reservationDetailId: %d]", id)));
     }
 
     List<ReservationDetail> findByReservationTime(ReservationTime reservationTime);
 
     Optional<ReservationDetail> findByReservationTimeAndDateAndTheme(ReservationTime reservationTime, LocalDate date, Theme theme);
 
+    // TODO: API 부활시키기
 //    default List<Reservation> searchWith(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo) {
 //        return this.findAll((root, query, cb) -> {
 //            List<Predicate> predicates = new ArrayList<>();

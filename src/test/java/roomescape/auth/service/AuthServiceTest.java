@@ -35,10 +35,12 @@ class AuthServiceTest {
     @DisplayName("존재하는 회원의 email, password로 로그인하면 memberId, accessToken을 Response 한다.")
     void loginSuccess() {
         // given
-        Member member = memberRepository.save(new Member("이름", "test@test.com", "12341234", Role.MEMBER));
+        String email = "test@test.com";
+        String password = "test@test.com";
+        memberRepository.save(new Member("이름", email, password, Role.MEMBER));
 
         // when
-        TokenDto response = authService.login(new LoginRequest("test@test.com", "12341234"));
+        TokenDto response = authService.login(new LoginRequest(email, password));
 
         // then
         assertAll(

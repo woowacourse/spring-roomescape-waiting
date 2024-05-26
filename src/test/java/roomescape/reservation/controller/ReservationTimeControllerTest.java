@@ -38,13 +38,12 @@ public class ReservationTimeControllerTest {
     @LocalServerPort
     private int port;
 
-    private final Map<String, String> params = Map.of(
-            "startAt", "17:00"
-    );
-
     @Test
     @DisplayName("처음으로 등록하는 시간의 id는 1이다.")
     void firstPost() {
+        Map<String, String> params = Map.of(
+                "startAt", "17:00"
+        );
         String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
 
         RestAssured.given().log().all()
@@ -76,6 +75,9 @@ public class ReservationTimeControllerTest {
     @Test
     @DisplayName("하나의 시간만 등록한 경우, 시간 목록 조회 결과 개수는 1개이다.")
     void readTimesSizeAfterFirstPost() {
+        Map<String, String> params = Map.of(
+                "startAt", "17:00"
+        );
         String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
 
         RestAssured.given().log().all()
@@ -101,6 +103,9 @@ public class ReservationTimeControllerTest {
     @Test
     @DisplayName("하나의 시간만 등록한 경우, 시간 삭제 뒤 시간 목록 조회 결과 개수는 0개이다.")
     void readTimesSizeAfterPostAndDelete() {
+        Map<String, String> params = Map.of(
+                "startAt", "17:00"
+        );
         String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
 
         RestAssured.given().log().all()
@@ -189,14 +194,9 @@ public class ReservationTimeControllerTest {
 
     static Stream<Map<String, String>> validateBlankRequestSource() {
         return Stream.of(
-                Map.of(
-                ),
-                Map.of(
-                        "startAt", ""
-                ),
-                Map.of(
-                        "startAt", " "
-                )
+                Map.of(),
+                Map.of("startAt", ""),
+                Map.of("startAt", " ")
         );
     }
 

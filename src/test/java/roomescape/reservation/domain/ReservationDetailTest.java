@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.stream.Stream;
 
-public class ReservationTest {
+public class ReservationDetailTest {
 
     @ParameterizedTest
     @MethodSource("validateConstructorParameterBlankSource")

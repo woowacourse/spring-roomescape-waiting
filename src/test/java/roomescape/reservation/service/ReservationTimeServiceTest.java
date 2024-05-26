@@ -9,10 +9,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.DataDuplicateException;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationDetailRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
 import roomescape.theme.domain.Theme;
@@ -33,11 +32,9 @@ class ReservationTimeServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationDetailRepository reservationDetailRepository;
     @Autowired
     private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("중복된 예약 시간을 등록하는 경우 예외가 발생한다.")
@@ -58,7 +55,7 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
 
         // when
-        reservationRepository.save(new ReservationDetail(LocalDate.now().plusDays(1L), reservationTime, theme));
+        reservationDetailRepository.save(new ReservationDetail(LocalDate.now().plusDays(1L), reservationTime, theme));
 
         // then
         assertThatThrownBy(() -> reservationTimeService.removeTimeById(reservationTime.getId()))

@@ -19,7 +19,6 @@ import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -33,6 +32,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DataJpaTest
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -41,8 +41,6 @@ class ReservationServiceTest {
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    ReservationRepository reservationRepository;
     @Autowired
     ThemeRepository themeRepository;
     @Autowired
@@ -86,7 +84,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("현재 날짜가 예약 당일이지만, 이미 지난 시간으로 예약을 생성하면 예외가 발생한다")
+    @DisplayName("예약하려는 날짜가 당일일 때, 이미 지난 시간으로 예약을 생성하면 예외가 발생한다")
     void beforeTimeReservationFail() {
         // given
         LocalDateTime beforeTime = LocalDateTime.now().minusHours(1L);
@@ -134,8 +132,10 @@ class ReservationServiceTest {
         List<MemberReservation> waitingReservations = memberReservationRepository.findByStatus(ReservationStatus.WAITING);
 
         // then
-        Assertions.assertThat(reservedReservations).hasSize(2);
-        Assertions.assertThat(waitingReservations).hasSize(1);
+        assertAll(
+                () -> Assertions.assertThat(reservedReservations).hasSize(2),
+                () -> Assertions.assertThat(waitingReservations).hasSize(1)
+        );
     }
 
     @Test
@@ -165,7 +165,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 대기 요청을 수락하면, 같은 날짜/시간/테마에 이미 예약이 있어도 가능한 것으로 판단하고 하나 더 받는다.")
+    @DisplayName("예약 승인을 요청한 대기 중인 예약을 승인 시, 같은 날짜/시간/테마에 이미 예약이 있어도 가능한 것으로 판단하고 하나 더 받는다.")
     void acceptReservationWaiting() {
         // given
         LocalDateTime tomorrow = LocalDateTime.now().plusDays(1L);
@@ -183,25 +183,44 @@ class ReservationServiceTest {
         // then
         List<ReservationResponse> reservedReservations = reservationService.findReservationsByStatus(ReservationStatus.RESERVED).reservations();
         Assertions.assertThat(reservedReservations).hasSize(2);
-        Assertions.assertThat(reservedReservations.contains(waitingReservation));
+    }
+
+    @Test
+    @DisplayName("예약 승인을 요청한 대기 중인 예약이, 1순위 대기 상태가 아니라면 예약 대기 상태를 예약 상태로 변경할 수 없다.")
+    void cannotAcceptReservationWaitingBecauseReservationOrderIsNotFirst() {
+        // given
+        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1L);
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(tomorrow.toLocalTime()));
+        Theme theme1 = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Member member1 = memberRepository.save(new Member("name1", "email1@email.com", "password", Role.MEMBER));
+        Member member2 = memberRepository.save(new Member("name2", "email2@email.com", "password", Role.MEMBER));
+        Member member3 = memberRepository.save(new Member("name3", "email3@email.com", "password", Role.MEMBER));
+
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member1.getId(), ReservationStatus.RESERVED);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member2.getId(), ReservationStatus.WAITING);
+        ReservationResponse waitingReservation = reservationService.addMemberReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member3.getId(), ReservationStatus.WAITING);
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> reservationService.approveWaitingReservation(waitingReservation.id()))
+                .isInstanceOf(ValidateException.class);
+
     }
 
     @Test
     @DisplayName("이미 예약이 존재하는 날짜/시간/테마에 예약 생성을 수행하면 예외가 발생한다.")
     void validateDateTimeThemeDuplication() {
         // given
-        Member member1 = memberRepository.save(new Member("이름", "member1@admin.com", "12341234", Role.MEMBER));
-
+        Member firstReserveMember = memberRepository.save(new Member("회원1", "member1@member.com", "12341234", Role.MEMBER));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId(), ReservationStatus.RESERVED);
-
-        Member member2 = memberRepository.save(new Member("이름", "member2@admin.com", "12341234", Role.MEMBER));
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), firstReserveMember.getId(), ReservationStatus.RESERVED);
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member2.getId(), ReservationStatus.RESERVED))
+        Member afterReserveMember = memberRepository.save(new Member("회원2", "member2@member.com", "12341234", Role.MEMBER));
+
+        Assertions.assertThatThrownBy(() -> reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), afterReserveMember.getId(), ReservationStatus.RESERVED))
                 .isInstanceOf(DataDuplicateException.class);
     }
 }

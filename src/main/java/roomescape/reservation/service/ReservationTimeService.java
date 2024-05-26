@@ -7,7 +7,7 @@ import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.DataDuplicateException;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationDetailRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
@@ -19,11 +19,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationDetailRepository reservationDetailRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationDetailRepository reservationDetailRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+        this.reservationDetailRepository = reservationDetailRepository;
     }
 
     public ReservationTimesResponse findAllTimes() {
@@ -55,7 +55,7 @@ public class ReservationTimeService {
     @Transactional
     public void removeTimeById(final Long id) {
         ReservationTime reservationTime = reservationTimeRepository.getById(id);
-        List<ReservationDetail> usingTimeReservations = reservationRepository.findByReservationTime(reservationTime);
+        List<ReservationDetail> usingTimeReservations = reservationDetailRepository.findByReservationTime(reservationTime);
         if (usingTimeReservations.size() > 0) {
             throw new AssociatedDataExistsException(ErrorType.TIME_IS_USED_CONFLICT,
                     String.format("해당 예약 시간(ReservationTime) 에 예약이 존재하여 시간을 삭제할 수 없습니다. [timeId: %d]", id));

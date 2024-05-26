@@ -67,7 +67,7 @@ public class AuthControllerTest {
         // given
         String email = "test@test.com";
         String password = "12341234";
-        String accessTokenCookie = getAccessTokenCookieByLogin(email, password);
+        String accessTokenCookie = loginAndGetAccessTokenCookie(email, password);
 
         // when & then
         RestAssured.given().log().all()
@@ -95,14 +95,10 @@ public class AuthControllerTest {
     @DisplayName("회원가입을 하면 jwt AccessToken과 RefreshToken 을 Response한다.")
     void getJwtAccessTokenWhenSignup() {
         // given
-        String name = "이름";
-        String email = "test@email.com";
-        String password = "12341234";
-
         Map<String, String> signupParams = Map.of(
-                "name", name,
-                "email", email,
-                "password", password
+                "name", "이름",
+                "email", "test@email.com",
+                "password", "12341234"
         );
 
         // when
@@ -149,7 +145,7 @@ public class AuthControllerTest {
         // given
         String email = "test@email.com";
         String password = "12341234";
-        List<String> jwtTokensCookie = getJwtTokensCookie(email, password);
+        List<String> jwtTokensCookie = saveMemberAndGetJwtTokenCookies(email, password);
         String accessToken = jwtTokensCookie.get(0);
         String refreshToken = jwtTokensCookie.get(1);
 
@@ -177,31 +173,29 @@ public class AuthControllerTest {
         // given
         String email = "test@email.com";
         String password = "12341234";
-        List<String> jwtTokensCookie = getJwtTokensCookie(email, password);
-        String accessTokenCookie = jwtTokensCookie.get(0);
-        String refreshTokenCookie = jwtTokensCookie.get(1);
+        List<String> jwtTokensCookie = saveMemberAndGetJwtTokenCookies(email, password);
+        String oldAccessToken = jwtTokensCookie.get(0);
+        String oldRefreshToken = jwtTokensCookie.get(1);
+
 
         Map<String, String> cookies = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", accessTokenCookie))
-                .header(new Header("Cookie", refreshTokenCookie))
+                .header(new Header("Cookie", oldAccessToken))
+                .header(new Header("Cookie", oldRefreshToken))
                 .port(port)
                 .when().get("/token-reissue")
                 .then().statusCode(200).log().all()
                 .extract().cookies();
-
         String newAccessToken = cookies.get("accessToken");
         String newRefreshToken = cookies.get("accessToken");
 
-        String olderAccessToken = accessTokenCookie.substring("accessToken=".length());
-        String olderRefreshToken = accessTokenCookie.substring("refreshToken=".length());
-
         // then
-        Assertions.assertThat(newAccessToken).isNotEqualTo(olderRefreshToken);
-        Assertions.assertThat(newRefreshToken).isNotEqualTo(olderRefreshToken);
+        Assertions.assertThat(newAccessToken).isNotEqualTo(oldRefreshToken);
+        Assertions.assertThat(newRefreshToken).isNotEqualTo(oldRefreshToken);
     }
 
-    private List<String> getJwtTokensCookie(final String email, final String password) {
+    // TEST
+    private List<String> saveMemberAndGetJwtTokenCookies(final String email, final String password) {
         memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(
@@ -226,7 +220,8 @@ public class AuthControllerTest {
         return tokens;
     }
 
-    private String getAccessTokenCookieByLogin(final String email, final String password) {
+    // TEST
+    private String loginAndGetAccessTokenCookie(final String email, final String password) {
         memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(

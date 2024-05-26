@@ -14,7 +14,7 @@ public record ReservationResponse(Long id, LocalDate date,
                                   @JsonProperty("theme") ThemeResponse theme) {
 
     public static ReservationResponse from(final MemberReservation memberReservation) {
-        ReservationDetail reservation = memberReservation.getReservation();
+        ReservationDetail reservation = memberReservation.getReservationDetail();
         return new ReservationResponse(
                 memberReservation.getId(),
                 reservation.getDate(),

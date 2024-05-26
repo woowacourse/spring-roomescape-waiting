@@ -23,7 +23,7 @@ public class MemberReservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
-    private ReservationDetail reservation;
+    private ReservationDetail reservationDetail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -36,16 +36,16 @@ public class MemberReservation {
     public MemberReservation() {
     }
 
-    public MemberReservation(final ReservationDetail reservation, final Member member, final ReservationStatus status) {
-        this.reservation = reservation;
+    public MemberReservation(final ReservationDetail reservationDetail, final Member member, final ReservationStatus status) {
+        this.reservationDetail = reservationDetail;
         this.member = member;
         this.status = status;
         validateNotNull();
     }
 
     private void validateNotNull() {
-        if (reservation == null || member == null || status == null) {
-            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약 대기(MemberReservation) 생성에 null이 입력되었습니다.");
+        if (reservationDetail == null || member == null || status == null) {
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약 대기(MemberReservation) 생성 값(reservationDetail, member, status)에 null이 입력되었습니다.");
         }
     }
 
@@ -61,8 +61,8 @@ public class MemberReservation {
         return id;
     }
 
-    public ReservationDetail getReservation() {
-        return reservation;
+    public ReservationDetail getReservationDetail() {
+        return reservationDetail;
     }
 
     public Member getMember() {
@@ -75,5 +75,15 @@ public class MemberReservation {
 
     public void changeStatusToReserve() {
         this.status = ReservationStatus.RESERVED;
+    }
+
+    @Override
+    public String toString() {
+        return "MemberReservation{" +
+                "id=" + id +
+                ", reservationDetail=" + reservationDetail +
+                ", member=" + member +
+                ", status=" + status +
+                '}';
     }
 }

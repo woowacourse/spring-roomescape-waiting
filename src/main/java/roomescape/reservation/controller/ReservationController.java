@@ -88,18 +88,6 @@ public class ReservationController {
     }
 
     @Auth
-    @DeleteMapping("/reservations/{memberReservationId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ApiResponse<Void> removeReservation(
-            @MemberId final Long memberId,
-            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
-    ) {
-        reservationService.removeMemberReservationById(memberReservationId, memberId);
-
-        return ApiResponse.success();
-    }
-
-    @Auth
     @PostMapping("/reservations/waitings")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ReservationResponse> requestReservationWaiting(
@@ -112,6 +100,18 @@ public class ReservationController {
 
         response.setHeader(HttpHeaders.LOCATION, "/reservations/waitings/" + reservationResponse.id());
         return ApiResponse.success(reservationResponse);
+    }
+
+    @Auth
+    @DeleteMapping("/reservations/{memberReservationId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ApiResponse<Void> removeReservation(
+            @MemberId final Long memberId,
+            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
+    ) {
+        reservationService.removeMemberReservationById(memberReservationId, memberId);
+
+        return ApiResponse.success();
     }
 
     @Auth
