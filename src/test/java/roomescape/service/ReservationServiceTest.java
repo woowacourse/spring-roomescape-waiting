@@ -15,9 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationWithRank;
+import roomescape.fixture.MemberFixture;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.system.exception.RoomescapeException;
 
@@ -140,8 +142,9 @@ class ReservationServiceTest {
     @Test
     void deleteWaiting() {
         // given
+        Member user = MemberFixture.createUserWithIdTwo();
         // when
-        reservationService.deleteWaiting(2L, 6L);
+        reservationService.deleteWaiting(user, 6L);
         //then
         assertThat(reservationService.findAll()).hasSize(5);
     }
@@ -149,8 +152,10 @@ class ReservationServiceTest {
     @DisplayName("실패: 대기가 아닌 예약을 삭제 시도시 예외 발생.")
     @Test
     void deleteWaiting_NotWaiting() {
+        // given
+        Member user = MemberFixture.createUserWithIdTwo();
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteWaiting(1L, 1L))
+        assertThatThrownBy(() -> reservationService.deleteWaiting(user, 1L))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("대기가 아닌 예약은 삭제할 수 없습니다.");
     }
@@ -158,8 +163,10 @@ class ReservationServiceTest {
     @DisplayName("실패: 내 예약이 아닌 대기를 삭제 시도시 예외 발생.")
     @Test
     void deleteWaiting_NotMine() {
+        // given
+        Member user = MemberFixture.createUserWithIdThree();
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteWaiting(1L, 6L))
+        assertThatThrownBy(() -> reservationService.deleteWaiting(user, 6L))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("다른 유저의 예약 대기는 삭제할 수 없습니다.");
     }

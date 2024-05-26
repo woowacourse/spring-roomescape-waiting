@@ -142,11 +142,14 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public void deleteWaiting(Long memberId, Long id) {
+    public void deleteWaiting(Member member, Long id) {
         Reservation reservation = reservationRepository.findById(id)
             .orElseThrow(() -> new RoomescapeException("주어진 id에 해당하는 예약대기가 존재하지 않습니다."));
         reservation.validateNotWaiting();
-        reservation.validateNotMyWaiting(memberId);
+
+        if (member.isNotAdmin()) {
+            reservation.validateNotMyWaiting(member.getId());
+        }
 
         reservationRepository.deleteById(id);
     }

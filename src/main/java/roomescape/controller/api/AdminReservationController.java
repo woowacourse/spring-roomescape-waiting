@@ -17,8 +17,10 @@ import roomescape.controller.dto.CreateReservationRequest;
 import roomescape.controller.dto.CreateReservationResponse;
 import roomescape.controller.dto.FindReservationResponse;
 import roomescape.controller.dto.FindWaitingReservationResponse;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.service.ReservationService;
+import roomescape.system.argumentresolver.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -81,5 +83,11 @@ public class AdminReservationController {
             .map(reservation -> FindWaitingReservationResponse.from(reservation))
             .toList();
         return ResponseEntity.ok(responses);
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@AuthenticationPrincipal Member member, @PathVariable Long id) {
+        reservationService.deleteWaiting(member, id);
+        return ResponseEntity.noContent().build();
     }
 }

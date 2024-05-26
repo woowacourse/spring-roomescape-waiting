@@ -74,7 +74,7 @@ public class UserReservationController {
     public ResponseEntity<Void> deleteReservationWaiting(
         @PathVariable Long id,
         @AuthenticationPrincipal Member member) {
-        reservationService.deleteWaiting(member.getId(), id);
+        reservationService.deleteWaiting(member, id);
 
         return ResponseEntity.noContent().build();
     }

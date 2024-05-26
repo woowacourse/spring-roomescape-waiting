@@ -131,4 +131,20 @@ class AdminReservationControllerTest {
             .statusCode(200)
             .body("size()", is(0));
     }
+
+    @DisplayName("성공: 예약 대기 삭제 -> 204")
+    @Test
+    void deleteWaitingReservation() {
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .when().delete("/admin/reservations/waiting/6")
+            .then().log().all()
+            .statusCode(204);
+
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .when().get("/admin/reservations/waiting")
+            .then().log().all()
+            .body("size()", is(0));
+    }
 }

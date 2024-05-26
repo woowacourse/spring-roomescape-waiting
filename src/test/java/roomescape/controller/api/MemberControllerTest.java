@@ -22,6 +22,6 @@ class MemberControllerTest {
             .when().get("/members")
             .then().log().all()
             .statusCode(200)
-            .body("id", contains(1, 2));
+            .body("id", contains(1, 2, 3));
     }
 }
