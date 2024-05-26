@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -25,15 +24,22 @@ public class DatabaseInitializer {
     }
 
     public void execute() {
-        Member member = createMember();
+        Member admin = createAdmin();
+        Member user = createUser();
         ReservationTime time = createTime();
         Theme theme = createTheme();
-        Reservation reservation = createReservation(member, time, theme);
-        Waiting waiting = createWaiting(member, time, theme);
+        createReservation(admin, user, time, theme);
+        createWaiting(admin, user, time, theme);
     }
 
-    private Member createMember() {
+    private Member createAdmin() {
         Member member = new Member("어드민", "admin@email.com", "password", MemberRole.ADMIN);
+        entityManager.persist(member);
+        return member;
+    }
+
+    private Member createUser() {
+        Member member = new Member("유저", "user@email.com", "password", MemberRole.USER);
         entityManager.persist(member);
         return member;
     }
@@ -51,16 +57,15 @@ public class DatabaseInitializer {
         return theme;
     }
 
-    private Reservation createReservation(Member member, ReservationTime time, Theme theme) {
-        Reservation reservation = new Reservation(LocalDate.of(2024, 8, 5), member, time, theme,
-                ReservationStatus.BOOKED);
-        entityManager.persist(reservation);
-        return reservation;
+    private void createReservation(Member admin, Member user, ReservationTime time, Theme theme) {
+        Reservation reservation1 = new Reservation(LocalDate.of(2024, 8, 5), admin, time, theme);
+        Reservation reservation2 = new Reservation(LocalDate.of(2024, 8, 6), admin, time, theme);
+        entityManager.persist(reservation1);
+        entityManager.persist(reservation2);
     }
 
-    private Waiting createWaiting(Member member, ReservationTime time, Theme theme) {
-        Waiting waiting = new Waiting(LocalDate.of(2024, 8, 5), member, time, theme);
+    private void createWaiting(Member admin, Member user, ReservationTime time, Theme theme) {
+        Waiting waiting = new Waiting(LocalDate.of(2024, 8, 6), user, time, theme);
         entityManager.persist(waiting);
-        return waiting;
     }
 }

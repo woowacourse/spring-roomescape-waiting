@@ -38,9 +38,8 @@ public class ReservationRequest {
         }
     }
 
-    public Reservation toReservation(Member member, ReservationTime reservationTime, Theme theme,
-                                     ReservationStatus status) {
-        return new Reservation(date, member, reservationTime, theme, status);
+    public Reservation toReservation(Member member, ReservationTime reservationTime, Theme theme) {
+        return new Reservation(date, member, reservationTime, theme);
     }
 
     public LocalDate getDate() {

@@ -67,7 +67,7 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + response.getId())).body(response);
     }
 
-    @RoleAllowed(value = MemberRole.ADMIN)
+    @RoleAllowed
     @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId) {
         reservationService.deleteReservation(reservationId);

@@ -92,6 +92,7 @@ class ThemeIntegrationTest extends IntegrationTest {
         @Test
         void 테마를_삭제할_수_있다() {
             jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", 1);
+            jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", 2);
             jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", 1);
 
             RestAssured.given().log().all()

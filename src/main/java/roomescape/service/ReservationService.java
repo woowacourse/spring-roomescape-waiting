@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -15,6 +16,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
+import roomescape.domain.Waiting;
 import roomescape.domain.WaitingRepository;
 import roomescape.domain.WaitingWithRank;
 import roomescape.exception.reservation.DuplicatedReservationException;
@@ -79,7 +81,7 @@ public class ReservationService {
         validateDateTimeReservation(request, time);
         validateDuplicateReservation(request);
 
-        Reservation reservation = request.toReservation(member, time, theme, ReservationStatus.BOOKED);
+        Reservation reservation = request.toReservation(member, time, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
@@ -102,6 +104,20 @@ public class ReservationService {
     public void deleteReservation(long id) {
         Reservation reservation = findReservationById(id);
         reservationRepository.delete(reservation);
+
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                ReservationStatus.WAITING
+        );
+
+        if (waiting.isPresent()) {
+            Waiting firstWaiting = waiting.get();
+            waitingRepository.delete(firstWaiting);
+            Reservation autoReservation = new Reservation(firstWaiting.getDate(), firstWaiting.getMember(), firstWaiting.getTime(), firstWaiting.getTheme());
+            reservationRepository.save(autoReservation);
+        }
     }
 
     private Reservation findReservationById(long id) {

@@ -37,8 +37,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
-        this(null, date, member, time, theme, status);
+    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme) {
+        this(null, date, member, time, theme, ReservationStatus.BOOKED);
     }
 
     public Long getId() {
