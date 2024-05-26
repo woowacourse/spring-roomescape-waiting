@@ -6,52 +6,18 @@ import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.THEME1;
 import static roomescape.TestFixture.THEME2;
 
-import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import roomescape.DBTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ThemeRepositoryTest {
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ReservationTimeRepository timeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAllInBatch();
-        themeRepository.deleteAllInBatch();
-        timeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-    }
+class ThemeRepositoryTest extends DBTest {
 
     @DisplayName("특정 기간동안 가장 많이 예약된 테마를 갯수만큼 조회한다.")
     @Test

@@ -5,35 +5,13 @@ import static roomescape.TestFixture.MEMBER1;
 import static roomescape.TestFixture.MEMBER1_EMAIL;
 import static roomescape.TestFixture.MEMBER1_PASSWORD;
 
-import io.restassured.RestAssured;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import roomescape.DBTest;
 import roomescape.domain.Member;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class MemberRepositoryTest {
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        memberRepository.deleteAllInBatch();
-    }
+class MemberRepositoryTest extends DBTest {
 
     @DisplayName("아이디와 비밀번호로 회원을 조회한다.")
     @Test
