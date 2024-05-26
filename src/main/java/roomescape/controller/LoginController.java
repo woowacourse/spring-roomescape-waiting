@@ -59,7 +59,7 @@ public class LoginController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<MemberResponse>> readMembers() {
+    public ResponseEntity<List<MemberResponse>> findAllMembers() {
         List<MemberResponse> members = memberService.findAll();
         return ResponseEntity.ok(members);
     }

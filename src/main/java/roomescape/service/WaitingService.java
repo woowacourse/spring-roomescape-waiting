@@ -41,7 +41,7 @@ public class WaitingService {
         return WaitingResponse.from(createdWaiting);
     }
 
-    public List<WaitingResponse> findEntireReservationList() {
+    public List<WaitingResponse> findEntireReservations() {
         return waitingRepository.findAll()
                 .stream()
                 .map(WaitingResponse::from)

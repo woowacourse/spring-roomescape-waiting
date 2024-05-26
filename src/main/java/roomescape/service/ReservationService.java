@@ -31,7 +31,7 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
-    public List<ReservationResponse> findEntireReservationList() {
+    public List<ReservationResponse> findAllReservations() {
         return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)

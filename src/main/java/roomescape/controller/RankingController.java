@@ -19,7 +19,7 @@ public class RankingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> read() {
-        return ResponseEntity.ok(rankService.getPopularThemeList());
+    public ResponseEntity<List<ThemeResponse>> findTenPopularThemes() {
+        return ResponseEntity.ok(rankService.getPopularThemes());
     }
 }

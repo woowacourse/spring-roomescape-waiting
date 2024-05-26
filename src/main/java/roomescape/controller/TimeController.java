@@ -25,7 +25,7 @@ public class TimeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TimeSlotResponse>> findAll() {
+    public ResponseEntity<List<TimeSlotResponse>> findAllTimeSlots() {
         List<TimeSlotResponse> timeSlots = timeService.findAll();
         return ResponseEntity.ok(timeSlots);
     }

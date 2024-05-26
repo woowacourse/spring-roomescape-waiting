@@ -18,7 +18,7 @@ public class RankService {
         this.themeRepository = themeRepository;
     }
 
-    public List<ThemeResponse> getPopularThemeList() {
+    public List<ThemeResponse> getPopularThemes() {
         LocalDate currentDate = LocalDate.now();
 
         Pageable pageable = PageRequest.of(0, 10);

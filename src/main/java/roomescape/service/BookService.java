@@ -26,7 +26,7 @@ public class BookService {
         this.timeSlotRepository = timeSlotRepository;
     }
 
-    public List<BookResponse> findAvaliableBookList(LocalDate date, Long themeId) {
+    public List<BookResponse> findAvaliableBooks(LocalDate date, Long themeId) {
         Theme theme = findThemeById(themeId);
         List<Reservation> reservations = reservationRepository.findAllByDateAndTheme(date, theme);
         List<TimeSlot> timeSlots = timeSlotRepository.findAll();

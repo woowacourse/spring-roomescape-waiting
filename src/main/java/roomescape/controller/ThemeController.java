@@ -25,7 +25,7 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> findAll() {
+    public ResponseEntity<List<ThemeResponse>> findAllThemes() {
         List<ThemeResponse> timeSlots = themeService.findAll();
         return ResponseEntity.ok(timeSlots);
     }
