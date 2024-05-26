@@ -34,46 +34,26 @@ public class CreateReservationService {
     public Long addReservation(ReservationRequest request) {
         Reservation reservation = convertReservation(request);
         validateReservationNotDuplicate(reservation);
+
         return reservationRepository.save(reservation).getId();
     }
 
     private Reservation convertReservation(ReservationRequest request) {
-        ReservationTime reservationTime = findReservationTime(request.timeId());
-        Theme theme = findTheme(request.themeId());
-        Member member = findMember(request.memberId());
+        ReservationTime reservationTime = timeRepository.getById(request.timeId());
+        Theme theme = themeRepository.getById(request.themeId());
+        Member member = memberRepository.getById(request.memberId());
+
         return request.toEntity(reservationTime, theme, member);
     }
 
-    private ReservationTime findReservationTime(Long timeId) {
-        return timeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 예약시간 정보 입니다.",
-                        new Throwable("time_id : " + timeId)
-                ));
-    }
-
-    private Theme findTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 테마 정보 입니다.",
-                        new Throwable("theme_id : " + themeId)
-                ));
-    }
-
-    private Member findMember(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 사용자 정보 입니다.",
-                        new Throwable("member_id : " + memberId)
-                ));
-    }
-
     private void validateReservationNotDuplicate(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+        boolean alreadyBooked = reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
                 reservation.getTimeId(),
-                reservation.getThemeId())
-        ) {
+                reservation.getThemeId()
+        );
+
+        if (alreadyBooked) {
             throw new IllegalArgumentException(
                     "[ERROR] 해당 시간에 동일한 테마가 예약되어있어 예약이 불가능합니다.",
                     new Throwable("생성 예약 정보 : " + reservation)

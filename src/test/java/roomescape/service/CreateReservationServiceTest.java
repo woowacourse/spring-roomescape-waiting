@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -47,7 +48,7 @@ class CreateReservationServiceTest {
 
         //when, then
         assertThatThrownBy(() -> createReservationService.addReservation(reservationRequest))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -61,7 +62,7 @@ class CreateReservationServiceTest {
 
         //when, then
         assertThatThrownBy(() -> createReservationService.addReservation(reservationRequest))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

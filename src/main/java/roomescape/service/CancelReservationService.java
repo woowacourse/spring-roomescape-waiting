@@ -21,17 +21,9 @@ public class CancelReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = findReservationById(id);
+        Reservation reservation = reservationRepository.getById(id);
         Optional<Waiting> priorityWaiting = waitingRepository.findFirstByReservationOrderByIdAsc(reservation);
         priorityWaiting.ifPresentOrElse(this::approve, () -> delete(reservation));
-    }
-
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 예약 정보 입니다.",
-                        new Throwable("reservation_id : " + id)
-                ));
     }
 
     private void approve(Waiting waiting) {

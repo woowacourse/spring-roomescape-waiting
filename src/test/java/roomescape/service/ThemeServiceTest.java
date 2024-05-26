@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ class ThemeServiceTest {
         Long notExistIdToFind = allTheme.size() + 1L;
 
         //when, then
-        assertThatThrownBy(() -> themeService.getTheme(notExistIdToFind)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> themeService.getTheme(notExistIdToFind)).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

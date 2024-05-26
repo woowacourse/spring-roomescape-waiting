@@ -37,12 +37,12 @@ public class ReservationQueryService {
     }
 
     public ReservationResponse getReservation(Long id) {
-        Reservation reservation = findReservationById(id);
+        Reservation reservation = reservationRepository.getById(id);
         return ReservationResponse.from(reservation);
     }
 
     public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
-        Member member = findMember(memberId);
+        Member member = memberRepository.getById(memberId);
         List<UserReservationResponse> userWaitings = waitingRepository.findWaitingsWithSequenceByMember(member).stream()
                 .map(UserReservationResponse::from)
                 .toList();
@@ -69,21 +69,5 @@ public class ReservationQueryService {
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
-    }
-
-    private Member findMember(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 사용자 정보 입니다.",
-                        new Throwable("member_id : " + memberId)
-                ));
-    }
-
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 예약 정보 입니다.",
-                        new Throwable("reservation_id : " + id)
-                ));
     }
 }

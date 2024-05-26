@@ -38,50 +38,30 @@ public class WaitingService {
     }
 
     public Long addWaiting(WaitingRequest waitingRequest) {
-        Member member = findMember(waitingRequest.memberId());
-        Reservation reservation = findReservation(waitingRequest);
+        Member member = memberRepository.getById(waitingRequest.memberId());
+        Reservation reservation = reservationRepository.getByDateAndTimeIdAndThemeId(
+                waitingRequest.date(),
+                waitingRequest.timeId(),
+                waitingRequest.themeId()
+        );
+
         Waiting waiting = new Waiting(member, reservation);
         waitingRepository.save(waiting);
-
         return waiting.getId();
     }
 
     public void deleteWaiting(Long id, LoginMember loginMember) {
-        Waiting waiting = findWaiting(id);
-        Member member = findMember(loginMember.id());
+        Waiting waiting = waitingRepository.getById(id);
+        Member member = memberRepository.getById(loginMember.id());
         validateWaitingOwner(member, waiting);
 
         waitingRepository.delete(waiting);
     }
 
     public void deleteWaitingByAdmin(Long id) {
-        Waiting waiting = findWaiting(id);
+        Waiting waiting = waitingRepository.getById(id);
 
         waitingRepository.delete(waiting);
-    }
-
-    private Reservation findReservation(WaitingRequest waitingRequest) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(
-                waitingRequest.date(),
-                waitingRequest.timeId(),
-                waitingRequest.themeId()
-        ).orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 예약입니다."));
-    }
-
-    private Member findMember(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 사용자 정보 입니다.",
-                        new Throwable("member_id : " + memberId)
-                ));
-    }
-
-    private Waiting findWaiting(Long waitingId) {
-        return waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 예약 대기 정보 입니다.",
-                        new Throwable("waiting_id : " + waitingId)
-                ));
     }
 
     private void validateWaitingOwner(Member member, Waiting waiting) {

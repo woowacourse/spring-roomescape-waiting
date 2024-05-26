@@ -18,31 +18,31 @@ import roomescape.repository.ReservationTimeRepository;
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeRepository timeRepository;
 
     public ReservationTimeService(
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository
+            ReservationTimeRepository timeRepository
     ) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
+        this.timeRepository = timeRepository;
     }
 
     public Long addReservationTime(ReservationTimeRequest reservationTimeRequest) {
         validateTimeDuplicate(reservationTimeRequest.startAt());
         ReservationTime reservationTime = reservationTimeRequest.toEntity();
-        return reservationTimeRepository.save(reservationTime).getId();
+        return timeRepository.save(reservationTime).getId();
     }
 
     public List<ReservationTimeResponse> getAllReservationTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> reservationTimes = timeRepository.findAll();
         return reservationTimes.stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public ReservationTimeResponse getReservationTime(Long id) {
-        ReservationTime reservationTime = findTimeById(id);
+        ReservationTime reservationTime = timeRepository.getById(id);
         return ReservationTimeResponse.from(reservationTime);
     }
 
@@ -60,7 +60,7 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTime(Long id) {
-        ReservationTime reservationTime = findTimeById(id);
+        ReservationTime reservationTime = timeRepository.getById(id);
         validateDeletable(reservationTime);
         reservationRepository.deleteById(reservationTime.getId());
     }
@@ -79,10 +79,10 @@ public class ReservationTimeService {
                 .toList();
 
         if (bookedTimeIds.isEmpty()) {
-            return reservationTimeRepository.findAll();
+            return timeRepository.findAll();
         }
 
-        return reservationTimeRepository.findByIdNotIn(bookedTimeIds);
+        return timeRepository.findByIdNotIn(bookedTimeIds);
     }
 
     private List<AvailableTimeResponse> concatTimeResponses(
@@ -98,20 +98,12 @@ public class ReservationTimeService {
     }
 
     private void validateTimeDuplicate(LocalTime time) {
-        if (reservationTimeRepository.existsByStartAt(time)) {
+        if (timeRepository.existsByStartAt(time)) {
             throw new IllegalArgumentException(
                     "[ERROR] 이미 등록된 시간은 등록할 수 없습니다.",
                     new Throwable("등록 시간 : " + time)
             );
         }
-    }
-
-    private ReservationTime findTimeById(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 잘못된 예약시간 정보 입니다.",
-                        new Throwable("time_id : " + timeId)
-                ));
     }
 
     private void validateDeletable(ReservationTime reservationTime) {

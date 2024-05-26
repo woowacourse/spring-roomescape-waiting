@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,10 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithSequence;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
+
+    default Waiting getById(Long id) {
+        return findById(id).orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 대기입니다."));
+    }
 
     @EntityGraph(attributePaths = {"member", "reservation"})
     List<Waiting> findAll();

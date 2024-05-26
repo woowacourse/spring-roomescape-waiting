@@ -1,5 +1,6 @@
 package roomescape.web.exception;
 
+import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.http.HttpStatus;
@@ -20,11 +21,11 @@ class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
-    @ExceptionHandler(value = IllegalArgumentException.class)
-    private ProblemDetail handleIllegalArgumentException(IllegalArgumentException e) {
+    @ExceptionHandler(value = {IllegalArgumentException.class, NoSuchElementException.class})
+    private ProblemDetail handleIllegalArgumentException(RuntimeException e) {
         Throwable cause = e.getCause();
         if (cause != null) {
-            logger.log(Level.SEVERE, "[IllegalArgumentException] " + cause.getMessage());
+            logger.log(Level.SEVERE, "[" + e.getClass().getSimpleName() + "]" + cause.getMessage());
         }
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }

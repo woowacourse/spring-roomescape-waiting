@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ class WaitingServiceTest {
 
         //when, then
         assertThatThrownBy(() -> waitingService.addWaiting(waitingRequest))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -61,7 +62,7 @@ class WaitingServiceTest {
 
         //when, then
         assertThatThrownBy(() -> waitingService.addWaiting(waitingRequest))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -99,7 +100,7 @@ class WaitingServiceTest {
 
         // when, then
         assertThatThrownBy(() -> waitingService.deleteWaiting(0L, loginMember))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
