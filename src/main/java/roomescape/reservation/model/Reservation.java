@@ -2,8 +2,6 @@ package roomescape.reservation.model;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,9 +18,6 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
-
     @Embedded
     private ReservationDate date;
 
@@ -36,18 +31,16 @@ public class Reservation {
     private Member member;
 
     public static Reservation of(
-            final ReservationStatus status,
             final LocalDate date,
             final ReservationTime time,
             final Theme theme,
             final Member member
     ) {
-        checkRequiredData(status, time, theme, member);
+        checkRequiredData(time, theme, member);
 
         final ReservationDate reservationDate = new ReservationDate(date);
         return new Reservation(
                 null,
-                status,
                 reservationDate,
                 time,
                 theme,
@@ -56,29 +49,26 @@ public class Reservation {
     }
 
     private static void checkRequiredData(
-            final ReservationStatus status,
             final ReservationTime reservationTime,
             final Theme theme,
             final Member member
     ) {
-        if (status == null || reservationTime == null || theme == null || member == null) {
-            throw new IllegalArgumentException("예약 상태, 시간, 테마, 회원 정보는 Null을 입력할 수 없습니다.");
+        if (reservationTime == null || theme == null || member == null) {
+            throw new IllegalArgumentException("시간, 테마, 회원 정보는 Null을 입력할 수 없습니다.");
         }
     }
 
     public static Reservation of(
             final Long id,
-            final ReservationStatus status,
             final LocalDate date,
             final ReservationTime time,
             final Theme theme,
             final Member member
     ) {
-        checkRequiredData(status, time, theme, member);
+        checkRequiredData(time, theme, member);
 
         return new Reservation(
                 id,
-                status,
                 new ReservationDate(date),
                 time,
                 theme,
@@ -91,14 +81,12 @@ public class Reservation {
 
     private Reservation(
             final Long id,
-            final ReservationStatus status,
             final ReservationDate date,
             final ReservationTime time,
             final Theme theme,
             final Member member
     ) {
         this.id = id;
-        this.status = status;
         this.date = date;
         this.time = time;
         this.theme = theme;
@@ -123,10 +111,6 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 
     public void setMember(Member member) {
