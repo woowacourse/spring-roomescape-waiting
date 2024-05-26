@@ -1,8 +1,9 @@
 package roomescape.domain.reservation;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import roomescape.domain.reservationdetail.ReservationDetail;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservationdetail.ReservationDetail;
 import roomescape.exception.reservation.DuplicatedReservationException;
 
 @RequiredArgsConstructor
@@ -16,7 +17,8 @@ public class ReservationFactory {
     }
 
     private void rejectPastReservation(ReservationDetail detail) {
-        if (detail.isBeforeNow()) {
+        LocalDateTime now = LocalDateTime.now();
+        if (detail.isBefore(now)) {
             throw new IllegalArgumentException(String.format("이미 지난 시간입니다. 입력한 예약 시간: %s", detail.getDateTime()));
         }
     }

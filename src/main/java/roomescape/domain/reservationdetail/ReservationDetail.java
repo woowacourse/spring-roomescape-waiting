@@ -41,8 +41,9 @@ public class ReservationDetail {
         this(null, date, time, theme);
     }
 
-    public boolean isBeforeNow() {
-        return date.isBefore(LocalDate.now());
+    public boolean isBefore(LocalDateTime dateTime) {
+        return LocalDateTime.of(date, time.getStartAt())
+                .isBefore(dateTime);
     }
 
     public LocalDateTime getDateTime() {
