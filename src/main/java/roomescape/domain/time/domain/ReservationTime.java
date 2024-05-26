@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name = "reservation_time")
@@ -23,6 +24,12 @@ public class ReservationTime {
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
+    }
+
+    public boolean isBooked(List<ReservationTime> bookedTimes) {
+        return bookedTimes.stream()
+                .map(ReservationTime::getId)
+                .anyMatch(bookedTimeId -> bookedTimeId.equals(this.id));
     }
 
     public Long getId() {

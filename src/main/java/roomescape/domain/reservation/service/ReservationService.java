@@ -71,7 +71,7 @@ public class ReservationService {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
 
         return allTimes.stream()
-                .map(time -> new BookableTimeResponse(time.getStartAt(), time.getId(), isBookedTime(bookedTimes, time)))
+                .map(time -> new BookableTimeResponse(time.getStartAt(), time.getId(), time.isBooked(bookedTimes)))
                 .toList();
     }
 
@@ -117,11 +117,6 @@ public class ReservationService {
         reservationRepository.save(changedReservation);
 
         return changedReservation;
-    }
-
-    private boolean isBookedTime(List<ReservationTime> bookedTimes, ReservationTime time) {
-        return bookedTimes.stream()
-                .anyMatch(bookedTime -> bookedTime.getId().equals(time.getId()));
     }
 
     private Reservation findReservationById(Long id) {
