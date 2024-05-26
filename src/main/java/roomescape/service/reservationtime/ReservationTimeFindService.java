@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatuses;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeStatuses;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
@@ -24,12 +24,12 @@ public class ReservationTimeFindService {
         return reservationTimeRepository.findAll();
     }
 
-    public ReservationStatuses findReservationStatuses(LocalDate date, long themeId) {
+    public ReservationTimeStatuses findReservationStatuses(LocalDate date, long themeId) {
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         List<ReservationTime> reservedTimes = reservations.stream()
                 .map(Reservation::getReservationTime)
                 .toList();
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return ReservationStatuses.of(reservedTimes, reservationTimes);
+        return ReservationTimeStatuses.of(reservedTimes, reservationTimes);
     }
 }

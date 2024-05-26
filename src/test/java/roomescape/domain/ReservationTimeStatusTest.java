@@ -7,10 +7,11 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationStatuses;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeStatus;
+import roomescape.domain.reservationtime.ReservationTimeStatuses;
 
-class ReservationStatusTest {
+class ReservationTimeStatusTest {
 
     @Test
     @DisplayName("예약된 시간과 전체 시간을 비교하여 예약 여부를 구한다.")
@@ -22,8 +23,8 @@ class ReservationStatusTest {
                 reservationTime1,
                 reservationTime2
         );
-        List<ReservationStatus> reservationStatuses = ReservationStatuses.of(reservedTimes, reservationTimes)
-                .getReservationStatuses();
+        List<ReservationTimeStatus> reservationStatuses = ReservationTimeStatuses.of(reservedTimes, reservationTimes)
+                .getReservationTimeStatuses();
 
         assertAll(
                 () -> assertThat(reservationStatuses.get(0).isBooked()).isTrue(),

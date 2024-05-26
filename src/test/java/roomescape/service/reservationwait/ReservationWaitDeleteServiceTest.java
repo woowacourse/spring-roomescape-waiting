@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwait.ReservationWait;
 import roomescape.domain.reservationwait.ReservationWaitStatus;
 import roomescape.domain.Theme;

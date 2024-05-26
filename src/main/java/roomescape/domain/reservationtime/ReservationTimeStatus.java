@@ -1,14 +1,13 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationtime;
 
 import java.util.Objects;
-import roomescape.domain.ReservationTime;
 
-public class ReservationStatus {
+public class ReservationTimeStatus {
 
     private final ReservationTime time;
     private final boolean isBooked;
 
-    public ReservationStatus(ReservationTime time, boolean isBooked) {
+    public ReservationTimeStatus(ReservationTime time, boolean isBooked) {
         this.time = time;
         this.isBooked = isBooked;
     }
@@ -29,7 +28,7 @@ public class ReservationStatus {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ReservationStatus that = (ReservationStatus) o;
+        ReservationTimeStatus that = (ReservationTimeStatus) o;
         return isBooked == that.isBooked && Objects.equals(time, that.time);
     }
 

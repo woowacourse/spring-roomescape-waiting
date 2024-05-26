@@ -6,10 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 

@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.dto.validator.IdPositive;
-import roomescape.domain.reservation.ReservationStatuses;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeStatuses;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
-import roomescape.service.dto.response.reservationTime.ReservationStatusResponses;
+import roomescape.service.dto.response.reservationTime.ReservationTimeStatusResponses;
 import roomescape.service.dto.response.reservationTime.ReservationTimeResponse;
 import roomescape.service.dto.response.reservationTime.ReservationTimeResponses;
 import roomescape.service.reservationtime.ReservationTimeCreateService;
@@ -48,11 +48,11 @@ public class ReservationTimeApiController {
     }
 
     @GetMapping("/times/available")
-    public ResponseEntity<ReservationStatusResponses> getReservationTimesIsBooked(
+    public ResponseEntity<ReservationTimeStatusResponses> getReservationTimesIsBooked(
             @RequestParam LocalDate date,
             @RequestParam @Positive(message = "1 이상의 값만 입력해주세요.") long themeId) {
-        ReservationStatuses reservationStatus = reservationTimeFindService.findReservationStatuses(date, themeId);
-        return ResponseEntity.ok(ReservationStatusResponses.from(reservationStatus));
+        ReservationTimeStatuses reservationStatus = reservationTimeFindService.findReservationStatuses(date, themeId);
+        return ResponseEntity.ok(ReservationTimeStatusResponses.from(reservationStatus));
     }
 
     @PostMapping("/times")

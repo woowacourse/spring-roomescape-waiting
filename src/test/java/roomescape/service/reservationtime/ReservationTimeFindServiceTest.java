@@ -1,24 +1,24 @@
 package roomescape.service.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberPassword;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeStatus;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -62,12 +62,14 @@ class ReservationTimeFindServiceTest extends BaseServiceTest {
         LocalDate date = LocalDate.now().plusDays(1L);
         reservationRepository.save(new Reservation(member, date, time, theme));
 
-        List<ReservationStatus> reservationStatuses = reservationTimeFindService.findReservationStatuses(date, 1L)
-                .getReservationStatuses();
-        Assertions.assertAll(
-                () -> assertThat(reservationStatuses.size()).isEqualTo(2),
-                () -> assertThat(reservationStatuses.get(0).isBooked()).isTrue(),
-                () -> assertThat(reservationStatuses.get(1).isBooked()).isFalse()
+        List<ReservationTimeStatus> reservationTimeStatuses =
+                reservationTimeFindService.findReservationStatuses(date, 1L)
+                        .getReservationTimeStatuses();
+
+        assertAll(
+                () -> assertThat(reservationTimeStatuses.size()).isEqualTo(2),
+                () -> assertThat(reservationTimeStatuses.get(0).isBooked()).isTrue(),
+                () -> assertThat(reservationTimeStatuses.get(1).isBooked()).isFalse()
         );
     }
 }
