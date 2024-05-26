@@ -68,8 +68,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findAllByStatusWithDetails(@Param(value = "status") ReservationStatus status);
 
-    Optional<Reservation> findFirstByDateAndTimeAndThemeAndStatus(LocalDate date, ReservationTime time,
-                                                                  Theme theme, ReservationStatus status);
+    Optional<Reservation> findFirstByDateAndTimeAndThemeAndStatusOrderById(LocalDate date, ReservationTime time,
+                                                                           Theme theme, ReservationStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "10000")})

@@ -24,7 +24,7 @@ public class BookingManageService extends ReservationManageService {
 
     @Override
     protected void scheduleForDeleting(Reservation deletedReservation) {
-        Optional<Reservation> firstWaitingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatus(
+        Optional<Reservation> firstWaitingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatusOrderById(
                 deletedReservation.getDate(), deletedReservation.getTime(),
                 deletedReservation.getTheme(), ReservationStatus.WAITING);
         firstWaitingReservation.ifPresent(Reservation::changeToBooking);

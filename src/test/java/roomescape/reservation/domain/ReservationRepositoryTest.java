@@ -196,7 +196,7 @@ class ReservationRepositoryTest extends RepositoryTest {
                 new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING));
 
         // when
-        Optional<Reservation> foundReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatus(
+        Optional<Reservation> foundReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatusOrderById(
                 MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING);
 
         // then
