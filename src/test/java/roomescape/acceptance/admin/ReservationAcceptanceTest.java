@@ -60,25 +60,32 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
                     .extract().as(ReservationResponse.class);
         }
 
-        @DisplayName("정상 작동 - 이미 있는 예약이 있다면, 예약 대기를 추가한다.")
+        @DisplayName("정상 작동 - 다른 사용자의 예약이 있다면, 예약 대기를 추가한다.")
         @TestFactory
-        Stream<DynamicTest> givenSameReservationAlreadyExist_whenAddReservation_ThenAddReservationWaiting() {
-            AdminReservationRequest requestBody = new AdminReservationRequest(
+        Stream<DynamicTest> givenReservationAlreadyExistForDifferentCustomer_whenAddReservation_thenAddReservationWaiting() {
+            AdminReservationRequest requestBody1 = new AdminReservationRequest(
                     CUSTOMER_1.getId(),
                     LocalDate.parse("2099-12-31"),
                     1L,
                     1L
             );
 
-            return Stream.of(
-                    DynamicTest.dynamicTest("예약을 추가한다", () -> sendPostRequest(requestBody)),
+            AdminReservationRequest requestBody2 = new AdminReservationRequest(
+                    CUSTOMER_2.getId(),
+                    LocalDate.parse("2099-12-31"),
+                    1L,
+                    1L
+            );
 
-                    DynamicTest.dynamicTest("동일한 예약을 추가한다", () -> {
-                                ReservationResponse response = sendPostRequest(requestBody)
+            return Stream.of(
+                    DynamicTest.dynamicTest("예약을 추가한다", () -> sendPostRequest(requestBody1)),
+
+                    DynamicTest.dynamicTest("다른 사용자의 동일한 예약을 추가한다", () -> {
+                                ReservationResponse response = sendPostRequest(requestBody2)
                                         .statusCode(HttpStatus.CREATED.value())
                                         .extract().as(ReservationResponse.class);
                                 assertAll(
-                                        () -> assertThat(response.member().id()).isEqualTo(CUSTOMER_1.getId()),
+                                        () -> assertThat(response.member().id()).isEqualTo(CUSTOMER_2.getId()),
                                         () -> assertThat(response.reservationStatus().isWaiting()).isTrue()
                                 );
                             }
@@ -100,6 +107,31 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
             assertAll(
                     () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
                     () -> assertThat(response.detail()).contains("지나간 시간에 대한 예약은 할 수 없습니다.")
+            );
+        }
+
+        @DisplayName("예외 발생 - 같은 사용자의 예약을 추가한다.")
+        @TestFactory
+        Stream<DynamicTest> givenReservationAlreadyExistForSameCustomer_whenAddReservation_thenFail() {
+            AdminReservationRequest request = new AdminReservationRequest(
+                    CUSTOMER_1.getId(),
+                    LocalDate.parse("2099-12-31"),
+                    1L,
+                    1L
+            );
+
+            return Stream.of(
+                    DynamicTest.dynamicTest("관리자가 예약을 추가한다", () -> sendPostRequest(request)),
+                    DynamicTest.dynamicTest("동일한 고객의 동일한 예약을 추가한다", () -> {
+                                CustomExceptionResponse response = sendPostRequest(request)
+                                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                                        .extract().as(CustomExceptionResponse.class);
+                                assertAll(
+                                        () -> assertThat(response.title()).isEqualTo("허용되지 않는 작업입니다."),
+                                        () -> assertThat(response.detail()).isEqualTo("중복된 예약은 할 수 없습니다.")
+                                );
+                            }
+                    )
             );
         }
 

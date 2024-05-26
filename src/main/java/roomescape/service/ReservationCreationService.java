@@ -43,6 +43,7 @@ public class ReservationCreationService {
     }
 
     private ReservationResponse addReservationForMember(ReservationCreationRequest request, Member member) {
+        validateNotDuplicated(request, member);
         ReservationTime reservationTime = findValidatedReservationTime(request.getTimeId());
         validateNotPast(request.getDate(), reservationTime.getStartAt());
         Theme theme = findValidatedTheme(request.getThemeId());
@@ -60,16 +61,23 @@ public class ReservationCreationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateNotPast(LocalDate date, LocalTime time) {
-        LocalDateTime reservationDateTime = date.atTime(time);
-        if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            throw new OperationNotAllowedCustomException("지나간 시간에 대한 예약은 할 수 없습니다.");
+    private void validateNotDuplicated(ReservationCreationRequest request, Member member) {
+        if(reservationRepository.existsByMemberIdAndDateAndReservationTimeIdAndThemeId(
+                member.getId(), request.getDate(), request.getTimeId(), request.getThemeId())){
+            throw new OperationNotAllowedCustomException("중복된 예약은 할 수 없습니다.");
         }
     }
 
     private ReservationTime findValidatedReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
+    }
+
+    private void validateNotPast(LocalDate date, LocalTime time) {
+        LocalDateTime reservationDateTime = date.atTime(time);
+        if (reservationDateTime.isBefore(LocalDateTime.now())) {
+            throw new OperationNotAllowedCustomException("지나간 시간에 대한 예약은 할 수 없습니다.");
+        }
     }
 
     private Theme findValidatedTheme(Long id) {

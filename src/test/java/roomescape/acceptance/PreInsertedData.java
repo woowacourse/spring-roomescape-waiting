@@ -123,7 +123,7 @@ public class PreInsertedData {
             WAITING
     );
 
-    public static final Reservation RESERVATION__WAITING_CUSTOMER1_THEME3_240502_1200 = new Reservation(
+    public static final Reservation RESERVATION_WAITING_CUSTOMER1_THEME3_240502_1200 = new Reservation(
             7L,
             CUSTOMER_2,
             LocalDate.parse("2024-05-02"),

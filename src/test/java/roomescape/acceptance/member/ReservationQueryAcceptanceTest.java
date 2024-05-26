@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance.Fixture.customerToken;
 import static roomescape.acceptance.PreInsertedData.*;
 
-class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
+class ReservationQueryAcceptanceTest extends BaseAcceptanceTest {
 
     @DisplayName("고객이 자신의 예약 목록을 조회한다.")
     @Test
@@ -31,7 +31,7 @@ class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
                 MyReservationResponse.of(RESERVATION_CUSTOMER1_THEME2_240501_1100, 0L),
                 MyReservationResponse.of(RESERVATION_CUSTOMER1_THEME3_240502_1100, 0L),
                 MyReservationResponse.of(RESERVATION_CUSTOMER1_THEME2_240501_1200, 0L),
-                MyReservationResponse.of(RESERVATION__WAITING_CUSTOMER1_THEME3_240502_1200, 1L)
+                MyReservationResponse.of(RESERVATION_WAITING_CUSTOMER1_THEME3_240502_1200, 1L)
         );
     }
 
