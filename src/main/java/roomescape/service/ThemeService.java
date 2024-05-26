@@ -30,7 +30,7 @@ public class ThemeService {
     public ThemeResponse save(ThemeRequest themeRequest) {
         Themes themes = new Themes(themeRepository.findAll());
         if (themes.hasNameOf(themeRequest.name())) {
-            throw new RoomescapeException(DUPLICATE_THEME);
+            throw new RoomescapeException(DUPLICATE_THEME, themeRequest.name());
         }
         Theme beforeSavedTheme = themeRequest.toTheme();
         Theme savedTheme = themeRepository.save(beforeSavedTheme);
@@ -53,7 +53,7 @@ public class ThemeService {
 
     public void delete(long themeId) {
         if (isUsedTheme(themeId)) {
-            throw new RoomescapeException(DELETE_USED_THEME);
+            throw new RoomescapeException(DELETE_USED_THEME, themeId);
         }
         themeRepository.deleteById(themeId);
     }

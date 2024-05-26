@@ -2,7 +2,7 @@ package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
 
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER_BY_EMAIL;
 import static roomescape.exception.ExceptionType.WRONG_PASSWORD;
 
 import java.util.Map;
@@ -69,7 +69,7 @@ class LoginControllerTest {
                 )).post("/login")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", is(NOT_FOUND_MEMBER.getMessage()));
+                .body("detail", is(NOT_FOUND_MEMBER_BY_EMAIL.getMessage()));
     }
 
     @DisplayName("잘못된 비밀번호로 요청을 보내면 예외가 발생한다.")
@@ -84,7 +84,7 @@ class LoginControllerTest {
                 )).post("/login")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", is(WRONG_PASSWORD.getMessage()));
+                .body("detail", is(WRONG_PASSWORD.getMessage()));
     }
 
     @DisplayName("로그인을 해 토큰이 생성된 경우")

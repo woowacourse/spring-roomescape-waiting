@@ -142,7 +142,7 @@ public class ReservationTimeControllerTest {
                     .post("/times")
                     .then().log().all()
                     .statusCode(400)
-                    .body("message", is(DUPLICATE_RESERVATION_TIME.getMessage()));
+                    .body("detail", is(DUPLICATE_RESERVATION_TIME.getMessage()));
         }
 
         @DisplayName("사용되지 않는 예약 시간을 삭제할 수 있다.")
@@ -168,7 +168,7 @@ public class ReservationTimeControllerTest {
                     .when().delete("/times/1")
                     .then()
                     .statusCode(400)
-                    .body("message", is(DELETE_USED_TIME.getMessage()));
+                    .body("detail", is(DELETE_USED_TIME.getMessage()));
 
             RestAssured.given().when().get("/times")
                     .then().body("size()", is(2));

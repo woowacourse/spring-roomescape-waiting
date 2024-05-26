@@ -198,7 +198,7 @@ public class ThemeControllerTest {
                     .post("/themes")
                     .then().log().all()
                     .statusCode(400)
-                    .body("message", is(DUPLICATE_THEME.getMessage()));
+                    .body("detail", is(DUPLICATE_THEME.getMessage()));
         }
 
         @DisplayName("사용되지 않는 테마를 삭제할 수 있다.")
@@ -224,7 +224,7 @@ public class ThemeControllerTest {
                     .when().delete("/themes/" + usedTheme.getId())
                     .then()
                     .statusCode(400)
-                    .body("message", is(DELETE_USED_THEME.getMessage()));
+                    .body("detail", is(DELETE_USED_THEME.getMessage()));
 
             RestAssured.given().when().get("/themes")
                     .then().body("size()", is(3));

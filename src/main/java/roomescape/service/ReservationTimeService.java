@@ -37,7 +37,7 @@ public class ReservationTimeService {
 
     public ReservationTimeResponse save(ReservationTimeRequest reservationTimeRequest) {
         if (reservationTimeRepository.existsByStartAt(reservationTimeRequest.startAt())) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION_TIME);
+            throw new RoomescapeException(DUPLICATE_RESERVATION_TIME, reservationTimeRequest.startAt());
         }
         ReservationTime beforeSavedReservationTime = reservationTimeRequest.toReservationTime();
         ReservationTime savedReservationTime = reservationTimeRepository.save(beforeSavedReservationTime);
@@ -52,7 +52,7 @@ public class ReservationTimeService {
 
     public List<AvailableTimeResponse> findByThemeAndDate(LocalDate date, long themeId) {
         Theme requestedTheme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME, themeId));
         Reservations findReservations = new Reservations(reservationRepository.findByThemeAndDate(requestedTheme, date));
 
         return new ReservationTimes(reservationTimeRepository.findAll()).getReservationTimes().stream()
@@ -62,7 +62,7 @@ public class ReservationTimeService {
 
     public void delete(long timeId) {
         if (isUsedTime(timeId)) {
-            throw new RoomescapeException(DELETE_USED_TIME);
+            throw new RoomescapeException(DELETE_USED_TIME, timeId);
         }
         reservationTimeRepository.deleteById(timeId);
     }

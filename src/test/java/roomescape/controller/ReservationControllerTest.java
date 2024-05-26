@@ -219,7 +219,7 @@ public class ReservationControllerTest {
                     .post("/reservations")
                     .then().log().all()
                     .statusCode(400)
-                    .body("message", is(PAST_TIME_RESERVATION.getMessage()));
+                    .body("detail", is(PAST_TIME_RESERVATION.getMessage()));
         }
 
         @DisplayName("중복된 예약을 생성할 수 없다.")
@@ -236,7 +236,7 @@ public class ReservationControllerTest {
                     .post("/reservations")
                     .then().log().all()
                     .statusCode(400)
-                    .body("message", is(DUPLICATE_RESERVATION.getMessage()));
+                    .body("detail", is(DUPLICATE_RESERVATION.getMessage()));
         }
 
         @DisplayName("예약을 하나 삭제할 수 있다.")
@@ -396,7 +396,7 @@ public class ReservationControllerTest {
                     .get("/reservations/search")
                     .then().log().all()
                     .statusCode(400)
-                    .body("message", is(NO_QUERY_PARAMETER.getMessage()));
+                    .body("detail", is(NO_QUERY_PARAMETER.getMessage()));
         }
 
         @DisplayName("테마 아이디를 사용하지 않으면 예외가 발생한다.")
@@ -407,7 +407,7 @@ public class ReservationControllerTest {
                     .get("/reservations/search")
                     .then().log().all()
                     .statusCode(400)
-                    .body("message", is(NO_QUERY_PARAMETER.getMessage()));
+                    .body("detail", is(NO_QUERY_PARAMETER.getMessage()));
         }
 
         @DisplayName("날짜와 테마를 이용해서 검색할 수 있다.")

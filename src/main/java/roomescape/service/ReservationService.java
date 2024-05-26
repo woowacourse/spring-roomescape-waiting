@@ -2,7 +2,7 @@ package roomescape.service;
 
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
 import static roomescape.exception.ExceptionType.DUPLICATE_WAITING_RESERVATION;
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER_BY_ID;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
@@ -57,7 +57,11 @@ public class ReservationService {
 
         Reservations reservations = new Reservations(reservationRepository.findAll());
         if (reservations.hasSameReservation(reservation)) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION);
+            throw new RoomescapeException(
+                    DUPLICATE_RESERVATION,
+                    reservationRequest.date(),
+                    reservationRequest.themeId(),
+                    reservationRequest.timeId());
         }
 
         return ReservationResponse.from(reservationRepository.save(reservation));
@@ -69,7 +73,12 @@ public class ReservationService {
         Reservation reservation = getReservation(loginMember.getId(), reservationRequest, ReservationStatus.WAITING);
         Reservations reservations = new Reservations(reservationRepository.findAllByMemberId(loginMember.getId()));
         if (reservations.hasSameReservation(reservation)) {
-            throw new RoomescapeException(DUPLICATE_WAITING_RESERVATION);
+            throw new RoomescapeException(
+                    DUPLICATE_WAITING_RESERVATION,
+                    loginMember.getId(),
+                    reservationRequest.date(),
+                    reservationRequest.themeId(),
+                    reservationRequest.timeId());
         }
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
@@ -85,7 +94,11 @@ public class ReservationService {
 
         Reservations reservations = new Reservations(reservationRepository.findAll());
         if (reservations.hasSameReservation(beforeSaveReservation)) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION);
+            throw new RoomescapeException(
+                    DUPLICATE_RESERVATION,
+                    reservationRequest.date(),
+                    reservationRequest.themeId(),
+                    reservationRequest.timeId());
         }
 
         return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
@@ -94,11 +107,11 @@ public class ReservationService {
 
     private Reservation getReservation(long memberId, ReservationRequest reservationRequest, ReservationStatus reservationStatus) {
         ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME, reservationRequest.timeId()));
         Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME, reservationRequest.themeId()));
         Member requestedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER_BY_ID, memberId));
 
         Reservation reservation = reservationRequest.toReservation(
                 requestedMember,
@@ -107,7 +120,7 @@ public class ReservationService {
                 reservationStatus);
 
         if (reservation.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
+            throw new RoomescapeException(PAST_TIME_RESERVATION, reservation.getReservationTime().getStartAt());
         }
         return reservation;
     }

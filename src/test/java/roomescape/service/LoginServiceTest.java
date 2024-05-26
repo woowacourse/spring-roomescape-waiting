@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER_BY_EMAIL;
 import static roomescape.exception.ExceptionType.WRONG_PASSWORD;
 
 import java.util.Map;
@@ -70,7 +70,7 @@ class LoginServiceTest {
                     defaultUser.getPassword()
             )))
                     .isInstanceOf(RoomescapeException.class)
-                    .hasMessage(NOT_FOUND_MEMBER.getMessage());
+                    .hasMessage(NOT_FOUND_MEMBER_BY_EMAIL.getMessage());
         }
 
         @DisplayName("잘못된 비밀번호로 요청을 하면 예외가 발생한다.")

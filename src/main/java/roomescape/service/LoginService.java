@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER_BY_EMAIL;
 import static roomescape.exception.ExceptionType.REQUIRED_LOGIN;
 import static roomescape.exception.ExceptionType.WRONG_PASSWORD;
 
@@ -30,9 +30,9 @@ public class LoginService {
 
     public String getLoginToken(LoginRequest loginRequest) {
         Member findMember = memberRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER_BY_EMAIL, loginRequest.email()));
         if (!findMember.getPassword().equals(loginRequest.password())) {
-            throw new RoomescapeException(WRONG_PASSWORD);
+            throw new RoomescapeException(WRONG_PASSWORD, loginRequest.password());
         }
 
         return jwtGenerator.generateWith(Map.of(
