@@ -6,11 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.core.token.TokenProvider;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.dto.request.LoginRequest;
@@ -19,11 +14,9 @@ import roomescape.auth.dto.response.LoginResponse;
 import roomescape.fixture.MemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.util.ServiceTest;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-class AuthServiceTest {
+class AuthServiceTest extends ServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;

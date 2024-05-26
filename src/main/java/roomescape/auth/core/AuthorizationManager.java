@@ -7,5 +7,5 @@ public interface AuthorizationManager {
 
     String getAuthorization(HttpServletRequest httpServletRequest);
 
-    void setAuthorization(HttpServletResponse httpServletResponse, final String token);
+    void setAuthorization(HttpServletResponse httpServletResponse, String token);
 }

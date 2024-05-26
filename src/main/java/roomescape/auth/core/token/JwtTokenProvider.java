@@ -20,11 +20,11 @@ public class JwtTokenProvider implements TokenProvider {
 
     private final TokenProperties tokenProperties;
 
-    public JwtTokenProvider(final TokenProperties tokenProperties) {
+    public JwtTokenProvider(TokenProperties tokenProperties) {
         this.tokenProperties = tokenProperties;
     }
 
-    public String createToken(final Member member) {
+    public String createToken(Member member) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + tokenProperties.getValidityInMilliseconds());
         return Jwts.builder()
@@ -37,7 +37,7 @@ public class JwtTokenProvider implements TokenProvider {
                 .compact();
     }
 
-    public AuthInfo extractAuthInfo(final String token) {
+    public AuthInfo extractAuthInfo(String token) {
         Claims claims = getClaims(token);
         return new AuthInfo(
                 Long.parseLong(claims.getSubject()),
@@ -45,7 +45,7 @@ public class JwtTokenProvider implements TokenProvider {
                 Role.valueOf(claims.get(MEMBER_ROLE_CLAIM, String.class)));
     }
 
-    private Claims getClaims(final String token) {
+    private Claims getClaims(String token) {
         try {
             return Jwts.parser().setSigningKey(tokenProperties.getSecretKey())
                     .parseClaimsJws(token)

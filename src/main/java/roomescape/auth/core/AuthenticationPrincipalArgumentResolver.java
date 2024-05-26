@@ -13,20 +13,20 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
     private final TokenProvider tokenProvider;
     private final AuthorizationManager authorizationManager;
 
-    public AuthenticationPrincipalArgumentResolver(final TokenProvider tokenProvider,
-                                                   final AuthorizationManager authorizationManager) {
+    public AuthenticationPrincipalArgumentResolver(TokenProvider tokenProvider,
+                                                   AuthorizationManager authorizationManager) {
         this.tokenProvider = tokenProvider;
         this.authorizationManager = authorizationManager;
     }
 
     @Override
-    public boolean supportsParameter(final MethodParameter parameter) {
+    public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(AuthenticationPrincipal.class);
     }
 
     @Override
-    public Object resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer,
-                                  final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest httpServletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
         String token = authorizationManager.getAuthorization(httpServletRequest);
         return tokenProvider.extractAuthInfo(token);

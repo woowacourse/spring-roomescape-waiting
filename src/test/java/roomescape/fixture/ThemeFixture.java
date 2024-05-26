@@ -2,7 +2,7 @@ package roomescape.fixture;
 
 import java.util.ArrayList;
 import java.util.List;
-import roomescape.theme.model.Theme;
+import roomescape.reservation.model.Theme;
 
 public class ThemeFixture {
 
@@ -11,7 +11,7 @@ public class ThemeFixture {
     }
 
     public static List<Theme> get(int count) {
-        final List<Theme> themes = new ArrayList<>();
+        List<Theme> themes = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
             themes.add(new Theme(

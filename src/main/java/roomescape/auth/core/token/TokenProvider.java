@@ -5,7 +5,7 @@ import roomescape.member.domain.Member;
 
 public interface TokenProvider {
 
-    String createToken(final Member member);
+    String createToken(Member member);
 
-    AuthInfo extractAuthInfo(final String token);
+    AuthInfo extractAuthInfo(String token);
 }

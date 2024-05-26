@@ -7,8 +7,8 @@ public class TokenProperties {
     private final String secretKey;
     private final long validityInMilliseconds;
 
-    public TokenProperties(final String secretKey,
-                            final long validityInMilliseconds) {
+    public TokenProperties(String secretKey,
+                           long validityInMilliseconds) {
         this.secretKey = secretKey;
         this.validityInMilliseconds = validityInMilliseconds;
     }

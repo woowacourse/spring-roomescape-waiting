@@ -5,52 +5,52 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.Slot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     @Query("""
-            select r, m, rt, t
-            from Reservation r
-            join fetch Member m
-            on r.member.id = m.id
-            join fetch ReservationTime rt
-            on r.reservationTime.id = rt.id
-            join fetch Theme t
-            on r.theme.id = t.id
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member m
+            JOIN FETCH r.slot.reservationTime rt
+            JOIN FETCH r.slot.theme t
             """)
     List<Reservation> findAll();
 
     @Query("""
-            select r, m, rt, t
-            from Reservation r
-            join fetch Member m
-            on r.member.id = m.id
-            join fetch ReservationTime rt
-            on r.reservationTime.id = rt.id
-            join fetch Theme t
-            on r.theme.id = t.id
-            where m.id = :memberId
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member m
+            JOIN FETCH r.slot.reservationTime rt
+            JOIN FETCH r.slot.theme t
+            WHERE m.id = :memberId
             """)
     List<Reservation> findAllByMemberId(Long memberId);
 
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findAllBySlot_DateAndSlot_ThemeId(LocalDate date, Long themeId);
 
     @Query("""
-            select r
-            from Reservation r
-            join fetch Member m
-            on r.member.id = m.id
-            join fetch ReservationTime rt
-            on r.reservationTime.id = rt.id
-            join fetch Theme t
-            on r.theme.id = t.id
-            where t.id = :themeId and m.id = :memberId and r.date between :dateFrom and :dateTo
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member m
+            JOIN FETCH r.slot.reservationTime rt
+            JOIN FETCH r.slot.theme t
+            WHERE t.id = :themeId
+              AND m.id = :memberId
+              AND r.slot.date BETWEEN :dateFrom AND :dateTo
             """)
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId,
+                                                                Long memberId,
+                                                                LocalDate dateFrom,
+                                                                LocalDate dateTo);
 
-    boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsBySlotAndMemberId(Slot slot, Long memberId);
 
-    boolean existsByReservationTimeId(Long reservationTimeId);
+    boolean existsBySlot(Slot slot);
 
-    boolean existsByThemeId(Long id);
+    boolean existsBySlot_ReservationTimeId(Long reservationTimeId);
+
+    boolean existsBySlot_ThemeId(Long id);
+
 }

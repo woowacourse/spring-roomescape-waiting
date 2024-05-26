@@ -25,15 +25,14 @@ import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.model.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.model.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 
-@IntegrationTest
-class ReservationIntegrationTest {
+class ReservationIntegrationTest extends IntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -296,7 +295,7 @@ class ReservationIntegrationTest {
                 .then().log().all()
 
                 .statusCode(400)
-                .body("detail", equalTo("이미 2025-12-23의 테마이름 테마에는 20:00 시의 예약이 존재하여 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("이미 예약이 존재하여 예약을 생성할 수 없습니다."));
     }
 
     @Test

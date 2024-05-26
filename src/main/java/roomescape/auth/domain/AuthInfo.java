@@ -8,14 +8,14 @@ public class AuthInfo {
     private final String name;
     private final Role role;
 
-    public AuthInfo(final Long memberId, final String name, final Role role) {
+    public AuthInfo(Long memberId, String name, Role role) {
         this.memberId = memberId;
         this.name = name;
         this.role = role;
     }
 
     public boolean isNotAdmin() {
-        return this.role.isNotAdmin();
+        return role.isNotAdmin();
     }
 
     public Long getMemberId() {
@@ -27,7 +27,7 @@ public class AuthInfo {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

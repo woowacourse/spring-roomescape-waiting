@@ -27,7 +27,7 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    public ReservationController(final ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
@@ -47,8 +47,8 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FindReservationResponse> getReservation(@PathVariable final Long id) {
-        return ResponseEntity.ok(reservationService.getReservation(id));
+    public ResponseEntity<FindReservationResponse> getReservation(@PathVariable Long id) {
+        return ResponseEntity.ok(reservationService.getOneReservation(id));
     }
 
     @GetMapping("/times")

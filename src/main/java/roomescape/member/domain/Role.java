@@ -8,7 +8,7 @@ public enum Role {
     USER,
     ;
 
-    public static Role getMemberRole(final String role) {
+    public static Role getMemberRole(String role) {
         return Arrays.stream(values())
                 .filter(memberRole -> Objects.equals(memberRole.name(), role))
                 .findFirst()
