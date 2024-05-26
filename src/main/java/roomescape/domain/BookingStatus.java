@@ -24,8 +24,7 @@ public class BookingStatus {
 
     private static boolean isReserved(List<ReservationTime> reservedTimes,
                                       ReservationTime reservationTime) {
-        return reservedTimes.stream()
-                .anyMatch(reservedTime -> reservedTime.equals(reservationTime));
+        return reservedTimes.contains(reservationTime);
     }
 
     public Map<ReservationTime, Boolean> getReservationStatus() {
