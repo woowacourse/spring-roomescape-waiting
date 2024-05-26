@@ -37,7 +37,7 @@ public class WaitingService {
         Reservation reservation = waiting.getReservation();
         validateDeletable(reservation);
 
-        List<Reservation> waitingReservations = findWaitingReservationBySameCriteria(reservation);
+        List<Reservation> waitingReservations = findWaitingReservationBySameConditions(reservation);
         adjustWaitingOrder(waitingReservations, waiting.getWaitingOrderValue());
         waitingRepository.delete(waiting);
         reservationRepository.delete(reservation);
@@ -59,7 +59,7 @@ public class WaitingService {
                 ));
     }
 
-    private List<Reservation> findWaitingReservationBySameCriteria(Reservation reservation) {
+    private List<Reservation> findWaitingReservationBySameConditions(Reservation reservation) {
         return reservationRepository.findByDateAndTimeIdAndThemeIdAndStatus(
                 reservation.getDate(),
                 reservation.getTime().getId(),

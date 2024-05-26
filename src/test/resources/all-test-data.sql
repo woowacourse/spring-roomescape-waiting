@@ -1,4 +1,5 @@
 SET REFERENTIAL_INTEGRITY FALSE;
+TRUNCATE TABLE waiting RESTART IDENTITY;
 TRUNCATE TABLE reservation RESTART IDENTITY;
 TRUNCATE TABLE reservation_time RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
@@ -19,8 +20,8 @@ VALUES ('10:00'),
        ('11:00'),
        ('12:00');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES (CURRENT_DATE() - INTERVAL '1' DAY, 1, 1, 1),
-       (CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 1),
-       (CURRENT_DATE() + INTERVAL '1' DAY, 2, 1, 1),
-       (CURRENT_DATE() + INTERVAL '2' DAY, 2, 1, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE() - INTERVAL '1' DAY, 1, 1, 1, 'RESERVED'),
+       (CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 1, 'RESERVED'),
+       (CURRENT_DATE() + INTERVAL '1' DAY, 2, 1, 1, 'RESERVED'),
+       (CURRENT_DATE() + INTERVAL '2' DAY, 2, 1, 1, 'RESERVED');

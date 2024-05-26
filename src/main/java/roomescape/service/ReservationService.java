@@ -114,10 +114,10 @@ public class ReservationService {
     }
 
     private void addWaiting(Reservation savedReservation) {
-        int waitingOrder = reservationRepository.countByDateAndTimeAndThemeAndStatus(
+        int waitingOrder = reservationRepository.countByDateAndTimeIdAndThemeIdAndStatus(
                 savedReservation.getDate(),
-                savedReservation.getTime(),
-                savedReservation.getTheme(),
+                savedReservation.getTime().getId(),
+                savedReservation.getTheme().getId(),
                 savedReservation.getStatus()
         );
         waitingRepository.save(new Waiting(savedReservation, waitingOrder));
