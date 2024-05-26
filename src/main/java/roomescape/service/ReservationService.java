@@ -36,6 +36,7 @@ public class ReservationService {
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll()
                 .stream()
+                .filter(reservation -> reservation.getReservationStatus().isReserved())
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -117,9 +118,13 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate dateFrom,
-                                                             LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.filter(themeId, memberId, dateFrom, dateTo);
+    public List<ReservationResponse> getFilteredReservations(
+            Long themeId,
+            Long memberId,
+            LocalDate dateFrom,
+            LocalDate dateTo)
+    {
+        List<Reservation> reservations = reservationRepository.filter(themeId, memberId, dateFrom, dateTo, ReservationStatus.RESERVED);
 
         return reservations.stream()
                 .map(ReservationResponse::from)

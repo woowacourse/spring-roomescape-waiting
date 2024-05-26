@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance.PreInsertedData.*;
+import static roomescape.domain.ReservationStatus.*;
 
 class ReservationRepositoryTest extends BaseRepositoryTest {
 
@@ -37,7 +38,7 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     @MethodSource("filterProvider")
     void filter(Long themeId, Long memberId, LocalDate from, LocalDate to, List<Reservation> expected) {
 
-        List<Reservation> filtered = reservationRepository.filter(themeId, memberId, from, to);
+        List<Reservation> filtered = reservationRepository.filter(themeId, memberId, from, to, RESERVED);
 
         assertThat(filtered).containsAll(expected);
     }
