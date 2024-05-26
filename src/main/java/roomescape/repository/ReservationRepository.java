@@ -54,11 +54,13 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
                           AND subR.date = r.date
                           AND subR.time.id = r.time.id
                           AND subR.createdAt < r.createdAt
+                          AND subR.status NOT IN ('CANCEL')
                        )
                    )
             FROM Reservation r
             JOIN r.member m
             WHERE m.id = :memberId
+            AND r.status NOT IN ('CANCEL')
             """)
     List<MemberReservation> findMemberReservation(@Param("memberId") Long memberId);
 
