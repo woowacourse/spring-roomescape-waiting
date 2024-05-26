@@ -70,7 +70,7 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
         Member member = memberRepository.save(new Member(null, Role.MEMBER, "호기", "hogi@email.com", "1234"));
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
         ReservationCreateRequest request = new ReservationCreateRequest(date, theme.getId(), time.getId());
         LoginMemberInToken loginMember = new LoginMemberInToken(1L, member.getRole(), member.getName(), member.getEmail());
         reservationService.save(request, loginMember);
@@ -79,6 +79,38 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.save(duplicateRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    @DisplayName("지난 날짜에 예약을 하면 예외가 발생한다.")
+    void pastDateExceptionTest() {
+        Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
+        Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "1234"));
+        LocalDate date = LocalDate.now().minusDays(1);
+        ReservationCreateRequest request = new ReservationCreateRequest(date, theme.getId(), time.getId());
+        LoginMemberInToken loginMember = new LoginMemberInToken(1L, member.getRole(), member.getName(), member.getEmail());
+
+        assertThatThrownBy(() -> reservationService.save(request, loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("지난 날짜는 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("지난 시간에 예약을 하면 예외가 발생한다.")
+    void pastTimeExceptionTest() {
+        Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now().minusHours(1)));
+        Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "1234"));
+        LocalDate date = LocalDate.now();
+        ReservationCreateRequest request = new ReservationCreateRequest(date, theme.getId(), time.getId());
+        LoginMemberInToken loginMember = new LoginMemberInToken(1L, member.getRole(), member.getName(), member.getEmail());
+
+        assertThatThrownBy(() -> reservationService.save(request, loginMember))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("지난 시간은 예약할 수 없습니다.");
+    }
+
+
 
     @Test
     void findByMemberAndThemeAndDateBetweenTest() {

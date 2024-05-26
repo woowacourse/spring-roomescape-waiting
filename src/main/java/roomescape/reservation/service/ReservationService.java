@@ -1,5 +1,7 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +49,22 @@ public class ReservationService {
     ) {
         Reservation reservation = getValidatedReservation(request, loginMember);
         validateDuplicateReservation(reservation);
+        validateDateTime(reservation.getDate(), reservation.getTime().getStartAt());
 
         return reservationRepository.save(reservation);
+    }
+
+    private void validateDateTime(LocalDate date, LocalTime time) {
+        final LocalDate today = LocalDate.now();
+        final LocalTime now = LocalTime.now();
+
+        if (date.isBefore(today)) {
+            throw new IllegalArgumentException("지난 날짜는 예약할 수 없습니다.");
+        }
+
+        if (date.isEqual(today) && time.isBefore(now)) {
+            throw new IllegalArgumentException("지난 시간은 예약할 수 없습니다.");
+        }
     }
 
     private Reservation getValidatedReservation(
