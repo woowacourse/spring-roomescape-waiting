@@ -97,17 +97,14 @@ public class ReservationService {
 
     public List<MyReservationResponse> findMyReservations(Long memberId) {
         return reservationRepository.findAllByMemberIdOrderByDateAsc(memberId).stream()
-                .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
-                        reservation.getDate(), reservation.getTime().getStartAt(), getWaitingOrder(reservation)))
+                .map(reservation -> MyReservationResponse.of(reservation, getWaitingOrder(reservation)))
                 .toList();
     }
 
-    private String getWaitingOrder(Reservation reservation) {
-        if (reservation.getStatus() == Status.RESERVATION) {
-            return reservation.getStatus().getValue();
-        }
+    private long getWaitingOrder(Reservation reservation) {
         return reservationRepository.countByOrder(
-                reservation.getId(), reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-        ) + "번째 " + reservation.getStatus().getValue();
+                reservation.getId(), reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId()
+        );
     }
 }
