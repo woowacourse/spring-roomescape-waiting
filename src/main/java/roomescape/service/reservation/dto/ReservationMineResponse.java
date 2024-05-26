@@ -1,8 +1,13 @@
 package roomescape.service.reservation.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationwaiting.ReservationWaitingWithRank;
 
 public class ReservationMineResponse {
     private final Long reservationId;
@@ -24,8 +29,21 @@ public class ReservationMineResponse {
                 reservation.getTheme().getName().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getDescription()
+                ReservationStatus.BOOKED.getDescription()
         );
+    }
+
+    public ReservationMineResponse(ReservationWaitingWithRank waitingWithRank) {
+        this(waitingWithRank.getWaiting().getReservation().getId(),
+                waitingWithRank.getWaiting().getReservation().getTheme().getName().getName(),
+                waitingWithRank.getWaiting().getReservation().getDate(),
+                waitingWithRank.getWaiting().getReservation().getTime().getStartAt(),
+                String.format(ReservationStatus.WAITING.getDescription(), waitingWithRank.getRank())
+        );
+    }
+
+    public LocalDateTime retrieveDateTime() {
+        return LocalDateTime.of(date, time);
     }
 
     public Long getReservationId() {
@@ -40,6 +58,7 @@ public class ReservationMineResponse {
         return date;
     }
 
+    @JsonFormat(shape = Shape.STRING, pattern = "HH:mm")
     public LocalTime getTime() {
         return time;
     }

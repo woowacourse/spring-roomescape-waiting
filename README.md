@@ -1,17 +1,39 @@
 # 기능 구현
 
-## 1단계
+## 1단계 - JPA 전환
 
 - [x] gradle 의존성을 추가한다
 - [x] 엔티티를 매핑한다
 - [x] 연관관계를 매핑한다
 - [x] Dao 클래스를 JpaRepository를 상속받는 Repository로 대체한다
 
-## 2단계
+## 2단계 - 내 예약 목록 조회 기능
 
-- [x] 내 예약 목록 조회 API를 구현한다
+- [x] `내 예약 목록` 조회 API를 구현한다
 - [x] 내 예약 확인 페이지를 제공한다
     - `GET /reservation-mine` 요청시 `reservation-mine.html` 페이지 응답
+
+## 3단계 - 예약 대기 기능
+
+- [x] 예약 대기 도메인을 추가한다
+- [x] `예약 대기` 추가 API를 구현한다
+    - [x] 본인이 예약한 예약에 대해선 예약 대기를 추가할 수 없음
+    - [x] 같은 예약에 대해선 여러 번 예약 대기를 추가할 수 없음
+    - [x] 존재하지 않는 예약에 대해선 예약 대기를 추가할 수 없음
+    - [x] 지난 예약에 대해선 예약 대기를 추가할 수 없음
+- [x] `예약 대기` 삭제 API를 구현한다
+    - [x] 본인의 예약 대기만 삭제할 수 있음
+- [x] `내 예약 목록` 조회 API 응답에 `예약 대기 목록`도 포함한다
+    - [x] 예약 대기 상태에 몇 번째 대기인지도 함께 표시 (같은 테마, 날짜, 시간의 예약 대기 중 내 예약 대기보다 빨리 생성된 갯수를 함께 응답)
+    - [x] 시간 순대로 정렬
+- [x] 클라이언트 코드를 수정한다
+
+## 4단계 - 예약 대기 관리
+
+- [x] 관리자용 예약 대기 목록 조회 API를 구현한다
+- [x] 관리자용 예약 대기 삭제 API를 구현한다
+- [x] 예약 삭제 API 요청 시, 예약 대기자가 자동으로 예약 승인이 된다
+    - 멱등성 보장하기 위해 지정한 예약 id와 사용자 id에 해당하는 예약을 삭제함
 
 # API 명세
 
@@ -102,7 +124,7 @@ Content-Type: application/json
 Response
 
 ```
-HTTP/1.1 200 OK
+HTTP/1.1 201 OK
 Content-Type: application/json
 
 {
@@ -161,7 +183,11 @@ Content-Type: application/json
   "reservations": [
     {
       "id": 1,
-      "name": "관리자",
+      "member": {
+        "id": 1,
+        "name": "사용자",
+        "email": "user@gmail.com"
+      },
       "date": "2024-08-05",
       "time": {
         "id": 1,
@@ -199,7 +225,7 @@ Content-Type: application/json
       "reservationId": 1,
       "theme": "레벨2 탈출",
       "date": "2024-08-05",
-      "time": "10:00:00",
+      "time": "10:00",
       "status": "예약"
     }
   ]
@@ -216,7 +242,7 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-  "date": "2023-08-05",
+  "date": "2024-08-06",
   "themeId": 1,
   "timeId": 1
 }
@@ -230,7 +256,11 @@ Content-Type: application/json
 
 {
   "id": 2,
-  "name": "관리자",
+  "member": {
+    "id": 1,
+    "name": "사용자",
+    "email": "user@gmail.com"
+  },
   "date": "2024-08-06",
   "time": {
     "id": 1,
@@ -255,7 +285,7 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-  "date": "2023-08-05", 
+  "date": "2024-08-07",
   "themeId": 1,
   "timeId": 1,
   "memberId": 1
@@ -270,7 +300,11 @@ Content-Type: application/json
 
 {
   "id": 3,
-  "name": "관리자",
+  "member": {
+    "id": 1,
+    "name": "사용자",
+    "email": "user@gmail.com"
+  },
   "date": "2024-08-07",
   "time": {
     "id": 1,
@@ -290,7 +324,100 @@ Content-Type: application/json
 Request
 
 ```
-DELETE /reservations/1
+DELETE /reservations/1?memberId=1
+Cookie: token=hello.example.token
+```
+
+Response
+
+```
+HTTP/1.1 204
+```
+
+## 예약 대기
+
+### 예약 대기 목록 조회 API (접근 권한: 관리자)
+
+Request
+
+```
+GET /reservations/waitings
+Cookie: token=hello.example.token
+```
+
+Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+{
+  "waitings": [
+    {
+      "id": 1,
+      "name": "사용자",
+      "theme": "레벨2 탈출",
+      "date": "2024-08-05",
+      "startAt": "10:00",
+      "reservationId": 1
+    }
+  ]
+}
+```
+
+### 예약 대기 추가 API
+
+Request
+
+```
+POST /reservations/waitings
+Cookie: token=hello.example.token
+Content-Type: application/json
+
+{
+  "date": "2023-08-05",
+  "themeId": 1,
+  "timeId": 1
+}
+```
+
+Response
+
+```
+HTTP/1.1 201
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "사용자",
+  "theme": "레벨2 탈출",
+  "date": "2024-08-05",
+  "startAt": "10:00",
+  "reservationId": 1
+}
+```
+
+### 예약 대기 삭제 API
+
+Request
+
+```
+DELETE /reservations/1/waitings
+Cookie: token=hello.example.token
+```
+
+Response
+
+```
+HTTP/1.1 204
+```
+
+### 관리자용 예약 대기 삭제 API (접근 권한: 관리자)
+
+Request
+
+```
+DELETE /admin/reservations/waitings/1
 Cookie: token=hello.example.token
 ```
 

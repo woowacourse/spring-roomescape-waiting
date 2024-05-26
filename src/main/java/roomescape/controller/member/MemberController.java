@@ -16,7 +16,7 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @RoleAllowed(value = MemberRole.ADMIN)
+    @RoleAllowed(MemberRole.ADMIN)
     @GetMapping("/members")
     public ResponseEntity<MemberListResponse> findAllMember() {
         MemberListResponse response = memberService.findAllMember();

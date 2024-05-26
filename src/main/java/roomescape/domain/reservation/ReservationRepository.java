@@ -2,27 +2,31 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
-    @Query("""
-            SELECT r.time.id
-            FROM Reservation r
-            WHERE r.date = :date AND r.theme.id = :themeId
-            """)
-    List<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
-
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeId(long themeId);
 
     List<Reservation> findByMemberId(Long id);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    @Query("""
+            SELECT r.time.id
+            FROM Reservation r
+            WHERE r.date = :date AND r.theme.id = :themeId
+            """)
+    List<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 
     @Query("""
             SELECT t

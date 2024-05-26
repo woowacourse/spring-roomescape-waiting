@@ -1,0 +1,18 @@
+### 예약 대기 목록 조회 API (접근 권한: 관리자)
+GET {{base-url}}/reservations/waitings
+
+### 예약 대기 추가 API
+POST {{base-url}}/reservations/waitings
+Content-Type: application/json
+
+{
+  "date": "2024-08-07",
+  "themeId": 1,
+  "timeId": 1
+}
+
+### 예약 대기 삭제 API
+DELETE {{base-url}}/reservations/1/waitings
+
+### 관리자용 예약 대기 삭제 API (접근 권한: 관리자)
+DELETE {{base-url}}/admin/reservations/waitings/1

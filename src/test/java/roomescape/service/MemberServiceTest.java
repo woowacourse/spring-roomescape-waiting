@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,9 @@ class MemberServiceTest extends ServiceTest {
     class FindAllMember {
         @Test
         void 사용자_목록을_조회할_수_있다() {
+            memberFixture.createUserMember();
+            memberFixture.createAdminMember();
+
             MemberListResponse response = memberService.findAllMember();
 
             assertThat(response.getMembers().size())
@@ -32,6 +36,13 @@ class MemberServiceTest extends ServiceTest {
     @Nested
     @DisplayName("id로 사용자 조회")
     class FindById {
+        Member member;
+
+        @BeforeEach
+        void setUp() {
+            member = memberFixture.createUserMember();
+        }
+
         @Test
         void id로_사용자를_조회할_수_있다() {
             Member member = memberService.findById(1L);

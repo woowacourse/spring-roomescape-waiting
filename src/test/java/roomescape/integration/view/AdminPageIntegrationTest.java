@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import roomescape.integration.IntegrationTest;
 
 class AdminPageIntegrationTest extends IntegrationTest {
+    @Override
+    protected void subclassSetUp() {
+        memberFixture.createAdminMember();
+    }
+
     @Test
     void 어드민_메인_페이지를_응답할_수_있다() {
         RestAssured.given().log().all()

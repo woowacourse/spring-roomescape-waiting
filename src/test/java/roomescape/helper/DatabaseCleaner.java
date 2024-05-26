@@ -11,11 +11,22 @@ public class DatabaseCleaner {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public void execute() { // TODO: 테이블 이름 가져와서 일괄로 처리하는 로직 짜보기
+    public void execute() {
+        clearReservationWaiting();
         clearReservation();
         clearMember();
         clearTime();
         clearTheme();
+    }
+
+    private void clearReservationWaiting() {
+        entityManager.createNativeQuery("DELETE FROM reservation_waiting").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART").executeUpdate();
+    }
+
+    private void clearReservation() {
+        entityManager.createNativeQuery("DELETE FROM reservation").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE reservation ALTER COLUMN id RESTART").executeUpdate();
     }
 
     private void clearMember() {
@@ -31,10 +42,5 @@ public class DatabaseCleaner {
     private void clearTheme() {
         entityManager.createNativeQuery("DELETE FROM theme").executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE theme ALTER COLUMN id RESTART").executeUpdate();
-    }
-
-    private void clearReservation() {
-        entityManager.createNativeQuery("DELETE FROM reservation").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE reservation ALTER COLUMN id RESTART").executeUpdate();
     }
 }

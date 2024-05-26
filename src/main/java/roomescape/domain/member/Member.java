@@ -14,12 +14,16 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     private MemberName name;
+
     @Embedded
     private MemberEmail email;
+
     @Embedded
     private MemberPassword password;
+
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
@@ -40,6 +44,10 @@ public class Member {
 
     public boolean isDifferentPassword(MemberPassword otherPassword) {
         return !password.equals(otherPassword);
+    }
+
+    public boolean isDifferentId(long otherId) {
+        return !id.equals(otherId);
     }
 
     public Long getId() {
