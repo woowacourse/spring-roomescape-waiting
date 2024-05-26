@@ -33,7 +33,7 @@ function render(data) {
 
         const actionCell = row.insertCell(row.cells.length);
 
-        actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
+        // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
         actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
@@ -43,8 +43,7 @@ function approve(event) {
     const id = row.cells[0].textContent;
 
     /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 승인 API 호출
+    수동 승인 X
      */
     const endpoint = '' + id;
     return fetch(endpoint, {
