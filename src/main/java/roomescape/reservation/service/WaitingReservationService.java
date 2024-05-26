@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
@@ -29,14 +28,14 @@ public class WaitingReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<ReservationViewResponse> handleWaitingOrder(List<ReservationWithStatus> reservationWithStatuses) {
+    public List<ReservationViewResponse> convertReservationsWithStatusToViewResponses(List<ReservationWithStatus> reservationWithStatuses) {
         return reservationWithStatuses
                 .stream()
-                .map(this::handler)
+                .map(this::generateReservationViewResponse)
                 .toList();
     }
 
-    private ReservationViewResponse handler(ReservationWithStatus reservationWithStatus) {
+    private ReservationViewResponse generateReservationViewResponse(ReservationWithStatus reservationWithStatus) {
         if (reservationWithStatus.status().isWaiting()) {
             int waitingCount = reservationRepository
                     .findMyWaitingOrder(reservationWithStatus.reservationId());

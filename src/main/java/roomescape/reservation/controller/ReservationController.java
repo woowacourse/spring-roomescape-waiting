@@ -55,6 +55,6 @@ public class ReservationController {
     @GetMapping("/reservations/mine")
     public List<ReservationViewResponse> getMyReservations(@LoginUser AuthInfo authInfo) {
         List<ReservationWithStatus> reservationWithStatuses = reservationService.findReservations(authInfo);
-        return waitingReservationService.handleWaitingOrder(reservationWithStatuses);
+        return waitingReservationService.convertReservationsWithStatusToViewResponses(reservationWithStatuses);
     }
 }
