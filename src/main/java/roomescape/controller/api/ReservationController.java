@@ -7,8 +7,8 @@ import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.service.MemberService;
 import roomescape.service.ReservationCreationService;
+import roomescape.service.ReservationDeletionService;
 import roomescape.service.ReservationQueryService;
 
 import java.net.URI;
@@ -20,15 +20,15 @@ public class ReservationController {
 
     private final ReservationCreationService reservationCreationService;
     private final ReservationQueryService reservationQueryService;
-    private final MemberService memberService;
+    private final ReservationDeletionService reservationDeletionService;
 
     public ReservationController(
             ReservationCreationService reservationCreationService,
             ReservationQueryService reservationQueryService,
-            MemberService memberService) {
+            ReservationDeletionService reservationDeletionService) {
         this.reservationCreationService = reservationCreationService;
         this.reservationQueryService = reservationQueryService;
-        this.memberService = memberService;
+        this.reservationDeletionService = reservationDeletionService;
     }
 
     @GetMapping
@@ -46,5 +46,13 @@ public class ReservationController {
 
         return ResponseEntity.created(location)
                 .body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id, Member member){
+        reservationDeletionService.deleteById(id, member);
+
+        return ResponseEntity.noContent()
+                .build();
     }
 }
