@@ -38,7 +38,7 @@ class ReservationServiceTest {
     @Test
     void save() {
         Reservation saved = reservationService.save(memberId, rawDate, timeId, themeId);
-        assertThat(saved.getId()).isEqualTo(5L);
+        assertThat(saved.getId()).isEqualTo(6L);
     }
 
     @DisplayName("실패: 존재하지 않는 멤버 ID 입력 시 예외가 발생한다.")
@@ -120,7 +120,7 @@ class ReservationServiceTest {
         // when
         Reservation saved = reservationService.saveWaiting(memberId, rawDate, timeId, themeId);
         //then
-        assertThat(saved.getId()).isEqualTo(5L);
+        assertThat(saved.getId()).isEqualTo(6L);
     }
 
     @DisplayName("실패: 동일한 멤버가 2개 이상의 예약 대기를 생성 시도시 예외 발생.")

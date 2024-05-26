@@ -52,7 +52,7 @@ class UserReservationControllerTest {
             .when().post("/reservations")
             .then().log().all()
             .statusCode(201)
-            .body("id", is(5))
+            .body("id", is(6))
             .body("memberName", is("사용자"))
             .body("date", is("2060-01-01"))
             .body("time", is("10:00"))
@@ -130,7 +130,7 @@ class UserReservationControllerTest {
             .when().get("/reservations-mine")
             .then().log().all()
             .statusCode(200)
-            .body("reservationId", contains(2, 4));
+            .body("reservationId", contains(2, 4, 5));
     }
 
     @DisplayName("성공: 예약 대기 요청 -> 200")
@@ -145,7 +145,7 @@ class UserReservationControllerTest {
             .when().post("/reservations/waiting")
             .then().log().all()
             .statusCode(201)
-            .body("id", is(5))
+            .body("id", is(6))
             .body("memberName", is("사용자"))
             .body("date", is("2060-01-01"))
             .body("time", is("10:00"))
