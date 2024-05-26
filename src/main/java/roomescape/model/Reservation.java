@@ -47,13 +47,15 @@ public class Reservation {
         this(0, date, time, theme, member);
     }
 
-    public Reservation() {
+    public Reservation(ReservationDto reservationDto) {
+        this(0,
+                reservationDto.getDate(),
+                new ReservationTime(reservationDto.getTimeId(), null),
+                new Theme(reservationDto.getThemeId(), null, null, null),
+                new Member(reservationDto.getMemberId(), null, null, null, null));
     }
 
-    public static Reservation of(ReservationDto reservationDto, ReservationTime time, long themeId, long memberId) {
-        return new Reservation(reservationDto.getDate(), time,
-                new Theme(themeId, null, null, null),
-                new Member(memberId, null, null, null, null));
+    public Reservation() {
     }
 
     public long getId() {

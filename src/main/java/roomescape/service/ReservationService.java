@@ -47,8 +47,7 @@ public class ReservationService {
         validateIsFuture(date, time.getStartAt());
         validateDuplication(date, time.getId(), reservationDto.getThemeId());
 
-        Reservation reservation = Reservation
-                .of(reservationDto, time, reservationDto.getThemeId(), reservationDto.getMemberId());
+        Reservation reservation = new Reservation(reservationDto);
         return reservationRepository.save(reservation);
     }
 
