@@ -46,4 +46,11 @@ public class ReservationWaitingController {
         reservationWaitingService.deleteReservationWaiting(reservationId, member);
         return ResponseEntity.noContent().build();
     }
+
+    @RoleAllowed(MemberRole.ADMIN)
+    @DeleteMapping("/admin/reservations/waitings/{waitingId}")
+    public ResponseEntity<Void> deleteAdminReservation(@PathVariable Long waitingId) {
+        reservationWaitingService.deleteAdminReservationWaiting(waitingId);
+        return ResponseEntity.noContent().build();
+    }
 }

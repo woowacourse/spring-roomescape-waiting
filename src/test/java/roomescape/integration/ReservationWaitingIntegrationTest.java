@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 
 public class ReservationWaitingIntegrationTest extends IntegrationTest {
@@ -143,7 +144,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         }
 
         @Test
-        void 사용자는_예약id로_본인의_예약_대기를_삭제할_수_있다() {
+        void 사용자는_예약_id로_본인의_예약_대기를_삭제할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createUserCookies())
                     .when().delete("/reservations/" + reservation.getId() + "/waitings")
@@ -152,7 +153,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         }
 
         @Test
-        void 예약id가_존재하지_않는_예약_대기는_삭제할_수_없다() {
+        void 예약_id가_존재하지_않는_예약_대기는_삭제할_수_없다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createUserCookies())
                     .when().delete("/reservations/10/waitings")
@@ -167,6 +168,40 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/reservations/" + reservation.getId() + "/waitings")
+                    .then().log().all()
+                    .statusCode(404);
+        }
+    }
+
+    @Nested
+    @DisplayName("관리자 예약 대기 삭제 API")
+    class DeleteAdminReservationWaiting {
+        ReservationWaiting waiting;
+
+        @BeforeEach
+        void setUp() {
+            ReservationTime time = timeFixture.createFutureTime();
+            Theme theme = themeFixture.createFirstTheme();
+            Member member = memberFixture.createUserMember();
+            Reservation reservation = reservationFixture.createFutureReservation(time, theme, member);
+            waiting = waitingFixture.createWaiting(reservation, member);
+            memberFixture.createAdminMember();
+        }
+
+        @Test
+        void 관리자는_선택한_예약_대기_id로_예약_대기를_삭제할_수_있다() {
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/admin/reservations/waitings/" + waiting.getId())
+                    .then().log().all()
+                    .statusCode(204);
+        }
+
+        @Test
+        void 예약_대기_id가_존재하지_않는_예약_대기는_삭제할_수_없다() {
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/admin/reservations/waitings/10")
                     .then().log().all()
                     .statusCode(404);
         }

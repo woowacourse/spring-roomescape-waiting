@@ -78,6 +78,16 @@ public class ReservationWaitingService {
         reservationWaitingRepository.delete(waiting);
     }
 
+    public void deleteAdminReservationWaiting(Long waitingId) {
+        ReservationWaiting waiting = findReservationWaitingById(waitingId);
+        reservationWaitingRepository.delete(waiting);
+    }
+
+    private ReservationWaiting findReservationWaitingById(Long id) {
+        return reservationWaitingRepository.findById(id)
+                .orElseThrow(NotFoundReservationWaitingException::new);
+    }
+
     private ReservationWaiting findReservationWaitingByReservationIdAndMember(Long reservationId, Long memberId) {
         return reservationWaitingRepository.findByReservationIdAndMemberId(reservationId, memberId)
                 .orElseThrow(NotFoundReservationWaitingException::new);
