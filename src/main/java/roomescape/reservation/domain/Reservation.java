@@ -78,6 +78,10 @@ public class Reservation {
         return new Reservation(null, member, date, time, theme, status, LocalDateTime.now());
     }
 
+    public void convertStatusToReserved() {
+        this.status = Status.RESERVATION;
+    }
+
     public Long getId() {
         return id;
     }
@@ -104,10 +108,6 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     @Override

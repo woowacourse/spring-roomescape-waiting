@@ -109,7 +109,7 @@ public class ReservationService {
 
         reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-        ).ifPresent(Reservation::setStatus);
+        ).ifPresent(Reservation::convertStatusToReserved);
     }
 
     private Reservation getById(long id) {
