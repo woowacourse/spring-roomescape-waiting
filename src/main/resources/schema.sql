@@ -10,10 +10,10 @@ create table if not exists member
 
 create table if not exists theme
 (
-    id          bigint       not null auto_increment,
-    name        varchar(20)  not null,
-    description varchar(200) not null,
-    thumbnail   varchar(200) not null,
+    id            bigint       not null auto_increment,
+    name          varchar(20)  not null,
+    description   varchar(200) not null,
+    thumbnail_url varchar(200) not null,
     primary key (id)
 );
 

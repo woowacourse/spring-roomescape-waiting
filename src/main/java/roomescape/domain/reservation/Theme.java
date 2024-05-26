@@ -18,11 +18,14 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     private ThemeName name;
-    @Column(nullable = false)
+
+    @Column(name = "description", nullable = false)
     private String description;
-    @Column(nullable = false)
+
+    @Column(name = "thumbnail_url", nullable = false)
     private String thumbnailUrl;
 
     protected Theme() {
