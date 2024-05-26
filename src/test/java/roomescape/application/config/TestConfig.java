@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import roomescape.application.auth.JwtTokenManager;
 import roomescape.application.auth.TokenManager;
+import roomescape.support.DatabaseCleaner;
 
 @TestConfiguration
 public class TestConfig {
@@ -29,5 +30,10 @@ public class TestConfig {
     @Primary
     public TokenManager testTokenManager() {
         return new JwtTokenManager(secret, expireInMillis, testClock());
+    }
+
+    @Bean
+    public DatabaseCleaner databaseCleaner() {
+        return new DatabaseCleaner();
     }
 }

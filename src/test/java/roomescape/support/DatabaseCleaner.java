@@ -5,10 +5,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Table;
 import java.util.List;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
 public class DatabaseCleaner {
     private static final String TRUNCATE_FORMAT = "TRUNCATE TABLE %s";
     private static final String ALTER_FORMAT = "ALTER TABLE %s ALTER COLUMN ID RESTART WITH 1";
