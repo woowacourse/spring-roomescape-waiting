@@ -12,6 +12,7 @@ import roomescape.registration.domain.waiting.domain.WaitingWithRank;
 import roomescape.registration.domain.waiting.dto.WaitingRequest;
 import roomescape.registration.domain.waiting.dto.WaitingResponse;
 import roomescape.registration.domain.waiting.repository.WaitingRepository;
+import roomescape.registration.dto.RegistrationRequest;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -20,7 +21,6 @@ import roomescape.theme.repository.ThemeRepository;
 @Service
 public class WaitingService {
 
-    // todo: 예약 레포가 여기있는게 맞나...
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -68,6 +68,22 @@ public class WaitingService {
 
     public List<WaitingWithRank> findMemberWaitingWithRank(long memberId) {
         return waitingRepository.findWaitingsWithRankByMemberId(memberId);
+    }
+
+    public long countWaitingRank(RegistrationRequest registrationRequest) {
+        Waiting waiting = waitingRepository.findByDateAndThemeIdAndReservationTimeIdAndMemberId(
+                registrationRequest.date(),
+                registrationRequest.themeId(),
+                registrationRequest.timeId(),
+                registrationRequest.memberId()
+        );
+
+        return waitingRepository.countWaitingRankByDateAndThemeIdAndReservationTimeId(
+                waiting.getId(),
+                registrationRequest.date(),
+                registrationRequest.themeId(),
+                registrationRequest.timeId()
+        );
     }
 
     public void removeWaiting(long waitingId) {
