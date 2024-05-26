@@ -24,6 +24,7 @@ import roomescape.reservation.service.dto.ReservationTimeCreate;
 @RestController
 @RequestMapping("/times")
 public class ReservationTimeController {
+
     private final ReservationTimeService reservationTimeService;
 
     public ReservationTimeController(ReservationTimeService reservationTimeService) {
@@ -47,7 +48,7 @@ public class ReservationTimeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") @Min(1) long timeId) {
         reservationTimeService.delete(timeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/available")

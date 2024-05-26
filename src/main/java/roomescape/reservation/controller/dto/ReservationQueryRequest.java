@@ -3,9 +3,13 @@ package roomescape.reservation.controller.dto;
 import java.time.LocalDate;
 
 public class ReservationQueryRequest {
+
     private final Long themeId;
+
     private final Long memberId;
+
     private final LocalDate startDate;
+
     private final LocalDate endDate;
 
     public ReservationQueryRequest(Long themeId, Long memberId, LocalDate startDate, LocalDate endDate) {

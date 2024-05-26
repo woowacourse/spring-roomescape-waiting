@@ -3,6 +3,7 @@ package roomescape.exception;
 public class AuthenticationException extends RuntimeException {
 
     private final String errorCode;
+
     private final ExceptionResponse exceptionResponse;
 
     public AuthenticationException(ErrorType errorType) {

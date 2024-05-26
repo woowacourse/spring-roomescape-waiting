@@ -12,6 +12,7 @@ import roomescape.member.domain.repository.MemberRepository;
 @Service
 @Transactional(readOnly = true)
 public class MemberService {
+
     private final MemberRepository memberRepository;
 
     public MemberService(MemberRepository memberRepository) {

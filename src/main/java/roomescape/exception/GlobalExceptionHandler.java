@@ -11,6 +11,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @ExceptionHandler(BadRequestException.class)

@@ -22,7 +22,9 @@ import roomescape.auth.service.dto.SignUpCommand;
 public class AuthController {
 
     private final AuthService authService;
+
     private final RequestHandler requestHandler;
+
     private final ResponseHandler responseHandler;
 
     public AuthController(AuthService authService, RequestHandler requestHandler, ResponseHandler responseHandler) {

@@ -23,6 +23,7 @@ import roomescape.reservation.service.dto.ThemeCreate;
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
+
     private final ThemeService themeService;
 
     public ThemeController(ThemeService themeService) {
@@ -50,7 +51,7 @@ public class ThemeController {
     public ResponseEntity<List<ThemeResponse>> findPopular(
             @RequestParam(value = "startDate", required = false) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) LocalDate endDate,
-            @RequestParam(value = "limit", required = false, defaultValue = "10") @Min(value = 1) @Max(value = 20) int limit) {
+            @RequestParam(value = "limit", required = false, defaultValue = "3") @Min(value = 1) @Max(value = 20) int limit) {
         if (startDate == null) {
             startDate = LocalDate.now().minusDays(7);
         }

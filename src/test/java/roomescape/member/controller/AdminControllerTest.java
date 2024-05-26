@@ -1,146 +1,168 @@
 package roomescape.member.controller;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.fixture.MemberFixture.getMemberAdmin;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.fixture.DateFixture.getNextDay;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import jakarta.servlet.http.Cookie;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import roomescape.auth.controller.dto.MemberResponse;
-import roomescape.auth.service.AuthService;
-import roomescape.auth.service.TokenProvider;
-import roomescape.auth.service.dto.SignUpCommand;
-import roomescape.member.service.MemberService;
+import roomescape.auth.domain.AuthInfo;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ThemeResponse;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.ReservationTimeService;
-import roomescape.reservation.service.ThemeService;
-import roomescape.reservation.service.dto.ReservationTimeCreate;
-import roomescape.reservation.service.dto.ThemeCreate;
 import roomescape.util.ControllerTest;
 
-@DisplayName("관리자 페이지 테스트")
+@DisplayName("관리자 API 통합 테스트")
 class AdminControllerTest extends ControllerTest {
-    @Autowired
-    ReservationService reservationService;
 
-    @Autowired
-    ReservationTimeService reservationTimeService;
+    @DisplayName("예약 목록 조회 시, 200을 반환한다.")
+    @Test
+    void getReservations() throws Exception {
+        //given
+        MemberResponse memberResponse = new MemberResponse(1L, "초코칩");
+        ReservationTimeResponse reservationTimeResponse = new ReservationTimeResponse(2L, LocalTime.NOON);
+        ThemeResponse themeResponse = new ThemeResponse(3L, "이름", "설명", "썸네일");
+        ReservationResponse reservationResponse = new ReservationResponse(4L,
+                memberResponse, getNextDay(),
+                reservationTimeResponse,
+                themeResponse
+        );
 
-    @Autowired
-    ThemeService themeService;
+        //when
+        doReturn(List.of(reservationResponse))
+                .when(reservationApplicationService)
+                .findMemberReservations(any());
 
-    @Autowired
-    MemberService memberService;
-
-    @Autowired
-    AuthService authService;
-
-    @Autowired
-    TokenProvider tokenProvider;
-
-    String token;
-
-    @BeforeEach
-    void setUp() {
-        token = tokenProvider.createAccessToken(getMemberAdmin().getEmail());
+        //then
+        mockMvc.perform(
+                get("/reservations")
+                        .cookie(new Cookie("token", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 
-    @DisplayName("관리자 메인 페이지 조회에 성공한다.")
+    @DisplayName("관리자 예약 생성 시, 201을 반환한다.")
     @Test
-    void adminMainPage() {
+    void create() throws Exception {
         //given
+        MemberResponse memberResponse = new MemberResponse(1L, "초코칩");
+        ReservationTimeResponse reservationTimeResponse = new ReservationTimeResponse(2L, LocalTime.NOON);
+        ThemeResponse themeResponse = new ThemeResponse(3L, "이름", "설명", "썸네일");
+        ReservationResponse reservationResponse = new ReservationResponse(4L,
+                memberResponse, getNextDay(),
+                reservationTimeResponse,
+                themeResponse
+        );
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("memberId", memberResponse.id());
+        params.put("date", "2099-08-05");
+        params.put("timeId", reservationTimeResponse.id());
+        params.put("themeId", themeResponse.id());
+
+        //when
+        doReturn(reservationResponse)
+                .when(reservationApplicationService)
+                .createMemberReservation(any());
+
+        //then
+        mockMvc.perform(
+                post("/admin/reservations")
+                        .cookie(new Cookie("token", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(params))
+        ).andExpect(status().isCreated());
+    }
+
+    @DisplayName("관리자 예약 삭제 시, 204를 반환한다.")
+    @Test
+    void deleteTest() throws Exception {
+        //given
+        MemberResponse memberResponse = new MemberResponse(1L, "초코칩");
+        ReservationTimeResponse reservationTimeResponse = new ReservationTimeResponse(2L, LocalTime.NOON);
+        ThemeResponse themeResponse = new ThemeResponse(3L, "이름", "설명", "썸네일");
+        ReservationResponse reservationResponse = new ReservationResponse(4L,
+                memberResponse, getNextDay(),
+                reservationTimeResponse,
+                themeResponse
+        );
+
+        //when
+        doNothing()
+                .when(reservationApplicationService)
+                .delete(isA(Long.class));
+
+        //then
+        mockMvc.perform(
+                delete(String.format(
+                        String.format("/admin/reservations/%d", reservationResponse.memberReservationId())))
+                        .cookie(new Cookie("token", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNoContent());
+    }
+
+
+    @DisplayName("대기 예약을 승인할 경우, 200을 반환한다.")
+    @Test
+    void approveWaiting() throws Exception {
+        //given
+        MemberResponse memberResponse = new MemberResponse(1L, "초코칩");
+        ReservationTimeResponse reservationTimeResponse = new ReservationTimeResponse(2L, LocalTime.NOON);
+        ThemeResponse themeResponse = new ThemeResponse(3L, "이름", "설명", "썸네일");
+        ReservationResponse waitingResponse = new ReservationResponse(4L,
+                memberResponse, getNextDay(),
+                reservationTimeResponse,
+                themeResponse
+        );
+
+        doNothing()
+                .when(reservationApplicationService)
+                .approveWaiting(isA(AuthInfo.class), isA(Long.class));
 
         //when & then
-        RestAssured.given().log().all()
-                .cookie("token", token)
-                .when().get("/admin")
-                .then().log().all()
-                .statusCode(200);
+        mockMvc.perform(
+                post(String.format("/admin/reservations/%d/waiting/approve", waitingResponse.memberReservationId()))
+                        .cookie(new Cookie("token", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 
-    @DisplayName("관리자 예약 페이지 조회에 성공한다.")
+    @DisplayName("대기 예약을 거절할 경우, 200을 반환한다.")
     @Test
-    void getAdminReservationPage() {
-        //given & when & then
-        RestAssured.given().log().all()
-                .cookie("token", token)
-                .when().get("/admin/reservation")
-                .then().log().all()
-                .statusCode(200);
-    }
-
-    @DisplayName("예약 목록 조회에 성공한다.")
-    @Test
-    void getReservations() {
-        //given & when & then
-        RestAssured.given().log().all()
-                .cookie("token", token)
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
-    }
-
-    @DisplayName("관리자가 예약을 생성 후, 예약을 삭제한다.")
-    @TestFactory
-    Stream<DynamicTest> createAndDelete() {
-        List<ReservationResponse> responses = new ArrayList<>();
-
-        return Stream.of(
-                dynamicTest("관리자 예약 생성 시, 201을 반환한다.", () -> {
-                    //given
-                    ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                            new ReservationTimeCreate(LocalTime.NOON));
-                    ThemeResponse themeResponse = themeService.create(
-                            new ThemeCreate("name", "description", "thumbnail"));
-                    MemberResponse memberResponse = authService.signUp(
-                            new SignUpCommand(getMemberChoco().getName(), getMemberChoco().getEmail(),
-                                    getMemberChoco().getPassword()));
-
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("memberId", memberResponse.id());
-                    params.put("date", "2099-08-05");
-                    params.put("timeId", reservationTimeResponse.id());
-                    params.put("themeId", themeResponse.id());
-
-                    //when & then
-                    ReservationResponse reservationResponse = RestAssured.given().log().all()
-                            .cookie("token", token)
-                            .contentType(ContentType.JSON)
-                            .body(params)
-                            .when().post("/admin/reservations")
-                            .then().log().all()
-                            .statusCode(201).extract().as(ReservationResponse.class);
-
-                    responses.add(reservationResponse);
-                }),
-                dynamicTest("관리자 예약 삭제 시, 204를 반환한다.", () -> {
-                    //given
-                    ReservationResponse reservationResponse = responses.get(0);
-
-                    //when &then
-                    RestAssured.given().log().all()
-                            .cookie("token", token)
-                            .when().delete("/admin/reservations/" + reservationResponse.memberReservationId())
-                            .then().log().all()
-                            .statusCode(204);
-                })
+    void denyWaiting() throws Exception {
+        //given
+        MemberResponse memberResponse = new MemberResponse(1L, "초코칩");
+        ReservationTimeResponse reservationTimeResponse = new ReservationTimeResponse(2L, LocalTime.NOON);
+        ThemeResponse themeResponse = new ThemeResponse(3L, "이름", "설명", "썸네일");
+        ReservationResponse waitingResponse = new ReservationResponse(4L,
+                memberResponse, getNextDay(),
+                reservationTimeResponse,
+                themeResponse
         );
+
+        //when
+        doNothing()
+                .when(reservationApplicationService)
+                .approveWaiting(isA(AuthInfo.class), isA(Long.class));
+
+        //when & then
+        mockMvc.perform(
+                post(String.format("/admin/reservations/%d/waiting/deny", waitingResponse.memberReservationId()))
+                        .cookie(new Cookie("token", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 }

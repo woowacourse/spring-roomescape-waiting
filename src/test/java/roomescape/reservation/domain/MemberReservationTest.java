@@ -25,8 +25,10 @@ class MemberReservationTest {
         Reservation nextMonthReservation = getNextMonthReservation(noon, theme);
 
         //when
-        MemberReservation memberReservation1 = new MemberReservation(id, member, nextDayReservation);
-        MemberReservation memberReservation2 = new MemberReservation(id, member, nextMonthReservation);
+        MemberReservation memberReservation1 = new MemberReservation(id, member, nextDayReservation,
+                ReservationStatus.APPROVED);
+        MemberReservation memberReservation2 = new MemberReservation(id, member, nextMonthReservation,
+                ReservationStatus.APPROVED);
 
         //then
         assertThat(memberReservation1).isEqualTo(memberReservation2);

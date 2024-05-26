@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 public class AvailableTimes {
+
     private final List<AvailableTime> availableTimes;
 
     public AvailableTimes(final List<AvailableTime> availableTimes) {

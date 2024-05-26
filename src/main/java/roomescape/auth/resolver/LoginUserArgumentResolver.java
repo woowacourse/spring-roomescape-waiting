@@ -15,8 +15,11 @@ import roomescape.member.service.MemberService;
 
 @Component
 public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
+
     private final RequestHandler requestHandler;
+
     private final MemberService memberService;
+
     private final AuthService authService;
 
     public LoginUserArgumentResolver(RequestHandler requestHandler, MemberService memberService,

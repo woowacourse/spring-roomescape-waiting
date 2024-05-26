@@ -10,6 +10,7 @@ import roomescape.exception.ErrorType;
 @Embeddable
 public class Name {
     private static final Pattern PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9]+(?:\\s+[a-zA-Z가-힣0-9]+)*$");
+
     private static final int MAX_NAME_LENGTH = 10;
 
     @Column(nullable = false, length = MAX_NAME_LENGTH)

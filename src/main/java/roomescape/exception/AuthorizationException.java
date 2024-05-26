@@ -1,7 +1,9 @@
 package roomescape.exception;
 
 public class AuthorizationException extends RuntimeException {
+
     private final String errorCode;
+
     private final ExceptionResponse exceptionResponse;
 
     public AuthorizationException(ErrorType errorType) {

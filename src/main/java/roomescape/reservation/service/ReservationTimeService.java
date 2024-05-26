@@ -19,7 +19,9 @@ import roomescape.reservation.service.dto.ReservationTimeCreate;
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
+
     private final ReservationRepository reservationRepository;
+
     private final ReservationTimeRepository reservationTimeRepository;
 
     public ReservationTimeService(ReservationRepository reservationRepository,

@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.ReservationTime;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
@@ -17,5 +18,5 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
                 JOIN r.time rt 
                 WHERE r.date = :date AND r.theme.id = :themeId
             """)
-    Set<ReservationTime> findReservedTime(LocalDate date, long themeId);
+    Set<ReservationTime> findReservedTime(@Param("date") LocalDate date, @Param("themeId") long themeId);
 }
