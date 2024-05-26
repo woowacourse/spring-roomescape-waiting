@@ -50,7 +50,7 @@ public class AdminReservationController {
                 .toList();
     }
 
-    @GetMapping("/admin/reservations-search")
+    @GetMapping("/admin/reservations/search")
     public List<ReservationResponse> searchReservations(@ModelAttribute SearchReservationsRequest request) {
         return reservationService.searchReservations(request)
                 .stream()
