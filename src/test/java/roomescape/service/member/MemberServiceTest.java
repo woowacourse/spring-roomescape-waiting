@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.Fixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
 import roomescape.service.member.dto.MemberResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -26,9 +26,9 @@ class MemberServiceTest {
     @Test
     void findAll() {
         // given
-        memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.MEMBER));
-        memberRepository.save(new Member("lini2", "lini2@email.com", "lini123", Role.MEMBER));
-        memberRepository.save(new Member("lini3", "lini3@email.com", "lini123", Role.MEMBER));
+        memberRepository.save(Fixture.member);
+        memberRepository.save(Fixture.member2);
+        memberRepository.save(Fixture.member3);
 
         // when
         List<MemberResponse> memberResponses = memberService.findAll();
@@ -41,7 +41,7 @@ class MemberServiceTest {
     @Test
     void findById() {
         // given
-        Member member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.MEMBER));
+        Member member = memberRepository.save(Fixture.member);
 
         // when
         Member result = memberService.findById(member.getId());

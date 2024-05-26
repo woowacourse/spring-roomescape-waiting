@@ -2,7 +2,6 @@ package roomescape.service.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,9 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.Fixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
@@ -36,7 +35,7 @@ import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql("/truncate-with-guests.sql")
+@Sql("/truncate.sql")
 class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
@@ -56,79 +55,79 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTime = reservationTimeRepository.save(
-                new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
-        theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
-        member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.MEMBER));
+        reservationTime = reservationTimeRepository.save(Fixture.reservationTime);
+        theme = themeRepository.save(Fixture.theme);
+        member = memberRepository.save(Fixture.member);
     }
 
     @DisplayName("새로운 예약을 저장한다.")
     @Test
     void create() {
-        //given
-        LocalDate date = LocalDate.now().plusDays(1);
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(),
-                reservationTime.getId(), theme.getId());
+        // given
+        LocalDate date = Fixture.tomorrow;
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(
+                date, member.getId(), reservationTime.getId(), theme.getId()
+        );
 
-        //when
+        // when
         ReservationResponse result = reservationService.create(adminReservationRequest);
 
-        //then
-        assertAll(
-                () -> assertThat(result.id()).isNotZero(),
-                () -> assertThat(result.time().id()).isEqualTo(reservationTime.getId()),
-                () -> assertThat(result.theme().id()).isEqualTo(theme.getId())
-        );
+        // then
+        SoftAssertions assertions = new SoftAssertions();
+        assertions.assertThat(result.id()).isNotZero();
+        assertions.assertThat(result.time().id()).isEqualTo(reservationTime.getId());
+        assertions.assertThat(result.theme().id()).isEqualTo(theme.getId());
+        assertions.assertAll();
     }
 
     @DisplayName("모든 예약 내역을 조회한다.")
     @Test
     void findAll() {
-        //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        // given
+        Schedule schedule = new Schedule(ReservationDate.of(Fixture.tomorrow), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
-        //when
+        // when
         List<ReservationResponse> reservations = reservationService.findAll();
 
-        //then
+        // then
         assertThat(reservations).hasSize(1);
     }
 
     @DisplayName("사용자 조건으로 예약 내역을 조회한다.")
     @Test
     void findByMember() {
-        //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        // given
+        Schedule schedule = new Schedule(ReservationDate.of(Fixture.tomorrow), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
-        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), null, null,
-                null);
+        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(
+                member.getId(), null, null, null
+        );
 
-        //when
+        // when
         List<ReservationResponse> reservations = reservationService.findByCondition(reservationFilterRequest);
 
-        //then
+        // then
         assertThat(reservations).hasSize(1);
     }
 
     @DisplayName("사용자와 테마 조건으로 예약 내역을 조회한다.")
     @Test
     void findByMemberAndTheme() {
-        //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        // given
+        Schedule schedule = new Schedule(ReservationDate.of(Fixture.tomorrow), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         long notMemberThemeId = theme.getId() + 1;
         ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(),
                 notMemberThemeId, null, null);
 
-        //when
+        // when
         List<ReservationResponse> reservations = reservationService.findByCondition(reservationFilterRequest);
 
-        //then
+        // then
         assertThat(reservations).isEmpty();
     }
 
@@ -137,20 +136,19 @@ class ReservationServiceTest {
     void findReservationsOf() {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
-        Theme theme = themeRepository.save(
-                new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
-                        "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg")
+                new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS))
         );
-        Member member = memberRepository.save(new Member("pedro", "pedro@email.com", "pedro123", Role.MEMBER));
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.now()), reservationTime);
+        Theme theme = themeRepository.save(Fixture.theme);
+        Member member = memberRepository.save(Fixture.member);
+        Schedule schedule = new Schedule(ReservationDate.of(Fixture.today), reservationTime);
+
         reservationRepository.save(
                 new Reservation(member, schedule, theme, ReservationStatus.RESERVED)
         );
         reservationWaitingRepository.save(new ReservationWaiting(member, theme, schedule));
 
         // when
-        List<MemberReservationResponse> reservations = reservationService.findReservationsOf(4L);
+        List<MemberReservationResponse> reservations = reservationService.findReservationsOf(member.getId());
 
         // then
         assertThat(reservations).hasSize(2);
@@ -159,15 +157,15 @@ class ReservationServiceTest {
     @DisplayName("id로 예약을 삭제한다.")
     @Test
     void deleteById() {
-        //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        // given
+        Schedule schedule = new Schedule(ReservationDate.of(Fixture.tomorrow), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         Reservation target = reservationRepository.save(reservation);
 
-        //when
+        // when
         reservationService.deleteById(target.getId());
 
-        //then
+        // then
         assertThat(reservationService.findAll()).isEmpty();
     }
 
@@ -175,7 +173,7 @@ class ReservationServiceTest {
     @Test
     void convertWaitingToReservationWhenReservationCanceled() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = Fixture.tomorrow;
         Schedule schedule = new Schedule(ReservationDate.of(date), reservationTime);
         ReservationWaiting waiting = new ReservationWaiting(member, theme, schedule);
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(waiting);
@@ -197,8 +195,8 @@ class ReservationServiceTest {
     @DisplayName("해당 테마와 일정으로 예약이 존재하면 예외를 발생시킨다.")
     @Test
     void duplicatedReservation() {
-        //given
-        LocalDate date = LocalDate.MAX;
+        // given
+        LocalDate date = Fixture.tomorrow;
         Schedule schedule = new Schedule(ReservationDate.of(date), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
@@ -206,7 +204,7 @@ class ReservationServiceTest {
         AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(),
                 reservationTime.getId(), theme.getId());
 
-        //when & then
+        // when & then
         assertThatThrownBy(() -> reservationService.create(adminReservationRequest))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("선택하신 테마와 일정은 이미 예약이 존재합니다.");
@@ -215,12 +213,13 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 시간으로 예약을 추가하면 예외를 발생시킨다.")
     @Test
     void cannotCreateByUnknownTime() {
-        //given
-        LocalDate date = LocalDate.now().plusDays(1);
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(), 0L,
-                theme.getId());
+        // given
+        LocalDate date = Fixture.tomorrow;
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(
+                date, member.getId(), 0L, theme.getId()
+        );
 
-        //when & then
+        // when & then
         assertThatThrownBy(() -> reservationService.create(adminReservationRequest))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("더이상 존재하지 않는 시간입니다.");
@@ -229,12 +228,12 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 테마로 예약을 추가하면 예외를 발생시킨다.")
     @Test
     void cannotCreateByUnknownTheme() {
-        //given
-        LocalDate date = LocalDate.now().plusDays(1);
+        // given
+        LocalDate date = Fixture.tomorrow;
         AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(),
                 reservationTime.getId(), 0L);
 
-        //when & then
+        // when & then
         assertThatThrownBy(() -> reservationService.create(adminReservationRequest))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("더이상 존재하지 않는 테마입니다.");

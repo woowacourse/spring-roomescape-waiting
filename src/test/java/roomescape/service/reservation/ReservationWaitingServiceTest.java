@@ -5,8 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,10 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.Fixture;
 import roomescape.auth.TokenProvider;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
@@ -35,6 +34,7 @@ import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationWaitingResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
+@Sql("/truncate.sql")
 class ReservationWaitingServiceTest {
     @Autowired
     private ReservationWaitingService reservationWaitingService;
@@ -57,10 +57,9 @@ class ReservationWaitingServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
-        theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
-        member = memberRepository.save(new Member("pedro", "pedro@email.com", "pedro123", Role.MEMBER));
+        reservationTime = reservationTimeRepository.save(Fixture.reservationTime);
+        theme = themeRepository.save(Fixture.theme);
+        member = memberRepository.save(Fixture.member);
         token = tokenProvider.create(member);
     }
 
@@ -68,11 +67,11 @@ class ReservationWaitingServiceTest {
     @Test
     void create() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = Fixture.tomorrow;
         ReservationRequest request = new ReservationRequest(
                 date, reservationTime.getId(), theme.getId()
         );
-        reservationRepository.save(new Reservation(member, new Schedule(ReservationDate.of(date), reservationTime), theme, ReservationStatus.RESERVED));
+        saveReservationOfDate(date);
 
         // when
         ReservationWaitingResponse response = reservationWaitingService.create(request, member.getId());
@@ -91,11 +90,11 @@ class ReservationWaitingServiceTest {
     @Test
     void throwsExceptionOnDuplicatedWaiting() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = Fixture.tomorrow;
         ReservationRequest request = new ReservationRequest(
                 date, reservationTime.getId(), theme.getId()
         );
-        reservationRepository.save(new Reservation(member, new Schedule(ReservationDate.of(date), reservationTime), theme, ReservationStatus.RESERVED));
+        saveReservationOfDate(date);
         reservationWaitingService.create(request, member.getId());
 
         // when & then
@@ -105,11 +104,18 @@ class ReservationWaitingServiceTest {
                 .hasMessage("이미 해당 테마에 예약 대기를 등록했습니다.");
     }
 
+    private void saveReservationOfDate(LocalDate date) {
+        Reservation reservation = new Reservation(
+                member, new Schedule(ReservationDate.of(date), reservationTime), theme, ReservationStatus.RESERVED
+        );
+        reservationRepository.save(reservation);
+    }
+
     @DisplayName("id로 등록된 예약 대기를 취소한다.")
     @Test
     void deleteById() {
         // given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        Schedule schedule = new Schedule(ReservationDate.of(Fixture.tomorrow), reservationTime);
         ReservationWaiting waiting = new ReservationWaiting(member, theme, schedule);
         ReservationWaiting target = reservationWaitingRepository.save(waiting);
 
@@ -124,7 +130,7 @@ class ReservationWaitingServiceTest {
     @Test
     void throwsExceptionWhenMemberIdNotMatched() {
         // given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        Schedule schedule = new Schedule(ReservationDate.of(Fixture.tomorrow), reservationTime);
         ReservationWaiting waiting = new ReservationWaiting(member, theme, schedule);
         ReservationWaiting target = reservationWaitingRepository.save(waiting);
 

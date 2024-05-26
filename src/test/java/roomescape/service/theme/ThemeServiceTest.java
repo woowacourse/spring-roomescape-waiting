@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.Fixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
@@ -30,7 +28,7 @@ import roomescape.service.theme.dto.ThemeRequest;
 import roomescape.service.theme.dto.ThemeResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql("/truncate-with-guests.sql")
+@Sql("/truncate.sql")
 class ThemeServiceTest {
     @Autowired
     private ThemeService themeService;
@@ -46,29 +44,24 @@ class ThemeServiceTest {
     @DisplayName("테마를 생성한다.")
     @Test
     void create() {
-        //given
-        ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        // given
+        ThemeRequest themeRequest = Fixture.themeRequest;
 
-        //when
+        // when
         ThemeResponse themeResponse = themeService.create(themeRequest);
 
-        //then
+        // then
         assertThat(themeResponse.id()).isNotZero();
     }
 
     @DisplayName("테마를 생성한다.")
     @Test
     void cannotCreateByDuplicatedName() {
-        //given
-        Theme theme = new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
-        themeRepository.save(theme);
+        // given
+        themeRepository.save(Fixture.theme);
+        ThemeRequest themeRequest = Fixture.themeRequest;
 
-        ThemeRequest themeRequest = new ThemeRequest(theme.getName().getValue(), "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
-
-        //when&then
+        // when&then
         assertThatThrownBy(() -> themeService.create(themeRequest))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("이미 존재하는 테마 이름입니다.");
@@ -103,17 +96,15 @@ class ThemeServiceTest {
     @DisplayName("예약이 존재하는 테마를 삭제하면 예외가 발생한다.")
     @Test
     void cannotDeleteByReservation() {
-        //given
+        // given
         Theme theme = createTheme("레벨2 탈출");
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS))
-        );
-        Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.MEMBER));
+        Member member = memberRepository.save(Fixture.member);
+        ReservationTime reservationTime = reservationTimeRepository.save(Fixture.reservationTime);
         Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
-        //when&then
+        // when&then
         long themeId = theme.getId();
         assertThatThrownBy(() -> themeService.deleteById(themeId))
                 .isInstanceOf(InvalidReservationException.class)
@@ -123,13 +114,13 @@ class ThemeServiceTest {
     @DisplayName("인기 테마를 조회한다.")
     @Test
     void findPopularThemes() {
-        //given
+        // given
         Theme theme1 = createTheme("레벨1 탈출");
         Theme theme2 = createTheme("레벨2 탈출");
         Theme theme3 = createTheme("레벨3 탈출");
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
-        Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.MEMBER));
+        ReservationTime reservationTime = reservationTimeRepository.save(Fixture.reservationTime);
+        Member member = memberRepository.save(Fixture.member);
         Schedule schedule1 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime);
         Schedule schedule2 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime);
         Schedule schedule3 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime);
@@ -138,10 +129,10 @@ class ThemeServiceTest {
         reservationRepository.save(new Reservation(member, schedule2, theme2, ReservationStatus.RESERVED));
         reservationRepository.save(new Reservation(member, schedule3, theme3, ReservationStatus.RESERVED));
 
-        //when
+        // when
         List<ThemeResponse> result = themeService.findPopularThemes();
 
-        //then
+        // then
         assertThat(result).hasSize(2);
     }
 
