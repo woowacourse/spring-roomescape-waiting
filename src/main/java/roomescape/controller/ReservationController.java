@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,14 +16,17 @@ import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationService reservationService;
+    private final ReservationWaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, ReservationWaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -42,12 +46,17 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public List<LoginMemberReservationResponse> findLoginMemberReservations(@Auth long memberId) {
-        return reservationService.findByMemberId(memberId);
+        List<LoginMemberReservationResponse> reservations = reservationService.findByMemberId(memberId);
+        List<LoginMemberReservationResponse> waitings = waitingService.findByMemberId(memberId);
+
+        List<LoginMemberReservationResponse> response = new ArrayList<>(reservations);
+        response.addAll(waitings);
+        return response;
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
-        reservationService.delete(id);
+    public ResponseEntity<Void> delete(@Auth long memberId, @PathVariable("id") long reservationId) {
+        reservationService.cancel(memberId, reservationId);
         return ResponseEntity.noContent().build();
     }
 }

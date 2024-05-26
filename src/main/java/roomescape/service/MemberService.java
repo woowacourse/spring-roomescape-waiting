@@ -6,6 +6,7 @@ import static roomescape.service.mapper.MemberInfoMapper.toResponse;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Sha256Encryptor;
 import roomescape.dto.LoginRequest;
@@ -15,6 +16,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.service.mapper.MemberInfoMapper;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
     private final Sha256Encryptor encryptor;

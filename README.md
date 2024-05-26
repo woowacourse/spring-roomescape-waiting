@@ -3,6 +3,19 @@
 - [x] JdbcTemplate 대신 Spring Data JPA 사용하도록 변경
 - [x] 내 예약 목록을 조회하는 API 구현
 
+- [x] 예약 대기 개념 추가 : 예약 대기는 특정 날짜, 시간, 테마에 예약이 있는 상태에서, 만약 그 예약이 취소된 경우 대기자에게 예약이 넘어가는 기능이다.
+  - 즉, 대입 전형의 예비 번호와 비슷한 개념이다.
+  - [x] 예약 대기 생성 : 같은 날짜, 시간, 테마에 같은 회원이 예약 대기는 하나만 생성할 수 있다.
+    - 같은 날짜, 시간, 테마에 같은 회원이 예약이 되어있는 경우, 예약 대기는 생성할 수 없다.
+    - 같은 날짜, 시간, 테마에 같은 회원이 예약대기가 있는 경우, 예약을 생성할 수 없다.
+  - [x] 예약 대기 취소 : 사용자는 예약 대기를 취소할 수 있다. 예약 대기 취소 시, 이전 대기자들이 연속적으로 대기 순번이 앞당겨진다.
+  - [x] 내 예약 조회 기능 변경 : 예약 대기 목록도 함께 보여준다. 이때, 예약 대기 순번도 보여준다.
+- [x] 예약 취소 기능 추가 : 회원이 자신의 예약을 취소할 수 있다.
+  - 예약 취소 시 기존 예약 대기 1번이 예약되고, 나머지 예약 대기의 순번이 당겨진다.
+
+- [x] 관리자의 예약 대기 관리 기능
+  - [x] 예약 대기를 거절할 수 있다. 즉, 예약 대기를 삭제할 수 있다. 예약 대기가 취소될 경우 이전 우선순위의 예약 대기의 순위가 올라간다.
+
 # API 명세
 
 ## 예약 조회 API
@@ -125,7 +138,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### Request
 
-> DELETE /reservations/1 HTTP/1.1
+> DELETE /reservations/{reservationId} HTTP/1.1
 
 ### Response
 
@@ -348,7 +361,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBR
         "theme": "테마2",
         "date": "2024-03-01",
         "time": "12:00",
-        "status": "예약"
+        "status": "1번째 예약 대기"
     },
     {
         "reservationId": 3,
@@ -357,5 +370,86 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBR
         "time": "14:00",
         "status": "예약"
     }
+]
+```
+
+## 예약 대기 추가 API
+
+### Request
+
+> POST /reservations/waiting HTTP/1.1
+> cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+> host: localhost:8080
+
+```json
+{
+  "date": "2024-03-01",
+  "themeId": 1,
+  "timeId": 1
+}
+```
+
+### Response
+
+> HTTP/1.1 204
+> Content-Type: application/json
+
+``` JSON 
+{
+  "id": 1,
+  "name": "브라운",
+  "date": "2024-05-26",
+  "time": {
+    "id": 1,
+    "startAt": "02:23"
+  },
+  "theme": {
+    "id": 1,
+    "name": "테마1",
+    "description": "description_cd6209599833",
+    "thumbnail": "thumbnail_38689040a3b6"
+  },
+  "priority": 1
+}
+```
+
+## 예약 대기 취소 API
+
+### Request
+
+> DELETE /reservations/waiting/{id} HTTP/1.1
+
+### Response
+
+> HTTP/1.1 204
+
+## 관리자 예약 대기 목록 조회
+
+### Request
+
+> GET /admin/reservations/waiting HTTP/1.1
+> cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+> host: localhost:8080
+
+### Response
+
+``` JSON 
+[
+  {
+    "id": 1,
+    "name": "브라운",
+    "date": "2024-05-26",
+    "time": {
+      "id": 1,
+      "startAt": "02:23"
+    },
+    "theme": {
+      "id": 1,
+      "name": "테마1",
+      "description": "description_cd6209599833",
+      "thumbnail": "thumbnail_38689040a3b6"
+    },
+    "priority": 1
+  }
 ]
 ```

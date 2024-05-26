@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import static roomescape.domain.Role.ADMIN;
 import static roomescape.domain.Role.MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_NAME;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class Member {
+public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -52,6 +53,10 @@ public class Member {
         this(id, name, email, encryptedPassword, MEMBER);
     }
 
+    public boolean isAdmin() {
+        return ADMIN.equals(role);
+    }
+
     public boolean hasIdOf(long id) {
         return this.id == id;
     }
@@ -74,6 +79,10 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public String getRoleName() {
+        return role.name();
     }
 
     @Override

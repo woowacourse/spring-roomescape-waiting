@@ -1,6 +1,7 @@
 package roomescape.exception;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -30,7 +31,12 @@ public enum ExceptionType {
     INVALID_EMAIL_FORMAT(BAD_REQUEST, "잘못된 이메일 포맷입니다."),
     INVALID_TOKEN(UNAUTHORIZED, "잘못된 토큰입니다. 다시 로그인하세요"),
     NOT_FOUND_MEMBER(BAD_REQUEST, "없는 회원입니다."),
-    PERMISSION_DENIED(FORBIDDEN, "권한이 없습니다.");
+    PERMISSION_DENIED(FORBIDDEN, "권한이 없습니다."),
+    WAITING_WITHOUT_RESERVATION(CONFLICT, "예약 대기는 예약이 있어야만 생성할 수 있습니다."),
+    WAITING_WITHOUT_MEMBER(CONFLICT, "예약 대기는 회원이 있어야만 생성할 수 있습니다."),
+    WAITING_AT_ALREADY_RESERVATION(CONFLICT, "예약이 되어있는 회원이 예약 대기를 생성할 수 없습니다."),
+    DUPLICATE_WAITING(BAD_REQUEST, "같은 테마와 날짜, 시간에 예약 대기는 한번만 생성할 수 있습니다."),
+    NOT_FOUND_RESERVATION(BAD_REQUEST, "없는 예약입니다.");
 
     private final HttpStatus status;
     private final String message;

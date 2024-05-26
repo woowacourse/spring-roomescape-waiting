@@ -4,8 +4,10 @@ import static roomescape.exception.ExceptionType.EMPTY_DATE;
 import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_THEME;
 import static roomescape.exception.ExceptionType.EMPTY_TIME;
+import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,16 +19,16 @@ import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class Reservation implements Comparable<Reservation> {
+public class Reservation extends BaseEntity implements Comparable<Reservation> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member reservationMember;
     private LocalDate date;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
     protected Reservation() {
@@ -84,12 +86,22 @@ public class Reservation implements Comparable<Reservation> {
         return dateTime.compareTo(otherDateTime);
     }
 
-    public boolean isBefore(LocalDateTime base) {
+    public void validatePastTimeReservation() {
+        if (isBefore(LocalDateTime.now())) {
+            throw new RoomescapeException(PAST_TIME_RESERVATION);
+        }
+    }
+
+    private boolean isBefore(LocalDateTime base) {
         return LocalDateTime.of(date, getTime()).isBefore(base);
     }
 
     public LocalTime getTime() {
         return time.getStartAt();
+    }
+
+    public void updateReservationMember(Member newReservationMember) {
+        this.reservationMember = newReservationMember;
     }
 
     public boolean hasIdOf(long id) {
@@ -118,6 +130,10 @@ public class Reservation implements Comparable<Reservation> {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     @Override

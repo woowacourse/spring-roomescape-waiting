@@ -11,7 +11,7 @@ import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class ReservationTime {
+public class ReservationTime extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
