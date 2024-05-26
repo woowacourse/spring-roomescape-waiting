@@ -20,7 +20,7 @@ public class WaitingServiceValidator {
     public void checkBothWaitingAndReservationNotExist(Slot slot) {
         if (bothWaitingAndReservationNotExist(slot)) {
             throw new IllegalArgumentException(
-                    slot.date() + " " + slot.reservationTime().getStartAt() + "의 " + slot.theme().getName()
+                    slot.date() + " " + slot.getStartAt() + "의 " + slot.getThemeName()
                             + " 테마는 바로 예약 가능하여 대기가 불가능합니다.");
         }
     }

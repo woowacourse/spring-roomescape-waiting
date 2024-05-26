@@ -15,7 +15,7 @@ public class AuthInfo {
     }
 
     public boolean isNotAdmin() {
-        return this.role.isNotAdmin();
+        return role.isNotAdmin();
     }
 
     public Long getMemberId() {
