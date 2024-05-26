@@ -6,7 +6,7 @@ docker-compose -p rooescape up -d
 2. 어플리케이션을 실행한다.
 3. 도커를 종료한다.
 ```
-docker-compose -p chess down
+docker-compose -p rooescape down
 ```
 
 ## 기능 요구 사항
