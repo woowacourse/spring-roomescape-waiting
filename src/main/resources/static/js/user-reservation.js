@@ -1,6 +1,6 @@
 const THEME_API_ENDPOINT = '/themes';
 const RESERVATION_API_ENDPOINT = '/reservations';
-const RESERVATION_WAITING_API_ENDPOINT = '/reservations/waiting';
+const RESERVATION_WAITING_API_ENDPOINT = '/waiting-reservations';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
