@@ -11,7 +11,8 @@ public enum WaitingExceptionCode implements ExceptionCode {
     THEME_INFO_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "필터링할 테마 정보가 존재하지 않습니다."),
     MEMBER_INFO_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "필터링할 유저 정보가 존재하지 않습니다."),
     DATE_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "필터링할 날짜 정보가 존재하지 않습니다."),
-    ALREADY_REGISTRATION_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 예약 혹은 예약 대기를 신청하였습니다.");
+    ALREADY_REGISTRATION_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 예약 혹은 예약 대기를 신청하였습니다."),
+    APPROVE_ORDER_EXCEPTION(HttpStatus.BAD_REQUEST, "예약 대기 순서대로 승인해야 합니다.");;
 
     private final HttpStatus httpStatus;
     private final String message;
