@@ -13,29 +13,35 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateReservationResponse;
 import roomescape.controller.dto.FindReservationResponse;
 import roomescape.controller.dto.FindReservationStandbyResponse;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationServiceTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private AdminReservationService adminReservationService;
 
     @Autowired
     private UserReservationService userReservationService;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -49,18 +55,13 @@ class AdminReservationServiceTest {
 
     @BeforeEach
     void setUpData() {
-        jdbcTemplate.update("""
-            INSERT INTO member(name, email, password, role)
-            VALUES ('러너덕', 'user@a.com', '123a!', 'USER'),
-                   ('트레', 'tre@a.com', '123a!', 'ADMIN');
-                        
-            INSERT INTO theme(name, description, thumbnail)
-            VALUES ('테마1', 'd1', 'https://test.com/test1.jpg'),
-                   ('테마1', 'd1', 'https://test.com/test1.jpg');
-                        
-            INSERT INTO reservation_time(start_at)
-            VALUES ('08:00');
-            """);
+        memberRepository.save(new Member("러너덕", "deock@test.com", "123a!", Role.USER));
+        memberRepository.save(new Member("트레", "tretre@test.com", "123a!", Role.USER));
+
+        themeRepository.save(new Theme("테마1", "d1", "https://test.com/test1.jpg"));
+        themeRepository.save(new Theme("테마2", "d2", "https://test.com/test2.jpg"));
+
+        reservationTimeRepository.save(new ReservationTime("08:00"));
     }
 
     @DisplayName("성공: 예약을 저장하고, 해당 예약을 id값과 함께 반환한다.")
@@ -73,18 +74,16 @@ class AdminReservationServiceTest {
     @DisplayName("실패: 존재하지 않는 멤버 ID 입력 시 예외가 발생한다.")
     @Test
     void save_MemberIdDoesntExist() {
-        assertThatThrownBy(
-            () -> adminReservationService.reserve(3L, date, timeId, themeId)
-        ).isInstanceOf(RoomescapeException.class)
+        assertThatThrownBy(() -> adminReservationService.reserve(3L, date, timeId, themeId))
+            .isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다.");
     }
 
     @DisplayName("실패: 존재하지 않는 시간 ID 입력 시 예외가 발생한다.")
     @Test
     void save_TimeIdDoesntExist() {
-        assertThatThrownBy(
-            () -> adminReservationService.reserve(userId, date, 2L, themeId)
-        ).isInstanceOf(RoomescapeException.class)
+        assertThatThrownBy(() -> adminReservationService.reserve(userId, date, 2L, themeId))
+            .isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다.");
     }
 
@@ -93,9 +92,8 @@ class AdminReservationServiceTest {
     void save_Duplication() {
         adminReservationService.reserve(userId, date, timeId, themeId);
 
-        assertThatThrownBy(
-            () -> adminReservationService.reserve(userId, date, timeId, themeId)
-        ).isInstanceOf(RoomescapeException.class)
+        assertThatThrownBy(() -> adminReservationService.reserve(userId, date, timeId, themeId))
+            .isInstanceOf(RoomescapeException.class)
             .hasMessage("해당 시간에 예약이 이미 존재합니다.");
     }
 
@@ -104,9 +102,8 @@ class AdminReservationServiceTest {
     void save_PastDateReservation() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
-        assertThatThrownBy(
-            () -> adminReservationService.reserve(userId, yesterday, timeId, themeId)
-        ).isInstanceOf(RoomescapeException.class)
+        assertThatThrownBy(() -> adminReservationService.reserve(userId, yesterday, timeId, themeId))
+            .isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
     }
 
@@ -118,9 +115,8 @@ class AdminReservationServiceTest {
 
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(oneMinuteAgo));
 
-        assertThatThrownBy(
-            () -> adminReservationService.reserve(userId, today, savedTime.getId(), themeId)
-        ).isInstanceOf(RoomescapeException.class)
+        assertThatThrownBy(() -> adminReservationService.reserve(userId, today, savedTime.getId(), themeId))
+            .isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
     }
 

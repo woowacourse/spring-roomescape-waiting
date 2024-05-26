@@ -15,25 +15,26 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class LoginControllerTest {
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     private static final String ID = "admin@a.com";
     private static final String PASSWORD = "123a!";
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @BeforeEach
     void setUpData() {
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('관리자', ?, ?, 'ADMIN')", ID, PASSWORD);
+        memberRepository.save(new Member("관리자", ID, PASSWORD, Role.ADMIN));
     }
 
     @DisplayName("성공: 로그인 성공")

@@ -14,10 +14,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class UserThemeControllerTest {
+
+    @Autowired
+    private ThemeService themeService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -41,11 +45,8 @@ class UserThemeControllerTest {
     @DisplayName("성공: 테마 조회 -> 200")
     @Test
     void findAll() {
-        jdbcTemplate.update("""
-            INSERT INTO theme(name, description, thumbnail)
-            VALUES ('t1', 'd1', 'https://test.com/test1.jpg'),
-            ('t2', 'd2', 'https://test.com/test2.jpg');
-            """);
+        themeService.save("t1", "d1", "https://test.com/test1.jpg");
+        themeService.save("t2", "d2", "https://test.com/test2.jpg");
 
         RestAssured.given().log().all()
             .cookie("token", userToken)

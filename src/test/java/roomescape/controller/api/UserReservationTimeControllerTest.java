@@ -4,30 +4,44 @@ import static org.hamcrest.Matchers.contains;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
+import roomescape.service.AdminReservationService;
+import roomescape.service.ReservationTimeService;
+import roomescape.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class UserReservationTimeControllerTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeService themeService;
+
+    @Autowired
+    private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private AdminReservationService adminReservationService;
 
     private String userToken;
 
     @BeforeEach
     void setUpToken() {
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('러너덕', 'user@a.com', '123a!', 'USER')");
+        memberRepository.save(new Member("러너덕", "user@a.com", "123a!", Role.USER));
 
         LoginRequest user = new LoginRequest("user@a.com", "123a!");
 
@@ -41,12 +55,10 @@ class UserReservationTimeControllerTest {
     @DisplayName("성공: 날짜, 테마 ID로부터 예약 시간 및 가능 여부 반환")
     @Test
     void findAllWithAvailability() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00'), ('23:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation (member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
-            """);
+        reservationTimeService.save("10:00");
+        reservationTimeService.save("23:00");
+        themeService.save("t1", "d1", "https://test.com/test.jpg");
+        adminReservationService.reserve(1L, LocalDate.parse("2060-01-01"), 1L, 1L);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)

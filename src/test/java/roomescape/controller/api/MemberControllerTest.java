@@ -8,25 +8,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class MemberControllerTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
 
     @DisplayName("성공: 모든 회원 조회 -> 200")
     @Test
     void findAll() {
-        jdbcTemplate.update("""
-            INSERT INTO member(name, email, password, role)
-            VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN'),
-                   ('사용자', 'user@a.com', '123a!', 'USER');
-            """);
+        memberRepository.save(new Member("관리자", "admin@a.com", "123a!", Role.ADMIN));
+        memberRepository.save(new Member("사용자", "user@a.com", "123a!", Role.USER));
 
         RestAssured.given().log().all()
             .when().get("/members")

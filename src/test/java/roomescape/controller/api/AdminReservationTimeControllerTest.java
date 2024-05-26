@@ -6,31 +6,45 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateTimeRequest;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
+import roomescape.service.AdminReservationService;
+import roomescape.service.ReservationTimeService;
+import roomescape.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationTimeControllerTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeService themeService;
+
+    @Autowired
+    private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private AdminReservationService adminReservationService;
 
     private String adminToken;
 
     @BeforeEach
     void setUpToken() {
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN');");
+        memberRepository.save(new Member("관리자", "admin@a.com", "123a!", Role.ADMIN));
 
         LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
 
@@ -58,12 +72,9 @@ class AdminReservationTimeControllerTest {
     @DisplayName("성공: 예약 시간 삭제 -> 204")
     @Test
     void delete() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at)
-            VALUES ('10:00'),
-                   ('23:00'),
-                   ('23:30');
-            """);
+        reservationTimeService.save("10:00");
+        reservationTimeService.save("12:00");
+        reservationTimeService.save("14:00");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -84,11 +95,8 @@ class AdminReservationTimeControllerTest {
     @DisplayName("성공: 예약 시간 조회 -> 200")
     @Test
     void findAll() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at)
-            VALUES ('10:00'),
-                   ('23:00');
-            """);
+        reservationTimeService.save("10:00");
+        reservationTimeService.save("23:00");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -118,12 +126,9 @@ class AdminReservationTimeControllerTest {
     @DisplayName("예약이 존재하는 시간 삭제 -> 400")
     @Test
     void delete_ReservationExists() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
-            """);
+        reservationTimeService.save("10:00");
+        themeService.save("테마1", "설명1", "https://test.com/test.jpg");
+        adminReservationService.reserve(1L, LocalDate.parse("2060-01-01"), 1L, 1L);
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -137,7 +142,7 @@ class AdminReservationTimeControllerTest {
     @DisplayName("실패: 이미 존재하는 시간을 저장 -> 400")
     @Test
     void save_Duplicate() {
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES ('10:00')");
+        reservationTimeService.save("10:00");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)

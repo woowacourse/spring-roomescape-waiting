@@ -6,31 +6,45 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateThemeRequest;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
+import roomescape.service.AdminReservationService;
+import roomescape.service.ReservationTimeService;
+import roomescape.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminThemeControllerTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeService themeService;
+
+    @Autowired
+    private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private AdminReservationService adminReservationService;
 
     private String adminToken;
 
     @BeforeEach
     void setUpToken() {
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN');");
+        memberRepository.save(new Member("관리자", "admin@a.com", "123a!", Role.ADMIN));
 
         LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
 
@@ -62,12 +76,9 @@ class AdminThemeControllerTest {
     @DisplayName("성공: 테마 삭제 -> 204")
     @Test
     void delete() {
-        jdbcTemplate.update("""
-            INSERT INTO theme(name, description, thumbnail)
-            VALUES ('t1', 'd1', 'https://test.com/test1.jpg'),
-            ('t2', 'd2', 'https://test.com/test2.jpg'),
-            ('t3', 'd3', 'https://test.com/test3.jpg');
-            """);
+        themeService.save("t1", "d1", "https://test.com/test1.jpg");
+        themeService.save("t2", "d2", "https://test.com/test2.jpg");
+        themeService.save("t3", "d3", "https://test.com/test3.jpg");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -101,8 +112,7 @@ class AdminThemeControllerTest {
     @DisplayName("실패: 중복 테마 추가 -> 400")
     @Test
     void save_Duplicate() {
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg')");
+        themeService.save("t1", "d1", "https://test.com/test.jpg");
 
         CreateThemeRequest request = new CreateThemeRequest("t1", "d2", "https://test2.com/test.jpg");
 
@@ -119,12 +129,9 @@ class AdminThemeControllerTest {
     @DisplayName("실패: 예약에서 사용되는 테마 삭제 -> 400")
     @Test
     void delete_ReservationExists() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
-            """);
+        reservationTimeService.save("10:00");
+        themeService.save("테마1", "설명1", "https://test.com/test.jpg");
+        adminReservationService.reserve(1L, LocalDate.parse("2060-01-01"), 1L, 1L);
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)

@@ -12,26 +12,51 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateReservationRequest;
 import roomescape.controller.dto.CreateUserReservationStandbyRequest;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
+import roomescape.service.ReservationTimeService;
+import roomescape.service.ThemeService;
+import roomescape.service.UserReservationService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class UserReservationControllerTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeService themeService;
+
+    @Autowired
+    private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private UserReservationService userReservationService;
+
+    private static final Long USER_ID = 1L;
+    private static final Long ANOTHER_USER_ID = 2L;
+
+    private static final Long TIME_ID = 1L;
+    private static final Long THEME_ID = 1L;
+
+    private static final LocalDate DATE_FIRST = LocalDate.parse("2060-01-01");
+    private static final LocalDate DATE_SECOND = LocalDate.parse("2060-01-02");
 
     private String userToken;
 
     @BeforeEach
-    void setUpToken() {
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('러너덕', 'user@a.com', '123a!', 'USER')");
+    void setUpData() {
+        reservationTimeService.save("10:00");
+        themeService.save("t1", "설명1", "https://test.com/test.jpg");
+        memberRepository.save(new Member("러너덕", "user@a.com", "123a!", Role.USER));
+        memberRepository.save(new Member("트레", "tre@a.com", "123a!", Role.USER));
 
         LoginRequest user = new LoginRequest("user@a.com", "123a!");
 
@@ -45,13 +70,7 @@ class UserReservationControllerTest {
     @DisplayName("성공: 예약 저장 -> 201")
     @Test
     void save() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            """);
-
-        CreateReservationRequest request = new CreateReservationRequest(
-            1L, LocalDate.parse("2060-01-01"), 1L, 1L);
+        CreateReservationRequest request = new CreateReservationRequest(USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -70,16 +89,10 @@ class UserReservationControllerTest {
     @DisplayName("성공: 예약대기 추가 -> 201")
     @Test
     void standby() {
-        jdbcTemplate.update("""
-            INSERT INTO member(name, email, password, role) VALUES ('트레', 'tre@a.com', '123a!', 'ADMIN');
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation (member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (2, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
-            """);
+        userReservationService.reserve(ANOTHER_USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
 
         CreateUserReservationStandbyRequest request = new CreateUserReservationStandbyRequest(
-            LocalDate.parse("2060-01-01"), 1L, 1L);
+            DATE_FIRST, THEME_ID, TIME_ID);
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -98,14 +111,8 @@ class UserReservationControllerTest {
     @DisplayName("성공: 예약대기 삭제 -> 204")
     @Test
     void deleteStandby() {
-        jdbcTemplate.update("""
-            INSERT INTO member(name, email, password, role) VALUES ('트레', 'tre@a.com', '123a!', 'ADMIN');
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation (member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (2, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED'),
-                   (1, '2060-01-01', '2024-01-02', 1, 1, 'STANDBY');
-            """);
+        userReservationService.reserve(ANOTHER_USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
+        userReservationService.standby(USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -117,14 +124,8 @@ class UserReservationControllerTest {
     @DisplayName("실패: 다른 사람의 예약대기 삭제 -> 400")
     @Test
     void deleteStandby_ReservedByOther() {
-        jdbcTemplate.update("""
-            INSERT INTO member(name, email, password, role) VALUES ('트레', 'tre@a.com', '123a!', 'USER');
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation (member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED'),
-                   (2, '2060-01-01', '2024-01-02', 1, 1, 'STANDBY');
-            """);
+        userReservationService.reserve(USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
+        userReservationService.standby(ANOTHER_USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -137,13 +138,8 @@ class UserReservationControllerTest {
     @DisplayName("실패: 존재하지 않는 time id 예약 -> 400")
     @Test
     void save_TimeIdNotFound() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            """);
-
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, LocalDate.parse("2060-01-01"), 2L, 1L);
+            USER_ID, DATE_FIRST, 2L, THEME_ID);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -158,13 +154,8 @@ class UserReservationControllerTest {
     @DisplayName("실패: 존재하지 않는 theme id 예약 -> 400")
     @Test
     void save_ThemeIdNotFound() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            """);
-
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, LocalDate.parse("2060-01-01"), 1L, 2L);
+            USER_ID, DATE_FIRST, TIME_ID, 2L);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -179,15 +170,9 @@ class UserReservationControllerTest {
     @DisplayName("실패: 중복 예약 -> 400")
     @Test
     void save_Duplication() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation (member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
-            """);
+        userReservationService.reserve(ANOTHER_USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
 
-        CreateReservationRequest request = new CreateReservationRequest(
-            1L, LocalDate.parse("2060-01-01"), 1L, 1L);
+        CreateReservationRequest request = new CreateReservationRequest(USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -201,12 +186,8 @@ class UserReservationControllerTest {
     @DisplayName("실패: 과거 시간 예약 -> 400")
     @Test
     void save_PastTime() {
-        jdbcTemplate.update("""
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            """);
-
-        CreateReservationRequest request = new CreateReservationRequest(1L, LocalDate.parse("2000-01-01"), 1L, 1L);
+        CreateReservationRequest request = new CreateReservationRequest(
+            USER_ID, LocalDate.now().minusDays(1), TIME_ID, THEME_ID);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -220,15 +201,9 @@ class UserReservationControllerTest {
     @DisplayName("성공: 나의 예약 목록 조회 -> 200")
     @Test
     void findMyReservations() {
-        jdbcTemplate.update("""
-            INSERT INTO member(name, email, password, role) VALUES ('트레', 'tre@a.com', '123a!', 'USER');
-            INSERT INTO reservation_time(start_at) VALUES ('10:00');
-            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation (member_id, reserved_date, created_at, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED'),
-                   (2, '2060-01-02', '2024-01-01', 1, 1, 'RESERVED'),
-                   (1, '2060-01-02', '2024-01-02', 1, 1, 'STANDBY');
-            """);
+        userReservationService.reserve(USER_ID, DATE_FIRST, TIME_ID, THEME_ID);
+        userReservationService.reserve(ANOTHER_USER_ID, DATE_SECOND, TIME_ID, THEME_ID);
+        userReservationService.standby(USER_ID, DATE_SECOND, TIME_ID, THEME_ID);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
