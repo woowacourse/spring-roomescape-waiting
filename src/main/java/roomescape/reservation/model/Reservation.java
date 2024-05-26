@@ -128,4 +128,8 @@ public class Reservation {
     public ReservationStatus getStatus() {
         return status;
     }
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
 }
