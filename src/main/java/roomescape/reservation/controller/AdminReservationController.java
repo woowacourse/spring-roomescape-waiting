@@ -8,19 +8,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationTimeResponse;
-import roomescape.reservation.dto.SaveReservationRequest;
-import roomescape.reservation.dto.SaveReservationTimeRequest;
-import roomescape.reservation.dto.SaveThemeRequest;
-import roomescape.reservation.dto.SearchReservationsRequest;
-import roomescape.reservation.dto.ThemeResponse;
+
+import roomescape.reservation.dto.*;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.WaitingService;
 
 import java.net.URI;
 import java.util.List;
@@ -33,15 +29,18 @@ public class AdminReservationController {
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final WaitingService waitingService;
 
     public AdminReservationController(
             final ReservationService reservationService,
             final ReservationTimeService reservationTimeService,
-            final ThemeService themeService
+            final ThemeService themeService,
+            final WaitingService waitingService
     ) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping("/admin/reservations")
@@ -93,5 +92,13 @@ public class AdminReservationController {
     public ResponseEntity<Void> deleteTheme(@PathVariable("themeId") final Long themeId) {
         themeService.deleteTheme(themeId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/admin/waitings")
+    public List<WaitingResponse> getWaitings() {
+        return waitingService.getWaitings()
+                .stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }

@@ -1,10 +1,12 @@
 package roomescape.reservation.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import roomescape.member.model.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.dto.WaitingRequest;
+import roomescape.reservation.dto.SaveWaitingRequest;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.Waiting;
@@ -23,7 +25,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
-    public Waiting saveWaiting(WaitingRequest request, Long memberId) {
+    public Waiting saveWaiting(SaveWaitingRequest request, Long memberId) {
         Reservation reserved = reservationRepository.findByDateAndThemeIdAndTimeId(
                 new ReservationDate(request.date()),
                 request.themeId(),
@@ -44,5 +46,9 @@ public class WaitingService {
 
     public void deleteWaiting(Long waitingId) {
         waitingRepository.deleteById(waitingId);
+    }
+
+    public List<Waiting> getWaitings() {
+        return waitingRepository.findAll();
     }
 }
