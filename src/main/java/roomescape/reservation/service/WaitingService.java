@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -79,16 +80,23 @@ public class WaitingService {
                 .collect(Collectors.groupingBy(Waiting::getSlot));
 
         return waitingGroupsBySlot.values().stream()
-                .map(waitingList -> {
-                    Long minId = waitingList.stream()
-                            .mapToLong(Waiting::getId)
-                            .min()
-                            .orElseThrow(() -> new IllegalStateException("대기 식별자가 존재하지 않습니다."));
-                    return waitingList.stream()
-                            .map(waiting -> FindWaitingResponse.from(waiting, minId.equals(waiting.getId())))
-                            .toList();
-                }).flatMap(List::stream)
+                .map(this::convertWaitingsToResponses)
+                .flatMap(List::stream)
                 .toList();
+    }
+
+    private List<FindWaitingResponse> convertWaitingsToResponses(List<Waiting> waitings) {
+        Long minId = getFirstId(waitings);
+        return waitings.stream()
+                .map(waiting -> FindWaitingResponse.from(waiting, minId.equals(waiting.getId())))
+                .toList();
+    }
+
+    private long getFirstId(List<Waiting> waitings) {
+        return waitings.stream()
+                .min(Comparator.comparing(Waiting::getId))
+                .map(Waiting::getId)
+                .orElseThrow(() -> new IllegalStateException("대기 식별자가 존재하지 않습니다."));
     }
 
     public void deleteWaiting(Long id) {
