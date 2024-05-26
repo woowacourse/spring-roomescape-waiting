@@ -3,7 +3,6 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.dto.ReservationWithRank;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationdetail.ReservationDetail;
 import roomescape.exception.reservation.NotFoundReservationException;

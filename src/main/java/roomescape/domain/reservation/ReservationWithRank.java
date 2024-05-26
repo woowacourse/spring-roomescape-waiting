@@ -1,6 +1,4 @@
-package roomescape.domain.dto;
-
-import roomescape.domain.reservation.Reservation;
+package roomescape.domain.reservation;
 
 public record ReservationWithRank(Reservation reservation, long rank) {
     public boolean isReserved() {

@@ -6,10 +6,10 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
-import roomescape.domain.dto.ReservationWithRank;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.reservationdetail.ReservationDetail;
 
