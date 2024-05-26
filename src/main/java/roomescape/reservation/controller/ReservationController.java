@@ -49,10 +49,6 @@ public class ReservationController {
 
     @GetMapping("/reservations-mine")
     public List<MyReservationResponse> getMyReservations(@Authenticated final AuthenticatedMember authenticatedMember) {
-        return reservationService.getMyReservations(authenticatedMember.id())
-                .stream()
-                .map(MyReservationResponse::from)
-                .toList();
         return reservationService.getMyReservations(authenticatedMember.id());
 //        return reservationService.getMyReservations(authenticatedMember.id())
 //                .stream()
@@ -71,5 +67,9 @@ public class ReservationController {
                 .body(WaitingResponse.from(savedWaiting));
     }
 
+    @DeleteMapping("/reservations-mine/{waiting-id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("waiting-id") final Long waitingId) {
+        waitingService.deleteWaiting(waitingId);
+        return ResponseEntity.noContent().build();
     }
 }
