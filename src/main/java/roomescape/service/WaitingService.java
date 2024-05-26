@@ -50,13 +50,13 @@ public class WaitingService {
         return waitingRepository.save(waiting);
     }
 
-    public List<Waiting> findWaitingsByMember(LoginMember member) {
-        return waitingRepository.findByMemberId(member.getId());
-    }
-
     public void deleteWaiting(long id) {
         validateExist(id);
         waitingRepository.deleteById(id);
+    }
+
+    public List<Waiting> findWaitingsByMember(LoginMember member) {
+        return waitingRepository.findByMemberId(member.getId());
     }
 
     private ReservationTime findReservationTime(ReservationDto reservationDto) {
