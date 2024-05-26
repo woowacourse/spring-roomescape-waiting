@@ -209,7 +209,8 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .then().log().all()
                     .statusCode(204);
 
-            Integer countReservationAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+            Integer countReservationAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation",
+                    Integer.class);
             assertThat(countReservationAfterDelete).isEqualTo(1);
         }
 
@@ -230,8 +231,10 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .then().log().all()
                     .statusCode(204);
 
-            Integer countReservationAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-            Integer countWaitingAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting", Integer.class);
+            Integer countReservationAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation",
+                    Integer.class);
+            Integer countWaitingAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting",
+                    Integer.class);
             assertThat(countReservationAfterDelete).isEqualTo(2);
             assertThat(countWaitingAfterDelete).isEqualTo(0);
         }

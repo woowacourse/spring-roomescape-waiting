@@ -24,5 +24,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findAllByStatus(ReservationStatus status);
 
-    Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId, ReservationStatus status);
+    Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId,
+                                                                  ReservationStatus status);
 }

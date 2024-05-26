@@ -75,7 +75,7 @@ public class WaitingService {
     }
 
     private void validateDuplicateWaiting(WaitingRequest request, Member member) {
-        if(reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
                 member.getId(), request.getDate(), request.getTimeId(), request.getThemeId())) {
             throw new DuplicatedReservationException();
         }

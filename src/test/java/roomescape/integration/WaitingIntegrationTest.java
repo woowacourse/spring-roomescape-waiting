@@ -136,7 +136,8 @@ class WaitingIntegrationTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(200);
 
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting WHERE STATUS = 'DENY'", Integer.class);
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting WHERE STATUS = 'DENY'",
+                Integer.class);
         assertThat(countAfterDelete).isEqualTo(1);
     }
 }

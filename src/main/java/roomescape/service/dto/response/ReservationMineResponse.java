@@ -1,7 +1,6 @@
 package roomescape.service.dto.response;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import roomescape.domain.Reservation;
 import roomescape.domain.Waiting;
 
@@ -13,7 +12,8 @@ public class ReservationMineResponse {
     private final String status;
     private final Long rank;
 
-    public ReservationMineResponse(Long id, ThemeResponse theme, LocalDate date, ReservationTimeResponse time, String status, Long rank) {
+    public ReservationMineResponse(Long id, ThemeResponse theme, LocalDate date, ReservationTimeResponse time,
+                                   String status, Long rank) {
         this.id = id;
         this.theme = theme;
         this.date = date;

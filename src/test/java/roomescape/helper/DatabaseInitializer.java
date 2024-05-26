@@ -50,7 +50,6 @@ public class DatabaseInitializer {
         return reservationTime;
     }
 
-
     private Theme createTheme() {
         Theme theme = new Theme("레벨2", "내용이다.", "https://www.naver.com/");
         entityManager.persist(theme);

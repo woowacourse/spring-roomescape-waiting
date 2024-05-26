@@ -24,8 +24,8 @@ import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
-import roomescape.service.dto.response.ReservationMineResponse;
 import roomescape.service.dto.request.ReservationRequest;
+import roomescape.service.dto.response.ReservationMineResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 @Service
@@ -115,7 +115,8 @@ public class ReservationService {
         if (waiting.isPresent()) {
             Waiting firstWaiting = waiting.get();
             waitingRepository.delete(firstWaiting);
-            Reservation autoReservation = new Reservation(firstWaiting.getDate(), firstWaiting.getMember(), firstWaiting.getTime(), firstWaiting.getTheme());
+            Reservation autoReservation = new Reservation(firstWaiting.getDate(), firstWaiting.getMember(),
+                    firstWaiting.getTime(), firstWaiting.getTheme());
             reservationRepository.save(autoReservation);
         }
     }

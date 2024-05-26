@@ -8,9 +8,9 @@ import roomescape.domain.MemberRole;
 import roomescape.exception.login.InvalidTokenException;
 import roomescape.exception.login.UnauthorizedEmailException;
 import roomescape.exception.login.UnauthorizedPasswordException;
-import roomescape.service.dto.response.LoginCheckResponse;
 import roomescape.service.dto.request.LoginRequest;
 import roomescape.service.dto.request.SignupRequest;
+import roomescape.service.dto.response.LoginCheckResponse;
 import roomescape.service.dto.response.SignupResponse;
 import roomescape.service.helper.JwtTokenProvider;
 
