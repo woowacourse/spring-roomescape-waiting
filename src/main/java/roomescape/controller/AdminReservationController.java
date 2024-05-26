@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.reservation.ReservationCreateService;
-import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.ReservationReadService;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
@@ -15,12 +15,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
-    private final ReservationService reservationService;
     private final ReservationCreateService reservationCreateService;
+    private final ReservationReadService reservationReadService;
 
-    public AdminReservationController(ReservationService reservationService, ReservationCreateService reservationCreateService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(ReservationCreateService reservationCreateService, ReservationReadService reservationReadService) {
         this.reservationCreateService = reservationCreateService;
+        this.reservationReadService = reservationReadService;
     }
 
     @PostMapping
@@ -34,7 +34,7 @@ public class AdminReservationController {
     @GetMapping("/search")
     public List<ReservationResponse> findReservations(
             @ModelAttribute("ReservationFindRequest") ReservationFilterRequest reservationFilterRequest) {
-        return reservationService.findByCondition(reservationFilterRequest);
+        return reservationReadService.findByCondition(reservationFilterRequest);
     }
 
 }

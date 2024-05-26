@@ -24,6 +24,7 @@ import roomescape.service.reservation.dto.ReservationResponse;
 import java.time.LocalDate;
 
 @Service
+@Transactional
 public class ReservationCreateService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -41,13 +42,11 @@ public class ReservationCreateService {
         this.reservationDetailRepository = reservationDetailRepository;
     }
 
-    @Transactional
     public ReservationResponse createAdminReservation(AdminReservationRequest adminReservationRequest) {
         return createReservation(adminReservationRequest.timeId(), adminReservationRequest.themeId(),
                 adminReservationRequest.memberId(), adminReservationRequest.date());
     }
 
-    @Transactional
     public ReservationResponse createMemberReservation(ReservationRequest reservationRequest, long memberId) {
         return createReservation(reservationRequest.timeId(), reservationRequest.themeId(), memberId,
                 reservationRequest.date());

@@ -4,9 +4,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMemberId;
-import roomescape.service.auth.AuthService;
 import roomescape.service.reservation.ReservationCreateService;
-import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.ReservationDeleteService;
+import roomescape.service.reservation.ReservationReadService;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
@@ -16,17 +16,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
-    private final ReservationService reservationService;
+    private final ReservationDeleteService reservationDeleteService;
     private final ReservationCreateService reservationCreateService;
+    private final ReservationReadService reservationReadService;
 
-    public ReservationController(ReservationService reservationService, ReservationCreateService reservationCreateService) {
-        this.reservationService = reservationService;
+    public ReservationController(ReservationDeleteService reservationDeleteService, ReservationCreateService reservationCreateService, ReservationReadService reservationReadService) {
+        this.reservationDeleteService = reservationDeleteService;
         this.reservationCreateService = reservationCreateService;
+        this.reservationReadService = reservationReadService;
     }
 
     @GetMapping
     public List<ReservationResponse> findAll() {
-        return reservationService.findAll();
+        return reservationReadService.findAll();
     }
 
     @PostMapping
@@ -40,7 +42,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long reservationId) {
-        reservationService.deleteById(reservationId);
+        reservationDeleteService.deleteById(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
