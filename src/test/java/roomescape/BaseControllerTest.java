@@ -43,17 +43,17 @@ public class BaseControllerTest {
     }
 
     protected String getMember1WithToken() {
-        memberRepository.save(TestFixture.MEMBER1);
+        memberRepository.save(TestFixture.getMember1());
         return TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
     }
 
     protected String getMember2WithToken() {
-        memberRepository.save(TestFixture.MEMBER2);
+        memberRepository.save(TestFixture.getMember2());
         return TestFixture.getTokenAfterLogin(TestFixture.MEMBER2_LOGIN_REQUEST);
     }
 
     protected String getAdminWithToken() {
-        memberRepository.save(TestFixture.ADMIN);
+        memberRepository.save(TestFixture.getAdminMember());
         return TestFixture.getTokenAfterLogin(TestFixture.ADMIN_LOGIN_REQUEST);
     }
 }

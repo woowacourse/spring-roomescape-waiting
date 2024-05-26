@@ -1,11 +1,11 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DBTest;
+import roomescape.TestFixture;
 
 class ReservationTimeRepositoryTest extends DBTest {
 
@@ -13,10 +13,10 @@ class ReservationTimeRepositoryTest extends DBTest {
     @Test
     void existByStartAt() {
         // given
-        timeRepository.save(RESERVATION_TIME_10AM);
+        timeRepository.save(TestFixture.getReservationTime10AM());
 
         // when
-        boolean exist = timeRepository.existsByStartAt(RESERVATION_TIME_10AM.getStartAt());
+        boolean exist = timeRepository.existsByStartAt(TestFixture.getReservationTime10AM().getStartAt());
 
         // then
         assertThat(exist).isTrue();

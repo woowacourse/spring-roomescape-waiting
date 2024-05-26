@@ -2,10 +2,6 @@ package roomescape.controller.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.TOMORROW;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -17,6 +13,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.BaseControllerTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -30,7 +27,9 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Test
     void createReservation() {
         // given
-        ReservationCreateRequest request = createReservationRequest(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1);
+        ReservationCreateRequest request = createReservationRequest(TestFixture.getMember1(), TestFixture.TOMORROW,
+                TestFixture.getReservationTime10AM(),
+                TestFixture.getTheme1());
 
         // when & then
         RestAssured.given().log().all()
@@ -114,7 +113,9 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Test
     void deleteReservationSuccess() {
         // given
-        Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
 
         // when & then
         RestAssured.given().log().all()
@@ -128,7 +129,8 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Test
     void findAllWaiting() {
         // given
-        reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
+        reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(), Status.WAITING);
 
         // when & then
         RestAssured.given().log().all()
@@ -142,7 +144,9 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Test
     void approveWaiting() {
         // given
-        Reservation waiting = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
+        Reservation waiting = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.WAITING);
 
         // when
         RestAssured.given().log().all()
@@ -160,7 +164,9 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Test
     void denyWaiting() {
         // given
-        Reservation waiting = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
+        Reservation waiting = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.WAITING);
 
         // when
         RestAssured.given().log().all()

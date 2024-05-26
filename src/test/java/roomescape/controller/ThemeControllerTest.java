@@ -1,10 +1,6 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.THEME2;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
@@ -12,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.BaseControllerTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -24,7 +21,7 @@ class ThemeControllerTest extends BaseControllerTest {
     @Test
     void findAllThemes() {
         // given
-        themeRepository.save(THEME1);
+        themeRepository.save(TestFixture.getTheme1());
 
         RestAssured.given().log().all()
                 .header("cookie", getMember1WithToken())
@@ -38,10 +35,10 @@ class ThemeControllerTest extends BaseControllerTest {
     @Test
     void findMostReservedThemes() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme1 = themeRepository.save(THEME1);
-        Theme theme2 = themeRepository.save(THEME2);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme1 = themeRepository.save(TestFixture.getTheme1());
+        Theme theme2 = themeRepository.save(TestFixture.getTheme2());
 
         // 테마 1번은 오늘 날짜이므로, 조회되지 않아야 한다.
         reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme1, Status.CONFIRMED));

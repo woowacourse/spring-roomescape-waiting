@@ -1,16 +1,13 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.TOMORROW;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DBTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -23,10 +20,11 @@ class ReservationSearchSpecificationTest extends DBTest {
 
     @BeforeEach
     void setUp() {
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(THEME1);
-        saved = reservationRepository.save(new Reservation(member, TOMORROW, time, theme, Status.CONFIRMED));
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        saved = reservationRepository.save(
+                new Reservation(member, TestFixture.TOMORROW, time, theme, Status.CONFIRMED));
     }
 
     @DisplayName("특정 테마에 대한 예약을 찾는다.")
@@ -104,7 +102,7 @@ class ReservationSearchSpecificationTest extends DBTest {
     void dateStartFrom() {
         // given
         ReservationSearchSpecification spec = new ReservationSearchSpecification().dateStartFrom(
-                TOMORROW);
+                TestFixture.TOMORROW);
 
         // when
         List<Reservation> found = reservationRepository.findAll(spec.build());
@@ -118,7 +116,7 @@ class ReservationSearchSpecificationTest extends DBTest {
     void dateEndAt() {
         // given
         ReservationSearchSpecification spec = new ReservationSearchSpecification().dateEndAt(
-                TOMORROW);
+                TestFixture.TOMORROW);
 
         // when
         List<Reservation> found = reservationRepository.findAll(spec.build());

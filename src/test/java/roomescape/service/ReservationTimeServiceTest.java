@@ -2,17 +2,12 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.RESERVATION_TIME_11AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.TIME_10AM;
-import static roomescape.TestFixture.TOMORROW;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DBTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -29,7 +24,7 @@ class ReservationTimeServiceTest extends DBTest {
     @Test
     void duplicatedTimeSaveThrowsException() {
         // given
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(TIME_10AM);
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(TestFixture.TIME_10AM);
         timeService.save(reservationTimeRequest);
 
         // when & then
@@ -42,17 +37,17 @@ class ReservationTimeServiceTest extends DBTest {
     @Test
     void findReservationAvailabilityTimes() {
         // given - 같은 날짜, 테마에 대해 10시는 예약, 11시는 예약하지 않는다.
-        Theme theme = themeRepository.save(THEME1);
-        Member member = memberRepository.save(MEMBER1);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        Member member = memberRepository.save(TestFixture.getMember1());
 
-        ReservationTime time1 = timeRepository.save(RESERVATION_TIME_10AM);
-        ReservationTime time2 = timeRepository.save(RESERVATION_TIME_11AM);
+        ReservationTime time1 = timeRepository.save(TestFixture.getReservationTime10AM());
+        ReservationTime time2 = timeRepository.save(TestFixture.getReservationTime11AM());
 
-        reservationRepository.save(new Reservation(member, TOMORROW, time2, theme, Status.CONFIRMED));
+        reservationRepository.save(new Reservation(member, TestFixture.TOMORROW, time2, theme, Status.CONFIRMED));
 
         // when
         ReservationAvailabilityTimeRequest timeRequest = new ReservationAvailabilityTimeRequest(
-                TOMORROW, theme.getId());
+                TestFixture.TOMORROW, theme.getId());
         List<ReservationAvailabilityTimeResponse> timeResponses =
                 timeService.findReservationAvailabilityTimes(timeRequest).responses();
 

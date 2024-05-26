@@ -1,16 +1,13 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.THEME2;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DBTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -23,10 +20,10 @@ class ThemeRepositoryTest extends DBTest {
     @Test
     void findMostReservedThemeInPeriodByCount() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme1 = themeRepository.save(THEME1);
-        Theme theme2 = themeRepository.save(THEME2);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme1 = themeRepository.save(TestFixture.getTheme1());
+        Theme theme2 = themeRepository.save(TestFixture.getTheme2());
 
         reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme1, Status.CONFIRMED));
         reservationRepository.save(

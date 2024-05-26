@@ -1,12 +1,6 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.RESERVATION_TIME_11AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.TOMORROW;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +20,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
     @Test
     void findAllReservationTime() {
         // given
-        timeRepository.save(RESERVATION_TIME_10AM);
+        timeRepository.save(TestFixture.getReservationTime10AM());
 
         // when & then
         RestAssured.given().log().all()
@@ -41,21 +35,21 @@ class ReservationTimeControllerTest extends BaseControllerTest {
     @Test
     void findAvailableReservationTime() {
         // given
-        Theme theme = themeRepository.save(THEME1);
-        ReservationTime time1 = timeRepository.save(RESERVATION_TIME_10AM);
-        ReservationTime time2 = timeRepository.save(RESERVATION_TIME_11AM);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        ReservationTime time1 = timeRepository.save(TestFixture.getReservationTime10AM());
+        ReservationTime time2 = timeRepository.save(TestFixture.getReservationTime11AM());
 
-        Member member = memberRepository.save(MEMBER1);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
 
         // 1번 시간에 대해서만 예약을 추가한다. 1번 시간의 booked는 true가 되고, 2번 시간의 booked는 false가 된다.
-        reservationRepository.save(new Reservation(member, TOMORROW, time1, theme, Status.CONFIRMED));
+        reservationRepository.save(new Reservation(member, TestFixture.TOMORROW, time1, theme, Status.CONFIRMED));
 
         // when & then
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .param("themeId", theme.getId())
-                .param("date", TOMORROW.toString())
+                .param("date", TestFixture.TOMORROW.toString())
                 .when().get("/times/filter")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())

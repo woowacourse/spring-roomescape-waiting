@@ -1,13 +1,13 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.MEMBER2;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DBTest;
+import roomescape.TestFixture;
+import roomescape.domain.Member;
 import roomescape.service.dto.response.MemberResponse;
 
 class MemberServiceTest extends DBTest {
@@ -16,14 +16,14 @@ class MemberServiceTest extends DBTest {
     @Test
     void findAll() {
         // given
-        memberRepository.save(MEMBER1);
-        memberRepository.save(MEMBER2);
+        Member savedMember1 = memberRepository.save(TestFixture.getMember1());
+        Member savedMember2 = memberRepository.save(TestFixture.getMember2());
 
         // when
         List<MemberResponse> members = memberService.findAll().responses();
 
         // then
         assertThat(members).hasSize(2);
-        assertThat(members).extracting("name").containsExactly(MEMBER1.getName(), MEMBER2.getName());
+        assertThat(members).extracting("name").contains(savedMember1.getName(), savedMember2.getName());
     }
 }

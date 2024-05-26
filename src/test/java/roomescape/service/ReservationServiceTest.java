@@ -2,20 +2,13 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.MEMBER2;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.RESERVATION_TIME_11AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.THEME2;
-import static roomescape.TestFixture.THE_DAY_AFTER_TOMORROW;
-import static roomescape.TestFixture.TOMORROW;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DBTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -32,12 +25,13 @@ class ReservationServiceTest extends DBTest {
     @Test
     void save() {
         // given
-        Theme theme = themeRepository.save(THEME1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
 
         // when
-        Member member2 = memberRepository.save(MEMBER2);
-        ReservationCreateRequest request = new ReservationCreateRequest(member2.getId(), TOMORROW, time.getId(),
+        Member member2 = memberRepository.save(TestFixture.getMember2());
+        ReservationCreateRequest request = new ReservationCreateRequest(member2.getId(), TestFixture.TOMORROW,
+                time.getId(),
                 theme.getId());
         ReservationResponse saved = reservationService.save(request);
 
@@ -49,15 +43,15 @@ class ReservationServiceTest extends DBTest {
     @Test
     void isReservationExistWhenSave() {
         // given -> member1이 먼저 예약한 상황
-        Member member1 = memberRepository.save(MEMBER1);
-        Theme theme = themeRepository.save(THEME1);
+        Member member1 = memberRepository.save(TestFixture.getMember1());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
         LocalDate date = LocalDate.now();
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
 
         reservationRepository.save(new Reservation(member1, date, time, theme, Status.CONFIRMED));
 
         // when
-        Member member2 = memberRepository.save(MEMBER2);
+        Member member2 = memberRepository.save(TestFixture.getMember2());
         ReservationCreateRequest request = new ReservationCreateRequest(member2.getId(), date, time.getId(),
                 theme.getId());
 
@@ -71,10 +65,10 @@ class ReservationServiceTest extends DBTest {
     @Test
     void isTimeNotExist() {
         // given
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Member member = memberRepository.save(TestFixture.getMember1());
         LocalDate date = LocalDate.now();
-        Theme theme = themeRepository.save(THEME1);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
         // when
         ReservationCreateRequest request = new ReservationCreateRequest(member.getId(), date, time.getId() + 1,
@@ -91,10 +85,10 @@ class ReservationServiceTest extends DBTest {
     @Test
     void isMemberNotExist() {
         // given
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Member member = memberRepository.save(TestFixture.getMember1());
         LocalDate date = LocalDate.now().plusDays(1);
-        Theme theme = themeRepository.save(THEME1);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
         // when
         ReservationCreateRequest request = new ReservationCreateRequest(member.getId() + 1, date, time.getId(),
@@ -111,10 +105,10 @@ class ReservationServiceTest extends DBTest {
     @Test
     void isThemeNotExist() {
         // given
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Member member = memberRepository.save(TestFixture.getMember1());
         LocalDate date = LocalDate.now().plusDays(1);
-        Theme theme = themeRepository.save(THEME1);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
         // when
         ReservationCreateRequest request = new ReservationCreateRequest(member.getId(), date, time.getId(),
@@ -130,10 +124,10 @@ class ReservationServiceTest extends DBTest {
     @Test
     void cantSaveReservationForPastDate() {
         // given
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Member member = memberRepository.save(TestFixture.getMember1());
         LocalDate date = LocalDate.now().minusDays(1);
-        Theme theme = themeRepository.save(THEME1);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
         // when
         ReservationCreateRequest request = new ReservationCreateRequest(member.getId(), date, time.getId(),
@@ -152,10 +146,10 @@ class ReservationServiceTest extends DBTest {
     @Test
     void cantSaveWaitingIfReserved() {
         // given
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Member member = memberRepository.save(TestFixture.getMember1());
         LocalDate date = LocalDate.now().plusDays(1);
-        Theme theme = themeRepository.save(THEME1);
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
         ReservationCreateRequest request = new ReservationCreateRequest(member.getId(), date, time.getId(),
                 theme.getId());
 
@@ -172,44 +166,45 @@ class ReservationServiceTest extends DBTest {
     @Test
     void findAllReservations() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(THEME1);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
-        reservationRepository.save(new Reservation(member, TOMORROW, time, theme, Status.CONFIRMED));
-        reservationRepository.save(new Reservation(member, THE_DAY_AFTER_TOMORROW, time, theme, Status.WAITING));
+        reservationRepository.save(new Reservation(member, TestFixture.TOMORROW, time, theme, Status.CONFIRMED));
+        reservationRepository.save(
+                new Reservation(member, TestFixture.THE_DAY_AFTER_TOMORROW, time, theme, Status.WAITING));
 
         // when
         List<ReservationResponse> responses = reservationService.findAll().responses();
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses).extracting(ReservationResponse::date).containsExactly(TOMORROW);
+        assertThat(responses).extracting(ReservationResponse::date).containsExactly(TestFixture.TOMORROW);
     }
 
     @DisplayName("예약 대기 목록은 날짜, 시간, 테마 이름, 예약 ID 순으로 정렬된다.")
     @Test
     void findAllWaiting() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time1 = timeRepository.save(RESERVATION_TIME_10AM);
-        ReservationTime time2 = timeRepository.save(RESERVATION_TIME_11AM);
-        Theme theme1 = themeRepository.save(THEME1);
-        Theme theme2 = themeRepository.save(THEME2);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time1 = timeRepository.save(TestFixture.getReservationTime10AM());
+        ReservationTime time2 = timeRepository.save(TestFixture.getReservationTime11AM());
+        Theme theme1 = themeRepository.save(TestFixture.getTheme1());
+        Theme theme2 = themeRepository.save(TestFixture.getTheme2());
 
         //  3 -> 4 -> 5 -> 1 -> 6 -> 2 순으로 정렬되어야 한다.
         Reservation r1 = reservationRepository.save(
-                new Reservation(member, THE_DAY_AFTER_TOMORROW, time1, theme1, Status.WAITING));
+                new Reservation(member, TestFixture.THE_DAY_AFTER_TOMORROW, time1, theme1, Status.WAITING));
         Reservation r2 = reservationRepository.save(
-                new Reservation(member, THE_DAY_AFTER_TOMORROW, time2, theme1, Status.WAITING));
+                new Reservation(member, TestFixture.THE_DAY_AFTER_TOMORROW, time2, theme1, Status.WAITING));
         Reservation r3 = reservationRepository.save(
-                new Reservation(member, TOMORROW, time1, theme1, Status.WAITING));
+                new Reservation(member, TestFixture.TOMORROW, time1, theme1, Status.WAITING));
         Reservation r4 = reservationRepository.save(
-                new Reservation(member, TOMORROW, time2, theme1, Status.WAITING));
+                new Reservation(member, TestFixture.TOMORROW, time2, theme1, Status.WAITING));
         Reservation r5 = reservationRepository.save(
-                new Reservation(member, TOMORROW, time2, theme2, Status.WAITING));
+                new Reservation(member, TestFixture.TOMORROW, time2, theme2, Status.WAITING));
         Reservation r6 = reservationRepository.save(
-                new Reservation(member, THE_DAY_AFTER_TOMORROW, time1, theme1, Status.WAITING));
+                new Reservation(member, TestFixture.THE_DAY_AFTER_TOMORROW, time1, theme1, Status.WAITING));
 
         // when
         List<ReservationResponse> responses = reservationService.findAllWaiting().responses();
@@ -237,13 +232,13 @@ class ReservationServiceTest extends DBTest {
     @Test
     void isWaitingReservationExist() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(THEME1);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
         // when
         Reservation waiting = reservationRepository.save(
-                new Reservation(member, TOMORROW, time, theme, Status.WAITING));
+                new Reservation(member, TestFixture.TOMORROW, time, theme, Status.WAITING));
 
         // then
         assertThatThrownBy(() -> reservationService.approveWaiting(waiting.getId() + 1))
@@ -255,16 +250,16 @@ class ReservationServiceTest extends DBTest {
     @Test
     void isReservationExist_WhenApproveWaiting() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(THEME1);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
         // when
-        Member member2 = memberRepository.save(MEMBER2);
-        reservationRepository.save(new Reservation(member2, TOMORROW, time, theme, Status.CONFIRMED));
+        Member member2 = memberRepository.save(TestFixture.getMember2());
+        reservationRepository.save(new Reservation(member2, TestFixture.TOMORROW, time, theme, Status.CONFIRMED));
 
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, TOMORROW, time, theme, Status.WAITING));
+                new Reservation(member, TestFixture.TOMORROW, time, theme, Status.WAITING));
 
         // then
         assertThatThrownBy(() -> reservationService.approveWaiting(reservation.getId()))
@@ -276,12 +271,12 @@ class ReservationServiceTest extends DBTest {
     @Test
     void approveWaiting() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(THEME1);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
 
         Reservation waiting = reservationRepository.save(
-                new Reservation(member, TOMORROW, time, theme, Status.WAITING));
+                new Reservation(member, TestFixture.TOMORROW, time, theme, Status.WAITING));
 
         // when
         reservationService.approveWaiting(waiting.getId());

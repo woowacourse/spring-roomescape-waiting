@@ -1,15 +1,13 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.THEME1;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DBTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -23,9 +21,9 @@ class ReservationRepositoryTest extends DBTest {
     @Test
     void findByThemeId() {
         // given
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(THEME1);
-        Member member = memberRepository.save(MEMBER1);
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        Member member = memberRepository.save(TestFixture.getMember1());
         reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme, Status.CONFIRMED));
         reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme, Status.CONFIRMED));
 
@@ -40,9 +38,9 @@ class ReservationRepositoryTest extends DBTest {
     @Test
     void findMemberReservationAndWaiting() {
         // given
-        Member member = memberRepository.save(MEMBER1);
-        ReservationTime time = timeRepository.save(RESERVATION_TIME_10AM);
-        Theme theme = themeRepository.save(THEME1);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
         reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme, Status.WAITING));
         reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme, Status.CONFIRMED));
 

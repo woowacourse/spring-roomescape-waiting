@@ -1,15 +1,12 @@
 package roomescape.domain;
 
-import static roomescape.TestFixture.ADMIN_EMAIL;
-import static roomescape.TestFixture.ADMIN_NAME;
-import static roomescape.TestFixture.ADMIN_PASSWORD;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.TestFixture;
 import roomescape.exception.BadRequestException;
 
 class MemberTest {
@@ -18,7 +15,8 @@ class MemberTest {
     @ParameterizedTest
     @NullAndEmptySource
     void nullEmptyName(String value) {
-        Assertions.assertThatThrownBy(() -> new Member(value, ADMIN_EMAIL, ADMIN_PASSWORD, Role.ADMIN))
+        Assertions.assertThatThrownBy(
+                        () -> new Member(value, TestFixture.ADMIN_EMAIL, TestFixture.ADMIN_PASSWORD, Role.ADMIN))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("이름에 빈값을 입력할 수 없습니다.");
     }
@@ -27,7 +25,8 @@ class MemberTest {
     @ParameterizedTest
     @NullSource
     void nullEmail(String value) {
-        Assertions.assertThatThrownBy(() -> new Member(ADMIN_NAME, value, ADMIN_PASSWORD, Role.ADMIN))
+        Assertions.assertThatThrownBy(
+                        () -> new Member(TestFixture.ADMIN_NAME, value, TestFixture.ADMIN_PASSWORD, Role.ADMIN))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("이메일에 빈값을 입력할 수 없습니다.");
     }
@@ -36,7 +35,8 @@ class MemberTest {
     @ParameterizedTest
     @ValueSource(strings = {"zeze", "zeze@", "@gmail.com"})
     void invalidEmailPattern(String value) {
-        Assertions.assertThatThrownBy(() -> new Member(ADMIN_NAME, value, ADMIN_PASSWORD, Role.ADMIN))
+        Assertions.assertThatThrownBy(
+                        () -> new Member(TestFixture.ADMIN_NAME, value, TestFixture.ADMIN_PASSWORD, Role.ADMIN))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("이메일 형식이 올바르지 않습니다.");
     }
@@ -45,7 +45,8 @@ class MemberTest {
     @ParameterizedTest
     @NullAndEmptySource
     void nullEmptyPassword(String value) {
-        Assertions.assertThatThrownBy(() -> new Member(ADMIN_NAME, ADMIN_EMAIL, value, Role.ADMIN))
+        Assertions.assertThatThrownBy(
+                        () -> new Member(TestFixture.ADMIN_NAME, TestFixture.ADMIN_EMAIL, value, Role.ADMIN))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("비밀번호에 빈값을 입력할 수 없습니다.");
     }
@@ -54,7 +55,8 @@ class MemberTest {
     @ParameterizedTest
     @NullSource
     void nullRole(Role value) {
-        Assertions.assertThatThrownBy(() -> new Member(ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD, value))
+        Assertions.assertThatThrownBy(
+                        () -> new Member(TestFixture.ADMIN_NAME, TestFixture.ADMIN_EMAIL, TestFixture.ADMIN_PASSWORD, value))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("역할에 빈값을 입력할 수 없습니다.");
     }

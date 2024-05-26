@@ -1,13 +1,6 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.TestFixture.MEMBER1;
-import static roomescape.TestFixture.MEMBER1_LOGIN_REQUEST;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.RESERVATION_TIME_11AM;
-import static roomescape.TestFixture.THEME1;
-import static roomescape.TestFixture.THEME2;
-import static roomescape.TestFixture.TOMORROW;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -30,7 +23,8 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     void findAllReservations() {
         // given
-        reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
+        reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(), Status.CONFIRMED);
 
         // when & then
         RestAssured.given().log().all()
@@ -45,8 +39,9 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     void createMemberReservation() {
         // given
-        ReservationCreateMemberRequest request = createMemberReservationRequest(TOMORROW, RESERVATION_TIME_10AM,
-                THEME1);
+        ReservationCreateMemberRequest request = createMemberReservationRequest(TestFixture.TOMORROW,
+                TestFixture.getReservationTime10AM(),
+                TestFixture.getTheme1());
 
         // when & then
         RestAssured.given().log().all()
@@ -61,8 +56,10 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     void createMemberWaiting() {
         // given
-        Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-        ReservationCreateMemberRequest request = createMemberReservationRequest(TOMORROW, saved.getTime(),
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        ReservationCreateMemberRequest request = createMemberReservationRequest(TestFixture.TOMORROW, saved.getTime(),
                 saved.getTheme());
 
         // when & then
@@ -78,9 +75,13 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     void findMyReservationsAndWaiting() {
         // given
-        Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-        reserveBySavedMember(saved.getMember(), TOMORROW, RESERVATION_TIME_11AM, THEME2, Status.WAITING);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        reserveBySavedMember(saved.getMember(), TestFixture.TOMORROW, TestFixture.getReservationTime11AM(),
+                TestFixture.getTheme2(),
+                Status.WAITING);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
 
         // when & then
         RestAssured.given().log().all()
@@ -97,7 +98,7 @@ class ReservationControllerTest extends BaseControllerTest {
     void outdatedReservation() {
         // given
         ReservationCreateMemberRequest request = createMemberReservationRequest(LocalDate.now().minusDays(1),
-                RESERVATION_TIME_10AM, THEME1);
+                TestFixture.getReservationTime10AM(), TestFixture.getTheme1());
 
         // when & then
         RestAssured.given().log().all()
@@ -112,8 +113,11 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     void duplicateReservation() {
         // given
-        Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-        ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(TOMORROW, saved.getTime().getId(),
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(
+                TestFixture.TOMORROW, saved.getTime().getId(),
                 saved.getTheme().getId());
 
         // when & then
@@ -129,10 +133,13 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     void waitingAfterReserve() {
         // given
-        Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.CONFIRMED);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
 
-        ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(TOMORROW, saved.getTime().getId(),
+        ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(
+                TestFixture.TOMORROW, saved.getTime().getId(),
                 saved.getTheme().getId());
 
         // when & then
@@ -148,8 +155,10 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     void cancelWaiting() {
         // given
-        Reservation saved = reserveAfterSave(MEMBER1, TOMORROW, RESERVATION_TIME_10AM, THEME1, Status.WAITING);
-        String accessToken = TestFixture.getTokenAfterLogin(MEMBER1_LOGIN_REQUEST);
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.WAITING);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
 
         // when & then
         RestAssured.given().log().all()

@@ -1,8 +1,6 @@
 package roomescape.controller.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.TIME_10AM;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -38,7 +36,7 @@ class AdminTimeControllerTest extends BaseControllerTest {
     @Test
     void deleteTime() {
         // given
-        ReservationTime saved = timeRepository.save(TestFixture.RESERVATION_TIME_10AM);
+        ReservationTime saved = timeRepository.save(TestFixture.getReservationTime10AM());
 
         // when & then
         RestAssured.given().log().all()
@@ -66,13 +64,13 @@ class AdminTimeControllerTest extends BaseControllerTest {
     @Test
     void duplicateReservationTime() {
         // given
-        timeRepository.save(RESERVATION_TIME_10AM);
+        timeRepository.save(TestFixture.getReservationTime10AM());
 
         // when & then
         RestAssured.given().log().all()
                 .header("cookie", getAdminWithToken())
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeRequest(TIME_10AM))
+                .body(new ReservationTimeRequest(TestFixture.TIME_10AM))
                 .when().post("/admin/times")
                 .then().log().all().assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
