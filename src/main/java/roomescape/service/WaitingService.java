@@ -15,7 +15,6 @@ import roomescape.repository.WaitingRepository;
 import java.util.List;
 
 @Service
-@Transactional
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -30,6 +29,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationResponse create(final Waiting waiting) {
         validate(waiting);
         final Waiting saved = waitingRepository.save(waiting);
@@ -47,6 +47,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> findMyWaitings(Long id) {
         final List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(id);
         return waitings.stream()
@@ -69,6 +70,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllWaitings() {
         List<Waiting> waitings = waitingRepository.findAll();
         return waitings.stream()
@@ -76,6 +78,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse approve(Long waitingId) {
         final Reservation reservation = getReservation(waitingId);
         final Reservation saved = reservationRepository.save(reservation);
