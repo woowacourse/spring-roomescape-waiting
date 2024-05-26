@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -61,6 +61,7 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<ReservationResponse> findAll() {
         List<ReservationResponse> responses = findAllByStatus(Status.CONFIRMED).stream()
                 .map(ReservationResponse::from)
@@ -69,6 +70,7 @@ public class ReservationService {
         return new ListResponse<>(responses);
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<ReservationResponse> findAllWaiting() {
         List<ReservationResponse> responses = findAllByStatus(Status.WAITING).stream()
                 .map(ReservationResponse::from)
@@ -78,6 +80,7 @@ public class ReservationService {
         return new ListResponse<>(responses);
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
         List<MyReservationResponse> responses = reservationRepository.findMyReservations(authInfo.id()).stream()
                 .map(r -> MyReservationResponse.from(r.getReservation(), r.getWaitingOrder()))
@@ -86,6 +89,7 @@ public class ReservationService {
         return new ListResponse<>(responses);
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
         Specification<Reservation> spec = new ReservationSearchSpecification()

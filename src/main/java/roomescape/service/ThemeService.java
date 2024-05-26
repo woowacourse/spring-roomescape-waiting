@@ -1,9 +1,9 @@
 package roomescape.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
 import roomescape.repository.ThemeRepository;
@@ -23,6 +23,7 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<ThemeResponse> findAll() {
         List<ThemeResponse> responses = themeRepository.findAll()
                 .stream()
@@ -32,6 +33,7 @@ public class ThemeService {
         return new ListResponse<>(responses);
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<ThemeResponse> findByRanking() {
         LocalDate dateTo = LocalDate.now().minusDays(1);
         LocalDate dateFrom = LocalDate.now().minusDays(7);
