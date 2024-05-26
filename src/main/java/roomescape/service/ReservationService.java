@@ -110,9 +110,8 @@ public class ReservationService {
     }
 
     public void approveWaiting(Long id) {
-        Reservation reservation = reservationRepository.findAllByStatus(Status.WAITING).stream()
-                .filter(r -> r.getId().equals(id))
-                .findAny()
+        Reservation reservation = reservationRepository.findById(id)
+                .filter(r -> r.getStatus() == Status.WAITING)
                 .orElseThrow(() -> new NotFoundException("대기중인 예약을 찾을 수 없습니다. id = " + id));
 
         validateIsReservationExist(reservation.getTheme().getId(), reservation.getTime().getId(),
