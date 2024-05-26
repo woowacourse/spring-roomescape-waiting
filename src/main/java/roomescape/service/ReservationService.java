@@ -8,7 +8,6 @@ import static roomescape.domain.reservation.ReservationStatus.WAITING;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,13 +101,12 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByIdAndStatus(id, CONFIRMED)
                 .orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(REJECTED);
-        Optional<Reservation> first = reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
+        reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
                 reservation.getTheme(),
                 reservation.getDate(),
                 reservation.getTime(),
                 WAITING
-        );
-        first.ifPresent(value -> value.updateStatus(CONFIRMED));
+        ).ifPresent(waitingReservation -> waitingReservation.updateStatus(CONFIRMED));
     }
 
     @Transactional

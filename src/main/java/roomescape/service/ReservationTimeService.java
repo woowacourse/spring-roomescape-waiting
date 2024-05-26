@@ -65,8 +65,6 @@ public class ReservationTimeService {
     }
 
     private AvailableTimeResponse parseAvailableTime(ReservationTime time, Set<ReservationTime> bookedTimes) {
-        return new AvailableTimeResponse(
-                new ReservationTimeResponse(time),
-                bookedTimes.contains(time));
+        return new AvailableTimeResponse(new ReservationTimeResponse(time), bookedTimes.contains(time));
     }
 }
