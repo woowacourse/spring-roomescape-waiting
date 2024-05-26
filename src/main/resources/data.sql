@@ -109,13 +109,19 @@ VALUES (1, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 2, NOW()) AS DATE), 4, 9);
 INSERT INTO reservation(member_id, status, date, time_id, theme_id)
 VALUES (5, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 6, NOW()) AS DATE), 3, 8);
 
+/**
+ waiting
+ */
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (13, 6);
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (13, 7);
+
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (15, 1);
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (15, 2);
 INSERT INTO Waiting(reservation_id, member_id)
 VALUES (15, 3);
+INSERT INTO Waiting(reservation_id, member_id)
+VALUES (15, 6);

@@ -88,8 +88,8 @@ public class AdminReservationController {
                 .body(ThemeResponse.from(savedTheme));
     }
 
-    @DeleteMapping("/admin/themes/{themeId}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("themeId") final Long themeId) {
+    @DeleteMapping("/admin/themes/{theme-id}")
+    public ResponseEntity<Void> deleteTheme(@PathVariable("theme-id") final Long themeId) {
         themeService.deleteTheme(themeId);
         return ResponseEntity.noContent().build();
     }
@@ -100,5 +100,11 @@ public class AdminReservationController {
                 .stream()
                 .map(WaitingResponse::from)
                 .toList();
+    }
+
+    @DeleteMapping("/admin/waitings/{waiting-id}")
+    public ResponseEntity<Void> deleteWaitings(@PathVariable("waiting-id") final Long waitingId) {
+        waitingService.deleteWaiting(waitingId);
+        return ResponseEntity.noContent().build();
     }
 }
