@@ -91,20 +91,15 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(final Long memberId) {
-
-        List<Waiting> waitings = waitingRepository.findAllByMemberId(memberId);
-//        List<WaitingWithRank> waitingsWithRank = waitings.stream()
-//                .map(waiting -> new WaitingWithRank(waiting, waitingRepository.findRank(waiting.getMember().getId())))
-//                .toList();
         List<WaitingWithRank> waitingsWithRank = waitingRepository.findWaitingsWithRank(memberId);
         List<MyReservationResponse> myWaitings = waitingsWithRank.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+
         List<MyReservationResponse> myReservedReservations = reservationRepository.findAllByMemberId(memberId).stream()
                 .map(MyReservationResponse::from)
                 .toList();
         List<MyReservationResponse> myReservations = new ArrayList<>(myReservedReservations);
-
         myReservations.addAll(myWaitings);
         return myReservations;
     }

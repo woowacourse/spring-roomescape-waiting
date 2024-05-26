@@ -21,8 +21,5 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRank(Long memberId);
 
-    List<Waiting> findAllByMemberId(Long memberId);
-
-
-    boolean existsByMemberIdAndReservationId(Long memberId,Long reservationId);
+    boolean existsByMemberIdAndReservationId(Long memberId, Long reservationId);
 }
