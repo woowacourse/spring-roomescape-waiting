@@ -25,4 +25,14 @@ public class StaticMemberPageController {
     public String getMemberReservationPage() {
         return "reservation-mine";
     }
+
+    @GetMapping("/waiting")
+    public String getWaitingPage() {
+        return "waiting";
+    }
+
+    @GetMapping("/signup")
+    public String getSignupPage() {
+        return "signup";
+    }
 }

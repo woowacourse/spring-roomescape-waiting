@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.request.ThemeRequest;
 import roomescape.model.Theme;
@@ -16,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = "/test_data.sql")
 class ThemeServiceTest {
 
     @Autowired
@@ -61,8 +60,8 @@ class ThemeServiceTest {
         assertThat(themeService.findAllThemes()).hasSize(1);
     }
 
-    @DisplayName("최근 일주일 간 가장 인기 있는 테마 10개를 조회한다.") //todo reservationService로 옮기기
-    @Sql("/theme-data.sql")
+    @DisplayName("최근 일주일 간 가장 인기 있는 테마 10개를 조회한다.")
+    @Sql({"/test_data.sql", "/theme-data.sql"})
     @Test
     void should_find_popular_theme_of_week() {
         List<Theme> popularThemes = themeService.findPopularThemes();

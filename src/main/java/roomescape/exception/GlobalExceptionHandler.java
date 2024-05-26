@@ -1,5 +1,6 @@
 package roomescape.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +31,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<String> handleAuthorizationException(AuthorizationException exception) {
         return ResponseEntity.status(403).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
+        return ResponseEntity.badRequest().body(exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

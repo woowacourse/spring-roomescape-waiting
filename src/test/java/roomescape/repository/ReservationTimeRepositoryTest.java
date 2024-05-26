@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
@@ -21,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.model.Role.MEMBER;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = "/test_data.sql")
 class ReservationTimeRepositoryTest {
 
@@ -107,9 +105,9 @@ class ReservationTimeRepositoryTest {
         Theme theme = new Theme("theme", "설명", "thumbnail");
         entityManager.persist(theme);
 
-        entityManager.persist(new Reservation(LocalDate.now(), reservedTime, theme, member));
+        entityManager.persist(new Reservation(LocalDate.now().plusDays(1), reservedTime, theme, member));
 
-        List<ReservationTime> allReservedTimes = reservationTimeRepository.findAllReservedTimes(LocalDate.now(), 1L);
+        List<ReservationTime> allReservedTimes = reservationTimeRepository.findAllReservedTimes(LocalDate.now().plusDays(1), 1L);
 
         assertThat(allReservedTimes).hasSize(1);
     }

@@ -9,8 +9,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +22,10 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         validatePast(date, time);
         this.id = id;
         this.date = date;
@@ -35,13 +34,13 @@ public class Reservation {
         this.member = member;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(null, date, time, theme, member);
     }
 
     private void validatePast(LocalDate date, ReservationTime time) {
         if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now()))) {
-            throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(LocalDateTime.now()));
+            throw new BadRequestException("현재(%s) 이전 시간으로 예약 대기를 추가할 수 없습니다.".formatted(LocalDateTime.now()));
         }
     }
 
@@ -73,7 +72,7 @@ public class Reservation {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        Reservation that = (Reservation) object;
+        Waiting that = (Waiting) object;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getDate(), that.getDate())
                 && Objects.equals(getTime(), that.getTime()) && Objects.equals(getTheme(),
                 that.getTheme()) && Objects.equals(getMember(), that.getMember());
@@ -86,7 +85,7 @@ public class Reservation {
 
     @Override
     public String toString() {
-        return "Reservation{" +
+        return "Waiting{" +
                 "id=" + id +
                 ", date=" + date +
                 ", time=" + time +

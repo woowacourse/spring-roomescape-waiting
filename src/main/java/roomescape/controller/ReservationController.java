@@ -11,6 +11,7 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
+import roomescape.service.ReservationWaitingService;
 
 import java.net.URI;
 import java.util.List;
@@ -20,10 +21,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final AuthService authService;
+    private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationController(ReservationService reservationService, AuthService authService) {
+    public ReservationController(ReservationService reservationService, AuthService authService, ReservationWaitingService reservationWaitingService) {
         this.reservationService = reservationService;
         this.authService = authService;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @GetMapping("/reservations")
@@ -38,24 +41,21 @@ public class ReservationController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(HttpServletRequest request) {
         Long memberId = authService.findMemberIdByCookie(request.getCookies());
-        List<Reservation> memberReservations = reservationService.findMemberReservations(memberId);
-        List<MemberReservationResponse> responses =
-                memberReservations.stream()
-                        .map(MemberReservationResponse::new)
-                        .toList();
+        List<MemberReservationResponse> responses = reservationWaitingService.getAllMemberReservationsAndWaiting(memberId);
         return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<Reservation> createReservation(@RequestBody ReservationRequest request,
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest request,
                                                          @AuthenticationPrincipal Member member) {
         Reservation reservation = reservationService.addReservation(request, member);
-        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
+        ReservationResponse reservationResponse = new ReservationResponse(reservation);
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
     }
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long id) {
-        reservationService.deleteReservation(id);
+        reservationWaitingService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 }
