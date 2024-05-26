@@ -9,20 +9,17 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
 import roomescape.auth.domain.Token;
 import roomescape.auth.dto.LoginRequest;
+import roomescape.auth.facade.AuthFacadeService;
 import roomescape.auth.provider.CookieProvider;
-import roomescape.auth.service.AuthService;
 import roomescape.member.dto.MemberLoginCheckResponse;
-import roomescape.member.service.MemberService;
 
 @RestController
 public class AuthController {
 
-    private final AuthService authService;
-    private final MemberService memberService;
+    private final AuthFacadeService authService;
 
-    public AuthController(AuthService authService, MemberService memberService) {
+    public AuthController(AuthFacadeService authService) {
         this.authService = authService;
-        this.memberService = memberService;
     }
 
     @PostMapping("/login")
@@ -37,6 +34,6 @@ public class AuthController {
 
     @GetMapping("/login/check")
     public MemberLoginCheckResponse loginCheck(@LoginMemberId Long id) {
-        return memberService.findLoginMemberInfo(id);
+        return authService.findLoginMemberInfo(id);
     }
 }

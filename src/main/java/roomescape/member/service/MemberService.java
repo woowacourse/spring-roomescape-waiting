@@ -4,8 +4,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberLoginCheckResponse;
-import roomescape.member.dto.MemberResponse;
 import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.exception.model.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
@@ -20,19 +18,8 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public MemberLoginCheckResponse findLoginMemberInfo(long id) {
-        Member member = memberRepository.findMemberById(id)
-                .orElseThrow(MemberNotFoundException::new);
-
-        return new MemberLoginCheckResponse(member.getName());
-    }
-
-    public List<MemberResponse> findMembersId() {
-        List<Member> members = memberRepository.findAll();
-
-        return members.stream()
-                .map(member -> new MemberResponse(member.getId()))
-                .toList();
+    public List<Member> findMembersId() {
+        return memberRepository.findAll();
     }
 
     public MemberRole findMemberRole(long id) {
@@ -40,5 +27,10 @@ public class MemberService {
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_ROLE_NOT_EXIST_EXCEPTION));
 
         return MemberRole.findMemberRole(member.getRole().name());
+    }
+
+    public Member findMember(long memberId) {
+        return memberRepository.findMemberById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
     }
 }
