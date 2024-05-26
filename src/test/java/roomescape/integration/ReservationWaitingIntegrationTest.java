@@ -129,7 +129,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
     }
 
     @Nested
-    @DisplayName("예약 대기 삭제 API")
+    @DisplayName("사용자 예약 대기 삭제 API")
     class DeleteReservationWaiting {
         Reservation reservation;
 
@@ -143,10 +143,10 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         }
 
         @Test
-        void 예약id로_본인의_예약_대기를_삭제할_수_있다() {
+        void 사용자는_예약id로_본인의_예약_대기를_삭제할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createUserCookies())
-                    .when().delete("/reservations/waitings/" + reservation.getId())
+                    .when().delete("/reservations/" + reservation.getId() + "/waitings")
                     .then().log().all()
                     .statusCode(204);
         }
@@ -155,7 +155,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
         void 예약id가_존재하지_않는_예약_대기는_삭제할_수_없다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createUserCookies())
-                    .when().delete("/reservations/waitings/10")
+                    .when().delete("/reservations/10/waitings")
                     .then().log().all()
                     .statusCode(404);
         }
@@ -166,7 +166,7 @@ public class ReservationWaitingIntegrationTest extends IntegrationTest {
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
-                    .when().delete("/reservations/waitings/" + reservation.getId())
+                    .when().delete("/reservations/" + reservation.getId() + "/waitings")
                     .then().log().all()
                     .statusCode(404);
         }

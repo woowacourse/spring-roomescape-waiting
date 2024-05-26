@@ -35,16 +35,14 @@ public class ReservationWaitingController {
     @RoleAllowed
     @PostMapping("/reservations/waitings")
     public ResponseEntity<ReservationWaitingResponse> saveReservationWaiting(
-            @RequestBody ReservationWaitingRequest request,
-            @LoginMember Member member) {
+            @RequestBody ReservationWaitingRequest request, @LoginMember Member member) {
         ReservationWaitingResponse response = reservationWaitingService.saveReservationWaiting(request, member);
         return ResponseEntity.created(URI.create("/reservations/waitings/" + response.getId())).body(response);
     }
 
     @RoleAllowed
-    @DeleteMapping("/reservations/waitings/{reservationId}") // TODO: 경로 순서 변경하기
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId,
-                                                  @LoginMember Member member) {
+    @DeleteMapping("/reservations/{reservationId}/waitings")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId, @LoginMember Member member) {
         reservationWaitingService.deleteReservationWaiting(reservationId, member);
         return ResponseEntity.noContent().build();
     }

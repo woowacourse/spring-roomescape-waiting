@@ -389,7 +389,7 @@ Content-Type: application/json
 Request
 
 ```
-DELETE /reservations/waitings/1
+DELETE /reservations/1/waitings
 Cookie: token=hello.example.token
 ```
 

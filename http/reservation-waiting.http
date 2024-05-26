@@ -12,7 +12,7 @@ Content-Type: application/json
 }
 
 ### 예약 대기 취소 API
-DELETE {{base-url}}/reservations/waitings/1
+DELETE {{base-url}}/reservations/1/waitings
 
 ### 관리자용 예약 대기 취소 API (접근 권한: 관리자)
 DELETE {{base-url}}/admin/reservations/waitings/1
