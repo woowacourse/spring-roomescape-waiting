@@ -59,7 +59,7 @@ class ThemeRepositoryTest {
     @Test
     void should_find_theme_when_give_theme_id() {
         Theme theme1 = saveTheme(createTheme(1L));
-        Theme theme2 = saveTheme(createTheme(2L));
+        saveTheme(createTheme(2L));
 
         Theme theme = themeRepository.findById(1L).get();
 
