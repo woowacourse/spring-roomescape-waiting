@@ -130,7 +130,7 @@ class UserReservationControllerTest {
             .when().get("/reservations-mine")
             .then().log().all()
             .statusCode(200)
-            .body("reservationId", contains(2, 4, 5));
+            .body("id", contains(2, 4, 5));
     }
 
     @DisplayName("성공: 예약 대기 요청 -> 200")
@@ -165,6 +165,6 @@ class UserReservationControllerTest {
             .cookie("token", userToken)
             .when().get("/reservations-mine")
             .then().log().all()
-            .body("reservationId", contains(2, 4));
+            .body("id", contains(2, 4));
     }
 }
