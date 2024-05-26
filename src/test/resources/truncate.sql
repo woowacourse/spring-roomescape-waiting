@@ -1,6 +1,6 @@
-DELETE FROM reservation_detail;
 DELETE FROM reservation_waiting;
 DELETE FROM reservation;
+DELETE FROM reservation_detail;
 DELETE FROM member;
 DELETE FROM time;
 DELETE FROM theme;
