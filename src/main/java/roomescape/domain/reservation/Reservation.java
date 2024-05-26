@@ -41,8 +41,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public boolean isReservationOf(Long memberId) {
-        return memberId.equals(member.getId());
+    public boolean isReservationOf(Member member) {
+        return this.member.equals(member);
     }
 
     public boolean isPast() {

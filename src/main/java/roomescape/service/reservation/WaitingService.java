@@ -32,18 +32,21 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaitingById(long reservationId, long memberId) {
-        memberRepository.findById(memberId);
+        Member member = memberRepository.getById(memberId);
         reservationRepository.findById(reservationId)
                 .ifPresent(reservation -> {
-                    validateAuthority(reservation, memberId);
-                    validateStatus(reservation);
-                    reservationRepository.deleteById(reservationId);
+                    deleteIfAvailable(member, reservation);
                 });
     }
 
-    private void validateAuthority(Reservation reservation, long memberId) {
-        Member member = memberRepository.getById(memberId);
-        if (member.isGuest() && !reservation.isReservationOf(memberId)) {
+    private void deleteIfAvailable(Member member, Reservation reservation) {
+        validateAuthority(reservation, member);
+        validateStatus(reservation);
+        reservationRepository.deleteById(reservation.getId());
+    }
+
+    private void validateAuthority(Reservation reservation, Member member) {
+        if (member.isGuest() && !reservation.isReservationOf(member)) {
             throw new ForbiddenException("예약 대기를 삭제할 권한이 없습니다.");
         }
     }
