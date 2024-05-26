@@ -1,9 +1,8 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import roomescape.member.domain.Member;
+import roomescape.reservation.persistence.ReservationStatusPersistConverter;
 
 import java.time.LocalDate;
 
@@ -38,7 +38,7 @@ public class Reservation {
     private Theme theme;
 
     @Column(nullable = false, name = "status")
-    @Enumerated(value = EnumType.STRING)
+    @Convert(converter = ReservationStatusPersistConverter.class)
     private ReservationStatus status;
 
     protected Reservation() {
