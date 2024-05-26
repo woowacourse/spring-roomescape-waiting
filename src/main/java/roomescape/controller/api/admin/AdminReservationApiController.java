@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.AuthenticatedMember;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.service.dto.request.ReservationAdminSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.response.WaitingResponse;
 import roomescape.service.reservation.AdminReservationService;
 import roomescape.service.reservation.ReservationService;
 
@@ -38,6 +41,16 @@ public class AdminReservationApiController {
         return ResponseEntity.ok(
                 reservations.stream()
                         .map(ReservationResponse::new)
+                        .toList()
+        );
+    }
+
+    @GetMapping("/api/admin/reservations/waiting-list")
+    public ResponseEntity<List<WaitingResponse>> getWaiting(@AuthenticatedMember Member member) {
+        List<Reservation> waitings = reservationService.findWaitings();
+        return ResponseEntity.ok(
+                waitings.stream()
+                        .map(WaitingResponse::new)
                         .toList()
         );
     }

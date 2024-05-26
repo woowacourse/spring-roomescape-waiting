@@ -127,4 +127,26 @@ public class ReservationApiControllerTest {
                 .then().log().all()
                 .statusCode(400);
     }
+
+    @Test
+    @DisplayName("모든 예약 대기 목록을 가져온다.")
+    void selectWaitings() {
+        RestAssured.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().get("/api/admin/reservations/waiting-list")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(4));
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제를 정상적으로 수행한다.")
+    void deleteWaiting() {
+        RestAssured.given().log().all()
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/api/reservations/2")
+                .then().log().all()
+                .statusCode(204);
+    }
 }
