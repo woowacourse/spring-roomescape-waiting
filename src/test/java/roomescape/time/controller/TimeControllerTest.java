@@ -24,7 +24,7 @@ import roomescape.model.ControllerTest;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
-import roomescape.time.service.TimeService;
+import roomescape.time.facade.TimeFacadeService;
 
 @WebMvcTest(TimeController.class)
 class TimeControllerTest extends ControllerTest {
@@ -35,12 +35,12 @@ class TimeControllerTest extends ControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private TimeService timeService;
+    private TimeFacadeService timeService;
 
     @Test
     @DisplayName("시간을 잘 저장하는지 확인한다.")
     void reservationTimeSave() throws Exception {
-        when(timeService.addReservationTime(any()))
+        when(timeService.addTime(any()))
                 .thenReturn(toResponse(time));
 
         String content = new ObjectMapper()
@@ -61,7 +61,7 @@ class TimeControllerTest extends ControllerTest {
     @Test
     @DisplayName("시간 정보를 잘 불러오는지 확인한다.")
     void reservationTimesList() throws Exception {
-        when(timeService.findReservationTimes())
+        when(timeService.findTimes())
                 .thenReturn(List.of(toResponse(time)));
 
         mockMvc.perform(get("/times"))

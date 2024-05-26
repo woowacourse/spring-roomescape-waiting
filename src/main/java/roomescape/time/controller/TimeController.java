@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
-import roomescape.time.service.TimeService;
+import roomescape.time.facade.TimeFacadeService;
 
 @RestController
 @RequestMapping("/times")
 public class TimeController {
-    private final TimeService timeService;
+    private final TimeFacadeService timeService;
 
-    public TimeController(TimeService timeService) {
+    public TimeController(TimeFacadeService timeService) {
         this.timeService = timeService;
     }
 
@@ -28,17 +28,17 @@ public class TimeController {
             @RequestBody TimeRequest timeRequest) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(timeService.addReservationTime(timeRequest));
+                .body(timeService.addTime(timeRequest));
     }
 
     @GetMapping
     public List<TimeResponse> reservationTimesList() {
-        return timeService.findReservationTimes();
+        return timeService.findTimes();
     }
 
     @DeleteMapping("/{reservationTimeId}")
     public ResponseEntity<Void> reservationTimeRemove(@PathVariable long reservationTimeId) {
-        timeService.removeReservationTime(reservationTimeId);
+        timeService.removeTime(reservationTimeId);
         return ResponseEntity.noContent().build();
     }
 }
