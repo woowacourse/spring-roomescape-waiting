@@ -77,6 +77,26 @@ public class Reservation {
         }
     }
 
+    public void validateNotWaiting() {
+        if (isNotWaiting()) {
+            throw new RoomescapeException("대기가 아닌 예약은 삭제할 수 없습니다.");
+        }
+    }
+
+    private boolean isNotWaiting() {
+        return !status.isWaiting();
+    }
+
+    public void validateNotMyWaiting(Long memberId) {
+        if (isNotMyWaiting(memberId)) {
+            throw new RoomescapeException("다른 유저의 예약 대기는 삭제할 수 없습니다.");
+        }
+    }
+
+    private boolean isNotMyWaiting(Long memberId) {
+        return !(member.getId() == memberId);
+    }
+
     public Long getId() {
         return id;
     }
@@ -120,13 +140,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    public boolean isNotWaiting() {
-        return !status.isWaiting();
-    }
-
-    public boolean isNotMyWaiting(Long memberId) {
-        return !(member.getId() == memberId);
     }
 }

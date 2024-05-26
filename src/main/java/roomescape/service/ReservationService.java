@@ -104,13 +104,10 @@ public class ReservationService {
     }
 
     public void deleteWaiting(Long memberId, Long id) {
-        Reservation reservation = reservationRepository.findById(id).orElseThrow(() -> new RoomescapeException("주어진 id에 해당하는 예약대기가 존재하지 않습니다."));
-        if (reservation.isNotWaiting()) {
-            throw new RoomescapeException("대기가 아닌 예약은 삭제할 수 없습니다.");
-        }
-        if (reservation.isNotMyWaiting(memberId)) {
-            throw new RoomescapeException("다른 유저의 예약 대기는 삭제할 수 없습니다.");
-        }
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new RoomescapeException("주어진 id에 해당하는 예약대기가 존재하지 않습니다."));
+        reservation.validateNotWaiting();
+        reservation.validateNotMyWaiting(memberId);
 
         reservationRepository.deleteById(id);
     }
