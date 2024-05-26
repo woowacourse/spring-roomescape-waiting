@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.auth.service.AuthService;
 import roomescape.config.DatabaseCleaner;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.member.dto.MemberSignUpRequest;

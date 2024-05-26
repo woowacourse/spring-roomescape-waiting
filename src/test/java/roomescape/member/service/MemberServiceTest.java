@@ -1,9 +1,7 @@
 package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.KAKI;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.member.repository.MemberRepository;
 
@@ -37,9 +34,9 @@ class MemberServiceTest {
     @DisplayName("중복된 이름 또는 이메일로 회원가입할 수 없다.")
     @Test
     void save() {
-        memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member kaki = memberRepository.save(KAKI);
 
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(KAKI_NAME, KAKI_EMAIL, KAKI_PASSWORD);
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(kaki.getName(), kaki.getEmail(), kaki.getPassword());
 
         assertThatThrownBy(() -> memberService.save(memberSignUpRequest))
                 .isInstanceOf(IllegalArgumentException.class);
