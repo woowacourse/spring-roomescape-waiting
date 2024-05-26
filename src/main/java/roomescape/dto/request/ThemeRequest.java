@@ -5,7 +5,10 @@ import roomescape.domain.Theme;
 import static roomescape.dto.request.exception.InputValidator.validateNotBlank;
 import static roomescape.dto.request.exception.InputValidator.validateNotNull;
 
-public record ThemeRequest(String name, String description, String thumbnail) {
+public record ThemeRequest(
+        String name,
+        String description,
+        String thumbnail) {
 
     public ThemeRequest {
         validateNotNull(name, description, thumbnail);

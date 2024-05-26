@@ -9,8 +9,7 @@ public record MyReservationResponse(
         Long reservationId,
         ThemeResponse theme,
         LocalDate date,
-        @JsonFormat(pattern = "HH:mm")
-        ReservationTimeResponse time,
+        @JsonFormat(pattern = "HH:mm") ReservationTimeResponse time,
         WaitingResponse waiting) {
 
     public static MyReservationResponse of(Reservation reservation, Long waitingRank) {
