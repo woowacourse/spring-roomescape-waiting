@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.BookingStatus;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Validated
+@RequestMapping("/api/times")
 @RestController
 public class ReservationTimeApiController {
 
@@ -25,7 +27,7 @@ public class ReservationTimeApiController {
         this.reservationTimeService = reservationTimeService;
     }
 
-    @GetMapping("/api/times")
+    @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
         List<ReservationTime> reservationTimes = reservationTimeService.findReservationTimes();
         return ResponseEntity.ok(
@@ -35,7 +37,7 @@ public class ReservationTimeApiController {
         );
     }
 
-    @GetMapping("/api/times/available")
+    @GetMapping("/available")
     public ResponseEntity<List<BookingStatusResponse>> getReservationTimesIsBooked(@RequestParam LocalDate date,
                                                                                    @RequestParam
                                                                                    @Positive(message = "1 이상의 값만 입력해주세요.")

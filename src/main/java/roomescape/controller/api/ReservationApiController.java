@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
@@ -24,6 +25,7 @@ import java.net.URI;
 import java.util.List;
 
 @Validated
+@RequestMapping("/api")
 @RestController
 public class ReservationApiController {
 
@@ -33,7 +35,7 @@ public class ReservationApiController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping("/api/reservations")
+    @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
         List<Reservation> reservations = reservationService.findReservations();
         return ResponseEntity.ok(
@@ -43,7 +45,7 @@ public class ReservationApiController {
         );
     }
 
-    @GetMapping("/api/reservations-mine")
+    @GetMapping("/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@AuthenticatedMember Member member) {
         List<ReservationWaitingWithRank> reservationWaitingWithRanks =
                 reservationService.findMemberReservations(member.getId());
@@ -54,7 +56,7 @@ public class ReservationApiController {
         );
     }
 
-    @PostMapping("/api/reservations")
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservationByMember(@RequestBody @Valid
                                                                       ReservationSaveRequest request,
                                                                       @AuthenticatedMember Member member) {
@@ -66,7 +68,7 @@ public class ReservationApiController {
                 .body(new ReservationResponse(newReservation));
     }
 
-    @DeleteMapping("/api/reservations/{id}")
+    @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteWaiting(@AuthenticatedMember Member member,
                                               @PathVariable
                                               @Positive(message = "1 이상의 값만 입력해주세요.")

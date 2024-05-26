@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Theme;
 import roomescape.service.dto.request.ThemeSaveRequest;
@@ -15,6 +16,7 @@ import roomescape.service.theme.ThemeService;
 
 import java.net.URI;
 
+@RequestMapping("/api/admin/themes")
 @RestController
 public class AdminThemeApiController {
 
@@ -24,7 +26,7 @@ public class AdminThemeApiController {
         this.themeService = themeService;
     }
 
-    @PostMapping("/api/admin/themes")
+    @PostMapping
     public ResponseEntity<ThemeResponse> addTheme(@RequestBody @Valid
                                                   ThemeSaveRequest request) {
         Theme theme = themeService.createTheme(request);
@@ -32,7 +34,7 @@ public class AdminThemeApiController {
                 .body(new ThemeResponse(theme));
     }
 
-    @DeleteMapping("/api/admin/themes/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable
                                             @Positive(message = "1 이상의 값만 입력해주세요.")
                                             long id) {

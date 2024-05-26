@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
@@ -14,6 +15,7 @@ import roomescape.service.auth.AuthService;
 import roomescape.service.dto.request.LoginRequest;
 import roomescape.service.dto.response.MemberIdAndNameResponse;
 
+@RequestMapping("/api")
 @RestController
 public class AuthApiController {
 
@@ -23,12 +25,12 @@ public class AuthApiController {
         this.authService = authService;
     }
 
-    @GetMapping("/api/login/check")
+    @GetMapping("/login/check")
     public ResponseEntity<MemberIdAndNameResponse> getMemberLoginInfo(@AuthenticatedMember Member member) {
         return ResponseEntity.ok(new MemberIdAndNameResponse(member.getId(), member.getName()));
     }
 
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody @Valid
                                       LoginRequest request,
                                       HttpServletResponse response) {

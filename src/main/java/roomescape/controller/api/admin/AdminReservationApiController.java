@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
+@RequestMapping("/api/admin/reservations")
 @RestController
 public class AdminReservationApiController {
 
@@ -32,7 +34,7 @@ public class AdminReservationApiController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping("/api/admin/reservations/search")
+    @GetMapping("/search")
     public ResponseEntity<List<ReservationResponse>> getSearchingReservations(@RequestParam long memberId,
                                                                               @RequestParam long themeId,
                                                                               @RequestParam LocalDate dateFrom,
@@ -45,7 +47,7 @@ public class AdminReservationApiController {
         );
     }
 
-    @GetMapping("/api/admin/reservations/waiting-list")
+    @GetMapping("/waiting-list")
     public ResponseEntity<List<WaitingResponse>> getWaiting(@AuthenticatedMember Member member) {
         List<Reservation> waitings = reservationService.findWaitings();
         return ResponseEntity.ok(
@@ -55,7 +57,7 @@ public class AdminReservationApiController {
         );
     }
 
-    @PostMapping("/api/admin/reservations")
+    @PostMapping
     public ResponseEntity<ReservationResponse> addReservationByAdmin(@RequestBody @Valid
                                                                      ReservationAdminSaveRequest request) {
         Reservation newReservation = adminReservationService.createReservation(request);
