@@ -49,19 +49,19 @@ class ThemeJpaRepositoryTest {
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
         Stream.of(
-                new Reservation(member, date.plusDays(0), times.get(0), themes.get(0), createdAt, BookStatus.BOOKED),
-                new Reservation(member, date.plusDays(1), times.get(1), themes.get(1), createdAt, BookStatus.BOOKED),
-                new Reservation(member, date.plusDays(1), times.get(0), themes.get(1), createdAt, BookStatus.BOOKED),
-                new Reservation(member, date.plusDays(1), times.get(0), themes.get(2), createdAt, BookStatus.BOOKED),
-                new Reservation(member, date.plusDays(2), times.get(1), themes.get(2), createdAt, BookStatus.BOOKED),
-                new Reservation(member, date.plusDays(2), times.get(2), themes.get(2), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(0), date.plusDays(0), times.get(0), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(1), date.plusDays(1), times.get(1), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(1), date.plusDays(1), times.get(0), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(2), date.plusDays(1), times.get(0), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(2), date.plusDays(2), times.get(1), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(2), date.plusDays(2), times.get(2), createdAt, BookStatus.BOOKED),
 
-                new Reservation(member, date.plusDays(2), times.get(0), themes.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
-                new Reservation(member, date.plusDays(2), times.get(1), themes.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
-                new Reservation(member, date.plusDays(2), times.get(2), themes.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
-                new Reservation(member, date.plusDays(3), times.get(0), themes.get(0), createdAt, BookStatus.BOOKED),
-                new Reservation(member, date.plusDays(3), times.get(1), themes.get(0), createdAt, BookStatus.BOOKED),
-                new Reservation(member, date.plusDays(3), times.get(0), themes.get(0), createdAt, BookStatus.BOOKED)
+                new Reservation(member, themes.get(0), date.plusDays(2), times.get(0), createdAt, BookStatus.BOOKING_CANCELLED),
+                new Reservation(member, themes.get(0), date.plusDays(2), times.get(1), createdAt, BookStatus.BOOKING_CANCELLED),
+                new Reservation(member, themes.get(0), date.plusDays(2), times.get(2), createdAt, BookStatus.BOOKING_CANCELLED),
+                new Reservation(member, themes.get(0), date.plusDays(3), times.get(0), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(0), date.plusDays(3), times.get(1), createdAt, BookStatus.BOOKED),
+                new Reservation(member, themes.get(0), date.plusDays(3), times.get(0), createdAt, BookStatus.BOOKED)
         ).forEach(entityManager::persist);
 
         int limit = 3;

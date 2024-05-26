@@ -44,7 +44,7 @@ public class ReservationFixture {
         LocalDateTime createdAt = LocalDateTime.now(clock);
         LocalDate date = LocalDate.of(2024, 1, 1);
 
-        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
+        Reservation reservation = new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED);
         return reservationRepository.save(reservation);
     }
 }

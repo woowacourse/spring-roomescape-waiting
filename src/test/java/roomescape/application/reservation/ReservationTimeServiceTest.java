@@ -99,7 +99,7 @@ class ReservationTimeServiceTest {
         long timeId = time.getId();
 
         reservationRepository.save(
-                new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED)
+                new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED)
         );
         assertThatCode(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(IllegalArgumentException.class)

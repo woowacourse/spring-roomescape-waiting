@@ -78,7 +78,7 @@ class ReservationWaitingServiceTest {
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
         LocalDateTime createdAt = LocalDateTime.parse("1999-01-01T00:00:00");
         reservationRepository.save(
-                new Reservation(member, date, time, theme, createdAt, status)
+                new Reservation(member, theme, date, time, createdAt, status)
         );
 
         assertThatCode(() -> reservationService.enqueueWaitingList(request))
@@ -96,12 +96,12 @@ class ReservationWaitingServiceTest {
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
         LocalDateTime createdAt = LocalDateTime.of(1999, 1, 1, 12, 0);
         reservationRepository.save(
-                new Reservation(pk, date, time, theme, createdAt, BookStatus.BOOKED)
+                new Reservation(pk, theme, date, time, createdAt, BookStatus.BOOKED)
         );
         for (int count = 1; count <= 5; count++) {
             Member m = memberRepository.save(MemberFixture.createMember("name" + count));
             reservationRepository.save(
-                    new Reservation(m, date, time, theme, createdAt, BookStatus.WAITING)
+                    new Reservation(m, theme, date, time, createdAt, BookStatus.WAITING)
             );
         }
 

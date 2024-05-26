@@ -58,7 +58,7 @@ class ReservationJpaRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
-        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
+        Reservation reservation = new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED);
         entityManager.persist(reservation);
 
         boolean exists = reservationRepository.existsByTimeId(time.getId());
@@ -74,7 +74,7 @@ class ReservationJpaRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
-        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
+        Reservation reservation = new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED);
         entityManager.persist(reservation);
 
         boolean exists = reservationRepository.existsActiveReservation(
@@ -92,7 +92,7 @@ class ReservationJpaRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
-        Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
+        Reservation reservation = new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED);
         entityManager.persist(reservation);
 
         boolean exists = reservationRepository.existsActiveReservation(
@@ -112,12 +112,12 @@ class ReservationJpaRepositoryTest {
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
         for (int day = 1; day <= 10; day++) {
             entityManager.persist(
-                    new Reservation(aru, date.plusDays(day), time, theme, createdAt, BookStatus.BOOKED)
+                    new Reservation(aru, theme, date.plusDays(day), time, createdAt, BookStatus.BOOKED)
             );
         }
         for (int day = 1; day <= 5; day++) {
             entityManager.persist(
-                    new Reservation(pk, date.plusDays(day), time, theme, createdAt, BookStatus.BOOKED)
+                    new Reservation(pk, theme, date.plusDays(day), time, createdAt, BookStatus.BOOKED)
             );
         }
 
@@ -141,7 +141,7 @@ class ReservationJpaRepositoryTest {
 
         for (int day = 1; day <= 10; day++) {
             LocalDateTime createdAt = LocalDateTime.of(2023, 1, day, 12, 0);
-            Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.WAITING);
+            Reservation reservation = new Reservation(member, theme, date, time, createdAt, BookStatus.WAITING);
             entityManager.persist(reservation);
         }
 
@@ -163,7 +163,7 @@ class ReservationJpaRepositoryTest {
         List<Reservation> reservations = new ArrayList<>();
         for (int day = 1; day <= 10; day++) {
             LocalDateTime createdAt = LocalDateTime.of(2023, 1, day, 12, 0);
-            Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
+            Reservation reservation = new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED);
             entityManager.persist(reservation);
             reservations.add(reservation);
         }
@@ -182,7 +182,7 @@ class ReservationJpaRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         LocalDateTime createdAt = LocalDateTime.of(2023, 1, 5, 12, 0);
 
-        Reservation reservation = new Reservation(member, date, time, theme, createdAt, status);
+        Reservation reservation = new Reservation(member, theme, date, time, createdAt, status);
         entityManager.persist(reservation);
 
         boolean exists = reservationRepository.existsAlreadyWaitingOrBooked(
@@ -200,7 +200,7 @@ class ReservationJpaRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         for (int day = 1; day <= 10; day++) {
             LocalDateTime createdAt = LocalDateTime.of(2023, 1, day, 12, 0);
-            Reservation reservation = new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED);
+            Reservation reservation = new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED);
             entityManager.persist(reservation);
         }
 

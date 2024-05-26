@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import roomescape.application.ServiceTest;
-import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
@@ -34,9 +33,6 @@ class ReservationLookupServiceTest {
 
     @Autowired
     private ReservationLookupService reservationLookupService;
-
-    @Autowired
-    private ReservationService reservationService;
 
     @Autowired
     private ReservationFixture reservationFixture;
@@ -68,19 +64,19 @@ class ReservationLookupServiceTest {
         Member pk = memberRepository.save(MEMBER_PK.create());
         ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         Theme theme = themeRepository.save(TEST_THEME.create());
+        LocalDate date = LocalDate.of(2024, 5, 21);
+        LocalDateTime createdAt = LocalDateTime.of(1999, 1, 1, 12, 0);
 
-        Reservation reservation = new Reservation(
-                aru, LocalDate.of(2024, 5, 21), time, theme,
-                LocalDateTime.of(1999, 1, 1, 12, 0),
-                BookStatus.BOOKED
+        reservationRepository.save(
+                new Reservation(aru, theme, date, time, createdAt, BookStatus.BOOKED)
         );
-        reservationRepository.save(reservation);
-        reservationService.enqueueWaitingList(new ReservationRequest(
-                pk.getId(), LocalDate.of(2024, 5, 21), time.getId(), theme.getId()
-        ));
-        reservationService.bookReservation(new ReservationRequest(
-                pk.getId(), LocalDate.of(2024, 5, 22), time.getId(), theme.getId()
-        ));
+        reservationRepository.save(
+                new Reservation(pk, theme, date, time, createdAt.plusMinutes(1), BookStatus.WAITING)
+        );
+        reservationRepository.save(
+                new Reservation(pk, theme, date.plusDays(1), time, createdAt.plusDays(1), BookStatus.BOOKED)
+        );
+
         List<ReservationStatusResponse> responses =
                 reservationLookupService.getReservationStatusesByMemberId(pk.getId());
 

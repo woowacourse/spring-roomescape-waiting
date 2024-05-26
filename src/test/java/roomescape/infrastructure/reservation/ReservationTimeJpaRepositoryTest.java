@@ -109,9 +109,9 @@ class ReservationTimeJpaRepositoryTest {
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
         List.of(
-                new Reservation(member, date, ten, theme, createdAt, BookStatus.BOOKED),
-                new Reservation(member, date, ten, theme, createdAt.plusMinutes(10), BookStatus.WAITING),
-                new Reservation(member, date, eleven, theme, createdAt, BookStatus.BOOKING_CANCELLED)
+                new Reservation(member, theme, date, ten, createdAt, BookStatus.BOOKED),
+                new Reservation(member, theme, date, ten, createdAt.plusMinutes(10), BookStatus.WAITING),
+                new Reservation(member, theme, date, eleven, createdAt, BookStatus.BOOKING_CANCELLED)
         ).forEach(entityManager::persist);
 
         List<TimeSlot> availableTimes = timeRepository.getReservationTimeAvailabilities(date, theme.getId());

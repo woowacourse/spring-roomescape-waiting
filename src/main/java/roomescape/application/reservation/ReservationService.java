@@ -54,7 +54,7 @@ public class ReservationService {
         Theme theme = themeRepository.getById(request.themeId());
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
         LocalDateTime now = LocalDateTime.now(clock);
-        Reservation reservation = new Reservation(member, request.date(), time, theme, now, BookStatus.BOOKED);
+        Reservation reservation = new Reservation(member, theme, request.date(), time, now, BookStatus.BOOKED);
         reservationRepository.save(reservation);
         return ReservationResponse.from(reservation);
     }
@@ -83,7 +83,7 @@ public class ReservationService {
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
         LocalDateTime now = LocalDateTime.now(clock);
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, request.date(), time, theme, now, BookStatus.WAITING)
+                new Reservation(member, theme, request.date(), time, now, BookStatus.WAITING)
         );
 
         long waitingCount = reservationRepository.getWaitingCount(reservation);

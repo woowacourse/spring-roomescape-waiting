@@ -28,16 +28,16 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @ManyToOne
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
+
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
-
-    @ManyToOne
-    @JoinColumn(name = "theme_id", nullable = false)
-    private Theme theme;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -49,21 +49,21 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
+    public Reservation(Long id, Member member, Theme theme, LocalDate date, ReservationTime time,
                        LocalDateTime createdAt, BookStatus status) {
         validateCreatedAtAfterReserveTime(date, time.getStartAt(), createdAt);
         this.id = id;
         this.member = member;
+        this.theme = theme;
         this.date = date;
         this.time = time;
-        this.theme = theme;
         this.createdAt = createdAt;
         this.status = status;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme,
+    public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time,
                        LocalDateTime createdAt, BookStatus status) {
-        this(null, member, date, time, theme, createdAt, status);
+        this(null, member, theme, date, time, createdAt, status);
     }
 
     private void validateCreatedAtAfterReserveTime(LocalDate date, LocalTime startAt, LocalDateTime createdAt) {

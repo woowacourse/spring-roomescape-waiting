@@ -27,7 +27,7 @@ class ReservationTest {
         Theme theme = new Theme("테마명", "설명", "url");
         Member member = MEMBER_ARU.create();
 
-        assertThatCode(() -> new Reservation(member, date, time, theme, createdAt, BookStatus.BOOKED))
+        assertThatCode(() -> new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("현재 시간보다 과거로 예약할 수 없습니다.");
     }
@@ -39,9 +39,9 @@ class ReservationTest {
         Member admin = ADMIN_PK.createWithId(2L);
         Reservation reservation = new Reservation(
                 aru,
+                TEST_THEME.create(),
                 LocalDate.now(),
                 TEN_AM.create(),
-                TEST_THEME.create(),
                 LocalDateTime.now().minusDays(1),
                 BookStatus.BOOKED
         );
@@ -57,9 +57,9 @@ class ReservationTest {
     void foreignerModifiableTest() {
         Reservation reservation = new Reservation(
                 MEMBER_PK.createWithId(1L),
+                TEST_THEME.create(),
                 LocalDate.now(),
                 TEN_AM.create(),
-                TEST_THEME.create(),
                 LocalDateTime.now().minusDays(1),
                 BookStatus.BOOKED
         );
@@ -74,9 +74,9 @@ class ReservationTest {
     void cancelOnNotBookedReservation() {
         Reservation reservation = new Reservation(
                 MEMBER_ARU.create(),
+                TEST_THEME.create(),
                 LocalDate.now(),
                 TEN_AM.create(),
-                TEST_THEME.create(),
                 LocalDateTime.now().minusDays(1),
                 BookStatus.WAITING
         );
@@ -92,9 +92,9 @@ class ReservationTest {
     void cancelOnNotWaitingReservation() {
         Reservation reservation = new Reservation(
                 MEMBER_ARU.create(),
+                TEST_THEME.create(),
                 LocalDate.now(),
                 TEN_AM.create(),
-                TEST_THEME.create(),
                 LocalDateTime.now().minusDays(1),
                 BookStatus.BOOKED
         );
@@ -109,9 +109,9 @@ class ReservationTest {
     void bookOnNotWaitingReservation() {
         Reservation reservation = new Reservation(
                 MEMBER_ARU.create(),
+                TEST_THEME.create(),
                 LocalDate.now(),
                 TEN_AM.create(),
-                TEST_THEME.create(),
                 LocalDateTime.now().minusDays(1),
                 BookStatus.BOOKED
         );

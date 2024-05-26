@@ -128,9 +128,9 @@ class ReservationServiceTest {
         LocalDateTime createdAt = date.minusDays(1).atStartOfDay();
 
         List<Reservation> reservations = Stream.of(
-                        new Reservation(aru, date, time, theme, createdAt, BookStatus.BOOKED),
-                        new Reservation(pk, date, time, theme, createdAt.plusHours(1), BookStatus.WAITING),
-                        new Reservation(seesaw, date, time, theme, createdAt.plusHours(2), BookStatus.WAITING))
+                        new Reservation(aru, theme, date, time, createdAt, BookStatus.BOOKED),
+                        new Reservation(pk, theme, date, time, createdAt.plusHours(1), BookStatus.WAITING),
+                        new Reservation(seesaw, theme, date, time, createdAt.plusHours(2), BookStatus.WAITING))
                 .map(reservationRepository::save)
                 .toList();
 
