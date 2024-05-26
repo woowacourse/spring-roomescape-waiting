@@ -33,6 +33,7 @@
 - [x] 관리자용 예약 대기 목록 조회 API를 구현한다
 - [x] 관리자용 예약 대기 삭제 API를 구현한다
 - [x] 예약 삭제 API 요청 시, 예약 대기자가 자동으로 예약 승인이 된다
+    - 멱등성 보장하기 위해 지정한 예약 id와 사용자 id에 해당하는 예약을 삭제함
 
 # API 명세
 
@@ -323,7 +324,7 @@ Content-Type: application/json
 Request
 
 ```
-DELETE /reservations/1
+DELETE /reservations/1?memberId=1
 Cookie: token=hello.example.token
 ```
 

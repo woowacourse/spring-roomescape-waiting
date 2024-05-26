@@ -227,31 +227,45 @@ class ReservationIntegrationTest extends IntegrationTest {
     @Nested
     @DisplayName("예약 삭제 API")
     class DeleteReservation {
+        Member member;
         Reservation reservation;
 
         @BeforeEach
         void setUp() {
             ReservationTime time = timeFixture.createFutureTime();
             Theme theme = themeFixture.createFirstTheme();
-            Member member = memberFixture.createUserMember();
+            member = memberFixture.createUserMember();
             reservation = reservationFixture.createFutureReservation(time, theme, member);
             memberFixture.createAdminMember();
         }
 
         @Test
-        void 예약을_삭제할_수_있다() {
+        void 예약_id와_예약자_id로_예약을_삭제할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
-                    .when().delete("/reservations/" + reservation.getId())
+                    .when().delete("/reservations/" + reservation.getId() + "?memberId=" + member.getId())
                     .then().log().all()
                     .statusCode(204);
         }
 
         @Test
-        void 존재하지_않는_예약은_삭제할_수_없다() {
+        void 존재하지_않는_예약_id로_예약을_삭제할_수_없다() {
+            long wrongReservationId = 10L;
+
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
-                    .when().delete("/reservations/10")
+                    .when().delete("/reservations/" + wrongReservationId + "?memberId=" + member.getId())
+                    .then().log().all()
+                    .statusCode(404);
+        }
+
+        @Test
+        void 예약자가_아닌_사용자_id로_예약을_삭제할_수_없다() {
+            long wrongMemberId = 10L;
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/reservations/" + reservation.getId() + "?memberId=" + wrongMemberId)
                     .then().log().all()
                     .statusCode(404);
         }

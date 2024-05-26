@@ -14,6 +14,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
@@ -166,19 +167,20 @@ class ReservationServiceTest extends ServiceTest {
     @Nested
     @DisplayName("예약 삭제")
     class DeleteReservation {
+        Member member;
         Reservation reservation;
 
         @BeforeEach
         void setUp() {
             ReservationTime time = timeFixture.createFutureTime();
             Theme theme = themeFixture.createFirstTheme();
-            Member member = memberFixture.createUserMember();
+            member = memberFixture.createUserMember();
             reservation = reservationFixture.createFutureReservation(time, theme, member);
         }
 
         @Test
-        void 예약_id로_예약_대기가_존재하지_않는_예약을_삭제할_수_있다() { // TODO: 테스트 메서드들 이름 형식 통일하기
-            reservationService.deleteReservation(reservation.getId());
+        void 예약_id와_예약자_id로_예약_대기가_존재하지_않는_예약을_삭제할_수_있다() { // TODO: 테스트 메서드들 이름 형식 통일하기
+            reservationService.deleteReservation(reservation.getId(), member.getId());
 
             List<Reservation> reservations = reservationFixture.findAllReservation();
             assertThat(reservations.size())
@@ -187,8 +189,38 @@ class ReservationServiceTest extends ServiceTest {
 
         @Test
         void 존재하지_않는_예약_id로_예약_삭제_시_예외가_발생한다() {
-            assertThatThrownBy(() -> reservationService.deleteReservation(10L))
+            long wrongReservationId = 10L;
+
+            assertThatThrownBy(() -> reservationService.deleteReservation(wrongReservationId, member.getId()))
                     .isInstanceOf(NotFoundReservationException.class);
+        }
+
+        @Test
+        void 예약자가_아닌_사용자_id로_예약_삭제_시_예외가_발생한다() {
+            long wrongMemberId = 10L;
+
+            assertThatThrownBy(() -> reservationService.deleteReservation(reservation.getId(), wrongMemberId))
+                    .isInstanceOf(NotFoundReservationMemberException.class);
+        }
+
+        @Test
+        void 예약_대기가_존재하는_예약_삭제_시_예약은_삭제되지_않고_대기번호_1번의_대기자가_예약자로_승격되면서_예약_대기가_삭제된다() {
+            Member otherMember = memberFixture.createAdminMember();
+            waitingFixture.createWaiting(reservation, otherMember);
+
+            reservationService.deleteReservation(reservation.getId(), member.getId());
+
+            List<Reservation> reservations = reservationFixture.findAllReservation();
+            List<ReservationWaiting> waitings = waitingFixture.findAllWaiting();
+            assertThat(reservations)
+                    .isNotEmpty()
+                    .first()
+                    .satisfies(reservation -> {
+                        assertThat(reservation).isEqualTo(this.reservation);
+                        assertThat(reservation.getMember()).isEqualTo(otherMember);
+                    });
+            assertThat(waitings)
+                    .isEmpty(); // TODO: 테스트 메서드들 empty 검증 형식 통일하기
         }
     }
 }
