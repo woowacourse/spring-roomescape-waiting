@@ -12,9 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.support.fixture.AuthFixture;
+import roomescape.support.model.TokenCookieDto;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -26,23 +26,23 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ThemeControllerTest {
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private AuthFixture authFixture;
 
     @LocalServerPort
     private int port;
 
-    @Autowired
-    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("모든 테마 정보를 조회한다.")
     void readThemes() {
-        String email = "admin@test.com";
-        String password = "12341234";
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin(email, password);
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .when().get("/themes")
                 .then().log().all()
@@ -53,9 +53,7 @@ class ThemeControllerTest {
     @Test
     @DisplayName("테마를 추가한다.")
     void createThemes() {
-        String email = "admin@test.com";
-        String password = "12341234";
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin(email, password);
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         Map<String, String> params = Map.of(
                 "name", "테마명",
@@ -65,7 +63,7 @@ class ThemeControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .body(params)
                 .when().post("/admin/themes")
@@ -78,9 +76,7 @@ class ThemeControllerTest {
     @Test
     @DisplayName("테마를 삭제한다.")
     void deleteThemes() {
-        String email = "admin@test.com";
-        String password = "12341234";
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin(email, password);
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         Map<String, String> params = Map.of(
                 "name", "테마명",
@@ -90,7 +86,7 @@ class ThemeControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .body(params)
                 .when().post("/admin/themes")
@@ -101,7 +97,7 @@ class ThemeControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .when().delete("/admin/themes/1")
                 .then().log().all()
@@ -111,13 +107,11 @@ class ThemeControllerTest {
     @Test
     @DisplayName("존재하지 않는 테마ID로 삭제를 요청하면 예외를 발생한다.")
     void failDeleteThemeByNotExistThemeId() {
-        String email = "admin@test.com";
-        String password = "12341234";
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin(email, password);
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .when().delete("/admin/themes/1")
                 .then().log().all()
@@ -150,13 +144,11 @@ class ThemeControllerTest {
     @MethodSource("requestValidateSource")
     @DisplayName("테마 생성 시, 요청 값에 공백 또는 null이 포함되어 있으면 400 에러를 발생한다.")
     void validateBlankRequest(Map<String, String> invalidRequestBody) {
-        String email = "admin@test.com";
-        String password = "12341234";
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin(email, password);
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .body(invalidRequestBody)
                 .when().post("/admin/themes")
@@ -181,23 +173,5 @@ class ThemeControllerTest {
                         "thumbnail", "http://testsfasdgasd.com"
                 )
         );
-    }
-
-    private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
-        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
-
-        Map<String, String> loginParams = Map.of(
-                "email", email,
-                "password", password
-        );
-
-        String accessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .body(loginParams)
-                .when().post("/login")
-                .then().log().all().extract().cookie("accessToken");
-
-        return "accessToken=" + accessToken;
     }
 }

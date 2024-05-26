@@ -14,9 +14,9 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.support.fixture.AuthFixture;
+import roomescape.support.model.TokenCookieDto;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -31,9 +31,10 @@ public class ReservationTimeControllerTest {
 
     @Autowired
     private ReservationTimeController reservationTimeController;
-
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private AuthFixture authFixture;
 
     @LocalServerPort
     private int port;
@@ -44,14 +45,14 @@ public class ReservationTimeControllerTest {
         Map<String, String> params = Map.of(
                 "startAt", "17:00"
         );
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .body(params)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201)
                 .body("data.id", is(1))
@@ -61,11 +62,11 @@ public class ReservationTimeControllerTest {
     @Test
     @DisplayName("아무 시간도 등록 하지 않은 경우, 시간 목록 조회 결과 개수는 0개이다.")
     void readEmptyTimes() {
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .port(port)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
@@ -78,14 +79,14 @@ public class ReservationTimeControllerTest {
         Map<String, String> params = Map.of(
                 "startAt", "17:00"
         );
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .body(params)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201)
                 .body("data.id", is(1))
@@ -93,7 +94,7 @@ public class ReservationTimeControllerTest {
 
         RestAssured.given().log().all()
                 .port(port)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
@@ -106,14 +107,14 @@ public class ReservationTimeControllerTest {
         Map<String, String> params = Map.of(
                 "startAt", "17:00"
         );
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .body(params)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201)
                 .body("data.id", is(1))
@@ -121,14 +122,14 @@ public class ReservationTimeControllerTest {
 
         RestAssured.given().log().all()
                 .port(port)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .port(port)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
@@ -154,14 +155,14 @@ public class ReservationTimeControllerTest {
     @MethodSource("validateRequestDataFormatSource")
     @DisplayName("예약 시간 생성 시, 시간 요청 데이터에 시간 포맷이 아닌 값이 입력되어오면 400 에러를 발생한다.")
     void validateRequestDataFormat(Map<String, String> request) {
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .body(request)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -180,14 +181,14 @@ public class ReservationTimeControllerTest {
     @MethodSource("validateBlankRequestSource")
     @DisplayName("예약 시간 생성 시, 요청 값에 공백 또는 null이 포함되어 있으면 400 에러를 발생한다.")
     void validateBlankRequest(Map<String, String> request) {
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("email@email.com", "password");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("email@email.com", "password", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header(new Header("Cookie", adminAccessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .port(port)
                 .body(request)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -198,23 +199,5 @@ public class ReservationTimeControllerTest {
                 Map.of("startAt", ""),
                 Map.of("startAt", " ")
         );
-    }
-
-    private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
-        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
-
-        Map<String, String> loginParams = Map.of(
-                "email", email,
-                "password", password
-        );
-
-        String accessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .body(loginParams)
-                .when().post("/login")
-                .then().log().all().extract().cookie("accessToken");
-
-        return "accessToken=" + accessToken;
     }
 }

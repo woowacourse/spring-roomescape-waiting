@@ -26,6 +26,8 @@ import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.support.fixture.AuthFixture;
+import roomescape.support.model.TokenCookieDto;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -54,6 +56,8 @@ public class ReservationControllerTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private AuthFixture authFixture;
 
     @LocalServerPort
     private int port;
@@ -62,7 +66,7 @@ public class ReservationControllerTest {
     @Test
     @DisplayName("회원권한이 있으면 예약을 등록할 수 있다.")
     void reservationHasRole() {
-        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto tokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies("member@email.com", "12341234", port);
 
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
@@ -77,7 +81,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", tokenCookieDto.accessTokenCookie())
                 .body(reservationParams)
                 .when().post("/reservations")
                 .then().log().all()
@@ -89,8 +93,7 @@ public class ReservationControllerTest {
     @Test
     @DisplayName("예약이 존재하지 않으면 예약대기 등록을 할 수 없다.")
     void cannotReservationWaitingBecauseReservationNotExist() {
-        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
-        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto tokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies("email@email.com", "password", port);
 
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
@@ -104,7 +107,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", tokenCookieDto.accessTokenCookie())
                 .body(reservationParams)
                 .when().post("/reservations/waitings")
                 .then().log().all()
@@ -115,7 +118,7 @@ public class ReservationControllerTest {
     @DisplayName("관리자 권한이 있으면 전체 예약정보를 조회할 수 있다.")
     void readEmptyReservations() {
         // given
-        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto tokenCookieDto = authFixture.saveAdminAndGetTokenCookies("admin@admin.com", "12341234", port);
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
@@ -133,7 +136,7 @@ public class ReservationControllerTest {
         // then
         RestAssured.given().log().all()
                 .port(port)
-                .header(new Header("Cookie", accessTokenCookie))
+                .header(new Header("Cookie", tokenCookieDto.accessTokenCookie()))
                 .when().get("/admin/reservations?status=RESERVED")
                 .then().log().all()
                 .statusCode(200)
@@ -146,7 +149,7 @@ public class ReservationControllerTest {
         // given
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
         Member anotherMember = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
-        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto memberTokenCookieDto = authFixture.loginAndGetTokenCookies(member.getEmail(), member.getPassword(), port);
 
         ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(18, 30)));
@@ -165,7 +168,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", memberTokenCookieDto.accessTokenCookie())
                 .when().get("/reservations/my")
                 .then().log().all()
                 .statusCode(200)
@@ -177,7 +180,7 @@ public class ReservationControllerTest {
     void canRemoveMyReservation() {
         // given
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
-        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto tokenCookieDto = authFixture.loginAndGetTokenCookies(member.getEmail(), member.getPassword(), port);
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
@@ -187,7 +190,7 @@ public class ReservationControllerTest {
         // when & then
         RestAssured.given().log().all()
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", tokenCookieDto.accessTokenCookie())
                 .when().delete("/reservations/" + reservation.getId())
                 .then().log().all()
                 .statusCode(204);
@@ -197,21 +200,20 @@ public class ReservationControllerTest {
     @DisplayName("본인의 예약이 아니면 예약 정보를 삭제할 수 없으며 403 Forbidden 을 Response 받는다.")
     void canRemoveAnotherReservation() {
         // given
-        Member member = memberRepository.save(new Member("name", "member1@email.com", "password", Role.MEMBER));
-        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto memberTokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies("member@email.com", "password", port);
 
-        Member anotherMember = memberRepository.save(new Member("name1", "member2@email.com", "password", Role.MEMBER));
+        Member anotherMember = memberRepository.save(new Member("name1", "another@email.com", "password", Role.MEMBER));
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
 
         ReservationDetail reservation = reservationDetailRepository.save(new ReservationDetail(LocalDate.now(), reservationTime, theme));
-        memberReservationRepository.save(new MemberReservation(reservation, anotherMember, ReservationStatus.RESERVED));
+        Long anotherMemberReservationId = memberReservationRepository.save(new MemberReservation(reservation, anotherMember, ReservationStatus.RESERVED)).getId();
 
         // when & then
         RestAssured.given().log().all()
                 .port(port)
-                .header("Cookie", accessTokenCookie)
-                .when().delete("/reservations/" + reservation.getId())
+                .header("Cookie", memberTokenCookieDto.accessTokenCookie())
+                .when().delete("/reservations/" + anotherMemberReservationId)
                 .then().log().all()
                 .statusCode(403);
     }
@@ -220,8 +222,7 @@ public class ReservationControllerTest {
     @DisplayName("본인의 예약이 아니더라도 관리자 권한이 있으면 예약 정보를 삭제할 수 있다.")
     void readReservationsSizeAfterPostAndDelete() {
         // given
-        Member member = memberRepository.save(new Member("name", "admin@admin.com", "password", Role.ADMIN));
-        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("admin@email.com", "password", port);
 
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
@@ -233,7 +234,7 @@ public class ReservationControllerTest {
         // when & then
         RestAssured.given().log().all()
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", adminTokenCookieDto.accessTokenCookie())
                 .when().delete("/reservations/" + anotherMemberReservationResponse.id())
                 .then().log().all()
                 .statusCode(204);
@@ -268,12 +269,12 @@ public class ReservationControllerTest {
     @MethodSource("requestValidateSource")
     @DisplayName("예약 생성 시, 요청 값에 공백 또는 null이 포함되어 있으면 400 에러를 발생한다.")
     void validateBlankRequest(Map<String, String> invalidRequestBody) {
-        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto tokenCookieDto = authFixture.saveAdminAndGetTokenCookies("member@email.com", "12341234", port);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", tokenCookieDto.accessTokenCookie())
                 .body(invalidRequestBody)
                 .when().post("/reservations")
                 .then().log().all()
@@ -308,7 +309,7 @@ public class ReservationControllerTest {
     @Test
     @DisplayName("예약 생성 시, 정수 요청 데이터에 문자가 입력되어오면 400 에러를 발생한다.")
     void validateRequestDataFormat() {
-        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto tokenCookieDto = authFixture.saveAdminAndGetTokenCookies("admin@admin.com", "12341234", port);
 
         Map<String, String> invalidTypeRequestBody = Map.of(
                 "date", LocalDate.now().plusDays(1L).toString(),
@@ -319,7 +320,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", tokenCookieDto.accessTokenCookie())
                 .body(invalidTypeRequestBody)
                 .when().post("/reservations")
                 .then().log().all()
@@ -330,16 +331,16 @@ public class ReservationControllerTest {
     @DisplayName("이미 예약이 존재하는 날짜/시간/테마로 예약 생성 요청 시, 409 에러를 발생한다.")
     void validateDateTimeThemeDuplication() {
         // given
-        Member member1 = memberRepository.save(new Member("이름", "member1@admin.com", "12341234", Role.MEMBER));
+        Member firstReserveMember = memberRepository.save(new Member("이름", "member1@admin.com", "12341234", Role.MEMBER));
 
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId(), ReservationStatus.RESERVED);
+        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), firstReserveMember.getId(), ReservationStatus.RESERVED);
 
-        Member member2 = memberRepository.save(new Member("이름", "member2@admin.com", "12341234", Role.MEMBER));
-        String member2AccessTokenCookie = getAccessTokenCookieByLogin(member2.getEmail(), member2.getPassword());
+        Member afterReserveMember = memberRepository.save(new Member("이름", "member2@admin.com", "12341234", Role.MEMBER));
+        TokenCookieDto afterReserveMemberTokenCookieDto = authFixture.loginAndGetTokenCookies(afterReserveMember.getEmail(), afterReserveMember.getPassword(), port);
 
         Map<String, String> reservationParams = Map.of(
                 "date", tomorrow.toString(),
@@ -352,7 +353,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", member2AccessTokenCookie)
+                .header("Cookie", afterReserveMemberTokenCookieDto.accessTokenCookie())
                 .body(reservationParams)
                 .when().post("/reservations")
                 .then().log().all()
@@ -365,21 +366,21 @@ public class ReservationControllerTest {
         // given
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
         Member anotherMember = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
-        String myAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto myTokenCookieDto = authFixture.loginAndGetTokenCookies(member.getEmail(), member.getPassword(), port);
 
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
         reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member.getId(), ReservationStatus.RESERVED);
-        ReservationResponse anotherMemberWaitingReservation = reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), anotherMember.getId(), ReservationStatus.WAITING);
+        Long anotherMemberWaitingReservationId = reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), anotherMember.getId(), ReservationStatus.WAITING).id();
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", myAccessTokenCookie)
-                .when().delete("/reservations/waitings/" + anotherMemberWaitingReservation.id())
+                .header("Cookie", myTokenCookieDto.accessTokenCookie())
+                .when().delete("/reservations/waitings/" + anotherMemberWaitingReservationId)
                 .then().log().all()
                 .statusCode(403);
     }
@@ -390,7 +391,7 @@ public class ReservationControllerTest {
         // given
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
         Member anotherMember = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
-        String myAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto myTokenCookieDto = authFixture.loginAndGetTokenCookies(member.getEmail(), member.getPassword(), port);
 
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
@@ -403,7 +404,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", myAccessTokenCookie)
+                .header("Cookie", myTokenCookieDto.accessTokenCookie())
                 .when().delete("/reservations/waitings/" + myWaitingReservation.id())
                 .then().log().all()
                 .statusCode(204);
@@ -413,7 +414,7 @@ public class ReservationControllerTest {
     @DisplayName("관리자는 모든 회원의 예약 대기 정보를 삭제할 수 있다.")
     void canRemoveAnotherMemberWaitingByAdminRole() {
         // given
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("admin@admin.com", "12341234", port);
         Member member1 = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
         Member member2 = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
 
@@ -428,7 +429,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", adminAccessTokenCookie)
+                .header("Cookie", adminTokenCookieDto.accessTokenCookie())
                 .when().delete("/reservations/waitings/" + waitingStatusReservation.id())
                 .then().log().all()
                 .statusCode(204);
@@ -438,7 +439,7 @@ public class ReservationControllerTest {
     @DisplayName("관리자가 회원의 예약 대기를 승인하면, 승인된 예약은 대기 상태에서 예약 상태로 변경된다.")
     void canApproveMemberWaitingByAdminRole() {
         // given
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("admin@admin.com", "12341234", port);
 
         Member reservedMember = memberRepository.save(new Member("name", "another1@email.com", "password", Role.MEMBER));
         Member waitingMember = memberRepository.save(new Member("name", "another2@email.com", "password", Role.MEMBER));
@@ -448,14 +449,14 @@ public class ReservationControllerTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
         reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), reservedMember.getId(), ReservationStatus.RESERVED);
-        reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), waitingMember.getId(), ReservationStatus.WAITING);
+        ReservationResponse waitingReservationResponse = reservationService.addMemberReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), waitingMember.getId(), ReservationStatus.WAITING);
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", adminAccessTokenCookie)
-                .when().patch("/reservations/waitings/2")
+                .header("Cookie", adminTokenCookieDto.accessTokenCookie())
+                .when().patch("/admin/reservations/waitings/" + waitingReservationResponse.id())
                 .then().log().all()
                 .statusCode(200);
 
@@ -469,24 +470,23 @@ public class ReservationControllerTest {
     @DisplayName("관리자가 아니라면 예약대기를 승인해줄 수 없으며, 403 Forbidden 이 발생한다.")
     void cannotApproveMemberWaitingByMemberRole() {
         // given
-        Member member = memberRepository.save(new Member("name", "member1@email.com", "password", Role.MEMBER));
-        String memberAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto tokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies("member1@email.com", "password", port);
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", memberAccessTokenCookie)
-                .when().patch("/reservations/waitings/1")
+                .header("Cookie", tokenCookieDto.accessTokenCookie())
+                .when().patch("/admin/reservations/waitings/1")
                 .then().log().all()
                 .statusCode(403);
     }
 
     @Test
-    @DisplayName("관리자는 전체 예약 대기 정보 조회 시, 첫 번째 순서로 대기중인 예약 정보를 조회한다.")
+    @DisplayName("관리자는 첫 번째 순서로 대기중인 예약 정보 전체를 조회할 수 있다.")
     void findFirstOrderWaitingReservationsWithAdminRole() {
         // given
-        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("admin@admin.com", "12341234", port);
 
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
         LocalTime tomorrowTime = LocalTime.now();
@@ -507,8 +507,8 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", adminAccessTokenCookie)
-                .when().get("/reservations/waitings")
+                .header("Cookie", adminTokenCookieDto.accessTokenCookie())
+                .when().get("/admin/reservations/waitings")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.reservations.size()", is(2));
@@ -522,50 +522,15 @@ public class ReservationControllerTest {
     @DisplayName("관리자가 아니면 전체 예약 대기 정보를 조회할 수 없고, 403 Forbidden 이 발생한다.")
     void cannotFindFirstOrderWaitingReservationsWithMemberRole() {
         // given
-        Member member = memberRepository.save(new Member("name", "member1@email.com", "password", Role.MEMBER));
-        String memberAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        TokenCookieDto tokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies("member1@email.com", "password", port);
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", memberAccessTokenCookie)
-                .when().get("/reservations/waitings")
+                .header("Cookie", tokenCookieDto.accessTokenCookie())
+                .when().get("/admin/reservations/waitings")
                 .then().log().all()
                 .statusCode(403);
-    }
-
-    private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
-        Member member = memberRepository.save(new Member("이름", email, password, Role.ADMIN));
-
-        Map<String, String> loginParams = Map.of(
-                "email", member.getEmail(),
-                "password", member.getPassword()
-        );
-
-        String accessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .body(loginParams)
-                .when().post("/login")
-                .then().log().all().extract().cookie("accessToken");
-
-        return "accessToken=" + accessToken;
-    }
-
-    private String getAccessTokenCookieByLogin(final String email, final String password) {
-        Map<String, String> loginParams = Map.of(
-                "email", email,
-                "password", password
-        );
-
-        String accessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .body(loginParams)
-                .when().post("/login")
-                .then().log().all().extract().cookie("accessToken");
-
-        return "accessToken=" + accessToken;
     }
 }

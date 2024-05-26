@@ -3,7 +3,6 @@ package roomescape.auth.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
-import io.restassured.response.Response;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,9 +13,9 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.support.fixture.AuthFixture;
+import roomescape.support.model.TokenCookieDto;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
@@ -27,6 +26,9 @@ public class AuthControllerTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private AuthFixture authFixture;
 
     @LocalServerPort
     private int port;
@@ -63,13 +65,13 @@ public class AuthControllerTest {
         // given
         String email = "test@test.com";
         String password = "12341234";
-        String accessTokenCookie = loginAndGetAccessTokenCookie(email, password);
+        TokenCookieDto tokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies(email, password, port);
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("cookie", accessTokenCookie)
+                .header("cookie", tokenCookieDto.accessTokenCookie())
                 .when().get("/login/check")
                 .then()
                 .body("data.name", is("이름"));
@@ -141,9 +143,9 @@ public class AuthControllerTest {
         // given
         String email = "test@email.com";
         String password = "12341234";
-        List<String> jwtTokensCookie = saveMemberAndGetJwtTokenCookies(email, password);
-        String accessToken = jwtTokensCookie.get(0);
-        String refreshToken = jwtTokensCookie.get(1);
+        TokenCookieDto tokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies(email, password, port);
+        String accessToken = tokenCookieDto.accessTokenCookie();
+        String refreshToken = tokenCookieDto.refreshTokenCookie();
 
         String expiredAccessToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -169,10 +171,9 @@ public class AuthControllerTest {
         // given
         String email = "test@email.com";
         String password = "12341234";
-        List<String> jwtTokensCookie = saveMemberAndGetJwtTokenCookies(email, password);
-        String oldAccessToken = jwtTokensCookie.get(0);
-        String oldRefreshToken = jwtTokensCookie.get(1);
-
+        TokenCookieDto tokenCookieDto = authFixture.saveMemberAndGetJwtTokenCookies(email, password, port);
+        String oldAccessToken = tokenCookieDto.accessTokenCookie();
+        String oldRefreshToken = tokenCookieDto.refreshTokenCookie();
 
         Map<String, String> cookies = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -188,50 +189,5 @@ public class AuthControllerTest {
         // then
         Assertions.assertThat(newAccessToken).isNotEqualTo(oldRefreshToken);
         Assertions.assertThat(newRefreshToken).isNotEqualTo(oldRefreshToken);
-    }
-
-    // TEST
-    private List<String> saveMemberAndGetJwtTokenCookies(final String email, final String password) {
-        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
-
-        Map<String, String> loginParams = Map.of(
-                "email", email,
-                "password", password
-        );
-
-        Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .body(loginParams)
-                .when().post("/login");
-
-        String accessToken = response
-                .then().log().all().extract().cookie("accessToken");
-        String refreshToken = response
-                .then().log().all().extract().cookie("refreshToken");
-
-        List<String> tokens = new ArrayList<>();
-        tokens.add("accessToken=" + accessToken);
-        tokens.add("refreshToken=" + refreshToken);
-        return tokens;
-    }
-
-    // TEST
-    private String loginAndGetAccessTokenCookie(final String email, final String password) {
-        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
-
-        Map<String, String> loginParams = Map.of(
-                "email", email,
-                "password", password
-        );
-
-        String accessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .body(loginParams)
-                .when().post("/login")
-                .then().log().all().extract().cookie("accessToken");
-
-        return "accessToken=" + accessToken;
     }
 }

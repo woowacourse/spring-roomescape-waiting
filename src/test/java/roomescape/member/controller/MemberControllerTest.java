@@ -1,7 +1,6 @@
 package roomescape.member.controller;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,8 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
-
-import java.util.Map;
+import roomescape.support.fixture.AuthFixture;
+import roomescape.support.model.TokenCookieDto;
 
 import static org.hamcrest.Matchers.is;
 
@@ -24,6 +23,9 @@ class MemberControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private AuthFixture authFixture;
+
     @LocalServerPort
     private int port;
 
@@ -31,7 +33,7 @@ class MemberControllerTest {
     @DisplayName("/members 으로 GET 요청을 보내면 회원 정보와 200 OK 를 받는다.")
     void getAdminPage() {
         // given
-        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        TokenCookieDto adminTokenCookieDto = authFixture.saveAdminAndGetTokenCookies("admin@admin.com", "12341234", port);
 
         memberRepository.save(new Member("이름1", "test@test.com", "password", Role.MEMBER));
         memberRepository.save(new Member("이름2", "test@test.com", "password", Role.MEMBER));
@@ -41,30 +43,10 @@ class MemberControllerTest {
         // when & then
         RestAssured.given().log().all()
                 .port(port)
-                .header(new Header("Cookie", accessTokenCookie))
+                .header(new Header("Cookie", adminTokenCookieDto.accessTokenCookie()))
                 .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.members.size()", is(5));
-    }
-
-
-    // TEST
-    private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
-        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
-
-        Map<String, String> loginParams = Map.of(
-                "email", email,
-                "password", password
-        );
-
-        String accessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .body(loginParams)
-                .when().post("/login")
-                .then().log().all().extract().cookie("accessToken");
-
-        return "accessToken=" + accessToken;
     }
 }
