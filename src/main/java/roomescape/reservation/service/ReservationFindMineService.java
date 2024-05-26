@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
@@ -23,6 +24,7 @@ public class ReservationFindMineService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> execute(Long memberId) {
         List<MyReservationResponse> reservations = findReservations(memberId);
         List<MyReservationResponse> waitings = findWaitings(memberId);
@@ -30,14 +32,14 @@ public class ReservationFindMineService {
         return makeMyReservations(reservations, waitings);
     }
 
-    public List<MyReservationResponse> findReservations(Long memberId) {
+    private List<MyReservationResponse> findReservations(Long memberId) {
         return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
     }
 
-    public List<MyReservationResponse> findWaitings(Long memberId) {
+    private List<MyReservationResponse> findWaitings(Long memberId) {
         return waitingRepository.findByMemberId(memberId)
                 .stream()
                 .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))

@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -32,12 +33,14 @@ public class ReservationCreateService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest request) {
         Reservation reservation = makeReservation(
                 request.memberId(), request.date(), request.timeId(), request.themeId());
         return saveReservation(reservation);
     }
 
+    @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest request, Long memberId) {
         Reservation reservation = makeReservation(
                 memberId, request.date(), request.timeId(), request.themeId());

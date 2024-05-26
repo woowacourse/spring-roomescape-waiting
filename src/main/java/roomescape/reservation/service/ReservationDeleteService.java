@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadArgumentRequestException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
@@ -20,6 +21,7 @@ public class ReservationDeleteService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public void execute(Long reservationId) {
         Reservation reservation = findReservation(reservationId);
         validateIsAfterFromNow(reservation);

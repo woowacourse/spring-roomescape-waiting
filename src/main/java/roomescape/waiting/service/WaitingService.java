@@ -3,6 +3,7 @@ package roomescape.waiting.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -39,6 +40,7 @@ public class WaitingService {
                 .orElseThrow(() -> new BadArgumentRequestException("해당 예약 대기가 존재하지 않습니다."));
     }
 
+    @Transactional
     public WaitingResponse createWaiting(WaitingRequest request, Long requestMemberId) {
         Reservation reservation = findReservation(request);
         Member member = findMember(requestMemberId);
@@ -78,6 +80,7 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
+    @Transactional
     public void deleteWaiting(Long waitingId, Long requestMemberId) {
         Waiting waiting = findWaiting(waitingId);
 
