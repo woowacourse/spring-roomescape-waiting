@@ -32,7 +32,7 @@ public class ReservationController {
         this.memberService = memberService;
     }
 
-    @RoleAllowed(value = MemberRole.ADMIN)
+    @RoleAllowed(MemberRole.ADMIN)
     @GetMapping("/reservations")
     public ResponseEntity<ReservationListResponse> findAllReservation(
             @RequestParam(required = false) Long memberId,
@@ -58,7 +58,7 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + response.getId())).body(response);
     }
 
-    @RoleAllowed(value = MemberRole.ADMIN)
+    @RoleAllowed(MemberRole.ADMIN)
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> saveAdminReservation(@RequestBody AdminReservationRequest request) {
         ReservationRequest input = new ReservationRequest(request);
@@ -67,7 +67,7 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + response.getId())).body(response);
     }
 
-    @RoleAllowed(value = MemberRole.ADMIN)
+    @RoleAllowed(MemberRole.ADMIN)
     @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId,
                                                   @RequestParam Long memberId) {

@@ -25,7 +25,7 @@ public class ReservationWaitingController {
         this.reservationWaitingService = reservationWaitingService;
     }
 
-    @RoleAllowed(value = MemberRole.ADMIN) // TODO: value 명시 안하는 쪽으로 통일하기
+    @RoleAllowed(MemberRole.ADMIN)
     @GetMapping("/reservations/waitings")
     public ResponseEntity<ReservationWaitingListResponse> findAllReservationWaiting() {
         ReservationWaitingListResponse response = reservationWaitingService.findAllReservationWaiting();
