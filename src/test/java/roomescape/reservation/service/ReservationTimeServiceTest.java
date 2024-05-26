@@ -12,14 +12,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.reservation.controller.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationTimeDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
-@SpringBootTest
-@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeServiceTest {
 
     @Autowired

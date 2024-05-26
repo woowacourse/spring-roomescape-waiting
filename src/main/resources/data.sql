@@ -6,8 +6,11 @@
         ('제로', '심약자는 도전하지 마시오', '제로 썸네일');
     insert into member(member_name, email, password, member_role) values
         ('anna', 'anna@gmail.com', 'password', 'ADMIN'),
-        ('bibob', 'bibob@gmail.com', 'password', 'MEMBER');
+        ('bibob', 'bibob@gmail.com', 'password', 'MEMBER'),
+        ('brown', 'brown@gmail.com', 'password', 'MEMBER');
     insert into reservation(date, time_id, theme_id, member_id, status) values
-        ('2024-12-12', 1, 1, 1, 'RESERVATION'),
-        ('2024-12-23', 2, 3, 1, 'RESERVATION'),
-        ('2024-12-25', 3, 2, 2, 'RESERVATION');
+        ('2024-12-12', 1, 1, 1, 'RESERVED'),
+        ('2024-12-23', 2, 3, 1, 'RESERVED'),
+        ('2024-12-25', 3, 2, 2, 'RESERVED'),
+        ('2024-12-23', 2 ,3, 2, 'PENDING'),
+        ('2024-12-23', 2, 3, 3, 'PENDING');

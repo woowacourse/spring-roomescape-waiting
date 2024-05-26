@@ -19,8 +19,10 @@ public record ReservationSaveRequest(
         long timeId
 ) {
 
-    public Reservation toEntity(final Member member, final ReservationTime reservationTime, final Theme theme,
-                                final Status status) {
+    public Reservation toEntity(
+            final Member member, final ReservationTime reservationTime,
+            final Theme theme, final Status status
+    ) {
         return Reservation.of(member, date, reservationTime, theme, status);
     }
 }

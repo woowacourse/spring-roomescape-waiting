@@ -72,6 +72,13 @@ public class Reservation {
         return new Reservation(null, member, date, time, theme, status);
     }
 
+    public void throwAlreadyEnrolled() {
+        if (status == Status.RESERVED) {
+            throw new IllegalArgumentException("[ERROR] 이미 예약 완료한 예약 대기 요청입니다.");
+        }
+        throw new IllegalArgumentException("[ERROR] 이미 예약 대기를 등록하였습니다.");
+    }
+
     public Long getId() {
         return id;
     }
@@ -98,6 +105,10 @@ public class Reservation {
 
     public Status getStatus() {
         return status;
+    }
+
+    public void setStatus(final Status status) {
+        this.status = status;
     }
 
     @Override

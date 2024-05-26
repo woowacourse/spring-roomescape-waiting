@@ -2,16 +2,21 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationWaitingResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 
 @Service
+@Transactional
 public class AdminReservationService {
 
     private final ReservationService reservationService;
@@ -27,7 +32,7 @@ public class AdminReservationService {
 
     public ReservationResponse save(final AdminReservationSaveRequest adminReservationSaveRequest) {
         Member member = findMemberById(adminReservationSaveRequest.memberId());
-        return reservationService.save(adminReservationSaveRequest.toReservationSaveRequest(), member);
+        return reservationService.reserve(adminReservationSaveRequest.toReservationSaveRequest(), member);
     }
 
     private Member findMemberById(final long memberId) {
@@ -77,9 +82,9 @@ public class AdminReservationService {
     ) {
         return reservations.stream()
                 .filter(reservation ->
-                        (memberId == null || reservation.getMember().getId().equals(memberId))
+                        (memberId == null || reservation.getMember().getId() == memberId)
                 ).filter(reservation ->
-                        (themeId == null || reservation.getTheme().getId().equals(themeId))
+                        (themeId == null || reservation.getTheme().getId() == themeId)
                 ).filter(reservation ->
                         (dateFrom == null ||
                                 (reservation.getDate().isEqual(dateFrom) || reservation.getDate().isAfter(dateFrom)))
@@ -87,6 +92,14 @@ public class AdminReservationService {
                         (dateTo == null ||
                                 (reservation.getDate().isEqual(dateTo) || reservation.getDate().isBefore(dateTo)))
                 ).distinct()
+                .toList();
+    }
+
+    public List<ReservationWaitingResponse> getAllWaitings() {
+        return reservationRepository.findByStatus(Status.PENDING)
+                .stream()
+                .map(ReservationWaitingResponse::from)
+                .sorted(Comparator.comparingLong(ReservationWaitingResponse::id))
                 .toList();
     }
 }
