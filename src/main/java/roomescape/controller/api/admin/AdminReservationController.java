@@ -39,8 +39,17 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<MultipleResponse<ReservationResponse>> getAllReservations() {
+    public ResponseEntity<MultipleResponse<ReservationResponse>> getAllReservedReservations() {
         List<ReservationResponse> reservations = reservationQueryService.getAllReservedReservations();
+        MultipleResponse<ReservationResponse> response = new MultipleResponse<>(reservations);
+
+        return ResponseEntity.ok()
+                .body(response);
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<MultipleResponse<ReservationResponse>> getAllWaitingReservations() {
+        List<ReservationResponse> reservations = reservationQueryService.getAllWaitingReservations();
         MultipleResponse<ReservationResponse> response = new MultipleResponse<>(reservations);
 
         return ResponseEntity.ok()

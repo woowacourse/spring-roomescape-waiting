@@ -125,7 +125,7 @@ public class PreInsertedData {
 
     public static final Reservation RESERVATION_WAITING_CUSTOMER1_THEME3_240502_1200 = new Reservation(
             7L,
-            CUSTOMER_2,
+            CUSTOMER_1,
             LocalDate.parse("2024-05-02"),
             TIME_12_00,
             THEME_3,

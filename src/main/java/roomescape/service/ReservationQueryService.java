@@ -25,6 +25,14 @@ public class ReservationQueryService {
                 .toList();
     }
 
+    public List<ReservationResponse> getAllWaitingReservations() {
+        return reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> reservation.getReservationStatus().isWaiting())
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     public List<MyReservationResponse> getMyReservations(Member member) {
         return reservationRepository.findByMemberId(member.getId()).stream()
                 .map(this::getMyReservationsWithWaitRank)
