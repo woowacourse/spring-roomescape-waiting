@@ -96,4 +96,14 @@ public class WaitingService {
                 })
                 .toList();
     }
+
+    public void convertWaitingToReservation(final Reservation reservation) {
+        if (waitingRepository.existsByReservation(reservation)) {
+            Waiting waiting = waitingRepository.findFirstByReservation(reservation)
+                    .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_WAITING));
+
+            reservation.setMember(waiting.getMember());
+            waitingRepository.delete(waiting);
+        }
+    }
 }

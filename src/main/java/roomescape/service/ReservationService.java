@@ -10,7 +10,6 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
-import roomescape.entity.Waiting;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
@@ -107,12 +106,7 @@ public class ReservationService {
         if (!waitingRepository.existsByReservation(reservation)) {
             reservationRepository.deleteById(id);
         }
-        if (waitingRepository.existsByReservation(reservation)) {
-            Waiting waiting = waitingRepository.findFirstByReservation(reservation)
-                    .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_WAITING));
-            reservation.setMember(waiting.getMember());
-            waitingRepository.delete(waiting);
-        }
+        waitingService.convertWaitingToReservation(reservation);
     }
 
     private Theme getTheme(Long id) {
