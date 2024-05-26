@@ -27,7 +27,7 @@ class WaitingReservationServiceTest extends ServiceTest {
     @Test
     void waitingReservationConfirm() {
         Reservation bookedMemberReservation = ReservationFixture.getBookedReservation();
-        waitingReservationService.deleteMemberReservation(AuthInfo.of(bookedMemberReservation.getMember()), bookedMemberReservation.getId());
+        waitingReservationService.deleteReservation(AuthInfo.of(bookedMemberReservation.getMember()), bookedMemberReservation.getId());
         ReservationSlot reservationSlot = bookedMemberReservation.getReservationSlot();
 
         List<ReservationWithStatus> myReservations = reservationService.findReservations(AuthInfo.of(MemberFixture.getMemberAdmin()));

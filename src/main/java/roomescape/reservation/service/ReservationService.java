@@ -7,10 +7,16 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.custom.BadRequestException;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
-import roomescape.reservation.controller.dto.*;
+import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.controller.dto.ReservationQueryRequest;
+import roomescape.reservation.controller.dto.ReservationRequest;
+import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.ReservationWithStatus;
 import roomescape.reservation.domain.*;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSlotRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.domain.specification.MemberReservationSpecification;
 
 import java.time.LocalDate;
@@ -20,14 +26,20 @@ import java.util.List;
 @Transactional
 public class ReservationService {
 
-    private final CommonFindService commonFindService;
+    private final MemberRepository memberRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationService(CommonFindService commonFindService,
+    public ReservationService(MemberRepository memberRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository,
                               ReservationSlotRepository reservationSlotRepository,
                               ReservationRepository reservationRepository) {
-        this.commonFindService = commonFindService;
+        this.memberRepository = memberRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
         this.reservationSlotRepository = reservationSlotRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -47,7 +59,8 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationWithStatus> findReservations(AuthInfo authInfo) {
-        Member member = commonFindService.getMember(authInfo.getId());
+        Member member = memberRepository.findById(authInfo.getId())
+                .orElseThrow(() -> new BadRequestException("해당 유저를 찾을 수 없습니다."));
         return reservationRepository.findAllByMember(member)
                 .stream()
                 .map(ReservationWithStatus::from)
@@ -56,10 +69,14 @@ public class ReservationService {
 
     public ReservationResponse createReservation(ReservationRequest reservationRequest, Long memberId) {
         LocalDate date = LocalDate.parse(reservationRequest.date());
-        ReservationTime reservationTime = commonFindService.getReservationSlotTime(reservationRequest.timeId());
-        Theme theme = commonFindService.getTheme(reservationRequest.themeId());
-        Member member = commonFindService.getMember(memberId);
-        ReservationSlot reservationSlot = commonFindService.getReservationSlot(date, reservationTime, theme);
+        ReservationTime reservationTime = reservationTimeRepository.findById(reservationRequest.timeId())
+                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 예약 시간이 없습니다."));
+        Theme theme = themeRepository.findById(reservationRequest.themeId())
+                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 테마가 없습니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BadRequestException("해당 유저를 찾을 수 없습니다."));
+        ReservationSlot reservationSlot = reservationSlotRepository.findByDateAndTimeAndTheme(date, reservationTime, theme)
+                .orElseGet(() -> reservationSlotRepository.save(new ReservationSlot(date, reservationTime, theme)));
         ReservationStatus reservationStatus = ReservationStatus.BOOKED;
 
         validateMemberReservation(reservationSlot, member);
@@ -82,13 +99,15 @@ public class ReservationService {
         }
     }
 
-    public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
-        Reservation reservation = commonFindService.getMemberReservation(memberReservationId);
-        Member member = commonFindService.getMember(authInfo.getId());
+    public void deleteMemberReservation(AuthInfo authInfo, long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 사용자 예약이 없습니다."));
+        Member member = memberRepository.findById(authInfo.getId())
+                .orElseThrow(() -> new BadRequestException("해당 유저를 찾을 수 없습니다."));
         if (!member.isAdmin() && !reservation.isBookedBy(member)) {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
-        reservationRepository.deleteById(memberReservationId);
+        reservationRepository.deleteById(reservationId);
     }
 
     public void delete(long reservationId) {

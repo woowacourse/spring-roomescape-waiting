@@ -4,11 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.exception.custom.BadRequestException;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationViewResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatus;
-import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -18,14 +20,13 @@ import java.util.List;
 @Service
 public class WaitingReservationService {
 
-    @Autowired
-    private final CommonFindService commonFindService;
+    private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
 
-    public WaitingReservationService(CommonFindService commonFindService,
-                                     ReservationRepository reservationRepository) {
-        this.commonFindService = commonFindService;
+    public WaitingReservationService(ReservationRepository reservationRepository,
+                                     MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository;
     }
 
     public List<ReservationViewResponse> handleWaitingOrder(List<ReservationWithStatus> reservationWithStatuses) {
@@ -54,14 +55,16 @@ public class WaitingReservationService {
     }
 
     @Transactional
-    public void deleteMemberReservation(AuthInfo authInfo, Long memberReservationId) {
-        Reservation memberReservation = commonFindService.getMemberReservation(memberReservationId);
-        Member member = commonFindService.getMember(authInfo.getId());
-        if (!member.isAdmin() && !memberReservation.isBookedBy(member)) {
+    public void deleteReservation(AuthInfo authInfo, Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 사용자 예약이 없습니다."));
+        Member member = memberRepository.findById(authInfo.getId())
+                .orElseThrow(() -> new BadRequestException("해당 유저를 찾을 수 없습니다."));
+        if (!member.isAdmin() && !reservation.isBookedBy(member)) {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
-        reservationRepository.deleteById(memberReservationId);
-        reservationRepository.findFirstByReservationSlotOrderByCreatedAt(memberReservation.getReservationSlot())
+        reservationRepository.deleteById(reservationId);
+        reservationRepository.findFirstByReservationSlotOrderByCreatedAt(reservation.getReservationSlot())
                         .ifPresent(Reservation::bookReservation);
     }
 }

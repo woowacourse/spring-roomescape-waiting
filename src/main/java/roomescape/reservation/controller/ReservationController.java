@@ -48,8 +48,8 @@ public class ReservationController {
     @DeleteMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@LoginUser AuthInfo authInfo,
-                                       @PathVariable("id") @Min(1) long reservationMemberId) {
-        waitingReservationService.deleteMemberReservation(authInfo, reservationMemberId);
+                                       @PathVariable("id") @Min(1) long reservationId) {
+        waitingReservationService.deleteReservation(authInfo, reservationId);
     }
 
     @GetMapping("/reservations/mine")
