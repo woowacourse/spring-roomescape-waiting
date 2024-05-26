@@ -55,10 +55,6 @@ public class Member {
         this(null, new PlayerName(name), new Email(email), new Password(password), role);
     }
 
-    public boolean hasId(long memberId) {
-        return id.equals(memberId);
-    }
-
     public boolean matchPassword(Password otherPassword) {
         return password.equals(otherPassword);
     }
