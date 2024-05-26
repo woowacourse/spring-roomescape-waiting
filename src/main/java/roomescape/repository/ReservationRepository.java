@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.dto.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.dto.ReservationRank;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 

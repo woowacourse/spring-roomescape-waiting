@@ -38,8 +38,6 @@ class MemberServiceTest {
 
     @Autowired
     private MemberService memberService;
-    @Autowired
-    private ReservationService reservationService;
 
     @DisplayName("토큰 요청정보로 토큰을 발급한다.")
     @Test

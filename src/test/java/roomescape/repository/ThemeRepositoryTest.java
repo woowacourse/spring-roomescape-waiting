@@ -63,7 +63,8 @@ class ThemeRepositoryTest {
         Theme savedTheme = themeRepository.save(defaultTheme);
 
         Theme theme = themeRepository.getThemeById(savedTheme.getId());
-        assertThat(theme.getThumbnail()).isEqualTo("https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        assertThat(theme.getThumbnail()).isEqualTo(
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
     }
 
     @DisplayName("id가 존재하지 않는다면 예외가 발생한다.")

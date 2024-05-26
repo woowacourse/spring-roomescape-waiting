@@ -16,10 +16,10 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.dto.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.dto.ReservationRank;
 import roomescape.fixture.MemberFixtures;
 import roomescape.fixture.ReservationFixtures;
 import roomescape.fixture.ThemeFixtures;
@@ -186,7 +186,8 @@ class ReservationRepositoryTest {
         Theme savedTheme = themeRepository.save(theme);
         reservationRepository.save(bookingReservation);
 
-        boolean result = reservationRepository.existsByMemberAndDateAndTimeAndTheme(savedMember, now, savedTime, savedTheme);
+        boolean result = reservationRepository.existsByMemberAndDateAndTimeAndTheme(savedMember, now, savedTime,
+                savedTheme);
 
         assertThat(result).isTrue();
     }
@@ -202,7 +203,8 @@ class ReservationRepositoryTest {
         TimeSlot savedTime = timeSlotRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
 
-        boolean result = reservationRepository.existsByMemberAndDateAndTimeAndTheme(savedMember, now, savedTime, savedTheme);
+        boolean result = reservationRepository.existsByMemberAndDateAndTimeAndTheme(savedMember, now, savedTime,
+                savedTheme);
 
         assertThat(result).isFalse();
     }
