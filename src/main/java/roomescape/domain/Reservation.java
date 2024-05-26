@@ -34,7 +34,6 @@ public class Reservation implements Comparable<Reservation> {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    // TODO: 생성자 오바
     protected Reservation() {
     }
 
