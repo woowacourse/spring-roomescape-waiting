@@ -29,6 +29,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.dto.ReservationCreateRequest;
+import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.reservation.repository.ReservationDetailRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationWaitingRepository;
@@ -132,19 +133,21 @@ class ReservationControllerTest {
         reservation = reservationRepository.save(reservation);
 
         Time otherTime = new Time(LocalTime.of(20, 0));
-        timeRepository.save(otherTime); // 예약되지 않은 시간으로 1개 조회
-        reservationRepository.save(reservation); // 예약된 시간 1개는 조회되지 않음
+        timeRepository.save(otherTime); // 예약되지 않은 시간으로 1개는 booked가 false
+        reservationRepository.save(reservation); // 예약된 시간 1개는 booked가 true
 
-        int actualSize = RestAssured.given()
+        List<ReservationTimeAvailabilityResponse> actual = RestAssured.given()
                 .cookie("token", cookie)
                 .when()
-                .get("/reservations/times/"+theme.getId()+"?date="+reservationDetail.getDate())
+                .get("/reservations/times/"+reservation.getTimeId()+"?date="+reservation.getDate())
                 .then()
                 .statusCode(200)
                 .extract()
-                .jsonPath().getInt("size()");
+                .jsonPath().getList(".", ReservationTimeAvailabilityResponse.class);
 
-        assertThat(actualSize).isEqualTo(1);
+        assertThat(actual).containsExactly(
+                ReservationTimeAvailabilityResponse.from(time, true),
+                ReservationTimeAvailabilityResponse.from(otherTime, false));
     }
 
     @Test
