@@ -46,13 +46,8 @@ public class AdminReservationController {
         ReservationConditionSearchRequest request
                 = new ReservationConditionSearchRequest(memberId, themeId, dateFrom, dateTo);
         List<ReservationResponse> reservationResponse = reservationService.findReservationsByConditions(request);
-        List<ReservationResponse> waitingResponse = waitingService.findReservationWaitingByConditions(request);
 
-        List<ReservationResponse> response = new ArrayList<>();
-        response.addAll(reservationResponse);
-        response.addAll(waitingResponse);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(reservationResponse);
     }
 
     @PostMapping

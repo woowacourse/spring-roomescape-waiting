@@ -87,7 +87,7 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("성공 : 예약 및 예약 대기 정보를 얻을 수 있다.")
+    @DisplayName("성공 : 예약 정보를 얻을 수 있다.")
     void findReservations() {
         reservation = reservationRepository.save(reservation);
         waiting = waitingRepository.save(waiting);
@@ -101,7 +101,7 @@ class ReservationControllerTest {
                 .extract()
                 .jsonPath().getInt("size()");
 
-        assertThat(actualSize).isEqualTo(2);
+        assertThat(actualSize).isEqualTo(1);
     }
 
     @Test
