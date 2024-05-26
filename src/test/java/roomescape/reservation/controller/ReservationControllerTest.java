@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
@@ -149,11 +150,10 @@ class ReservationControllerTest {
     @Test
     @DisplayName("성공 : 예약을 만들 수 있다.")
     void createReservation() {
-        ReservationCreateRequest params = new ReservationCreateRequest(
-                reservation.getMemberId(),
-                reservation.getThemeId(),
-                reservation.getTimeId(),
-                reservation.getDate()
+        Map<String, String> params = Map.of(
+                "themeId", reservation.getThemeId().toString(),
+                "timeId", reservation.getTimeId().toString(),
+                "date", reservation.getDate().toString()
         );
 
         RestAssured.given()
