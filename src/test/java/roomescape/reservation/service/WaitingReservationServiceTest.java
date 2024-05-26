@@ -26,9 +26,9 @@ class WaitingReservationServiceTest extends ServiceTest {
     @DisplayName("예약 대기 변경 성공 : 예약 삭제 시 대기 번호가 빠른 예약이 BOOKED 처리된다.")
     @Test
     void waitingReservationConfirm() {
-        Reservation bookedMemberReservation = ReservationFixture.getBookedReservation();
-        waitingReservationService.deleteReservation(AuthInfo.of(bookedMemberReservation.getMember()), bookedMemberReservation.getId());
-        ReservationSlot reservationSlot = bookedMemberReservation.getReservationSlot();
+        Reservation bookedReservation = ReservationFixture.getBookedReservation();
+        waitingReservationService.deleteReservation(AuthInfo.of(bookedReservation.getMember()), bookedReservation.getId());
+        ReservationSlot reservationSlot = bookedReservation.getReservationSlot();
 
         List<ReservationWithStatus> myReservations = reservationService.findReservations(AuthInfo.of(MemberFixture.getMemberAdmin()));
         ReservationWithStatus nextReservationWithStatus = myReservations.stream()

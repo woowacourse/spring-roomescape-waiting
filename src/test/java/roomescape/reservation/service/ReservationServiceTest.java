@@ -29,7 +29,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
-import roomescape.reservation.domain.specification.MemberReservationSpecification;
+import roomescape.reservation.domain.specification.ReservationSpecification;
 import roomescape.util.ServiceTest;
 
 @DisplayName("예약 로직 테스트")
@@ -179,13 +179,13 @@ class ReservationServiceTest extends ServiceTest {
         ReservationSlot reservationSlot = getNextDayReservationSlot(time, theme);
         reservationSlotRepository.save(reservationSlot);
         Member member = memberRepository.save(getMemberChoco());
-        Reservation memberReservation = reservationRepository.save(
+        Reservation reservation = reservationRepository.save(
                 new Reservation(member, reservationSlot));
 
         //when
-        reservationService.deleteMemberReservation(AuthInfo.of(member), memberReservation.getId());
-        Specification<Reservation> spec = Specification.where(MemberReservationSpecification.greaterThanOrEqualToStartDate(LocalDate.now()))
-                .and(MemberReservationSpecification.lessThanOrEqualToEndDate(LocalDate.now().plusDays(1)));
+        reservationService.deleteReservation(AuthInfo.of(member), reservation.getId());
+        Specification<Reservation> spec = Specification.where(ReservationSpecification.greaterThanOrEqualToStartDate(LocalDate.now()))
+                .and(ReservationSpecification.lessThanOrEqualToEndDate(LocalDate.now().plusDays(1)));
 
         //then
         assertThat(reservationRepository.findAll(spec)).hasSize(0);
@@ -211,7 +211,7 @@ class ReservationServiceTest extends ServiceTest {
 
     @DisplayName("예약 삭제 시, 사용자 예약도 함께 삭제된다.")
     @Test
-    void deleteMemberReservation() {
+    void deleteReservation() {
         //given
         Member member = memberRepository.save(getMemberChoco());
         ReservationTime time = reservationTimeRepository.save(getNoon());
@@ -260,24 +260,24 @@ class ReservationServiceTest extends ServiceTest {
         Member choco = getMemberChoco();
         Member tacan = getMemberTacan();
 
-        ReservationSlot reservationSlot1 = reservationSlotRepository.save(reservationSlot);
-        Reservation save = reservationRepository.save(new Reservation(choco, reservationSlot));
+        reservationSlotRepository.save(reservationSlot);
+        reservationRepository.save(new Reservation(choco, reservationSlot));
 
         //when
-        ReservationResponse memberReservation1 = reservationService.createReservation(new ReservationRequest(
+        reservationService.createReservation(new ReservationRequest(
                 reservationSlot.getDate().format(DateTimeFormatter.ISO_DATE),
                 reservationSlot.getTime().getId(),
                 reservationSlot.getTheme().getId(
                 )), tacan.getId());
         List<Reservation> allByMember = reservationRepository.findAllByMember(tacan);
-        Reservation addedMemberReservation = allByMember
+        Reservation addedReservation = allByMember
                 .stream()
-                .filter(memberReservation -> Objects.equals(memberReservation.getReservationSlot().getId(), reservationSlot.getId()))
+                .filter(reservation -> Objects.equals(reservation.getReservationSlot().getId(), reservationSlot.getId()))
                 .findAny()
                 .get();
 
         //then
-        assertThat(addedMemberReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(addedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
 }

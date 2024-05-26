@@ -26,10 +26,10 @@ class ReservationTest {
         ReservationSlot nextMonthReservationSlot = getNextMonthReservationSlot(noon, theme);
 
         //when
-        Reservation memberReservation1 = new Reservation(id, member, nextDayReservationSlot);
-        Reservation memberReservation2 = new Reservation(id, member, nextMonthReservationSlot);
+        Reservation reservation1 = new Reservation(id, member, nextDayReservationSlot);
+        Reservation reservation2 = new Reservation(id, member, nextMonthReservationSlot);
 
         //then
-        assertThat(memberReservation1).isEqualTo(memberReservation2);
+        assertThat(reservation1).isEqualTo(reservation2);
     }
 }

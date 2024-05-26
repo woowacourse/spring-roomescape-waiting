@@ -5,7 +5,7 @@ import roomescape.reservation.domain.Reservation;
 
 import java.time.LocalDate;
 
-public class MemberReservationSpecification {
+public class ReservationSpecification {
 
     public static Specification<Reservation> greaterThanOrEqualToStartDate(LocalDate startDate) {
         return (root, query, criteriaBuilder) ->

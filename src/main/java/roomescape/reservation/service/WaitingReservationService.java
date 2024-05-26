@@ -46,9 +46,9 @@ public class WaitingReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByWaitingReservation() {
-        List<Reservation> memberReservations = reservationRepository
+        List<Reservation> reservations = reservationRepository
                 .findAllByStatus(ReservationStatus.WAITING);
-        return memberReservations.stream()
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
