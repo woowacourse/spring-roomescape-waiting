@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalTime;
 import roomescape.domain.reservationdetail.ReservationTime;
 
-public record ReservationTimeResponse(Long id, LocalTime startAt) {
+public record ReservationTimeResponse(
+        Long id,
+        LocalTime startAt
+) {
 
     public static ReservationTimeResponse from(ReservationTime time) {
         return new ReservationTimeResponse(

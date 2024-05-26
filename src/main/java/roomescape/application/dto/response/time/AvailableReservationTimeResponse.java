@@ -11,6 +11,7 @@ public record AvailableReservationTimeResponse(
         LocalTime startAt,
         boolean alreadyBooked
 ) {
+
     public static AvailableReservationTimeResponse of(ReservationTime time, List<ReservationTime> reservedTimes) {
         return new AvailableReservationTimeResponse(
                 time.getId(),

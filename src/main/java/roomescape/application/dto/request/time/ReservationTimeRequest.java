@@ -7,7 +7,8 @@ import java.time.LocalTime;
 import roomescape.domain.reservationdetail.ReservationTime;
 
 public record ReservationTimeRequest(
-        @NotNull(message = "시간은 빈값을 허용하지 않습니다.") LocalTime startAt) {
+        @NotNull(message = "시간은 빈값을 허용하지 않습니다.") LocalTime startAt
+) {
 
     public ReservationTime toReservationTime() {
         return new ReservationTime(startAt);
