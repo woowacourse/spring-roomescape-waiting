@@ -14,20 +14,18 @@ public record UserReservationResponse(
         @NotBlank(message = "예약 상태는 빈값이 올 수 없습니다.") String status
 ) {
     public static UserReservationResponse of(Reservation reservation, Long rank) {
-        if (!reservation.isReserved()) {
-            rank++;
-        }
-        if (rank == 0) {
-            return new UserReservationResponse(
-                    reservation.getId(),
-                    reservation.getDetail().getTheme().getName(),
-                    reservation.getDetail().getDate(),
-                    reservation.getDetail().getTime().getStartAt(), "예약");
-        }
         return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getDetail().getTheme().getName(),
                 reservation.getDetail().getDate(),
-                reservation.getDetail().getTime().getStartAt(), rank + "번째 예약");
+                reservation.getDetail().getTime().getStartAt(),
+                getStatus(reservation, rank));
+    }
+
+    private static String getStatus(Reservation reservation, Long rank) {
+        if (reservation.isReserved()) {
+            return "예약";
+        }
+        return rank + "번째 예약";
     }
 }
