@@ -6,8 +6,8 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWithRank;
 import roomescape.domain.Theme;
+import roomescape.dto.service.ReservationWithRank;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,7 +49,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByMemberId(long memberId);
 
     @Query("""
-            SELECT new roomescape.domain.ReservationWithRank(
+            SELECT new roomescape.dto.service.ReservationWithRank(
                 r, 
                 (
                     SELECT COUNT(r2)

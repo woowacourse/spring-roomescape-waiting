@@ -1,7 +1,7 @@
 package roomescape.dto;
 
 import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationWithRank;
+import roomescape.dto.service.ReservationWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
