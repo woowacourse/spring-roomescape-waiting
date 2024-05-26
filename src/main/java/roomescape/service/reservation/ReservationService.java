@@ -81,7 +81,7 @@ public class ReservationService {
                         reservations.stream().map(ReservationMineResponse::new),
                         reservationWaitingWithRanks.stream().map(ReservationMineResponse::new)
                 )
-                .sorted(Comparator.comparing(ReservationMineResponse::getDateTime))
+                .sorted(Comparator.comparing(ReservationMineResponse::retrieveDateTime))
                 .toList();
         return new ReservationMineListResponse(myReservations);
     }

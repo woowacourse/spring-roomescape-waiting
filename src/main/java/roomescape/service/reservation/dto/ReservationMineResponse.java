@@ -42,9 +42,9 @@ public class ReservationMineResponse {
         );
     }
 
-    public LocalDateTime getDateTime() {
+    public LocalDateTime retrieveDateTime() {
         return LocalDateTime.of(date, time);
-    } // TODO: 이름 변경해서 response에 안나오게 하기
+    }
 
     public Long getReservationId() {
         return reservationId;
