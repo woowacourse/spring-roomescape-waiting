@@ -274,4 +274,33 @@ class ReservationControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$[0].time").value(MIA_RESERVATION_TIME.toString()))
                 .andExpect(jsonPath("$[0].status").value(ReservationStatus.BOOKING.getStatus()));
     }
+
+    @Test
+    @DisplayName("예약 대기 POST 요청 시 상태코드 201을 반환한다.")
+    void createWaitingReservation() throws Exception {
+        // given
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, 1L);
+        ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
+        Theme expectedTheme = WOOTECO_THEME(1L);
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), ReservationStatus.WAITING);
+
+        BDDMockito.given(reservationService.createWaitingReservation(any()))
+                .willReturn(expectedReservation);
+        BDDMockito.given(reservationTimeService.findById(anyLong()))
+                .willReturn(expectedTime);
+        BDDMockito.given(themeService.findById(anyLong()))
+                .willReturn(expectedTheme);
+
+        // when & then
+        mockMvc.perform(post("/reservations/waiting")
+                        .cookie(COOKIE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.memberName").value(MIA_NAME))
+                .andExpect(jsonPath("$.time.id").value(1L))
+                .andExpect(jsonPath("$.time.startAt").value(MIA_RESERVATION_TIME.toString()))
+                .andExpect(jsonPath("$.date").value(MIA_RESERVATION_DATE.toString()));
+    }
 }

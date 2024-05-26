@@ -2,6 +2,7 @@ package roomescape;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
@@ -56,6 +57,10 @@ public class TestFixture {
 
     public static Reservation MIA_RESERVATION(ReservationTime time, Theme theme, Member member) {
         return new Reservation(member, MIA_RESERVATION_DATE, time, theme);
+    }
+
+    public static Reservation MIA_RESERVATION(ReservationTime time, Theme theme, Member member, ReservationStatus status) {
+        return new Reservation(member, MIA_RESERVATION_DATE, time, theme, status);
     }
 
     public static Reservation TOMMY_RESERVATION() {
