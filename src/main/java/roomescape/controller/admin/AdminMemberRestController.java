@@ -1,4 +1,4 @@
-package roomescape.controller.member;
+package roomescape.controller.admin;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
