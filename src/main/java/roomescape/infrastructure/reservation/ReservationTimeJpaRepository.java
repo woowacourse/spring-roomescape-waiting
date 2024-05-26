@@ -22,7 +22,9 @@ public interface ReservationTimeJpaRepository extends
             select new roomescape.domain.reservation.TimeSlot(rt, (count(r.id) > 0))
             from ReservationTime as rt left join Reservation as r
             on rt = r.time and r.date = :date and r.theme.id = :themeId
+            and r.status = roomescape.domain.reservation.BookStatus.BOOKED
             group by rt.id, rt.startAt
+            order by rt.startAt asc
             """)
     List<TimeSlot> getReservationTimeAvailabilities(LocalDate date, long themeId);
 
