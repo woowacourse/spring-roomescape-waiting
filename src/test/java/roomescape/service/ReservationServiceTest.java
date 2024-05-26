@@ -93,9 +93,7 @@ class ReservationServiceTest {
     @Test
     void should_add_reservation_times_when_give_member_request() {
         themeRepository.save(createTheme(1L));
-        themeRepository.save(createTheme(2L));
         reservationTimeRepository.save(createReservationTime(1L, "10:00"));
-        reservationTimeRepository.save(createReservationTime(2L, "11:00"));
         Member member = memberRepository.save(createMember(1L));
 
         ReservationRequest request = new ReservationRequest(now().plusDays(2), 1L, 1L);
@@ -112,9 +110,7 @@ class ReservationServiceTest {
     @Test
     void should_add_waiting_reservation_times_when_give_member_request() {
         themeRepository.save(createTheme(1L));
-        themeRepository.save(createTheme(2L));
         reservationTimeRepository.save(createReservationTime(1L, "10:00"));
-        reservationTimeRepository.save(createReservationTime(2L, "11:00"));
         Member member = memberRepository.save(createMember(1L));
         ReservationRequest request = new ReservationRequest(now().plusDays(2), 1L, 1L);
 
@@ -164,9 +160,7 @@ class ReservationServiceTest {
     @Test
     void should_add_reservation_times_when_give_admin_request() {
         themeRepository.save(createTheme(1L));
-        themeRepository.save(createTheme(2L));
         reservationTimeRepository.save(createReservationTime(1L, "10:00"));
-        reservationTimeRepository.save(createReservationTime(2L, "11:00"));
         memberRepository.save(createAdmin(1L));
         AdminReservationRequest request =
                 new AdminReservationRequest(now().plusDays(2), 1L, 1L, 1L);
@@ -181,9 +175,7 @@ class ReservationServiceTest {
     @Test
     void should_throw_exception_when_not_exist_member() {
         themeRepository.save(createTheme(1L));
-        themeRepository.save(createTheme(2L));
         reservationTimeRepository.save(createReservationTime(1L, "10:00"));
-        reservationTimeRepository.save(createReservationTime(2L, "11:00"));
         AdminReservationRequest request =
                 new AdminReservationRequest(now().plusDays(2), 1L, 1L, 1L);
 
@@ -298,9 +290,7 @@ class ReservationServiceTest {
     @Test
     void should_throw_exception_when_previous_date() {
         themeRepository.save(createTheme(1L));
-        themeRepository.save(createTheme(2L));
         reservationTimeRepository.save(createReservationTime(1L, "10:00"));
-        reservationTimeRepository.save(createReservationTime(2L, "11:00"));
         ReservationRequest request = new ReservationRequest(now().minusDays(1), 1L, 1L);
         Member member = memberRepository.save(createMember(1L));
 
