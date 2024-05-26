@@ -2,6 +2,7 @@ package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
@@ -41,12 +42,10 @@ public class WaitingService {
     }
 
     private void validateAuthority(Reservation reservation, long memberId) {
-        memberRepository.findById(memberId)
-                .ifPresentOrElse(member -> {
-                    if (member.isGuest() && !reservation.isReservationOf(memberId)) {
-                        throw new ForbiddenException("예약 대기를 삭제할 권한이 없습니다.");
-                    }
-                }, ForbiddenException::new);
+        Member member = memberRepository.getById(memberId);
+        if (member.isGuest() && !reservation.isReservationOf(memberId)) {
+            throw new ForbiddenException("예약 대기를 삭제할 권한이 없습니다.");
+        }
     }
 
     private void validateStatus(Reservation reservation) {
