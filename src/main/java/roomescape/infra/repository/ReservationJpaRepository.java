@@ -56,7 +56,7 @@ public interface ReservationJpaRepository extends
 
     @Override
     @Query(""" 
-            select new roomescape.domain.dto.ReservationWithRank(mine,
+            select new roomescape.domain.reservation.ReservationWithRank(mine,
                 (select count(r) + 1 from Reservation r
                 where r.createdAt < mine.createdAt
                 and r.detail = mine.detail
