@@ -115,4 +115,24 @@ class AdminPageControllerTest {
             .then().log().all()
             .statusCode(401);
     }
+
+    @DisplayName("성공: /admin/waiting 페이지 응답 -> 200")
+    @Test
+    void getWaitingPage_Admin_Ok() {
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .when().get("/admin/waiting")
+            .then().log().all()
+            .statusCode(200);
+    }
+
+    @DisplayName("실패: /admin/theme 페이지 응답 -> 401")
+    @Test
+    void getWaitingPage_User_Unauthorized() {
+        RestAssured.given().log().all()
+            .cookie("token", userToken)
+            .when().get("/admin/waiting")
+            .then().log().all()
+            .statusCode(401);
+    }
 }
