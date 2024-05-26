@@ -7,29 +7,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.global.auth.jwt.JwtHandler;
 import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.member.service.MemberService;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DataJpaTest
-@Import({AuthService.class, JwtHandler.class, MemberService.class})
+@Import(AuthService.class)
 class AuthServiceTest {
 
     @Autowired
     private AuthService authService;
     @Autowired
     private MemberRepository memberRepository;
-    @Autowired
-    private MemberService memberService;
-    @Autowired
-    private JwtHandler jwtHandler;
 
     @Test
     @DisplayName("존재하는 회원의 email, password로 로그인하면 memberId, accessToken을 Response 한다.")
