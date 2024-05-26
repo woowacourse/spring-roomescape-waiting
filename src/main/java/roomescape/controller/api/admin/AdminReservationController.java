@@ -5,7 +5,9 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.service.ReservationService;
+import roomescape.service.ReservationCreationService;
+import roomescape.service.ReservationDeletionService;
+import roomescape.service.ReservationQueryService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -15,15 +17,22 @@ import java.util.List;
 @RestController
 public class AdminReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationCreationService reservationCreationService;
+    private final ReservationQueryService reservationQueryService;
+    private final ReservationDeletionService reservationDeletionService;
 
-    public AdminReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(
+            ReservationCreationService reservationCreationService,
+            ReservationQueryService reservationQueryService,
+            ReservationDeletionService reservationDeletionService) {
+        this.reservationCreationService = reservationCreationService;
+        this.reservationQueryService = reservationQueryService;
+        this.reservationDeletionService = reservationDeletionService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addAdminReservation(@RequestBody AdminReservationRequest request) {
-        ReservationResponse reservationResponse = reservationService.addAdminReservation(request);
+        ReservationResponse reservationResponse = reservationCreationService.addReservationByAdmin(request);
 
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
@@ -31,7 +40,7 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<MultipleResponse<ReservationResponse>> getAllReservations() {
-        List<ReservationResponse> reservations = reservationService.getAllReservations();
+        List<ReservationResponse> reservations = reservationQueryService.getAllReservedReservations();
         MultipleResponse<ReservationResponse> response = new MultipleResponse<>(reservations);
 
         return ResponseEntity.ok()
@@ -43,10 +52,9 @@ public class AdminReservationController {
             @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
             @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo
-    ) {
+            @RequestParam(required = false) LocalDate dateTo) {
         List<ReservationResponse> reservations
-                = reservationService.getFilteredReservations(themeId, memberId, dateFrom, dateTo);
+                = reservationQueryService.getFilteredReservations(themeId, memberId, dateFrom, dateTo);
         MultipleResponse<ReservationResponse> response = new MultipleResponse<>(reservations);
 
         return ResponseEntity.ok(response);
@@ -54,10 +62,8 @@ public class AdminReservationController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(
-            @PathVariable Long id
-    ) {
-        reservationService.deleteById(id);
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+        reservationDeletionService.deleteById(id);
 
         return ResponseEntity.noContent()
                 .build();

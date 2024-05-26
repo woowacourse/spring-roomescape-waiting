@@ -43,6 +43,6 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         String subject = jwtProvider.getSubject(token);
         long memberId = Long.parseLong(subject);
 
-        return memberService.findValidatedSiteUserById(memberId);
+        return memberService.findValidatedMemberById(memberId);
     }
 }

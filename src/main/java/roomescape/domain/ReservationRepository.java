@@ -21,6 +21,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
+    boolean existsByMemberIdAndDateAndReservationTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
+
     @Query("""
             SELECT COUNT(r)
             FROM Reservation r

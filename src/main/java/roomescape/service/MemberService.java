@@ -1,9 +1,10 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.MemberRepository;
 import roomescape.dto.response.MemberPreviewResponse;
-import roomescape.dto.response.MyReservationResponse;
+import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.util.List;
 
@@ -11,11 +12,9 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final ReservationRepository reservationRepository;
 
-    public MemberService(MemberRepository memberRepository, ReservationRepository reservationRepository) {
+    public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     public List<MemberPreviewResponse> getAllMemberPreview() {
@@ -24,18 +23,8 @@ public class MemberService {
                 .toList();
     }
 
-    public List<MyReservationResponse> getMyReservations(Member member) {
-        return reservationRepository.findByMemberId(member.getId()).stream()
-                .map(this::getMyReservationsWithWaitRank)
-                .toList();
-    }
-
-    private MyReservationResponse getMyReservationsWithWaitRank(Reservation reservation) {
-        long waitingRank = 0L;
-        if (reservation.getReservationStatus().isWaiting()) {
-            waitingRank = reservationRepository.countPreviousReservationsWithSameDateThemeTimeAndStatus(reservation.getId(), ReservationStatus.WAITING);
-        }
-        
-        return MyReservationResponse.of(reservation, waitingRank);
+    public Member findValidatedMemberById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 사용자가 없습니다."));
     }
 }
