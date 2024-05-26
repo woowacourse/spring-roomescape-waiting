@@ -19,6 +19,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
+import roomescape.global.handler.exception.NotFoundException;
 import roomescape.global.handler.exception.ValidationException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -125,5 +126,10 @@ class WaitingServiceTest {
         assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
     }
 
-
+    @DisplayName("존재 하지 않는 예약대기 삭제 테스트")
+    @Test
+    void deleteNotFoundWaiting() {
+        assertThatThrownBy(() -> waitingService.deleteWaiting(999L))
+                .isInstanceOf(NotFoundException.class);
+    }
 }

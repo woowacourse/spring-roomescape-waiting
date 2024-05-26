@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +17,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Theme;
+import roomescape.global.handler.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -94,4 +96,29 @@ class ReservationTimeServiceTest {
         );
     }
 
+    @DisplayName("존재 하지 않는 예약시간 삭제 테스트")
+    @Test
+    void deleteNotFoundReservationTime() {
+        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(999L))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @DisplayName("이미 예약된 예약시간에 대한 삭제 테스트")
+    @Test
+    void deleteReservationTimeInUsed() {
+        LocalDate date = LocalDate.of(2999, 12, 12);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "happy", "hi", "abcd.html");
+
+        ReservationTime reservedTime = reservationTimeRepository.save(time);
+        Theme savedTheme = themeRepository.save(theme);
+
+        reservationRepository.save(new Reservation(
+                new Member(1L, "asd", "asd@email.com", "password", Role.USER),
+                new Schedule(date, reservedTime, savedTheme)
+        ));
+
+        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(reservedTime.getId()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

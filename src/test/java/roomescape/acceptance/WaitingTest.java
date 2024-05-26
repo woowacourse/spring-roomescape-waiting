@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.service.reservation.dto.request.ReservationRequest;
 import roomescape.service.reservation.dto.request.ReservationTimeRequest;
@@ -170,5 +171,16 @@ class WaitingTest extends AcceptanceTest {
                             .statusCode(400);
                 })
         );
+    }
+
+    @DisplayName("존재하지 않는 예약대기에 대한 삭제")
+    @Test
+    void delete() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", adminToken)
+                .when().delete("waitings/999")
+                .then().log().all()
+                .statusCode(404);
     }
 }

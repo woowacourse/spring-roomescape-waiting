@@ -82,7 +82,9 @@ public class WaitingService {
     }
 
     public void deleteWaiting(Long id) {
-        waitingRepository.deleteById(id);
+        Waiting foundWaiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("id값: %d 에 대한 예약대기가 존재하지 않습니다.", id)));
+        waitingRepository.delete(foundWaiting);
     }
 
     private Theme getTheme(Long id) {

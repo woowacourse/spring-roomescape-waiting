@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.service.reservation.dto.request.ReservationTimeRequest;
 import roomescape.service.reservation.dto.request.ThemeRequest;
@@ -93,5 +94,16 @@ class ReservationTimeTest extends AcceptanceTest {
                             .body("size()", is(1));
                 })
         );
+    }
+
+    @DisplayName("존재하지 않는 예약 시간에 대한 삭제")
+    @Test
+    void delete() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", adminToken)
+                .when().delete("times/999")
+                .then().log().all()
+                .statusCode(404);
     }
 }

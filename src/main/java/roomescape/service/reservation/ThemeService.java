@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Theme;
+import roomescape.global.handler.exception.NotFoundException;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.reservation.dto.request.ThemeRequest;
 import roomescape.service.reservation.dto.response.ThemeResponse;
@@ -13,10 +15,12 @@ import roomescape.service.reservation.dto.response.ThemeResponse;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
     private final Clock clock;
 
-    public ThemeService(ThemeRepository themeRepository, Clock clock) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository, Clock clock) {
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
         this.clock = clock;
     }
 
@@ -47,6 +51,12 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
-        themeRepository.deleteById(id);
+        Theme foundTheme = themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("id값: %d 에 대한 테마가 존재하지 않습니다.", id)));
+
+        if (reservationRepository.existsBySchedule_Theme(foundTheme)) {
+            throw new IllegalArgumentException("해당 테마에 대한 예약이 존재해 삭제할 수 없습니다.");
+        }
+        themeRepository.delete(foundTheme);
     }
 }

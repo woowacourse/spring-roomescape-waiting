@@ -263,4 +263,15 @@ class ReservationTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(400);
     }
+
+    @DisplayName("존재하지 않는 예약에 대한 삭제")
+    @Test
+    void delete() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", adminToken)
+                .when().delete("reservations/999")
+                .then().log().all()
+                .statusCode(404);
+    }
 }

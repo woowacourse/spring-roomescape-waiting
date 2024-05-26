@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.global.handler.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -67,6 +68,12 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTime(Long id) {
+        ReservationTime foundReservationTime = reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("id값: %d 에 대한 예약시간이 존재하지 않습니다.", id)));
+
+        if (reservationRepository.existsBySchedule_Time(foundReservationTime)) {
+            throw new IllegalArgumentException("해당 예약시간에 대한 예약이 존재해 삭제할 수 없습니다.");
+        }
         reservationTimeRepository.deleteById(id);
     }
 }

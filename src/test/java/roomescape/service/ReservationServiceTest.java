@@ -137,6 +137,13 @@ class ReservationServiceTest {
         assertThat(findReservations).hasSize(1);
     }
 
+    @DisplayName("존재 하지 않는 예약 삭제 테스트")
+    @Test
+    void deleteNotFoundReservation() {
+        assertThatThrownBy(() -> reservationService.deleteReservation(999L))
+                .isInstanceOf(NotFoundException.class);
+    }
+
     @DisplayName("사용자별 모든 예약 조회 테스트")
     @Test
     void findAllByMemberId() {
