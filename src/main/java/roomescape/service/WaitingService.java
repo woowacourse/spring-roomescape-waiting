@@ -29,14 +29,6 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
-    public List<WaitingResponse> getAllWaitings() {
-        List<Waiting> waitings = waitingRepository.findAll();
-
-        return waitings.stream()
-                .map(WaitingResponse::from)
-                .toList();
-    }
-
     public Long addWaiting(WaitingRequest waitingRequest) {
         Member member = memberRepository.getById(waitingRequest.memberId());
         Reservation reservation = reservationRepository.getByDateAndTimeIdAndThemeId(
@@ -50,16 +42,16 @@ public class WaitingService {
         return waiting.getId();
     }
 
-    public void deleteWaiting(Long id, LoginMember loginMember) {
+    public void deleteWaitingByAdmin(Long id) {
         Waiting waiting = waitingRepository.getById(id);
-        Member member = memberRepository.getById(loginMember.id());
-        validateWaitingOwner(member, waiting);
 
         waitingRepository.delete(waiting);
     }
 
-    public void deleteWaitingByAdmin(Long id) {
+    public void deleteWaiting(Long id, LoginMember loginMember) {
         Waiting waiting = waitingRepository.getById(id);
+        Member member = memberRepository.getById(loginMember.id());
+        validateWaitingOwner(member, waiting);
 
         waitingRepository.delete(waiting);
     }
@@ -71,5 +63,13 @@ public class WaitingService {
                     new Throwable("waiting_id : " + waiting.getId())
             );
         }
+    }
+
+    public List<WaitingResponse> getAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        return waitings.stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }

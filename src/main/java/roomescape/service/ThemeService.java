@@ -29,6 +29,30 @@ public class ThemeService {
         return themeRepository.save(theme).getId();
     }
 
+    public void validateNameDuplicate(ThemeName name) {
+        if (themeRepository.existsByName(name)) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 동일한 이름의 테마가 존재해 등록할 수 없습니다.",
+                    new Throwable("theme_name : " + name)
+            );
+        }
+    }
+
+    public void deleteTheme(Long id) {
+        Theme theme = themeRepository.getById(id);
+        validateDeletable(theme);
+        themeRepository.deleteById(id);
+    }
+
+    private void validateDeletable(Theme theme) {
+        if (reservationRepository.existsByThemeId(theme.getId())) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 예약되어있는 테마는 삭제할 수 없습니다.",
+                    new Throwable("theme_id : " + theme.getId())
+            );
+        }
+    }
+
     public List<ThemeResponse> getAllTheme() {
         List<Theme> themes = themeRepository.findAll();
 
@@ -52,29 +76,5 @@ public class ThemeService {
         return themeRepository.findAllById(popularThemeIds)
                 .stream().map(ThemeResponse::from)
                 .toList();
-    }
-
-    public void deleteTheme(Long id) {
-        Theme theme = themeRepository.getById(id);
-        validateDeletable(theme);
-        themeRepository.deleteById(id);
-    }
-
-    public void validateNameDuplicate(ThemeName name) {
-        if (themeRepository.existsByName(name)) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 동일한 이름의 테마가 존재해 등록할 수 없습니다.",
-                    new Throwable("theme_name : " + name)
-            );
-        }
-    }
-
-    private void validateDeletable(Theme theme) {
-        if (reservationRepository.existsByThemeId(theme.getId())) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 예약되어있는 테마는 삭제할 수 없습니다.",
-                    new Throwable("theme_id : " + theme.getId())
-            );
-        }
     }
 }

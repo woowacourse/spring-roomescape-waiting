@@ -14,10 +14,6 @@ public class Name {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     private void validateName(String name) {
         validateNameFormat(name);
         validateNameLength(name);
@@ -40,5 +36,9 @@ public class Name {
 
             );
         }
+    }
+
+    public String getName() {
+        return name;
     }
 }

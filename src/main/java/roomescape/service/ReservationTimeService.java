@@ -34,6 +34,30 @@ public class ReservationTimeService {
         return timeRepository.save(reservationTime).getId();
     }
 
+    private void validateTimeDuplicate(LocalTime time) {
+        if (timeRepository.existsByStartAt(time)) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 이미 등록된 시간은 등록할 수 없습니다.",
+                    new Throwable("등록 시간 : " + time)
+            );
+        }
+    }
+
+    public void deleteReservationTime(Long id) {
+        ReservationTime reservationTime = timeRepository.getById(id);
+        validateDeletable(reservationTime);
+        reservationRepository.deleteById(reservationTime.getId());
+    }
+
+    private void validateDeletable(ReservationTime reservationTime) {
+        if (reservationRepository.existsByTimeId(reservationTime.getId())) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 해당 시간에 예약이 존재해서 삭제할 수 없습니다.",
+                    new Throwable("예약 시간 : " + reservationTime.getStartAt())
+            );
+        }
+    }
+
     public List<ReservationTimeResponse> getAllReservationTimes() {
         List<ReservationTime> reservationTimes = timeRepository.findAll();
         return reservationTimes.stream()
@@ -57,12 +81,6 @@ public class ReservationTimeService {
                 .toList();
 
         return concatTimeResponses(alreadyBookedTimeResponses, availableTimeResponses);
-    }
-
-    public void deleteReservationTime(Long id) {
-        ReservationTime reservationTime = timeRepository.getById(id);
-        validateDeletable(reservationTime);
-        reservationRepository.deleteById(reservationTime.getId());
     }
 
     private List<ReservationTime> findBookedTimes(LocalDate date, Long themeId) {
@@ -95,23 +113,5 @@ public class ReservationTimeService {
         responses.sort(Comparator.comparingLong(AvailableTimeResponse::id));
 
         return responses;
-    }
-
-    private void validateTimeDuplicate(LocalTime time) {
-        if (timeRepository.existsByStartAt(time)) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 이미 등록된 시간은 등록할 수 없습니다.",
-                    new Throwable("등록 시간 : " + time)
-            );
-        }
-    }
-
-    private void validateDeletable(ReservationTime reservationTime) {
-        if (reservationRepository.existsByTimeId(reservationTime.getId())) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 해당 시간에 예약이 존재해서 삭제할 수 없습니다.",
-                    new Throwable("예약 시간 : " + reservationTime.getStartAt())
-            );
-        }
     }
 }
