@@ -116,7 +116,6 @@ class ReservationServiceTest {
         assertThat(reservations).hasSize(3);
     }
 
-    // TODO: TestFixture 만들기
     @DisplayName("성공: 예약 대기 생성")
     @Test
     void saveWaiting() {

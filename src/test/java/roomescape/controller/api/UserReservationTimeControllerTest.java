@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.fixture.LoginRequestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -23,7 +24,7 @@ class UserReservationTimeControllerTest {
 
     @BeforeEach
     void login() {
-        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+        LoginRequest user = LoginRequestFixture.createUserRequest();
 
         userToken = RestAssured.given()
             .contentType(ContentType.JSON)

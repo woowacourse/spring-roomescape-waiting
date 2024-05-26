@@ -17,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginCheckResponse;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.fixture.LoginRequestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -26,7 +27,7 @@ class LoginControllerTest {
     @DisplayName("성공: 로그인 성공")
     @Test
     void login_Success() {
-        LoginRequest request = new LoginRequest("admin@a.com", "123a!");
+        LoginRequest request = LoginRequestFixture.createUserRequest();
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
             .body(request)
@@ -51,7 +52,7 @@ class LoginControllerTest {
     @DisplayName("성공: 토큰을 이용해서 이름을 가져올 수 있다.")
     @Test
     void checkLogin() {
-        LoginRequest request = new LoginRequest("admin@a.com", "123a!");
+        LoginRequest request = LoginRequestFixture.createAdminRequest();
         String token = RestAssured.given()
             .contentType(ContentType.JSON)
             .body(request)

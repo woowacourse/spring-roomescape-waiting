@@ -14,6 +14,8 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateReservationRequest;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.fixture.LoginRequestFixture;
+import roomescape.fixture.ReservationRequestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -25,8 +27,8 @@ class AdminReservationControllerTest {
 
     @BeforeEach
     void login() {
-        LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
-        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+        LoginRequest admin = LoginRequestFixture.createAdminRequest();
+        LoginRequest user = LoginRequestFixture.createUserRequest();
 
         adminToken = RestAssured.given()
             .contentType(ContentType.JSON)
@@ -44,8 +46,7 @@ class AdminReservationControllerTest {
     @DisplayName("성공: 예약 추가 -> 201")
     @Test
     void save() {
-        CreateReservationRequest request = new CreateReservationRequest(1L,
-            "2026-06-06", 1L, 1L);
+        CreateReservationRequest request = ReservationRequestFixture.create();
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)

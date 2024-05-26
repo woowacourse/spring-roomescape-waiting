@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.fixture.LoginRequestFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(value = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -19,7 +20,7 @@ class UserPageControllerTest {
 
     @BeforeEach
     void login() {
-        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+        LoginRequest user = LoginRequestFixture.createUserRequest();
 
         userToken = RestAssured.given()
             .contentType(ContentType.JSON)

@@ -14,6 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateThemeRequest;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.fixture.LoginRequestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -24,7 +25,7 @@ class AdminThemeControllerTest {
 
     @BeforeEach
     void login() {
-        LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
+        LoginRequest admin = LoginRequestFixture.createAdminRequest();
 
         adminToken = RestAssured.given()
             .contentType(ContentType.JSON)
