@@ -8,13 +8,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class Reservation implements Comparable<Reservation> {
+public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,22 +32,7 @@ public class Reservation implements Comparable<Reservation> {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public static ReservationBuilder builder() {
-        return new ReservationBuilder();
-    }
-
     protected Reservation() {
-    }
-
-    public Reservation(long id, Reservation reservationBeforeSave) {
-        this(
-                id,
-                reservationBeforeSave.reservationMember,
-                reservationBeforeSave.date,
-                reservationBeforeSave.time,
-                reservationBeforeSave.theme,
-                reservationBeforeSave.status
-        );
     }
 
     public Reservation(
@@ -78,9 +62,9 @@ public class Reservation implements Comparable<Reservation> {
         }
     }
 
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new RoomescapeException(ExceptionType.EMPTY_THEME);
+    private void validateDate(LocalDate date) {
+        if (date == null) {
+            throw new RoomescapeException(ExceptionType.EMPTY_DATE);
         }
     }
 
@@ -90,10 +74,14 @@ public class Reservation implements Comparable<Reservation> {
         }
     }
 
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new RoomescapeException(ExceptionType.EMPTY_DATE);
+    private void validateTheme(Theme theme) {
+        if (theme == null) {
+            throw new RoomescapeException(ExceptionType.EMPTY_THEME);
         }
+    }
+
+    public static ReservationBuilder builder() {
+        return new ReservationBuilder();
     }
 
     public boolean isAuthor(Member member) {
@@ -102,13 +90,6 @@ public class Reservation implements Comparable<Reservation> {
 
     public void approve() {
         status = ReservationStatus.APPROVED;
-    }
-
-    @Override
-    public int compareTo(Reservation other) {
-        LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
-        LocalDateTime otherDateTime = LocalDateTime.of(other.date, other.time.getStartAt());
-        return dateTime.compareTo(otherDateTime);
     }
 
     public LocalTime getTime() {

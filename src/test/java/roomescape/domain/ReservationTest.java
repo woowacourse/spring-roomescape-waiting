@@ -1,6 +1,5 @@
 package roomescape.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.exception.ExceptionType.EMPTY_DATE;
 import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
@@ -70,29 +69,5 @@ class ReservationTest {
                         .build())
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(EMPTY_THEME.getMessage());
-    }
-
-    @Test
-    @DisplayName("날짜를 기준으로 비교를 잘 하는지 확인.")
-    void compareTo() {
-        Reservation first = Reservation.builder()
-                        .id(1L)
-                        .member(DEFAULT_MEMBER)
-                        .date(LocalDate.now().plusDays(1))
-                        .time(DEFAULT_TIME)
-                        .theme(DEFAULT_THEME)
-                        .build();
-
-        Reservation second = Reservation.builder()
-                .id(1L)
-                .member(DEFAULT_MEMBER)
-                .date(LocalDate.now())
-                .time(DEFAULT_TIME)
-                .theme(DEFAULT_THEME)
-                .build();
-
-        int compareTo = first.compareTo(second);
-
-        assertThat(compareTo).isGreaterThan(0);
     }
 }
