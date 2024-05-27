@@ -22,7 +22,6 @@ import roomescape.repository.ThemeRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -109,22 +108,20 @@ public class ReservationService {
 
     @Transactional
     public void delete(final Long id) {
-        final Optional<Reservation> reservationResult = reservationRepository.findById(id);
-        if (reservationResult.isPresent() && reservationResult.get().getStatus() == ReservationStatus.RESERVED) {
-            updateWaitReservation(reservationResult.get());
-            reservationRepository.deleteById(id);
-        }
+        reservationRepository.findById(id)
+                .filter(reservation -> !reservation.isWaiting())
+                .ifPresent(reservation -> {
+                    updateWaitReservation(reservation);
+                    reservationRepository.deleteById(id);
+                });
     }
 
     private void updateWaitReservation(final Reservation reservation) {
         final LocalDate date = reservation.getDate();
         final Long timeId = reservation.getTime().getId();
         final Long themeId = reservation.getTheme().getId();
-        final Optional<Reservation> waitReservationResult = reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, ReservationStatus.WAITING);
-        if (!waitReservationResult.isEmpty()) {
-            final Reservation waitReservation = waitReservationResult.get();
-            waitReservation.changeToReserved();
-        }
+        reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, ReservationStatus.WAITING)
+                .ifPresent(Reservation::changeToReserved);
     }
 
     @Transactional(readOnly = true)
@@ -169,9 +166,7 @@ public class ReservationService {
 
     public void deleteWaitingById(final Long id) {
         reservationRepository.findById(id)
-                .stream()
                 .filter(Reservation::isWaiting)
-                .findFirst()
                 .ifPresent(reservation -> reservationRepository.deleteById(id));
     }
 }
