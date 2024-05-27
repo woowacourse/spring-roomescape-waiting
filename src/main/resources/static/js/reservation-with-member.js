@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
   requestRead(RESERVATION_API_ENDPOINT)
-      .then(render)
+      .then(data => render(data.responses))
       .catch(error => console.error('Error fetching reservations:', error));
 
   fetchTimes();
@@ -41,7 +41,7 @@ function render(data) {
 function fetchTimes() {
   requestRead(TIME_API_ENDPOINT)
       .then(data => {
-        timesOptions.push(...data);
+        timesOptions.push(...data.responses);
       })
       .catch(error => console.error('Error fetching time:', error));
 }
@@ -49,7 +49,7 @@ function fetchTimes() {
 function fetchThemes() {
   requestRead(THEME_API_ENDPOINT)
       .then(data => {
-        themesOptions.push(...data);
+        themesOptions.push(...data.responses);
         populateSelect('theme', themesOptions, 'name');
       })
       .catch(error => console.error('Error fetching theme:', error));
@@ -58,7 +58,7 @@ function fetchThemes() {
 function fetchMembers() {
   requestRead(MEMBER_API_ENDPOINT)
       .then(data => {
-        membersOptions.push(...data);
+        membersOptions.push(...data.responses);
         populateSelect('member', membersOptions, 'name');
       })
       .catch(error => console.error('Error fetching member:', error));
@@ -208,7 +208,7 @@ function applyFilter(event) {
   }).then(response => {
     if (response.ok) return response.json();
     throw new Error('Read failed');
-  }).then(render)
+  }).then(data => render(data.responses))
       .catch(error => console.error("Error fetching available times:", error));
 }
 

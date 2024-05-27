@@ -15,7 +15,7 @@ import java.time.LocalTime;
 import roomescape.member.domain.Member;
 
 @Entity
-public class Reservation {
+public class Reservation extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +26,7 @@ public class Reservation {
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
+    private ReservationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -38,26 +38,26 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id", nullable = false)
-    private ReservationTime reservationTime;
+    private ReservationTime time;
 
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
+    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime time, ReservationStatus status) {
         validateLastDate(date);
         this.member = member;
         this.date = date;
         this.theme = theme;
-        this.reservationTime = reservationTime;
+        this.time = time;
         this.status = status;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
+    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime time, ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.theme = theme;
-        this.reservationTime = reservationTime;
+        this.time = time;
         this.status = status;
     }
 
@@ -65,6 +65,22 @@ public class Reservation {
         if (date.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("지난 날짜는 예약할 수 없습니다.");
         }
+    }
+
+    public boolean sameDate(LocalDate otherDate) {
+        return date.equals(otherDate);
+    }
+
+    public boolean sameThemeId(Long otherThemeId) {
+        return theme.sameThemeId(otherThemeId);
+    }
+
+    public boolean sameTimeId(Long otherTimeId) {
+        return time.sameTimeId(otherTimeId);
+    }
+
+    public void updateStatus(ReservationStatus updateStatus) {
+        this.status = updateStatus;
     }
 
     public Long getId() {
@@ -88,11 +104,15 @@ public class Reservation {
     }
 
     public ReservationTime getTime() {
-        return reservationTime;
+        return time;
     }
 
     public LocalTime getStartAt() {
-        return reservationTime.getStartAt();
+        return time.getStartAt();
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public String getStatusDisplayName() {

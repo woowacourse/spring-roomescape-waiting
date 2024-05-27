@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.member.service.MemberService;
@@ -29,9 +30,9 @@ public class MemberApiController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<MemberResponse>> findAll() {
+    public ResponseEntity<MultipleResponses<MemberResponse>> findAll() {
         List<MemberResponse> memberResponses = memberService.findAll();
 
-        return ResponseEntity.ok(memberResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(memberResponses));
     }
 }

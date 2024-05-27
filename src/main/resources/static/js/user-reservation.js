@@ -2,7 +2,7 @@ const THEME_API_ENDPOINT = '/themes';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
-        .then(renderTheme)
+        .then(data => renderTheme(data.responses))
         .catch(error => console.error('Error fetching times:', error));
 
     flatpickr("#datepicker", {
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
+    document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
 function renderTheme(themes) {
@@ -50,9 +51,6 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
-        if (booked) {
-            div.classList.add('disabled');
-        }
     }
     return div;
 }
@@ -68,7 +66,7 @@ function checkDate() {
         timeSlots.innerHTML = '';
 
         requestRead(THEME_API_ENDPOINT)
-            .then(renderTheme)
+            .then(date => renderTheme(date.responses))
             .catch(error => console.error('Error fetching times:', error));
     }
 }
@@ -95,7 +93,7 @@ function fetchAvailableTimes(date, themeId) {
     }).then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
-    }).then(renderAvailableTimes)
+    }).then(data => renderAvailableTimes(data.responses))
         .catch(error => console.error("Error fetching available times:", error));
 }
 
@@ -126,18 +124,20 @@ function checkDateAndThemeAndTime() {
     const selectedThemeElement = document.querySelector('.theme-slot.active');
     const selectedTimeElement = document.querySelector('.time-slot.active');
     const reserveButton = document.getElementById("reserve-button");
+    const waitButton = document.getElementById("wait-button");
 
     if (selectedDate && selectedThemeElement && selectedTimeElement) {
         if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
-            // 선택된 시간이 이미 예약된 경우
-            reserveButton.classList.add("disabled");
+            reserveButton.classList.add("disabled"); // 선택된 시간이 이미 예약된 경우
+            waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
         } else {
-            // 선택된 시간이 예약 가능한 경우
-            reserveButton.classList.remove("disabled");
+            reserveButton.classList.remove("disabled"); // 선택된 시간이 예약 가능한 경우
+            waitButton.classList.add("disabled"); // 예약 대기 버튼 비활성화
         }
     } else {
         // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
         reserveButton.classList.add("disabled");
+        waitButton.classList.add("disabled");
     }
 }
 
@@ -171,6 +171,47 @@ function onReservationButtonClick() {
             })
             .then(data => {
                 const message = `${data.date} 날짜로 ${data.theme.name} 테마가 ${data.time.startAt}에 예약되었습니다.`;
+                alert(message);
+                location.reload();
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+    } else {
+        alert("예약날짜, 테마, 예약시간을 모두 선택해주세요.");
+    }
+}
+
+
+function onWaitButtonClick() {
+    const selectedDate = document.getElementById("datepicker").value;
+    const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
+    const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+
+    if (selectedDate && selectedThemeId && selectedTimeId) {
+        const reservationData = {
+            date: selectedDate,
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
+        };
+
+        fetch('/reservations/waiting', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reservationData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorResponse => {
+                        throw new Error(JSON.stringify(errorResponse));
+                    })
+                }
+                return response.json();
+            })
+            .then(data => {
+                const message = `${data.date} 날짜로 ${data.theme.name} 테마가 ${data.time.startAt}에 예약 대기되었습니다.`;
                 alert(message);
                 location.reload();
             })

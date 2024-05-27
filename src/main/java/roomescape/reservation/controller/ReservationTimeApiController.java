@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.TimeResponse;
 import roomescape.reservation.dto.TimeSaveRequest;
@@ -27,20 +28,20 @@ public class ReservationTimeApiController {
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<TimeResponse>> findAll() {
+    public ResponseEntity<MultipleResponses<TimeResponse>> findAll() {
         List<TimeResponse> times = reservationTimeService.findAll();
 
-        return ResponseEntity.ok(times);
+        return ResponseEntity.ok(new MultipleResponses<>(times));
     }
 
     @GetMapping("/times/available")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailableTimes(
+    public ResponseEntity<MultipleResponses<AvailableReservationTimeResponse>> findAvailableTimes(
             @RequestParam("date") LocalDate date,
             @RequestParam("theme-id") Long themeId
     ) {
         List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(date, themeId);
 
-        return ResponseEntity.ok(availableTimes);
+        return ResponseEntity.ok(new MultipleResponses<>(availableTimes));
     }
 
     @PostMapping("/times")

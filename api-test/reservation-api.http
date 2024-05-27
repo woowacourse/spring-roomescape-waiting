@@ -16,10 +16,25 @@ POST http://localhost:8080/reservations
 Content-Type: application/json
 
 {
-  "date": "2024-05-20",
+  "date": "2024-05-26",
   "timeId": 1,
   "themeId": 1
 }
+
+### 사용자 예약 대기 추가 API
+
+POST http://localhost:8080/reservations/waiting
+Content-Type: application/json
+
+{
+  "date": "2024-05-26",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 예약 취소 API
+
+PATCH http://localhost:8080/reservations/29
 
 ### 관리자 예약 추가 API
 
@@ -32,6 +47,10 @@ Content-Type: application/json
   "timeId": 1,
   "memberId": 1
 }
+
+### 관리자 예약 대기 조회
+
+GET http://localhost:8080/admin/reservations/waiting
 
 ### 예약 삭제 API
 

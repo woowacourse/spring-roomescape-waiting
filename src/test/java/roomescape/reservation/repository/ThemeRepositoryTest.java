@@ -2,32 +2,25 @@ package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.util.Fixture.HORROR_DESCRIPTION;
-import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.JOJO_EMAIL;
-import static roomescape.util.Fixture.JOJO_NAME;
-import static roomescape.util.Fixture.JOJO_PASSWORD;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
-import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.ACTION_THEME;
+import static roomescape.util.Fixture.HORROR_THEME;
+import static roomescape.util.Fixture.JOJO;
+import static roomescape.util.Fixture.KAKI;
+import static roomescape.util.Fixture.RESERVATION_HOUR_10;
+import static roomescape.util.Fixture.TODAY;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.ThemeName;
 
 @DataJpaTest
 class ThemeRepositoryTest {
@@ -44,39 +37,39 @@ class ThemeRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    EntityManager entityManager;
+
     @DisplayName("id로 엔티티를 찾는다.")
     @Test
     void findByIdTest() {
-        Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
-        Theme savedTheme = themeRepository.save(theme);
-        Theme findTheme = themeRepository.findById(savedTheme.getId()).get();
+        Theme horrorTheme = themeRepository.save(HORROR_THEME);
+        Theme findTheme = themeRepository.findById(horrorTheme.getId()).get();
 
         assertAll(
-                () -> assertThat(findTheme.getName()).isEqualTo(HORROR_THEME_NAME),
-                () -> assertThat(findTheme.getDescription()).isEqualTo(HORROR_DESCRIPTION),
-                () -> assertThat(findTheme.getThumbnail()).isEqualTo(THUMBNAIL)
+                () -> assertThat(findTheme.getName()).isEqualTo(horrorTheme.getName()),
+                () -> assertThat(findTheme.getDescription()).isEqualTo(horrorTheme.getDescription()),
+                () -> assertThat(findTheme.getThumbnail()).isEqualTo(horrorTheme.getThumbnail())
         );
     }
 
     @DisplayName("이름으로 엔티티를 찾는다.")
     @Test
     void findByIdNameTest() {
-        Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
-        Theme savedTheme = themeRepository.save(theme);
-        Theme findTheme = themeRepository.findByThemeName_Name(savedTheme.getName()).get();
+        Theme horrorTheme = themeRepository.save(HORROR_THEME);
+        Theme findTheme = themeRepository.findByThemeName_Name(horrorTheme.getName()).get();
 
         assertAll(
-                () -> assertThat(findTheme.getName()).isEqualTo(HORROR_THEME_NAME),
-                () -> assertThat(findTheme.getDescription()).isEqualTo(HORROR_DESCRIPTION),
-                () -> assertThat(findTheme.getThumbnail()).isEqualTo(THUMBNAIL)
+                () -> assertThat(findTheme.getName()).isEqualTo(horrorTheme.getName()),
+                () -> assertThat(findTheme.getDescription()).isEqualTo(horrorTheme.getDescription()),
+                () -> assertThat(findTheme.getThumbnail()).isEqualTo(horrorTheme.getThumbnail())
         );
     }
 
     @DisplayName("전체 엔티티를 조회한다.")
     @Test
     void findAllTest() {
-        Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
-        themeRepository.save(theme);
+        themeRepository.save(HORROR_THEME);
         List<Theme> themes = themeRepository.findAll();
 
         assertThat(themes.size()).isEqualTo(1);
@@ -85,72 +78,48 @@ class ThemeRepositoryTest {
     @DisplayName("테마 ID로 예약이 참조된 테마들을 찾는다.")
     @Test
     void findReservationInSameIdTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime hour10 = reservationTimeRepository.save(RESERVATION_HOUR_10);
 
-        Theme theme = themeRepository.save(
-                new Theme(
-                        new ThemeName(HORROR_THEME_NAME),
-                        new Description(HORROR_DESCRIPTION),
-                        THUMBNAIL
-                )
-        );
+        Theme horrorTheme = themeRepository.save(HORROR_THEME);
 
-        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member kaki = memberRepository.save(KAKI);
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
-        boolean exist = !themeRepository.findThemesThatReservationReferById(theme.getId()).isEmpty();
+        reservationRepository.save(new Reservation(kaki, TODAY, horrorTheme, hour10, ReservationStatus.SUCCESS));
+        boolean exist = !themeRepository.findThemesThatReservationReferById(horrorTheme.getId())
+                .isEmpty();
 
         assertThat(exist).isTrue();
     }
 
-    @DisplayName("n일 이후의 날짜를 기준으로 n개의 인기 테마를 조회한다.")
+    @DisplayName("주어진 기간 사이에 가장 많이 예약된 테마를 n개 조회한다..")
     @Test
-    void findTopTenThemesDescendingOfLastWeekTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+    void findLimitOfPopularThemesDescBetweenPeriod() {
+        ReservationTime hour10 = reservationTimeRepository.save(RESERVATION_HOUR_10);
 
-        Theme theme1 = themeRepository.save(
-                new Theme(
-                        new ThemeName(HORROR_THEME_NAME),
-                        new Description(HORROR_DESCRIPTION),
-                        THUMBNAIL
-                )
-        );
+        Theme horrorTheme = themeRepository.save(HORROR_THEME);
+        Theme actionTheme = themeRepository.save(ACTION_THEME);
 
-        Theme theme2 = themeRepository.save(
-                new Theme(
-                        new ThemeName("액션"),
-                        new Description("액션 탈출"),
-                        THUMBNAIL
-                )
-        );
+        Member kaki = memberRepository.save(KAKI);
+        Member jojo = memberRepository.save(JOJO);
 
-        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
-        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+        reservationRepository.save(new Reservation(kaki, TODAY, horrorTheme, hour10, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, actionTheme, hour10, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, actionTheme, hour10, ReservationStatus.SUCCESS));
 
-        reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme1, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(jojo, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
-
-        LocalDate dateFrom = LocalDate.now(). minusWeeks(1);
-        List<Theme> themes = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, 2);
+        List<Theme> popularThemes = themeRepository.findLimitOfPopularThemesDescBetweenPeriod(TODAY, TODAY, 2);
 
         assertAll(
-                () -> assertThat(themes.get(0).getName()).isEqualTo("액션"),
-                () -> assertThat(themes.size()).isEqualTo(2)
+                () -> assertThat(popularThemes.get(0).getName()).isEqualTo(actionTheme.getName()),
+                () -> assertThat(popularThemes).hasSize(2)
         );
     }
 
     @DisplayName("id를 받아 삭제한다.")
     @Test
     void deleteTest() {
-        Theme theme = themeRepository.save(
-                new Theme(
-                        new ThemeName(HORROR_THEME_NAME),
-                        new Description(HORROR_DESCRIPTION),
-                        THUMBNAIL
-                )
-        );
-        themeRepository.deleteById(theme.getId());
+        Theme horrorTheme = themeRepository.save(HORROR_THEME);
+        themeRepository.deleteById(horrorTheme.getId());
+
         List<Theme> themes = themeRepository.findAll();
 
         assertThat(themes.size()).isEqualTo(0);

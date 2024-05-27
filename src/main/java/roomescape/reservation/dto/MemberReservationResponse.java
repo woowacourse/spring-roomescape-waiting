@@ -10,16 +10,18 @@ public record MemberReservationResponse(
         String theme,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
-        String status
+        String status,
+        int rank
 ) {
 
-    public static MemberReservationResponse toResponse(Reservation reservation) {
+    public static MemberReservationResponse toResponse(Reservation reservation, int rank) {
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                reservation.getStatusDisplayName()
+                reservation.getStatusDisplayName(),
+                rank
         );
     }
 }

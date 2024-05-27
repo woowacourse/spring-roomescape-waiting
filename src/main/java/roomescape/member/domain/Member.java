@@ -53,6 +53,10 @@ public class Member {
         this.password = password;
     }
 
+    public boolean sameMemberId(Long otherMemberId) {
+        return id.equals(otherMemberId);
+    }
+
     public Long getId() {
         return id;
     }

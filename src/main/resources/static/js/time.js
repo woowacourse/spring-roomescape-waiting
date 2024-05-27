@@ -11,7 +11,7 @@ function createBody(inputs) {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addRow);
   requestRead()
-      .then(render)
+      .then(data => render(data.responses))
       .catch(error => console.error('Error fetching times:', error));
 });
 

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.dto.MultipleResponses;
+import roomescape.reservation.domain.Period;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.dto.ThemeSaveRequest;
@@ -26,19 +28,20 @@ public class ThemeApiController {
     }
 
     @GetMapping("/themes/popular")
-    public ResponseEntity<List<PopularThemeResponse>> findTopTenThemesOfLastWeek(
-            @RequestParam(value = "limitCount", defaultValue = "10") int limitCount
+    public ResponseEntity<MultipleResponses<PopularThemeResponse>> findTopTenThemesOfLastWeek(
+            @RequestParam(name = "period", defaultValue = "WEEK") Period period,
+            @RequestParam(name = "limitCount", defaultValue = "10") int limitCount
     ) {
-        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekForLimitCount(limitCount);
+        List<PopularThemeResponse> popularThemeResponses = themeService.findPopularThemesBetweenPeriod(period, limitCount);
 
-        return ResponseEntity.ok(popularThemeResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(popularThemeResponses));
     }
 
     @GetMapping("/themes")
-    public ResponseEntity<List<ThemeResponse>> findAll() {
+    public ResponseEntity<MultipleResponses<ThemeResponse>> findAll() {
         List<ThemeResponse> themeResponses = themeService.findAll();
 
-        return ResponseEntity.ok(themeResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(themeResponses));
     }
 
     @PostMapping("/themes")

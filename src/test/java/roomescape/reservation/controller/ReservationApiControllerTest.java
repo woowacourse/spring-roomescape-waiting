@@ -1,6 +1,7 @@
 package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static roomescape.util.Fixture.TODAY;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,17 +67,17 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
-                .body("$", hasSize(1));
+                .body("responses", hasSize(1));
     }
 
     @DisplayName("회원이 예약을 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
     @Test
-    void saveMemberReservation() throws JsonProcessingException {
+    void saveReservation() throws JsonProcessingException {
         saveMemberAsKaki();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
 
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, 1L, 1L);
 
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
@@ -90,6 +91,27 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .header("Location", "/reservations/1");
     }
 
+    @DisplayName("회원이 예약 대기를 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
+    @Test
+    void saveReservationWaiting() throws JsonProcessingException {
+        saveMemberAsKaki();
+        saveThemeAsHorror();
+        saveReservationTimeAsTen();
+
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .contentType(ContentType.JSON)
+                .body(objectMapper.writeValueAsString(reservationSaveRequest))
+                .accept(ContentType.JSON)
+                .when()
+                .post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value())
+                .header("Location", "/reservations/1");
+    }
+
     @DisplayName("관리자가 예약을 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
     @Test
     void saveAdminReservation() throws JsonProcessingException {
@@ -97,7 +119,7 @@ class ReservationApiControllerTest extends IntegrationTest {
         saveThemeAsHorror();
         saveReservationTimeAsTen();
 
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(1L, LocalDate.now(), 1L, 1L);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(1L, TODAY, 1L, 1L);
 
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getAdminToken())

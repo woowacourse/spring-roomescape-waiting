@@ -1,6 +1,6 @@
 package roomescape.reservation.domain;
 
-public enum Status {
+public enum ReservationStatus {
     SUCCESS("예약"),
     CANCEL("취소"),
     WAIT("대기"),
@@ -8,7 +8,7 @@ public enum Status {
 
     private final String displayName;
 
-    Status(String displayName) {
+    ReservationStatus(String displayName) {
         this.displayName = displayName;
     }
 

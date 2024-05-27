@@ -14,7 +14,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class IntegrationTest {
+public abstract class IntegrationTest {
 
     @LocalServerPort
     private int port;
@@ -73,7 +73,7 @@ public class IntegrationTest {
     }
 
     protected void saveSuccessReservationAsDateNow() {
-        String sql = "insert into reservation (member_id, date, theme_id, time_id, status) values (1, CURRENT_DATE, 1, 1, 'SUCCESS')";
+        String sql = "insert into reservation (member_id, date, theme_id, time_id, status, created_at) values (1, CURRENT_DATE, 1, 1, 'SUCCESS', CURRENT_TIMESTAMP())";
 
         jdbcTemplate.update(sql);
     }

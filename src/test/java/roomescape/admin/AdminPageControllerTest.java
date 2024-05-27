@@ -51,13 +51,25 @@ class AdminPageControllerTest extends IntegrationTest {
                     .contentType(ContentType.HTML);
         }
 
-        @DisplayName("/theme 을 요청하면 html을 반환한다.")
+        @DisplayName("/admin/theme 을 요청하면 html을 반환한다.")
         @Test
         void requestTheme() {
             RestAssured.given().log().all()
                     .cookie(CookieUtils.TOKEN_KEY, getAdminToken())
                     .when()
                     .get("/admin/theme")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .contentType(ContentType.HTML);
+        }
+
+        @DisplayName("/admin/waiting을 요청하면 html을 반환한다.")
+        @Test
+        void requestWaiting() {
+            RestAssured.given().log().all()
+                    .cookie(CookieUtils.TOKEN_KEY, getAdminToken())
+                    .when()
+                    .get("/admin/waiting")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value())
                     .contentType(ContentType.HTML);
@@ -108,6 +120,17 @@ class AdminPageControllerTest extends IntegrationTest {
                     .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                     .when()
                     .get("/admin/theme")
+                    .then().log().all()
+                    .statusCode(HttpStatus.FORBIDDEN.value());
+        }
+
+        @DisplayName("일반 사용자가 /admin/waiting을 요청하면 403 응답 코드를 반환한다.")
+        @Test
+        void requestWaiting() {
+            RestAssured.given().log().all()
+                    .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                    .when()
+                    .get("/admin/waiting")
                     .then().log().all()
                     .statusCode(HttpStatus.FORBIDDEN.value());
         }
