@@ -12,8 +12,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static roomescape.fixture.fixture.*;
-import static roomescape.fixture.fixture.USER_MEMBER;
+import static roomescape.fixture.MemberFixture.*;
+import static roomescape.fixture.DateFixture.*;
+import static roomescape.fixture.TimeSlotFixture.*;
+import static roomescape.fixture.ThemeFixture.*;
 
 @DataJpaTest
 class WaitingRepositoryTest {

@@ -17,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.dto.request.TokenRequest;
 import roomescape.dto.response.TimeSlotResponse;
 
-import static roomescape.fixture.fixture.*;
+import static roomescape.fixture.TestFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
