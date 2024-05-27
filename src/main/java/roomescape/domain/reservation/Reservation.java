@@ -55,6 +55,10 @@ public class Reservation {
         status = Status.RESERVED;
     }
 
+    public boolean isReserved() {
+        return status == Status.RESERVED;
+    }
+
     public Long getId() {
         return id;
     }

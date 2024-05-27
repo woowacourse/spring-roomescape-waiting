@@ -15,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
+import roomescape.service.booking.reservation.ReservationService;
 
 @Sql("/popular-theme-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -51,7 +52,7 @@ class ThemeServiceTest {
     @Test
     void 예약_되어있는_테마를_삭제할_경우_예외_발생() {
         //given
-        ReservationResponse reservationResponse = reservationService.getReservation(1L);
+        ReservationResponse reservationResponse = reservationService.findReservation(1L);
         ThemeResponse themeResponse = reservationResponse.theme();
         Long themeId = themeResponse.id();
 
@@ -87,7 +88,7 @@ class ThemeServiceTest {
     }
 
     void deleteAllReservation() {
-        List<ReservationResponse> reservationResponses = reservationService.getAllReservations();
+        List<ReservationResponse> reservationResponses = reservationService.findAllReservations();
         reservationResponses.forEach(reservation -> reservationService.deleteReservation(reservation.id()));
     }
 }

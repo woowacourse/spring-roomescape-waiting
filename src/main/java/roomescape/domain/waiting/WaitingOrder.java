@@ -16,11 +16,17 @@ public class WaitingOrder {
     }
 
     public void decreaseWaitingOrderByOne() {
-        waitingOrder--;
+        if (waitingOrder > 1) {
+            waitingOrder--;
+        }
+    }
+
+    public boolean isFirstOrder() {
+        return waitingOrder == 1;
     }
 
     private void validateWaitingOrder(int order) {
-        if (order == 0) {
+        if (order < 1) {
             throw new IllegalArgumentException(
                     "[ERROR] 잘못된 대기 순서입니다. 관리자에게 문의해주세요.",
                     new Throwable("order : " + order));

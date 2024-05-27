@@ -1,8 +1,8 @@
 package roomescape.dto.reservation;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Status;
@@ -32,7 +32,7 @@ public record ReservationRequest(
         );
     }
 
-    public Reservation toEntityByReserved(ReservationTime reservationTime, Theme theme, Member member, Status status) {
+    public Reservation toEntity(ReservationTime reservationTime, Theme theme, Member member, Status status) {
         return new Reservation(
                 date,
                 reservationTime,

@@ -19,6 +19,7 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.dto.waiting.WaitingResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
+import roomescape.service.booking.waiting.WaitingService;
 
 @Sql("/waiting-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -38,7 +39,7 @@ class WaitingServiceTest {
     @Test
     void 모든_대기중인_예약_조회() {
         //given, when
-        List<WaitingResponse> allWaitingReservations = waitingService.getAllWaitingReservations();
+        List<WaitingResponse> allWaitingReservations = waitingService.findAllWaitingReservations();
 
         //then
         assertThat(allWaitingReservations).hasSize(2);
@@ -54,10 +55,10 @@ class WaitingServiceTest {
         int waitingOrder2 = waiting2.getWaitingOrderValue();
 
         //when
-        waitingService.deleteWaiting(1L);
+        waitingService.cancelWaiting(1L);
 
         //then
-        List<WaitingResponse> allWaitingReservations = waitingService.getAllWaitingReservations();
+        List<WaitingResponse> allWaitingReservations = waitingService.findAllWaitingReservations();
 
         assertAll(
                 () -> assertThat(allWaitingReservations).extracting(WaitingResponse::waitingId).containsOnly(2L),
@@ -77,10 +78,10 @@ class WaitingServiceTest {
         int waitingOrder2 = waiting2.getWaitingOrderValue();
 
         //when
-        waitingService.deleteWaitingForUser(reservation.getId());
+        waitingService.cancelWaitingForUser(reservation.getId());
 
         //then
-        List<WaitingResponse> allWaitingReservations = waitingService.getAllWaitingReservations();
+        List<WaitingResponse> allWaitingReservations = waitingService.findAllWaitingReservations();
 
         assertAll(
                 () -> assertThat(allWaitingReservations).extracting(WaitingResponse::waitingId).containsOnly(2L),
@@ -97,7 +98,7 @@ class WaitingServiceTest {
         //when, then
         assertAll(
                 () -> assertThat(reservation.getStatus()).isEqualTo(Status.RESERVED),
-                () -> assertThatThrownBy(() -> waitingService.deleteWaitingForUser(reservation.getId()))
+                () -> assertThatThrownBy(() -> waitingService.cancelWaitingForUser(reservation.getId()))
                         .isInstanceOf(IllegalArgumentException.class)
         );
     }

@@ -19,6 +19,8 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.repository.WaitingRepository;
+import roomescape.service.booking.reservation.ReservationService;
+import roomescape.service.booking.time.ReservationTimeService;
 
 @Sql("/all-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -40,14 +42,14 @@ class ReservationServiceTest {
     @Test
     void 잘못된_예약_시간대_id로_예약을_추가할_경우_예외_발생() {
         //given
-        List<ReservationTimeResponse> allReservationTimes = reservationTimeService.getAllReservationTimes();
+        List<ReservationTimeResponse> allReservationTimes = reservationTimeService.findAllReservationTimes();
         Long notExistTimeId = allReservationTimes.size() + 1L;
 
         ReservationRequest reservationRequest = new ReservationRequest(
                 LocalDate.now(), notExistTimeId, 1L, 1L);
 
         //when, then
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest))
+        assertThatThrownBy(() -> reservationService.resisterReservation(reservationRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -61,7 +63,7 @@ class ReservationServiceTest {
                 LocalDate.now(), 1L, notExistIdToFind, 1L);
 
         //when, then
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest))
+        assertThatThrownBy(() -> reservationService.resisterReservation(reservationRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -70,13 +72,13 @@ class ReservationServiceTest {
         //given
         ReservationRequest reservationRequest1 = new ReservationRequest(
                 LocalDate.now().plusDays(3), 1L, 1L, 1L);
-        reservationService.addReservation(reservationRequest1);
+        reservationService.resisterReservation(reservationRequest1);
 
         //when, then
         ReservationRequest reservationRequest2 = new ReservationRequest(
                 LocalDate.now().plusDays(3), 1L, 1L, 2L);
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest2))
+        assertThatThrownBy(() -> reservationService.resisterReservation(reservationRequest2))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -87,25 +89,25 @@ class ReservationServiceTest {
                 LocalDate.now().minusDays(1), 1L, 1L, 1L);
 
         //when, then
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest))
+        assertThatThrownBy(() -> reservationService.resisterReservation(reservationRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 존재하지_않는_id로_조회할_경우_예외_발생() {
         //given
-        List<ReservationResponse> allReservations = reservationService.getAllReservations();
+        List<ReservationResponse> allReservations = reservationService.findAllReservations();
         Long notExistIdToFind = allReservations.size() + 1L;
 
         //when, then
-        assertThatThrownBy(() -> reservationService.getReservation(notExistIdToFind))
+        assertThatThrownBy(() -> reservationService.findReservation(notExistIdToFind))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 존재하지_않는_id로_삭제할_경우_예외_발생() {
         //given
-        List<ReservationResponse> allReservations = reservationService.getAllReservations();
+        List<ReservationResponse> allReservations = reservationService.findAllReservations();
         Long notExistIdToFind = allReservations.size() + 1L;
 
         //when, then
@@ -122,7 +124,7 @@ class ReservationServiceTest {
         reservationFilter.setMemberId(filteringUserId);
 
         //when
-        List<ReservationResponse> reservationResponses = reservationService.getReservationsByFilter(reservationFilter);
+        List<ReservationResponse> reservationResponses = reservationService.findReservationsByFilter(reservationFilter);
 
         //then
         assertThat(reservationResponses).isNotEmpty()
@@ -143,7 +145,7 @@ class ReservationServiceTest {
         reservationFilter.setEndDate(endDate);
 
         //when
-        List<ReservationResponse> reservationResponses = reservationService.getReservationsByFilter(reservationFilter);
+        List<ReservationResponse> reservationResponses = reservationService.findReservationsByFilter(reservationFilter);
 
         //then
         assertThat(reservationResponses).isNotEmpty()

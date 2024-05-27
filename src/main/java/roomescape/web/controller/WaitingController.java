@@ -14,8 +14,8 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.UserReservationRequest;
 import roomescape.dto.waiting.WaitingResponse;
-import roomescape.service.ReservationService;
-import roomescape.service.WaitingService;
+import roomescape.service.booking.reservation.ReservationService;
+import roomescape.service.booking.waiting.WaitingService;
 
 @Controller
 public class WaitingController {
@@ -33,26 +33,26 @@ public class WaitingController {
             @RequestBody UserReservationRequest userReservationRequest,
             LoginMember loginMember) {
         ReservationRequest reservationRequest = ReservationRequest.from(userReservationRequest, loginMember.id());
-        Long savedId = reservationService.addReservationWaiting(reservationRequest);
-        ReservationResponse reservationResponse = reservationService.getReservation(savedId);
+        Long savedId = waitingService.resisterWaiting(reservationRequest);
+        ReservationResponse reservationResponse = reservationService.findReservation(savedId);
         return ResponseEntity.created(URI.create("/reservations/" + savedId)).body(reservationResponse);
     }
 
     @GetMapping("/admin/reservations/waiting")
     public ResponseEntity<List<WaitingResponse>> getWaitingReservations() {
-        List<WaitingResponse> waitingResponse = waitingService.getAllWaitingReservations();
+        List<WaitingResponse> waitingResponse = waitingService.findAllWaitingReservations();
         return ResponseEntity.ok(waitingResponse);
     }
 
     @DeleteMapping("/admin/reservations/waiting/{id}")
     public ResponseEntity<Void> deleteWaitingByAdmin(@PathVariable Long id) {
-        waitingService.deleteWaiting(id);
+        waitingService.cancelWaiting(id);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/reservations/waiting/{id}")
     public ResponseEntity<Void> deleteWaitingByUser(@PathVariable Long id) {
-        waitingService.deleteWaitingForUser(id);
+        waitingService.cancelWaitingForUser(id);
         return ResponseEntity.noContent().build();
     }
 }

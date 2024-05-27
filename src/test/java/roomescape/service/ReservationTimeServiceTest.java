@@ -19,6 +19,8 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationtime.TimeWithAvailableResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
+import roomescape.service.booking.reservation.ReservationService;
+import roomescape.service.booking.time.ReservationTimeService;
 
 @Sql("/all-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -35,29 +37,29 @@ class ReservationTimeServiceTest {
     void 동일한_시간을_추가할_경우_예외_발생() {
         //given
         ReservationTimeRequest reservationTimeRequest1 = new ReservationTimeRequest(LocalTime.parse("00:00"));
-        reservationTimeService.addReservationTime(reservationTimeRequest1);
+        reservationTimeService.resisterReservationTime(reservationTimeRequest1);
 
         //when, then
         ReservationTimeRequest reservationTimeRequest2 = new ReservationTimeRequest(LocalTime.parse("00:00"));
-        assertThatThrownBy(() -> reservationTimeService.addReservationTime(reservationTimeRequest2))
+        assertThatThrownBy(() -> reservationTimeService.resisterReservationTime(reservationTimeRequest2))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 존재하지_않는_id로_조회할_경우_예외_발생() {
         //given
-        List<ReservationTimeResponse> allReservationTimes = reservationTimeService.getAllReservationTimes();
+        List<ReservationTimeResponse> allReservationTimes = reservationTimeService.findAllReservationTimes();
         Long notExistIdToFind = allReservationTimes.size() + 1L;
 
         //when, then
-        assertThatThrownBy(() -> reservationTimeService.getReservationTime(notExistIdToFind))
+        assertThatThrownBy(() -> reservationTimeService.findReservationTime(notExistIdToFind))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void 예약이_존재하는_시간대를_삭제할_경우_예외_발생() {
         //given
-        ReservationResponse reservationResponse = reservationService.getReservation(1L);
+        ReservationResponse reservationResponse = reservationService.findReservation(1L);
         ReservationTimeResponse timeResponse = reservationResponse.time();
         Long timeId = timeResponse.id();
 
@@ -75,7 +77,7 @@ class ReservationTimeServiceTest {
         );
 
         //then
-        List<ReservationTimeResponse> allReservationTimes = reservationTimeService.getAllReservationTimes();
+        List<ReservationTimeResponse> allReservationTimes = reservationTimeService.findAllReservationTimes();
 
         assertAll(
                 () -> assertThat(timesWithAvailable).hasSize(allReservationTimes.size()),
