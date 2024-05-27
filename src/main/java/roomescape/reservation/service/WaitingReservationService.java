@@ -40,7 +40,7 @@ public class WaitingReservationService {
 
     @Transactional
     public ReservationResponse save(WaitingReservationSaveRequest saveRequest) {
-        Reservation reservation = createValidReservation(saveRequest);
+        Reservation reservation = createWaitingReservation(saveRequest);
         validateMemberReservationUnique(reservation);
         validateWaitingAvailable(reservation);
 
@@ -49,7 +49,7 @@ public class WaitingReservationService {
         return ReservationResponse.toResponse(savedReservation);
     }
 
-    private Reservation createValidReservation(WaitingReservationSaveRequest saveRequest) {
+    private Reservation createWaitingReservation(WaitingReservationSaveRequest saveRequest) {
         Member member = memberRepository.findById(saveRequest.memberId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
