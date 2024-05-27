@@ -6,7 +6,7 @@ import static roomescape.exception.ExceptionDomainType.RESERVATION_TIME;
 import static roomescape.exception.ExceptionDomainType.THEME;
 import static roomescape.exception.ExceptionDomainType.WAITING;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
@@ -70,7 +70,7 @@ public class CreateValidator {
         final Theme theme = validateExistTheme(input.themeId());
         final Member member = validateExistMember(input.memberId());
 
-        final Waiting waiting = input.toWaiting(reservationTime, theme, member, LocalTime.now());
+        final Waiting waiting = input.toWaiting(reservationTime, theme, member, LocalDateTime.now());
         if (!reservationRepository.existsByDateAndTimeId(ReservationDate.from(input.date()), input.timeId())) {
             throw new InvalidWaitingException();
         }

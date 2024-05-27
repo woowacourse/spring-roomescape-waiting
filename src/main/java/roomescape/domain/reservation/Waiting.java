@@ -30,13 +30,13 @@ public class Waiting {
     @ManyToOne
     private Member member;
 
-    private LocalTime createdAt;
+    private LocalDateTime createdAt;
 
     public Waiting() {
     }
 
     public Waiting(Long id, ReservationDate date, ReservationTime time, Theme theme, Member member,
-                   LocalTime createdAt) {
+                   LocalDateTime createdAt) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -75,7 +75,7 @@ public class Waiting {
         return member;
     }
 
-    public LocalTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 }

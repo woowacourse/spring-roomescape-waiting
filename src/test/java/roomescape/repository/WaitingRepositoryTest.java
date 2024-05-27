@@ -2,7 +2,7 @@ package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,8 +53,8 @@ class WaitingRepositoryTest {
         final var time = timeRepository.save(ReservationTimeFixture.getDomain());
         final var date = ReservationDate.from("2025-05-30");
         reservationRepository.save(new Reservation(null, date, time, theme, member1));
-        waitingRepository.save(new Waiting(null, date, time, theme, member2, LocalTime.now().minusHours(1)));
-        waitingRepository.save(new Waiting(null, date, time, theme, member3, LocalTime.now()));
+        waitingRepository.save(new Waiting(null, date, time, theme, member2, LocalDateTime.now().minusHours(1)));
+        waitingRepository.save(new Waiting(null, date, time, theme, member3, LocalDateTime.now()));
 
         WaitingWithRank myWaiting = waitingRepository.findWaitingsWithRankByMemberId(member3.getId()).get(0);
         assertThat(myWaiting.getRank())
@@ -70,8 +70,8 @@ class WaitingRepositoryTest {
         final var time = timeRepository.save(ReservationTimeFixture.getDomain());
         final var date = ReservationDate.from("2025-05-30");
 
-        waitingRepository.save(new Waiting(null, date, time, theme, member2, LocalTime.now().minusHours(1)));
-        waitingRepository.save(new Waiting(null, date, time, theme, member1, LocalTime.now()));
+        waitingRepository.save(new Waiting(null, date, time, theme, member2, LocalDateTime.now().minusHours(1)));
+        waitingRepository.save(new Waiting(null, date, time, theme, member1, LocalDateTime.now()));
 
         Waiting waiting = waitingRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAt(date, time, theme).get();
         assertThat(waiting.getMember().getEmail())

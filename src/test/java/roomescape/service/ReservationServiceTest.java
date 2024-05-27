@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -165,9 +165,9 @@ class ReservationServiceTest {
                 new Reservation(null, ReservationDate.from("2024-05-30"), time, theme, member1));
         waitingRepository.save(
                 new Waiting(null, ReservationDate.from("2024-05-30"), time, theme, member2,
-                        LocalTime.now().minusHours(1)));
+                        LocalDateTime.now().minusHours(1)));
         waitingRepository.save(
-                new Waiting(null, ReservationDate.from("2024-05-30"), time, theme, member3, LocalTime.now()));
+                new Waiting(null, ReservationDate.from("2024-05-30"), time, theme, member3, LocalDateTime.now()));
 
         reservationService.deleteReservation(reservation.getId());
         assertThat(reservationRepository.existsByDateAndTimeIdAndMemberId(
