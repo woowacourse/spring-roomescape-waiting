@@ -14,13 +14,16 @@ public record UserReservationResponse(
         String status
 ) {
 
+    private static final String RESERVED = "예약";
+    private static final String WAITING_ORDER = "%d번째 예약 대기";
+
     public static UserReservationResponse create(Reservation reservation) {
         return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getThemeName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                "예약"
+                RESERVED
         );
     }
 
@@ -31,7 +34,7 @@ public record UserReservationResponse(
                 reservation.getTheme().getThemeName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                String.format("%d번째 예약 대기", waiting.getWaitingOrderValue())
+                String.format(WAITING_ORDER, waiting.getWaitingOrderValue())
         );
     }
 }

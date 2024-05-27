@@ -27,8 +27,8 @@ public class ThemeSearchService {
     }
 
     public List<ThemeResponse> findAllThemes() {
-        List<Theme> themes = themeRepository.findAll();
-        return themes.stream()
+        return themeRepository.findAll()
+                .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
@@ -38,7 +38,8 @@ public class ThemeSearchService {
                 DateUtil.A_WEEK_AGO, DateUtil.YESTERDAY);
 
         return themeRepository.findAllById(popularThemeIds)
-                .stream().map(ThemeResponse::from)
+                .stream()
+                .map(ThemeResponse::from)
                 .toList();
     }
 

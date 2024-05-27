@@ -5,6 +5,8 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class WaitingOrder {
 
+    private static final int MIN_ORDER = 1;
+
     private int waitingOrder;
 
     protected WaitingOrder() {
@@ -16,17 +18,21 @@ public class WaitingOrder {
     }
 
     public void decreaseWaitingOrderByOne() {
-        if (waitingOrder > 1) {
+        if (waitingOrder > MIN_ORDER) {
             waitingOrder--;
         }
     }
 
     public boolean isFirstOrder() {
-        return waitingOrder == 1;
+        return waitingOrder == MIN_ORDER;
+    }
+
+    public boolean isWaitingOrderGreaterThan(int waitingOrderToCompare) {
+        return waitingOrder > waitingOrderToCompare;
     }
 
     private void validateWaitingOrder(int order) {
-        if (order < 1) {
+        if (order < MIN_ORDER) {
             throw new IllegalArgumentException(
                     "[ERROR] 잘못된 대기 순서입니다. 관리자에게 문의해주세요.",
                     new Throwable("order : " + order));

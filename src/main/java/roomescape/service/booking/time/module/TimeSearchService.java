@@ -29,21 +29,20 @@ public class TimeSearchService {
     }
 
     public List<ReservationTimeResponse> findAllTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return reservationTimes.stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(ReservationTimeResponse::from).toList();
     }
 
     public List<TimeWithAvailableResponse> findAvailableTimes(LocalDate date, Long themeId) {
-        List<ReservationTime> allTimes = reservationTimeRepository.findAll();
-        return allTimes.stream()
+        return reservationTimeRepository.findAll()
+                .stream()
                 .map(reservationTime -> createTimeWithAvailableResponses(date, themeId, reservationTime))
                 .toList();
     }
 
-    private TimeWithAvailableResponse createTimeWithAvailableResponses(
-            LocalDate date, Long themeId, ReservationTime reservationTime) {
+    private TimeWithAvailableResponse createTimeWithAvailableResponses(LocalDate date, Long themeId,
+                                                                       ReservationTime reservationTime) {
         boolean isBooked = reservationRepository.existsByDateAndTimeIdAndThemeId(
                 date, reservationTime.getId(), themeId);
 
@@ -51,10 +50,8 @@ public class TimeSearchService {
     }
 
     private ReservationTime findTimeById(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 잘못된 예약시간 정보 입니다.",
-                        new Throwable("time_id : " + timeId)
-                ));
+        return reservationTimeRepository.findById(timeId).orElseThrow(
+                () -> new IllegalArgumentException("[ERROR] 잘못된 잘못된 예약시간 정보 입니다.",
+                        new Throwable("time_id : " + timeId)));
     }
 }

@@ -47,7 +47,7 @@ public class WaitingCancelService {
     private void adjustWaitingOrder(List<Reservation> reservationsToAdjust, int waitingOrderToDelete) {
         for (Reservation reservation : reservationsToAdjust) {
             Waiting waiting = findWaitingByReservationId(reservation.getId());
-            if (waiting.getWaitingOrderValue() > waitingOrderToDelete) {
+            if (waiting.isWaitingOrderGreaterThan(waitingOrderToDelete)) {
                 updateWaitingStatus(reservation, waiting);
             }
         }

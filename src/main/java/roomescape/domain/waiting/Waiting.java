@@ -38,6 +38,10 @@ public class Waiting {
         return waitingOrder.isFirstOrder();
     }
 
+    public boolean isWaitingOrderGreaterThan(int waitingOrderToCompare) {
+        return waitingOrder.isWaitingOrderGreaterThan(waitingOrderToCompare);
+    }
+
     private void validateAvailableWaiting(Reservation reservation) {
         if (reservation.isReserved()) {
             throw new IllegalArgumentException(
