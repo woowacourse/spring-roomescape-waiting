@@ -141,7 +141,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public void removeReservation(long reservationId, MemberProfileInfo memberProfileInfo) throws IllegalAuthorizationException {
+    public void removeMyReservation(long reservationId, MemberProfileInfo memberProfileInfo) throws IllegalAuthorizationException {
         List<Reservation> myReservations = reservationRepository.findAllByMember_Id(memberProfileInfo.id());
         myReservations.stream()
                 .filter(reservation -> reservation.getId().equals(reservationId))
@@ -150,6 +150,10 @@ public class ReservationService {
                         reservation -> reservationRepository.deleteById(reservationId),
                         () -> { throw new IllegalAuthorizationException("자신의 예약만 삭제할 수 있습니다."); }
                 );
+    }
+
+    public void cancelReservation(long reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 
 }

@@ -108,27 +108,27 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("자신이 요청한 예약을 정상적으로 지운다.")
-    void removeReservation_ShouldRemoveReservation_WhenRequestFromReservationOwner() {
+    void removeMyReservation_ShouldRemoveReservation_WhenRequestFromReservationOwner() {
         Mockito.doNothing()
                 .when(reservationRepository)
                 .deleteById(reservation.getId());
         Mockito.when(reservationRepository.findAllByMember_Id(reservation.getMemberId()))
                 .thenReturn(List.of(reservation));
 
-        assertThatCode(() -> reservationService.removeReservation(reservation.getId(),
+        assertThatCode(() -> reservationService.removeMyReservation(reservation.getId(),
                 new MemberProfileInfo(member.getId(), member.getName(), member.getEmail()))).doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("자신의 요청하지 않은 예약을 취소 요청할 경우, 예외를 던진다.")
-    void removeReservation_ShouldThrowException_WhenRequestNotFromReservationOwner() {
+    void removeMyReservation_ShouldThrowException_WhenRequestNotFromReservationOwner() {
 
         Mockito.when(reservationRepository.findAllByMember_Id(any(Long.class)))
                 .thenReturn(List.of());
         MemberProfileInfo memberProfileInfo = new MemberProfileInfo(0L, member.getName(), member.getEmail());
 
         Long reservationId = reservation.getId();
-        assertThatThrownBy(() -> reservationService.removeReservation(reservationId,
+        assertThatThrownBy(() -> reservationService.removeMyReservation(reservationId,
                 memberProfileInfo)).isInstanceOf(
                 IllegalAuthorizationException.class);
     }
