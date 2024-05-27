@@ -52,6 +52,7 @@ public class ReservationService {
         return ReservationResponse.from(reservation);
     }
 
+    @Transactional
     public List<ReservationResponse> findByFilter(ReservationFilterRequest request) {
         return reservationRepository.findByMemberAndThemeBetweenDates(
                         request.memberId(), request.themeId(), request.startDate(), request.endDate())
@@ -60,6 +61,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll()
                 .stream()
@@ -67,6 +69,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
         return reservationRepository.findAllByMemberId(memberId)
                 .stream()

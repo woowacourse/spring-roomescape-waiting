@@ -31,6 +31,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTime);
     }
 
+    @Transactional
     public List<ReservationTimeResponse> findAll() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -46,6 +47,7 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
+    @Transactional
     public List<AvailableTimeResponse> findAvailableTimes(LocalDate date, long themeId) {
         return reservationTimeRepository.getReservationTimeAvailabilities(date, themeId)
                 .stream()

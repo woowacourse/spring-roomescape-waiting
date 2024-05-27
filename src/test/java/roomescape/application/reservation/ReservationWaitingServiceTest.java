@@ -61,7 +61,6 @@ class ReservationWaitingServiceTest {
 
     @Test
     @DisplayName("예약과 예약 대기를 모두 조회한다")
-    @Transactional
     void readAllReservationAndWaiting() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
         waitingRepository.save(new Waiting(reservation, member1));

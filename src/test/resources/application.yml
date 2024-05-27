@@ -8,3 +8,4 @@ spring:
 jwt:
   secret: testtesttesttesttesttesttesttesttesttesttest
   expire-in-millis: 1800000
+

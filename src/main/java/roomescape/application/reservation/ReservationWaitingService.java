@@ -19,6 +19,7 @@ public class ReservationWaitingService {
         this.waitingService = waitingService;
     }
 
+    @Transactional
     public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
         List<ReservationStatusResponse> reservationResponses = reservationService.findAllByMemberId(memberId);
         List<ReservationStatusResponse> waitingResponses = waitingService.findAllByMemberId(memberId);

@@ -45,6 +45,7 @@ public class WaitingService {
         return ReservationResponse.from(waiting);
     }
 
+    @Transactional
     public List<ReservationResponse> findAll() {
         List<Waiting> waitings = waitingRepository.findAll();
         return waitings.stream()
@@ -52,6 +53,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
         List<Waiting> waitings = waitingRepository.findAllByMemberIdOrderByCreatedAtAsc(memberId);
         return waitings.stream()

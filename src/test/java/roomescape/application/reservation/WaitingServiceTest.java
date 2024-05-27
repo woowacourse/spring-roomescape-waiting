@@ -131,7 +131,6 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("멤버의 예약 대기를 생성 순서에 따라 조회한다.")
-    @Transactional
     void readAllWaitingByMemberId() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
         waitingRepository.save(new Waiting(reservation, member1));
@@ -151,7 +150,6 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("모든 예약 대기를 조회한다.")
-    @Transactional
     void readAllWaiting() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
         waitingRepository.save(new Waiting(reservation, member1));

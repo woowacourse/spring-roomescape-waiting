@@ -35,6 +35,7 @@ public class ThemeService {
         return ThemeResponse.from(savedTheme);
     }
 
+    @Transactional
     public List<ThemeResponse> findAll() {
         return themeRepository.findAll()
                 .stream()
@@ -50,6 +51,7 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
+    @Transactional
     public List<ThemeResponse> findPopularThemes() {
         LocalDate today = LocalDate.now(clock);
         return themeRepository.findPopularThemesDateBetween(

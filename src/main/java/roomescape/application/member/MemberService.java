@@ -49,11 +49,13 @@ public class MemberService {
         return new TokenResponse(token);
     }
 
+    @Transactional
     public MemberResponse findById(Long memberId) {
         Member member = memberRepository.getById(memberId);
         return MemberResponse.from(member);
     }
 
+    @Transactional
     public List<MemberResponse> findAll() {
         return memberRepository.findAll()
                 .stream()
