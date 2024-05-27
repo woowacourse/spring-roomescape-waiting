@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -89,7 +90,7 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
                 prin.getId());
 
         assertThatThrownBy(() -> reservationWaitingService.addReservationWaiting(request))
-                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .isExactlyInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("예약이 존재하지 않습니다.");
     }
 
@@ -151,7 +152,7 @@ class ReservationWaitingServiceTest extends BaseServiceTest {
     void deleteReservationWaitingFailWhenNotFound() {
         assertThatThrownBy(
                 () -> reservationWaitingService.deleteReservationWaiting(1L, prin.getId()))
-                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .isExactlyInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("존재하지 않는 예약 대기입니다.");
     }
 

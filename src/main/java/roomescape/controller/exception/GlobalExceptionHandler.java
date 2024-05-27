@@ -1,6 +1,7 @@
 package roomescape.controller.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -68,6 +69,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalArgumentException(IllegalArgumentException e) {
         log.error("[IllegalArgumentException]", e);
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse noSuchElementException(NoSuchElementException e) {
+        log.error("[NoSuchElementException]", e);
         return new ErrorResponse(e.getMessage());
     }
 

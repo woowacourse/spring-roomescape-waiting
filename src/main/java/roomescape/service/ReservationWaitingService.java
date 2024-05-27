@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -63,22 +64,22 @@ public class ReservationWaitingService {
         ReservationTime time = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
         return reservationRepository.findByDateAndTimeAndTheme(request.date(), time, theme)
-                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("예약이 존재하지 않습니다."));
     }
 
     private ReservationTime getTime(long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 시간입니다."));
     }
 
     private Theme getTheme(long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 테마입니다."));
     }
 
     private Member getMember(long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
     }
 
     private void validateWaitingCount(List<ReservationWaiting> reservationWaitings) {
@@ -99,7 +100,7 @@ public class ReservationWaitingService {
     @Transactional
     public void deleteReservationWaiting(long waitingId, long memberId) {
         ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 대기입니다."));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 대기입니다."));
         Member member = getMember(memberId);
         if (member.isNotAdmin()) {
             reservationWaiting.validateOwner(member);
