@@ -7,17 +7,11 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.WaitingResponse;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.ReservationTime;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-
-    @Query("SELECT DISTINCT r FROM Reservation r LEFT JOIN FETCH r.member LEFT JOIN FETCH r.theme LEFT JOIN FETCH r.time")
-    List<Reservation> findAllFetchJoin();
 
     @Query("SELECT DISTINCT r FROM Reservation r LEFT JOIN FETCH r.member LEFT JOIN FETCH r.theme LEFT JOIN FETCH r.time WHERE r.status = :status")
     List<Reservation> findAllByStatusFetchJoin(@Param("status") ReservationStatus status);
@@ -25,8 +19,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDateBetween(LocalDate start, LocalDate end);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
-
-    List<Reservation> findByDateAndThemeAndTimeOrderByCreatedAt(LocalDate date, Theme theme, ReservationTime time);
 
     List<Reservation> findByDateBetweenAndMemberIdAndThemeId(
             LocalDate start,
@@ -36,8 +28,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     Optional<Reservation> findByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId, ReservationStatus status);
-
-    List<Reservation> findByMemberId(Long id);
 
     Optional<Reservation> findByIdAndStatus(Long id, ReservationStatus status);
 
