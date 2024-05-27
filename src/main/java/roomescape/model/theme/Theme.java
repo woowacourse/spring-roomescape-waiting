@@ -27,8 +27,6 @@ public class Theme {
     @Valid
     @Embedded
     private Thumbnail thumbnail;
-    @OneToMany(mappedBy = "reservationInfo.theme")
-    private Set<Reservation> reservations;
 
     private Theme(Long id, Name name, Description description, Thumbnail thumbnail) {
         this.id = id;

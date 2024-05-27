@@ -29,8 +29,6 @@ public class Member {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations;
 
     private Member(Long id, MemberName name, MemberEmail email, MemberPassword password, Role role) {
         this.id = id;
