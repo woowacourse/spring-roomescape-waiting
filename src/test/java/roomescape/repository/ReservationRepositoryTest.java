@@ -30,7 +30,7 @@ class ReservationRepositoryTest {
 
     @Test
     @DisplayName("멤버 이메일을 통해 모든 예약을 조회한다")
-    void findAllByMemberEmail() {
+    void findByMemberEmail() {
         // given
         Member member = memberRepository.save(new Member("seyang@test.com", "seyang", "Seyang"));
         Theme theme = themeRepository.save(new Theme("Theme 1", "Desc 1", "Thumb 1"));
@@ -40,7 +40,7 @@ class ReservationRepositoryTest {
         Reservation reservation = reservationRepository.save(new Reservation(member, theme, date, time));
 
         // when
-        List<Reservation> actual = reservationRepository.findAllByMemberEmail(member.getEmail());
+        List<Reservation> actual = reservationRepository.findByMemberEmail(member.getEmail());
 
         // then
         assertThat(actual).contains(reservation);

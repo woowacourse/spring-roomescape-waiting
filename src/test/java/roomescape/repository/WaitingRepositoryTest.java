@@ -14,6 +14,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingWithRank;
 
 @DataJpaTest
 class WaitingRepositoryTest {
@@ -47,10 +48,11 @@ class WaitingRepositoryTest {
                 memberRepository.save(new Member("beta@test.com", "beta", "Beta"))
         );
         Reservation reservation = reservationRepository.save(new Reservation(members.get(0), theme, date, time));
-        LocalDateTime waitingDateTime = date.atTime(time.getStartAt()).minusDays(3);
+        LocalDateTime threeDaysAgo = date.atTime(time.getStartAt()).minusDays(3);
+        LocalDateTime twoDaysAgo = date.atTime(time.getStartAt()).minusDays(2);
         List<Waiting> waitingList = List.of(
-                waitingRepository.save(new Waiting(reservation, members.get(1), waitingDateTime)),
-                waitingRepository.save(new Waiting(reservation, members.get(2), waitingDateTime))
+                waitingRepository.save(new Waiting(reservation, members.get(1), threeDaysAgo)),
+                waitingRepository.save(new Waiting(reservation, members.get(2), twoDaysAgo))
         );
 
         // when
@@ -58,5 +60,33 @@ class WaitingRepositoryTest {
 
         // then
         assertThat(actual).containsExactlyElementsOf(waitingList);
+    }
+
+    @Test
+    @DisplayName("특정 사용자의 예약 대기를 순위를 포함하여 조회한다.")
+    void findWithRankByMemberEmail() {
+        // given
+        Theme theme = themeRepository.save(new Theme("Theme 1", "Desc 1", "Thumb 1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime time = timeRepository.save(new ReservationTime("10:00"));
+
+        List<Member> members = List.of(
+                memberRepository.save(new Member("seyang@test.com", "seyang", "Seyang")),
+                memberRepository.save(new Member("alpha@test.com", "alpha", "Alpha")),
+                memberRepository.save(new Member("beta@test.com", "beta", "Beta"))
+        );
+        Reservation reservation = reservationRepository.save(new Reservation(members.get(0), theme, date, time));
+        LocalDateTime threeDaysAgo = date.atTime(time.getStartAt()).minusDays(3);
+        LocalDateTime twoDaysAgo = date.atTime(time.getStartAt()).minusDays(2);
+        waitingRepository.save(new Waiting(reservation, members.get(1), threeDaysAgo));
+        waitingRepository.save(new Waiting(reservation, members.get(2), twoDaysAgo));
+
+        // when
+        List<WaitingWithRank> actual = waitingRepository.findWithRankByMemberEmail(
+                members.get(2).getEmail());
+
+        // then
+        assertThat(actual).hasSize(1);
+        assertThat(actual.get(0).getRank()).isEqualTo(2);
     }
 }

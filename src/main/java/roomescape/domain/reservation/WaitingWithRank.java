@@ -1,14 +1,30 @@
 package roomescape.domain.reservation;
 
-import java.util.List;
+public class WaitingWithRank {
+    private Waiting waiting;
+    private Long rank;
 
-public record WaitingWithRank(Waiting waiting, int rank) {
-
-    public WaitingWithRank(Waiting waiting, List<Waiting> sameTimeWaitings) {
-        this(waiting, sameTimeWaitings.stream().sorted(WaitingWithRank::sortWaiting).toList().indexOf(waiting) + 1);
+    public WaitingWithRank() {
     }
 
-    private static int sortWaiting(Waiting o1, Waiting o2) {
-        return o1.getCreatedAt().compareTo(o2.getCreatedAt());
+    public WaitingWithRank(Waiting waiting, Long rank) {
+        this.waiting = waiting;
+        this.rank = rank;
+    }
+
+    public Waiting getWaiting() {
+        return waiting;
+    }
+
+    public Long getRank() {
+        return rank;
+    }
+
+    @Override
+    public String toString() {
+        return "WaitingWithRank{" +
+                "waiting=" + waiting +
+                ", rank=" + rank +
+                '}';
     }
 }

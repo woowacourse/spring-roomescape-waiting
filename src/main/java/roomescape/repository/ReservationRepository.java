@@ -19,7 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             SELECT r, r.member, r.theme, r.time FROM Reservation r
             WHERE r.member.email = :email
             """)
-    List<Reservation> findAllByMemberEmail(String email);
+    List<Reservation> findByMemberEmail(String email);
 
     boolean existsByTimeId(long timeId);
 

@@ -41,7 +41,7 @@ public class ReservationResponse implements Comparable<ReservationResponse> {
     }
 
     public ReservationResponse(WaitingWithRank waitingWithRank) {
-        this(waitingWithRank.waiting().getReservation(), ORDER_STATUS_FORMAT.formatted(waitingWithRank.rank()));
+        this(waitingWithRank.getWaiting().getReservation(), ORDER_STATUS_FORMAT.formatted(waitingWithRank.getRank()));
     }
 
     public long getId() {

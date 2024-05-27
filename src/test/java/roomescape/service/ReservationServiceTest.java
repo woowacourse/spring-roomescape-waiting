@@ -154,7 +154,7 @@ class ReservationServiceTest {
         // when
         Long reservationId = reservation.getId();
         reservationService.deleteReservation(reservationId);
-        List<Reservation> actualReservation = reservationRepository.findAllByMemberEmail(member2.getEmail());
+        List<Reservation> actualReservation = reservationRepository.findByMemberEmail(member2.getEmail());
         List<Waiting> actualWaiting = waitingRepository.findByReservationId(reservationId);
 
         // then

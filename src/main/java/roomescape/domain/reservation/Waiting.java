@@ -11,7 +11,7 @@ import java.util.Objects;
 import roomescape.domain.member.Member;
 
 @Entity
-public class Waiting {
+public class Waiting implements Comparable<Waiting> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -89,5 +89,10 @@ public class Waiting {
                 ", member=" + member +
                 ", createdAt=" + createdAt +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Waiting o) {
+        return createdAt.compareTo(o.createdAt);
     }
 }

@@ -8,13 +8,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingWithRank;
 
 @Repository
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findByReservationId(long reservationId);
 
-    List<Waiting> findByMemberEmail(String email);
+    @Query("""
+            SELECT new roomescape.domain.reservation.WaitingWithRank
+            (w, (SELECT COUNT(w2) + 1
+                FROM Waiting w2
+                WHERE w2.reservation = w.reservation
+                AND w2.createdAt < w.createdAt))
+            FROM Waiting w
+            WHERE w.member.email = :email
+            """)
+    List<WaitingWithRank> findWithRankByMemberEmail(String email);
 
     @Query("""
             SELECT w from Waiting w

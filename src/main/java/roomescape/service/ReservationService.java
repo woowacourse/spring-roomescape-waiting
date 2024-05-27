@@ -15,7 +15,6 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationConflictException;
@@ -81,24 +80,15 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservationsByMemberEmail(String email) {
-        Stream<ReservationResponse> reservationsConfirm = reservationRepository.findAllByMemberEmail(email).stream()
+        Stream<ReservationResponse> reservationsConfirm = reservationRepository.findByMemberEmail(email).stream()
                 .map(ReservationResponse::new);
-        Stream<ReservationResponse> reservationsWaiting = waitingRepository.findByMemberEmail(email).stream()
-                .map(this::assignRankToWaiting)
+        Stream<ReservationResponse> reservationsWaiting = waitingRepository.findWithRankByMemberEmail(email)
+                .stream()
                 .map(ReservationResponse::new);
 
         return Stream.concat(reservationsConfirm, reservationsWaiting)
                 .sorted()
                 .toList();
-    }
-
-    private WaitingWithRank assignRankToWaiting(Waiting waiting) {
-        Reservation waitingReservation = waiting.getReservation();
-        List<Waiting> sameTimeWaitings = waitingRepository.findByThemeIdAndStartAt(
-                waitingReservation.themeId(),
-                waitingReservation.getDate(),
-                waitingReservation.getTime().getStartAt());
-        return new WaitingWithRank(waiting, sameTimeWaitings);
     }
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
