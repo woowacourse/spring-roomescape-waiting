@@ -30,7 +30,7 @@ public class ReservationService {
     private final ReservationDetailFactory reservationDetailFactory;
 
     @Transactional
-    public Reservation saveReservation(ReservationRequest request) {
+    public synchronized Reservation saveReservation(ReservationRequest request) {
         Member member = memberRepository.getById(request.memberId());
         ReservationDetail reservationDetail = reservationDetailFactory.createReservationDetail(
                 request.date(), request.timeId(), request.themeId());
