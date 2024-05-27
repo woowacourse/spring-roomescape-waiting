@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,7 @@ public class ReservationService {
         return ReservationOutput.toOutputs(themeReservations);
     }
 
+    @Transactional
     public void deleteReservation(final long id) {
         Optional<Reservation> reservation = reservationRepository.findById(id);
         if (reservation.isPresent()) {
