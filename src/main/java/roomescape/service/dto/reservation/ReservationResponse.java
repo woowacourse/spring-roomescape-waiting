@@ -1,43 +1,48 @@
 package roomescape.service.dto.reservation;
 
 import roomescape.domain.reservation.Reservation;
-import roomescape.service.dto.member.MemberResponse;
-import roomescape.service.dto.theme.ThemeResponse;
 
 public class ReservationResponse {
 
     private final long id;
-    private final MemberResponse member;
-    private final ThemeResponse theme;
+    private final String name;
+    private final String theme;
     private final String date;
-    private final ReservationTimeResponse time;
+    private final String startAt;
+    private final String status;
 
-    public ReservationResponse(long id, MemberResponse member, ThemeResponse theme, String date,
-                               ReservationTimeResponse time) {
+    public ReservationResponse(long id,
+                               String name,
+                               String theme,
+                               String date,
+                               String startAt,
+                               String status) {
         this.id = id;
-        this.member = member;
+        this.name = name;
         this.theme = theme;
         this.date = date;
-        this.time = time;
+        this.startAt = startAt;
+        this.status = status;
     }
 
     public ReservationResponse(Reservation reservation) {
         this(reservation.getId(),
-                new MemberResponse(reservation),
-                new ThemeResponse(reservation.getTheme()),
+                reservation.memberName(),
+                reservation.themeName(),
                 reservation.getDate().toString(),
-                new ReservationTimeResponse(reservation.getTime()));
+                reservation.getStartAt().toString(),
+                reservation.getReservationStatus().toString());
     }
 
     public long getId() {
         return id;
     }
 
-    public MemberResponse getMember() {
-        return member;
+    public String getName() {
+        return name;
     }
 
-    public ThemeResponse getTheme() {
+    public String getTheme() {
         return theme;
     }
 
@@ -45,7 +50,11 @@ public class ReservationResponse {
         return date;
     }
 
-    public ReservationTimeResponse getTime() {
-        return time;
+    public String getStartAt() {
+        return startAt;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }

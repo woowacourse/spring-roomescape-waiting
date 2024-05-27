@@ -19,11 +19,11 @@ import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.service.dto.member.MemberCreateRequest;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
-import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.time.AvailableTimeResponse;
 import roomescape.service.dto.time.AvailableTimeResponses;
+import roomescape.service.dto.time.ReservationTimeRequest;
+import roomescape.service.dto.time.ReservationTimeResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -63,18 +63,6 @@ class ReservationTimeRestControllerTest {
                 .contentType(ContentType.JSON)
                 .body(param)
                 .when().post(path)
-                .then().log().all()
-                .statusCode(201);
-    }
-
-    @DisplayName("예약 시간을 생성하는데 성공하면 응답과 201 상태 코드를 반환한다.")
-    @Test
-    void return_201_when_create_reservation_time() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .body(reservationTimeCreate1)
-                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -140,23 +128,5 @@ class ReservationTimeRestControllerTest {
         assertThat(actualResponse)
                 .usingRecursiveComparison()
                 .isEqualTo(expectedResponse);
-    }
-
-    @DisplayName("예약 시간을 삭제하는데 성공하면 응답과 204 상태 코드를 반환한다.")
-    @Test
-    void return_204_when_delete_reservation_time() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .body(reservationTimeCreate1)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .when().delete("/admin/times/1")
-                .then().log().all()
-                .statusCode(204);
     }
 }

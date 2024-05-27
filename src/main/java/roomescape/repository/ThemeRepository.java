@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Theme;
-import roomescape.repository.exception.ThemeNotFoundException;
+import roomescape.exception.reservation.ThemeNotFoundException;
 
 @Repository
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
@@ -23,6 +23,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate);
 
     default Theme fetchById(long themeId) {
-        return findById(themeId).orElseThrow(() -> new ThemeNotFoundException("테마가 존재하지 않습니다."));
+        return findById(themeId).orElseThrow(ThemeNotFoundException::new);
     }
 }

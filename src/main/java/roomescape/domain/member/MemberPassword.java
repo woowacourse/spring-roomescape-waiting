@@ -2,6 +2,7 @@ package roomescape.domain.member;
 
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import roomescape.exception.BadRequestException;
 
 @Embeddable
 public class MemberPassword {
@@ -22,10 +23,7 @@ public class MemberPassword {
 
     private void validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 반드시 입력되어야 합니다.");
-        }
-        if (password.length() > 30) {
-            throw new IllegalArgumentException("비밀번호의 길이는 30글자까지 가능합니다.");
+            throw new BadRequestException("비밀번호는 반드시 입력되어야 합니다.");
         }
     }
 

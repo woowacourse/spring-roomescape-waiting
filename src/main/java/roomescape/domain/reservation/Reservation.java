@@ -1,6 +1,9 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,9 +11,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import org.hibernate.annotations.DynamicInsert;
 import roomescape.domain.member.Member;
+import roomescape.exception.reservation.DateTimePassedException;
 
 @Entity
+@DynamicInsert
 public class Reservation {
 
     @Id
@@ -30,14 +39,33 @@ public class Reservation {
     @JoinColumn(name = "reservation_time_id")
     private ReservationTime time;
 
-    public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private ReservationStatus status;
+
+    @Column(name = "created_at")
+    private OffsetDateTime createdAt;
+
+    public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time, ReservationStatus status) {
+        validateDateTimeHasPassed(date, time);
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
+        this.status = status;
     }
 
     protected Reservation() {
+    }
+
+    private void validateDateTimeHasPassed(LocalDate date, ReservationTime time) {
+        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+            throw new DateTimePassedException();
+        }
+    }
+
+    public void updateStatus(ReservationStatus reservationStatus) {
+        this.status = reservationStatus;
     }
 
     public Long getId() {
@@ -64,6 +92,10 @@ public class Reservation {
         return time;
     }
 
+    public LocalTime getStartAt() {
+        return time.getStartAt();
+    }
+
     public String memberEmail() {
         return member.getEmail();
     }
@@ -74,5 +106,9 @@ public class Reservation {
 
     public Long themeId() {
         return theme.getId();
+    }
+
+    public ReservationStatus getReservationStatus() {
+        return status;
     }
 }

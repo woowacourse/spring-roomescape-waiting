@@ -1,32 +1,35 @@
 package roomescape.service;
 
-import jakarta.persistence.criteria.Predicate;
+import static roomescape.domain.reservation.ReservationStatus.CANCELED;
+import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
+import static roomescape.domain.reservation.ReservationStatus.REJECTED;
+import static roomescape.domain.reservation.ReservationStatus.WAITING;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.member.MemberNotFoundException;
-import roomescape.exception.reservation.DateTimePassedException;
-import roomescape.exception.reservation.ReservationConflictException;
+import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.reservation.MyReservationResponse;
+import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
+import roomescape.service.helper.QueryGenerator;
 
 @Service
-@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -45,76 +48,84 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
-        Specification<Reservation> specification = getSearchSpecification(request);
-
+    public List<ReservationResponse> searchReservations(ReservationSearchParams request) {
+        Specification<Reservation> specification = QueryGenerator.getSearchSpecification(request);
         return reservationRepository.findAll(specification)
-                .stream().map(ReservationResponse::new)
+                .stream()
+                .map(ReservationResponse::new)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<MyReservationResponse> findReservationsByMemberEmail(String email) {
-        return reservationRepository.findAllByMemberEmail(email)
-                .stream().map(MyReservationResponse::new)
+    public List<ReservationResponse> findAllReservationsByStatus(String status) {
+        return reservationRepository.findAllByStatus(ReservationStatus.fromString(status))
+                .stream()
+                .map(ReservationResponse::new)
                 .toList();
     }
 
-    public ReservationResponse createReservation(ReservationCreate reservationInfo) {
-        long timeId = reservationInfo.getTimeId();
-        LocalDate date = reservationInfo.getDate();
-        long themeId = reservationInfo.getThemeId();
-        String email = reservationInfo.getEmail();
-
-        ReservationTime time = reservationTimeRepository.fetchById(timeId);
-        validatePreviousDate(date, time);
-        validateDuplicatedReservation(date, themeId, timeId);
-
+    @Transactional(readOnly = true)
+    public List<ReservationRankResponse> findAllReservationsByEmail(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        Theme theme = themeRepository.fetchById(themeId);
-        Reservation savedReservation = reservationRepository.save(new Reservation(member, theme, date, time));
-        return new ReservationResponse(savedReservation);
+        List<ReservationRankResponse> reservations = reservationRepository.findReservationRankByMember(member);
+        reservations.sort(Comparator
+                .comparing(ReservationRankResponse::getDate)
+                .thenComparing(ReservationRankResponse::getTime));
+        return reservations;
     }
 
-    public void deleteReservation(long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new ReservationNotFoundException();
+    @Transactional
+    public ReservationResponse createReservation(ReservationCreate createInfo) {
+        LocalDate date = createInfo.getDate();
+        Member member = memberRepository.findByEmail(createInfo.getEmail()).orElseThrow(MemberNotFoundException::new);
+        Theme theme = themeRepository.fetchById(createInfo.getThemeId());
+        ReservationTime time = reservationTimeRepository.fetchById(createInfo.getTimeId());
+
+        validateDuplicatedReservation(member, theme, date, time);
+
+        Reservation reservation = generateReservation(member, theme, date, time);
+        reservationRepository.save(reservation);
+        return new ReservationResponse(reservation);
+    }
+
+    @Transactional
+    public void cancelWaitingReservation(String email, long id) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        Reservation reservation = reservationRepository.findByIdAndMemberAndStatus(id, member, WAITING)
+                .orElseThrow(ReservationNotFoundException::new);
+        reservation.updateStatus(CANCELED);
+    }
+
+    @Transactional
+    public void rejectConfirmedReservation(long id) {
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, CONFIRMED)
+                .orElseThrow(ReservationNotFoundException::new);
+        reservation.updateStatus(REJECTED);
+        reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
+                reservation.getTheme(),
+                reservation.getDate(),
+                reservation.getTime(),
+                WAITING
+        ).ifPresent(waitingReservation -> waitingReservation.updateStatus(CONFIRMED));
+    }
+
+    @Transactional
+    public void rejectWaitingReservation(long id) {
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, WAITING)
+                .orElseThrow(ReservationNotFoundException::new);
+        reservation.updateStatus(REJECTED);
+    }
+
+    private void validateDuplicatedReservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
+        if (reservationRepository.existsByMemberAndThemeAndDateAndTime(member, theme, date, time)) {
+            throw new ReservationDuplicatedException();
         }
-        reservationRepository.deleteById(id);
     }
 
-    private Specification<Reservation> getSearchSpecification(ReservationSearchParams request) {
-        return ((root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            root.fetch("member");
-            root.fetch("theme");
-            root.fetch("time");
-
-            if (request.getEmail() != null) {
-                predicates.add(builder.equal(root.get("member").get("email"), request.getEmail()));
-            }
-            if (request.getThemeId() != null) {
-                predicates.add(builder.equal(root.get("theme").get("id"), request.getThemeId()));
-            }
-            if (request.getDateFrom() != null) {
-                predicates.add(builder.greaterThanOrEqualTo(root.get("date"), request.getDateFrom()));
-            }
-            if (request.getDateTo() != null) {
-                predicates.add(builder.lessThanOrEqualTo(root.get("date"), request.getDateTo()));
-            }
-            return builder.and(predicates.toArray(new Predicate[0]));
-        });
-    }
-
-    private void validatePreviousDate(LocalDate date, ReservationTime time) {
-        if (date.atTime(time.getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new DateTimePassedException();
+    private Reservation generateReservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
+        if (reservationRepository.existsByThemeAndDateAndTime(theme, date, time)) {
+            return new Reservation(member, theme, date, time, WAITING);
         }
-    }
-
-    private void validateDuplicatedReservation(LocalDate date, Long themeId, Long timeId) {
-        if (reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
-            throw new ReservationConflictException();
-        }
+        return new Reservation(member, theme, date, time, CONFIRMED);
     }
 }

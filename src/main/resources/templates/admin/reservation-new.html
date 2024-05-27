@@ -22,7 +22,10 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a class="nav-link" href="/admin/reservation">Reservation</a>
+        <a class="nav-link" href="/admin/reservation/waiting">Waiting Reservation</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/reservation/confirmed">Confirmed Reservation</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/admin/theme">Theme</a>
@@ -41,7 +44,7 @@
           <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
+          <a class="dropdown-item" href="/my/reservation">My Reservation</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
         </div>
@@ -87,12 +90,12 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="date-from">From</label>
-          <input type="date" id="date-from" name="date-from" class="form-control">
+          <label for="start-date">From</label>
+          <input type="date" id="start-date" name="start-date" class="form-control">
         </div>
         <div class="form-group">
-          <label for="date-to">To</label>
-          <input type="date" id="date-to" name="date-to" class="form-control">
+          <label for="end-date">To</label>
+          <input type="date" id="end-date" name="end-date" class="form-control">
         </div>
         <button type="submit" class="btn btn-primary float-right">적용</button>
       </form>

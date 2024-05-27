@@ -2,6 +2,7 @@ package roomescape.service.dto.time;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalDate;
 import roomescape.controller.helper.validator.DateFormatConstraint;
 
 public class AvailableTimeRequest {
@@ -18,8 +19,8 @@ public class AvailableTimeRequest {
         this.themeId = themeId;
     }
 
-    public String getDate() {
-        return date;
+    public LocalDate getDate() {
+        return LocalDate.parse(date);
     }
 
     public Long getThemeId() {

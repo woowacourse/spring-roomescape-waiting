@@ -17,3 +17,4 @@ security:
   jwt:
     secret-key: 011070243be2a70035923d1cf8b65cf39a32a4eb8ae053f31b0f157d0a45bfa8
     expiration-period: 1800000
+  salt: o4314hqwkjlehqweihddddddeydihjwahdkljahsdlkjhdjkhasjkdh8712hdijaksdkjshlkjhk

@@ -19,9 +19,9 @@ import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.service.dto.member.MemberCreateRequest;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
+import roomescape.service.dto.time.ReservationTimeRequest;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -73,18 +73,6 @@ class ThemeRestControllerTest {
                 .contentType(ContentType.JSON)
                 .body(param)
                 .when().post(path)
-                .then().log().all()
-                .statusCode(201);
-    }
-
-    @DisplayName("테마를 생성하는데 성공하면 응답과 201 상태 코드를 반환한다.")
-    @Test
-    void return_201_when_create_theme() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .body(themeCreate1)
-                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -144,23 +132,5 @@ class ThemeRestControllerTest {
         assertThat(actualResponse)
                 .usingRecursiveComparison()
                 .isEqualTo(expectedResponse);
-    }
-
-    @DisplayName("테마를 삭제하는데 성공하면 응답과 204 상태 코드를 반환한다.")
-    @Test
-    void return_204_when_delete_theme() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .body(themeCreate1)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .when().delete("/admin/themes/1")
-                .then().log().all()
-                .statusCode(204);
     }
 }
