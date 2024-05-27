@@ -56,10 +56,10 @@ class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
         TypeRef<MultipleResponse<MyReservationResponse>> reservationListFormat = new TypeRef<>() {
         };
 
-        MultipleResponse<MyReservationResponse> response = RestAssured.given().log().ifValidationFails()
+        MultipleResponse<MyReservationResponse> response = RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().get("/reservations")
-                .then().log().ifValidationFails()
+                .then().log().all()
                 .extract().as(reservationListFormat);
 
         return response.items().stream().filter(r -> r.date().equals(reservation.getDate())
