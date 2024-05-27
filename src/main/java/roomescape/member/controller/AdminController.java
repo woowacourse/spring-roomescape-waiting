@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.core.AuthenticationPrincipal;
+import roomescape.auth.domain.AuthInfo;
 import roomescape.member.dto.request.CreateReservationByAdminRequest;
 import roomescape.member.dto.response.CreateReservationResponse;
 import roomescape.member.service.AdminService;
@@ -52,8 +54,9 @@ public class AdminController {
     }
 
     @DeleteMapping("/waitings/reject/{waitingId}")
-    public ResponseEntity<Void> rejectWaiting(@PathVariable Long waitingId) {
-        waitingService.rejectWaiting(waitingId);
+    public ResponseEntity<Void> rejectWaiting(@AuthenticationPrincipal AuthInfo authInfo,
+                                              @PathVariable Long waitingId) {
+        waitingService.deleteWaiting(authInfo, waitingId);
         return ResponseEntity.noContent().build();
     }
 }

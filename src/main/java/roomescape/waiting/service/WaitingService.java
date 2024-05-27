@@ -1,7 +1,6 @@
 package roomescape.waiting.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.common.exception.ForbiddenException;
@@ -62,7 +61,7 @@ public class WaitingService {
                 .toList();
     }
 
-    public void deleteWaiting(final Long waitingId) {
+    public void deleteWaitingForReservationUpgrade(final Long waitingId) {
         Waiting waiting = waitingRepository.getById(waitingId);
         waitingRepository.delete(waiting);
     }
@@ -78,12 +77,5 @@ public class WaitingService {
         if (waiting.isNotSameMember(memberId)) {
             throw new ForbiddenException("회원의 권한이 없어, 식별자 " + memberId + "인 예약 대기를 삭제할 수 없습니다.");
         }
-    }
-
-    public void rejectWaiting(final Long waitingId) {
-        waitingRepository.findById(waitingId)
-                .ifPresentOrElse(waitingRepository::delete, () -> {
-                    throw new NoSuchElementException("식별자 " + waitingId + "인 예약 대기가 존재하지 않아 거절할 수 없습니다.");
-                });
     }
 }
