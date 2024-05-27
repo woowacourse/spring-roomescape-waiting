@@ -23,6 +23,7 @@ import roomescape.registration.domain.reservation.dto.ReservationTimeAvailabilit
 import roomescape.registration.domain.reservation.repository.ReservationRepository;
 import roomescape.registration.domain.waiting.domain.Waiting;
 import roomescape.registration.domain.waiting.repository.WaitingRepository;
+import roomescape.registration.dto.RegistrationDto;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -47,16 +48,16 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
-    public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
-        ReservationTime time = reservationTimeRepository.findById(reservationRequest.timeId())
+    public ReservationResponse addReservation(RegistrationDto registrationDto) {
+        ReservationTime time = reservationTimeRepository.findById(registrationDto.timeId())
                 .orElseThrow(() -> new RoomEscapeException(ReservationTimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
-        Theme theme = themeRepository.findById(reservationRequest.themeId())
+        Theme theme = themeRepository.findById(registrationDto.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
-        Member member = memberRepository.findMemberById(memberId)
+        Member member = memberRepository.findMemberById(registrationDto.memberId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_MEMBER_IS_NULL_EXCEPTION));
 
-        validateDateAndTimeWhenSave(reservationRequest.date(), time);
-        Reservation saveReservation = new Reservation(reservationRequest.date(), time, theme, member);
+        validateDateAndTimeWhenSave(registrationDto.date(), time);
+        Reservation saveReservation = new Reservation(registrationDto.date(), time, theme, member);
 
         return ReservationResponse.from(reservationRepository.save(saveReservation));
     }
