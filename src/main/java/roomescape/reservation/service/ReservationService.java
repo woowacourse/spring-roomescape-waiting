@@ -34,7 +34,6 @@ public class ReservationService {
     public ReservationResponse save(ReservationSaveRequest saveRequest) {
         Reservation reservation = reservationFactoryService.createSuccess(saveRequest);
         reservationSchedulerService.validateSaveReservation(reservation);
-
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
@@ -55,13 +54,8 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenAndStatus(
-                        request.themeId(),
-                        request.memberId(),
-                        request.dateFrom(),
-                        request.dateTo(),
-                        Status.SUCCESS
-                ).stream()
+        return findAllReservationsWithCond(request)
+                .stream()
                 .map(ReservationResponse::toResponse)
                 .toList();
     }
@@ -76,5 +70,15 @@ public class ReservationService {
     @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    private List<Reservation> findAllReservationsWithCond(ReservationSearchCondRequest request) {
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenAndStatus(
+                request.themeId(),
+                request.memberId(),
+                request.dateFrom(),
+                request.dateTo(),
+                Status.SUCCESS
+        );
     }
 }
