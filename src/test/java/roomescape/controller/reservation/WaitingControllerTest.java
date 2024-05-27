@@ -1,7 +1,5 @@
 package roomescape.controller.reservation;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
@@ -52,35 +50,12 @@ public class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("모든 예약 대기를 반환한다.")
-    void getWaitings() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .when().get("/waiting")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2));
-    }
-
-    @Test
-    @DisplayName("어드민이 아니면 예약 대기 목록을 조회할 수 없다.")
-    void getWaitingsFailIfNotAdmin() {
-        RestAssured.given().log().all()
-                .cookie("token", memberToken)
-                .contentType(ContentType.JSON)
-                .when().get("/waiting")
-                .then().log().all()
-                .statusCode(401);
-    }
-
-    @Test
     @DisplayName("예약 대기를 추가한다.")
     void addWaiting() {
         CreateReservationRequest request = new CreateReservationRequest(
                 LocalDate.now().plusDays(1), 1L, 1L);
         RestAssured.given().log().all()
-                .cookie("token", memberToken)
+                .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations")
@@ -88,7 +63,7 @@ public class WaitingControllerTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie("token", memberToken)
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/waiting")
@@ -100,7 +75,7 @@ public class WaitingControllerTest {
     @DisplayName("예약대기를 삭제한다.")
     void deleteWaiting() {
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie("token", memberToken)
                 .contentType(ContentType.JSON)
                 .when().delete("/waiting/7")
                 .then().log().all().statusCode(204);

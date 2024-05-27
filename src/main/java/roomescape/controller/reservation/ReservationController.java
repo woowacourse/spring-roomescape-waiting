@@ -16,7 +16,6 @@ import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.MyReservationResponse;
 import roomescape.controller.reservation.dto.ReservationResponse;
-import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -27,11 +26,6 @@ public class ReservationController {
 
     public ReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
-    }
-
-    @GetMapping
-    public List<ReservationResponse> getReservations() {
-        return reservationService.getReservedReservations();
     }
 
     @GetMapping("/mine")
@@ -50,12 +44,6 @@ public class ReservationController {
                 .buildAndExpand(reservation.id())
                 .toUri();
         return ResponseEntity.created(uri).body(reservation);
-    }
-
-    @GetMapping(value = "/search", params = {"themeId", "memberId", "dateFrom", "dateTo"})
-    public List<ReservationResponse> searchReservations(
-            @Valid final ReservationSearchCondition request) {
-        return reservationService.searchReservations(request);
     }
 
     @DeleteMapping("/{id}")

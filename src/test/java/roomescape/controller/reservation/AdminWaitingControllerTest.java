@@ -4,21 +4,23 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.MemberLoginRequest;
-import roomescape.controller.reservation.dto.AdminCreateReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(value = "/data.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
-class AdminReservationControllerTest {
+class AdminWaitingControllerTest {
+
+    @Autowired
+    ReservationController reservationController;
 
     @LocalServerPort
     int port;
@@ -27,7 +29,7 @@ class AdminReservationControllerTest {
     String memberToken;
 
     @BeforeEach
-    void beforeEach() {
+    void setUp() {
         RestAssured.port = port;
 
         adminToken = RestAssured
@@ -48,40 +50,25 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 조회")
-    void getReservations() {
+    @DisplayName("모든 예약 대기를 반환한다.")
+    void getWaitings() {
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
-                .when().get("/admin/reservations")
+                .when().get("/admin/waitings")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(6));
+                .body("size()", is(2));
     }
 
     @Test
-    @DisplayName("어드민이 아니면 예약을 조회할 수 없다.")
-    void accessDenied() {
+    @DisplayName("어드민이 아니면 예약 대기 목록을 조회할 수 없다.")
+    void getWaitingsFailIfNotAdmin() {
         RestAssured.given().log().all()
                 .cookie("token", memberToken)
                 .contentType(ContentType.JSON)
-                .when().get("/admin/reservations")
+                .when().get("/admin/waiting")
                 .then().log().all()
                 .statusCode(401);
-    }
-
-    @Test
-    @DisplayName("예약 생성")
-    void createReservationAdmin() {
-        final AdminCreateReservationRequest request = new AdminCreateReservationRequest(1L,
-                1L, LocalDate.now().plusDays(1), 1L);
-
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(201);
     }
 }

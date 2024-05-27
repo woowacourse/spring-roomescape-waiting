@@ -121,7 +121,7 @@ class AdminEndToEndTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(7));
