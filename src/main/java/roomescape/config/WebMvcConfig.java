@@ -8,20 +8,16 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 import java.util.List;
 
 @Configuration
-@EnableJpaAuditing
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final HandlerMethodArgumentResolver loginMemberArgumentResolver;
     private final HandlerInterceptor roleCheckHandlerInterceptor;
 
-    public WebMvcConfig(
-            HandlerMethodArgumentResolver loginMemberArgumentResolver,
-            HandlerInterceptor roleCheckHandlerInterceptor
-    ) {
+    public WebMvcConfig(HandlerMethodArgumentResolver loginMemberArgumentResolver,
+                        HandlerInterceptor roleCheckHandlerInterceptor) {
         this.loginMemberArgumentResolver = loginMemberArgumentResolver;
         this.roleCheckHandlerInterceptor = roleCheckHandlerInterceptor;
     }
