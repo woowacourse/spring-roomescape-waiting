@@ -5,8 +5,6 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.*;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.service.auth.dto.LoginRequest;
-import roomescape.service.reservation.dto.AdminReservationRequest;
-import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
 import java.time.LocalDate;
