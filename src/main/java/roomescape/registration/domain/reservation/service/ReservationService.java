@@ -3,7 +3,9 @@ package roomescape.registration.domain.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
@@ -19,6 +21,8 @@ import roomescape.registration.domain.reservation.dto.ReservationRequest;
 import roomescape.registration.domain.reservation.dto.ReservationResponse;
 import roomescape.registration.domain.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.registration.domain.reservation.repository.ReservationRepository;
+import roomescape.registration.domain.waiting.domain.Waiting;
+import roomescape.registration.domain.waiting.repository.WaitingRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -31,15 +35,16 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              MemberRepository memberRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
@@ -104,8 +109,21 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void removeReservation(long reservationId) {
-        reservationRepository.deleteById(reservationId);
+        Optional<Waiting> waiting = waitingRepository.findFirstByReservationIdOrderByCreatedAt(reservationId);
+
+        if (waiting.isEmpty()) {
+            reservationRepository.deleteById(reservationId);
+            return;
+        }
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RoomEscapeException(ReservationExceptionCode.RESERVATION_NOT_EXIST));
+        reservation.setMember(waiting.get().getMember());
+
+        reservationRepository.save(reservation);
+        waitingRepository.deleteById(waiting.get().getId());
     }
 
     private List<ReservationTime> extractReservationTimes(List<Reservation> reservations) {

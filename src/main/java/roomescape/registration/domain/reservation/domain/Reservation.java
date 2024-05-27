@@ -31,6 +31,8 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
+    // todo: 나중에 예약 / 방탈출 분리하자.
+    // 방탈출: 날짜, 시간, 테마 / 예약: 방탈출, 멤버
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
@@ -47,6 +49,10 @@ public class Reservation {
 
     public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         this(NULL_ID, date, reservationTime, theme, member);
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
     }
 
     public long getId() {

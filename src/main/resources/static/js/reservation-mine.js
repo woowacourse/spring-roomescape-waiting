@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('Read failed');
       })
       .then(render)
-      .catch(error => console.error('Error fetching reservations:', error));
+      .catch(error => console.error('Error fetching registrations:', error));
 });
 
 function render(data) {
