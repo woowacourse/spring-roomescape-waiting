@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -22,6 +23,7 @@ public class Member {
     private Role role = Role.MEMBER;
 
     @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "name"))
     @Column(nullable = false)
     private MemberName name;
 
@@ -53,7 +55,7 @@ public class Member {
     }
 
     public String getName() {
-        return name.getName();
+        return name.getValue();
     }
 
     public String getEmail() {
