@@ -69,7 +69,7 @@ public class WaitingService {
         LocalDateTime timeToBook = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         if (timeToBook.isBefore(now)) {
-            throw new BadRequestException("[ERROR] 현재 이전 예약은 할 수 없습니다.");
+            throw new BadRequestException("[ERROR] 현재 이전 대기는 할 수 없습니다.");
         }
     }
 
@@ -81,7 +81,7 @@ public class WaitingService {
 
         boolean isExistReservation = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
         if (isExistReservation) {
-            throw new DuplicatedException("[ERROR] 본인의 예약에는 대기를 할 수 없습니다..");
+            throw new DuplicatedException("[ERROR] 본인의 예약에는 대기를 할 수 없습니다.");
         }
     }
 
@@ -96,7 +96,7 @@ public class WaitingService {
     private void validateExist(long id) {
         boolean isNotExist = !waitingRepository.existsById(id);
         if (isNotExist) {
-            throw new NotFoundException("[ERROR] 존재하지 않는 예약입니다.");
+            throw new NotFoundException("[ERROR] 존재하지 않는 대기입니다.");
         }
     }
 }
