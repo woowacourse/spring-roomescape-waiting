@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.request.ReservationRequest;
 import roomescape.controller.request.WaitingRequest;
 import roomescape.controller.response.WaitingResponse;
 import roomescape.model.Waiting;
@@ -14,8 +14,8 @@ import roomescape.service.WaitingService;
 import roomescape.service.dto.ReservationDto;
 
 import java.net.URI;
-import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/reservations/waiting")
 public class WaitingController {

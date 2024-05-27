@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.AdminReservationRequest;
 import roomescape.controller.response.ReservationResponse;
@@ -17,6 +18,7 @@ import roomescape.service.dto.ReservationDto;
 import java.net.URI;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
