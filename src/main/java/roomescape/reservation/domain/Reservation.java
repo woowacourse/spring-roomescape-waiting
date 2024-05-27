@@ -91,6 +91,14 @@ public class Reservation {
         return this.member.equals(member);
     }
 
+    public boolean isSuccessReservation() {
+        return status.isSuccess();
+    }
+
+    public boolean isWaitingReservation() {
+        return status.isWait();
+    }
+
     public Long getId() {
         return id;
     }
