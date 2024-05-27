@@ -118,8 +118,7 @@ public class ReservationService {
     }
 
     private void changeReservationMember(Reservation reservation, List<ReservationWaiting> reservationWaitings) {
-        reservationWaitings.sort(Comparator.comparing(ReservationWaiting::getDate)
-                .thenComparing(ReservationWaiting::getTime));
+        reservationWaitings.sort(Comparator.comparing(ReservationWaiting::getCreatedAt));
         ReservationWaiting firstWaiting = reservationWaitings.get(0);
         reservation.changeMember(firstWaiting.getMember());
         reservationWaitingRepository.delete(firstWaiting);
