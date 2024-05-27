@@ -22,6 +22,7 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -56,8 +57,10 @@ class ReservationServiceTest {
         final ReservationResponse reservationResponse = service.register(reservationRequest);
         long afterCreateSize = getReservationSize();
         //then
-        assertThat(reservationResponse.id()).isEqualTo(afterCreateSize);
-        assertThat(afterCreateSize).isEqualTo(initialSize + 1);
+        assertAll(
+                () -> assertThat(reservationResponse.id()).isEqualTo(afterCreateSize),
+                () -> assertThat(afterCreateSize).isEqualTo(initialSize + 1)
+        );
     }
 
     @Test
@@ -79,8 +82,10 @@ class ReservationServiceTest {
         long initialSize = getReservationSize();
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("1999-01-01"), 1L, 1L, 1L);
         //when, then
-        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(ReservationFailException.class);
-        assertThat(getReservationSize()).isEqualTo(initialSize);
+        assertAll(
+                () -> assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(ReservationFailException.class),
+                () -> assertThat(getReservationSize()).isEqualTo(initialSize)
+        );
     }
 
     @Test
@@ -91,9 +96,11 @@ class ReservationServiceTest {
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 99L,
                 1L);
         //when, then
-        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
-                InvalidClientFieldWithValueException.class);
-        assertThat(getReservationSize()).isEqualTo(initialSize);
+        assertAll(
+                () -> assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
+                        InvalidClientFieldWithValueException.class),
+                () -> assertThat(getReservationSize()).isEqualTo(initialSize)
+        );
     }
 
     @Test
@@ -104,9 +111,12 @@ class ReservationServiceTest {
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 99L, 1L,
                 1L);
         //when, then
-        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
-                InvalidClientFieldWithValueException.class);
-        assertThat(getReservationSize()).isEqualTo(initialSize);
+
+        assertAll(
+                () -> assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
+                        InvalidClientFieldWithValueException.class),
+                () -> assertThat(getReservationSize()).isEqualTo(initialSize)
+        );
     }
 
     @Test
@@ -117,9 +127,11 @@ class ReservationServiceTest {
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 1L,
                 99L);
         //when, then
-        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
-                InvalidClientFieldWithValueException.class);
-        assertThat(getReservationSize()).isEqualTo(initialSize);
+        assertAll(
+                () -> assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
+                        InvalidClientFieldWithValueException.class),
+                () -> assertThat(getReservationSize()).isEqualTo(initialSize)
+        );
     }
 
     @Test
@@ -169,8 +181,10 @@ class ReservationServiceTest {
         final ReservationResponse reservationResponse = service.register(reservationRequest);
         long afterCreateSize = getReservationSize();
         //then
-        assertThat(reservationResponse.id()).isEqualTo(afterCreateSize);
-        assertThat(afterCreateSize).isEqualTo(initialSize + 1);
+        assertAll(
+                () -> assertThat(reservationResponse.id()).isEqualTo(afterCreateSize),
+                () -> assertThat(afterCreateSize).isEqualTo(initialSize + 1)
+        );
     }
 
     @Test

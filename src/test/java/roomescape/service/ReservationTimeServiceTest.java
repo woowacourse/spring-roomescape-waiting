@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -48,8 +49,10 @@ class ReservationTimeServiceTest {
         final ReservationTimeResponse reservationTimeResponse = service.register(reservationTimeRequest);
         long afterCreateSize = getReservationTimeSize();
         //then
-        assertThat(reservationTimeResponse.id()).isEqualTo(afterCreateSize);
-        assertThat(afterCreateSize).isEqualTo(initialSize + 1);
+        assertAll(
+                () -> assertThat(reservationTimeResponse.id()).isEqualTo(afterCreateSize),
+                () -> assertThat(afterCreateSize).isEqualTo(initialSize + 1)
+        );
     }
 
     @Test
@@ -70,8 +73,10 @@ class ReservationTimeServiceTest {
         //given
         long initialSize = getReservationTimeSize();
         //when, then
-        assertThatThrownBy(() -> service.delete(1L)).isInstanceOf(DeleteNotAllowException.class);
-        assertThat(getReservationTimeSize()).isEqualTo(initialSize);
+        assertAll(
+                () -> assertThatThrownBy(() -> service.delete(1L)).isInstanceOf(DeleteNotAllowException.class),
+                () -> assertThat(getReservationTimeSize()).isEqualTo(initialSize)
+        );
     }
 
     @DisplayName("예약 가능한 시간 목록들을 반환한다.")

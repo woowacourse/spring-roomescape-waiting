@@ -14,6 +14,7 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -46,8 +47,10 @@ class ThemeServiceTest {
         final ThemeResponse themeResponse = service.register(themeRequest);
         long afterCreateSize = getThemeSize();
         //then
-        assertThat(themeResponse.id()).isEqualTo(afterCreateSize);
-        assertThat(afterCreateSize).isEqualTo(initialSize + 1);
+        assertAll(
+                () -> assertThat(themeResponse.id()).isEqualTo(afterCreateSize),
+                () -> assertThat(afterCreateSize).isEqualTo(initialSize + 1)
+        );
     }
 
     @Test
@@ -68,9 +71,10 @@ class ThemeServiceTest {
         //given
         long initialSize = getThemeSize();
         //when, then
-        assertThatThrownBy(() -> service.delete(1L)).isInstanceOf(DeleteNotAllowException.class);
-        assertThat(getThemeSize()).isEqualTo(initialSize);
-
+        assertAll(
+                () -> assertThatThrownBy(() -> service.delete(1L)).isInstanceOf(DeleteNotAllowException.class),
+                () -> assertThat(getThemeSize()).isEqualTo(initialSize)
+        );
     }
 
     @DisplayName("기간이 주어지면 가장 많이 예약한 테마 목록 순으로 조회 결과가 반환된다.")

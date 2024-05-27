@@ -16,6 +16,7 @@ import roomescape.domain.dto.SignupRequest;
 import roomescape.exception.SignupFailException;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -65,8 +66,10 @@ class MemberServiceTest {
                 new Password("hashedpassword", "salt"));
         SignupRequest signupRequest = new SignupRequest("user@test.com", "123456", "ash");
         //when, then
-        assertThatThrownBy(() -> service.registerUser(signupRequest)).isInstanceOf(SignupFailException.class);
-        assertThat(getMemberSize()).isEqualTo(3);
+        assertAll(
+                () -> assertThatThrownBy(() -> service.registerUser(signupRequest)).isInstanceOf(SignupFailException.class),
+                () -> assertThat(getMemberSize()).isEqualTo(3)
+        );
     }
 
     @DisplayName("로그인 정보가 일치하지 않으면 예외를 발생시킨다. ")
