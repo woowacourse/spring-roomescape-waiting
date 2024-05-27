@@ -118,8 +118,8 @@ public class ReservationService {
 
     private void updateWaitReservation(final Reservation reservation) {
         final LocalDate date = reservation.getDate();
-        final Long timeId = reservation.getTime().getId();
-        final Long themeId = reservation.getTheme().getId();
+        final Long timeId = reservation.getTimeId();
+        final Long themeId = reservation.getThemeId();
         reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, ReservationStatus.WAITING)
                 .ifPresent(Reservation::changeToReserved);
     }

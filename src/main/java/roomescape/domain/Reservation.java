@@ -83,4 +83,12 @@ public class Reservation {
     public ReservationStatus getStatus() {
         return status;
     }
+
+    public Long getTimeId() {
+        return time.getId();
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
 }
