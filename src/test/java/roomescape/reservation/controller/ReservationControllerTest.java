@@ -1,40 +1,28 @@
 package roomescape.reservation.controller;
 
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
-import static roomescape.fixture.MemberFixture.getMemberClover;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
-import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.TokenProvider;
-import roomescape.member.controller.dto.MemberResponse;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.controller.dto.ReservationTimeRequest;
-import roomescape.reservation.controller.dto.ReservationTimeResponse;
-import roomescape.reservation.controller.dto.ThemeRequest;
-import roomescape.reservation.controller.dto.ThemeResponse;
+import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
 import roomescape.util.ControllerTest;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.getMemberClover;
 
 @DisplayName("예약 API 통합 테스트")
 class ReservationControllerTest extends ControllerTest {
@@ -56,7 +44,7 @@ class ReservationControllerTest extends ControllerTest {
     String token;
 
     @BeforeEach
-    void setUp() {
+    void beforeEach() {
         token = tokenProvider.createAccessToken(getMemberChoco().getEmail());
     }
 
@@ -65,7 +53,7 @@ class ReservationControllerTest extends ControllerTest {
     void create() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("10:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();
@@ -87,15 +75,15 @@ class ReservationControllerTest extends ControllerTest {
     @TestFactory
     Stream<DynamicTest> delete() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(
-                AuthInfo.of(getMemberChoco()),
+        ReservationResponse reservationResponse = reservationService.createReservation(
                 new ReservationRequest(
                         LocalDate.now().plusDays(10).toString(),
                         reservationTimeResponse.id(),
-                        themeResponse.id())
+                        themeResponse.id()),
+                getMemberChoco().getId()
         );
 
         return Stream.of(
@@ -108,7 +96,7 @@ class ReservationControllerTest extends ControllerTest {
 
                     RestAssured.given().log().all()
                             .cookie("token", cloverToken)
-                            .when().delete("/reservations/" + reservationResponse.memberReservationId())
+                            .when().delete("/reservations/" + reservationResponse.reservationId())
                             .then().log().all()
                             .statusCode(403);
                 }),
@@ -116,7 +104,7 @@ class ReservationControllerTest extends ControllerTest {
                     //given
                     RestAssured.given().log().all()
                             .cookie("token", token)
-                            .when().delete("/reservations/" + reservationResponse.memberReservationId())
+                            .when().delete("/reservations/" + reservationResponse.reservationId())
                             .then().log().all()
                             .statusCode(204);
                 })
@@ -141,7 +129,7 @@ class ReservationControllerTest extends ControllerTest {
     void createBadRequest(String date) {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();
@@ -164,7 +152,7 @@ class ReservationControllerTest extends ControllerTest {
     void createReservationAfterNow() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();

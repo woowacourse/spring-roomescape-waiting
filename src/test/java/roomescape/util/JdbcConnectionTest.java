@@ -28,7 +28,7 @@ public class JdbcConnectionTest {
     void connectionTest() {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
-            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
+            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION_SLOT", null).next()).isTrue();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

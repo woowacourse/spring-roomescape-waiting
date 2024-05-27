@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
@@ -36,6 +37,7 @@ public class ReservationTimeController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") @Min(1) long timeId) {
         reservationTimeService.delete(timeId);
     }

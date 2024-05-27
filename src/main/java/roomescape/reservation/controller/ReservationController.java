@@ -7,11 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.global.annotation.LoginUser;
-import roomescape.reservation.controller.dto.MyReservationResponse;
-import roomescape.reservation.controller.dto.ReservationQueryRequest;
-import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -21,9 +19,12 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @GetMapping("/reservations")
@@ -33,26 +34,27 @@ public class ReservationController {
             @RequestParam(value = "dateFrom", required = false) LocalDate startDate,
             @RequestParam(value = "dateTo", required = false) LocalDate endDate
     ) {
-        return reservationService.findMemberReservations(
+        return reservationService.findReservations(
                 new ReservationQueryRequest(themeId, memberId, startDate, endDate));
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(@LoginUser AuthInfo authInfo,
                                                       @RequestBody @Valid ReservationRequest reservationRequest) {
-        ReservationResponse response = reservationService.createMemberReservation(authInfo, reservationRequest);
-        return ResponseEntity.created(URI.create("/reservations/" + response.memberReservationId())).body(response);
+        ReservationResponse response = reservationService.createReservation(reservationRequest, authInfo.getId());
+        return ResponseEntity.created(URI.create("/reservations/" + response.reservationId())).body(response);
     }
 
     @DeleteMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@LoginUser AuthInfo authInfo,
-                                       @PathVariable("id") @Min(1) long reservationMemberId) {
-        reservationService.deleteMemberReservation(authInfo, reservationMemberId);
+                                       @PathVariable("id") @Min(1) long reservationId) {
+        waitingReservationService.deleteReservation(authInfo, reservationId);
     }
 
     @GetMapping("/reservations/mine")
-    public List<MyReservationResponse> getMyReservations(@LoginUser AuthInfo authInfo) {
-        return reservationService.findMyReservations(authInfo);
+    public List<ReservationViewResponse> getMyReservations(@LoginUser AuthInfo authInfo) {
+        List<ReservationWithStatus> reservationWithStatuses = reservationService.findReservations(authInfo);
+        return waitingReservationService.convertReservationsWithStatusToViewResponses(reservationWithStatuses);
     }
 }

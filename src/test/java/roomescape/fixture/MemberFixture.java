@@ -17,6 +17,6 @@ public class MemberFixture {
     }
 
     public static Member getMemberTacan() {
-        return new Member( "타칸", "dev.tacan@gmail.com","1234", Role.USER);
+        return new Member( 3L, "타칸", "dev.tacan@gmail.com","1234", Role.USER);
     }
 }

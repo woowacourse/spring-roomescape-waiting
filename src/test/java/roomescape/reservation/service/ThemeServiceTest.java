@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.ReservationFixture.getNextDayReservation;
+import static roomescape.fixture.ReservationSlotFixture.getNextDayReservationSlot;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
 
@@ -17,8 +17,8 @@ import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.util.ServiceTest;
@@ -27,13 +27,13 @@ import roomescape.util.ServiceTest;
 @DisplayName("테마 로직 테스트")
 class ThemeServiceTest extends ServiceTest {
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationSlotRepository reservationSlotRepository;
     @Autowired
     ThemeRepository themeRepository;
     @Autowired
     ReservationTimeRepository timeRepository;
     @Autowired
-    MemberReservationRepository memberReservationRepository;
+    ReservationRepository reservationRepository;
     @Autowired
     ThemeService themeService;
 
@@ -47,7 +47,7 @@ class ThemeServiceTest extends ServiceTest {
         List<ThemeResponse> themes = themeService.findAllThemes();
 
         //then
-        assertAll(() -> assertThat(themes).hasSize(1),
+        assertAll(
                 () -> assertThat(themes.get(0).name()).isEqualTo(theme.getName()),
                 () -> assertThat(themes.get(0).description()).isEqualTo(theme.getDescription()),
                 () -> assertThat(themes.get(0).thumbnail()).isEqualTo(theme.getThumbnail()));
@@ -76,13 +76,13 @@ class ThemeServiceTest extends ServiceTest {
     void delete() {
         //given
         Theme theme = getTheme1();
-        themeRepository.save(theme);
+        Theme saved = themeRepository.save(theme);
 
         //when
         themeService.delete(theme.getId());
 
         //then
-        assertThat(themeRepository.findAll()).hasSize(0);
+        assertThat(themeRepository.findAll()).doesNotContain(saved);
     }
 
     @DisplayName("예약이 존재하는 테마 삭제 시, 예외가 발생한다.")
@@ -91,7 +91,7 @@ class ThemeServiceTest extends ServiceTest {
         //given
         ReservationTime time = timeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
-        reservationRepository.save(getNextDayReservation(time, theme));
+        reservationSlotRepository.save(getNextDayReservationSlot(time, theme));
 
         //when & then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))

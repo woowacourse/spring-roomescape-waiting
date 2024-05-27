@@ -12,7 +12,7 @@ public class ReservationPageController {
     }
 
     @GetMapping("/reservation")
-    public String getReservationPage() {
+    public String getReservationSlotPage() {
         return "reservation";
     }
 

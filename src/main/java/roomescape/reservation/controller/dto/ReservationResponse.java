@@ -4,33 +4,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 
 public record ReservationResponse(
         @JsonProperty("id")
-        long memberReservationId,
+        long reservationId,
         MemberResponse member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme) {
-    public static ReservationResponse from(long memberReservationId, Reservation reservation, Member member) {
+    public static ReservationResponse from(long reservationId, ReservationSlot reservationSlot, Member member) {
         return new ReservationResponse(
-                memberReservationId,
+                reservationId,
                 MemberResponse.from(member),
-                reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme())
+                reservationSlot.getDate(),
+                ReservationTimeResponse.from(reservationSlot.getTime()),
+                ThemeResponse.from(reservationSlot.getTheme())
         );
     }
 
-    public static ReservationResponse from(MemberReservation memberReservation) {
+    public static ReservationResponse from(Reservation reservation) {
+        ReservationSlot reservationSlot = reservation.getReservationSlot();
         return new ReservationResponse(
-                memberReservation.getId(),
-                MemberResponse.from(memberReservation.getMember()),
-                memberReservation.getReservation().getDate(),
-                ReservationTimeResponse.from(memberReservation.getReservation().getTime()),
-                ThemeResponse.from(memberReservation.getReservation().getTheme())
+                reservation.getId(),
+                MemberResponse.from(reservation.getMember()),
+                reservationSlot.getDate(),
+                ReservationTimeResponse.from(reservationSlot.getTime()),
+                ThemeResponse.from(reservationSlot.getTheme())
         );
     }
 }

@@ -5,24 +5,28 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.BadRequestException;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.AvailableTimes;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeService {
-    private final ReservationRepository reservationRepository;
+
+    private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationTimeService(ReservationRepository reservationRepository,
+    public ReservationTimeService(ReservationSlotRepository reservationSlotRepository,
                                   ReservationTimeRepository reservationTimeRepository) {
-        this.reservationRepository = reservationRepository;
+        this.reservationSlotRepository = reservationSlotRepository;
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
@@ -36,6 +40,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTimeRepository.save(reservationTime));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAll() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -44,12 +49,13 @@ public class ReservationTimeService {
     }
 
     public void delete(long timeId) {
-        if (reservationRepository.existsByTimeId(timeId)) {
+        if (reservationSlotRepository.existsByTimeId(timeId)) {
             throw new BadRequestException("예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(timeId);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableTimeResponse> findAvailableTimes(LocalDate date, long themeId) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
         Set<ReservationTime> reservedTimes = reservationTimeRepository.findReservedTime(date, themeId);

@@ -2,11 +2,11 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import roomescape.exception.custom.BadRequestException;
+import org.hibernate.annotations.CreationTimestamp;
+import roomescape.member.domain.Member;
 
 @Entity
 public class Reservation {
@@ -14,63 +14,69 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private LocalDate date;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_time_id")
-    private ReservationTime time;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Theme theme;
 
+    @ManyToOne
+    private Member member;
+
+    @ManyToOne
+    private ReservationSlot reservationSlot;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
 
     public Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme) {
-        validate(date, time);
+    public Reservation(Member member,
+                       ReservationSlot reservationSlot,
+                       ReservationStatus status) {
+        this.member = member;
+        this.reservationSlot = reservationSlot;
+        this.status = status;
+    }
+
+    public Reservation(Long id, Member member, ReservationSlot reservationSlot) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.member = member;
+        this.reservationSlot = reservationSlot;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme) {
-        this(null, date, time, theme);
+    public Reservation(Member member, ReservationSlot reservationSlot) {
+        this.member = member;
+        this.reservationSlot = reservationSlot;
+        this.createdAt = LocalDateTime.now();
+        this.status = ReservationStatus.BOOKED;
     }
 
-    public boolean isPast() {
-        return LocalDateTime.of(this.date, this.time.getStartAt()).isBefore(LocalDateTime.now());
+    public boolean isBookedBy(Member member) {
+        return this.member.equals(member);
     }
 
-
-    private void validate(LocalDate date, ReservationTime time) {
-        if (date == null || time == null) {
-            throw new BadRequestException("필수 요청값이 누락되었습니다.");
-        }
-    }
-
-    public boolean isSame(LocalDate date, ReservationTime time, Theme theme) {
-        return this.date.equals(date) && this.time.equals(time) && this.theme.equals(theme);
+    public void bookReservation() {
+        this.status = ReservationStatus.BOOKED;
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public Member getMember() {
+        return member;
     }
 
-    public ReservationTime getTime() {
-        return time;
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
     }
 
-    public Theme getTheme() {
-        return theme;
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -90,9 +96,10 @@ public class Reservation {
     public String toString() {
         return "Reservation{" +
                 "id=" + id +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
+                ", member=" + member +
+                ", reservationSlot=" + reservationSlot +
+                ", createdAt=" + createdAt +
+                ", status=" + status +
                 '}';
     }
 }
