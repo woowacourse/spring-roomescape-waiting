@@ -1,4 +1,4 @@
-package roomescape.service.exception;
+package roomescape.domain.exception;
 
 public class PastReservationException extends RuntimeException {
 

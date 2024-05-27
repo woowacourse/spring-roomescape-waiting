@@ -21,16 +21,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.domain.MemberRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
-import roomescape.infrastructure.MemberRepository;
-import roomescape.infrastructure.ReservationRepository;
-import roomescape.infrastructure.ReservationTimeRepository;
-import roomescape.infrastructure.ThemeRepository;
-import roomescape.service.exception.PastReservationException;
+import roomescape.domain.ThemeRepository;
+import roomescape.domain.exception.PastReservationException;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
 import roomescape.service.response.ReservationTimeAppResponse;
@@ -61,31 +60,31 @@ class ReservationServiceTest {
         Reservation reservation = VALID_RESERVATION;
 
         when(reservationTimeRepository.findById(timeId))
-            .thenReturn(Optional.of(VALID_RESERVATION_TIME));
+                .thenReturn(Optional.of(VALID_RESERVATION_TIME));
         when(themeRepository.findById(themeId))
-            .thenReturn(Optional.of(VALID_THEME));
+                .thenReturn(Optional.of(VALID_THEME));
         when(memberRepository.findById(memberId))
-            .thenReturn(Optional.of(VALID_MEMBER));
+                .thenReturn(Optional.of(VALID_MEMBER));
 
         when(reservationRepository.save(any(Reservation.class)))
-            .thenReturn(new Reservation(
-                reservationId,
-                VALID_MEMBER,
-                VALID_RESERVATION_DATE,
-                VALID_RESERVATION_TIME,
-                VALID_THEME, ReservationStatus.RESERVED)
-            );
+                .thenReturn(new Reservation(
+                        reservationId,
+                        VALID_MEMBER,
+                        VALID_RESERVATION_DATE,
+                        VALID_RESERVATION_TIME,
+                        VALID_THEME)
+                );
 
         ReservationAppRequest request = new ReservationAppRequest(VALID_RESERVATION_DATE.getDate().toString(), timeId,
-            themeId, memberId);
+                themeId, memberId);
         ReservationAppResponse actual = reservationService.save(request);
         ReservationAppResponse expected = new ReservationAppResponse(
-            reservationId,
-            reservation.getMember().getName().getName(),
-            reservation.getReservationDate(),
-            ReservationTimeAppResponse.from(reservation.getReservationTime()),
-            ThemeAppResponse.from(reservation.getTheme()),
-            reservation.getStatus().getStatus());
+                reservationId,
+                reservation.getMember().getName().getName(),
+                reservation.getReservationDate(),
+                ReservationTimeAppResponse.from(reservation.getReservationTime()),
+                ThemeAppResponse.from(reservation.getTheme())
+        );
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -94,7 +93,7 @@ class ReservationServiceTest {
     @Test
     void save_TimeIdDoesntExist() {
         assertThatThrownBy(() -> reservationService.save(new ReservationAppRequest("2030-12-31", 1L, 1L, 1L)))
-            .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @DisplayName("실패: 중복 예약을 생성하면 예외가 발생한다.")
@@ -103,18 +102,19 @@ class ReservationServiceTest {
         String rawDate = "2030-12-31";
 
         when(themeRepository.findById(themeId))
-            .thenReturn(Optional.of(VALID_THEME));
+                .thenReturn(Optional.of(VALID_THEME));
         when(reservationTimeRepository.findById(timeId))
-            .thenReturn(Optional.of(VALID_RESERVATION_TIME));
+                .thenReturn(Optional.of(VALID_RESERVATION_TIME));
         when(memberRepository.findById(memberId))
-            .thenReturn(Optional.of(VALID_MEMBER));
+                .thenReturn(Optional.of(VALID_MEMBER));
 
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(new ReservationDate(rawDate), timeId, themeId))
-            .thenReturn(true);
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(new ReservationDate(rawDate), timeId,
+                themeId))
+                .thenReturn(true);
 
         assertThatThrownBy(
-            () -> reservationService.save(new ReservationAppRequest(rawDate, timeId, themeId, memberId)))
-            .isInstanceOf(IllegalStateException.class);
+                () -> reservationService.save(new ReservationAppRequest(rawDate, timeId, themeId, memberId)))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @DisplayName("실패: 어제 날짜에 대한 예약을 생성하면 예외가 발생한다.")
@@ -123,15 +123,15 @@ class ReservationServiceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
         when(reservationTimeRepository.findById(timeId))
-            .thenReturn(Optional.of(VALID_RESERVATION_TIME));
+                .thenReturn(Optional.of(VALID_RESERVATION_TIME));
         when(themeRepository.findById(themeId))
-            .thenReturn(Optional.of(VALID_THEME));
+                .thenReturn(Optional.of(VALID_THEME));
         when(memberRepository.findById(memberId))
-            .thenReturn(Optional.of(VALID_MEMBER));
+                .thenReturn(Optional.of(VALID_MEMBER));
 
         assertThatThrownBy(
-            () -> reservationService.save(
-                new ReservationAppRequest(yesterday.toString(), timeId, themeId, memberId))
+                () -> reservationService.save(
+                        new ReservationAppRequest(yesterday.toString(), timeId, themeId, memberId))
         ).isInstanceOf(PastReservationException.class);
     }
 
@@ -145,15 +145,15 @@ class ReservationServiceTest {
         Theme theme = new Theme("방탈출1", "방탈출1을 한다.", "https://url");
 
         when(reservationTimeRepository.findById(timeId))
-            .thenReturn(Optional.of(reservationTime));
+                .thenReturn(Optional.of(reservationTime));
         when(themeRepository.findById(themeId))
-            .thenReturn(Optional.of(theme));
+                .thenReturn(Optional.of(theme));
         when(memberRepository.findById(memberId))
-            .thenReturn(Optional.of(VALID_MEMBER));
+                .thenReturn(Optional.of(VALID_MEMBER));
 
         assertThatThrownBy(
-            () -> reservationService.save(
-                new ReservationAppRequest(today.toString(), timeId, themeId, memberId))
+                () -> reservationService.save(
+                        new ReservationAppRequest(today.toString(), timeId, themeId, memberId))
         ).isInstanceOf(PastReservationException.class);
     }
 
@@ -161,10 +161,9 @@ class ReservationServiceTest {
     @Test
     void findByMemberId() {
         Reservation memberReservation = new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE,
-            VALID_RESERVATION_TIME, VALID_THEME,
-            ReservationStatus.RESERVED);
+                VALID_RESERVATION_TIME, VALID_THEME);
         when(reservationRepository.findAllByMemberId(memberId))
-            .thenReturn(List.of(memberReservation));
+                .thenReturn(List.of(memberReservation));
 
         List<ReservationAppResponse> actual = reservationService.findByMemberId(memberId);
         List<ReservationAppResponse> expected = List.of(ReservationAppResponse.from(memberReservation));

@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.MemberAuthService;
 import roomescape.service.request.MemberSignUpAppRequest;
 import roomescape.service.response.MemberAppResponse;
+import roomescape.service.response.SignupMemberAppResponse;
 import roomescape.web.auth.CookieHandler;
 import roomescape.web.auth.JwtProvider;
 import roomescape.web.controller.request.MemberSignUpWebRequest;
 import roomescape.web.controller.request.TokenWebRequest;
 import roomescape.web.controller.response.MemberWebResponse;
+import roomescape.web.controller.response.SignupMemberWebResponse;
 
 @RestController
 public class MemberAuthController {
@@ -54,11 +56,11 @@ public class MemberAuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<MemberWebResponse> signUp(@Valid @RequestBody MemberSignUpWebRequest request) {
-        MemberAppResponse appResponse = memberAuthService.signUp(
-            new MemberSignUpAppRequest(request.name(), request.email(), request.password()));
+    public ResponseEntity<SignupMemberWebResponse> signUp(@Valid @RequestBody MemberSignUpWebRequest request) {
+        SignupMemberAppResponse appResponse = memberAuthService.signUp(
+                new MemberSignUpAppRequest(request.name(), request.email(), request.password()));
 
-        MemberWebResponse response = new MemberWebResponse(appResponse.id(), appResponse.name(), appResponse.role());
+        SignupMemberWebResponse response = new SignupMemberWebResponse(appResponse.id(), appResponse.name(), appResponse.role());
         return ResponseEntity.created(URI.create("/member" + appResponse.id())).body(response);
     }
 

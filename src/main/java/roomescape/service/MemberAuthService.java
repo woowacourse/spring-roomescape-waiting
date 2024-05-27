@@ -3,15 +3,18 @@ package roomescape.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.MemberEmail;
 import roomescape.domain.MemberName;
 import roomescape.domain.MemberPassword;
-import roomescape.infrastructure.MemberRepository;
+import roomescape.domain.MemberRepository;
 import roomescape.service.request.MemberSignUpAppRequest;
 import roomescape.service.response.MemberAppResponse;
+import roomescape.service.response.SignupMemberAppResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberAuthService {
     private final MemberRepository memberRepository;
 
@@ -19,7 +22,8 @@ public class MemberAuthService {
         this.memberRepository = memberRepository;
     }
 
-    public MemberAppResponse signUp(MemberSignUpAppRequest request) {
+    @Transactional
+    public SignupMemberAppResponse signUp(MemberSignUpAppRequest request) {
         if (memberRepository.existsByEmail(new MemberEmail(request.email()))) {
             throw new IllegalStateException("해당 이메일의 회원이 이미 존재합니다.");
         }
@@ -30,7 +34,7 @@ public class MemberAuthService {
                 new MemberPassword(request.password()));
 
         Member savedMember = memberRepository.save(newMember);
-        return new MemberAppResponse(savedMember.getId(), savedMember.getName().getName(),
+        return new SignupMemberAppResponse(savedMember.getId(), savedMember.getName().getName(),
                 savedMember.getRole().name());
     }
 

@@ -2,8 +2,6 @@ package roomescape.domain;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
+import roomescape.domain.exception.PastReservationException;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -31,31 +29,35 @@ public class Reservation {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private ReservationStatus status;
-
     protected Reservation() {
     }
 
-    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
-        this(null, member, date, time, theme, status);
+    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme);
     }
 
-    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
+    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme) {
         validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-        validateStatus(status);
         this.member = member;
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
+    }
+
+    public static Reservation create(Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        Reservation newInstance = new Reservation(member, date, time, theme);
+        validatePastReservation(newInstance);
+        return newInstance;
+    }
+
+    private static void validatePastReservation(Reservation reservation) {
+        if (reservation.isPast()) {
+            throw new PastReservationException();
+        }
     }
 
     private void validateMember(Member member) {
@@ -79,12 +81,6 @@ public class Reservation {
     private void validateTheme(Theme theme) {
         if (theme == null) {
             throw new IllegalArgumentException("예약 테마는 비어있을 수 없습니다.");
-        }
-    }
-
-    private void validateStatus(ReservationStatus status) {
-        if (status == null) {
-            throw new IllegalArgumentException("예약 상태는 비어있을 수 없습니다.");
         }
     }
 
@@ -112,7 +108,7 @@ public class Reservation {
         return theme;
     }
 
-    public ReservationStatus getStatus() {
-        return status;
+    public void changeMember(Member member) {
+        this.member = member;
     }
 }

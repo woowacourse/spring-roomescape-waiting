@@ -2,40 +2,45 @@ package roomescape.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
+import roomescape.domain.MemberRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.ReservationWaitingRepository;
 import roomescape.domain.Theme;
-import roomescape.infrastructure.MemberRepository;
-import roomescape.infrastructure.ReservationRepository;
-import roomescape.infrastructure.ReservationTimeRepository;
-import roomescape.infrastructure.ThemeRepository;
-import roomescape.service.exception.PastReservationException;
+import roomescape.domain.ThemeRepository;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository, MemberRepository memberRepository) {
+            ThemeRepository themeRepository, MemberRepository memberRepository,
+            ReservationWaitingRepository reservationWaitingRepository) {
 
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     @Transactional
@@ -44,10 +49,8 @@ public class ReservationService {
         ReservationDate date = new ReservationDate(request.date());
         ReservationTime time = findTime(request.timeId());
         Theme theme = findTheme(request.themeId());
-        Reservation reservation = new Reservation(member, date, time, theme, ReservationStatus.RESERVED);
-        validatePastReservation(reservation);
         validateDuplication(date, request.timeId(), request.themeId());
-
+        Reservation reservation = Reservation.create(member, date, time, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationAppResponse.from(savedReservation);
@@ -68,12 +71,6 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("예약에 대한 사용자가 존재하지 않습니다."));
     }
 
-    private void validatePastReservation(Reservation reservation) {
-        if (reservation.isPast()) {
-            throw new PastReservationException();
-        }
-    }
-
     private void validateDuplication(ReservationDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new IllegalStateException("이미 존재하는 예약 정보 입니다.");
@@ -82,7 +79,14 @@ public class ReservationService {
 
     @Transactional
     public void delete(Long id) {
-        reservationRepository.deleteById(id);
+        Optional<ReservationWaiting> nextWaiting = reservationWaitingRepository.findFirstByReservationIdOrderByPriorityAsc(
+                id);
+        nextWaiting.ifPresentOrElse(reservationWaiting -> {
+                    reservationWaiting.approveWaitingMember();
+                    reservationWaitingRepository.delete(reservationWaiting);
+                },
+                () -> reservationRepository.deleteById(id)
+        );
     }
 
     public List<ReservationAppResponse> findAll() {

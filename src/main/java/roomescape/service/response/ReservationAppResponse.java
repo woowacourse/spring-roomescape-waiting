@@ -8,8 +8,8 @@ public record ReservationAppResponse(
         String name,
         ReservationDate date,
         ReservationTimeAppResponse reservationTimeAppResponse,
-        ThemeAppResponse themeAppResponse,
-        String reservationStatus) {
+        ThemeAppResponse themeAppResponse
+) {
 
     public static ReservationAppResponse from(Reservation reservation) {
         return new ReservationAppResponse(
@@ -22,8 +22,7 @@ public record ReservationAppResponse(
                 new ThemeAppResponse(reservation.getTheme().getId(),
                         reservation.getTheme().getName(),
                         reservation.getTheme().getDescription(),
-                        reservation.getTheme().getThumbnail()),
-                reservation.getStatus().getStatus()
+                        reservation.getTheme().getThumbnail())
         );
     }
 }
