@@ -23,7 +23,7 @@ public class AuthService {
 
     public LoginResponse login(final LoginRequest loginMemberRequest) {
         String email = loginMemberRequest.email();
-        Member member = memberRepository.getByEmail(new Email(email), "로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요.");
+        Member member = memberRepository.getByEmail(new Email(email));
         checkInvalidAuthInfo(member, loginMemberRequest.password());
         return new LoginResponse(tokenProvider.createToken(member));
     }

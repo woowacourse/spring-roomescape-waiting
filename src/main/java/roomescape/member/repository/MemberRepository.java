@@ -10,8 +10,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(Email email);
 
-    default Member getByEmail(Email email, String exceptionMessage) {
-        return findByEmail(email).orElseThrow(() -> new NoSuchElementException(exceptionMessage));
+    default Member getByEmail(Email email) {
+        return findByEmail(email).orElseThrow(
+                () -> new NoSuchElementException("이메일 " + email.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
     }
 
     default Member getById(Long id) {

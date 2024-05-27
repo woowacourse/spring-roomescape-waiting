@@ -63,7 +63,7 @@ class AuthIntegrationTest {
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(404)
-                .body("detail", equalTo("로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요."));
+                .body("detail", equalTo("이메일 login@naver.com에 해당하는 회원이 존재하지 않습니다."));
     }
 
     @Test
