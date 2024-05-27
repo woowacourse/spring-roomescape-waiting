@@ -1,9 +1,10 @@
+const ADMIN_RESERVATION_ENDPOINT = '/admin/reservations';
 document.addEventListener('DOMContentLoaded', () => {
   /*
-  TODO: [4단계] 예약 대기 관리 기능
-        예약 대기 목록 조회 endpoint 설정
+  [4단계] 예약 대기 관리 기능
+  예약 대기 목록 조회 endpoint 설정
    */
-  fetch('/admin/reservations') // 내 예약 목록 조회 API 호출
+  fetch(ADMIN_RESERVATION_ENDPOINT) // 내 예약 목록 조회 API 호출
       .then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
@@ -20,8 +21,7 @@ function render(data) {
     const row = tableBody.insertRow();
 
     /*
-    TODO: [4단계] 예약 대기 관리 기능
-          예약 대기 목록 조회 response 명세에 맞춰 값 설정
+    [4단계] 예약 대기 관리 기능
      */
     const id = item.id;
     const name = item.memberName;
@@ -38,10 +38,8 @@ function render(data) {
     const actionCell = row.insertCell(row.cells.length);
 
     /*
-    TODO: [4단계] 예약 대기 관리 기능
-          예약 대기 승인/거절 버튼이 필요한 경우 활성화하여 사용
+    [4단계] 예약 대기 관리 기능
      */
-    // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
     actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
   });
 }
@@ -51,8 +49,8 @@ function approve(event) {
   const id = row.cells[0].textContent;
 
   /*
-  TODO: [4단계] 예약 대기 목록 관리 기능
-        예약 대기 승인 API 호출
+  [4단계] 예약 대기 목록 관리 기능
+  예약 대기 승인 API 호출
    */
   const endpoint = '' + id;
   return fetch(endpoint, {
@@ -68,10 +66,10 @@ function deny(event) {
   const id = row.cells[0].textContent;
 
   /*
-  TODO: [4단계] 예약 대기 목록 관리 기능
-        예약 대기 거절 API 호출
+  [4단계] 예약 대기 목록 관리 기능
+   예약 대기 거절 API 호출
    */
-  const endpoint = '/reservations/' + id;
+  const endpoint = `${ADMIN_RESERVATION_ENDPOINT}/${id}`;
   return fetch(endpoint, {
     method: 'DELETE'
   }).then(response => {

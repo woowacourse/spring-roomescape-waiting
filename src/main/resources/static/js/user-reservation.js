@@ -160,7 +160,7 @@ function onReservationButtonClick() {
       timeId: selectedTimeId,
     };
 
-    fetch('/reservations', {
+    fetch(RESERVATION_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -202,9 +202,9 @@ function onWaitButtonClick() {
     };
 
     /*
-    TODO: [3단계] 예약 대기 생성 요청 API 호출
+    [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('', {
+    fetch(RESERVATION_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
