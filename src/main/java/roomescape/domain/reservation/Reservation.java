@@ -20,7 +20,7 @@ public class Reservation {
     private Member member;
 
     @Embedded
-    Schedule schedule;
+    private Schedule schedule;
 
     protected Reservation() {
     }
