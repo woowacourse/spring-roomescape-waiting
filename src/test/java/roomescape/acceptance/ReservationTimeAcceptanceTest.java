@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.*;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlMergeMode;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 

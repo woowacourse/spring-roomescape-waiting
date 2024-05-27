@@ -1,15 +1,12 @@
 package roomescape.controller;
 
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import roomescape.auth.LoginMemberId;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.auth.AuthService;
 import roomescape.service.theme.ThemeService;
-import roomescape.service.theme.dto.ThemeRequest;
 import roomescape.service.theme.dto.ThemeResponse;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController

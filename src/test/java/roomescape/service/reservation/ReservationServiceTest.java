@@ -22,6 +22,11 @@ import java.time.LocalTime;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql("/truncate-with-time-and-theme.sql")
 public abstract class ReservationServiceTest {
+    protected ReservationDetail reservationDetail;
+    protected Theme theme;
+    protected Member admin;
+    protected Member member;
+    protected Member anotherMember;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -30,11 +35,6 @@ public abstract class ReservationServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private ReservationDetailRepository reservationDetailRepository;
-    protected ReservationDetail reservationDetail;
-    protected Theme theme;
-    protected Member admin;
-    protected Member member;
-    protected Member anotherMember;
 
     @BeforeEach
     void setUp() {

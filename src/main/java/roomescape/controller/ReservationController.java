@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMemberId;
 import roomescape.service.reservation.ReservationCreateService;
-import roomescape.service.reservation.ReservationDeleteService;
 import roomescape.service.reservation.ReservationReadService;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;

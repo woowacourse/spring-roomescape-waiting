@@ -36,7 +36,7 @@ public class ReservationDeleteService {
     }
 
     private void updateIfDeletedReserved(Reservation reservation) {
-        if(reservation.isReserved()) {
+        if (reservation.isReserved()) {
             ReservationDetail detail = reservation.getDetail();
             reservationRepository.findFirstByDetailIdOrderByCreatedAt(detail.getId())
                     .ifPresent(Reservation::reserved);

@@ -10,10 +10,8 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

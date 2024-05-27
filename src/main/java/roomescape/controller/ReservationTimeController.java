@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMemberId;
-import roomescape.service.auth.AuthService;
 import roomescape.service.schedule.ReservationTimeService;
 import roomescape.service.schedule.dto.AvailableReservationTimeResponse;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
