@@ -3,7 +3,7 @@ package roomescape.acceptance;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
-import static roomescape.acceptance.PreInsertedData.*;
+import static roomescape.PreInsertedData.*;
 
 public class Fixture {
 

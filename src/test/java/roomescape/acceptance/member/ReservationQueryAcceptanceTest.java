@@ -12,7 +12,7 @@ import roomescape.dto.response.MultipleResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance.Fixture.customer1Token;
-import static roomescape.acceptance.PreInsertedData.*;
+import static roomescape.PreInsertedData.*;
 
 class ReservationQueryAcceptanceTest extends BaseAcceptanceTest {
 

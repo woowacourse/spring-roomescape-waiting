@@ -11,7 +11,7 @@ import roomescape.dto.response.ReservationResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.*;
+import static roomescape.PreInsertedData.*;
 
 @DisplayName("관리자가 예약을 필터링해서 조회한다.")
 class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {

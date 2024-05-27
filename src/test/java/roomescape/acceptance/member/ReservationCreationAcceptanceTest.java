@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.adminToken;
 import static roomescape.acceptance.Fixture.customer1Token;
-import static roomescape.acceptance.PreInsertedData.*;
+import static roomescape.PreInsertedData.*;
 
 class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
 

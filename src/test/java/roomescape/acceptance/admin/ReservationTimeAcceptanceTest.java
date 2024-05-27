@@ -21,8 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.TIME_10_O0;
-import static roomescape.acceptance.PreInsertedData.TIME_11_00;
+import static roomescape.PreInsertedData.TIME_10_O0;
+import static roomescape.PreInsertedData.TIME_11_00;
 
 class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 

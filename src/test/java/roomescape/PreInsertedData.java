@@ -1,4 +1,4 @@
-package roomescape.acceptance;
+package roomescape;
 
 import roomescape.domain.*;
 

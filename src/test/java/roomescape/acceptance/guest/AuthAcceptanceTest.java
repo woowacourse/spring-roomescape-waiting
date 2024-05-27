@@ -13,8 +13,8 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.acceptance.PreInsertedData.THEME_1;
-import static roomescape.acceptance.PreInsertedData.TIME_10_O0;
+import static roomescape.PreInsertedData.THEME_1;
+import static roomescape.PreInsertedData.TIME_10_O0;
 
 class AuthAcceptanceTest extends BaseAcceptanceTest {
 

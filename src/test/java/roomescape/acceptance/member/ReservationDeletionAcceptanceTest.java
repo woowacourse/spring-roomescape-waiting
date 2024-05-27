@@ -20,8 +20,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.*;
-import static roomescape.acceptance.PreInsertedData.RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100;
-import static roomescape.acceptance.PreInsertedData.RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100;
 
 @DisplayName("고객이 예약 대기를 삭제한다.")
 class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
