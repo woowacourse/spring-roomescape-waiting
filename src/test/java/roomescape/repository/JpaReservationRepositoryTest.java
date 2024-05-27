@@ -149,7 +149,7 @@ class JpaReservationRepositoryTest {
                         .time(time)
                         .theme(theme)
                         .build());
-        Theme randomTheme = new Theme(2L, DEFAULT_THEME);
+        Theme randomTheme = themeRepository.save(DEFAULT_THEME);
 
         assertAll(
                 () -> assertThat(reservationRepository.existsByTheme(reservation.getTheme())).isTrue(),

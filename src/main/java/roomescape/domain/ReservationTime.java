@@ -1,14 +1,13 @@
 package roomescape.domain;
 
+import static roomescape.exception.ExceptionType.EMPTY_TIME;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import roomescape.exception.RoomescapeException;
-
 import java.time.LocalTime;
-
-import static roomescape.exception.ExceptionType.EMPTY_TIME;
+import roomescape.exception.RoomescapeException;
 
 @Entity
 public class ReservationTime {
@@ -31,10 +30,6 @@ public class ReservationTime {
         }
         this.id = id;
         this.startAt = startAt;
-    }
-
-    public boolean isIdOf(long id) {
-        return this.id == id;
     }
 
     public long getId() {
