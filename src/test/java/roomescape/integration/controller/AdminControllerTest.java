@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.integration.controller;
 
 import static org.hamcrest.Matchers.is;
 
@@ -24,7 +24,7 @@ import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-public class AdminIntegrationTest {
+public class AdminControllerTest {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @LocalServerPort
     private int port;

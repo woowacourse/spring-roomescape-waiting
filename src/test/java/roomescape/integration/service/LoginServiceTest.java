@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.integration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,6 +24,8 @@ import roomescape.dto.LoginRequest;
 import roomescape.entity.Member;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
+import roomescape.service.JwtGenerator;
+import roomescape.service.LoginService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class LoginServiceTest {
