@@ -50,7 +50,7 @@ public class ClientReservationController {
         return ResponseEntity.ok(reservationService.findMemberReservations(member));
     }
 
-    @DeleteMapping("/reservations-mine/wait/{id}")
+    @DeleteMapping("/reservations-mine/waiting/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable(value = "id") Long id, Member member) {
         reservationService.deleteByIdWithWaiting(id, member);
         return ResponseEntity.noContent().build();
