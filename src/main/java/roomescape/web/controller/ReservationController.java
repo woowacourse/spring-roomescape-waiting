@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ReservationService;
-import roomescape.service.dto.request.member.MemberInfo;
+import roomescape.service.dto.request.member.Credential;
 import roomescape.service.dto.request.reservation.ReservationRequest;
 import roomescape.service.dto.request.reservation.ReservationSearchCond;
 import roomescape.service.dto.request.reservation.UserReservationRequest;
@@ -50,10 +50,10 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> saveReservation(@Valid @RequestBody UserReservationRequest request,
-                                                               MemberInfo memberInfo) {
+                                                               Credential credential) {
         ReservationRequest reservationRequest = ReservationRequest.builder()
                 .date(request.date())
-                .memberId(memberInfo.id())
+                .memberId(credential.id())
                 .timeId(request.timeId())
                 .themeId(request.themeId())
                 .build();

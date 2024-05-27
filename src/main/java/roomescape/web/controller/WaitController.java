@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ReservationWaitService;
-import roomescape.service.dto.request.member.MemberInfo;
+import roomescape.service.dto.request.member.Credential;
 import roomescape.service.dto.request.wait.WaitRequest;
 import roomescape.service.dto.response.wait.WaitResponse;
 
@@ -25,23 +25,23 @@ public class WaitController {
     private final ReservationWaitService waitService;
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<WaitResponse>> findAllByMemberId(MemberInfo memberInfo) {
-        List<WaitResponse> reservations = waitService.findAllByMemberId(memberInfo.id());
+    public ResponseEntity<List<WaitResponse>> findAllByMemberId(Credential credential) {
+        List<WaitResponse> reservations = waitService.findAllByMemberId(credential.id());
 
         return ResponseEntity.ok(reservations);
     }
 
     @PostMapping("/reservation-wait")
-    public ResponseEntity<Void> saveReservationWait(@Valid @RequestBody WaitRequest request, MemberInfo memberInfo) {
-        waitService.saveReservationWait(request, memberInfo.id());
+    public ResponseEntity<Void> saveReservationWait(@Valid @RequestBody WaitRequest request, Credential credential) {
+        waitService.saveReservationWait(request, credential.id());
 
         return ResponseEntity.created(URI.create("/")).build();
     }
 
     @DeleteMapping("/reservation-wait/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId,
-                                                  MemberInfo memberInfo) {
-        waitService.deleteReservationWait(reservationId, memberInfo.id());
+                                                  Credential credential) {
+        waitService.deleteReservationWait(reservationId, credential.id());
 
         return ResponseEntity.noContent().build();
     }

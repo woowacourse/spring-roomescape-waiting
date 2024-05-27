@@ -13,7 +13,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.exception.member.AuthenticationFailureException;
-import roomescape.service.dto.request.member.MemberInfo;
+import roomescape.service.dto.request.member.Credential;
 import roomescape.service.security.JwtProvider;
 
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().equals(MemberInfo.class);
+        return parameter.getParameterType().equals(Credential.class);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = extractCookie(request.getCookies(), "token");
-        return new MemberInfo(jwtProvider.extractId(token));
+        return new Credential(jwtProvider.extractId(token));
     }
 
     private String extractCookie(Cookie[] cookies, String targetCookie) {

@@ -1,5 +1,5 @@
 package roomescape.service.dto.request.member;
 
-public record MemberInfo(Long id) {
+public record Credential(Long id) {
 
 }
