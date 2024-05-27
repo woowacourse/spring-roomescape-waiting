@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class TimeStamp {
+public abstract class BaseTimeEntity {
     @LastModifiedDate
     protected LocalDateTime createdAt;
 

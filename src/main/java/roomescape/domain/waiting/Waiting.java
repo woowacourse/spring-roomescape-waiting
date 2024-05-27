@@ -11,14 +11,14 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.domain.TimeStamp;
+import roomescape.domain.BaseTimeEntity;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 
 @Entity
-public class Waiting extends TimeStamp {
+public class Waiting extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
