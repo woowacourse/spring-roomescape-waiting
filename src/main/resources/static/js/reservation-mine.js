@@ -41,7 +41,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-  const endpoint = `/reservations/wait/${id}`;
+  const endpoint = `/reservations/wait/${id}/cancel`;
   return fetch(endpoint, {
     method: 'PUT'
   }).then(response => {

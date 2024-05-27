@@ -55,7 +55,7 @@ class AdminReservationWaitApiControllerTest extends BaseControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().put("/admin/reservations/1")
+                .when().put("/admin/reservations/wait/1/cancel")
                 .then().log().all()
                 .statusCode(204);
     }

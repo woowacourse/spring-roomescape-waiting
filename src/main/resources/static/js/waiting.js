@@ -55,7 +55,7 @@ function deny(event) {
   const row = event.target.closest('tr');
   const id = row.cells[0].textContent;
 
-  const endpoint = `/admin/reservations/${id}`;
+  const endpoint = `/admin/reservations/wait/${id}/cancel`;
   return fetch(endpoint, {
     method: 'PUT'
   }).then(response => {

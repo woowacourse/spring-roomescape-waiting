@@ -56,7 +56,7 @@ class ReservationWaitApiControllerTest extends BaseControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", TokenGenerator.makeUserToken())
-                .when().put("/reservations/wait/{reservationWaitId}", 1)
+                .when().put("/reservations/wait/{reservationWaitId}/cancel", 1)
                 .then().log().all()
                 .statusCode(204);
     }

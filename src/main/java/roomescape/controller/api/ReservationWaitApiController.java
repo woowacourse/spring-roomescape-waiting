@@ -37,7 +37,7 @@ public class ReservationWaitApiController {
                 .body(new ReservationWaitResponse(newReservationWait));
     }
 
-    @PutMapping("/reservations/wait/{reservationWaitId}")
+    @PutMapping("/reservations/wait/{reservationWaitId}/cancel")
     public ResponseEntity<Void> cancelReservationWait(@PathVariable long reservationWaitId) {
         reservationWaitUpdateService.cancelById(reservationWaitId);
         return ResponseEntity.noContent().build();
