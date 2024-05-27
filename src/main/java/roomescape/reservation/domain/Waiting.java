@@ -47,7 +47,7 @@ public class Waiting {
         this(null, date, reservationTime, theme, member);
     }
 
-    public boolean hasNoAuthToDeleteThis(Member member) {
+    public boolean isNotDeletableBy(Member member) {
         return !(member.isAdmin()) && !(Objects.equals(this.member, member));
     }
 

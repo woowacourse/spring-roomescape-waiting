@@ -74,7 +74,7 @@ public class Reservation {
         return Objects.equals(this.member, member);
     }
 
-    public boolean hasNoAuthToDeleteThis(Member member) {
+    public boolean isNotDeletableBy(Member member) {
         return !(member.isAdmin()) && !(Objects.equals(this.member, member));
     }
 

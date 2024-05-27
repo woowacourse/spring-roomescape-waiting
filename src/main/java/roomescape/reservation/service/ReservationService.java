@@ -144,7 +144,7 @@ public class ReservationService {
     }
 
     private void validateDeleteAuth(Member member, Reservation reservation) {
-        if (reservation.hasNoAuthToDeleteThis(member)) {
+        if (reservation.isNotDeletableBy(member)) {
             throw new AuthException("예약을 삭제할 권한이 없습니다.");
         }
     }
