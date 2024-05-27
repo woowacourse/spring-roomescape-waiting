@@ -32,7 +32,7 @@ class ThemeTest extends AcceptanceTest {
 
     @DisplayName("ADMIN 테마 CRUD 테스트")
     @TestFactory
-    Stream<DynamicTest> reservationByAdmin() {
+    Stream<DynamicTest> themeByAdmin() {
         return Stream.of(
                 dynamicTest("테마를 추가한다.", () -> {
                     ThemeRequest themeRequest = new ThemeRequest("happy", "hi", "abcd.html");
@@ -78,7 +78,7 @@ class ThemeTest extends AcceptanceTest {
 
     @DisplayName("존재하지 않는 테마에 대한 삭제")
     @Test
-    void delete() {
+    void deleteNonExistTheme() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies("token", adminToken)

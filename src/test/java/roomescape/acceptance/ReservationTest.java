@@ -141,7 +141,6 @@ class ReservationTest extends AcceptanceTest {
     @TestFactory
     Stream<DynamicTest> duplicateReservation() {
         Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "2030-12-12");
         reservationRequest.put("timeId", "1");
         reservationRequest.put("themeId", "1");
@@ -174,13 +173,11 @@ class ReservationTest extends AcceptanceTest {
     @TestFactory
     Stream<DynamicTest> validateMemberAlreadyReservedThemeOnDate() {
         Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "2030-12-12");
         reservationRequest.put("timeId", "1");
         reservationRequest.put("themeId", "1");
 
         Map<String, String> reservationRequest2 = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "2030-12-12");
         reservationRequest.put("timeId", "2");
         reservationRequest.put("themeId", "1");
@@ -213,27 +210,8 @@ class ReservationTest extends AcceptanceTest {
     @Test
     void invalidDateFormat() {
         Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "2025-aa-bb");
         reservationRequest.put("timeId", "1");
-        reservationRequest.put("themeId", "1");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", userToken)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @DisplayName("올바르지 않은 예약자명 형식으로 입력시 예외처리")
-    @Test
-    void invalidTimeIdFormat() {
-        Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "12345678900");
-        reservationRequest.put("date", "2030-12-12");
-        reservationRequest.put("timeId", "a");
         reservationRequest.put("themeId", "1");
 
         RestAssured.given().log().all()
@@ -249,7 +227,6 @@ class ReservationTest extends AcceptanceTest {
     @Test
     void pastTimeSlotReservation() {
         Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "1999-12-12");
         reservationRequest.put("timeId", "1");
         reservationRequest.put("themeId", "1");
@@ -265,7 +242,7 @@ class ReservationTest extends AcceptanceTest {
 
     @DisplayName("존재하지 않는 예약에 대한 삭제")
     @Test
-    void delete() {
+    void deleteNonExistReservation() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies("token", adminToken)

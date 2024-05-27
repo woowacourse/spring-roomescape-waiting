@@ -127,7 +127,7 @@ class WaitingServiceTest {
 
     @DisplayName("존재 하지 않는 예약대기 삭제 테스트")
     @Test
-    void deleteNotFoundWaiting() {
+    void deleteNonExistWaiting() {
         assertThatThrownBy(() -> waitingService.deleteWaiting(999L))
                 .isInstanceOf(NotFoundException.class);
     }

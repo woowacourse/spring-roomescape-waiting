@@ -79,7 +79,7 @@ class ThemeServiceTest {
 
     @DisplayName("존재 하지 않는 테마 삭제 테스트")
     @Test
-    void deleteNotFoundTheme() {
+    void deleteNonExistTheme() {
         assertThatThrownBy(() -> themeService.deleteTheme(999L))
                 .isInstanceOf(NotFoundException.class);
     }

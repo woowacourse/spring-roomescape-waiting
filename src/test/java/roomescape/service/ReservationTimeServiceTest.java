@@ -101,7 +101,7 @@ class ReservationTimeServiceTest {
 
     @DisplayName("존재 하지 않는 예약시간 삭제 테스트")
     @Test
-    void deleteNotFoundReservationTime() {
+    void deleteNonExistReservationTime() {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(999L))
                 .isInstanceOf(NotFoundException.class);
     }

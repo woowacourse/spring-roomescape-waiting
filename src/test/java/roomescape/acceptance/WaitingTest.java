@@ -47,7 +47,7 @@ class WaitingTest extends AcceptanceTest {
 
     @DisplayName("예약 대기/삭제 테스트")
     @TestFactory
-    Stream<DynamicTest> reservationByAdmin() {
+    Stream<DynamicTest> waitingByAdmin() {
         return Stream.of(
                 dynamicTest("예약을 추가한다.", () -> {
                     ReservationRequest reservationRequest = new ReservationRequest(
@@ -175,7 +175,7 @@ class WaitingTest extends AcceptanceTest {
 
     @DisplayName("존재하지 않는 예약대기에 대한 삭제")
     @Test
-    void delete() {
+    void deleteNonExistWaiting() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies("token", adminToken)

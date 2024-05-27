@@ -21,7 +21,7 @@ class MemberNameTest {
     @DisplayName("예약자명이 1자 미만, 10자 초과일 경우 예외처리")
     @ValueSource(strings = {"", " ", "abcdefghijk"})
     @ParameterizedTest
-    void nameLength2(String name) {
+    void invalidNameLength(String name) {
         assertThatThrownBy(() -> new MemberName(name))
                 .isInstanceOf(IllegalArgumentException.class);
     }

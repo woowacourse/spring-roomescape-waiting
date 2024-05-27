@@ -138,7 +138,7 @@ class ReservationServiceTest {
 
     @DisplayName("존재 하지 않는 예약 삭제 테스트")
     @Test
-    void deleteNotFoundReservation() {
+    void deleteNonExistReservation() {
         assertThatThrownBy(() -> reservationService.deleteReservation(999L))
                 .isInstanceOf(NotFoundException.class);
     }
