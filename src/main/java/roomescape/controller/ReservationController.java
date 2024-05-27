@@ -54,12 +54,6 @@ public class ReservationController {
                 .body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@NotNull @Min(1) @PathVariable("id") Long id, LoginMember member) {
-        reservationService.deleteReservation(id, member);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping(value = "/times", params = {"date", "themeId"})
     public ResponseEntity<List<ReservationTimeInfoResponse>> showReservationTimesInformation(@NotNull LocalDate date,
                                                                                              @NotNull @Min(1) Long themeId) {

@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
-import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.LoginMember;
@@ -116,32 +115,23 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제한다.")
     @Test
     void should_delete_reservation() {
-        reservationService.deleteReservation(1L, loginMember);
+        reservationService.deleteReservation(1L);
         assertThat(reservationService.findAllReservations()).hasSize(INITIAL_RESERVATION_COUNT - 1);
     }
 
     @DisplayName("존재하는 예약을 삭제하려 하면 예외가 발생하지 않는다.")
     @Test
     void should_not_throw_exception_when_exist_reservation() {
-        assertThatCode(() -> reservationService.deleteReservation(1L, loginMember))
+        assertThatCode(() -> reservationService.deleteReservation(1L))
                 .doesNotThrowAnyException();
     }
 
     @DisplayName("존재하지 않는 예약을 삭제하려 하면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_not_exist_reservation() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(999L, loginMember))
+        assertThatThrownBy(() -> reservationService.deleteReservation(999L))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("[ERROR] 존재하지 않는 예약입니다.");
-    }
-
-    @DisplayName("본인의 소유가 아닌 예약을 삭제하려 하면 예외가 발생한다.")
-    @Test
-    void should_throw_exception_when_not_owned_reservation() {
-        LoginMember otherMember = new LoginMember(2L);
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L, otherMember))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("[ERROR] 해당 예약의 소유자가 아닙니다.");
     }
 
     @DisplayName("예약 가능 상태를 담은 시간 정보를 반환한다.")

@@ -5,6 +5,8 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,7 +15,6 @@ import roomescape.controller.request.AdminReservationRequest;
 import roomescape.controller.response.WaitingResponse;
 import roomescape.model.member.MemberWithoutPassword;
 import roomescape.model.member.Role;
-import roomescape.service.AuthService;
 import roomescape.util.TokenManager;
 
 import java.time.LocalDate;
@@ -27,8 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class AdminControllerTest {
 
+    private static final int INITIAL_RESERVATION_COUNT = 2;
     private static final int INITIAL_WAITING_COUNT = 2;
-
     private static final String LOGIN_USER_TOKEN = TokenManager.create(
             new MemberWithoutPassword(1L, "에버", "treeboss@gmail.com", Role.USER));
     private static final String LOGIN_ADMIN_TOKEN = TokenManager.create(
@@ -42,7 +43,7 @@ public class AdminControllerTest {
     private final SimpleJdbcInsert waitingInsertActor;
 
     @Autowired
-    public AdminControllerTest(JdbcTemplate jdbcTemplate, AuthService authService) {
+    public AdminControllerTest(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.memberInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("member")
@@ -70,6 +71,7 @@ public class AdminControllerTest {
         insertTime(LocalTime.of(1, 0));
         insertTheme("n1", "d1", "t1");
         insertReservation(LocalDate.of(3333, 1, 1), 1, 1, 1);
+        insertReservation(LocalDate.of(3333, 1, 1), 2, 2, 2);
         insertWaiting(LocalDate.of(3333, 1, 1), 1, 1, 2);
         insertWaiting(LocalDate.of(3333, 1, 1), 1, 1, 3);
     }
@@ -152,16 +154,57 @@ public class AdminControllerTest {
 
     // TODO: 쿠키가 존재하지 않는 경우 테스트
 
-    @DisplayName("존재하는 예약 대기라면 예약 대기를 삭제할 수 있다.")
+    @DisplayName("존재하는 예약이라면 예외를 반환하지 않고 예약을 삭제할 수 있다.")
     @Test
-    void should_delete_reservation_waiting_when_reservation_waiting_exist() {
+    void should_delete_reservation_when_reservation_exist() {
         RestAssured.given().log().all()
                 .cookie("token", LOGIN_ADMIN_TOKEN)
-                .when().delete("/admin/reservations/waiting/1")
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @DisplayName("예약 삭제 - id가 1 미만일 경우 예외를 반환한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "-1", "-999"})
+    void should_throw_exception_when_delete_by_invalid_id(String id) {
+        RestAssured.given().log().all()
+                .cookie("token", LOGIN_ADMIN_TOKEN)
+                .when().delete("/admin/reservations/" + id)
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @DisplayName("예약 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
+    @Test
+    void should_throw_exception_when_delete_by_id_null() {
+        RestAssured.given().log().all()
+                .cookie("token", LOGIN_ADMIN_TOKEN)
+                .when().delete("/admin/reservations/")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    @DisplayName("예약 삭제 - 로그인이 되지 않은 경우 401 예외를 반환한다.")
+    @Test
+    void should_throw_exception_when_not_login() {
+        RestAssured.given().log().all()
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(401);
+    }
+
+    @DisplayName("예약이 삭제될 경우 해당 방탈출의 가장 높은 우선순위의 예약 대기를 자동으로 승인한다.")
+    @Test
+    void should_reserve_first_waiting_when_delete_reservation() {
+        RestAssured.given().log().all()
+                .cookie("token", LOGIN_ADMIN_TOKEN)
+                .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
-        assertThat(countAll()).isEqualTo(INITIAL_WAITING_COUNT - 1);
+        assertThat(countAllReservations()).isEqualTo(INITIAL_RESERVATION_COUNT);
+        assertThat(countAllWaiting()).isEqualTo(INITIAL_WAITING_COUNT - 1);
     }
 
     @DisplayName("전체 예약 대기를 조회한다.")
@@ -177,7 +220,23 @@ public class AdminControllerTest {
         assertThat(reservations).hasSize(INITIAL_WAITING_COUNT);
     }
 
-    private Integer countAll() {
+    @DisplayName("존재하는 예약 대기라면 예약 대기를 삭제할 수 있다.")
+    @Test
+    void should_delete_reservation_waiting_when_reservation_waiting_exist() {
+        RestAssured.given().log().all()
+                .cookie("token", LOGIN_ADMIN_TOKEN)
+                .when().delete("/admin/reservations/waiting/1")
+                .then().log().all()
+                .statusCode(204);
+
+        assertThat(countAllWaiting()).isEqualTo(INITIAL_WAITING_COUNT - 1);
+    }
+
+    private Integer countAllReservations() {
+        return jdbcTemplate.queryForObject("SELECT count(id) from reservation", Integer.class);
+    }
+
+    private Integer countAllWaiting() {
         return jdbcTemplate.queryForObject("SELECT count(id) from waiting", Integer.class);
     }
 }

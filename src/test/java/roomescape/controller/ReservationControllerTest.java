@@ -18,8 +18,6 @@ import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.model.member.MemberWithoutPassword;
 import roomescape.model.member.Role;
-import roomescape.service.AuthService;
-import roomescape.service.dto.AuthDto;
 import roomescape.util.TokenManager;
 
 import java.time.LocalDate;
@@ -36,12 +34,10 @@ class ReservationControllerTest {
 
     private static final int INITIAL_TIME_COUNT = 5;
     private static final int INITIAL_RESERVATION_COUNT = 15;
-    private static final int INITIAL_WAITING_COUNT = 1;
     private static final String LOGIN_TOKEN = TokenManager.create(
             new MemberWithoutPassword(1L, "에버", "treeboss@gmail.com", Role.USER));
 
     private final JdbcTemplate jdbcTemplate;
-    private final AuthService authService;
     private final SimpleJdbcInsert themeInsertActor;
     private final SimpleJdbcInsert timeInsertActor;
     private final SimpleJdbcInsert memberInsertActor;
@@ -49,9 +45,8 @@ class ReservationControllerTest {
     private final SimpleJdbcInsert waitingInsertActor;
 
     @Autowired
-    public ReservationControllerTest(JdbcTemplate jdbcTemplate, AuthService authService) {
+    public ReservationControllerTest(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.authService = authService;
         this.themeInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
                 .usingGeneratedKeyColumns("id");
@@ -163,53 +158,6 @@ class ReservationControllerTest {
         assertThat(countAllReservations()).isEqualTo(INITIAL_RESERVATION_COUNT + 1);
     }
 
-    @DisplayName("존재하는 예약이라면 예약을 삭제할 수 있다.")
-    @Test
-    void should_delete_reservation_when_reservation_exist() {
-        RestAssured.given().log().all()
-                .cookie("token", LOGIN_TOKEN)
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
-
-        List<ReservationResponse> reservations = RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .extract().jsonPath().getList(".", ReservationResponse.class);
-        assertThat(reservations.stream().noneMatch(response -> response.getId() == 1)).isTrue();
-    }
-
-    @DisplayName("예약 삭제 - id가 1 미만일 경우 예외를 반환한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"0", "-1", "-999"})
-    void should_throw_exception_when_delete_by_invalid_id(String id) {
-        RestAssured.given().log().all()
-                .cookie("token", LOGIN_TOKEN)
-                .when().delete("/reservations/" + id)
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @DisplayName("예약 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
-    @Test
-    void should_throw_exception_when_delete_by_id_null() {
-        RestAssured.given().log().all()
-                .cookie("token", LOGIN_TOKEN)
-                .when().delete("/reservations/")
-                .then().log().all()
-                .statusCode(404);
-    }
-
-    @DisplayName("예약 삭제 - 로그인이 되지 않은 경우 401 예외를 반환한다.")
-    @Test
-    void should_throw_exception_when_not_login() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(401);
-    }
-
     @DisplayName("특정 날짜와 테마에 따른 모든 시간의 예약 가능 여부를 확인 - 테마 id가 null 또는 1 미만일 경우 예외를 반환한다.")
     @ParameterizedTest
     @NullSource
@@ -279,24 +227,7 @@ class ReservationControllerTest {
         assertThat(responses).hasSize(15);
     }
 
-    @DisplayName("예약이 삭제될 경우 해당 방탈출의 가장 높은 우선순위의 예약 대기를 자동으로 승인한다.")
-    @Test
-    void should_reserve_first_waiting_when_delete_reservation() {
-        RestAssured.given().log().all()
-                .cookie("token", LOGIN_TOKEN)
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
-
-        assertThat(countAllReservations()).isEqualTo(INITIAL_RESERVATION_COUNT);
-        assertThat(countAllWaiting()).isEqualTo(INITIAL_WAITING_COUNT - 1);
-    }
-
     private Integer countAllReservations() {
         return jdbcTemplate.queryForObject("SELECT count(id) from reservation", Integer.class);
-    }
-
-    private Integer countAllWaiting() {
-        return jdbcTemplate.queryForObject("SELECT count(id) from waiting", Integer.class);
     }
 }

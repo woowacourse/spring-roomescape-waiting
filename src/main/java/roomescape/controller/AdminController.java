@@ -41,6 +41,12 @@ public class AdminController {
                 .body(response);
     }
 
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@NotNull @Min(1) @PathVariable("id") Long id) {
+        reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/reservations/waiting")
     public ResponseEntity<List<WaitingResponse>> getAllWaiting() {
         List<Waiting> allWaiting = waitingService.findAllWaiting();

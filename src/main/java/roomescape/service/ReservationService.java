@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.model.Reservation;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
+//@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -79,10 +78,8 @@ public class ReservationService {
                 .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 사용자에 대한 예약입니다."));
     }
 
-    public void deleteReservation(long id, LoginMember member) {
+    public void deleteReservation(long id) {
         Reservation reservation = findReservation(id);
-        validateIsOwner(reservation.getMember(), member);
-
         findWaiting(reservation).ifPresent(this::approveWaiting);
         reservationRepository.deleteById(id);
     }
@@ -131,12 +128,6 @@ public class ReservationService {
         boolean isExist = reservationRepository.existsByReservationInfo(reservationInfo);
         if (isExist) {
             throw new DuplicatedException("[ERROR] 중복되는 예약은 추가할 수 없습니다.");
-        }
-    }
-
-    private void validateIsOwner(Member owner, LoginMember member) {
-        if (owner.getId() != member.getId()) {
-            throw new BadRequestException("[ERROR] 해당 예약의 소유자가 아닙니다.");
         }
     }
 }
