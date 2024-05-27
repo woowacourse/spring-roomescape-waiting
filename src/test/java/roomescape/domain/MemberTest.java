@@ -19,7 +19,7 @@ class MemberTest {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
 
-        Assertions.assertThatThrownBy(() -> new Member("", "example@example.com", encrypted))
+        Assertions.assertThatThrownBy(() -> new Member(1L, "", "example@example.com", encrypted, Role.MEMBER))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(EMPTY_NAME.getMessage());
     }
@@ -30,7 +30,7 @@ class MemberTest {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
 
-        Assertions.assertThatThrownBy(() -> new Member(null, "example@example.com", encrypted))
+        Assertions.assertThatThrownBy(() -> new Member(1L, null, "example@example.com", encrypted, Role.MEMBER))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(EMPTY_NAME.getMessage());
     }
@@ -42,7 +42,7 @@ class MemberTest {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
 
-        Assertions.assertThatThrownBy(() -> new Member("name", email, encrypted))
+        Assertions.assertThatThrownBy(() -> new Member(1L, "name", email, encrypted, Role.MEMBER))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(INVALID_EMAIL_FORMAT.getMessage());
     }
@@ -53,7 +53,7 @@ class MemberTest {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
 
-        Assertions.assertThatThrownBy(() -> new Member("name", null, encrypted))
+        Assertions.assertThatThrownBy(() -> new Member(1L, "name", null, encrypted, Role.MEMBER))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(INVALID_EMAIL_FORMAT.getMessage());
     }
@@ -62,7 +62,7 @@ class MemberTest {
     @ValueSource(strings = {"123456", "f6f2ea8f45d8a057c9566a33f99474da2e5c6a6604d736121650e2730c6fb0a"})
     @DisplayName("회원 생성 시 비밀번호가 제대로 암호화되어있지 않은 경우 예외 발생하는지 확인")
     void createWithRawPassword(String password) {
-        Assertions.assertThatThrownBy(() -> new Member("name", "email@email.com", password))
+        Assertions.assertThatThrownBy(() -> new Member(1L, "name", "email@email.com", password, Role.MEMBER))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("암호화된 비밀번호로 생성하세요!");
     }
@@ -70,7 +70,7 @@ class MemberTest {
     @Test
     @DisplayName("회원 생성 시 비밀번호가 없는 경우 예외 발생하는지 확인")
     void createWithNullPassword() {
-        Assertions.assertThatThrownBy(() -> new Member("name", "email@email.com", null))
+        Assertions.assertThatThrownBy(() -> new Member(1L, "name", "email@email.com", null, Role.MEMBER))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("암호화된 비밀번호로 생성하세요!");
     }

@@ -31,12 +31,9 @@ public class Member {
     protected Member() {
     }
 
-    public Member(String name, String email, String encryptedPassword) {
-        this(null, name, email, encryptedPassword, Role.MEMBER);
-    }
-
     public Member(Long id, String name, String email, String encryptedPassword, Role role) {
         validateName(name);
+
         this.id = id;
         this.name = name;
         this.email = new Email(email);
