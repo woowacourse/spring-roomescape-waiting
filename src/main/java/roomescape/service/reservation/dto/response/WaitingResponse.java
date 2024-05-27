@@ -11,7 +11,7 @@ public record WaitingResponse(Long id, String name,
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),
-                waiting.getMember().getName(),
+                waiting.getMemberName(),
                 waiting.getDate(),
                 MemberResponse.from(waiting.getMember()),
                 ReservationTimeResponse.from(waiting.getTime()),

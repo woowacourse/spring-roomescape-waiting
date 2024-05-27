@@ -47,6 +47,10 @@ public class Reservation {
         return member;
     }
 
+    public String getMemberName() {
+        return member.getName();
+    }
+
     public LocalDate getDate() {
         return schedule.getDate();
     }
@@ -57,9 +61,5 @@ public class Reservation {
 
     public Theme getTheme() {
         return schedule.getTheme();
-    }
-
-    public Schedule getSchedule() {
-        return schedule;
     }
 }

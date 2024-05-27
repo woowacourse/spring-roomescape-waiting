@@ -47,6 +47,10 @@ public class Waiting {
         return member;
     }
 
+    public String getMemberName() {
+        return member.getName();
+    }
+
     public LocalDate getDate() {
         return schedule.getDate();
     }
