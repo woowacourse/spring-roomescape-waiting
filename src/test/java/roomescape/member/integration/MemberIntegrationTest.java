@@ -13,7 +13,7 @@ import org.springframework.http.ResponseCookie;
 import roomescape.auth.domain.Token;
 import roomescape.auth.provider.CookieProvider;
 import roomescape.model.IntegrationTest;
-import roomescape.registration.dto.RegistrationInfo;
+import roomescape.registration.dto.RegistrationInfoDto;
 
 class MemberIntegrationTest extends IntegrationTest {
 
@@ -31,7 +31,7 @@ class MemberIntegrationTest extends IntegrationTest {
     @DisplayName("회원의 예약 내역들을 가져올 수 있다.")
     void memberReservationList() {
         int memberId = 1;
-        RegistrationInfo firstReservation = firstMemberFirstReservation();
+        RegistrationInfoDto firstReservation = firstMemberFirstReservation();
         Token token = tokenProvider.getAccessToken(memberId);
         ResponseCookie cookie = CookieProvider.setCookieFrom(token);
 
@@ -50,8 +50,8 @@ class MemberIntegrationTest extends IntegrationTest {
                 .body("[0].status", equalTo(firstReservation.status()));
     }
 
-    private RegistrationInfo firstMemberFirstReservation() {
-        return new RegistrationInfo(
+    private RegistrationInfoDto firstMemberFirstReservation() {
+        return new RegistrationInfoDto(
                 1,
                 "polla",
                 LocalDate.parse("2024-04-30"),

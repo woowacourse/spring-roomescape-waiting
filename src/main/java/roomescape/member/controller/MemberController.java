@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
-import roomescape.registration.dto.RegistrationInfo;
+import roomescape.registration.dto.RegistrationInfoDto;
 import roomescape.registration.domain.reservation.service.ReservationService;
 import roomescape.registration.domain.waiting.service.WaitingService;
 
@@ -33,15 +33,15 @@ public class MemberController {
 
     // todo: 정렬 어떻게 할지 생각
     @GetMapping("/member/registrations")
-    public List<RegistrationInfo> memberReservationList(@LoginMemberId long memberId) {
-        List<RegistrationInfo> reservationsOfMember = reservationService.findMemberReservations(memberId)
+    public List<RegistrationInfoDto> memberReservationList(@LoginMemberId long memberId) {
+        List<RegistrationInfoDto> reservationsOfMember = reservationService.findMemberReservations(memberId)
                 .stream()
-                .map((RegistrationInfo::from))
+                .map((RegistrationInfoDto::from))
                 .toList();
 
-        List<RegistrationInfo> waitingsOfMember = waitingService.findMemberWaitingWithRank(memberId)
+        List<RegistrationInfoDto> waitingsOfMember = waitingService.findMemberWaitingWithRank(memberId)
                 .stream()
-                .map((RegistrationInfo::from))
+                .map((RegistrationInfoDto::from))
                 .toList();
 
         return Stream.concat(reservationsOfMember.stream(), waitingsOfMember.stream())

@@ -14,7 +14,7 @@ import roomescape.registration.domain.waiting.domain.WaitingWithRank;
 import roomescape.registration.domain.waiting.dto.WaitingRequest;
 import roomescape.registration.domain.waiting.dto.WaitingResponse;
 import roomescape.registration.domain.waiting.repository.WaitingRepository;
-import roomescape.registration.dto.RegistrationRequest;
+import roomescape.registration.dto.RegistrationDto;
 
 @Service
 public class WaitingService {
@@ -64,19 +64,19 @@ public class WaitingService {
         return waitingRepository.findWaitingsWithRankByMemberId(memberId);
     }
 
-    public long countWaitingRank(RegistrationRequest registrationRequest) {
+    public long countWaitingRank(RegistrationDto registrationDto) {
         Waiting waiting = waitingRepository.findByReservationDateAndReservationThemeIdAndReservationReservationTimeIdAndMemberId(
-                registrationRequest.date(),
-                registrationRequest.themeId(),
-                registrationRequest.timeId(),
-                registrationRequest.memberId()
+                registrationDto.date(),
+                registrationDto.themeId(),
+                registrationDto.timeId(),
+                registrationDto.memberId()
         );
 
         return waitingRepository.countWaitingRankByDateAndThemeIdAndReservationTimeId(
                 waiting.getId(),
-                registrationRequest.date(),
-                registrationRequest.themeId(),
-                registrationRequest.timeId()
+                registrationDto.date(),
+                registrationDto.themeId(),
+                registrationDto.timeId()
         );
     }
 
