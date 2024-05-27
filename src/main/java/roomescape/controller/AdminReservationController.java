@@ -3,16 +3,11 @@ package roomescape.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.auth.LoginMemberId;
 import roomescape.service.reservation.ReservationCreateService;
-import roomescape.service.reservation.ReservationDeleteService;
-import roomescape.service.reservation.ReservationReadService;
+import roomescape.service.reservation.ReservationCommonService;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
-import roomescape.service.theme.ThemeService;
-import roomescape.service.theme.dto.ThemeRequest;
-import roomescape.service.theme.dto.ThemeResponse;
 
 import java.net.URI;
 import java.util.List;
@@ -21,13 +16,11 @@ import java.util.List;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationCreateService reservationCreateService;
-    private final ReservationReadService reservationReadService;
-    private final ReservationDeleteService reservationDeleteService;
+    private final ReservationCommonService reservationCommonService;
 
-    public AdminReservationController(ReservationCreateService reservationCreateService, ReservationReadService reservationReadService, ReservationDeleteService reservationDeleteService) {
+    public AdminReservationController(ReservationCreateService reservationCreateService, ReservationCommonService reservationCommonService) {
         this.reservationCreateService = reservationCreateService;
-        this.reservationReadService = reservationReadService;
-        this.reservationDeleteService = reservationDeleteService;
+        this.reservationCommonService = reservationCommonService;
     }
 
     @PostMapping
@@ -41,12 +34,12 @@ public class AdminReservationController {
     @GetMapping("/search")
     public List<ReservationResponse> findReservations(
             @ModelAttribute("ReservationFindRequest") ReservationFilterRequest reservationFilterRequest) {
-        return reservationReadService.findByCondition(reservationFilterRequest);
+        return reservationCommonService.findByCondition(reservationFilterRequest);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long reservationId) {
-        reservationDeleteService.deleteById(reservationId);
+        reservationCommonService.deleteById(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

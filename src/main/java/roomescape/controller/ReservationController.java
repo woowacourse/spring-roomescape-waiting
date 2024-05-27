@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMemberId;
 import roomescape.service.reservation.ReservationCreateService;
-import roomescape.service.reservation.ReservationReadService;
+import roomescape.service.reservation.ReservationCommonService;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
@@ -16,9 +16,9 @@ import java.util.List;
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationCreateService reservationCreateService;
-    private final ReservationReadService reservationReadService;
+    private final ReservationCommonService reservationReadService;
 
-    public ReservationController(ReservationCreateService reservationCreateService, ReservationReadService reservationReadService) {
+    public ReservationController(ReservationCreateService reservationCreateService, ReservationCommonService reservationReadService) {
         this.reservationCreateService = reservationCreateService;
         this.reservationReadService = reservationReadService;
     }
