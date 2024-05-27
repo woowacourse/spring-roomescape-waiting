@@ -16,6 +16,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.UnauthorizedException;
 
 @Entity
 @Table(name = "waiting")
@@ -46,8 +47,10 @@ public class ReservationWaiting {
         this.schedule = schedule;
     }
 
-    public boolean isWaitingOf(long memberId) {
-        return member.getId() == memberId;
+    public void checkCancelAuthority(long memberId) {
+        if (member.getId() != memberId) {
+            throw new UnauthorizedException("예약 대기를 취소할 권한이 없습니다.");
+        }
     }
 
     public Long getId() {

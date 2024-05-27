@@ -16,7 +16,6 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidMemberException;
 import roomescape.exception.InvalidReservationException;
-import roomescape.exception.UnauthorizedException;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationWaitingResponse;
 
@@ -99,13 +98,7 @@ public class ReservationWaitingService {
 
     public void deleteById(long waitingId, long memberId) {
         reservationWaitingRepository.findById(waitingId)
-                .ifPresent(waiting -> validateAuthority(waiting, memberId));
+                .ifPresent(waiting -> waiting.checkCancelAuthority(memberId));
         deleteById(waitingId);
-    }
-
-    private void validateAuthority(ReservationWaiting waiting, long memberId) {
-        if (!waiting.isWaitingOf(memberId)) {
-            throw new UnauthorizedException("예약 대기를 취소할 권한이 없습니다.");
-        }
     }
 }
