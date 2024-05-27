@@ -7,9 +7,9 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
+import roomescape.controller.dto.UserReservationViewResponse;
+import roomescape.controller.dto.UserReservationViewResponses;
 import roomescape.service.dto.response.ReservationResponses;
-import roomescape.service.dto.response.UserReservationResponse;
-import roomescape.service.dto.response.UserReservationResponses;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -148,8 +148,8 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .when().get("/reservations-mine")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .response().jsonPath().getObject("$", UserReservationResponses.class)
-                            .userReservationResponses()
+                            .response().jsonPath().getObject("$", UserReservationViewResponses.class)
+                            .userReservationViewResponses()
                             .size();
                 }),
                 dynamicTest("예약을 추가한다.", () -> {
@@ -167,16 +167,16 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .statusCode(201).extract().header("location").split("/")[2];
                 }),
                 dynamicTest("내 예약 목록을 조회하면 사이즈가 1증가한다.", () -> {
-                    List<UserReservationResponse> userReservationResponses = RestAssured.given().log().all()
+                    List<UserReservationViewResponse> userReservationViewResponses = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
                             .when().get("/reservations-mine")
                             .then().log().all()
                             .statusCode(200)
-                            .extract().as(UserReservationResponses.class)
-                            .userReservationResponses();
+                            .extract().as(UserReservationViewResponses.class)
+                            .userReservationViewResponses();
 
-                    assertThat(userReservationResponses).hasSize(userReservationSize + 1);
+                    assertThat(userReservationViewResponses).hasSize(userReservationSize + 1);
                 }),
                 dynamicTest("존재하지 않는 시간으로 예약을 추가할 수 없다.", () -> {
                     Map<String, Object> params = Map.of(

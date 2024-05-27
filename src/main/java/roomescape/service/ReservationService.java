@@ -11,7 +11,6 @@ import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
-import roomescape.service.dto.response.UserReservationResponses;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -100,16 +99,16 @@ public class ReservationService {
         return new ReservationResponses(reservationResponses);
     }
 
-    public UserReservationResponses findAllUserReservation(Long memberId) {
+    public List<UserReservationResponse> findAllUserReservation(Long memberId) {
         Member user = findMemberById(memberId);
         return getAllReservationAndWaiting(user);
     }
 
-    private UserReservationResponses getAllReservationAndWaiting(Member user) {
+    private List<UserReservationResponse> getAllReservationAndWaiting(Member user) {
         List<UserReservationResponse> allReservations = new ArrayList<>();
         allReservations.addAll(findUserReservations(user));
         allReservations.addAll(findUserWaitings(user));
-        return new UserReservationResponses(allReservations);
+        return allReservations;
     }
 
     private List<UserReservationResponse> findUserReservations(Member user) {

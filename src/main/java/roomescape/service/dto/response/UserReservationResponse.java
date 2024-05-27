@@ -1,41 +1,35 @@
 package roomescape.service.dto.response;
 
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.WaitingWithRank;
+import roomescape.domain.reservation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.OptionalLong;
 
 import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 public record UserReservationResponse(
         long id,
-        String theme,
-        LocalDate date,
-        LocalTime time,
-        String status,
-        long rank
+        ReservationSlot reservationSlot,
+        ReservationStatus status,
+        OptionalLong rank
 ) {
     public static UserReservationResponse reserved(Reservation reservation) {
         return new UserReservationResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                RESERVED.name(),
-                Reservation.RESERVATION_RANK
+                reservation.getReservationSlot(),
+                RESERVED,
+                OptionalLong.empty()
         );
     }
 
     public static UserReservationResponse from(WaitingWithRank waitingWithRank) {
         return new UserReservationResponse(
                 waitingWithRank.waiting().getId(),
-                waitingWithRank.waiting().getReservation().getTheme().getName(),
-                waitingWithRank.waiting().getReservation().getDate(),
-                waitingWithRank.waiting().getReservation().getTime().getStartAt(),
-                WAITING.name(),
-                waitingWithRank.rank() + 1
+                waitingWithRank.waiting().getReservation().getReservationSlot(),
+                WAITING,
+                OptionalLong.of(waitingWithRank.rank() + 1)
         );
     }
 }

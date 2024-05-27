@@ -7,8 +7,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.service.dto.response.UserReservationResponse;
-import roomescape.service.dto.response.UserReservationResponses;
+import roomescape.controller.dto.UserReservationViewResponse;
+import roomescape.controller.dto.UserReservationViewResponses;
 import roomescape.service.dto.response.WaitingResponse;
 
 import java.time.LocalDate;
@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.controller.dto.ReservationStatusMessageMapper.WAITING_MESSAGE;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 @Transactional
@@ -37,8 +38,8 @@ class WaitingControllerTest extends IntegrationTestSupport {
                             .when().get("/reservations-mine")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .response().jsonPath().getObject("$", UserReservationResponses.class)
-                            .userReservationResponses()
+                            .response().jsonPath().getObject("$", UserReservationViewResponses.class)
+                            .userReservationViewResponses()
                             .size();
                 }),
                 dynamicTest("예약을 추가한다.", () -> {
@@ -100,18 +101,18 @@ class WaitingControllerTest extends IntegrationTestSupport {
                             .id();
                 }),
                 dynamicTest("내 예약 목록에는 대기 목록도 포함한다.", () -> {
-                    List<UserReservationResponse> userReservationResponses = RestAssured.given().log().all()
+                    List<UserReservationViewResponse> userReservationViewResponses = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER2_TOKEN)
                             .when().get("/reservations-mine")
                             .then().log().all()
                             .statusCode(200)
-                            .extract().as(UserReservationResponses.class)
-                            .userReservationResponses();
+                            .extract().as(UserReservationViewResponses.class)
+                            .userReservationViewResponses();
 
-                    int waitingSize = userReservationResponses
+                    int waitingSize = userReservationViewResponses
                             .stream()
-                            .filter(response -> response.status().contains(WAITING.name()))
+                            .filter(response -> response.status().contains(WAITING_MESSAGE.getMessage()))
                             .toList()
                             .size();
 

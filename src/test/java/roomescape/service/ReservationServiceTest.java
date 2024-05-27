@@ -10,6 +10,7 @@ import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
@@ -122,15 +123,16 @@ class ReservationServiceTest extends IntegrationTestSupport {
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         // when
-        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(memberId).userReservationResponses();
+        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(memberId);
 
         // then
+        ReservationSlot slot = allUserReservation.get(0).reservationSlot();
         assertAll(
                 () -> assertThat(allUserReservation).hasSize(1),
-                () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationSaveRequest.date()),
-                () -> assertThat(allUserReservation.get(0).time()).isEqualTo(reservationResponse.time().startAt()),
-                () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name()),
-                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(RESERVED.name())
+                () -> assertThat(slot.getDate()).isEqualTo(reservationSaveRequest.date()),
+                () -> assertThat(slot.getTime().getStartAt()).isEqualTo(reservationResponse.time().startAt()),
+                () -> assertThat(slot.getTheme().getName()).isEqualTo(reservationResponse.theme().name()),
+                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(RESERVED)
         );
     }
 }

@@ -9,8 +9,6 @@ import java.util.Objects;
 @Entity
 @Table
 public class Reservation {
-    public static int RESERVATION_RANK = 0;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

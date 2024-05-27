@@ -16,7 +16,7 @@ function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 
-    data.userReservationResponses.forEach(item => {
+    data.userReservationViewResponses.forEach(item => {
         const row = tableBody.insertRow();
 
         /*
@@ -26,13 +26,7 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        let status;
-        if (item.status == "RESERVED") {
-            status = "예약"
-        } else {
-            status = item.rank + "번째 예약 대기"
-        }
-
+        const status = item.status;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
