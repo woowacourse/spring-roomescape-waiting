@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.model.Reservation;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-//@Transactional
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -80,7 +81,7 @@ public class ReservationService {
 
     public void deleteReservation(long id) {
         Reservation reservation = findReservation(id);
-        findWaiting(reservation).ifPresent(this::approveWaiting);
+        findFirstWaiting(reservation).ifPresent(this::approveWaiting);
         reservationRepository.deleteById(id);
     }
 
@@ -89,7 +90,7 @@ public class ReservationService {
                 .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 예약입니다."));
     }
 
-    private Optional<Waiting> findWaiting(Reservation reservation) {
+    private Optional<Waiting> findFirstWaiting(Reservation reservation) {
         ReservationInfo reservationInfo = reservation.getReservationInfo();
         return waitingRepository.findFirstByReservationInfo(reservationInfo);
     }
