@@ -12,7 +12,6 @@ import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.*;
 import roomescape.member.dto.MemberIdNameResponse;
-import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.SignUpRequest;
 import roomescape.member.repository.MemberJpaRepository;
@@ -75,11 +74,6 @@ public class MemberService {
                 .setExpiration(Date.from(expiration))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
-    }
-
-    public MemberNameResponse getMemberNameResponseByToken(String token) throws AuthenticationException {
-        Member member = parseTokenToLoginMember(token);
-        return new MemberNameResponse(member);
     }
 
     public boolean isAdminToken(String token) throws AuthenticationException {
