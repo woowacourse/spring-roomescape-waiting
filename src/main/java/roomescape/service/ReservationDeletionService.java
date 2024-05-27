@@ -45,7 +45,7 @@ public class ReservationDeletionService {
     }
 
     private void updateFirstWaitingReservationIfAny(Long id) {
-        List<Reservation> waitings = reservationRepository.findReservationsWithSameDateThemeTimeAndStatus(id, ReservationStatus.WAITING);
+        List<Reservation> waitings = reservationRepository.findReservationsWithSameDateThemeTimeAndStatusOrderedById(id, ReservationStatus.WAITING);
         if(!waitings.isEmpty()) {
             Reservation firstWaiting = waitings.get(0);
             firstWaiting.setStatus(ReservationStatus.RESERVED);

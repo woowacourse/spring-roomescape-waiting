@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.acceptance.PreInsertedData.*;
+import static roomescape.PreInsertedData.*;
 import static roomescape.domain.ReservationStatus.*;
 
 class ReservationRepositoryTest extends BaseRepositoryTest {
@@ -77,5 +77,28 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
                                 RESERVATION_CUSTOMER2_THEME3_240502_1200
                         ))
         );
+    }
+
+    @DisplayName("같은 날짜, 테마, 시간인 예약 중 주어진 예약 상태와 예약 목록을 구한다.")
+    @Test
+    void findReservationsWithSameDateThemeTimeAndStatus() {
+        Long id = RESERVATION_CUSTOMER1_THEME2_240501_1100.getId();
+
+        List<Reservation> reservations = reservationRepository.findReservationsWithSameDateThemeTimeAndStatusOrderedById(id, WAITING);
+
+        assertThat(reservations).containsExactly(
+                RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100,
+                RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100
+        );
+    }
+
+    @DisplayName("같은 날짜, 테마, 시간인 예약 중 주어진 예약 상태와 동일하면서, 먼저 예약된 수를 구한다.")
+    @Test
+    void countPreviousReservationsWithSameDateThemeTimeAndStatus() {
+        Long id = RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100.getId();
+
+        Long waitingCountInFrontOfMe = reservationRepository.countPreviousReservationsWithSameDateThemeTimeAndStatus(id, WAITING);
+
+        assertThat(waitingCountInFrontOfMe).isEqualTo(1L);
     }
 }

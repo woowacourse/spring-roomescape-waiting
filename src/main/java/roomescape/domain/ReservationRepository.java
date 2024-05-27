@@ -67,18 +67,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Long countPreviousReservationsWithSameDateThemeTimeAndStatus(@Param("reservationId") Long reservationId, @Param("reservationStatus") ReservationStatus reservationStatus);
 
     @Query("""
-            SELECT COUNT(r)
-            FROM Reservation r
-            JOIN Reservation s
-                ON r.date = s.date
-                AND r.theme.id = s.theme.id
-                AND r.reservationTime.id = s.reservationTime.id
-            WHERE s.id = :reservationId
-                AND r.reservationStatus = :reservationStatus
-    """)
-    Long countReservationsWithSameDateThemeTimeAndStatus(@Param("reservationId") Long reservationId, @Param("reservationStatus") ReservationStatus reservationStatus);
-
-    @Query("""
             SELECT r
             FROM Reservation r
             JOIN Reservation s
@@ -89,5 +77,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND r.reservationStatus = :reservationStatus
             ORDER BY r.id ASC
     """)
-    List<Reservation> findReservationsWithSameDateThemeTimeAndStatus(@Param("reservationId") Long reservationId, @Param("reservationStatus") ReservationStatus reservationStatus);
+    List<Reservation> findReservationsWithSameDateThemeTimeAndStatusOrderedById(@Param("reservationId") Long reservationId, @Param("reservationStatus") ReservationStatus reservationStatus);
 }
