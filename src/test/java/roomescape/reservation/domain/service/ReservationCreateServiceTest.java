@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.reservation.domain.service;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
