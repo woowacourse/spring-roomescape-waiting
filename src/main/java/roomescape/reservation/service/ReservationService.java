@@ -49,7 +49,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public MemberReservationStatusResponse findByIdWithStatus(Long id) {
+    public MemberReservationStatusResponse findById(Long id) {
         Reservation foundReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchRecordException("해당하는 예약이 존재하지 않습니다 ID: " + id));
         return new MemberReservationStatusResponse(foundReservation);

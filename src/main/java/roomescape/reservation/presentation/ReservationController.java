@@ -35,7 +35,7 @@ public class ReservationController {
 
     @GetMapping("/reservations/{id}")
     public ResponseEntity<MemberReservationStatusResponse> getReservationById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(reservationService.findByIdWithStatus(id));
+        return ResponseEntity.ok(reservationService.findById(id));
     }
 
     @GetMapping(path = "/reservations", params = {"memberId", "themeId", "dateFrom", "dateTo"})
