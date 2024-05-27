@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.model.Reservation;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -40,7 +42,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
-    } // TODO: 추가된 의존성이 너무 많은가?
+    }
 
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
