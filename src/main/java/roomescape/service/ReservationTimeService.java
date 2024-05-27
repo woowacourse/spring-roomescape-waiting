@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
@@ -17,6 +18,7 @@ import roomescape.service.dto.response.AvailableTimeResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;

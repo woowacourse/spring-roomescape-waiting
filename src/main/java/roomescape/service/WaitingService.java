@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.WaitingWithRank;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
@@ -21,6 +22,7 @@ import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.response.WaitingResponse;
 
 @Service
+@Transactional
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
