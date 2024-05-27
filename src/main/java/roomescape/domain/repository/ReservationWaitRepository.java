@@ -34,15 +34,21 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
                                                                  @Param("themeName") String themeName,
                                                                  @Param("status") Status status);
 
-    Optional<ReservationWait> findTopByOrderByStatusPriorityAsc();
+    Optional<ReservationWait> findTopByOrderByStatusPriorityDesc();
 
     Optional<ReservationWait> findTopByReservationOrderByStatusPriorityDesc(Reservation reservation);
 
-    List<ReservationWait> findByMemberAndReservation(Member member, Reservation reservation);
+
+    Optional<ReservationWait> findTopByReservationOrderByStatusPriorityAsc(Reservation reservation);
+
+
+    Optional<ReservationWait> findByMemberIdAndReservationId(long memberId, long reservationId);
 
     List<ReservationWait> findAllByMember(Member member);
 
-    long countByStatusPriorityIsLessThan(long priority);
+    boolean existsByMemberAndReservation(Member member, Reservation reservation);
+
+    long countByReservationAndStatusPriorityIsLessThan(Reservation reservation, long priority);
 
     void deleteById(long id);
 

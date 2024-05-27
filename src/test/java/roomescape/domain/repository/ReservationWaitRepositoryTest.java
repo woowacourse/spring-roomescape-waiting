@@ -127,7 +127,7 @@ class ReservationWaitRepositoryTest {
 
     @Test
     @DisplayName("예약 대기 우선순위 중 가장 높은 값을 찾아온다")
-    void findPriorityIndex_ShouldFindTopIndexOfPriority() {
+    void findTopByOrderByStatusPriorityDesc_ShouldFindTopIndexOfPriority() {
         // given
         ReservationWait wait1 = new ReservationWait(dummyMember, dummyReservation, 123);
         ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 1238);
@@ -135,11 +135,11 @@ class ReservationWaitRepositoryTest {
         waitRepository.save(wait2);
 
         // when
-        Optional<ReservationWait> wait = waitRepository.findTopByOrderByStatusPriorityAsc();
+        Optional<ReservationWait> wait = waitRepository.findTopByOrderByStatusPriorityDesc();
 
         // then
         Assertions.assertThat(wait).isPresent()
-                .hasValue(wait1);
+                .hasValue(wait2);
 
     }
 
@@ -168,12 +168,12 @@ class ReservationWaitRepositoryTest {
         ReservationWait savedWaits = waitRepository.save(new ReservationWait(dummyMember, dummyReservation, 1));
 
         // when
-        List<ReservationWait> foundWaits = waitRepository.findByMemberAndReservation(dummyMember,
-                dummyReservation);
+        Optional<ReservationWait> foundWaits = waitRepository.findByMemberIdAndReservationId(dummyMember.getId(),
+                dummyReservation.getId());
 
         // then
-        Assertions.assertThat(foundWaits).hasSize(1)
-                .containsExactlyInAnyOrder(savedWaits);
+        Assertions.assertThat(foundWaits)
+                .hasValue(savedWaits);
     }
 
     @Test
@@ -190,7 +190,8 @@ class ReservationWaitRepositoryTest {
     }
 
     @Test
-    void tdd() {
+    void findTopByReservationOrderByStatusPriorityDesc() {
+        // given
         ReservationWait wait1 = new ReservationWait(dummyMember, dummyReservation, 1);
         ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 1);
         ReservationWait wait3 = new ReservationWait(dummyMember, dummyReservation, 1);
@@ -203,28 +204,31 @@ class ReservationWaitRepositoryTest {
         waitRepository.save(wait4);
         waitRepository.save(wait5);
 
+        // when
         Optional<ReservationWait> waits = waitRepository.findTopByReservationOrderByStatusPriorityDesc(
                 dummyReservation);
 
+        // then
         Assertions.assertThat(waits)
                 .hasValue(wait1);
     }
 
     @Test
     @DisplayName("기준 우선순위보다 높은 우선순위의 갯수를 구한다")
-    void countByPriorityBefore_ShouldGetNumberOfPriority_ThatGreaterThenParam() {
+    void countByStatusPriorityIsLessThan_ShouldGetNumberOfPriority_ThatGreaterThenParam() {
         // given
         ReservationWait wait1 = new ReservationWait(dummyMember, dummyReservation, 1);
-        ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 1);
+        ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 2);
 
         waitRepository.save(wait1);
         waitRepository.save(wait2);
 
         // when
-        long count = waitRepository.countByStatusPriorityIsLessThan(3L);
+        long count = waitRepository.countByReservationAndStatusPriorityIsLessThan(wait1.getReservation(), 3L);
 
         // then
         Assertions.assertThat(count).isEqualTo(2L);
 
     }
+
 }

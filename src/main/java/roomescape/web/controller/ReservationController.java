@@ -53,7 +53,7 @@ public class ReservationController {
                                                                Credential credential) {
         ReservationRequest reservationRequest = ReservationRequest.builder()
                 .date(request.date())
-                .memberId(credential.id())
+                .memberId(credential.memberId())
                 .timeId(request.timeId())
                 .themeId(request.themeId())
                 .build();

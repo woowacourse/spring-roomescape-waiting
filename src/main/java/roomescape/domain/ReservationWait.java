@@ -1,8 +1,5 @@
 package roomescape.domain;
 
-import static roomescape.domain.ReservationStatus.Status.RESERVED;
-
-import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -21,14 +18,16 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.exception.wait.DuplicatedReservationException;
 
 @Entity
 @Getter
-@Table(name = "reservation_wait")
 @AllArgsConstructor
+@Table(name = "reservation_wait")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationWait {
+    private static final long PRIORITY_INCREMENTAL_STEP = 1L;
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,23 +47,26 @@ public class ReservationWait {
         this.status = new ReservationStatus(priority);
     }
 
-    public void validateDuplicateWait(List<ReservationWait> waits) {
-        if (waits.isEmpty()) {
-            return;
+    public void validateDuplicateWait(boolean hasSameWait) {
+        if (hasSameWait) {
+            throw new DuplicatedReservationException();
         }
-        throw new DuplicatedReservationException();
-    }
-
-    public void reserve() {
-        status.reserve();
     }
 
     public long getPriority() {
         return status.getPriority();
     }
 
+    public long getNextPriority() {
+        return status.getPriority() + PRIORITY_INCREMENTAL_STEP;
+    }
+
     public boolean isReserved() {
-        return status.isSameAs(RESERVED);
+        return status.isSameAs(Status.RESERVED);
+    }
+
+    public void reserve() {
+        status.reserve();
     }
 
     @Override

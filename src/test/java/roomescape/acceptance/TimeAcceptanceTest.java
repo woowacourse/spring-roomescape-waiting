@@ -97,7 +97,6 @@ class TimeAcceptanceTest extends AcceptanceFixture {
                 .body("size()", is(1));
     }
 
-    // GET localhost:8080/times/available?date=2024-10-11&theme-id=1
     @Test
     @DisplayName("예약 가능 시간 조회 API")
     void inquire_available_time_API() {

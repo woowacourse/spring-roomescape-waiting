@@ -38,4 +38,3 @@ public class AdminController {
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 }
-

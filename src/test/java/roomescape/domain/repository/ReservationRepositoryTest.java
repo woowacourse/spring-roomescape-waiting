@@ -130,8 +130,8 @@ class ReservationRepositoryTest {
         reservationRepository.save(reservation2);
 
         // when
-        Optional<Reservation> findReservations = reservationRepository.findByDateAndTimeAndTheme(
-                LocalDate.of(2023, 1, 1), savedTime, savedTheme1);
+        Optional<Reservation> findReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
+                LocalDate.of(2023, 1, 1), savedTime.getId(), savedTheme1.getId());
 
         // then
         Assertions.assertThat(findReservations)

@@ -26,14 +26,14 @@ public class WaitController {
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<WaitResponse>> findAllByMemberId(Credential credential) {
-        List<WaitResponse> reservations = waitService.findAllByMemberId(credential.id());
+        List<WaitResponse> reservations = waitService.findAllByMemberId(credential.memberId());
 
         return ResponseEntity.ok(reservations);
     }
 
     @PostMapping("/reservation-wait")
     public ResponseEntity<Void> saveReservationWait(@Valid @RequestBody WaitRequest request, Credential credential) {
-        waitService.saveReservationWait(request, credential.id());
+        waitService.saveReservationWait(request, credential.memberId());
 
         return ResponseEntity.created(URI.create("/")).build();
     }
@@ -41,7 +41,7 @@ public class WaitController {
     @DeleteMapping("/reservation-wait/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId,
                                                   Credential credential) {
-        waitService.deleteReservationWait(reservationId, credential.id());
+        waitService.deleteReservationWait(reservationId, credential.memberId());
 
         return ResponseEntity.noContent().build();
     }
