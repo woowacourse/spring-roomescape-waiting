@@ -42,6 +42,10 @@ public class Waiting {
         this(null, date, member, time, theme, ReservationStatus.WAITING);
     }
 
+    public void denyWaiting() {
+        status = ReservationStatus.DENY;
+    }
+
     public Long getId() {
         return id;
     }
@@ -64,9 +68,5 @@ public class Waiting {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    public void denyWaiting() {
-        status = ReservationStatus.DENY;
     }
 }
