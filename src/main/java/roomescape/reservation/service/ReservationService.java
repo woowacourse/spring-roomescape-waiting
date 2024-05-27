@@ -122,8 +122,8 @@ public class ReservationService {
     }
 
     private void validateReservingPastTime(LocalDate date, LocalTime time) {
-        LocalDate nowDate = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        LocalTime nowTime = LocalTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
         if (date.isBefore(nowDate) || (date.isEqual(nowDate) && time.isBefore(nowTime))) {
             throw new IllegalReservationDateException(
                     nowDate + " " + nowTime + ": 예약 날짜와 시간은 현재 보다 이전일 수 없습니다");
