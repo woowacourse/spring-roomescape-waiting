@@ -55,7 +55,7 @@ public class ReservationService {
         validateIsFuture(date, time);
         validateDuplication(date, time, theme);
 
-        Reservation reservation = reservationDto.toReservation(time, theme, member);
+        Reservation reservation = new Reservation(date, time, theme, member);
         return reservationRepository.save(reservation);
     }
 

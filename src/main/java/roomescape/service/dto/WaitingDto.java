@@ -2,14 +2,14 @@ package roomescape.service.dto;
 
 import java.time.LocalDate;
 
-public class ReservationDto {
+public class WaitingDto {
 
     private final LocalDate date;
     private final long timeId;
     private final long themeId;
     private final long memberId;
 
-    public ReservationDto(LocalDate date, Long timeId, Long themeId, Long memberId) {
+    public WaitingDto(LocalDate date, Long timeId, Long themeId, Long memberId) {
         this.date = date;
         this.timeId = timeId;
         this.themeId = themeId;

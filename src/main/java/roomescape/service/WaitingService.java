@@ -53,7 +53,7 @@ public class WaitingService {
         validateDuplication(date, time, theme, member);
         validateIsReservationOwner(member, reservation.getMember());
 
-        Waiting waiting = waitingDto.toWaiting(member, time, theme);
+        Waiting waiting = new Waiting(date, time, theme, member);
         return waitingRepository.save(waiting);
     }
 
