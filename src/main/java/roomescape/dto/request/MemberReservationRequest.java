@@ -1,11 +1,17 @@
 package roomescape.dto.request;
 
+import roomescape.domain.*;
+
 import java.time.LocalDate;
 
 public record MemberReservationRequest(LocalDate date, Long timeId, Long themeId) {
 
     public MemberReservationRequest {
         isValid(date, timeId, themeId);
+    }
+
+    public Reservation toEntity(Member member, TimeSlot time, Theme theme) {
+        return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
     }
 
     private void isValid(LocalDate date, Long timeId, Long themeId) {

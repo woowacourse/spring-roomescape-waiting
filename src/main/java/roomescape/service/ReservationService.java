@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.dto.LoginMember;
+import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -18,19 +19,23 @@ import roomescape.repository.*;
 @Transactional
 public class ReservationService {
 
-    private final MemberRepository memberRepository;
-    private final TimeSlotRepository timeSlotRepository;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final ThemeRepository themeRepository;
 
-    public ReservationService(MemberRepository memberRepository, TimeSlotRepository timeSlotRepository,
-                              ReservationRepository reservationRepository, WaitingRepository waitingRepository, ThemeRepository themeRepository) {
-        this.memberRepository = memberRepository;
-        this.timeSlotRepository = timeSlotRepository;
+    private final MemberService memberService;
+    private final ThemeService themeService;
+    private final TimeService timeService;
+    private final WaitingService waitingService;
+
+    public ReservationService(ReservationRepository reservationRepository, WaitingRepository waitingRepository,
+                              MemberService memberService, ThemeService themeService, TimeService timeService,
+                              WaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
-        this.themeRepository = themeRepository;
+        this.memberService = memberService;
+        this.themeService = themeService;
+        this.timeService = timeService;
+        this.waitingService = waitingService;
     }
 
     @Transactional(readOnly = true)
@@ -46,18 +51,36 @@ public class ReservationService {
                                                               String dateFrom, String dateTo) {
         LocalDate from = LocalDate.parse(dateFrom);
         LocalDate to = LocalDate.parse(dateTo);
-        Member member = findMemberById(memberId);
-        Theme theme = findThemeById(themeId);
+        Member member = memberService.findMemberById(memberId);
+        Theme theme = themeService.findThemeById(themeId);
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, from, to)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public ReservationResponse create(ReservationRequest reservationRequest) {
-        Member member = findMemberById(reservationRequest.memberId());
-        TimeSlot timeSlot = findTimeSlotById(reservationRequest.timeId());
-        Theme theme = findThemeById(reservationRequest.themeId());
+    @Transactional(readOnly = true)
+    public List<ReservationMineResponse> findMyReservationsAndWaitings(LoginMember loginMember) {
+        List<ReservationMineResponse> myReservations = findMyReservations(loginMember);
+        List<ReservationMineResponse> myWaitings = waitingService.findMyWaitings(loginMember);
+
+        myReservations.addAll(myWaitings);
+        return myReservations;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
+        Member member = memberService.findMemberById(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findAllByMemberOrderByDateAsc(member);
+        return reservations.stream()
+                .map(ReservationMineResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    public ReservationResponse createByAdmin(ReservationRequest reservationRequest) {
+        Member member = memberService.findMemberById(reservationRequest.memberId());
+        TimeSlot timeSlot = timeService.findTimeSlotById(reservationRequest.timeId());
+        Theme theme = themeService.findThemeById(reservationRequest.themeId());
 
         validate(reservationRequest.date(), timeSlot, theme, member);
 
@@ -66,13 +89,16 @@ public class ReservationService {
         return ReservationResponse.from(createdReservation);
     }
 
-    @Transactional(readOnly = true)
-    public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
-        Member member = findMemberById(loginMember.id());
-        List<Reservation> reservations = reservationRepository.findAllByMemberOrderByDateAsc(member);
-        return reservations.stream()
-                .map(ReservationMineResponse::from)
-                .collect(Collectors.toList());
+    public ReservationResponse createByClient(Long memberId, MemberReservationRequest reservationRequest) {
+        Member member = memberService.findMemberById(memberId);
+        TimeSlot timeSlot = timeService.findTimeSlotById(reservationRequest.timeId());
+        Theme theme = themeService.findThemeById(reservationRequest.themeId());
+
+        validate(reservationRequest.date(), timeSlot, theme, member);
+
+        Reservation reservation = reservationRequest.toEntity(member, timeSlot, theme);
+        Reservation createdReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(createdReservation);
     }
 
     public void delete(Long id) {
@@ -120,20 +146,5 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeAndMember(date, timeSlot, member)) {
             throw new IllegalArgumentException("[ERROR] 동일한 시간대에 예약을 두 개 이상 할 수 없습니다.");
         }
-    }
-
-    private Member findMemberById(long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
-    }
-
-    private TimeSlot findTimeSlotById(long timeId) {
-        return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 시간 입니다"));
-    }
-
-    private Theme findThemeById(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 테마 입니다"));
     }
 }

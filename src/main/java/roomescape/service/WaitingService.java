@@ -15,20 +15,20 @@ import java.util.List;
 @Service
 @Transactional
 public class WaitingService {
-    private final MemberRepository memberRepository;
-    private final TimeSlotRepository timeSlotRepository;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final ThemeRepository themeRepository;
 
-    public WaitingService(MemberRepository memberRepository, TimeSlotRepository timeSlotRepository,
-                          ReservationRepository reservationRepository, WaitingRepository waitingRepository,
-                          ThemeRepository themeRepository) {
-        this.memberRepository = memberRepository;
-        this.timeSlotRepository = timeSlotRepository;
+    private final MemberService memberService;
+    private final TimeService timeService;
+    private final ThemeService themeService;
+
+    public WaitingService(ReservationRepository reservationRepository, WaitingRepository waitingRepository,
+                          MemberService memberService, TimeService timeService, ThemeService themeService) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
-        this.themeRepository = themeRepository;
+        this.memberService = memberService;
+        this.timeService = timeService;
+        this.themeService = themeService;
     }
 
     @Transactional(readOnly = true)
@@ -41,11 +41,23 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public List<ReservationMineResponse> findMyWaitings(LoginMember loginMember) {
-        Member member = findMemberById(loginMember.id());
+        Member member = memberService.findMemberById(loginMember.id());
         List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberIdByDateAsc(member);
         return waitings.stream()
                 .map(ReservationMineResponse::from)
                 .toList();
+    }
+
+    public WaitingResponse create(WaitingRequest waitingRequest) {
+        Member member = memberService.findMemberById(waitingRequest.memberId());
+        TimeSlot timeSlot = timeService.findTimeSlotById(waitingRequest.timeId());
+        Theme theme = themeService.findThemeById(waitingRequest.themeId());
+
+        validate(waitingRequest.date(), timeSlot, theme, member);
+
+        Waiting waiting = waitingRequest.toEntity(member, timeSlot, theme);
+        Waiting createdWaiting = waitingRepository.save(waiting);
+        return WaitingResponse.from(createdWaiting);
     }
 
     public void delete(Long id) {
@@ -71,20 +83,5 @@ public class WaitingService {
         if (waitingRepository.existsByDateAndTimeAndThemeAndMember(date, timeSlot, theme, member)) {
             throw new IllegalArgumentException("[ERROR] 예약 대기는 중복으로 신청할 수 없습니다.");
         }
-    }
-
-    private Member findMemberById(long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
-    }
-
-    private TimeSlot findTimeSlotById(long timeId) {
-        return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 시간 입니다"));
-    }
-
-    private Theme findThemeById(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 테마 입니다"));
     }
 }
