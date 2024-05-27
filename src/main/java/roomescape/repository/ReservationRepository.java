@@ -3,6 +3,8 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -24,11 +26,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByIdAndStatus(Long id, ReservationStatus status);
 
+    @EntityGraph(attributePaths = {"member", "theme", "time"}, type = EntityGraphType.FETCH)
     List<Reservation> findAllByDateAndThemeIdOrderByTimeStartAtAsc(LocalDate date, Long themeId);
 
+    @EntityGraph(attributePaths = {"member", "theme", "time"}, type = EntityGraphType.FETCH)
     List<Reservation> findAllByThemeIdAndMemberIdAndDateIsBetweenOrderByDateAscTimeStartAtAsc(
         Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
+    @EntityGraph(attributePaths = {"member", "theme", "time"}, type = EntityGraphType.FETCH)
     List<Reservation> findAllByStatusOrderByDateAscTimeStartAtAsc(ReservationStatus status);
 
     Optional<Reservation> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(LocalDate date, Long timeId, Long themeId);
