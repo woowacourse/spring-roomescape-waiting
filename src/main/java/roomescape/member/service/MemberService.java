@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
@@ -21,8 +22,8 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
 
     @Value("${security.jwt.token.secret-key}")

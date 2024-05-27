@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.reservation.domain.ReservationTime;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeJpaRepository reservationTimeJpaRepository;

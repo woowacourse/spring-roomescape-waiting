@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.theme.domain.Name;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeJpaRepository themeJpaRepository;
