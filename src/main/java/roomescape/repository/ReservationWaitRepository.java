@@ -17,15 +17,15 @@ public interface ReservationWaitRepository extends JpaRepository<ReservationWait
     @Query("""
             SELECT new roomescape.domain.reservationwait.ReservationWaitWithRank(
                 w,
-                COUNT(w2)
+                COUNT(previous)
             )
             FROM ReservationWait w
-            LEFT JOIN ReservationWait w2
-                ON w2.status = 'WAITING'
-                AND w2.theme = w.theme
-                AND w2.time = w.time
-                AND w2.date = w.date
-                AND w2.id < w.id
+            LEFT JOIN ReservationWait previous
+                ON previous.status = 'WAITING'
+                AND previous.theme = w.theme
+                AND previous.time = w.time
+                AND previous.date = w.date
+                AND previous.id < w.id
             WHERE w.status = 'WAITING'
             AND w.member.id = :memberId
             GROUP BY w
