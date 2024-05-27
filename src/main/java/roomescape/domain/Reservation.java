@@ -7,12 +7,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import roomescape.exception.ExceptionType;
-import roomescape.exception.RoomescapeException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import roomescape.exception.ExceptionType;
+import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Reservation implements Comparable<Reservation> {
@@ -34,16 +33,11 @@ public class Reservation implements Comparable<Reservation> {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    protected Reservation() {
+    public static ReservationBuilder builder() {
+        return new ReservationBuilder();
     }
 
-    public Reservation(
-            Member reservationMember,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-        this(null, reservationMember, date, time, theme, null);
+    protected Reservation() {
     }
 
     public Reservation(long id, Reservation reservationBeforeSave) {
@@ -55,26 +49,6 @@ public class Reservation implements Comparable<Reservation> {
                 reservationBeforeSave.theme,
                 reservationBeforeSave.status
         );
-    }
-
-    public Reservation(
-            Long id,
-            Member reservationMember,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-        this(id, reservationMember, date, time, theme, null);
-    }
-
-    public Reservation(
-            Member reservationMember,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme,
-            ReservationStatus status
-    ) {
-        this(null, reservationMember, date, time, theme, status);
     }
 
     public Reservation(

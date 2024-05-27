@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -17,10 +20,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ReservationService {
@@ -54,9 +53,16 @@ public class ReservationService {
         validateDuplicateReservation(date, time, theme, member);
 
         ReservationStatus status = determineStatus(time, theme, date);
-        Reservation reservation = reservationRepository.save(new Reservation(member, date, time, theme, status));
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .status(status)
+                .build();
+        Reservation saved = reservationRepository.save(reservation);
 
-        return ReservationResponse.from(reservation);
+        return ReservationResponse.from(saved);
     }
 
     private void validateDuplicateReservation(LocalDate date, ReservationTime time, Theme theme, Member member) {

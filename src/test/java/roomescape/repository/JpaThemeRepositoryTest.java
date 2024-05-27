@@ -59,14 +59,54 @@ class JpaThemeRepositoryTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Member member = memberRepository.save(DEFAULT_MEMBER);
 
-        reservationRepository.save(new Reservation(member, date, reservationTime2, theme2));
-        reservationRepository.save(new Reservation(member, date, reservationTime1, theme2));
-        reservationRepository.save(new Reservation(member, date, reservationTime3, theme2));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(date)
+                        .time(reservationTime2)
+                        .theme(theme2)
+                        .build());
+        reservationRepository.save(
+                Reservation.builder()
+                .member(member)
+                .date(date)
+                .time(reservationTime1)
+                .theme(theme2)
+                .build());
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(date)
+                        .time(reservationTime3)
+                        .theme(theme2)
+                        .build()
+        );
 
-        reservationRepository.save(new Reservation(member, date, reservationTime1, theme1));
-        reservationRepository.save(new Reservation(member, date, reservationTime2, theme1));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(date)
+                        .time(reservationTime1)
+                        .theme(theme1)
+                        .build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(date)
+                        .time(reservationTime2)
+                        .theme(theme1)
+                        .build()
+        );
 
-        reservationRepository.save(new Reservation(member, date, reservationTime1, theme3));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(date)
+                        .time(reservationTime1)
+                        .theme(theme3)
+                        .build()
+        );
 
         List<Theme> result = themeRepository.findAndOrderByPopularityFirstTheme(
                 date, date.plusDays(1), PageRequest.of(0, 10));

@@ -97,7 +97,12 @@ class JpaReservationTimeRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
         Theme theme = themeRepository.save(DEFAULT_THEME);
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
 
         List<ReservationTime> response = reservationRepository.findAllByDateAndTheme(
                         reservation.getDate(), reservation.getTheme())

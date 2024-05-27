@@ -51,7 +51,12 @@ class JpaReservationRepositoryTest {
     @DisplayName("Reservation 을 잘 저장하는지 확인한다.")
     void save() {
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
         List<Reservation> afterSave = reservationRepository.findAll();
 
         assertThat(afterSave)
@@ -63,7 +68,13 @@ class JpaReservationRepositoryTest {
     @DisplayName("Reservation 을 잘 조회하는지 확인한다.")
     void findAll() {
         List<Reservation> beforeSave = reservationRepository.findAll();
-        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
         List<Reservation> afterSave = reservationRepository.findAll();
 
         assertThat(afterSave.size()).isEqualTo(beforeSave.size() + 1);
@@ -73,7 +84,13 @@ class JpaReservationRepositoryTest {
     @DisplayName("Reservation 을 잘 지우는지 확인한다.")
     void delete() {
         List<Reservation> beforeSaveAndDelete = reservationRepository.findAll();
-        Reservation saved = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        Reservation saved = reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
 
         reservationRepository.deleteById(saved.getId());
 
@@ -87,7 +104,14 @@ class JpaReservationRepositoryTest {
     void existsByThemeAndDateAndTime() {
         LocalDate reservedDate = DEFAULT_RESERVATION.getDate();
         LocalDate notReservedDate = reservedDate.plusDays(1);
-        reservationRepository.save(new Reservation(member, reservedDate, time, theme));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(reservedDate)
+                        .time(time)
+                        .theme(theme)
+                        .build()
+        );
 
         assertAll(
                 () -> assertThat(
@@ -100,7 +124,13 @@ class JpaReservationRepositoryTest {
     @Test
     @DisplayName("특정 시간에 예약이 있는지 확인한다.")
     void existsByTime() {
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        Reservation reservation = reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
         ReservationTime randomTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 56)));
 
         assertAll(
@@ -112,7 +142,13 @@ class JpaReservationRepositoryTest {
     @Test
     @DisplayName("특정 테마에 예약이 있는지 확인한다.")
     void existsByTheme() {
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        Reservation reservation = reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
         Theme randomTheme = new Theme(2L, DEFAULT_THEME);
 
         assertAll(
@@ -124,7 +160,13 @@ class JpaReservationRepositoryTest {
     @Test
     @DisplayName("특정 회원의 예약을 잘 조회하는지 확인한다.")
     void findByMemberId() {
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        Reservation reservation = reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
 
         List<Reservation> reservations = reservationRepository.findAllByMemberId(member.getId());
 
@@ -142,8 +184,20 @@ class JpaReservationRepositoryTest {
         LocalDate onPeriodDate = startDate;
         LocalDate notOnPeriodDate = startDate.plusDays(2);
 
-        Reservation onPeriodreservation = reservationRepository.save(new Reservation(member, onPeriodDate, time, theme));
-        Reservation notOnPeriodreservation = reservationRepository.save(new Reservation(member, notOnPeriodDate, time, theme));
+        Reservation onPeriodreservation = reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(onPeriodDate)
+                        .time(time)
+                        .theme(theme)
+                        .build());
+        Reservation notOnPeriodreservation = reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(notOnPeriodDate)
+                        .time(time)
+                        .theme(theme)
+                        .build());
 
         List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 member.getId(), theme.getId(), startDate, endDate);

@@ -60,8 +60,18 @@ class AvailableTimeServiceTest {
         ReservationTime time4 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
 
         LocalDate selectedDate = LocalDate.now().plusDays(1);
-        reservationRepository.save(new Reservation(member, selectedDate, time1, theme));
-        reservationRepository.save(new Reservation(member, selectedDate, time3, theme));
+        reservationRepository.save(Reservation.builder()
+                .member(member)
+                .date(selectedDate)
+                .time(time1)
+                .theme(theme)
+                .build());
+        reservationRepository.save(Reservation.builder()
+                .member(member)
+                .date(selectedDate)
+                .time(time3)
+                .theme(theme)
+                .build());
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = availableTimeService.findByThemeAndDate(selectedDate, theme.getId());
