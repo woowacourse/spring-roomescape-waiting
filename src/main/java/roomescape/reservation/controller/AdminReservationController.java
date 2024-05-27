@@ -34,6 +34,11 @@ public class AdminReservationController {
                 .body(reservationCreateResponse);
     }
 
+    @GetMapping
+    public ResponseEntity<List<ReservationResponse>> reservationList() {
+        return ResponseEntity.ok(reservationService.findReservations());
+    }
+
     @GetMapping("/search")
     public List<ReservationResponse> reservationListInCondition(
             @RequestParam("themeId") long themeId,
