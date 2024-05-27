@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 @Service
 public class ReservationService {
@@ -157,10 +156,9 @@ public class ReservationService {
 
     private Integer calculateWaitingNumber(final Reservation reservation, final Member member) {
         final List<Reservation> reservations = reservationRepository.findByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
-        return IntStream.range(0, reservations.size())
-                .filter(index -> reservations.get(index).getMember().getId().equals(member.getId()))
-                .findFirst()
-                .orElseThrow(() -> new ReservationFailException("대기중인 예약을 찾을 수 없습니다."));
+        return Math.toIntExact(reservations.stream()
+                .takeWhile(found -> !found.getMember().getId().equals(member.getId()))
+                .count());
     }
 
     public void deleteByIdWithWaiting(final Long id, final Member member) {

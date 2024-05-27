@@ -12,6 +12,7 @@ import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationWaitingResponse;
+import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
@@ -129,6 +130,19 @@ class ReservationServiceTest {
         Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
         //when, then
         assertThat(service.findMemberReservations(member).getData()).hasSize(8);
+    }
+
+    @Test
+    @DisplayName("로그인한 회원의 예약 목록 중 대기중인 예약이 있을경우 대기번호를 포함한 문자를 반환한다.")
+    void given_member_when_findMemberReservationsWithWaitingAndGetMessage_then_containsWaitingNumber() {
+        //given
+        Password password = new Password("hashedpassword", "salt");
+        Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
+        //when
+        final ReservationsMineResponse waitingMineResponse = service.findMemberReservations(member).getData().get(7);
+        final String message = waitingMineResponse.status();
+        //then
+        assertThat(message).contains("2");
     }
 
     @Test
