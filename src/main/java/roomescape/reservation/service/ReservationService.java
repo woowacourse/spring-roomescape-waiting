@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;
+import roomescape.reservation.dto.request.CreateReservationByAdminRequest;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.request.CreateMyReservationRequest;
 import roomescape.reservation.dto.request.CreateReservationRequest;
 import roomescape.reservation.dto.response.CreateReservationResponse;
 import roomescape.reservation.dto.response.FindAdminReservationResponse;
@@ -47,16 +49,28 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
-    public CreateReservationResponse createReservation(final AuthInfo authInfo,
-                                                       final CreateReservationRequest createReservationRequest) {
+    public CreateReservationResponse createMyReservation(final AuthInfo authInfo,
+                                                         final CreateMyReservationRequest createMyReservationRequest) {
+        CreateReservationRequest createReservationRequest = CreateReservationRequest.of(authInfo.getMemberId(),
+                createMyReservationRequest);
+        return CreateReservationResponse.from(createReservation(createReservationRequest));
+    }
+
+    public CreateReservationResponse createReservationByAdmin(
+            final CreateReservationByAdminRequest createReservationByAdminRequest) {
+        CreateReservationRequest createReservationRequest = CreateReservationRequest.of(createReservationByAdminRequest);
+        return CreateReservationResponse.from(createReservation(createReservationRequest));
+    }
+
+    public Reservation createReservation(final CreateReservationRequest createReservationRequest) {
         ReservationTime reservationTime = reservationTimeRepository.getById(createReservationRequest.timeId());
         Theme theme = themeRepository.getById(createReservationRequest.themeId());
-        Member member = memberRepository.getById(authInfo.getMemberId());
+        Member member = memberRepository.getById(createReservationRequest.memberId());
 
         checkAlreadyExistReservation(createReservationRequest, createReservationRequest.date(), theme.getName(),
                 reservationTime.getStartAt());
         Reservation reservation = createReservationRequest.toReservation(member, reservationTime, theme);
-        return CreateReservationResponse.from(reservationRepository.save(reservation));
+        return reservationRepository.save(reservation);
     }
 
     private void checkAlreadyExistReservation(final CreateReservationRequest createReservationRequest,

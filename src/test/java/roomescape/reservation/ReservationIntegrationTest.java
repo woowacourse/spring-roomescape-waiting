@@ -25,7 +25,7 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.dto.request.CreateReservationRequest;
+import roomescape.reservation.dto.request.CreateMyReservationRequest;
 import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.dto.response.FindReservationResponse;
 import roomescape.reservation.model.Reservation;
@@ -81,7 +81,7 @@ class ReservationIntegrationTest {
         reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2024-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2024-11-30"),
                 1L, 1L);
 
         // when & then
@@ -117,7 +117,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 생성 살패: 날짜 과거")
     void createReservationTime_WhenDimeIsPast() {
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2000-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2000-11-30"),
                 1L, 1L);
 
         RestAssured.given().log().all()
@@ -134,7 +134,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 생성 살패: 날짜 없음")
     void createReservationTime_WhenDimeIsNull() {
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(null, 1L, 1L);
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(null, 1L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -151,7 +151,7 @@ class ReservationIntegrationTest {
     @ValueSource(longs = {0, -1})
     @DisplayName("방탈출 예약 생성 살패: 시간 식별자 형식")
     void createReservationTime_WhenTimeIsInvalidType(Long timeId) {
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2024-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2024-11-30"),
                 timeId, 1L);
 
         RestAssured.given().log().all()
@@ -168,7 +168,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 생성 살패: 시간 null")
     void createReservationTime_WhenTimeIsPast() {
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2024-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2024-11-30"),
                 null, 1L);
 
         RestAssured.given().log().all()
@@ -186,7 +186,7 @@ class ReservationIntegrationTest {
     @DisplayName("방탈출 예약 생성 살패: 시간 없음")
     void createReservation_WhenTimeNotExist() {
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2024-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2024-11-30"),
                 1L, 1L);
 
         RestAssured.given().log().all()
@@ -204,7 +204,7 @@ class ReservationIntegrationTest {
     @ValueSource(longs = {0, -1})
     @DisplayName("방탈출 예약 생성 살패: 테마 식별자 형식")
     void createReservationTime_WhenThemeIdIsInvalidType(Long themeId) {
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2024-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2024-11-30"),
                 1L, themeId);
 
         RestAssured.given().log().all()
@@ -221,7 +221,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 생성 살패: 테마 null")
     void createReservation_WhenThemeIsNull() {
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2024-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2024-11-30"),
                 1L, null);
 
         RestAssured.given().log().all()
@@ -240,7 +240,7 @@ class ReservationIntegrationTest {
     void createReservation_WhenThemeNotExist() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(LocalDate.parse("2024-11-30"),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(LocalDate.parse("2024-11-30"),
                 1L, 1L);
 
         RestAssured.given().log().all()
@@ -264,7 +264,7 @@ class ReservationIntegrationTest {
         Reservation reservation = reservationRepository.save(
                 new Reservation(member, LocalDate.parse("2025-12-23"), reservationTime, theme));
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(reservation.getDate(),
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(reservation.getDate(),
                 reservation.getReservationTime().getId(),
                 reservation.getTheme().getId());
 

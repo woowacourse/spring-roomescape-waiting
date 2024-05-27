@@ -18,14 +18,13 @@ import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.dto.request.CreateReservationRequest;
+import roomescape.reservation.dto.request.CreateMyReservationRequest;
 import roomescape.reservation.dto.response.CreateReservationResponse;
 import roomescape.reservation.dto.response.FindAdminReservationResponse;
 import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.dto.response.FindReservationResponse;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
@@ -74,12 +73,12 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(ThemeFixture.getOne());
         Member member = memberRepository.save(MemberFixture.getOne());
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(
                 LocalDate.of(2024, 10, 10), reservationTime.getId(), theme.getId());
         AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getRole());
 
         // when
-        CreateReservationResponse createReservationResponse = reservationService.createReservation(
+        CreateReservationResponse createReservationResponse = reservationService.createMyReservation(
                 authInfo,
                 createReservationRequest);
 
@@ -94,12 +93,12 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(ThemeFixture.getOne());
         Member member = memberRepository.save(MemberFixture.getOne());
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(
                 LocalDate.of(2024, 10, 10), 1L, theme.getId());
         AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getRole());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createReservation(authInfo, createReservationRequest))
+        assertThatThrownBy(() -> reservationService.createMyReservation(authInfo, createReservationRequest))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("식별자 1에 해당하는 시간이 존재하지 않습니다.");
     }
@@ -111,12 +110,12 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
         Member member = memberRepository.save(MemberFixture.getOne());
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(
                 LocalDate.of(2024, 10, 10), reservationTime.getId(), 1L);
         AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getRole());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createReservation(authInfo, createReservationRequest))
+        assertThatThrownBy(() -> reservationService.createMyReservation(authInfo, createReservationRequest))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("식별자 1에 해당하는 테마가 존재하지 않습니다.");
     }
@@ -131,12 +130,12 @@ class ReservationServiceTest {
         List<Member> members = MemberFixture.get(2).stream().map(memberRepository::save).toList();
         reservationRepository.save(new Reservation(members.get(0), sameDate, sameReservationTime, sameTheme));
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(
                 sameDate, sameReservationTime.getId(), sameTheme.getId());
         AuthInfo authInfo = new AuthInfo(members.get(1).getId(), members.get(1).getName(), members.get(1).getRole());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createReservation(authInfo, createReservationRequest))
+        assertThatThrownBy(() -> reservationService.createMyReservation(authInfo, createReservationRequest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 2024-10-10의 테마 이름 테마에는 10:00 시의 예약이 존재하여 예약을 생성할 수 없습니다.");
     }
@@ -150,12 +149,12 @@ class ReservationServiceTest {
         Theme sameTheme = themeRepository.save(ThemeFixture.getOne());
         List<Member> members = MemberFixture.get(2).stream().map(memberRepository::save).toList();
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+        CreateMyReservationRequest createReservationRequest = new CreateMyReservationRequest(
                 sameDate, sameReservationTime.getId(), sameTheme.getId());
         AuthInfo authInfo = new AuthInfo(members.get(1).getId(), members.get(1).getName(), members.get(1).getRole());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createReservation(authInfo, createReservationRequest))
+        assertThatThrownBy(() -> reservationService.createMyReservation(authInfo, createReservationRequest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("2024-04-10는 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
     }
@@ -172,7 +171,7 @@ class ReservationServiceTest {
         Reservation reservation2 = reservationRepository.save(new Reservation(member, date, reservationTime, theme));
 
         // when & then
-        assertThat(reservationService.getReservationsByAdmin()).containsExactly(
+        assertThat(reservationService.getReservations()).containsExactly(
                 FindAdminReservationResponse.from(reservation1),
                 FindAdminReservationResponse.from(reservation2));
     }
