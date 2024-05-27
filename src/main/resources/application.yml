@@ -1,3 +1,9 @@
 spring:
-  profiles:
-    active: local
+  config:
+    import:
+      - classpath:application-local.yml
+      - classpath:application-dev.yml
+
+jwt:
+  secret: devdevdevdevdevdevdevdevdevdevdevdev
+  expire-in-millis: 1800000
