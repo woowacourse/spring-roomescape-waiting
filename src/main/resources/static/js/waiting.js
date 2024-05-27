@@ -1,9 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [4단계] 예약 대기 관리 기능
-          예약 대기 목록 조회 endpoint 설정
-     */
-    fetch('/admin/reservations/waiting') // 내 예약 목록 조회 API 호출
+    fetch('/admin/reservations/waiting')
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -19,21 +15,17 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        /*
-        TODO: [4단계] 예약 대기 관리 기능
-              예약 대기 목록 조회 response 명세에 맞춰 값 설정
-         */
         const id = item.id;
         const name = item.name;
         const theme = item.theme;
         const date = item.date;
         const startAt = item.startAt;
 
-        row.insertCell(0).textContent = id;            // 예약 대기 id
-        row.insertCell(1).textContent = name;          // 예약자명
-        row.insertCell(2).textContent = theme;         // 테마명
-        row.insertCell(3).textContent = date;          // 예약 날짜
-        row.insertCell(4).textContent = startAt;       // 시작 시간
+        row.insertCell(0).textContent = id;
+        row.insertCell(1).textContent = name;
+        row.insertCell(2).textContent = theme;
+        row.insertCell(3).textContent = date;
+        row.insertCell(4).textContent = startAt;
 
         const actionCell = row.insertCell(row.cells.length);
 
@@ -50,10 +42,6 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 승인 API 호출
-     */
     const endpoint = '' + id;
     return fetch(endpoint, {
         method: ''
@@ -67,10 +55,6 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 거절 API 호출
-     */
     const endpoint = '/reservations/waiting/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
