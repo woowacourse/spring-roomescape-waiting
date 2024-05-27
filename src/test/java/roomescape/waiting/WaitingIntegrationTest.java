@@ -262,6 +262,6 @@ class WaitingIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1인 예약 대기가 존재하지 않아 거절할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 예약 대기가 존재하지 않습니다."));
     }
 }

@@ -344,6 +344,6 @@ class ReservationServiceTest {
         // then
         assertThatThrownBy(() -> reservationService.cancelReservation(authInfo, reservation.getId()))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessage("식별자 1인 예약에 대해 권한이 존재하지 않아, 삭제가 불가능합니다.");
+                .hasMessage("식별자 1인 예약에 대해 회원 식별자 2의 권한이 존재하지 않아, 삭제가 불가능합니다.");
     }
 }

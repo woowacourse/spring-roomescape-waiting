@@ -121,16 +121,17 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private void checkCancelAuthorization(final Reservation reservation, final Long requesterId) {
-        Member member = memberRepository.getById(requesterId);
+    private void checkCancelAuthorization(final Reservation reservation, final Long memberId) {
+        Member member = memberRepository.getById(memberId);
         if (member.isNotAdmin() && !reservation.isOwnedBy(member)) {
-            throw new ForbiddenException("식별자 " + reservation.getId() + "인 예약에 대해 권한이 존재하지 않아, 삭제가 불가능합니다.");
+            throw new ForbiddenException(
+                    "식별자 " + reservation.getId() + "인 예약에 대해 회원 식별자 " + memberId + "의 권한이 존재하지 않아, 삭제가 불가능합니다.");
         }
     }
 
-    private void updateReservationByMember(Reservation reservation) {
+    private void updateReservationByMember(final Reservation reservation) {
         Waiting waiting = waitingRepository.getFirstByReservation(reservation);
         reservation.updateMember(waiting.getMember());
-        waitingService.deleteWaiting(waiting.getId());
+        waitingService.deleteWaitingForReservationUpgrade(waiting.getId());
     }
 }
