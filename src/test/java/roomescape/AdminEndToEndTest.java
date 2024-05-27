@@ -45,7 +45,7 @@ class AdminEndToEndTest {
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201);
 
@@ -58,13 +58,13 @@ class AdminEndToEndTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/times/6")
+                .when().delete("/admin/times/6")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/times/6")
+                .when().delete("/admin/times/6")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -79,7 +79,7 @@ class AdminEndToEndTest {
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201);
 
@@ -92,13 +92,13 @@ class AdminEndToEndTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/themes/5")
+                .when().delete("/admin/themes/5")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/themes/5")
+                .when().delete("/admin/themes/5")
                 .then().log().all()
                 .statusCode(400);
     }

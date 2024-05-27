@@ -1,8 +1,6 @@
 package roomescape.config;
 
-import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
 
 import java.util.List;
 import org.springframework.context.annotation.Configuration;
@@ -33,9 +31,5 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/admin/**");
         registry.addInterceptor(new CheckAdminAndHttpMethodInterceptor(authService, GET))
                 .addPathPatterns("/waiting", "/reservations", "/members");
-        registry.addInterceptor(new CheckAdminAndHttpMethodInterceptor(authService, POST))
-                .addPathPatterns("/themes", "/times");
-        registry.addInterceptor(new CheckAdminAndHttpMethodInterceptor(authService, DELETE))
-                .addPathPatterns("/themes/*", "/times/*");
     }
 }
