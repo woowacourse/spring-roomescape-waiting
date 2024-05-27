@@ -45,7 +45,7 @@ public class ThemeService {
         int limit = rankingPolicy.exposureSize();
 
         PageRequest pageRequest = PageRequest.of(0, limit);
-        List<Theme> themes = themeRepository.findThemeByPeriodWithLimit(startDate, endDate, pageRequest);
+        List<Theme> themes = themeRepository.findByPeriodWithLimit(startDate, endDate, pageRequest);
 
         return themes.stream()
                 .map(ThemeResponse::from)

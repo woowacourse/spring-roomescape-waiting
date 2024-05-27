@@ -34,35 +34,17 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
                                                                  @Param("themeName") String themeName,
                                                                  @Param("status") Status status);
 
-    @Query("""
-            SELECT w.status.priority
-            FROM ReservationWait w
-            ORDER BY w.status.priority DESC
-            LIMIT 1
-            """)
-    Optional<Long> findPriorityIndex();
+    Optional<ReservationWait> findTopByOrderByStatusPriorityAsc();
 
-    @Query("""
-            SELECT w
-            FROM ReservationWait w
-            WHERE w.reservation.id = :reservationId
-            ORDER BY w.status.priority
-            LIMIT 1
-            """)
-    Optional<ReservationWait> findTopPriorityByReservationId(@Param("reservationId") Long reservationId);
+    Optional<ReservationWait> findTopByReservationOrderByStatusPriorityDesc(Reservation reservation);
 
     List<ReservationWait> findByMemberAndReservation(Member member, Reservation reservation);
 
     List<ReservationWait> findAllByMember(Member member);
 
-    @Query("""
-            SELECT COUNT(w)
-            FROM ReservationWait w
-            WHERE w.status.priority < :priority
-            """)
-    long countByPriorityBefore(@Param("priority") long priority);
+    long countByStatusPriorityIsLessThan(long priority);
 
-    void deleteById(Long id);
+    void deleteById(long id);
 
     void deleteByMember(Member member);
 

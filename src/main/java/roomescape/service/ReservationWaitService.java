@@ -42,7 +42,8 @@ public class ReservationWaitService {
 
         return waitRepository.findAllByMember(member)
                 .stream()
-                .map(wait -> WaitResponse.from(wait, waitRepository.countByPriorityBefore(wait.getPriority())))
+                .map(wait -> WaitResponse.from(wait,
+                        waitRepository.countByStatusPriorityIsLessThan(wait.getPriority())))
                 .toList();
     }
 
@@ -60,7 +61,8 @@ public class ReservationWaitService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(AuthenticationFailureException::new);
 
-        long waitCount = waitRepository.findPriorityIndex()
+        Long waitCount = waitRepository.findTopByOrderByStatusPriorityAsc()
+                .map(ReservationWait::getPriority)
                 .orElse(RESERVE_NUMBER);
 
         ReservationWait wait = new ReservationWait(member, reservation, waitCount + 1L);
@@ -99,12 +101,12 @@ public class ReservationWaitService {
                 .orElseThrow(NotFoundReservationException::new);
         ReservationWait wait = waitRepository.findByMemberAndReservation(member, reservation).get(0);
         waitRepository.deleteById(wait.getId());
-        proceedAutoScheduling(wait, reservationId);
+        proceedAutoScheduling(wait);
     }
 
-    private void proceedAutoScheduling(ReservationWait wait, Long reservationId) {
+    private void proceedAutoScheduling(ReservationWait wait) {
         if (wait.isReserved()) {
-            waitRepository.findTopPriorityByReservationId(reservationId)
+            waitRepository.findTopByReservationOrderByStatusPriorityDesc(wait.getReservation())
                     .ifPresent(ReservationWait::reserve);
         }
     }

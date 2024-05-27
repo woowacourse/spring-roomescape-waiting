@@ -24,8 +24,8 @@ public interface ThemeRepository extends Repository<Theme, Long> {
             GROUP BY t.id, t.name, t.description, t.thumbnail
             ORDER BY COUNT(r) DESC
             """)
-    List<Theme> findThemeByPeriodWithLimit(@Param("start") LocalDate start, @Param("end") LocalDate end,
-                                           Pageable pageable);
+    List<Theme> findByPeriodWithLimit(@Param("start") LocalDate start, @Param("end") LocalDate end,
+                                      Pageable pageable);
 
     List<Theme> findAll();
 

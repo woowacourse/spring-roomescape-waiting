@@ -79,7 +79,7 @@ class ThemeRepositoryTest {
         PageRequest pageRequest = PageRequest.of(0, 10);
 
         // when
-        List<Theme> themesByPeriodWithLimit = themeRepository.findThemeByPeriodWithLimit(LocalDate.of(2023, 2, 2),
+        List<Theme> themesByPeriodWithLimit = themeRepository.findByPeriodWithLimit(LocalDate.of(2023, 2, 2),
                 LocalDate.of(2023, 2, 3), pageRequest);
 
         // then

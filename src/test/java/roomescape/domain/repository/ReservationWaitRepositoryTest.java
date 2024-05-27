@@ -135,11 +135,11 @@ class ReservationWaitRepositoryTest {
         waitRepository.save(wait2);
 
         // when
-        Optional<Long> priorityIndex = waitRepository.findPriorityIndex();
+        Optional<ReservationWait> wait = waitRepository.findTopByOrderByStatusPriorityAsc();
 
         // then
-        Assertions.assertThat(priorityIndex).isPresent()
-                .hasValue(1238L);
+        Assertions.assertThat(wait).isPresent()
+                .hasValue(wait1);
 
     }
 
@@ -184,8 +184,47 @@ class ReservationWaitRepositoryTest {
         waitRepository.save(wait);
 
         // when & then
-        Assertions.assertThat(waitRepository.findTopPriorityByReservationId(dummyReservation.getId()))
+        Assertions.assertThat(waitRepository.findTopByReservationOrderByStatusPriorityDesc(dummyReservation))
                 .isPresent()
                 .hasValue(wait);
+    }
+
+    @Test
+    void tdd() {
+        ReservationWait wait1 = new ReservationWait(dummyMember, dummyReservation, 1);
+        ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 1);
+        ReservationWait wait3 = new ReservationWait(dummyMember, dummyReservation, 1);
+        ReservationWait wait4 = new ReservationWait(dummyMember, dummyReservation, 1);
+        ReservationWait wait5 = new ReservationWait(dummyMember, dummyReservation, 1);
+
+        waitRepository.save(wait1);
+        waitRepository.save(wait2);
+        waitRepository.save(wait3);
+        waitRepository.save(wait4);
+        waitRepository.save(wait5);
+
+        Optional<ReservationWait> waits = waitRepository.findTopByReservationOrderByStatusPriorityDesc(
+                dummyReservation);
+
+        Assertions.assertThat(waits)
+                .hasValue(wait1);
+    }
+
+    @Test
+    @DisplayName("기준 우선순위보다 높은 우선순위의 갯수를 구한다")
+    void countByPriorityBefore_ShouldGetNumberOfPriority_ThatGreaterThenParam() {
+        // given
+        ReservationWait wait1 = new ReservationWait(dummyMember, dummyReservation, 1);
+        ReservationWait wait2 = new ReservationWait(dummyMember, dummyReservation, 1);
+
+        waitRepository.save(wait1);
+        waitRepository.save(wait2);
+
+        // when
+        long count = waitRepository.countByStatusPriorityIsLessThan(3L);
+
+        // then
+        Assertions.assertThat(count).isEqualTo(2L);
+
     }
 }
