@@ -34,7 +34,7 @@ public class ReservationTimeService {
         return new ResponsesWrapper<>(reservationTimeRespons);
     }
 
-    public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
+    public ReservationTimeResponse register(ReservationTimeRequest reservationTimeRequest) {
         validateDuplicatedTime(reservationTimeRequest);
         final ReservationTime reservationTime = reservationTimeRepository.save(reservationTimeRequest.toEntity());
         return ReservationTimeResponse.from(reservationTime);

@@ -1,6 +1,5 @@
 package roomescape.controller.admin;
 
-import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +11,8 @@ import roomescape.domain.dto.ReservationTimeRequest;
 import roomescape.domain.dto.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/admin/times")
 public class AdminTimeController {
@@ -22,8 +23,8 @@ public class AdminTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> create(@RequestBody ReservationTimeRequest reservationTimeRequest) {
-        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(reservationTimeRequest);
+    public ResponseEntity<ReservationTimeResponse> register(@RequestBody ReservationTimeRequest reservationTimeRequest) {
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.register(reservationTimeRequest);
         return ResponseEntity.created(URI.create("/admin/times/" + reservationTimeResponse.id())).body(
                 reservationTimeResponse);
     }

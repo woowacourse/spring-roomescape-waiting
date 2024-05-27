@@ -1,11 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +9,13 @@ import roomescape.domain.dto.BookResponse;
 import roomescape.domain.dto.ReservationTimeRequest;
 import roomescape.domain.dto.ReservationTimeResponse;
 import roomescape.exception.DeleteNotAllowException;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -39,12 +40,12 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("시간 등록이 성공하면 결과값과 함께 Db에 저장된다.")
-    void given_reservationTimeRequestWithInitialSize_when_create_then_returnReservationTimeResponseAndSaveDb() {
+    void given_reservationTimeRequestWithInitialSize_when_register_then_returnReservationTimeResponseAndSaveDb() {
         //given
         long initialSize = getReservationTimeSize();
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.parse("11:22"));
         //when
-        final ReservationTimeResponse reservationTimeResponse = service.create(reservationTimeRequest);
+        final ReservationTimeResponse reservationTimeResponse = service.register(reservationTimeRequest);
         long afterCreateSize = getReservationTimeSize();
         //then
         assertThat(reservationTimeResponse.id()).isEqualTo(afterCreateSize);
@@ -65,7 +66,7 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("예약이 되어있는 시간을 지울 경우 예외를 발생시키고 Db에 반영하지 않는다.")
-    void given_initialSize_when_createWithNotExistThemeId_then_throwException() {
+    void given_initialSize_when_registerWithNotExistThemeId_then_throwException() {
         //given
         long initialSize = getReservationTimeSize();
         //when, then

@@ -18,7 +18,7 @@ public class ClientTimeController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponsesWrapper<ReservationTimeResponse>> findAll() {
+    public ResponseEntity<ResponsesWrapper<ReservationTimeResponse>> getReservationTimes() {
         return ResponseEntity.ok(reservationTimeService.findAll());
     }
 }

@@ -21,12 +21,12 @@ public class ClientThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponsesWrapper<ThemeResponse>> findAll() {
+    public ResponseEntity<ResponsesWrapper<ThemeResponse>> getThemes() {
         return ResponseEntity.ok(themeService.findAll());
     }
 
-    @GetMapping("/rank")
-    public ResponseEntity<ResponsesWrapper<ThemeResponse>> read(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate, @RequestParam Long size) {
-        return ResponseEntity.ok(themeService.getPopularThemeList(startDate, endDate, size));
+    @GetMapping("/popular")
+    public ResponseEntity<ResponsesWrapper<ThemeResponse>> getPopularTheme(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate, @RequestParam Long size) {
+        return ResponseEntity.ok(themeService.findPopularTheme(startDate, endDate, size));
     }
 }

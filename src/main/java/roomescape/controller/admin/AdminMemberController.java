@@ -18,7 +18,7 @@ public class AdminMemberController {
     }
 
     @GetMapping
-    ResponseEntity<ResponsesWrapper<MemberResponse>> read() {
+    ResponseEntity<ResponsesWrapper<MemberResponse>> getMembers() {
         final ResponsesWrapper<MemberResponse> memberResponses = memberService.findEntireMembers();
         return ResponseEntity.ok(memberResponses);
     }

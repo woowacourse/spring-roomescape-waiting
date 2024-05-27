@@ -29,7 +29,7 @@ public class ClientMemberController {
 
     @PostMapping("/members")
     ResponseEntity<SignupResponse> signup(@RequestBody SignupRequest signupRequest, HttpServletResponse response) {
-        final SignupResponse signupResponse = memberService.createUser(signupRequest);
+        final SignupResponse signupResponse = memberService.registerUser(signupRequest);
         setCookie(response, signupResponse.accessToken());
         return ResponseEntity.ok(signupResponse);
     }

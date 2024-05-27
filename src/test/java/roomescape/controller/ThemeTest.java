@@ -1,10 +1,6 @@
 package roomescape.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-
 import io.restassured.RestAssured;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.dto.ThemeResponse;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -28,7 +29,7 @@ class ThemeTest {
 
     @DisplayName("theme 목록 조회 요청이 올바르게 동작한다.")
     @Test
-    void given_when_GetThemes_then_statusCodeIsOk() {
+    void given_when_getThemes_then_statusCodeIsOk() {
         RestAssured.given().log().all()
                 .when().get("/themes")
                 .then().log().all()
@@ -44,7 +45,7 @@ class ThemeTest {
         String size = "10";
         final List<ThemeResponse> themeResponses = RestAssured.given().log().all()
                 .when()
-                .get("/themes/rank?startDate={startDate}&endDate={endDate}&size={count}",
+                .get("/themes/popular?startDate={startDate}&endDate={endDate}&size={count}",
                         startDate, endDate, size)
                 .then().extract().body()
                 .jsonPath().getList("data", ThemeResponse.class);
@@ -61,7 +62,7 @@ class ThemeTest {
         String count = "10";
         RestAssured.given().log().all()
                 .when()
-                .get("/themes/rank?startDate={startDate}&endDate={endDate}&size={count}",
+                .get("/themes/popular?startDate={startDate}&endDate={endDate}&size={count}",
                         invalidStartDate, endDate, count)
                 .then().log().all()
                 .statusCode(400)

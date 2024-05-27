@@ -142,4 +142,14 @@ class ClientReservationTest {
                 .then().log().all()
                 .statusCode(201);
     }
+
+    @DisplayName("로그인한 사용자의 대기중인 예약을 삭제한다.")
+    @Test
+    void given_memberToken_when_deleteWaiting_then_statusCodeIsNoContent() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
+                .when().delete("/reservations-mine/wait/10")
+                .then().log().all()
+                .statusCode(204);
+    }
 }

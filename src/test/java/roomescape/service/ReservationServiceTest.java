@@ -35,24 +35,24 @@ class ReservationServiceTest {
     }
 
     private long getReservationSize() {
-        return service.findEntireReservationList().getData().size();
+        return service.findEntireReservations().getData().size();
     }
 
     @Test
     @DisplayName("예약 목록을 반환한다.")
-    void given_when_findEntireReservationList_then_returnReservationResponses() {
+    void given_when_findEntireReservations_then_returnReservationResponses() {
         //when, then
-        assertThat(service.findEntireReservationList().getData().size()).isEqualTo(10);
+        assertThat(service.findEntireReservations().getData().size()).isEqualTo(10);
     }
 
     @Test
     @DisplayName("예약이 성공하면 결과값과 함께 Db에 저장된다.")
-    void given_reservationRequestWithInitialSize_when_createReservation_then_returnReservationResponseAndSaveDb() {
+    void given_reservationRequestWithInitialSize_when_register_then_returnReservationResponseAndSaveDb() {
         //given
         long initialSize = getReservationSize();
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2999-01-01"), 1L, 1L, 1L);
         //when
-        final ReservationResponse reservationResponse = service.create(reservationRequest);
+        final ReservationResponse reservationResponse = service.register(reservationRequest);
         long afterCreateSize = getReservationSize();
         //then
         assertThat(reservationResponse.id()).isEqualTo(afterCreateSize);
@@ -73,62 +73,62 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이전 날짜로 예약 할 경우 예외가 발생하고, Db에 저장하지 않는다.")
-    void given_reservationRequestWithInitialSize_when_createWithPastDate_then_throwException() {
+    void given_reservationRequestWithInitialSize_when_registerWithPastDate_then_throwException() {
         //given
         long initialSize = getReservationSize();
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("1999-01-01"), 1L, 1L, 1L);
         //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(ReservationFailException.class);
+        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(ReservationFailException.class);
         assertThat(getReservationSize()).isEqualTo(initialSize);
     }
 
     @Test
     @DisplayName("themeId가 존재하지 않을 경우 예외를 발생하고, Db에 저장하지 않는다.")
-    void given_reservationRequestWithInitialSize_when_createWithNotExistThemeId_then_throwException() {
+    void given_reservationRequestWithInitialSize_when_registerWithNotExistThemeId_then_throwException() {
         //given
         long initialSize = getReservationSize();
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 99L,
                 1L);
         //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(
+        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
                 InvalidClientFieldWithValueException.class);
         assertThat(getReservationSize()).isEqualTo(initialSize);
     }
 
     @Test
     @DisplayName("timeId 존재하지 않을 경우 예외를 발생하고, Db에 저장하지 않는다.")
-    void given_reservationRequestWithInitialSize_when_createWithNotExistTimeId_then_throwException() {
+    void given_reservationRequestWithInitialSize_when_registerWithNotExistTimeId_then_throwException() {
         //given
         long initialSize = getReservationSize();
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 99L, 1L,
                 1L);
         //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(
+        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
                 InvalidClientFieldWithValueException.class);
         assertThat(getReservationSize()).isEqualTo(initialSize);
     }
 
     @Test
     @DisplayName("memberId 존재하지 않을 경우 예외를 발생하고, Db에 저장하지 않는다.")
-    void given_reservationRequestWithInitialSize_when_createWithNotExistMemberId_then_throwException() {
+    void given_reservationRequestWithInitialSize_when_registerWithNotExistMemberId_then_throwException() {
         //given
         long initialSize = getReservationSize();
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 1L,
                 99L);
         //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(
+        assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
                 InvalidClientFieldWithValueException.class);
         assertThat(getReservationSize()).isEqualTo(initialSize);
     }
 
     @Test
     @DisplayName("로그인한 회원의 예약 목록을 반환한다.")
-    void given_member_when_findReservationByMember_then_returnReservationMineResponses() {
+    void given_member_when_findMemberReservations_then_returnReservationMineResponses() {
         //given
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
         //when, then
-        assertThat(service.findReservationsByMember(member).getData()).hasSize(8);
+        assertThat(service.findMemberReservations(member).getData()).hasSize(8);
     }
 
     @Test
@@ -147,12 +147,12 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 예약이 되어있는 날짜와 시간 및 테마에 다른 사용자가 예약 등록을 할 경우 예약이 저장된다.")
-    void given_reservationRequest_when_createAlreadyReservedWithDifferentMemberId_then_createdWithStatusIsWaiting() {
+    void given_reservationRequest_when_registerAlreadyReservedWithDifferentMemberId_then_createdWithStatusIsWaiting() {
         //given
         long initialSize = getReservationSize();
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-04-30"), 1L, 1L, 2L);
         //when
-        final ReservationResponse reservationResponse = service.create(reservationRequest);
+        final ReservationResponse reservationResponse = service.register(reservationRequest);
         long afterCreateSize = getReservationSize();
         //then
         assertThat(reservationResponse.id()).isEqualTo(afterCreateSize);
@@ -170,13 +170,13 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("회원 Id가 일치하지 않는 대기중인 예약을 제거할 수 없다.")
-    void given_differentMemberId_when_deleteByMember_then_notDeleted() {
+    void given_differentMemberId_when_deleteByIdWithWaiting_then_notDeleted() {
         //given, when
         long initialSize = getReservationSize();
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "duck", Role.USER);
         //when
-        service.deleteWaitingByMember(9L, member);
+        service.deleteByIdWithWaiting(9L, member);
         long afterCreateSize = getReservationSize();
         //then
         assertThat(afterCreateSize).isEqualTo(initialSize);
@@ -198,7 +198,7 @@ class ReservationServiceTest {
     @DisplayName("예약 대기 목록을 반환한다.")
     void given_when_findEntireWaitingReservationList_then_ReservationWaitingResponse() {
         //given, when
-        final ResponsesWrapper<ReservationWaitingResponse> waitingReservations = service.findEntireWaitingReservationList();
+        final ResponsesWrapper<ReservationWaitingResponse> waitingReservations = service.findEntireWaitingReservations();
         //then
         assertThat(waitingReservations.getData()).hasSize(2);
     }

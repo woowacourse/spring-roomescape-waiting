@@ -38,12 +38,12 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("테마 등록이 성공하면 결과값과 함께 Db에 저장된다.")
-    void given_themeRequestWithInitialSize_when_create_then_returnThemeResponseAndSaveDb() {
+    void given_themeRequestWithInitialSize_when_register_then_returnThemeResponseAndSaveDb() {
         //given
         long initialSize = getThemeSize();
         ThemeRequest themeRequest = new ThemeRequest("test", "testDescription", "testThumbnail");
         //when
-        final ThemeResponse themeResponse = service.create(themeRequest);
+        final ThemeResponse themeResponse = service.register(themeRequest);
         long afterCreateSize = getThemeSize();
         //then
         assertThat(themeResponse.id()).isEqualTo(afterCreateSize);
@@ -64,7 +64,7 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("예약이 되어있는 테마를 지울 경우 예외를 발생시키고 Db에 반영하지 않는다.")
-    void given_initialSize_when_createWithNotExistThemeId_then_throwException() {
+    void given_initialSize_when_registerWithNotExistThemeId_then_throwException() {
         //given
         long initialSize = getThemeSize();
         //when, then
@@ -75,13 +75,14 @@ class ThemeServiceTest {
 
     @DisplayName("기간이 주어지면 가장 많이 예약한 테마 목록 순으로 조회 결과가 반환된다.")
     @Test
-    void givenStartDateEndDateCount_when_getPopularThemeListAndGetFirst_then_getMostReservedTheme() {
+    void givenStartDateEndDateCount_when_getPopularThemeListAndGetFirst_then_findMostReservedTheme() {
         //given
         LocalDate startDate = LocalDate.parse("2024-04-30");
         LocalDate endDate = LocalDate.parse("2024-05-02");
         Long count = 10L;
         //when
-        final ResponsesWrapper<ThemeResponse> popularThemeList = service.getPopularThemeList(startDate, endDate, count);
+        final ResponsesWrapper<ThemeResponse> popularThemeList = service.findPopularTheme(startDate, endDate, count);
+        //then
         assertThat(popularThemeList.getData().get(0).id()).isEqualTo(2L);
     }
 }

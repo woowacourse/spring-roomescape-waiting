@@ -31,28 +31,28 @@ public class ClientReservationController {
     }
 
     @GetMapping("/books/{date}/{theme_id}")
-    public ResponseEntity<ResponsesWrapper<BookResponse>> read(@PathVariable(value = "date") LocalDate date,
-                                                               @PathVariable(value = "theme_id") Long themeId) {
+    public ResponseEntity<ResponsesWrapper<BookResponse>> getAvailableBooks(@PathVariable(value = "date") LocalDate date,
+                                                                            @PathVariable(value = "theme_id") Long themeId) {
         return ResponseEntity.ok(reservationTimeService.findAvailableBookList(date, themeId));
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest reservationRequest,
-                                                      Member member) {
+    public ResponseEntity<ReservationResponse> register(@RequestBody ReservationRequest reservationRequest,
+                                                        Member member) {
         final ReservationResponse reservationResponse =
-                reservationService.create(reservationRequest.with(member.getId()));
+                reservationService.register(reservationRequest.with(member.getId()));
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<ResponsesWrapper<ReservationsMineResponse>> readByMember(Member member) {
-        return ResponseEntity.ok(reservationService.findReservationsByMember(member));
+    public ResponseEntity<ResponsesWrapper<ReservationsMineResponse>> getMemberReservations(Member member) {
+        return ResponseEntity.ok(reservationService.findMemberReservations(member));
     }
 
-    @DeleteMapping("/reservations-mine/{id}")
-    public ResponseEntity<Void> deleteReservationByMember(@PathVariable(value = "id") Long id, Member member) {
-        reservationService.deleteWaitingByMember(id, member);
+    @DeleteMapping("/reservations-mine/wait/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable(value = "id") Long id, Member member) {
+        reservationService.deleteByIdWithWaiting(id, member);
         return ResponseEntity.noContent().build();
     }
 }

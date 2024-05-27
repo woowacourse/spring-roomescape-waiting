@@ -47,25 +47,25 @@ class MemberServiceTest {
 
     @DisplayName("회원정보가 등록되어 있지않으면 회원가입을 성공한다.")
     @Test
-    void given_signupRequest_when_createUser_then_success() {
+    void given_signupRequest_when_registerUser_then_success() {
         //given
         when(passwordEncoder.encode(any(String.class))).thenReturn(new Password("hashedpassword", "salt"));
         SignupRequest signupRequest = new SignupRequest("ash@test.com", "123456", "ash");
         //when
-        service.createUser(signupRequest);
+        service.registerUser(signupRequest);
         //then
         assertThat(getMemberSize()).isEqualTo(4);
     }
 
     @DisplayName("이미 회원으로 등록되어 있으면 회원을 가입하지 않는다.")
     @Test
-    void given_signupRequest_when_createUserWithAlreadyExistMember_then_fail() {
+    void given_signupRequest_when_registerUserWithAlreadyExistMember_then_fail() {
         //given
         when(passwordEncoder.encode(any(String.class), any(String.class))).thenReturn(
                 new Password("hashedpassword", "salt"));
         SignupRequest signupRequest = new SignupRequest("user@test.com", "123456", "ash");
         //when, then
-        assertThatThrownBy(() -> service.createUser(signupRequest)).isInstanceOf(SignupFailException.class);
+        assertThatThrownBy(() -> service.registerUser(signupRequest)).isInstanceOf(SignupFailException.class);
         assertThat(getMemberSize()).isEqualTo(3);
     }
 

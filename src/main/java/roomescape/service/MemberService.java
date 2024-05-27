@@ -38,7 +38,7 @@ public class MemberService {
         return new ResponsesWrapper<>(memberResponses);
     }
 
-    public SignupResponse createUser(final SignupRequest signupRequest) {
+    public SignupResponse registerUser(final SignupRequest signupRequest) {
         validateExist(signupRequest);
         Password password = passwordEncoder.encode(signupRequest.password());
         final Member member = memberRepository.save(signupRequest.toEntity(password));

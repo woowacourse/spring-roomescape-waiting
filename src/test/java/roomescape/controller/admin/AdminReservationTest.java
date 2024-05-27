@@ -281,7 +281,7 @@ class AdminReservationTest {
         RestAssured.given().log().all()
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
-                .when().delete("/admin/reservations/wait/10")
+                .when().delete("/admin/reservations/waiting/10")
                 .then().log().all()
                 .statusCode(204);
     }

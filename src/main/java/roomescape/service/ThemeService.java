@@ -31,7 +31,7 @@ public class ThemeService {
         return new ResponsesWrapper<>(themeResponses);
     }
 
-    public ThemeResponse create(final ThemeRequest themeRequest) {
+    public ThemeResponse register(final ThemeRequest themeRequest) {
         final Theme theme = themeRepository.save(themeRequest.toEntity());
         return ThemeResponse.from(theme);
     }
@@ -41,7 +41,7 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public ResponsesWrapper<ThemeResponse> getPopularThemeList(final LocalDate startDate, final LocalDate endDate, final Long count) {
+    public ResponsesWrapper<ThemeResponse> findPopularTheme(final LocalDate startDate, final LocalDate endDate, final Long count) {
         final List<Theme> themes = themeRepository.findPopularThemeByDate(startDate, endDate, PageRequest.of(0, count.intValue()));
         final List<ThemeResponse> themeResponses = themes.stream().map(ThemeResponse::from).toList();
         return new ResponsesWrapper<>(themeResponses);

@@ -42,7 +42,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ResponsesWrapper<ReservationResponse> findEntireReservationList() {
+    public ResponsesWrapper<ReservationResponse> findEntireReservations() {
         final List<ReservationResponse> reservationResponses = reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
@@ -51,7 +51,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ResponsesWrapper<ReservationWaitingResponse> findEntireWaitingReservationList() {
+    public ResponsesWrapper<ReservationWaitingResponse> findEntireWaitingReservations() {
         final List<ReservationWaitingResponse> reservations = reservationRepository.findByStatus(ReservationStatus.WAITING)
                 .stream()
                 .map(ReservationWaitingResponse::from)
@@ -59,7 +59,7 @@ public class ReservationService {
         return new ResponsesWrapper<>(reservations);
     }
 
-    public ReservationResponse create(final ReservationRequest reservationRequest) {
+    public ReservationResponse register(final ReservationRequest reservationRequest) {
         validateDuplicatedReservation(reservationRequest);
         final ReservationTime reservationTime = getReservationTime(reservationRequest);
         final Theme theme = getTheme(reservationRequest);
@@ -140,7 +140,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ResponsesWrapper<ReservationsMineResponse> findReservationsByMember(final Member member) {
+    public ResponsesWrapper<ReservationsMineResponse> findMemberReservations(final Member member) {
         final List<ReservationsMineResponse> reservationsMineResponses = reservationRepository.findByMember(member)
                 .stream()
                 .map(reservation -> buildReservationMineResponse(reservation, member))
@@ -163,7 +163,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationFailException("대기중인 예약을 찾을 수 없습니다."));
     }
 
-    public void deleteWaitingByMember(final Long id, final Member member) {
+    public void deleteByIdWithWaiting(final Long id, final Member member) {
         if (reservationRepository.existsByIdAndMemberId(id, member.getId())) {
             deleteWaitingById(id);
         }
