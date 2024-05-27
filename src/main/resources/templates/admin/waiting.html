@@ -33,7 +33,6 @@
       <li class="nav-item">
         <a class="nav-link" href="/admin/time">Time</a>
       </li>
-      <!--      TODO: [4단계] 사용자 로그인 - 로그인 기능 구현 후 활성화-->
       <li class="nav-item">
         <a class="nav-link" href="/login">Login</a>
       </li>
@@ -54,18 +53,16 @@
 </nav>
 
 <div class="content-container">
-  <h2 class="content-container-title">테마 관리 페이지</h2>
-  <div class="table-header">
-    <button id="add-button" class="btn btn-custom mb-2 float-right">테마 추가</button>
-  </div>
+  <h2 class="content-container-title">예약 대기 관리 페이지</h2>
   <div class="table-container"/>
   <table class="table">
     <thead>
     <tr>
-      <th scope="col">순서</th>
-      <th scope="col">제목</th>
-      <th scope="col">설명</th>
-      <th scope="col">썸네일 URL</th>
+      <th scope="col">예약대기 번호</th>
+      <th scope="col">예약자</th>
+      <th scope="col">테마</th>
+      <th scope="col">날짜</th>
+      <th scope="col">시간</th>
       <th scope="col"></th>
     </tr>
     </thead>
@@ -74,9 +71,7 @@
   </table>
 </div>
 
-<!--TODO: [4단계] 사용자 로그인 - 로그인 기능 구현 후 활성화-->
 <script src="/js/user-scripts.js"></script>
-
-<script src="/js/theme.js"></script>
+<script src="/js/waiting.js"></script>
 </body>
 </html>

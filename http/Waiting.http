@@ -1,0 +1,11 @@
+### 예약 대기 추가 API (멤버)
+POST http://localhost:8080/reservations/waitings
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0dEB0dC5jb20iLCJuYW1lIjoi7Ja065Oc66-8Iiwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzE2ODIxNjQ2fQ.Z8zbcMHGw3NmTjXStOCVI7XN3gZqyhUmjyitwfFsKRYMzCqJnEsRhsZ8TVXzilsdx_0lz0n9VDiAV65sYk4rSw;
+host: localhost:8080
+Content-Type: application/json
+
+{
+  "date": "2100-01-21",
+  "themeId": 1002,
+  "timeId": 1001
+}

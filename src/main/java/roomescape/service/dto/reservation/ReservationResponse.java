@@ -1,6 +1,7 @@
 package roomescape.service.dto.reservation;
 
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.dto.theme.ThemeResponse;
 
@@ -16,21 +17,30 @@ public class ReservationResponse {
     private final String status;
 
     public ReservationResponse(long id, MemberResponse member, ThemeResponse theme, String date,
-                               ReservationTimeResponse time) {
+                               ReservationTimeResponse time, String status) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
-        this.status = DEFAULT_STATUS;
+        this.status = status;
     }
 
-    public ReservationResponse(Reservation reservation) {
+    public ReservationResponse(Reservation reservation, String status) {
         this(reservation.getId(),
                 new MemberResponse(reservation),
                 new ThemeResponse(reservation.getTheme()),
                 reservation.getDate().toString(),
-                new ReservationTimeResponse(reservation.getTime()));
+                new ReservationTimeResponse(reservation.getTime()),
+                status);
+    }
+
+    public ReservationResponse(Reservation reservation) {
+        this(reservation, DEFAULT_STATUS);
+    }
+
+    public ReservationResponse(WaitingWithRank waitingWithRank) {
+        this(waitingWithRank.getWaiting().getReservation(), waitingWithRank.formatOrderStatus());
     }
 
     public long getId() {

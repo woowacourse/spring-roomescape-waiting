@@ -2,19 +2,20 @@
 
 ## Admin PAGE
 
-- [X] `/admin` `GET` 요청 시 어드민 메인 페이지를 응답한다.
-- [X] `/admin/reservation` `GET` 요청 시 예약 관리 페이지를 응답한다.
-- [X] `/admin/time` `GET` 요청 시 시간 관리 페이지를 응답한다.
-- [X] `/admin/theme` `GET` 요청 시 테마 관리 페이지를 응답한다.
+- [x] `/admin` `GET` 요청 시 어드민 메인 페이지를 응답한다.
+- [x] `/admin/reservation` `GET` 요청 시 예약 관리 페이지를 응답한다.
+- [x] `/admin/time` `GET` 요청 시 시간 관리 페이지를 응답한다.
+- [x] `/admin/theme` `GET` 요청 시 테마 관리 페이지를 응답한다.
+- [x] `/admin/waiting` `GET` 요청 시 예약 대기 관리 페이지를 응답한다.
 
 ## Reservation PAGE
 
-- [X] `/reservation` `GET` 요청 시 예약 페이지를 응답한다.
+- [x] `/reservation` `GET` 요청 시 예약 페이지를 응답한다.
 
 ## Reservation API
 
-- [X] `/reservations` `GET` 요청 시 예약 목록을 조회하고 API 명세에 맞게 응답을 반환한다.
-- [X] `/reservations` `POST` 요청 시 예약을 추가하고 API 명세에 맞게 응답을 반환한다.
+- [x] `/reservations` `GET` 요청 시 예약 목록을 조회하고 API 명세에 맞게 응답을 반환한다.
+- [x] `/reservations` `POST` 요청 시 예약을 추가하고 API 명세에 맞게 응답을 반환한다.
     - [x] 예약자 명, 테마 아이디, 예약 날짜, 시간 아이디가 비어있으면 예외를 발생시키고 상태코드 400을 반환한다.
     - [x] 예약 날짜가 형식에 맞지 않는다면 예외를 발생시키고 상태코드 400을 반환한다.
     - [x] 테마 아이디가 자연수가 아니라면 예외를 발생시키고 상태코드 400을 반환한다.
@@ -22,28 +23,33 @@
     - [x] 현재보다 이전 날짜 및 시간이라면 예외를 발생시키고 상태코드 400을 반환한다.
     - [x] 예약 시간 아이디가 시간 테이블에 없으면 예외를 발생시키고 상태코드 400을 반환한다.
     - [x] 해당 테마에 같은 날짜와 시간의 예약이 존재하면 예외를 발생시키고 상태코드 400을 반환한다.
-- [X] `/admin/reservations` `POST` 요청 시 예약을 추가하고 API 명세에 맞게 응답을 반환한다.
+- [x] `/reservations/waitings` `POST` 요청 시 존재하는 예약에 대해 대기를 만든다.
+- [x] `/reservatinos/waitings/{id}` `DELETE` 요청 시 자신의 예약 대기를 삭제 한다.
+    - [x] 만약 어드민일 경우 자신의 예약 대기 여부에 상관 없이 삭제가 가능하다.
+- [x] `/admin/reservations` `POST` 요청 시 예약을 추가하고 API 명세에 맞게 응답을 반환한다.
     - [x] 토큰을 확인하고 권한이 어드민인 경우만 접근이 가능하다.
-- [X] `/admin/reservations/{id}` `DELETE` 요청 시 예약을 삭제하고 API 명세에 맞게 응답을 반환한다.
+- [x] `/admin/reservations/{id}` `DELETE` 요청 시 예약을 삭제하고 API 명세에 맞게 응답을 반환한다.
     - [x] 토큰을 확인하고 권한이 어드민인 경우만 접근이 가능하다.
     - [x] 존재하지 않는 아이디를 삭제하려고 하면 예외를 발생시키고 상태코드 400을 반환한다.
+    - [x] 만약 예약 대기가 존재할 경우 가장 우선 순위인 대기를 에약으로 변경한다.
+- [x] `/admin/reservations/waitings` `GET` 요청 시 예약 대기 목록들을 응답한다.
 
 ## Time API
 
-- [X] `/times` `GET` 요청 시 시간 목록을 조회하고 API 명세에 맞게 응답을 반환한다.
-- [X] `/admin/times` `POST` 요청 시 시간을 추가하고 API 명세에 맞게 응답을 반환한다.
+- [x] `/times` `GET` 요청 시 시간 목록을 조회하고 API 명세에 맞게 응답을 반환한다.
+- [x] `/admin/times` `POST` 요청 시 시간을 추가하고 API 명세에 맞게 응답을 반환한다.
     - [x] 토큰을 확인하고 권한이 어드민인 경우만 접근이 가능하다.
-    - [X] 시작 시간이 null이라면 예외를 발생시키고 상태코드 400을 반환한다.
-    - [X] 시작 시간이 형식에 맞지 않는다면 예외를 발생시키고 상태코드 400을 반환한다.
-    - [X] 시작 시간이 중복이라면 예외를 발생시키고 상태코드 400을 반환한다.
-- [X] `/admin/times/{id}` `DELETE` 요청 시 시간을 삭제하고 API 명세에 맞게 응답을 반환한다.
+    - [x] 시작 시간이 null이라면 예외를 발생시키고 상태코드 400을 반환한다.
+    - [x] 시작 시간이 형식에 맞지 않는다면 예외를 발생시키고 상태코드 400을 반환한다.
+    - [x] 시작 시간이 중복이라면 예외를 발생시키고 상태코드 400을 반환한다.
+- [x] `/admin/times/{id}` `DELETE` 요청 시 시간을 삭제하고 API 명세에 맞게 응답을 반환한다.
     - [x] 토큰을 확인하고 권한이 어드민인 경우만 접근이 가능하다.
-    - [X] 예약이 존재하는 시간을 삭제하려고 하면 예외를 발생시키고 상태코드 400을 반환한다.
-    - [X] 존재하지 않는 아이디를 삭제하려고 하면 예외를 발생시키고 상태코드 400을 반환한다.
-- [X] `/times/availability?date=${date}&themeId=${themeId}` `GET` 요청 시 시간 목록을 조회하고 API 명세에 맞게 응답을 반환한다.
-    - [X] 날짜, 테마 아이디가 비어있으면 예외를 발생시키고 상태코드 400을 반환한다.
-    - [X] 예약 날짜가 형식에 맞지 않는다면 예외를 발생시키고 상태코드 400을 반환한다.
-    - [X] 테마 아이디가 자연수가 아니라면 예외를 발생시키고 상태코드 400을 반환한다.
+    - [x] 예약이 존재하는 시간을 삭제하려고 하면 예외를 발생시키고 상태코드 400을 반환한다.
+    - [x] 존재하지 않는 아이디를 삭제하려고 하면 예외를 발생시키고 상태코드 400을 반환한다.
+- [x] `/times/availability?date=${date}&themeId=${themeId}` `GET` 요청 시 시간 목록을 조회하고 API 명세에 맞게 응답을 반환한다.
+    - [x] 날짜, 테마 아이디가 비어있으면 예외를 발생시키고 상태코드 400을 반환한다.
+    - [x] 예약 날짜가 형식에 맞지 않는다면 예외를 발생시키고 상태코드 400을 반환한다.
+    - [x] 테마 아이디가 자연수가 아니라면 예외를 발생시키고 상태코드 400을 반환한다.
 
 ## Theme PAGE
 
@@ -59,7 +65,7 @@
     - [x] 토큰을 확인하고 권한이 어드민인 경우만 접근이 가능하다.
     - [x] 예약이 존재하는 테마를 삭제하려고 하면 예외를 발생시키고 상태코드 400을 반환한다.
     - [x] 존재하지 않는 아이디를 삭제하려고 하면 예외를 발생시키고 상태코드 400을 반환한다.
-- [X] `/themes/popular?start-date=2024-05-02&end-date=2024-05-09&count=10` `GET` 요청 시 예약이 많은 순서로 인기 테마 결과를 API 명세에 맞게
+- [x] `/themes/popular?start-date=2024-05-02&end-date=2024-05-09&count=10` `GET` 요청 시 예약이 많은 순서로 인기 테마 결과를 API 명세에 맞게
   반환한다.
 
 ## Member PAGE
@@ -151,6 +157,56 @@ cokie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyerOymiOyerOymiCJ9.t
 
 ```http
 HTTP/1.1 204
+```
+
+### 예약 대기 추가
+
+```http request
+POST /reservations/waitings HTTP/1.1
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyerOymiOyerOymiCJ9.t1Oa1y2_dhNdGuLy27Rm9ONAak-LGVpN0f3HROTJjLZh_CldzvJBEBN4fPUnCt1eDWNVpWTjUFdbPyJofoPZxA; Max-Age=1440; Expires=Thu, 09 May 2024 11:10:20 GMT; Path=/; HttpOnly
+
+{
+  "themeId": 1,
+  "date": "2024-05-27",
+  "timeId": 1
+}
+```
+
+```http request
+HTTP/1.1 201
+Location: /reservations/1
+```
+
+### 에약 대기 삭제
+
+```http request
+DELETE /reservations/waiting/{id} HTTP/1.1
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyerOymiOyerOymiCJ9.t1Oa1y2_dhNdGuLy27Rm9ONAak-LGVpN0f3HROTJjLZh_CldzvJBEBN4fPUnCt1eDWNVpWTjUFdbPyJofoPZxA; Max-Age=1440; Expires=Thu, 09 May 2024 11:10:20 GMT; Path=/; HttpOnly
+```
+
+```http request
+HTTP/1.1 204
+```
+
+### 예약 대기 목록 조회
+
+```http request
+GET /admin/reservations/waitings HTTP/1.1
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyerOymiOyerOymiCJ9.t1Oa1y2_dhNdGuLy27Rm9ONAak-LGVpN0f3HROTJjLZh_CldzvJBEBN4fPUnCt1eDWNVpWTjUFdbPyJofoPZxA; Max-Age=1440; Expires=Thu, 09 May 2024 11:10:20 GMT; Path=/; HttpOnly
+```
+
+```http request
+HTTP/1.1 200
+
+[
+  {
+    "id": 1,
+    "name": "memberName",
+    "theme": "themeName",
+    "date": "2024-05-27",
+    "startAt": "10:00",
+  }
+]
 ```
 
 ## times
@@ -389,6 +445,8 @@ Date: Thu, 09 May 2024 10:47:09 GMT
 GET /admin/members HTTP 1.1
 cokie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyerOymiOyerOymiCJ9.t1Oa1y2_dhNdGuLy27Rm9ONAak-LGVpN0f3HROTJjLZh_CldzvJBEBN4fPUnCt1eDWNVpWTjUFdbPyJofoPZxA; Max-Age=1440; Expires=Thu, 09 May 2024 11:10:20 GMT; Path=/; HttpOnly
 ```
+
+- [X] `/reservation/waiting`
 
 ```http
 HTTP/1.1 200 
