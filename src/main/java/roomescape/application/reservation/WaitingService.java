@@ -19,6 +19,7 @@ import roomescape.exception.UnAuthorizedException;
 
 @Service
 public class WaitingService {
+    public static final int INDEX_OFFSET = 1;
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
@@ -97,7 +98,7 @@ public class WaitingService {
         if (waiting.isWaiting()) {
             List<Waiting> sameReservationWaitings =
                     waitingRepository.findByReservationIdOrderByCreatedAtAsc(waiting.getReservation().getId());
-            return ReservationStatusResponse.of(waiting, sameReservationWaitings.indexOf(waiting) + 1);
+            return ReservationStatusResponse.of(waiting, sameReservationWaitings.indexOf(waiting) + INDEX_OFFSET);
         }
         return ReservationStatusResponse.from(waiting);
     }
