@@ -120,16 +120,10 @@ public class ReservationService {
     }
 
     private List<UserReservationResponse> findUserWaitings(Member user) {
-        return waitingRepository.findByMemberAndDateGreaterThanEqual(user, LocalDate.now())
+        return waitingRepository.findMemberWaitingWithRankAndDateGreaterThanEqual(user, LocalDate.now())
                 .stream()
-                .map(waiting -> UserReservationResponse.from(waiting, getWaitingRank(waiting)))
+                .map(UserReservationResponse::from)
                 .toList();
-    }
-
-    // TODO 성능 생각해서 쿼리 줄이기
-    private int getWaitingRank(Waiting waiting) {
-        List<Waiting> waitings = waitingRepository.findByReservationOrderById(waiting.getReservation());
-        return waitings.indexOf(waiting);
     }
 
     public Reservation createReservation(ReservationSaveRequest request) {

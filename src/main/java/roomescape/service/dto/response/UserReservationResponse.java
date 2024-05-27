@@ -1,7 +1,7 @@
 package roomescape.service.dto.response;
 
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,7 +15,7 @@ public record UserReservationResponse(
         LocalDate date,
         LocalTime time,
         String status,
-        int rank
+        long rank
 ) {
     public static UserReservationResponse reserved(Reservation reservation) {
         return new UserReservationResponse(
@@ -28,14 +28,14 @@ public record UserReservationResponse(
         );
     }
 
-    public static UserReservationResponse from(Waiting waiting, int rank) {
+    public static UserReservationResponse from(WaitingWithRank waitingWithRank) {
         return new UserReservationResponse(
-                waiting.getId(),
-                waiting.getReservation().getTheme().getName(),
-                waiting.getReservation().getDate(),
-                waiting.getReservation().getTime().getStartAt(),
+                waitingWithRank.waiting().getId(),
+                waitingWithRank.waiting().getReservation().getTheme().getName(),
+                waitingWithRank.waiting().getReservation().getDate(),
+                waitingWithRank.waiting().getReservation().getTime().getStartAt(),
                 WAITING.name(),
-                rank + 1
+                waitingWithRank.rank() + 1
         );
     }
 }
