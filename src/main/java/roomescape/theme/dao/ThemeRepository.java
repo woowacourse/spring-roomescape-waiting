@@ -14,7 +14,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                    FROM theme th
                    INNER JOIN (
                        SELECT theme_id
-                       FROM reservation
+                       FROM reservation_content
                        WHERE date BETWEEN :startDate AND :endDate
                        GROUP BY theme_id
                        ORDER BY COUNT(theme_id) DESC

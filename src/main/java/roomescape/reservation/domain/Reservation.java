@@ -6,9 +6,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
@@ -19,35 +20,41 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-    private LocalDate date;
-    @ManyToOne
-    private Time time;
-    @ManyToOne
-    private Theme theme;
-    private String status = "예약";
 
-    protected Reservation() {
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ReservationContent reservationContent;
+
+    private LocalDateTime createdAt;
+
+    public Reservation() {
+    }
+
+    public Reservation(Member member, ReservationContent reservationContent) {
+        this.member = member;
+        this.reservationContent = reservationContent;
     }
 
     public Reservation(Member member, LocalDate date, Time time, Theme theme) {
-        this(null, member, date, time, theme);
+        this(member, new ReservationContent(date, time, theme));
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Time time, Theme theme) {
-        validate(member, date, time, theme);
+    public Reservation(Long id, Member member, ReservationContent reservationContent, LocalDateTime createdAt) {
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservationContent = reservationContent;
+        this.createdAt = createdAt;
     }
 
-    private void validate(Member member, LocalDate date, Time time, Theme theme) {
-        if (member == null || date == null || time == null || theme == null) {
-            throw new BadRequestException("예약 정보가 부족합니다.");
-        }
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public boolean isReservedDateBetween(LocalDate start, LocalDate end) {
+        return start.isBefore(reservationContent.getDate()) && end.isAfter(reservationContent.getDate());
     }
 
     public Long getId() {
@@ -58,36 +65,40 @@ public class Reservation {
         return member;
     }
 
-    public String getMemberName() {
-        return member.getName();
+    public Long getMemberId() {
+        return member.getId();
     }
 
-    public LocalDate getDate() {
-        return date;
+    public ReservationContent getReservationContent() {
+        return reservationContent;
+    }
+
+    public Long getReservationContentId() {
+        return reservationContent.getId();
     }
 
     public Time getTime() {
-        return time;
+        return reservationContent.getTime();
     }
 
     public Long getTimeId() {
-        return time.getId();
+        return reservationContent.getTime().getId();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationContent.getTheme();
     }
 
     public Long getThemeId() {
-        return theme.getId();
+        return reservationContent.getTheme().getId();
     }
 
-    public String getStatus() {
-        return status;
+    public LocalDate getDate() {
+        return reservationContent.getDate();
     }
 
-    public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
-        return date.isAfter(start) && date.isBefore(end);
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override
@@ -98,25 +109,22 @@ public class Reservation {
         if (!(o instanceof Reservation that)) {
             return false;
         }
-        if (id == null || that.id == null) {
-            return Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme,
-                    that.theme);
-        }
-        return Objects.equals(id, that.id);
+        return Objects.equals(id, that.id) && Objects.equals(member, that.member)
+                && Objects.equals(reservationContent, that.reservationContent);
     }
 
     @Override
     public int hashCode() {
-        if (id == null) {
-            return Objects.hash(date, time, theme);
-        }
-        return Objects.hash(id);
+        return Objects.hash(id, member, reservationContent);
     }
 
     @Override
     public String toString() {
-        return "Reservation{" + "date=" + date + ", id=" + id + ", member=" + member + ", time=" + time + ", theme="
-                + theme + '}';
+        return "Reservation{" +
+                "id=" + id +
+                ", member=" + member +
+                ", reservationContent=" + reservationContent +
+                '}';
     }
 
 }

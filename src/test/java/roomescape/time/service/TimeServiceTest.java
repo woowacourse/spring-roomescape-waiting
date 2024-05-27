@@ -85,7 +85,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
-        Mockito.when(reservationRepository.countReservationsByTime_Id(1L))
+        Mockito.when(reservationRepository.countReservationsByReservationContent_Time_Id(1L))
                 .thenReturn(1);
 
         assertThatThrownBy(() -> timeService.removeReservationTime(1L))
