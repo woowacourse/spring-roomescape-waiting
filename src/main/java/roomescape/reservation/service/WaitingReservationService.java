@@ -17,54 +17,26 @@ public class WaitingReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationFactoryService reservationFactoryService;
+    private final ReservationSchedulerService reservationSchedulerService;
 
     public WaitingReservationService(
             ReservationRepository reservationRepository,
-            ReservationFactoryService reservationFactoryService
+            ReservationFactoryService reservationFactoryService,
+            ReservationSchedulerService reservationSchedulerService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationFactoryService = reservationFactoryService;
+        this.reservationSchedulerService = reservationSchedulerService;
     }
 
     @Transactional
     public ReservationResponse save(WaitingReservationSaveRequest saveRequest) {
         Reservation reservation = reservationFactoryService.createWaiting(saveRequest);
-        validateMemberReservationUnique(reservation);
-        validateWaitingAvailable(reservation);
+        reservationSchedulerService.validateSaveWaiting(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
-    }
-
-    private void validateMemberReservationUnique(Reservation reservation) {
-        Optional<Reservation> duplicatedReservation = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndMember(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                reservation.getMember()
-        );
-        duplicatedReservation.ifPresent(this::throwExceptionByStatus);
-    }
-
-    private void throwExceptionByStatus(Reservation memberReservation) {
-        if (memberReservation.isWaitingReservation()) {
-            throw new IllegalArgumentException("이미 회원이 예약 대기한 내역이 있습니다.");
-        }
-        if (memberReservation.isSuccessReservation()) {
-            throw new IllegalArgumentException("이미 회원이 예약한 내역이 있습니다.");
-        }
-    }
-
-    private void validateWaitingAvailable(Reservation reservation) {
-        Optional<Reservation> savedReservation = reservationRepository.findFirstByDateAndReservationTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
-        if (savedReservation.isEmpty()) {
-            throw new IllegalArgumentException("추가된 예약이 없습니다. 예약을 추가해 주세요.");
-        }
     }
 
     public List<WaitingResponse> findAll() {

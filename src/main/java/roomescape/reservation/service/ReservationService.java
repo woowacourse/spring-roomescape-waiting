@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
@@ -19,54 +18,26 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationFactoryService reservationFactoryService;
+    private final ReservationSchedulerService reservationSchedulerService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            ReservationFactoryService reservationFactoryService
+            ReservationFactoryService reservationFactoryService,
+            ReservationSchedulerService reservationSchedulerService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationFactoryService = reservationFactoryService;
+        this.reservationSchedulerService = reservationSchedulerService;
     }
 
     @Transactional
     public ReservationResponse save(ReservationSaveRequest saveRequest) {
         Reservation reservation = reservationFactoryService.createSuccess(saveRequest);
-        validateMemberReservationUnique(reservation);
-        validateReservationAvailable(reservation);
+        reservationSchedulerService.validateSaveReservation(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
-    }
-
-    private void validateMemberReservationUnique(Reservation reservation) {
-        Optional<Reservation> duplicatedReservation = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndMember(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                reservation.getMember()
-        );
-        duplicatedReservation.ifPresent(this::throwExceptionByStatus);
-    }
-
-    private void throwExceptionByStatus(Reservation memberReservation) {
-        if (memberReservation.isWaitingReservation()) {
-            throw new IllegalArgumentException("이미 회원이 예약 대기한 내역이 있습니다.");
-        }
-        if (memberReservation.isSuccessReservation()) {
-            throw new IllegalArgumentException("이미 회원이 예약한 내역이 있습니다.");
-        }
-    }
-
-    private void validateReservationAvailable(Reservation reservation) {
-        Optional<Reservation> savedReservation = reservationRepository.findFirstByDateAndReservationTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
-        if (savedReservation.isPresent()) {
-            throw new IllegalArgumentException("예약이 다 찼습니다. 예약 대기를 걸어주세요.");
-        }
     }
 
     public ReservationResponse findById(Long id) {
