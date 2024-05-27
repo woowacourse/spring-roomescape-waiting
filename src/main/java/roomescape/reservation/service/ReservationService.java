@@ -78,24 +78,17 @@ public class ReservationService {
     }
 
     private void findAllMembersReservedReservation(List<MemberReservationStatusResponse> responses, Long memberId) {
-        List<Reservation> reservations = reservationRepository.findAllReservedByMemberId(memberId);
-        for (Reservation reservation : reservations) {
-            responses.add(new MemberReservationStatusResponse(reservation));
-        }
+        reservationRepository.findAllReservedByMemberId(memberId)
+                .stream()
+                .map(MemberReservationStatusResponse::new)
+                .forEach(responses::add);
     }
 
     private void findAllMembersWaitingReservation(List<MemberReservationStatusResponse> responses, Long memberId) {
-        List<ReservationWaiting> reservationWaitings
-                = reservationRepository.findAllReservationWaitingByMemberId(memberId);
-        for (ReservationWaiting reservationWaiting : reservationWaitings) {
-            int rank = reservationRepository.countWaitingRank(
-                    reservationWaiting.getDate(),
-                    reservationWaiting.getTime().getId(),
-                    reservationWaiting.getTheme().getId(),
-                    reservationWaiting.getCreatedAt()
-            );
-            responses.add(new MemberReservationStatusResponse(reservationWaiting, rank));
-        }
+        reservationRepository.findAllReservationWaitingByMemberId(memberId)
+                .stream()
+                .map(MemberReservationStatusResponse::new)
+                .forEach(responses::add);
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {

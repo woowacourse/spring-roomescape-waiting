@@ -41,7 +41,28 @@ public class ReservationWaiting {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column
+    private Long rank;
+
     public ReservationWaiting() {
+    }
+
+    public ReservationWaiting(Long id,
+                              Member member,
+                              LocalDate date,
+                              ReservationTime time,
+                              Theme theme,
+                              Status status,
+                              LocalDateTime createdAt,
+                              Long rank) {
+        this.id = id;
+        this.member = member;
+        this.date = new ReservationDate(date);
+        this.time = time;
+        this.theme = theme;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.rank = rank;
     }
 
     public ReservationWaiting(Long id,
@@ -58,6 +79,7 @@ public class ReservationWaiting {
         this.theme = theme;
         this.status = status;
         this.createdAt = createdAt;
+        this.rank = null;
     }
 
     public Long getId() {
@@ -90,6 +112,10 @@ public class ReservationWaiting {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Long getRank() {
+        return rank;
     }
 
     @Override

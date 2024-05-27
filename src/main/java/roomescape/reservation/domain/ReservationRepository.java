@@ -32,16 +32,24 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllReservedByMemberId(Long memberId);
 
     @Query("""
-        SELECT new roomescape.reservation.domain.ReservationWaiting(r.id,
-                                                                    r.member,
-                                                                    r.date.value,
-                                                                    r.time,
-                                                                    r.theme,
-                                                                    r.status,
-                                                                    r.createdAt)
-        FROM Reservation AS r
-        WHERE r.member.id = :memberId
-        AND r.status = 'WAITING'
+        SELECT new roomescape.reservation.domain.ReservationWaiting(r1.id,
+                                                                        r1.member,
+                                                                        r1.date.value,
+                                                                        r1.time,
+                                                                        r1.theme,
+                                                                        r1.status,
+                                                                        r1.createdAt,
+                                                                        COUNT(r2.id))
+        FROM Reservation AS r1
+        LEFT JOIN Reservation AS r2
+            ON r1.date.value = r2.date.value
+            AND r1.time.id = r2.time.id
+            AND r1.theme.id = r2.theme.id
+            AND r1.createdAt > r2.createdAt
+        WHERE r1.status = 'WAITING'
+            AND r1.member.id = :memberId
+        GROUP BY r1.id, r1.member, r1.date.value, r1.time, r1.theme, r1.status, r1.createdAt
+        ORDER BY r1.createdAt ASC
         """)
     List<ReservationWaiting> findAllReservationWaitingByMemberId(Long memberId);
 
