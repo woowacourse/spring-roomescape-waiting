@@ -1,6 +1,5 @@
 package roomescape.theme.repository;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,10 +19,11 @@ public interface ThemeJpaRepository extends JpaRepository<Theme, Long> {
             WHERE r.date BETWEEN :startDate AND :endDate
             GROUP BY r.theme
             ORDER BY COUNT(r.theme) DESC
+            LIMIT :limit
             """)
     List<Theme> findTrendingThemesBetweenDates(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            Pageable pageable
+            long limit
     );
 }

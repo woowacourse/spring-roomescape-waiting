@@ -32,8 +32,8 @@ public class ThemeController {
     }
 
     @GetMapping("/trending")
-    public ResponseEntity<List<ThemeResponse>> findTrendingThemes(@RequestParam Long limit) {
-        return ResponseEntity.ok(themeService.findTrendingThemes(limit).stream().toList());
+    public ResponseEntity<List<ThemeResponse>> findTrendingThemes() {
+        return ResponseEntity.ok(themeService.findTrendingThemes().stream().toList());
     }
 
     @DeleteMapping("/{id}")

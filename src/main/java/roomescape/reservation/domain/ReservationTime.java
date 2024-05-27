@@ -1,15 +1,15 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.exceptions.MissingRequiredFieldException;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class ReservationTime {
@@ -39,10 +39,11 @@ public class ReservationTime {
     }
 
     public boolean isBeforeNow(LocalDate date) {
-        LocalDateTime dateTimeToReserve = LocalDateTime.of(date, startAt);
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
+        ZonedDateTime dateTimeAtSeoul = dateTime.atZone(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        return dateTimeToReserve.isBefore(now);
+        return dateTimeAtSeoul.isBefore(now);
     }
 
     public boolean isBelongTo(List<Long> timeIds) {

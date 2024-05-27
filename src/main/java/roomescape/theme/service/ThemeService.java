@@ -1,7 +1,6 @@
 package roomescape.theme.service;
 
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
@@ -18,6 +17,8 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class ThemeService {
+
+    private static final long ROW_LIMIT = 10;
 
     private final ThemeJpaRepository themeJpaRepository;
 
@@ -48,7 +49,7 @@ public class ThemeService {
         return new ThemeResponse(theme);
     }
 
-    public List<ThemeResponse> findTrendingThemes(Long limit) {
+    public List<ThemeResponse> findTrendingThemes() {
         LocalDate now = LocalDate.now();
         LocalDate trendingStatsStart = now.minusDays(7);
         LocalDate trendingStatsEnd = now.minusDays(1);
@@ -56,7 +57,7 @@ public class ThemeService {
         List<Theme> mostReservedThemesBetweenDates = themeJpaRepository.findTrendingThemesBetweenDates(
                 trendingStatsStart,
                 trendingStatsEnd,
-                PageRequest.of(0, Math.toIntExact(limit))
+                ROW_LIMIT
         );
 
         return mostReservedThemesBetweenDates
