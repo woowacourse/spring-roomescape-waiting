@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -113,7 +112,6 @@ public class ReservationService {
             throw new ReservationNotFoundException();
         }
         approveWaiting(id);
-        reservationRepository.deleteById(id);
     }
 
     private void validatePreviousDate(LocalDate date, ReservationTime time) {
@@ -130,23 +128,17 @@ public class ReservationService {
 
     private void approveWaiting(long reservationId) {
         List<Waiting> waitings = waitingRepository.findByReservationId(reservationId);
-        Optional<Waiting> primaryWaitingOptional = waitings.stream()
-                .min(Comparator.comparing(Waiting::getCreatedAt));
-        if (primaryWaitingOptional.isEmpty()) {
+        if (waitings.isEmpty()) {
             return;
         }
 
-        Waiting primaryWaiting = primaryWaitingOptional.get();
-        Reservation oldReservation = primaryWaiting.getReservation();
-        Reservation newReservation = reservationRepository.save(new Reservation(
-                primaryWaiting.getMember(),
-                oldReservation.getTheme(),
-                oldReservation.getDate(),
-                oldReservation.getTime()));
+        Waiting primaryWaiting = waitings.stream()
+                .min(Comparator.comparing(Waiting::getCreatedAt))
+                .get();
+        Reservation reservation = primaryWaiting.getReservation();
+        reservation.assignWaitingMember(primaryWaiting.getMember());
+        reservationRepository.save(reservation);
 
-        waitingRepository.saveAll(waitings.stream()
-                .map(waiting -> new Waiting(waiting, newReservation))
-                .toList());
         waitingRepository.deleteById(primaryWaiting.getId());
     }
 }

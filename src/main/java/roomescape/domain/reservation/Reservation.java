@@ -70,4 +70,8 @@ public class Reservation {
     public Long themeId() {
         return theme.getId();
     }
+
+    public void assignWaitingMember(Member member) {
+        this.member = member;
+    }
 }
