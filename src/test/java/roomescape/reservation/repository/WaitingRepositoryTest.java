@@ -26,6 +26,32 @@ class WaitingRepositoryTest {
     private WaitingRepository waitingRepository;
 
     @Test
+    @DisplayName("특정 회원이 특정 날짜, 시간, 테마에 이미 예약 대기를 걸었으면 true를 반환한다.")
+    void trueIfAlreadyWaiting() {
+        boolean isAlreadyWaiting = waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
+                WAITING_1.getDate(),
+                WAITING_1.getReservationTime(),
+                WAITING_1.getTheme(),
+                WAITING_1.getMember()
+        );
+
+        assertThat(isAlreadyWaiting).isTrue();
+    }
+
+    @Test
+    @DisplayName("특정 회원이 특정 날짜, 시간, 테마에 이미 예약 대기를 걸지 않았으면 false를 반환한다.")
+    void falseIfNotWaiting() {
+        boolean isAlreadyWaiting = waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
+                RESERVATION_2.getDate(),
+                RESERVATION_2.getReservationTime(),
+                RESERVATION_2.getTheme(),
+                WAITING_1.getMember()
+        );
+
+        assertThat(isAlreadyWaiting).isFalse();
+    }
+
+    @Test
     @DisplayName("특정 회원이 가진 예약 대기들을 대기 순번과 함께 조회한다.")
     void findWaitingsWithRankByMemberId() {
         List<WaitingWithRank> waitingsWithRanks = waitingRepository
