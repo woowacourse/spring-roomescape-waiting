@@ -7,10 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.springframework.data.annotation.CreatedDate;
 import roomescape.member.domain.Member;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
+import roomescape.registration.domain.reservation.domain.Reservation;
 
 @Entity
 public class Waiting {
@@ -21,56 +21,43 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
-
     @ManyToOne
-    @JoinColumn(name = "theme_id", referencedColumnName = "id", nullable = false)
-    private Theme theme;
-
-    @ManyToOne
-    @JoinColumn(name = "reservation_time_id", referencedColumnName = "id", nullable = false)
-    private ReservationTime reservationTime;
+    @JoinColumn(name = "reservation_id", referencedColumnName = "id", nullable = false)
+    private Reservation reservation;
 
     @ManyToOne
     @JoinColumn(name = "member_id", referencedColumnName = "id", nullable = false)
     private Member member;
 
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
     public Waiting() {
     }
 
-    public Waiting(LocalDate date, Theme theme, ReservationTime reservationTime, Member member) {
+    public Waiting(Reservation reservation, Member member, LocalDateTime createdAt) {
         this.id = NULL_ID;
-        this.date = date;
-        this.theme = theme;
-        this.reservationTime = reservationTime;
+        this.reservation = reservation;
         this.member = member;
+        this.createdAt = createdAt;
     }
 
-    public Waiting(long id, LocalDate date, Theme theme, ReservationTime reservationTime, Member member) {
+    public Waiting(long id, Reservation reservation, Member member, LocalDateTime createdAt) {
         this.id = id;
-        this.date = date;
-        this.theme = theme;
-        this.reservationTime = reservationTime;
+        this.reservation = reservation;
         this.member = member;
+        this.createdAt = createdAt;
     }
 
     public long getId() {
         return id;
     }
 
-    public Theme getTheme() {
-        return theme;
+    public Reservation getReservation() {
+        return reservation;
     }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getReservationTime() {
-        return reservationTime;
-    }
-
+    
     public Member getMember() {
         return member;
     }
