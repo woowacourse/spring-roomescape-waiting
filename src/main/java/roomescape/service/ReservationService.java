@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -68,8 +67,8 @@ public class ReservationService {
         }
 
         for (WaitingWithRank waitingWithRank : waitingWithRanks) {
-            Long rank = waitingWithRank.getRank();
-            responses.add(new ReservationMineResponse(waitingWithRank.getWaiting(), rank + 1));
+            Long rank = waitingWithRank.rank();
+            responses.add(new ReservationMineResponse(waitingWithRank.waiting(), rank + 1));
         }
 
         responses.sort(Comparator.comparing(ReservationMineResponse::date).thenComparing(o -> o.time().getStartAt()));
