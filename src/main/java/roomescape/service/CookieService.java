@@ -3,12 +3,12 @@ package roomescape.service;
 import jakarta.servlet.http.Cookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.response.TokenResponse;
 import roomescape.infrastructure.TokenGenerator;
 
-import java.util.Arrays;
-
 @Service
+@Transactional
 public class CookieService {
 
     private final TokenGenerator tokenGenerator;

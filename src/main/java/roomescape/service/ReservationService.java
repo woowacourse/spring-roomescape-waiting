@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRequest;
@@ -14,6 +15,7 @@ import roomescape.dto.response.ReservationResponse;
 import roomescape.repository.*;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final MemberRepository memberRepository;
@@ -31,6 +33,7 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -38,6 +41,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findDistinctReservations(Long memberId, Long themeId,
                                                               String dateFrom, String dateTo) {
         LocalDate from = LocalDate.parse(dateFrom);
@@ -62,6 +66,7 @@ public class ReservationService {
         return ReservationResponse.from(createdReservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
         Member member = findMemberById(loginMember.id());
         List<Reservation> reservations = reservationRepository.findAllByMemberOrderByDateAsc(member);

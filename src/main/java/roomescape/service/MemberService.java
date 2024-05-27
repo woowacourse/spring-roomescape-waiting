@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.jsonwebtoken.JwtException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.TokenRequest;
@@ -13,6 +14,7 @@ import roomescape.infrastructure.TokenGenerator;
 import roomescape.repository.MemberRepository;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -21,6 +23,28 @@ public class MemberService {
     public MemberService(MemberRepository memberRepository, TokenGenerator tokenGenerator) {
         this.memberRepository = memberRepository;
         this.tokenGenerator = tokenGenerator;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberResponse> findAll() {
+        return memberRepository.findAll()
+                .stream()
+                .map(MemberResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Member findMemberById(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
+    }
+
+    @Transactional(readOnly = true)
+    public LoginMember findLoginMemberByToken(String token) {
+        String email = tokenGenerator.getPayload(token);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new JwtException("[ERROR] 존재하지 않는 회원 입니다"));
+        return LoginMember.from(member);
     }
 
     public TokenResponse createToken(TokenRequest tokenRequest) {
@@ -34,19 +58,5 @@ public class MemberService {
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new JwtException("[ERROR] 로그인이 필요합니다."));
         return MemberResponse.from(member);
-    }
-
-    public LoginMember findLoginMemberByToken(String token) {
-        String email = tokenGenerator.getPayload(token);
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new JwtException("[ERROR] 존재하지 않는 회원 입니다"));
-        return LoginMember.from(member);
-    }
-
-    public List<MemberResponse> findAll() {
-        return memberRepository.findAll()
-                .stream()
-                .map(MemberResponse::from)
-                .toList();
     }
 }

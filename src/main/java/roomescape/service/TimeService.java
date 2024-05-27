@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.request.TimeSlotRequest;
 import roomescape.dto.response.TimeSlotResponse;
@@ -9,6 +10,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.TimeSlotRepository;
 
 @Service
+@Transactional
 public class TimeService {
 
     private final TimeSlotRepository timeSlotRepository;
@@ -19,11 +21,18 @@ public class TimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<TimeSlotResponse> findAll() {
         return timeSlotRepository.findAll()
                 .stream()
                 .map(TimeSlotResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TimeSlot findTimeSlotById(long id) {
+        return timeSlotRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 시간입니다"));
     }
 
     public TimeSlotResponse create(TimeSlotRequest timeSlotRequest) {
@@ -49,10 +58,5 @@ public class TimeService {
         if (reservationRepository.existsByTime(timeSlot)) {
             throw new IllegalArgumentException("[ERROR] 예약이 등록된 시간은 제거할 수 없습니다");
         }
-    }
-
-    private TimeSlot findTimeSlotById(long id) {
-        return timeSlotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 시간입니다"));
     }
 }

@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRequest;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional
 public class WaitingService {
     private final MemberRepository memberRepository;
     private final TimeSlotRepository timeSlotRepository;
@@ -29,18 +31,7 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
-    public WaitingResponse create(WaitingRequest waitingRequest) {
-        Member member = findMemberById(waitingRequest.memberId());
-        TimeSlot timeSlot = findTimeSlotById(waitingRequest.timeId());
-        Theme theme = findThemeById(waitingRequest.themeId());
-
-        validate(waitingRequest.date(), timeSlot, theme, member);
-
-        Waiting waiting = waitingRequest.toEntity(member, timeSlot, theme);
-        Waiting createdWaiting = waitingRepository.save(waiting);
-        return WaitingResponse.from(createdWaiting);
-    }
-
+    @Transactional(readOnly = true)
     public List<WaitingResponse> findEntireReservations() {
         return waitingRepository.findAll()
                 .stream()
@@ -48,6 +39,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationMineResponse> findMyWaitings(LoginMember loginMember) {
         Member member = findMemberById(loginMember.id());
         List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberIdByDateAsc(member);

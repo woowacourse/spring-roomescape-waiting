@@ -20,6 +20,6 @@ public class RankingController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> findTenPopularThemes() {
-        return ResponseEntity.ok(rankService.getPopularThemes());
+        return ResponseEntity.ok(rankService.findPopularThemes());
     }
 }
