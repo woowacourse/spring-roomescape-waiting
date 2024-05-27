@@ -1,6 +1,9 @@
 package roomescape.domain.reservation;
 
 public class WaitingWithRank {
+
+    private static final String ORDER_STATUS_FORMAT = "%d번째 예약대기";
+
     private Waiting waiting;
     private Long rank;
 
@@ -18,6 +21,10 @@ public class WaitingWithRank {
 
     public Long getRank() {
         return rank;
+    }
+
+    public String formatOrderStatus() {
+        return ORDER_STATUS_FORMAT.formatted(rank);
     }
 
     @Override

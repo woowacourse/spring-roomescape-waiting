@@ -95,8 +95,20 @@ public class ReservationService {
                 .map(ReservationResponse::new);
 
         return Stream.concat(reservationsConfirm, reservationsWaiting)
-                .sorted()
+                .sorted(this::compareReservation)
                 .toList();
+    }
+
+    private int compareReservation(ReservationResponse reservation1, ReservationResponse reservation2) {
+        int comparedDate = reservation1.getDate().compareTo(reservation2.getDate());
+        if (comparedDate != 0) {
+            return comparedDate;
+        }
+        int comparedTime = reservation1.getTime().getStartAt().compareTo(reservation2.getTime().getStartAt());
+        if (comparedTime != 0) {
+            return comparedTime;
+        }
+        return (int) (reservation1.getTheme().getId() - reservation2.getTime().getId());
     }
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {

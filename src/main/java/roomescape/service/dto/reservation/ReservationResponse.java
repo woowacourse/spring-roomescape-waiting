@@ -5,10 +5,9 @@ import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.dto.theme.ThemeResponse;
 
-public class ReservationResponse implements Comparable<ReservationResponse> {
+public class ReservationResponse {
 
     private static final String DEFAULT_STATUS = "예약";
-    private static final String ORDER_STATUS_FORMAT = "%d번째 예약대기";
 
     private final long id;
     private final MemberResponse member;
@@ -41,7 +40,7 @@ public class ReservationResponse implements Comparable<ReservationResponse> {
     }
 
     public ReservationResponse(WaitingWithRank waitingWithRank) {
-        this(waitingWithRank.getWaiting().getReservation(), ORDER_STATUS_FORMAT.formatted(waitingWithRank.getRank()));
+        this(waitingWithRank.getWaiting().getReservation(), waitingWithRank.formatOrderStatus());
     }
 
     public long getId() {
@@ -66,18 +65,5 @@ public class ReservationResponse implements Comparable<ReservationResponse> {
 
     public String getStatus() {
         return status;
-    }
-
-    @Override
-    public int compareTo(ReservationResponse o) {
-        int comparedDate = date.compareTo(o.getDate());
-        if (comparedDate != 0) {
-            return comparedDate;
-        }
-        int comparedTime = time.getStartAt().compareTo(o.getTime().getStartAt());
-        if (comparedTime != 0) {
-            return comparedTime;
-        }
-        return (int) (theme.getId() - o.theme.getId());
     }
 }
