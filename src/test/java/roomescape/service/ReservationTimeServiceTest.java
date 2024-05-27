@@ -35,7 +35,6 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("시간 목록을 반환한다.")
     void given_when_findAll_then_returnReservationTimeResponses() {
-        //when, then
         assertThat(service.findAll().getData().size()).isEqualTo(4);
     }
 

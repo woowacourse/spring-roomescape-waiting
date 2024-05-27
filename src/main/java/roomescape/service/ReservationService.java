@@ -158,6 +158,7 @@ public class ReservationService {
                 .count());
     }
 
+    //TODO: 좀 더 가독성 있게
     public void deleteByIdWithWaiting(final Long id, final Member member) {
         if (reservationRepository.existsByIdAndMember_Id(id, member.getId())) {
             deleteWaitingById(id);

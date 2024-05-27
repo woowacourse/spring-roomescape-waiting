@@ -42,7 +42,6 @@ class MemberServiceTest {
     @Test
     @DisplayName("사용자 목록을 반환한다.")
     void given_when_findEntireMembers_then_returnMemberResponses() {
-        //when, then
         assertThat(service.findEntireMembers().getData().size()).isEqualTo(3);
     }
 

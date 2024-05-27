@@ -23,7 +23,6 @@ class ReservationTimeRepositoryTest {
     @DisplayName("Db에 등록된 시간 목록을 조회할 수 있다.")
     @Test
     void given_when_findAll_then_ReturnReservationTimes() {
-        //given, when, then
         assertThat(reservationTimeRepository.findAll().size()).isEqualTo(4);
     }
 
@@ -54,14 +53,12 @@ class ReservationTimeRepositoryTest {
     @DisplayName("시간이 Db에 이미 등록되어 있는지 확인할 수 있다.")
     @Test
     void given_when_isExist_then_returnExistResult() {
-        //given, when, then
         assertThat(reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"))).isTrue();
     }
 
     @DisplayName("Id를 통해 시간 정보를 반환할 수 있다.")
     @Test
     void given_when_findById_then_returnOptionalReservationTime() {
-        //given, when, then
         assertThat(reservationTimeRepository.findById(1L).get().getId()).isEqualTo(1);
     }
 }

@@ -9,11 +9,9 @@ class PasswordTest {
 
     @DisplayName("salt값이 동일한 패스워드의 해시값은 동일하다.")
     @Test
-    void given_twoPasswordWithSameSalt_when_getHash_then_equal() {
-        //given
+    void given_twoPasswordWithSameSalt_when_check_then_equal() {
         Password password1 = new Password("hashvalue", "salt");
         Password password2 = new Password("hashvalue", "salt");
-        //when, then
         assertThat(password1.check(password2)).isTrue();
     }
 }

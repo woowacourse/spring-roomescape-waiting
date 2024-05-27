@@ -26,7 +26,6 @@ class ThemeRepositoryTest {
     @DisplayName("Db에 등록된 테마 목록을 조회할 수 있다.")
     @Test
     void given_when_findAll_then_ReturnThemes() {
-        //given, when, then
         assertThat(themeRepository.findAll().size()).isEqualTo(4);
     }
 
@@ -57,7 +56,6 @@ class ThemeRepositoryTest {
     @DisplayName("Id를 통해 Theme 객체를 반환할 수 있다.")
     @Test
     void given_when_findById_then_returnOptionalTheme() {
-        //given, when, then
         assertThat(themeRepository.findById(1L).get().getId()).isEqualTo(1);
     }
 
@@ -70,6 +68,7 @@ class ThemeRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         //when
         final List<Theme> popularThemeByDate = themeRepository.findPopularThemeByDate(startDate, endDate, pageable);
+        //then
         assertThat(popularThemeByDate.get(0).getId()).isEqualTo(2);
     }
 }

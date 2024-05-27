@@ -43,7 +43,6 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약 목록을 반환한다.")
     void given_when_findEntireReservations_then_returnReservationResponses() {
-        //when, then
         assertThat(service.findEntireReservations().getData().size()).isEqualTo(10);
     }
 
@@ -111,7 +110,6 @@ class ReservationServiceTest {
         final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 99L, 1L,
                 1L);
         //when, then
-
         assertAll(
                 () -> assertThatThrownBy(() -> service.register(reservationRequest)).isInstanceOf(
                         InvalidClientFieldWithValueException.class),
@@ -190,7 +188,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약이 제거되면 우선 대기중인 상태의 예약이 예약 상태가 된다.")
     void given_when_deleteReservationHasWaitingReservation_then_stateChangedToReserved() {
-        //given, when
+        //when
         service.delete(8L);
         //then
         assertThat(repository.findById(9L).get().getStatus()).isEqualTo(ReservationStatus.RESERVED);
@@ -199,7 +197,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("회원 Id가 일치하지 않는 대기중인 예약을 제거할 수 없다.")
     void given_differentMemberId_when_deleteByIdWithWaiting_then_notDeleted() {
-        //given, when
+        //given
         long initialSize = getReservationSize();
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "duck", Role.USER);
@@ -213,7 +211,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("대기중인 예약을 제거할 수 있다.")
     void given_when_deleteWaitingById_then_deleted() {
-        //given, when
+        //given
         long initialSize = getReservationSize();
         //when
         service.deleteWaitingById(9L);
@@ -225,7 +223,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약 대기 목록을 반환한다.")
     void given_when_findEntireWaitingReservationList_then_ReservationWaitingResponse() {
-        //given, when
+        //when
         final ResponsesWrapper<ReservationWaitingResponse> waitingReservations = service.findEntireWaitingReservations();
         //then
         assertThat(waitingReservations.getData()).hasSize(2);
