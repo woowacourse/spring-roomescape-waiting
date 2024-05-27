@@ -14,7 +14,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.MemberReservationStatusResponse;
@@ -125,7 +124,7 @@ public class ReservationService {
         Theme theme = getTheme(request.themeId());
 
         Reservation reservation
-                = new Reservation(member,request.date(), reservationTime, theme, status, LocalDateTime.now());
+                = new Reservation(member, request.date(), reservationTime, theme, status, LocalDateTime.now());
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
     }
