@@ -21,6 +21,7 @@ import roomescape.dto.theme.ThemeResponse;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.booking.reservation.ReservationService;
 import roomescape.service.booking.time.ReservationTimeService;
+import roomescape.service.theme.ThemeService;
 
 @Sql("/all-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

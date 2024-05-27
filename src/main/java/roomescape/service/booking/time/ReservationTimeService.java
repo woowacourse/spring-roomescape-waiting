@@ -17,8 +17,10 @@ public class ReservationTimeService {
     private final TimeSearchService timeSearchService;
     private final TimeDeleteService timeDeleteService;
 
-    public ReservationTimeService(TimeResisterService timeResisterService, TimeSearchService timeSearchService,
-                                  TimeDeleteService timeDeleteService) {
+    public ReservationTimeService(TimeResisterService timeResisterService,
+                                  TimeSearchService timeSearchService,
+                                  TimeDeleteService timeDeleteService
+    ) {
         this.timeResisterService = timeResisterService;
         this.timeSearchService = timeSearchService;
         this.timeDeleteService = timeDeleteService;

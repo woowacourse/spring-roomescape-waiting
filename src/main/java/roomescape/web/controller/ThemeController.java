@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
-import roomescape.service.ThemeService;
+import roomescape.service.theme.ThemeService;
 
 @RestController
 @RequestMapping("/themes")
@@ -27,7 +27,7 @@ class ThemeController {
     @PostMapping
     public ResponseEntity<ThemeResponse> addTheme(@RequestBody ThemeRequest themeRequest) {
         Long savedId = themeService.addTheme(themeRequest);
-        ThemeResponse themeResponse = themeService.getTheme(savedId);
+        ThemeResponse themeResponse = themeService.findTheme(savedId);
         return ResponseEntity.created(URI.create("/themes/" + savedId)).body(themeResponse);
     }
 
@@ -39,7 +39,7 @@ class ThemeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ThemeResponse> getReservation(@PathVariable Long id) {
-        ThemeResponse themeResponses = themeService.getTheme(id);
+        ThemeResponse themeResponses = themeService.findTheme(id);
         return ResponseEntity.ok(themeResponses);
     }
 

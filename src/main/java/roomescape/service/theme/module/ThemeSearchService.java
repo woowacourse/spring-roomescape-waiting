@@ -1,0 +1,50 @@
+package roomescape.service.theme.module;
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import roomescape.domain.theme.Theme;
+import roomescape.dto.theme.ThemeResponse;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.util.DateUtil;
+
+@Service
+public class ThemeSearchService {
+
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
+
+    public ThemeSearchService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+        this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
+    }
+
+    public ThemeResponse findTheme(Long themeId) {
+        Theme theme = findThemeById(themeId);
+        return ThemeResponse.from(theme);
+    }
+
+    public List<ThemeResponse> findAllThemes() {
+        List<Theme> themes = themeRepository.findAll();
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
+    }
+
+    public List<ThemeResponse> findPopularThemes() {
+        List<Long> popularThemeIds = reservationRepository.findTopThemeIdsByReservationCountsForDate(
+                DateUtil.A_WEEK_AGO, DateUtil.YESTERDAY);
+
+        return themeRepository.findAllById(popularThemeIds)
+                .stream().map(ThemeResponse::from)
+                .toList();
+    }
+
+    private Theme findThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "[ERROR] 잘못된 테마 정보 입니다.",
+                        new Throwable("theme_id : " + themeId)
+                ));
+    }
+}

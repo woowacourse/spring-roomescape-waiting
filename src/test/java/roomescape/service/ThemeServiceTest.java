@@ -16,6 +16,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.booking.reservation.ReservationService;
+import roomescape.service.theme.ThemeService;
 
 @Sql("/popular-theme-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -46,7 +47,7 @@ class ThemeServiceTest {
         Long notExistIdToFind = allTheme.size() + 1L;
 
         //when, then
-        assertThatThrownBy(() -> themeService.getTheme(notExistIdToFind)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> themeService.findTheme(notExistIdToFind)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
