@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMemberId;
 import roomescape.service.reservation.ReservationCreateService;
+import roomescape.service.reservation.ReservationDeleteService;
 import roomescape.service.reservation.ReservationReadService;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationFilterRequest;
@@ -22,11 +23,13 @@ public class AdminController {
     private final ReservationCreateService reservationCreateService;
     private final ReservationReadService reservationReadService;
     private final ThemeService themeService;
+    private final ReservationDeleteService reservationDeleteService;
 
-    public AdminController(ReservationCreateService reservationCreateService, ReservationReadService reservationReadService, ThemeService themeService) {
+    public AdminController(ReservationCreateService reservationCreateService, ReservationReadService reservationReadService, ThemeService themeService, ReservationDeleteService reservationDeleteService) {
         this.reservationCreateService = reservationCreateService;
         this.reservationReadService = reservationReadService;
         this.themeService = themeService;
+        this.reservationDeleteService = reservationDeleteService;
     }
 
     @PostMapping("/reservations")
@@ -41,6 +44,12 @@ public class AdminController {
     public List<ReservationResponse> findReservations(
             @ModelAttribute("ReservationFindRequest") ReservationFilterRequest reservationFilterRequest) {
         return reservationReadService.findByCondition(reservationFilterRequest);
+    }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") long reservationId) {
+        reservationDeleteService.deleteById(reservationId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/themes")

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.AdminReservationRequest;
+import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
 import java.time.LocalDate;
@@ -115,7 +116,7 @@ class AdminAcceptanceTest extends AcceptanceTest {
                             .then().log().all().statusCode(204);
 
                 }),
-                DynamicTest.dynamicTest("모든 테마를 조회하면 0개이다.", () -> {
+                DynamicTest.dynamicTest("모든 테마를 조회하면 3개이다.", () -> {
                     RestAssured.given().log().all()
                             .when().get("/themes")
                             .then().log().all()
@@ -193,5 +194,73 @@ class AdminAcceptanceTest extends AcceptanceTest {
                 .contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/admin/themes")
                 .then().log().all().statusCode(400).body("message", is("올바르지 않은 썸네일 형식입니다."));
+    }
+
+    @DisplayName("어드민이 예약을 취소한다.")
+    @TestFactory
+    Stream<DynamicTest> deleteReservationByAdmin() {
+        AtomicLong reservationId = new AtomicLong();
+        return Stream.of(
+                DynamicTest.dynamicTest("예약을 저장하고, 식별자를 가져온다.", () -> {
+                    reservationId.set((int) RestAssured.given().contentType(ContentType.JSON)
+                            .cookie("token", guestToken)
+                            .body(new ReservationRequest(date, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().extract().body().jsonPath().get("id"));
+                }),
+                DynamicTest.dynamicTest("예약을 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", adminToken)
+                            .when().delete("/admin/reservations/" + reservationId)
+                            .then().log().all()
+                            .assertThat().statusCode(204);
+                }),
+                DynamicTest.dynamicTest("남은 예약 개수는 총 3개이다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", adminToken)
+                            .when().get("/reservations")
+                            .then().log().all()
+                            .assertThat().body("size()", is(3));
+                })
+        );
+    }
+
+    @DisplayName("어드민은 이미 일정이 지난 예약을 삭제할 수 없다.")
+    @TestFactory
+    @Sql(value = {"/truncate-with-admin-and-guest.sql", "/insert-past-reservation.sql"})
+    Stream<DynamicTest> cannotDeletePastReservation() {
+        return Stream.of(
+                DynamicTest.dynamicTest("관리자가 일정이 지난 예약을 삭제하려고 하면 예외가 발생한다.", () -> {
+                    long reservationId = 1;
+                    RestAssured.given().log().all()
+                            .cookie("token", adminToken)
+                            .when().delete("/admin/reservations/" + reservationId)
+                            .then().log().all()
+                            .assertThat().statusCode(400).body("message", is("이미 지난 예약은 삭제할 수 없습니다."));
+                })
+        );
+    }
+
+    @DisplayName("사용자는 예약을 취소할 수 없다.")
+    @TestFactory
+    Stream<DynamicTest> cannotDeleteReservationByGuest() {
+        AtomicLong reservationId = new AtomicLong();
+        return Stream.of(
+                DynamicTest.dynamicTest("예약을 저장하고, 식별자를 가져온다.", () -> {
+                    reservationId.set((int) RestAssured.given().contentType(ContentType.JSON)
+                            .cookie("token", guestToken)
+                            .body(new ReservationRequest(date, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().extract().body().jsonPath().get("id"));
+                }),
+                DynamicTest.dynamicTest("예약을 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", guestToken)
+                            .when().delete("/admin/reservations/" + reservationId)
+                            .then().log().all()
+                            .assertThat().statusCode(403)
+                            .body("message", is("권한이 없습니다. 관리자에게 문의해주세요."));
+                })
+        );
     }
 }

@@ -273,7 +273,7 @@
 ### 예약 삭제 - 어드민
 - http method: DELETE
 - cookie: token={token}
-- uri: /reservations/{id}
+- uri: /admin/reservations/{id}
   - path variable
     - id: 예약 정보 식별자
 - response
