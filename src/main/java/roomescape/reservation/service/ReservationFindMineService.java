@@ -25,7 +25,7 @@ public class ReservationFindMineService {
     }
 
     @Transactional(readOnly = true)
-    public List<MyReservationResponse> execute(Long memberId) {
+    public List<MyReservationResponse> findMyReservations(Long memberId) {
         List<MyReservationResponse> reservations = findReservations(memberId);
         List<MyReservationResponse> waitings = findWaitings(memberId);
 

@@ -34,14 +34,14 @@ public class ReservationCreateService {
     }
 
     @Transactional
-    public ReservationResponse execute(ReservationCreateRequest request) {
+    public ReservationResponse createReservation(ReservationCreateRequest request) {
         Reservation reservation = makeReservation(
                 request.memberId(), request.date(), request.timeId(), request.themeId());
         return saveReservation(reservation);
     }
 
     @Transactional
-    public ReservationResponse execute(ReservationCreateRequest request, Long memberId) {
+    public ReservationResponse createReservation(ReservationCreateRequest request, Long memberId) {
         Reservation reservation = makeReservation(
                 memberId, request.date(), request.timeId(), request.themeId());
         return saveReservation(reservation);

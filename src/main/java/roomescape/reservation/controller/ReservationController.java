@@ -46,14 +46,14 @@ public class ReservationController {
 
     @GetMapping("/accounts")
     public List<MyReservationResponse> findMyReservations(LoggedInMember member) {
-        return findMineService.execute(member.id());
+        return findMineService.findMyReservations(member.id());
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationCreateRequest request,
             LoggedInMember member) {
-        ReservationResponse response = createService.execute(request, member.id());
+        ReservationResponse response = createService.createReservation(request, member.id());
 
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location)
@@ -63,6 +63,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable Long id) {
-        deleteService.execute(id);
+        deleteService.deleteReservation(id);
     }
 }

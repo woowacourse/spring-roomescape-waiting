@@ -19,11 +19,11 @@ import roomescape.reservation.service.ReservationFindService;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationFindService findService;
-    private final ReservationCreateService updateService;
+    private final ReservationCreateService createService;
 
-    public AdminReservationController(ReservationFindService findService, ReservationCreateService updateService) {
+    public AdminReservationController(ReservationFindService findService, ReservationCreateService createService) {
         this.findService = findService;
-        this.updateService = updateService;
+        this.createService = createService;
     }
 
     @GetMapping
@@ -34,7 +34,7 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationCreateRequest request) {
-        ReservationResponse response = updateService.execute(request);
+        ReservationResponse response = createService.createReservation(request);
 
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location)

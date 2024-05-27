@@ -22,7 +22,7 @@ public class ReservationDeleteService {
     }
 
     @Transactional
-    public void execute(Long reservationId) {
+    public void deleteReservation(Long reservationId) {
         Reservation reservation = findReservation(reservationId);
         validateIsAfterFromNow(reservation);
 
