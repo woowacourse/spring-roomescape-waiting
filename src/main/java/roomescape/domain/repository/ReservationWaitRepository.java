@@ -64,9 +64,9 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
 
     void deleteById(Long id);
 
-    void deleteByMemberId(Long memberId);
+    void deleteByMember(Member member);
 
-    void deleteByReservationId(Long reservationId);
+    void deleteByReservation(Reservation reservation);
 
     void deleteAll();
 }

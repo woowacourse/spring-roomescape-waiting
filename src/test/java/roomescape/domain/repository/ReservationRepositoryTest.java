@@ -77,11 +77,12 @@ class ReservationRepositoryTest {
         createReservation(2);
         createReservation(3);
 
+        Theme theme = themeRepository.findById(themeId).orElseThrow();
         // when
-        List<Long> timeIds = reservationRepository.findTimeIdByDateAndThemeId(LocalDate.of(2023, 1, 2), themeId);
+        List<Reservation> reservations = reservationRepository.findByDateAndTheme(LocalDate.of(2023, 1, 2), theme);
 
         // then
-        Assertions.assertThat(timeIds)
+        Assertions.assertThat(reservations)
                 .hasSize(1);
 
     }

@@ -85,7 +85,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(NotFoundReservationException::new);
 
-        waitRepository.deleteByReservationId(reservationId);
+        waitRepository.deleteByReservation(reservation);
         reservationRepository.delete(reservation);
     }
 }

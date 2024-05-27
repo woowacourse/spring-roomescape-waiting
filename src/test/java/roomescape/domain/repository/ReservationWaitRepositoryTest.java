@@ -103,7 +103,7 @@ class ReservationWaitRepositoryTest {
         waitRepository.save(reservationWait);
 
         // when
-        waitRepository.deleteByMemberId(dummyMember.getId());
+        waitRepository.deleteByMember(dummyMember);
 
         // then
         Assertions.assertThat(waitRepository.findAll())
@@ -118,7 +118,7 @@ class ReservationWaitRepositoryTest {
         waitRepository.save(reservationWait);
 
         // when
-        waitRepository.deleteByReservationId(dummyReservation.getId());
+        waitRepository.deleteByReservation(dummyReservation);
 
         // then
         Assertions.assertThat(waitRepository.findAll())

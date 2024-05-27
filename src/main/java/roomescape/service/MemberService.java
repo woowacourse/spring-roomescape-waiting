@@ -44,7 +44,7 @@ public class MemberService {
     public void deleteMember(Long memberId) {
         Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(IllegalArgumentException::new);
-        waitRepository.deleteByMemberId(memberId);
+        waitRepository.deleteByMember(findMember);
         memberRepository.delete(findMember);
     }
 }
