@@ -57,23 +57,6 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-//    public List<ReservationWaitingWithOrderDto> getMyReservationWaiting(final Long memberId) {
-//        final List<ReservationWaiting> reservationWaiting = reservationWaitingRepository.findAllByMemberId(memberId);
-//        return reservationWaiting.stream()
-//                .map(waiting -> ReservationWaitingWithOrderDto.from(waiting, parseReservationWaitingOrder(waiting)))
-//                .toList();
-//    }
-//
-//    private int parseReservationWaitingOrder(final ReservationWaiting reservationWaiting) {
-//        final int beforeWaitingCount = reservationWaitingRepository.countAllByThemeAndDateAndTimeAndCreatedAtBefore(
-//                reservationWaiting.getTheme(),
-//                reservationWaiting.getDate(),
-//                reservationWaiting.getTime(),
-//                reservationWaiting.getCreatedAt()
-//        );
-//        return beforeWaitingCount + 1;
-//    }
-
     public Long saveReservationWaiting(final SaveReservationWaitingRequest request) {
         final ReservationTime reservationTime = reservationTimeService.getReservationTime(request.time());
         final Theme theme = themeService.getTheme(request.theme());
