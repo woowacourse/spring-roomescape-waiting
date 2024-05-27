@@ -85,6 +85,10 @@ public class ReservationService {
         reservationRepository.delete(findValidatedReservation(id));
     }
 
+    public boolean checkReservationExists(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId);
+    }
+
     private ReservationTime findValidatedReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));

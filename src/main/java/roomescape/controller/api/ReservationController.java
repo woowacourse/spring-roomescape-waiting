@@ -1,6 +1,7 @@
 package roomescape.controller.api;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.domain.Member;
@@ -29,8 +31,8 @@ public class ReservationController {
         this.memberService = memberService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<MemberReservationResponse>> getReservationsOf(Member member) {
+    @GetMapping("/my")
+    public ResponseEntity<List<MemberReservationResponse>> getMyReservations(Member member) {
         List<MemberReservationResponse> response = memberService.getReservationsOf(member);
         return ResponseEntity.ok(response);
     }
@@ -43,5 +45,18 @@ public class ReservationController {
         ReservationResponse response = reservationService.addMemberReservation(request, member);
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<Void> checkReservationExists(
+            @RequestParam LocalDate date,
+            @RequestParam Long timeId,
+            @RequestParam Long themeId
+    ) {
+        boolean exists = reservationService.checkReservationExists(date, timeId, themeId);
+        if (!exists) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().build();
     }
 }
