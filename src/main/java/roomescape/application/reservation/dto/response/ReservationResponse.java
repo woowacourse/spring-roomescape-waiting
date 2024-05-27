@@ -9,9 +9,10 @@ import roomescape.domain.reservation.Theme;
 
 public record ReservationResponse(long id,
                                   String member,
+                                  String theme,
                                   LocalDate date,
-                                  LocalTime startAt,
-                                  String theme) {
+                                  LocalTime startAt
+) {
 
     public static ReservationResponse from(Reservation reservation) {
         Member member = reservation.getMember();
@@ -21,9 +22,8 @@ public record ReservationResponse(long id,
         return new ReservationResponse(
                 reservation.getId(),
                 member.getName(),
-                reservation.getDate(),
-                time.getStartAt(),
-                theme.getName()
+                theme.getName(), reservation.getDate(),
+                time.getStartAt()
         );
     }
 }
