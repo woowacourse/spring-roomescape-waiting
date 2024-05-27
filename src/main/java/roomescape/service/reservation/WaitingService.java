@@ -8,6 +8,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.exception.ForbiddenException;
+import roomescape.exception.InvalidMemberException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.service.reservation.dto.ReservationResponse;
 
@@ -32,9 +33,14 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaitingById(long reservationId, long memberId) {
-        Member member = memberRepository.getById(memberId);
+        Member member = getById(memberId);
         reservationRepository.findById(reservationId)
                 .ifPresent(reservation -> deleteIfAvailable(member, reservation));
+    }
+
+    private Member getById(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new InvalidMemberException("회원 정보를 찾을 수 없습니다."));
     }
 
     private void deleteIfAvailable(Member member, Reservation reservation) {
