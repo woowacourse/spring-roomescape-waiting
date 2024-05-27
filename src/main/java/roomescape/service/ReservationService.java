@@ -84,13 +84,12 @@ public class ReservationService {
         Optional<Waiting> firstWaiting = waitingRepository
                 .findFirstByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme());
 
-        if (firstWaiting.isPresent()) {
+        firstWaiting.ifPresent(waiting -> {
             Reservation newReservation =
-                    new Reservation(firstWaiting.get().getMember(), reservation.getDate(),
-                            reservation.getTime(), reservation.getTheme());
-            waitingRepository.delete(firstWaiting.get());
+                    new Reservation(waiting.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+            waitingRepository.delete(waiting);
             reservationRepository.save(newReservation);
-        }
+        });
     }
 
     private void validate(LocalDate date, TimeSlot timeSlot, Theme theme, Member member) {
