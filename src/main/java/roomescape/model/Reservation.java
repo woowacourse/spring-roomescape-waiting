@@ -30,11 +30,11 @@ public class Reservation {
     }
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(0L, member, new ReservationInfo(date, time, theme));
+        this(null, member, new ReservationInfo(date, time, theme));
     }
 
     public Reservation(Member member, ReservationInfo reservationInfo) {
-        this(0L, member, reservationInfo);
+        this(null, member, reservationInfo);
     }
 
     protected Reservation() {

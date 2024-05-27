@@ -23,7 +23,7 @@ public class ReservationTime {
     }
 
     public ReservationTime(LocalTime startAt) {
-        this(0L, startAt);
+        this(null, startAt);
     }
 
     protected ReservationTime() {

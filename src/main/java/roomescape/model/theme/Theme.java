@@ -36,11 +36,11 @@ public class Theme {
     }
 
     public Theme(Name name, Description description, Thumbnail thumbnail) {
-        this(0L, name, description, thumbnail);
+        this(null, name, description, thumbnail);
     }
 
     public Theme(String name, String description, String thumbnail) {
-        this(0L, new Name(name), new Description(description), new Thumbnail(thumbnail));
+        this(null, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
 
     public Theme(Long id, String name, String description, String thumbnail) { // TODO: for test?

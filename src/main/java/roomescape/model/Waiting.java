@@ -30,7 +30,7 @@ public class Waiting {
     }
 
     public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(0L, member, new ReservationInfo(date, time, theme));
+        this(null, member, new ReservationInfo(date, time, theme));
     }
 
     protected Waiting() {

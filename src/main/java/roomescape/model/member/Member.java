@@ -39,7 +39,7 @@ public class Member {
     }
 
     public Member(String name, String email, String password, Role role) {
-        this(0L, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
+        this(null, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
     }
 
     public Member(Long id, String name, String email, String password, Role role) {
