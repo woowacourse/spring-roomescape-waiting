@@ -14,16 +14,18 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByDateAndTimeIdAndMemberId(ReservationDate reservationDate, Long timeId, Long memberId);
 
-    @Query("SELECT new roomescape.repository.dto.WaitingWithRank(" +
-            "    w, " +
-            "    (SELECT COUNT(w2) + 1 " +
-            "     FROM Waiting w2 " +
-            "     WHERE w2.theme = w.theme " +
-            "       AND w2.date = w.date " +
-            "       AND w2.time = w.time " +
-            "       AND w2.createdAt < w.createdAt)) " +
-            "FROM Waiting w " +
-            "WHERE w.member.id = :memberId")
+    @Query("""
+            SELECT new roomescape.repository.dto.WaitingWithRank(
+            w1, COUNT(w2)) 
+            FROM Waiting w1 
+            INNER JOIN Waiting w2 
+            ON w1.theme = w2.theme
+            AND w2.date = w1.date 
+            AND w2.time = w1.time 
+            AND w2.createdAt < w1.createdAt 
+            WHERE w1.member.id = :memberId 
+            GROUP BY w1.id
+            """)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
     Optional<Waiting> findFirstByDateAndTimeAndThemeOrderByCreatedAt(ReservationDate reservationDate,
