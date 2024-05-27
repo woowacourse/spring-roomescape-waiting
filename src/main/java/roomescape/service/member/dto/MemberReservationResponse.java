@@ -26,13 +26,13 @@ public record MemberReservationResponse(
     }
 
     public static MemberReservationResponse from(WaitingWithRank waitingWithRank) {
-        ReservationWaiting waiting = waitingWithRank.getWaiting();
+        ReservationWaiting waiting = waitingWithRank.waiting();
         return new MemberReservationResponse(
                 waiting.getId(),
                 waiting.getTheme().getName().getValue(),
                 waiting.getDate(),
                 waiting.getSchedule().getTime(),
-                waitingWithRank.getRank() + "번째 예약대기"
+                waitingWithRank.rank() + "번째 예약대기"
         );
     }
 }

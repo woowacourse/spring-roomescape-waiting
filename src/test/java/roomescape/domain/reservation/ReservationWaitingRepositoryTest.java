@@ -29,8 +29,8 @@ class ReservationWaitingRepositoryTest {
 
         // then
         SoftAssertions assertions = new SoftAssertions();
-        assertions.assertThat(waitingsWithRank.get(0).getRank()).isEqualTo(theme1Rank);
-        assertions.assertThat(waitingsWithRank.get(1).getRank()).isEqualTo(theme2Rank);
+        assertions.assertThat(waitingsWithRank.get(0).rank()).isEqualTo(theme1Rank);
+        assertions.assertThat(waitingsWithRank.get(1).rank()).isEqualTo(theme2Rank);
         assertions.assertAll();
     }
 }
