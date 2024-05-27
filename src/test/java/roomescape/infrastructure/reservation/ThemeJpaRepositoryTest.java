@@ -66,7 +66,7 @@ class ThemeJpaRepositoryTest {
         ).forEach(entityManager::persist);
 
         int limit = 3;
-        List<Theme> themeIds = themeRepository.findPopularThemesDateBetween(date, date.plusDays(2), limit);
+        List<Theme> themeIds = themeRepository.findPopularThemes(date, date.plusDays(2), limit);
         assertThat(themeIds).containsExactly(themes.get(2), themes.get(1), themes.get(0));
     }
 }

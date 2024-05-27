@@ -1,6 +1,5 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface ThemeRepository {
@@ -9,7 +8,7 @@ public interface ThemeRepository {
 
     List<Theme> findAll();
 
-    List<Theme> findPopularThemesDateBetween(LocalDate startDate, LocalDate endDate, int limitCount);
+    List<Theme> findPopularThemesByFilter(PopularThemeLookupFilter filter);
 
     Theme getById(long id);
 

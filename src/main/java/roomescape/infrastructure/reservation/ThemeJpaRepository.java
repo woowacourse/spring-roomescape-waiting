@@ -8,12 +8,15 @@ import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.PopularThemeLookupFilter;
 
 public interface ThemeJpaRepository extends ThemeRepository, ListCrudRepository<Theme, Long> {
 
     @Override
-    default List<Theme> findPopularThemesDateBetween(LocalDate startDate, LocalDate endDate, int limitCount) {
-        return findPopularThemesDateBetween(startDate, endDate, limitCount, BookStatus.BOOKED);
+    default List<Theme> findPopularThemesByFilter(PopularThemeLookupFilter filter) {
+        return findPopularThemesDateBetween(
+                filter.startDate(), filter.endDate(), filter.limitCount(), BookStatus.BOOKED
+        );
     }
 
     @Query("""
