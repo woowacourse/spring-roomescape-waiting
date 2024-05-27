@@ -2,7 +2,7 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.service.exception.DeletingException;
+import roomescape.controller.exception.AuthorizationException;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -22,7 +22,7 @@ class ReservationTest {
         assertThatCode(() -> reservation.validateOwn(memberId))
                 .doesNotThrowAnyException();
         assertThatThrownBy(() -> reservation.validateOwn(anotherMemberId))
-                .isInstanceOf(DeletingException.class);
+                .isInstanceOf(AuthorizationException.class);
 
     }
 }

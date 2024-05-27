@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
+import roomescape.controller.exception.AuthorizationException;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
-import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.Role;
 import roomescape.repository.dto.ReservationRankResponse;
-import roomescape.service.exception.DeletingException;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.UserDeleteReservationException;
@@ -112,7 +112,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         final long anotherMemberId = 2L;
 
         assertThatThrownBy(() -> reservationService.deleteWaitReservation(waitReservationId, anotherMemberId))
-                .isInstanceOf(DeletingException.class);
+                .isInstanceOf(AuthorizationException.class);
     }
 
     @Test
