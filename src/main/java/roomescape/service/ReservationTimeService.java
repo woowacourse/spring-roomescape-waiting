@@ -1,10 +1,10 @@
 package roomescape.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.BadRequestException;
@@ -29,6 +29,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<ReservationTimeResponse> findAll() {
         List<ReservationTimeResponse> responses = reservationTimeRepository.findAll()
                 .stream()
@@ -58,6 +59,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<ReservationAvailabilityTimeResponse> findReservationAvailabilityTimes(
             ReservationAvailabilityTimeRequest timeRequest) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();

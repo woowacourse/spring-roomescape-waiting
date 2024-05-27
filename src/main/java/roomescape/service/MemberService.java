@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.response.ListResponse;
 import roomescape.service.dto.response.MemberResponse;
@@ -15,6 +16,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public ListResponse<MemberResponse> findAll() {
         List<MemberResponse> members = memberRepository.findAll().stream()
                 .map(MemberResponse::from)

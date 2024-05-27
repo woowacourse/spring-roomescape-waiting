@@ -2,10 +2,6 @@ package roomescape.service.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
 
 public record ReservationCreateRequest(
         @NotNull
@@ -21,9 +17,5 @@ public record ReservationCreateRequest(
     public static ReservationCreateRequest from(ReservationCreateMemberRequest adminRequest, Long memberId) {
         return new ReservationCreateRequest(memberId, adminRequest.date(), adminRequest.timeId(),
                 adminRequest.themeId());
-    }
-
-    public Reservation toReservation(Member member, ReservationTime reservationTime, RoomTheme roomTheme) {
-        return new Reservation(member, date, reservationTime, roomTheme);
     }
 }

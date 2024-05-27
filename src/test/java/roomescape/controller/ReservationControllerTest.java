@@ -1,271 +1,211 @@
 package roomescape.controller;
 
-import static roomescape.TestFixture.DATE_AFTER_1DAY;
-import static roomescape.TestFixture.MEMBER_BROWN;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.ROOM_THEME1;
-import static roomescape.TestFixture.VALID_STRING_DATE;
+import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.List;
-import java.util.Map;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import roomescape.BaseControllerTest;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.RoomThemeRepository;
-import roomescape.service.dto.request.ReservationCreateRequest;
+import roomescape.domain.Status;
+import roomescape.domain.Theme;
+import roomescape.service.dto.request.ReservationCreateMemberRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ReservationControllerTest {
+class ReservationControllerTest extends BaseControllerTest {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private RoomThemeRepository roomThemeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        for (Reservation reservation : reservations) {
-            reservationRepository.deleteById(reservation.getId());
-        }
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationTimeRepository.deleteById(reservationTime.getId());
-        }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
-        }
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
-    }
-
-    @DisplayName("모든 예약 내역 조회 성공 테스트")
+    @DisplayName("모든 예약 내역을 조회한다.")
     @Test
     void findAllReservations() {
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        // given
+        reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(), Status.CONFIRMED);
 
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember2WithToken())
                 .when().get("/reservations")
-                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("count", is(1));
     }
 
-    @DisplayName("멤버 예약 추가 성공 테스트")
+    @DisplayName("멤버가 예약을 성공적으로 추가한다.")
     @Test
     void createMemberReservation() {
         // given
-        String accessToken = TestFixture.getMemberToken(memberRepository);
+        ReservationCreateMemberRequest request = createMemberReservationRequest(TestFixture.TOMORROW,
+                TestFixture.getReservationTime10AM(),
+                TestFixture.getTheme1());
 
-        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
-                RESERVATION_TIME_10AM, ROOM_THEME1);
-
-        // then
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember1WithToken())
                 .contentType(ContentType.JSON)
-                .body(reservationRequest)
+                .body(request)
                 .when().post("/reservations")
                 .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
     }
 
-    @DisplayName("어드민 예약 추가 성공 테스트")
+    @DisplayName("멤버가 예약 대기를 성공적으로 추가한다.")
     @Test
-    void createAdminReservation() {
+    void createMemberWaiting() {
         // given
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        ReservationCreateMemberRequest request = createMemberReservationRequest(TestFixture.TOMORROW, saved.getTime(),
+                saved.getTheme());
 
-        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
-                RESERVATION_TIME_10AM, ROOM_THEME1);
-
-        // then
+        // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember2WithToken())
                 .contentType(ContentType.JSON)
-                .body(reservationRequest)
-                .when().post("/admin/reservations")
+                .body(request)
+                .when().post("/reservations/waiting")
                 .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
     }
 
-    @DisplayName("내 예약 조회 성공 테스트")
+    @DisplayName("멤버의 예약 및 대기 목록을 조회한다.")
     @Test
-    void findMyReservations() {
+    void findMyReservationsAndWaiting() {
         // given
-        String accessToken = TestFixture.getMemberToken(memberRepository);
-
-        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
-                RESERVATION_TIME_10AM, ROOM_THEME1);
-
-        // 예약 추가
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .contentType(ContentType.JSON)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all();
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        reserveBySavedMember(saved.getMember(), TestFixture.TOMORROW, TestFixture.getReservationTime11AM(),
+                TestFixture.getTheme2(),
+                Status.WAITING);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
 
         // when & then
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .when().get("/reservations-mine")
-                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("count", is(2));
     }
 
-
-    @DisplayName("날짜 양식을 잘못 입력할 시 400을 응답한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"20223-10-11", "2024-13-1"})
-    void invalidDateReservation(String value) {
-        // given
-        String accessToken = TestFixture.getMemberToken(memberRepository);
-
-        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, value, RESERVATION_TIME_10AM,
-                ROOM_THEME1);
-
-        // when & then
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .contentType(ContentType.JSON)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all().assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
-    }
-
-    @DisplayName("지나간 시간 예약 시도 시 400을 응답한다.")
+    @DisplayName("현재보다 이전 시간으로의 예약 시도 시 400을 응답한다.")
     @Test
     void outdatedReservation() {
         // given
-        String accessToken = TestFixture.getMemberToken(memberRepository);
+        ReservationCreateMemberRequest request = createMemberReservationRequest(LocalDate.now().minusDays(1),
+                TestFixture.getReservationTime10AM(), TestFixture.getTheme1());
 
-        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, "2023-12-12",
-                RESERVATION_TIME_10AM, ROOM_THEME1);
         // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember1WithToken())
                 .contentType(ContentType.JSON)
-                .body(reservationRequest)
+                .body(request)
                 .when().post("/reservations")
                 .then().log().all().assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
-    @DisplayName("중복된 시간 예약 시도 시 400을 응답한다.")
+    @DisplayName("예약을 추가할 때 이미 예약이 존재하는 경우 400을 응답한다.")
     @Test
     void duplicateReservation() {
         // given
-        String accessToken = TestFixture.getMemberToken(memberRepository);
-
-        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
-                RESERVATION_TIME_10AM, ROOM_THEME1);
-
-        // 중복된 시간을 저장한다.
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .contentType(ContentType.JSON)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all();
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(
+                TestFixture.TOMORROW, saved.getTime().getId(),
+                saved.getTheme().getId());
 
         // when & then
         RestAssured.given().log().all()
-                .header("cookie", accessToken)
+                .header("cookie", getMember2WithToken())
                 .contentType(ContentType.JSON)
-                .body(reservationRequest)
+                .body(request)
                 .when().post("/reservations")
                 .then().log().all().assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
-    @DisplayName("참조키가 존재하지 않음으로 인한 예약 추가 실패 테스트")
+    @DisplayName("예약과 대기를 동시에 할 수 없다.")
     @Test
-    void noPrimaryKeyReservation() {
+    void waitingAfterReserve() {
         // given
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.CONFIRMED);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
+
+        ReservationCreateMemberRequest request = new ReservationCreateMemberRequest(
+                TestFixture.TOMORROW, saved.getTime().getId(),
+                saved.getTheme().getId());
 
         // when & then
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .body(new ReservationCreateRequest(1L, DATE_AFTER_1DAY, 1L, 1L))
-                .when().post("/reservations")
-                .then().log().all().assertThat().statusCode(HttpStatus.NOT_FOUND.value());
+                .body(request)
+                .when().post("/reservations/waiting")
+                .then().log().all().assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
-    @DisplayName("예약 취소 성공 테스트")
+    @DisplayName("멤버가 예약 대기를 취소한다.")
     @Test
-    void deleteReservationSuccess() {
+    void cancelWaiting() {
         // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
-        Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
-
-        String accessToken = TestFixture.getAdminToken(memberRepository);
-
-        // when & then
-        Long id = savedReservation.getId();
-        RestAssured.given().log().all()
-                .header("cookie", accessToken)
-                .when().delete("/reservations/" + id)
-                .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
-    }
-
-    @DisplayName("예약 취소 실패 테스트")
-    @Test
-    void deleteReservationFail() {
-        // given
-        long invalidId = 0;
-
-        String accessToken = TestFixture.getAdminToken(memberRepository);
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.WAITING);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
 
         // when & then
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
-                .when().delete("/reservations/" + invalidId)
+                .when().delete("/reservations/waiting/{id}", saved.getId())
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 
-    private Map<String, Object> createReservationRequest(Member member, String date, ReservationTime time,
-                                                         RoomTheme theme) {
+    @DisplayName("존재하지 않는 예약 대기를 취소하면 404를 응답한다.")
+    @Test
+    void cancelNotExistWaiting() {
+        // given
+        Reservation saved = reserveAfterSave(TestFixture.getMember1(),
+                TestFixture.TOMORROW, TestFixture.getReservationTime10AM(), TestFixture.getTheme1(),
+                Status.WAITING);
+        String accessToken = TestFixture.getTokenAfterLogin(TestFixture.MEMBER1_LOGIN_REQUEST);
+
+        // when & then
+        RestAssured.given().log().all()
+                .header("cookie", accessToken)
+                .when().delete("/reservations/waiting/{id}", saved.getId() + 1)
+                .then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    private Reservation reserveAfterSave(Member member, LocalDate date, ReservationTime time, Theme theme,
+                                         Status status) {
         Member savedMember = memberRepository.save(member);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(time);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(theme);
+        ReservationTime savedReservationTime = timeRepository.save(time);
+        Theme savedTheme = themeRepository.save(theme);
 
-        return Map.of(
-                "memberId", savedMember.getId(),
-                "date", date,
-                "timeId", savedReservationTime.getId(),
-                "themeId", savedRoomTheme.getId());
+        return reservationRepository.save(new Reservation(savedMember, date, savedReservationTime, savedTheme, status));
+    }
+
+    private Reservation reserveBySavedMember(Member member, LocalDate date, ReservationTime time, Theme theme,
+                                             Status status) {
+        ReservationTime savedReservationTime = timeRepository.save(time);
+        Theme savedTheme = themeRepository.save(theme);
+
+        return reservationRepository.save(new Reservation(member, date, savedReservationTime, savedTheme, status));
+    }
+
+    private ReservationCreateMemberRequest createMemberReservationRequest(LocalDate date, ReservationTime time,
+                                                                          Theme theme) {
+        ReservationTime savedReservationTime = timeRepository.save(time);
+        Theme savedTheme = themeRepository.save(theme);
+
+        return new ReservationCreateMemberRequest(date, savedReservationTime.getId(), savedTheme.getId());
     }
 }

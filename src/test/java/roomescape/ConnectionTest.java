@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ConnectionTest {
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

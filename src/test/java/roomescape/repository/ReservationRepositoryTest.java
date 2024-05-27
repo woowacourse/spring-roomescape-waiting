@@ -1,109 +1,76 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DATE_AFTER_1DAY;
-import static roomescape.TestFixture.MEMBER_BROWN;
-import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.ROOM_THEME1;
 
+import java.time.LocalDate;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import roomescape.DBTest;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.ReservationWithWaitingOrder;
+import roomescape.domain.Status;
+import roomescape.domain.Theme;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ReservationRepositoryTest {
+class ReservationRepositoryTest extends DBTest {
 
-    @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private RoomThemeRepository roomThemeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @BeforeEach
-    void setUp() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        for (Reservation reservation : reservations) {
-            reservationRepository.deleteById(reservation.getId());
-        }
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationTimeRepository.deleteById(reservationTime.getId());
-        }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
-        }
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
-    }
-
-    @DisplayName("존재하는 모든 예약을 보여준다.")
+    @DisplayName("테마 ID로 예약을 조회한다.")
     @Test
-    void findAll() {
-        assertThat(reservationRepository.findAll()).isEmpty();
-    }
-
-
-    @DisplayName("날짜와 시간이 같은 예약이 존재하는지 여부를 반환한다.")
-    @Test
-    void duplicatedReservationTest() {
+    void findByThemeId() {
         // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
-        boolean existsFalse
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
-                savedRoomTheme.getId());
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        Member member = memberRepository.save(TestFixture.getMember1());
+        reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme, Status.CONFIRMED));
+        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme, Status.CONFIRMED));
+
         // when
-        boolean existsTrue
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
-                savedRoomTheme.getId());
+        List<Reservation> reservations = reservationRepository.findByThemeId(theme.getId());
+
         // then
-        assertAll(
-                () -> assertThat(existsFalse).isFalse(),
-                () -> assertThat(existsTrue).isTrue()
-        );
+        assertThat(reservations).hasSize(2);
     }
 
-    @DisplayName("예약을 저장한다.")
+    @DisplayName("멤버의 모든 예약 및 대기를 조회한다.")
     @Test
-    void save() {
+    void findMemberReservationAndWaiting() {
         // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme, Status.WAITING));
+        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme, Status.CONFIRMED));
+
         // when
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+        List<ReservationWithWaitingOrder> myReservations = reservationRepository.findMyReservations(member.getId());
+
         // then
-        assertThat(reservationRepository.findAll()).hasSize(1);
+        assertThat(myReservations).hasSize(2);
+        assertThat(myReservations).extracting("reservation.status").contains(Status.WAITING, Status.CONFIRMED);
+        assertThat(myReservations).extracting("reservation.member.id").containsOnly(member.getId());
     }
 
-    @DisplayName("해당 id의 예약을 삭제한다.")
-    @Test
-    void deleteById() {
+    @DisplayName("예약 상태를 이용하여 해당되는 모든 예약을 조회한다.")
+    @ParameterizedTest
+    @EnumSource(Status.class)
+    void findAllConfirmed(Status status) {
         // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
-        Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+        Member member = memberRepository.save(TestFixture.getMember1());
+        ReservationTime time = timeRepository.save(TestFixture.getReservationTime10AM());
+        Theme theme = themeRepository.save(TestFixture.getTheme1());
+        reservationRepository.save(new Reservation(member, LocalDate.now(), time, theme, Status.WAITING));
+        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme, Status.CONFIRMED));
+
         // when
-        reservationRepository.deleteById(savedReservation.getId());
+        List<Reservation> reservations = reservationRepository.findAllByStatus(status);
+
         // then
-        assertThat(reservationRepository.findAll()).isEmpty();
+        assertThat(reservations).hasSize(1);
+        assertThat(reservations).extracting("status").containsOnly(status);
     }
 }

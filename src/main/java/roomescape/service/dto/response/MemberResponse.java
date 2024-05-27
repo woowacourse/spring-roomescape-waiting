@@ -9,7 +9,8 @@ public record MemberResponse(
         @NotNull
         Long id,
         @NotBlank
-        String name) {
+        String name
+) {
 
     public static MemberResponse from(Member member) {
         return new MemberResponse(member.getId(), member.getName());

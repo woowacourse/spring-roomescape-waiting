@@ -1,9 +1,9 @@
 package roomescape.service.auth;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
@@ -24,7 +24,7 @@ public class AuthService {
         this.tokenCookieManager = tokenCookieManager;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseCookie login(LoginRequest loginRequest) {
         Member member = memberRepository.findByEmailAndPassword(loginRequest.email(), loginRequest.password())
                 .orElseThrow(() -> new NotFoundException("일치하는 회원 정보가 없습니다. email = " + loginRequest.email()
