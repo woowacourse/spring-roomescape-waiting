@@ -12,12 +12,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
-@Table(name = "reservation")
-public class Reservation {
+@Table(name = "waiting")
+public class Waiting {
+    private static final LocalDate LIMIT_DATE = LocalDate.now();
+    private static final LocalTime LIMIT_TIME = LocalTime.now();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,17 +38,18 @@ public class Reservation {
     private Theme theme;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "status")
-    private ReservationStatus status;
+    private WaitingStatus status;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme, ReservationStatus.RESERVED);
+    public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme, WaitingStatus.WAITING);
     }
 
-    private Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
-                        final Theme theme, final ReservationStatus status) {
+    private Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
+                    WaitingStatus status) {
+        validateDateTime(date, time);
         this.id = id;
         this.member = member;
         this.date = date;
@@ -53,8 +58,22 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation approve(Waiting waiting) {
-        return new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
+    private void validateDateTime(LocalDate date, ReservationTime time) {
+        if (date.isBefore(LIMIT_DATE)) {
+            throw new IllegalArgumentException("예약 날짜는 예약 가능한 기간보다 이전일 수 없습니다.");
+        }
+
+        if (date.isEqual(LIMIT_DATE) && time.isBeforeOrSame(LIMIT_TIME)) {
+            throw new IllegalArgumentException("예약 시간은 예약 가능한 시간 이전이거나 같을 수 없습니다.");
+        }
+    }
+
+    public void reject() {
+        this.status = WaitingStatus.REJECTED;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Member getMember() {
@@ -73,16 +92,12 @@ public class Reservation {
         return theme;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public ReservationStatus getStatus() {
+    public WaitingStatus getStatus() {
         return status;
     }
 
     @Override
-    public final boolean equals(final Object o) {
+    public final boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -98,8 +113,8 @@ public class Reservation {
         if (thisEffectiveClass != oEffectiveClass) {
             return false;
         }
-        final Reservation that = (Reservation) o;
-        return getId() != null && Objects.equals(getId(), that.getId());
+        Waiting waiting = (Waiting) o;
+        return getId() != null && Objects.equals(getId(), waiting.getId());
     }
 
     @Override

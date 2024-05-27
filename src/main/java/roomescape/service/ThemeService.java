@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.domain.dto.ThemeRequest;
 import roomescape.domain.dto.ThemeResponse;
@@ -29,11 +30,13 @@ public class ThemeService {
         return new ThemeResponses(themeResponses);
     }
 
+    @Transactional
     public ThemeResponse create(final ThemeRequest themeRequest) {
         final Theme theme = themeRepository.save(themeRequest.toEntity());
         return ThemeResponse.from(theme);
     }
 
+    @Transactional
     public void delete(final Long id) {
         validateExistReservation(id);
         themeRepository.deleteById(id);

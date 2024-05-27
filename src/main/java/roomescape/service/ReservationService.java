@@ -3,12 +3,15 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationResponses;
@@ -19,6 +22,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -26,14 +30,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(final ReservationTimeRepository reservationTimeRepository,
                               final ReservationRepository reservationRepository,
-                              final ThemeRepository themeRepository, final MemberRepository memberRepository) {
+                              final ThemeRepository themeRepository,
+                              final MemberRepository memberRepository,
+                              final WaitingRepository waitingRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional(readOnly = true)
@@ -45,6 +53,7 @@ public class ReservationService {
         return new ReservationResponses(reservationResponses);
     }
 
+    @Transactional
     public ReservationResponse create(final ReservationRequest reservationRequest) {
         validateDuplicatedReservation(reservationRequest);
         final ReservationTime reservationTime = getReservationTime(reservationRequest);
@@ -86,8 +95,23 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(final Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
         reservationRepository.deleteById(id);
+
+        Optional<Waiting> foundWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderById(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        updateWaitingToReservation(foundWaiting);
+    }
+
+    private void updateWaitingToReservation(Optional<Waiting> foundWaiting) {
+        foundWaiting.ifPresent(waiting -> {
+            Reservation approvedReservation = Reservation.approve(waiting);
+            waitingRepository.delete(waiting);
+            reservationRepository.save(approvedReservation);
+        });
     }
 
     @Transactional(readOnly = true)
@@ -106,6 +130,6 @@ public class ReservationService {
         return reservationRepository.findByMember(member)
                 .stream()
                 .map(ReservationsMineResponse::from)
-                .toList();
+                .collect(Collectors.toList());
     }
 }

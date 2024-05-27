@@ -19,7 +19,7 @@ class MemberRepositoryTest {
     @Test
     void given_when_findAll_then_returnReservations() {
         //given, when, then
-        assertThat(memberRepository.findAll()).hasSize(2);
+        assertThat(memberRepository.findAll()).hasSize(3);
     }
 
     @DisplayName("Db에 회원 정보를 저장한다.")

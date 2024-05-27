@@ -10,22 +10,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Member;
+import roomescape.domain.WaitingWithRank;
 import roomescape.domain.dto.BookResponses;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
+import roomescape.service.WaitingService;
 
 @RestController
 public class ClientReservationController {
     private final ReservationTimeService reservationTimeService;
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
     public ClientReservationController(final ReservationTimeService reservationTimeService,
-                                       final ReservationService reservationService) {
+                                       final ReservationService reservationService,
+                                       final WaitingService waitingService) {
         this.reservationTimeService = reservationTimeService;
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping("/books/{date}/{theme_id}")
@@ -47,6 +52,11 @@ public class ClientReservationController {
     public ResponseEntity<List<ReservationsMineResponse>> readByMember(Member member) {
         final List<ReservationsMineResponse> reservationsMineResponses =
                 reservationService.findReservationsByMember(member);
+        final List<WaitingWithRank> waitingsByMember = waitingService.findWaitingsByMember(member);
+        List<ReservationsMineResponse> waitingResponses = waitingsByMember.stream()
+                .map(ReservationsMineResponse::from)
+                .toList();
+        reservationsMineResponses.addAll(waitingResponses);
         return ResponseEntity.ok(reservationsMineResponses);
     }
 }

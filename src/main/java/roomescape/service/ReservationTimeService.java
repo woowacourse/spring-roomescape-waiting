@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.BookResponse;
 import roomescape.domain.dto.BookResponses;
@@ -33,6 +34,7 @@ public class ReservationTimeService {
         return new ReservationTimeResponses(reservationTimeRespons);
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
         validateDuplicatedTime(reservationTimeRequest);
         final ReservationTime reservationTime = reservationTimeRepository.save(reservationTimeRequest.toEntity());
@@ -45,6 +47,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         validateExistReservation(id);
         reservationTimeRepository.deleteById(id);

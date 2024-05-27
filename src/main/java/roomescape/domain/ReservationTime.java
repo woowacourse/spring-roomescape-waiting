@@ -36,6 +36,10 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
+    public boolean isBeforeOrSame(LocalTime limitTime) {
+        return startAt.isBefore(limitTime) || startAt == limitTime;
+    }
+
     public Long getId() {
         return id;
     }
