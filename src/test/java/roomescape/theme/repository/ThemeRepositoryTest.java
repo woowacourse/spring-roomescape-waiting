@@ -37,7 +37,7 @@ class ThemeRepositoryTest {
     private ReservationRepository reservationRepository;
 
     @Test
-    @DisplayName("Theme 테이블에서 많이 예약된 테마 10개를 내림차순으로 가져온다.")
+    @DisplayName("많이 예약된 테마 10개 내림차순 조회")
     void findOrderByReservation() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());

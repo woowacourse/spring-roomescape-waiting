@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.fixture.MemberFixture;
+import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
@@ -435,5 +436,35 @@ class ReservationIntegrationTest {
                 .then().log().all()
 
                 .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("회원의 예약 목록을 조회한다.")
+    void getMembersWithReservations() {
+        Member member1 = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+        Member member2 = memberRepository.save(new Member("로키", Role.USER, "qwer@naver.com", "hihi"));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
+        List<Theme> themes = ThemeFixture.get(3).stream().map(themeRepository::save).toList();
+        Reservation reservation1 = reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(0)));
+        Reservation reservation2 = reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(1)));
+        Reservation reservation3 = reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member2, reservationTime, themes.get(2)));
+
+        List<FindReservationResponse> findReservationResponses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin(member1))
+                .when().get("/members/reservations")
+                .then().log().all()
+
+                .statusCode(200)
+                .extract().jsonPath()
+                .getList(".", FindReservationResponse.class);
+
+        assertThat(findReservationResponses.containsAll(List.of(
+                FindReservationResponse.from(reservation1),
+                FindReservationResponse.from(reservation2))
+        ));
     }
 }

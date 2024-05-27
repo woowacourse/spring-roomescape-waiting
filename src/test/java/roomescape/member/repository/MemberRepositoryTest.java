@@ -1,7 +1,9 @@
 package roomescape.member.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +20,7 @@ class MemberRepositoryTest {
     private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("동일한 이메일인 회원을 조회한다.")
+    @DisplayName("동일한 이메일인 회원 조회 성공")
     void findByEmail() {
         String email = "asdf1@asdf.com";
         Member member = memberRepository.save(MemberFixture.getOne(email));
@@ -28,9 +30,11 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("동일한 이메일인 회원이 없는 경우, 빈 옵셔널을 반환한다.")
-    void findByEmail_WhenNotExist() {
+    @DisplayName("동일한 이메일인 회원 조회 실패: 회원 없음")
+    void getByEmail_WhenNotExist() {
         String email = "asdf1@asdf.com";
-        assertThat(memberRepository.findByEmail(new Email(email))).isEmpty();
+        assertThatThrownBy(() -> memberRepository.getByEmail(new Email(email)))
+                .hasMessage("이메일 asdf1@asdf.com에 해당하는 회원이 존재하지 않습니다.")
+                .isInstanceOf(NoSuchElementException.class);
     }
 }

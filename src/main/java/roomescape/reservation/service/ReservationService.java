@@ -84,7 +84,7 @@ public class ReservationService {
         }
     }
 
-    public List<FindAdminReservationResponse> getReservationsByAdmin() {
+    public List<FindAdminReservationResponse> getReservations() {
         return reservationRepository.findAll().stream()
                 .map(FindAdminReservationResponse::from)
                 .toList();

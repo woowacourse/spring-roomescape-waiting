@@ -61,7 +61,7 @@ class WaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("해당하는 회원의 대기 정보와 해당 대기보다 일찍 저장된 데이터의 갯수를 조회한다.")
+    @DisplayName("회원의 대기 정보로부터 해당 대기보다 일찍 저장된 데이터의 갯수 조회")
     void findWaitingsWithRankByMemberId() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());
@@ -83,7 +83,7 @@ class WaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기가 존재한다면, 참을 반환한다.")
+    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기가 존재: 참")
     void existsByMemberIdAndReservationId() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());
@@ -100,7 +100,7 @@ class WaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기가 존재하지 않는다면, 거짓을 반환한다.")
+    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기 없음: 거짓")
     void existsByMemberIdAndReservationId_WhenNotExists() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());
@@ -115,7 +115,7 @@ class WaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("주어진 예약에 대한 예약 대기가 존재할 경우, 참을 반환한다.")
+    @DisplayName("주어진 예약에 대한 예약 대기 존재: 참")
     void existsByReservation() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());
@@ -131,7 +131,7 @@ class WaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("주어진 예약에 대한 예약 대기가 존재하지 않을 경우, 거짓을 반환한다.")
+    @DisplayName("주어진 예약에 대한 예약 대기가 없음: 거짓")
     void existsByReservation_WhenNotExist() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());

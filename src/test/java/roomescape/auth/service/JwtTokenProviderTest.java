@@ -17,7 +17,7 @@ class JwtTokenProviderTest {
     private static final String SECRET_KEY = "secret";
 
     @Test
-    @DisplayName("토큰의 비밀 키가 다른 경우 경우 예외를 반환한다.")
+    @DisplayName("인증 객체 추출 성공")
     void extractAuthInfo() {
         TokenProvider tokenProvider = new JwtTokenProvider(new TokenProperties(SECRET_KEY, 1000));
         Member member = MemberFixture.getOneWithId(1L);
@@ -28,7 +28,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("토큰의 형식이 올바르지 않은 경우 예외를 반환한다.")
+    @DisplayName("인증 객체 추출 실패: 토큰의 형식이 다름")
     void extractAuthInfo_WhenTokenIsMalformed() {
         TokenProvider tokenProvider = new JwtTokenProvider(new TokenProperties(SECRET_KEY, 100));
 
@@ -38,7 +38,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("토큰이 만료되었을 경우 예외를 반환한다.")
+    @DisplayName("인증 객체 추출 실패: 토큰 만료")
     void extractAuthInfo_WhenTokenIsExpired() {
         TokenProvider tokenProvider = new JwtTokenProvider(new TokenProperties(SECRET_KEY, 1));
         String token = tokenProvider.createToken(MemberFixture.getOneWithId(1L));
@@ -49,7 +49,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("토큰의 비밀 키가 다른 경우 경우 예외를 반환한다.")
+    @DisplayName("인증 객체 추출 실패: 토큰의 비밀 키가 다름")
     void extractAuthInfo_WhenTokenSignatureIsInvalid() {
         TokenProvider tokenProvider = new JwtTokenProvider(new TokenProperties(SECRET_KEY, 100));
         TokenProvider tokenProviderWithOtherSecretKey = new JwtTokenProvider(new TokenProperties("asdf", 100));

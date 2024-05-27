@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class ReservationTimeTest {
 
     @Test
-    @DisplayName("예약 시간 생성 시 시작 시간이 빈 값인 경우 예외가 발생한다.")
+    @DisplayName("예약 시간 생성 실패: 시작 시간 없음")
     void createReservationTime() {
         assertThatThrownBy(() -> new ReservationTime(1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -23,7 +23,7 @@ class ReservationTimeTest {
     class isSameTo {
 
         @Test
-        @DisplayName("주어진 id값이 시간 객체의 id와 동일할 경우 참을 반환한다.")
+        @DisplayName("주어진 id값이 시간 객체의 id와 같음: 참")
         void isSameTo() {
             long sameTimeId = 1L;
             ReservationTime reservationTime = new ReservationTime(sameTimeId, LocalTime.parse("10:00"));
@@ -32,7 +32,7 @@ class ReservationTimeTest {
         }
 
         @Test
-        @DisplayName("주어진 id값이 시간 객체의 id와 동일하지 않는 경우 거짓을 반환한다.")
+        @DisplayName("주어진 id값이 시간 객체의 id와 다름: 거짓")
         void isSameTo_WhenNotSame() {
             ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
             ReservationTime sameTime = new ReservationTime(2L, LocalTime.parse("20:00"));

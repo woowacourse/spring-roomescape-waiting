@@ -32,7 +32,7 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FindAdminReservationResponse>> getReservations() {
-        return ResponseEntity.ok(reservationService.getReservationsByAdmin());
+    public ResponseEntity<List<FindAdminReservationResponse>> getReservationsByAdmin() {
+        return ResponseEntity.ok(reservationService.getReservations());
     }
 }

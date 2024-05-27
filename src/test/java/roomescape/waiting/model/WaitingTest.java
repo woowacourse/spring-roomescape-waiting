@@ -13,7 +13,7 @@ import roomescape.reservation.model.Reservation;
 class WaitingTest {
 
     @Test
-    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기가 존재한다면, 참을 반환한다.")
+    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기 존재: 참")
     void isNotSameMember() {
         // given
         Reservation reservation = ReservationFixture.getOneWithId(1L);
@@ -25,7 +25,7 @@ class WaitingTest {
     }
 
     @Test
-    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기가 존재하지 않는다면, 거짓을 반환한다.")
+    @DisplayName("해당하는 회원, 예약과 동일한 예약 대기 없음: 거짓")
     void isNotSameMember_WhenNotSame() {
         // given
         Reservation reservation = ReservationFixture.getOneWithId(1L);
