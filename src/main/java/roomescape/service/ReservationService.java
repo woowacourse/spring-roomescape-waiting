@@ -15,9 +15,11 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
 import roomescape.exception.member.MemberNotFoundException;
+import roomescape.exception.reservation.CannotWaitingForMineException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationConflictException;
 import roomescape.exception.reservation.ReservationNotFoundException;
+import roomescape.exception.reservation.WaitingConflictException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -26,6 +28,7 @@ import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
+import roomescape.service.dto.waiting.WaitingResponse;
 
 @Service
 public class ReservationService {
@@ -52,6 +55,12 @@ public class ReservationService {
 
         return reservationRepository.findAll(specification)
                 .stream().map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<WaitingResponse> findWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::new)
                 .toList();
     }
 
@@ -107,11 +116,43 @@ public class ReservationService {
         return new ReservationResponse(savedReservation);
     }
 
+    public WaitingResponse createWaiting(ReservationCreate reservationInfo) {
+        Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(
+                reservationInfo.getDate(),
+                reservationInfo.getThemeId(),
+                reservationInfo.getTimeId()
+        ).orElseThrow(ReservationNotFoundException::new);
+        Member member = memberRepository.findByEmail(reservationInfo.getEmail())
+                .orElseThrow(MemberNotFoundException::new);
+        validateMineReservation(reservation, member);
+        validateDuplicatedWaiting(reservation, member);
+
+        Waiting waiting = waitingRepository.save(new Waiting(reservation, member, LocalDateTime.now()));
+
+        return new WaitingResponse(waiting);
+    }
+
+    private void validateMineReservation(Reservation reservation, Member member) {
+        if (reservation.getMember().getId().equals(member.getId())) {
+            throw new CannotWaitingForMineException();
+        }
+    }
+
+    private void validateDuplicatedWaiting(Reservation reservation, Member member) {
+        if (waitingRepository.existsByReservationIdAndMemberEmail(reservation.getId(), member.getEmail())) {
+            throw new WaitingConflictException();
+        }
+    }
+
     public void deleteReservation(long id) {
         if (!reservationRepository.existsById(id)) {
             throw new ReservationNotFoundException();
         }
         approveWaiting(id);
+    }
+
+    public void deleteWaiting(String email, long reservationId) {
+        waitingRepository.deleteByReservationIdAndMemberEmail(reservationId, email);
     }
 
     private void validatePreviousDate(LocalDate date, ReservationTime time) {

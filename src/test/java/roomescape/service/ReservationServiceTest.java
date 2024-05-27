@@ -20,6 +20,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
+import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationConflictException;
 import roomescape.exception.reservation.ReservationNotFoundException;
@@ -32,6 +33,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
+import roomescape.service.dto.waiting.WaitingResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -180,5 +182,64 @@ class ReservationServiceTest {
 
         // then
         assertThat(actual).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("이미 예약된 것에 대기를 생성한다.")
+    void createWaiting() {
+        // given
+        Member member = memberRepository.save(sampleMember);
+        Member member2 = memberRepository.save(new Member("t2@t2.com", "123", "양새", "MEMBER"));
+        ReservationTime time = reservationTimeRepository.save(sampleTime);
+        Theme theme = themeRepository.save(sampleTheme);
+        Reservation reservation = reservationRepository.save(new Reservation(member, theme, sampleDate, time));
+
+        // when
+        WaitingResponse actual = reservationService.createWaiting(new ReservationCreate(
+                member2.getEmail(), theme.getId(), reservation.getDate().toString(), time.getId()
+        ));
+        WaitingResponse expected = new WaitingResponse(actual.id(), member2.getName(), theme.getName(),
+                reservation.getDate().toString(), time.getStartAt().toString());
+
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약에 대한 대기를 생성할 시 예외가 발생한다.")
+    void createWaitingNotExistReservation() {
+        // given
+        Member member = memberRepository.save(sampleMember);
+        ReservationTime time = reservationTimeRepository.save(sampleTime);
+        Theme theme = themeRepository.save(sampleTheme);
+        Reservation reservation = reservationRepository.save(new Reservation(member, theme, sampleDate, time));
+        reservationRepository.delete(reservation);
+
+        ReservationCreate request = new ReservationCreate(member.getEmail(), theme.getId(),
+                reservation.getDate().toString(),
+                time.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.createWaiting(request))
+                .isInstanceOf(ReservationNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 멤버에 대한 대기를 생성할 시 예외가 발생한다.")
+    void createWaitingNotExistMember() {
+        // given
+        Member member = memberRepository.save(sampleMember);
+        ReservationTime time = reservationTimeRepository.save(sampleTime);
+        Theme theme = themeRepository.save(sampleTheme);
+        Reservation reservation = reservationRepository.save(new Reservation(member, theme, sampleDate, time));
+        String notExistEmail = "no@test.com";
+
+        ReservationCreate request = new ReservationCreate(notExistEmail, theme.getId(),
+                reservation.getDate().toString(),
+                time.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.createWaiting(request))
+                .isInstanceOf(MemberNotFoundException.class);
     }
 }

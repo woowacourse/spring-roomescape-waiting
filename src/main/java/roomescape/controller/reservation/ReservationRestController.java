@@ -20,7 +20,6 @@ import roomescape.controller.dto.MemberReservationRequest;
 import roomescape.controller.helper.AuthenticationPrincipal;
 import roomescape.controller.helper.LoginMember;
 import roomescape.service.ReservationService;
-import roomescape.service.WaitingService;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -30,11 +29,9 @@ import roomescape.service.dto.waiting.WaitingResponse;
 public class ReservationRestController {
 
     private final ReservationService reservationService;
-    private final WaitingService waitingService;
 
-    public ReservationRestController(ReservationService reservationService, WaitingService waitingService) {
+    public ReservationRestController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.waitingService = waitingService;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -52,7 +49,7 @@ public class ReservationRestController {
     @PostMapping("/reservations/waitings")
     public ResponseEntity<WaitingResponse> createWaiting(@AuthenticationPrincipal LoginMember loginMember,
                                                          @Valid @RequestBody MemberReservationRequest request) {
-        WaitingResponse response = waitingService.createWaiting(new ReservationCreate(loginMember, request));
+        WaitingResponse response = reservationService.createWaiting(new ReservationCreate(loginMember, request));
         URI uri = UriComponentsBuilder.fromPath("/reservations/waitings/{id}")
                 .build(response.id());
 
@@ -62,7 +59,7 @@ public class ReservationRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/reservations/waitings/{id}")
     public void deleteWaiting(@AuthenticationPrincipal LoginMember loginMember, @PathVariable long id) {
-        waitingService.deleteWaiting(loginMember.getEmail(), id);
+        reservationService.deleteWaiting(loginMember.getEmail(), id);
     }
 
     @GetMapping("/admin/reservations")
@@ -90,6 +87,6 @@ public class ReservationRestController {
 
     @GetMapping("/admin/reservations/waitings")
     public List<WaitingResponse> findWaitings() {
-        return waitingService.findAll();
+        return reservationService.findWaitings();
     }
 }
