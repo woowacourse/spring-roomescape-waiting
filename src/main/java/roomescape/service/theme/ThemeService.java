@@ -5,27 +5,27 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.theme.module.ThemeDeleteService;
-import roomescape.service.theme.module.ThemeResisterService;
+import roomescape.service.theme.module.ThemeRegisterService;
 import roomescape.service.theme.module.ThemeSearchService;
 
 @Service
 public class ThemeService {
 
-    private final ThemeResisterService themeResisterService;
+    private final ThemeRegisterService themeRegisterService;
     private final ThemeSearchService themeSearchService;
     private final ThemeDeleteService themeDeleteService;
 
-    public ThemeService(ThemeResisterService themeResisterService,
+    public ThemeService(ThemeRegisterService themeRegisterService,
                         ThemeSearchService themeSearchService,
                         ThemeDeleteService themeDeleteService
     ) {
-        this.themeResisterService = themeResisterService;
+        this.themeRegisterService = themeRegisterService;
         this.themeSearchService = themeSearchService;
         this.themeDeleteService = themeDeleteService;
     }
 
     public Long addTheme(ThemeRequest themeRequest) {
-        return themeResisterService.resisterTheme(themeRequest);
+        return themeRegisterService.resisterTheme(themeRequest);
     }
 
     public ThemeResponse findTheme(Long themeId) {

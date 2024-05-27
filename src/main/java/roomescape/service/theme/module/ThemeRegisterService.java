@@ -1,17 +1,19 @@
 package roomescape.service.theme.module;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.repository.ThemeRepository;
 
 @Service
-public class ThemeResisterService {
+@Transactional
+public class ThemeRegisterService {
 
     private final ThemeRepository themeRepository;
 
-    public ThemeResisterService(ThemeRepository themeRepository) {
+    public ThemeRegisterService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
     }
 

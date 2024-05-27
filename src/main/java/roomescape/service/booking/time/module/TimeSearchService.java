@@ -3,6 +3,7 @@ package roomescape.service.booking.time.module;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.time.ReservationTime;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.reservationtime.TimeWithAvailableResponse;
@@ -10,6 +11,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeSearchService {
 
     private final ReservationTimeRepository reservationTimeRepository;

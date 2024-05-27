@@ -7,27 +7,27 @@ import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.reservationtime.TimeWithAvailableResponse;
 import roomescape.service.booking.time.module.TimeDeleteService;
-import roomescape.service.booking.time.module.TimeResisterService;
+import roomescape.service.booking.time.module.TimeRegisterService;
 import roomescape.service.booking.time.module.TimeSearchService;
 
 @Service
 public class ReservationTimeService {
 
-    private final TimeResisterService timeResisterService;
+    private final TimeRegisterService timeRegisterService;
     private final TimeSearchService timeSearchService;
     private final TimeDeleteService timeDeleteService;
 
-    public ReservationTimeService(TimeResisterService timeResisterService,
+    public ReservationTimeService(TimeRegisterService timeRegisterService,
                                   TimeSearchService timeSearchService,
                                   TimeDeleteService timeDeleteService
     ) {
-        this.timeResisterService = timeResisterService;
+        this.timeRegisterService = timeRegisterService;
         this.timeSearchService = timeSearchService;
         this.timeDeleteService = timeDeleteService;
     }
 
     public Long resisterReservationTime(ReservationTimeRequest reservationTimeRequest) {
-        return timeResisterService.registerTime(reservationTimeRequest);
+        return timeRegisterService.registerTime(reservationTimeRequest);
     }
 
     public ReservationTimeResponse findReservationTime(Long timeId) {

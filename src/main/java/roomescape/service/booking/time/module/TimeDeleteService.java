@@ -1,11 +1,13 @@
 package roomescape.service.booking.time.module;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 public class TimeDeleteService {
 
     private final ReservationTimeRepository reservationTimeRepository;

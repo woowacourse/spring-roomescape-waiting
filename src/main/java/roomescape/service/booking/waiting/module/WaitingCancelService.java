@@ -2,12 +2,14 @@ package roomescape.service.booking.waiting.module;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.waiting.Waiting;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
 @Service
+@Transactional
 public class WaitingCancelService {
 
     private final WaitingRepository waitingRepository;

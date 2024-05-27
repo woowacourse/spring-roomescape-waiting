@@ -1,11 +1,13 @@
 package roomescape.service.theme.module;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ThemeDeleteService {
 
     private final ThemeRepository themeRepository;

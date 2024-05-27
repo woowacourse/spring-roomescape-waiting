@@ -1,10 +1,12 @@
 package roomescape.service.booking.reservation.module;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.repository.ReservationRepository;
 
 @Service
+@Transactional
 public class ReservationCancelService {
 
     private final ReservationRepository reservationRepository;

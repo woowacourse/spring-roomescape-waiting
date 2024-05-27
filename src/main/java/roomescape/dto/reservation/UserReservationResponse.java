@@ -14,7 +14,7 @@ public record UserReservationResponse(
         String status
 ) {
 
-    public static UserReservationResponse creat(Reservation reservation) {
+    public static UserReservationResponse create(Reservation reservation) {
         return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getThemeName(),

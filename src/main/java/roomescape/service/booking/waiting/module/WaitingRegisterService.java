@@ -1,43 +1,52 @@
-package roomescape.service.booking.reservation.module;
+package roomescape.service.booking.waiting.module;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
+import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.util.DateUtil;
 
 @Service
-public class ReservationResisterService {
+@Transactional
+public class WaitingRegisterService {
 
+    private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationResisterService(ReservationRepository reservationRepository,
-                                      ReservationTimeRepository timeRepository,
-                                      ThemeRepository themeRepository,
-                                      MemberRepository memberRepository
+    public WaitingRegisterService(WaitingRepository waitingRepository,
+                                  ReservationRepository reservationRepository,
+                                  ReservationTimeRepository timeRepository,
+                                  ThemeRepository themeRepository,
+                                  MemberRepository memberRepository
     ) {
+        this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
 
-    public Long resisterReservation(ReservationRequest request) {
+    public Long registerWaiting(ReservationRequest request) {
         Reservation reservation = convertReservation(request);
-        validateReservationAvailability(reservation);
-        return reservationRepository.save(reservation).getId();
+        validateAddableWaiting(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        addWaiting(savedReservation);
+        return savedReservation.getId();
     }
 
     private Reservation convertReservation(ReservationRequest request) {
@@ -71,9 +80,19 @@ public class ReservationResisterService {
                 ));
     }
 
-    private void validateReservationAvailability(Reservation reservation) {
+    private void addWaiting(Reservation savedReservation) {
+        int waitingOrder = reservationRepository.countByDateAndTimeIdAndThemeIdAndStatus(
+                savedReservation.getDate(),
+                savedReservation.getTime().getId(),
+                savedReservation.getTheme().getId(),
+                savedReservation.getStatus()
+        );
+        waitingRepository.save(new Waiting(savedReservation, waitingOrder));
+    }
+
+    private void validateAddableWaiting(Reservation reservation) {
         validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
-        validateReservationNotDuplicate(reservation);
+        validateWaitingDuplicate(reservation);
     }
 
     private void validateUnPassedDate(LocalDate date, LocalTime time) {
@@ -85,15 +104,16 @@ public class ReservationResisterService {
         }
     }
 
-    private void validateReservationNotDuplicate(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+    private void validateWaitingDuplicate(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
                 reservation.getDate(),
                 reservation.getTime().getId(),
-                reservation.getTheme().getId())
+                reservation.getTheme().getId(),
+                reservation.getMember().getId())
         ) {
             throw new IllegalArgumentException(
-                    "[ERROR] 해당 시간에 동일한 테마가 예약되어있어 예약이 불가능합니다.",
-                    new Throwable("생성 예약 정보 : " + reservation)
+                    "[ERROR] 이미 사용자에게 등록되거나 대기중인 예약이 있습니다..",
+                    new Throwable("생성 예약 대기 정보 : " + reservation)
             );
         }
     }

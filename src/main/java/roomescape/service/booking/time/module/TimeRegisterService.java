@@ -2,16 +2,18 @@ package roomescape.service.booking.time.module;
 
 import java.time.LocalTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.time.ReservationTime;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
-public class TimeResisterService {
+@Transactional
+public class TimeRegisterService {
 
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public TimeResisterService(ReservationTimeRepository reservationTimeRepository) {
+    public TimeRegisterService(ReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
