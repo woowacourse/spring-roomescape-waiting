@@ -27,6 +27,7 @@ import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationWaitingResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -45,7 +46,6 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional
     public List<ReservationResponse> findAll() {
         return reservationRepository.findByStatusIn(List.of(Status.CREATED))
                 .stream()
@@ -53,7 +53,6 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
         return reservationRepository.findMyReservationsAndStatusIn(
                         authInfo.id(),
@@ -63,7 +62,6 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional
     public List<ReservationWaitingResponse> findReservationsWaiting() {
         return reservationRepository.findByStatusIn(List.of(Status.WAITING))
                 .stream()
@@ -71,7 +69,6 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional
     public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
         Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
@@ -110,12 +107,7 @@ public class ReservationService {
 
         reservation.validateAuthorization(member);
 
-        updateReservationStatus(reservation, Status.WAITING_CANCEL);
-    }
-
-    private void updateReservationStatus(Reservation reservation, Status status) {
-        reservation.updateStatus(status);
-        reservationRepository.save(reservation);
+        reservation.updateStatus(Status.WAITING_CANCEL);
     }
 
     @Transactional
@@ -126,10 +118,10 @@ public class ReservationService {
                 .findTopByStatusInOrderByCreatedAt(List.of(Status.WAITING))
                 .orElse(null);
 
-        updateReservationStatus(reservation, Status.DELETED);
+        reservation.updateStatus(Status.DELETED);
 
         if (reservationWaiting != null) {
-            updateReservationStatus(reservationWaiting, Status.CREATED);
+            reservationWaiting.updateStatus(Status.CREATED);
         }
     }
 
