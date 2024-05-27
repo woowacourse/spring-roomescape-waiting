@@ -41,6 +41,6 @@ class AuthControllerTest extends IntegrationTestSupport {
 
         //then
         assertThat(check.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(check.getBody()).isNull();
+        assertThat(check.getBody()).isEqualTo(CookieMemberResponse.NON_LOGIN);
     }
 }
