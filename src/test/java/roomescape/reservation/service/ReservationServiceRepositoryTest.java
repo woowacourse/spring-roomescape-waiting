@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,15 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.auth.dto.LoginMember;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.MemberReservationCreateRequest;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -141,6 +143,43 @@ public class ReservationServiceRepositoryTest {
 
         //when, then
         assertThatThrownBy(() -> reservationService.deleteWaiting(reservationId))
+                .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @DisplayName("멤버는 자신의 예약 대기를 삭제할 수 있다.")
+    @Test
+    void deleteWaitingReservation() {
+        //given
+        MemberReservationCreateRequest request = new MemberReservationCreateRequest(
+                LocalDate.now().plusMonths(6),
+                1L,
+                1L);
+        LoginMember member = new LoginMember(1L, "test@gmail.com");
+
+        reservationService.createReservation(request, member);
+        Long waitingId = reservationService.createWaitingReservation(request, member).getId();
+
+        //when, then
+        assertThatCode(() -> reservationService.deleteWaitingReservation(waitingId, member))
+                .doesNotThrowAnyException();
+    }
+
+    @DisplayName("멤버는 다른 사람의 예약 대기를 삭제할 수 없다.")
+    @Test
+    void deleteOtherWaitingReservation() {
+        //given
+        MemberReservationCreateRequest request = new MemberReservationCreateRequest(
+                LocalDate.now().plusMonths(6),
+                1L,
+                1L);
+        LoginMember member = new LoginMember(1L, "test@gmail.com");
+        LoginMember member2 = new LoginMember(2L, "test2@gmail.com");
+
+        reservationService.createReservation(request, member);
+        Long waitingId = reservationService.createWaitingReservation(request, member).getId();
+
+        //when, then
+        assertThatThrownBy(() -> reservationService.deleteWaitingReservation(waitingId, member2))
                 .isInstanceOf(UnauthorizedException.class);
     }
 }
