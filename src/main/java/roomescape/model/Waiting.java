@@ -24,7 +24,6 @@ public class Waiting {
     private LocalDate date;
     @NotNull
     private LocalDateTime created_at;
-
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "time_id")

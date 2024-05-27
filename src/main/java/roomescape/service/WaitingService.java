@@ -13,6 +13,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.model.member.LoginMember;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -55,8 +56,12 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
-    public List<Waiting> findWaitingsByMember(LoginMember member) {
-        return waitingRepository.findByMemberId(member.getId());
+    public List<WaitingWithRank> findWaitingsWithRankByMember(LoginMember member) {
+        List<Waiting> allWaitings = findAllWaitings();
+        List<Waiting> waitings = waitingRepository.findByMemberId(member.getId());
+        return waitings.stream()
+                .map(waiting -> new WaitingWithRank(waiting, allWaitings))
+                .toList();
     }
 
     private ReservationTime findReservationTime(ReservationDto reservationDto) {

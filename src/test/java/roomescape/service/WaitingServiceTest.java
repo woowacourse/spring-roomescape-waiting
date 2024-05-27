@@ -20,6 +20,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.model.member.LoginMember;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -151,7 +152,7 @@ class WaitingServiceTest {
     @Test
     void should_find_waitings_by_member() {
         LoginMember member = new LoginMember(3L);
-        List<Waiting> waitings = waitingService.findWaitingsByMember(member);
+        List<WaitingWithRank> waitings = waitingService.findWaitingsWithRankByMember(member);
         assertAll(
                 () -> assertThat(waitings).hasSize(1),
                 () -> assertThat(waitings.get(0).getId()).isEqualTo(1L));

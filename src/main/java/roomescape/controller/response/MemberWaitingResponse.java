@@ -3,15 +3,15 @@ package roomescape.controller.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 
 public class MemberWaitingResponse {
 
-    private final long reservationId;
-    private final String theme;
-    private final LocalDate date;
-    private final LocalTime time;
-    private final String status;
+    private long reservationId;
+    private String theme;
+    private LocalDate date;
+    private LocalTime time;
+    private String status;
 
     private MemberWaitingResponse(long reservationId, String theme, LocalDate date, LocalTime time, String status) {
         this.reservationId = reservationId;
@@ -21,9 +21,9 @@ public class MemberWaitingResponse {
         this.status = status;
     }
 
-    public MemberWaitingResponse(Waiting waiting) {
+    public MemberWaitingResponse(WaitingWithRank waiting) {
         this(waiting.getId(), waiting.getTheme().getName(),
-                waiting.getDate(), waiting.getTime().getStartAt(), "대기");
+                waiting.getDate(), waiting.getTime().getStartAt(), waiting.getRank() + "번째 예약대기");
     }
 
     public long getReservationId() {

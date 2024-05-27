@@ -16,6 +16,7 @@ import roomescape.controller.request.ReservationRequest;
 import roomescape.controller.response.MemberWaitingResponse;
 import roomescape.controller.response.WaitingResponse;
 import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.model.member.LoginMember;
 import roomescape.service.WaitingService;
 import roomescape.service.dto.ReservationDto;
@@ -52,9 +53,9 @@ public class WaitingController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MemberWaitingResponse>> getWaitingsOfMember(LoginMember member) {
-        List<Waiting> waitings = waitingService.findWaitingsByMember(member);
+        List<WaitingWithRank> waitings = waitingService.findWaitingsWithRankByMember(member);
         List<MemberWaitingResponse> response = waitings.stream()
-                .map((MemberWaitingResponse::new))
+                .map(MemberWaitingResponse::new)
                 .toList();
         return ResponseEntity.ok(response);
     }
