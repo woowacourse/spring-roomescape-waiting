@@ -18,21 +18,19 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin")
-public class AdminController {
+@RequestMapping("/admin/reservations")
+public class AdminReservationController {
     private final ReservationCreateService reservationCreateService;
     private final ReservationReadService reservationReadService;
-    private final ThemeService themeService;
     private final ReservationDeleteService reservationDeleteService;
 
-    public AdminController(ReservationCreateService reservationCreateService, ReservationReadService reservationReadService, ThemeService themeService, ReservationDeleteService reservationDeleteService) {
+    public AdminReservationController(ReservationCreateService reservationCreateService, ReservationReadService reservationReadService, ReservationDeleteService reservationDeleteService) {
         this.reservationCreateService = reservationCreateService;
         this.reservationReadService = reservationReadService;
-        this.themeService = themeService;
         this.reservationDeleteService = reservationDeleteService;
     }
 
-    @PostMapping("/reservations")
+    @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody @Valid AdminReservationRequest adminReservationRequest) {
         ReservationResponse reservationResponse = reservationCreateService.createAdminReservation(adminReservationRequest);
@@ -40,27 +38,15 @@ public class AdminController {
                 .body(reservationResponse);
     }
 
-    @GetMapping("/reservations/search")
+    @GetMapping("/search")
     public List<ReservationResponse> findReservations(
             @ModelAttribute("ReservationFindRequest") ReservationFilterRequest reservationFilterRequest) {
         return reservationReadService.findByCondition(reservationFilterRequest);
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long reservationId) {
         reservationDeleteService.deleteById(reservationId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/themes")
-    public ResponseEntity<ThemeResponse> createTheme(@RequestBody @Valid ThemeRequest themeRequest, @LoginMemberId long memberId) {
-        ThemeResponse themeResponse = themeService.create(themeRequest);
-        return ResponseEntity.created(URI.create("/themes/" + themeResponse.id())).body(themeResponse);
-    }
-
-    @DeleteMapping("/themes/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") long themeId) {
-        themeService.deleteById(themeId);
         return ResponseEntity.noContent().build();
     }
 }
