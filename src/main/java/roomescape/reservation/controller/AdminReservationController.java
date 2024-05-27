@@ -12,27 +12,29 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationCreateService;
+import roomescape.reservation.service.ReservationFindService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
+    private final ReservationFindService findService;
+    private final ReservationCreateService createService;
 
-    private final ReservationService service;
-
-    public AdminReservationController(ReservationService service) {
-        this.service = service;
+    public AdminReservationController(ReservationFindService findService, ReservationCreateService createService) {
+        this.findService = findService;
+        this.createService = createService;
     }
 
     @GetMapping
     public List<ReservationResponse> findReservations(
             @ModelAttribute ReservationSearchRequest searchRequest) {
-        return service.findReservations(searchRequest);
+        return findService.findReservations(searchRequest);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationCreateRequest request) {
-        ReservationResponse response = service.createReservation(request);
+        ReservationResponse response = createService.createReservation(request);
 
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location)

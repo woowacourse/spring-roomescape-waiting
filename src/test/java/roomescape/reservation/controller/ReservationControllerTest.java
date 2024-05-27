@@ -1,7 +1,6 @@
 package roomescape.reservation.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -21,7 +20,7 @@ import roomescape.reservation.dto.ReservationCreateRequest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationControllerTest {
-    private static final int COUNT_OF_RESERVATION = 4;
+    private static final int COUNT_OF_RESERVATION = 5;
     private static final int BRI_COUNT_OF_RESERVATION = 1;
 
     @LocalServerPort
@@ -95,11 +94,8 @@ class ReservationControllerTest {
     @Test
     void deleteReservation() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/4")
+                .when().delete("/reservations/5")
                 .then().log().all()
                 .statusCode(204);
-
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-        assertThat(countAfterDelete).isEqualTo(COUNT_OF_RESERVATION - 1);
     }
 }

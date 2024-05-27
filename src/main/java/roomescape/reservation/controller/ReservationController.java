@@ -16,32 +16,44 @@ import roomescape.auth.dto.LoggedInMember;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationCreateService;
+import roomescape.reservation.service.ReservationDeleteService;
+import roomescape.reservation.service.ReservationFindMineService;
+import roomescape.reservation.service.ReservationFindService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
-    private final ReservationService service;
+    private final ReservationFindService findService;
+    private final ReservationFindMineService findMineService;
+    private final ReservationCreateService createService;
+    private final ReservationDeleteService deleteService;
 
-    public ReservationController(ReservationService service) {
-        this.service = service;
+    public ReservationController(ReservationFindService findService,
+                                 ReservationFindMineService findMineService,
+                                 ReservationCreateService createService,
+                                 ReservationDeleteService deleteService) {
+        this.findService = findService;
+        this.findMineService = findMineService;
+        this.createService = createService;
+        this.deleteService = deleteService;
     }
 
     @GetMapping
     public List<ReservationResponse> findReservations() {
-        return service.findReservations();
+        return findService.findReservations();
     }
 
     @GetMapping("/accounts")
     public List<MyReservationResponse> findMyReservations(LoggedInMember member) {
-        return service.findReservations(member.id());
+        return findMineService.findMyReservations(member.id());
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationCreateRequest request,
             LoggedInMember member) {
-        ReservationResponse response = service.createReservation(request, member.id());
+        ReservationResponse response = createService.createReservation(request, member.id());
 
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location)
@@ -51,6 +63,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable Long id) {
-        service.deleteReservation(id);
+        deleteService.deleteReservation(id);
     }
 }

@@ -13,7 +13,7 @@ import roomescape.member.domain.Password;
 import roomescape.test.RepositoryTest;
 
 class MemberRepositoryTest extends RepositoryTest {
-    private static final int COUNT_OF_MEMBER = 4;
+    private static final int COUNT_OF_MEMBER = 5;
 
     @Autowired
     private MemberRepository memberRepository;
