@@ -3,9 +3,9 @@ package roomescape.reservation.dto;
 import jakarta.validation.constraints.NotNull;
 import roomescape.auth.dto.LoginMember;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.entity.MemberReservation;
+import roomescape.reservation.domain.entity.Reservation;
+import roomescape.reservation.domain.entity.ReservationStatus;
 
 import java.time.LocalDate;
 

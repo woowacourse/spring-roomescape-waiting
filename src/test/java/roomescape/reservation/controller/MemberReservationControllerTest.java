@@ -12,7 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.service.TokenCookieService;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.entity.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.HashMap;

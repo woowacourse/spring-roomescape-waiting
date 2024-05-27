@@ -3,9 +3,9 @@ package roomescape.reservation.facade;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.*;
-import roomescape.reservation.service.ReservationCreateService;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.WaitingReservationService;
+import roomescape.reservation.domain.service.ReservationCreateService;
+import roomescape.reservation.domain.service.ReservationService;
+import roomescape.reservation.domain.service.WaitingReservationService;
 
 import java.util.List;
 

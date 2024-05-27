@@ -1,12 +1,12 @@
-package roomescape.reservation.service;
+package roomescape.reservation.domain.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.entity.MemberReservation;
+import roomescape.reservation.domain.entity.Reservation;
+import roomescape.reservation.domain.entity.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.repository.MemberReservationRepository;
 

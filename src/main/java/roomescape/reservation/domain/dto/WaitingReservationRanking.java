@@ -1,4 +1,6 @@
-package roomescape.reservation.domain;
+package roomescape.reservation.domain.dto;
+
+import roomescape.reservation.domain.entity.MemberReservation;
 
 public interface WaitingReservationRanking {
 

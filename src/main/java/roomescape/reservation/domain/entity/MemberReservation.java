@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.reservation.domain.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;

@@ -4,10 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.WaitingReservationRanking;
+import roomescape.reservation.domain.entity.MemberReservation;
+import roomescape.reservation.domain.entity.Reservation;
+import roomescape.reservation.domain.entity.ReservationStatus;
+import roomescape.reservation.domain.dto.WaitingReservationRanking;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

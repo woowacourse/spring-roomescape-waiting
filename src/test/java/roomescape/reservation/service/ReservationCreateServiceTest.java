@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.entity.ReservationStatus;
+import roomescape.reservation.domain.service.ReservationCreateService;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 

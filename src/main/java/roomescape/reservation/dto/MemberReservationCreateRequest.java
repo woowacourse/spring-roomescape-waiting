@@ -1,7 +1,7 @@
 package roomescape.reservation.dto;
 
 import jakarta.validation.constraints.NotNull;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.entity.ReservationStatus;
 
 import java.time.LocalDate;
 

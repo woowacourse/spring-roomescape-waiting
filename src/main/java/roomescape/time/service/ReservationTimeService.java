@@ -2,7 +2,7 @@ package roomescape.time.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.entity.Reservation;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.reservation.repository.MemberReservationRepository;

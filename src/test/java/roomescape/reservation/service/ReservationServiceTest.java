@@ -9,8 +9,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.ForbiddenException;
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.entity.MemberReservation;
+import roomescape.reservation.domain.entity.ReservationStatus;
+import roomescape.reservation.domain.service.ReservationService;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.repository.MemberReservationRepository;
 

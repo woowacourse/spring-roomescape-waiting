@@ -7,8 +7,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.entity.MemberReservation;
+import roomescape.reservation.domain.entity.ReservationStatus;
+import roomescape.reservation.domain.service.WaitingReservationService;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.repository.MemberReservationRepository;
 

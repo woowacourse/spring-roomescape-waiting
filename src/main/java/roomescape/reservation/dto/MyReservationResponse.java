@@ -1,8 +1,8 @@
 package roomescape.reservation.dto;
 
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.WaitingReservationRanking;
+import roomescape.reservation.domain.entity.MemberReservation;
+import roomescape.reservation.domain.entity.Reservation;
+import roomescape.reservation.domain.dto.WaitingReservationRanking;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

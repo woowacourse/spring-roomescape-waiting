@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.Fixtures;
 import roomescape.exception.BadRequestException;
+import roomescape.reservation.domain.entity.Reservation;
 
 import java.time.LocalDate;
 
