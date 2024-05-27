@@ -25,7 +25,6 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -38,7 +37,7 @@ class ReservationJpaRepositoryTest {
     private EntityManager entityManager;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationJpaRepository reservationRepository;
 
     @Autowired
     private ThemeRepository themeRepository;

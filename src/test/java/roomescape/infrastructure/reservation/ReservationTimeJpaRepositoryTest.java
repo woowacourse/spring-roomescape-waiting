@@ -23,7 +23,6 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.TimeSlot;
 import roomescape.fixture.TimeFixture;
@@ -35,7 +34,7 @@ class ReservationTimeJpaRepositoryTest {
     private EntityManager entityManager;
 
     @Autowired
-    private ReservationTimeRepository timeRepository;
+    private ReservationTimeJpaRepository timeRepository;
 
     @Test
     @DisplayName("특정 시간이 저장소에 존재하면 true를 반환한다.")

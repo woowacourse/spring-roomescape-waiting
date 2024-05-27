@@ -25,7 +25,6 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
 
 @DataJpaTest
 class ThemeJpaRepositoryTest {
@@ -34,7 +33,7 @@ class ThemeJpaRepositoryTest {
     private EntityManager entityManager;
 
     @Autowired
-    private ThemeRepository themeRepository;
+    private ThemeJpaRepository themeRepository;
 
     @Test
     @DisplayName("주어진 날짜 사이에 확정된 예약을 기준으로 인기 테마를 반환한다.")
@@ -66,7 +65,9 @@ class ThemeJpaRepositoryTest {
         ).forEach(entityManager::persist);
 
         int limit = 3;
-        List<Theme> themeIds = themeRepository.findPopularThemes(date, date.plusDays(2), limit);
+        List<Theme> themeIds = themeRepository.findPopularThemesDateBetween(
+                date, date.plusDays(2), limit, BOOKED
+        );
         assertThat(themeIds).containsExactly(themes.get(2), themes.get(1), themes.get(0));
     }
 }
