@@ -247,7 +247,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+  return fetch(`${ADMIN_RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
         if (response.status !== 204) return response.json().then(data => {
           throw new Error(data.message || 'Delete failed');
