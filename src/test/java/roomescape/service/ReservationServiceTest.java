@@ -195,14 +195,14 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("회원 Id가 일치하지 않는 대기중인 예약을 제거할 수 없다.")
-    void given_differentMemberId_when_deleteByIdWithWaiting_then_notDeleted() {
+    @DisplayName("소유자가 아닌 회원의 대기중인 예약을 제거할 수 없다.")
+    void given_differentMemberId_when_deleteByIdAndOwner_then_notDeleted() {
         //given
         long initialSize = getReservationSize();
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "duck", Role.USER);
         //when
-        service.deleteByIdWithWaiting(9L, member);
+        service.deleteByIdAndOwner(9L, member);
         long afterCreateSize = getReservationSize();
         //then
         assertThat(afterCreateSize).isEqualTo(initialSize);
