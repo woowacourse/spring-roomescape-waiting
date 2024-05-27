@@ -74,8 +74,7 @@ public class ReservationService {
 
     private void acceptWaiting(List<Waiting> waitings, Reservation reservation) {
         Waiting nextWaiting = Collections.min(waitings);
-        Member member = nextWaiting.getMember();
-        reservation.setMember(member);
+        reservation.acceptWaiting(nextWaiting);
         reservationRepository.save(reservation);
         waitingRepository.delete(nextWaiting);
     }
