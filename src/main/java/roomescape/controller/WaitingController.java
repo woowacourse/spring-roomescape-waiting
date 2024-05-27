@@ -51,7 +51,7 @@ public class WaitingController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MemberWaitingResponse>> getReservationsOfMember(LoginMember member) {
+    public ResponseEntity<List<MemberWaitingResponse>> getWaitingsOfMember(LoginMember member) {
         List<Waiting> waitings = waitingService.findWaitingsByMember(member);
         List<MemberWaitingResponse> response = waitings.stream()
                 .map((MemberWaitingResponse::new))
@@ -60,7 +60,7 @@ public class WaitingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@Min(1) @PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteWaiting(@Min(1) @PathVariable("id") Long id) {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
