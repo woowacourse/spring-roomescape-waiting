@@ -22,11 +22,9 @@ public class DatabaseCleaner {
 
     private void truncate() {
         List<String> tableNames = getTableNames();
-        entityManager.createNativeQuery("SET foreign_key_checks = 0").executeUpdate();
         for (String tableName : tableNames) {
             entityManager.createNativeQuery("TRUNCATE TABLE " + tableName).executeUpdate();
         }
-        entityManager.createNativeQuery("SET foreign_key_checks = 1").executeUpdate();
     }
 
     private List<String> getTableNames() {
