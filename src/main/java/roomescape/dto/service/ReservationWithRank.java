@@ -1,11 +1,9 @@
 package roomescape.dto.service;
 
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Theme;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.Reservation;
+import roomescape.domain.Theme;
 
 public class ReservationWithRank {
     private Reservation reservation;
@@ -32,11 +30,7 @@ public class ReservationWithRank {
         return reservation.getTheme();
     }
 
-    public ReservationStatus getStatus() {
-        return reservation.getStatus();
-    }
-
-    public Long getRank() {
-        return rank;
+    public String getStatusMessage() {
+        return reservation.getStatus().makeStatusMessage(rank);
     }
 }

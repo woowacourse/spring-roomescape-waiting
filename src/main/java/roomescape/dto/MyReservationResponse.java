@@ -1,10 +1,8 @@
 package roomescape.dto;
 
-import roomescape.domain.ReservationStatus;
-import roomescape.dto.service.ReservationWithRank;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.dto.service.ReservationWithRank;
 
 public record MyReservationResponse(
         long id,
@@ -14,15 +12,12 @@ public record MyReservationResponse(
         String status
 ) {
     public static MyReservationResponse from(ReservationWithRank reservation) {
-        ReservationStatus reservationStatus = reservation.getStatus();
-        String statusMessage = reservationStatus.makeStatusMessage(reservation.getRank());
-
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                statusMessage
+                reservation.getStatusMessage()
         );
     }
 }
