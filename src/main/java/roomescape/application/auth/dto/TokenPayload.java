@@ -1,12 +1,12 @@
 package roomescape.application.auth.dto;
 
-import roomescape.domain.role.MemberRole;
-import roomescape.domain.role.Role;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 
 public record TokenPayload(long memberId, String name, Role role) {
 
-    public static TokenPayload from(MemberRole memberRole) {
-        return new TokenPayload(memberRole.getMemberId(), memberRole.getMemberName(), memberRole.getRole());
+    public static TokenPayload from(Member member) {
+        return new TokenPayload(member.getId(), member.getName(), member.getRole());
     }
 
     public boolean hasRoleOf(Role requiredRole) {

@@ -15,7 +15,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import roomescape.application.auth.TokenManager;
 import roomescape.application.auth.dto.TokenPayload;
-import roomescape.domain.role.Role;
+import roomescape.domain.member.Role;
 import roomescape.exception.UnAuthorizedException;
 
 @ExtendWith(MockitoExtension.class)

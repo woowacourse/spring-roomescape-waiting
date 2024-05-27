@@ -4,6 +4,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  sql.init.mode: never
 
 jwt:
   secret: testtesttesttesttesttesttesttesttesttesttest

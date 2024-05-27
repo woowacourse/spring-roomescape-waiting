@@ -1,4 +1,4 @@
-package roomescape.presentation.member;
+package roomescape.presentation.auth;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +18,6 @@ import roomescape.application.member.MemberService;
 import roomescape.application.member.dto.request.MemberLoginRequest;
 import roomescape.application.member.dto.response.TokenResponse;
 import roomescape.presentation.ControllerTest;
-import roomescape.presentation.auth.CredentialContext;
 
 @WebMvcTest(AuthController.class)
 class AuthControllerTest extends ControllerTest {

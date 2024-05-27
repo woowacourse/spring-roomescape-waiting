@@ -6,9 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
 
 @Entity
+@Table(name = "theme")
 public class Theme {
     private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final int MAX_THUMBNAIL_URL_LENGTH = 200;
@@ -16,11 +18,14 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     private ThemeName name;
-    @Column(nullable = false)
+
+    @Column(name = "description", nullable = false)
     private String description;
-    @Column(nullable = false)
+
+    @Column(name = "thumbnail_url", nullable = false)
     private String thumbnailUrl;
 
     protected Theme() {
@@ -56,11 +61,10 @@ public class Theme {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Theme other)) {
             return false;
         }
-        Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+        return Objects.equals(id, other.getId());
     }
 
     @Override

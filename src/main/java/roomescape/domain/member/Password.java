@@ -9,7 +9,7 @@ public class Password {
     private static final int PASSWORD_MIN_LENGTH = 8;
     private static final int PASSWORD_MAX_LENGTH = 20;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     protected Password() {
@@ -33,13 +33,8 @@ public class Password {
         }
     }
 
-
     public boolean matches(String other) {
         return password.equals(other);
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     @Override
@@ -47,15 +42,18 @@ public class Password {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Password other)) {
             return false;
         }
-        Password other = (Password) o;
-        return password.equals(other.password);
+        return Objects.equals(password, other.getPassword());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(password);
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

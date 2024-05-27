@@ -1,10 +1,10 @@
 package roomescape.infrastructure.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 
 @DataJpaTest
-class JpaMemberRepositoryTest {
+class MemberJpaRepositoryTest {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -34,7 +34,7 @@ class JpaMemberRepositoryTest {
     @DisplayName("이메일로 회원을 조회한다.")
     void findByEmailTest() {
         entityManager.persist(new Member("name", "email@test.com", "password"));
-        Optional<Member> actual = memberRepository.findByEmail(new Email("email@test.com"));
-        assertThat(actual).isPresent();
+        assertThatCode(() -> memberRepository.getByEmail(new Email("email@test.com")))
+                .doesNotThrowAnyException();
     }
 }

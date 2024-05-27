@@ -1,33 +1,33 @@
 package roomescape.domain.reservation;
 
-import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.ListCrudRepository;
+import java.util.Optional;
+import org.springframework.data.jpa.domain.Specification;
 
-public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
+public interface ReservationRepository {
 
-    List<Reservation> findAllByMemberId(Long id);
+    Reservation save(Reservation reservation);
+
+    List<Reservation> findAll(Specification<Reservation> specification);
 
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeId(long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    boolean existsActiveReservation(long themeId, LocalDate date, long timeId);
 
-    @Query("""
-            select r from Reservation as r
-            where (:memberId is null or r.member.id = :memberId)
-            and (:themeId is null or r.theme.id = :themeId)
-            and (:startDate is null or r.date >= :startDate)
-            and (:endDate is null or r.date <= :endDate)
-            """)
-    List<Reservation> findByMemberAndThemeBetweenDates(@Nullable Long memberId, @Nullable Long themeId,
-                                                       @Nullable LocalDate startDate, @Nullable LocalDate endDate);
+    Reservation getById(long id);
 
-    default Reservation getById(long id) {
-        return findById(id).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약입니다."));
-    }
+    Optional<Reservation> findFirstWaiting(Theme theme, LocalDate date, ReservationTime time);
+
+    long getWaitingCount(Reservation reservation);
+
+    List<Reservation> findActiveReservationByMemberId(long memberId);
+
+    boolean existsAlreadyWaitingOrBooked(long memberId, long themeId, LocalDate date, long timeId);
+
+    List<Reservation> findAllBookedReservations();
+
+    List<Reservation> findAllWaitingReservations();
 }

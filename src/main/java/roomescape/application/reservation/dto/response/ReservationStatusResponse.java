@@ -7,13 +7,13 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 
 public record ReservationStatusResponse(
-        Long reservationId,
+        long id,
         String theme,
         LocalDate date,
         LocalTime time,
-        String status
+        long waitingCount
 ) {
-    public static ReservationStatusResponse from(Reservation reservation) {
+    public static ReservationStatusResponse of(Reservation reservation, long waitingCount) {
         Theme theme = reservation.getTheme();
         ReservationTime time = reservation.getTime();
         return new ReservationStatusResponse(
@@ -21,7 +21,7 @@ public record ReservationStatusResponse(
                 theme.getName(),
                 reservation.getDate(),
                 time.getStartAt(),
-                "예약"
+                waitingCount
         );
     }
 }

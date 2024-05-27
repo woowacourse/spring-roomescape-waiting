@@ -9,7 +9,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.application.auth.dto.TokenPayload;
-import roomescape.domain.role.Role;
+import roomescape.domain.member.Role;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.InvalidTokenException;
 

@@ -18,7 +18,7 @@ import roomescape.application.reservation.dto.request.ThemeRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationTimeResponse;
 import roomescape.application.reservation.dto.response.ThemeResponse;
-import roomescape.domain.role.Role;
+import roomescape.domain.member.Role;
 
 @TestComponent
 public class AcceptanceFixture {

@@ -3,7 +3,7 @@ package roomescape.presentation.auth;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 import roomescape.application.auth.dto.TokenPayload;
-import roomescape.domain.role.Role;
+import roomescape.domain.member.Role;
 import roomescape.exception.UnAuthorizedException;
 
 @Component

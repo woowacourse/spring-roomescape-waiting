@@ -8,7 +8,7 @@ import java.util.Objects;
 public class ThemeName {
     private static final int NAME_MAX_LENGTH = 20;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     protected ThemeName() {
@@ -37,11 +37,10 @@ public class ThemeName {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ThemeName other)) {
             return false;
         }
-        ThemeName themeName = (ThemeName) o;
-        return name.equals(themeName.name);
+        return Objects.equals(name, other.getName());
     }
 
     @Override

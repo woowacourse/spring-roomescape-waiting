@@ -1,4 +1,4 @@
-package roomescape.presentation.member;
+package roomescape.presentation.auth;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +12,6 @@ import roomescape.application.member.MemberService;
 import roomescape.application.member.dto.request.MemberLoginRequest;
 import roomescape.application.member.dto.response.MemberResponse;
 import roomescape.application.member.dto.response.TokenResponse;
-import roomescape.presentation.auth.LoginMemberId;
 
 @RestController
 public class AuthController {

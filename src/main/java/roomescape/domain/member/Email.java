@@ -43,24 +43,23 @@ public class Email {
         }
     }
 
-    public String getAddress() {
-        return address;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Email other)) {
             return false;
         }
-        Email other = (Email) o;
-        return address.equals(other.address);
+        return Objects.equals(address, other.getAddress());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(address);
+    }
+
+    public String getAddress() {
+        return address;
     }
 }

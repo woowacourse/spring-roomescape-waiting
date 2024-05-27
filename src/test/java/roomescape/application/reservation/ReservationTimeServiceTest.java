@@ -2,6 +2,10 @@ package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static roomescape.fixture.MemberFixture.MEMBER_PK;
+import static roomescape.fixture.ThemeFixture.TEST_THEME;
+import static roomescape.fixture.TimeFixture.ELEVEN_AM;
+import static roomescape.fixture.TimeFixture.TEN_AM;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -15,8 +19,8 @@ import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationTimeRequest;
 import roomescape.application.reservation.dto.response.ReservationTimeResponse;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -56,7 +60,8 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("이미 존재하는 예약 시간을 생성 요청하면 예외가 발생한다.")
     void shouldThrowsIllegalStateExceptionWhenCreateExistStartAtTime() {
-        LocalTime startAt = createTime(10, 0).getStartAt();
+        LocalTime startAt = reservationTimeRepository.save(TEN_AM.create())
+                .getStartAt();
         ReservationTimeRequest request = new ReservationTimeRequest(startAt);
         assertThatCode(() -> reservationTimeService.create(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -66,17 +71,19 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약 시간 조회를 요청하면 저장되어있는 모든 예약 시간대를 반환한다.")
     void shouldReturnAllReservationTimesWhenFindAll() {
-        ReservationTime time = createTime(10, 0);
+        ReservationTime ten = reservationTimeRepository.save(TEN_AM.create());
+        ReservationTime eleven = reservationTimeRepository.save(ELEVEN_AM.create());
         List<ReservationTimeResponse> times = reservationTimeService.findAll();
         assertThat(times).containsExactly(
-                new ReservationTimeResponse(time.getId(), LocalTime.of(10, 0))
+                new ReservationTimeResponse(ten.getId(), ten.getStartAt()),
+                new ReservationTimeResponse(eleven.getId(), eleven.getStartAt())
         );
     }
 
     @Test
     @DisplayName("예약 삭제 요청을 하면, 해당 예약이 저장되어있는지 확인 후 존재하면 삭제한다.")
     void shouldDeleteReservationWhenDeleteById() {
-        ReservationTime reservationTime = createTime(10, 0);
+        ReservationTime reservationTime = reservationTimeRepository.save(TEN_AM.create());
         reservationTimeService.deleteById(reservationTime.getId());
         assertThat(reservationTimeRepository.findAll()).isEmpty();
     }
@@ -84,21 +91,18 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약에 사용된 예약 시간을 삭제 요청하면, 예외가 발생한다.")
     void shouldThrowsExceptionReservationWhenReservedInTime() {
-        ReservationTime time = createTime(10, 0);
+        Member member = memberRepository.save(MEMBER_PK.create());
+        Theme theme = themeRepository.save(TEST_THEME.create());
+        ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
+        LocalDate date = LocalDate.parse("2024-01-01");
+        LocalDateTime createdAt = LocalDateTime.now(clock);
         long timeId = time.getId();
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "url"));
-        Member member = MemberFixture.createMember("오리");
-        Member savedMember = memberRepository.save(member);
-        reservationRepository.save(new Reservation(
-                savedMember, LocalDate.parse("2024-01-01"), time, theme, LocalDateTime.now(clock)
-        ));
+
+        reservationRepository.save(
+                new Reservation(member, theme, date, time, createdAt, BookStatus.BOOKED)
+        );
         assertThatCode(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("연관된 예약이 존재하여 삭제할 수 없습니다.");
-    }
-
-    private ReservationTime createTime(int hour, int minute) {
-        LocalTime startAt = LocalTime.of(hour, minute);
-        return reservationTimeRepository.save(new ReservationTime(startAt));
     }
 }
