@@ -15,6 +15,7 @@ import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.reservation.ReservationRegisterService;
+import roomescape.service.reservation.ReservationSearchService;
 import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
@@ -25,13 +26,16 @@ public class ClientReservationController {
     private final ReservationTimeService reservationTimeService;
     private final ReservationService reservationService;
     private final ReservationRegisterService reservationRegisterService;
+    private final ReservationSearchService reservationSearchService;
 
     public ClientReservationController(final ReservationTimeService reservationTimeService,
                                        final ReservationService reservationService,
-                                       final ReservationRegisterService reservationRegisterService) {
+                                       final ReservationRegisterService reservationRegisterService,
+                                       final ReservationSearchService reservationSearchService) {
         this.reservationTimeService = reservationTimeService;
         this.reservationService = reservationService;
         this.reservationRegisterService = reservationRegisterService;
+        this.reservationSearchService = reservationSearchService;
     }
 
     @GetMapping("/books/{date}/{theme_id}")
@@ -51,7 +55,7 @@ public class ClientReservationController {
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<ResponsesWrapper<ReservationsMineResponse>> getMemberReservations(Member member) {
-        return ResponseEntity.ok(reservationService.findMemberReservations(member));
+        return ResponseEntity.ok(reservationSearchService.findMemberReservations(member));
     }
 
     @DeleteMapping("/reservations-mine/waiting/{id}")

@@ -14,6 +14,7 @@ import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.reservation.ReservationRegisterService;
+import roomescape.service.reservation.ReservationSearchService;
 import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
@@ -24,21 +25,24 @@ import java.time.LocalDate;
 public class AdminReservationController {
     private final ReservationService reservationService;
     private final ReservationRegisterService reservationRegisterService;
+    private final ReservationSearchService reservationSearchService;
 
     public AdminReservationController(final ReservationService reservationService,
-                                      final ReservationRegisterService reservationRegisterService) {
+                                      final ReservationRegisterService reservationRegisterService,
+                                      final ReservationSearchService reservationSearchService) {
         this.reservationService = reservationService;
         this.reservationRegisterService = reservationRegisterService;
+        this.reservationSearchService = reservationSearchService;
     }
 
     @GetMapping
     public ResponseEntity<ResponsesWrapper<ReservationResponse>> getReservations() {
-        return ResponseEntity.ok(reservationService.findEntireReservations());
+        return ResponseEntity.ok(reservationSearchService.findEntireReservations());
     }
 
     @GetMapping("waiting")
     public ResponseEntity<ResponsesWrapper<ReservationWaitingResponse>> getWaitingReservations() {
-        return ResponseEntity.ok(reservationService.findEntireWaitingReservations());
+        return ResponseEntity.ok(reservationSearchService.findEntireWaitingReservations());
     }
 
     @PostMapping
@@ -55,7 +59,7 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public ResponseEntity<ResponsesWrapper<ReservationResponse>> search(@RequestParam Long themeId, @RequestParam Long memberId, @RequestParam LocalDate dateFrom, @RequestParam LocalDate dateTo) {
-        return ResponseEntity.ok(reservationService.findReservations(themeId, memberId, dateFrom, dateTo));
+        return ResponseEntity.ok(reservationSearchService.findReservations(themeId, memberId, dateFrom, dateTo));
     }
 
     @DeleteMapping("/waiting/{id}")
