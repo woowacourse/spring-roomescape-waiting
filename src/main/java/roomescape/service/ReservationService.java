@@ -1,38 +1,49 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.ReservationRank;
+import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.ReservationFilterRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
+import roomescape.dto.response.ReservationPendingResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
+import roomescape.validation.ReservationValidator;
 
 @Service
+@Transactional
 public class ReservationService {
 
+    private final ReservationValidator reservationValidator;
     private final MemberRepository memberRepository;
     private final TimeSlotRepository timeSlotRepository;
-    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationService(MemberRepository memberRepository, TimeSlotRepository timeSlotRepository,
-                              ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+    public ReservationService(ReservationValidator reservationValidator,
+                              MemberRepository memberRepository,
+                              TimeSlotRepository timeSlotRepository,
+                              ThemeRepository themeRepository,
+                              ReservationRepository reservationRepository) {
+        this.reservationValidator = reservationValidator;
         this.memberRepository = memberRepository;
         this.timeSlotRepository = timeSlotRepository;
-        this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<ReservationResponse> findEntireReservationList() {
@@ -43,70 +54,84 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findDistinctReservations(ReservationFilterRequest request) {
-        Member member = getMemberById(request.memberId());
-        Theme theme = getThemeById(request.themeId());
-        return reservationRepository.findAllByMemberAndThemeAndDateBetween(
-                        member,
-                        theme,
-                        request.dateFrom(),
-                        request.dateTo())
-                .stream()
+        Member member = memberRepository.getMemberById(request.memberId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
+        List<Reservation> reservations = reservationRepository.findAllByMemberAndThemeAndDateBetween(
+                member,
+                theme,
+                request.dateFrom(),
+                request.dateTo()
+        );
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public ReservationResponse create(ReservationRequest request, LocalDateTime now) {
-        Member member = getMemberById(request.memberId());
-        TimeSlot timeSlot = getTimeSlotById(request.timeId());
-        Theme theme = getThemeById(request.themeId());
-        Reservation reservation = request.toEntity(member, timeSlot, theme);
+    public List<ReservationPendingResponse> findAllPending() {
+        List<ReservationRank> reservationRanks =
+                reservationRepository.findAllPendingOrderByDateAscTime();
+        return reservationRanks.stream()
+                .map(ReservationPendingResponse::from)
+                .toList();
+    }
+
+    public ReservationResponse create(AdminReservationRequest request, LocalDateTime now) {
+        Member member = memberRepository.getMemberById(request.memberId());
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
+        Reservation reservation = getReservation(request, member, timeSlot, theme);
         reservation.validatePast(now);
-        validateDuplicatedReservation(request.date(), timeSlot, theme);
+        reservationValidator.validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
 
-    public ReservationResponse create(LoginMember loginMember, MemberReservationRequest request, LocalDateTime now) {
-        Member member = getMemberById(loginMember.id());
-        TimeSlot timeSlot = getTimeSlotById(request.timeId());
-        Theme theme = getThemeById(request.themeId());
-        Reservation reservation = request.toEntity(member, timeSlot, theme);
+    public ReservationResponse create(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {
+        Member member = memberRepository.getMemberById(loginMember.id());
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
+        Reservation reservation = getReservation(request, member, timeSlot, theme);
         reservation.validatePast(now);
-        validateDuplicatedReservation(request.date(), timeSlot, theme);
+        reservationValidator.validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
 
     public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
-        Member member = getMemberById(loginMember.id());
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return reservations.stream()
+        Member member = memberRepository.getMemberById(loginMember.id());
+        List<ReservationRank> reservationRanks = reservationRepository.findReservationRanksWithMember(member);
+        return reservationRanks.stream()
                 .map(ReservationMineResponse::from)
                 .toList();
     }
 
     public void delete(Long id) {
+        Reservation reservation = reservationRepository.getReservationBy(id);
+        if (!reservation.isPending()) {
+            Optional<Reservation> pendingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatusOrderById(
+                    reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.PENDING);
+            pendingReservation.ifPresent(Reservation::book);
+        }
         reservationRepository.deleteById(id);
     }
 
-    private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, timeSlot, theme)) {
-            throw new IllegalArgumentException("예약이 종료되었습니다");
+    private Reservation getReservation(AdminReservationRequest request,
+                                       Member member,
+                                       TimeSlot timeSlot,
+                                       Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), timeSlot, theme)) {
+            return request.toEntity(member, timeSlot, theme, ReservationStatus.PENDING);
         }
+        return request.toEntity(member, timeSlot, theme, ReservationStatus.BOOKING);
     }
 
-    private Member getMemberById(long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
-    }
-
-    private TimeSlot getTimeSlotById(long timeId) {
-        return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간 입니다"));
-    }
-
-    private Theme getThemeById(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다"));
+    private Reservation getReservation(ReservationRequest request,
+                                       Member member,
+                                       TimeSlot timeSlot,
+                                       Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), timeSlot, theme)) {
+            return request.toEntity(member, timeSlot, theme, ReservationStatus.PENDING);
+        }
+        return request.toEntity(member, timeSlot, theme, ReservationStatus.BOOKING);
     }
 }

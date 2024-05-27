@@ -10,6 +10,6 @@ public record ThemeRequest(@NotNull(message = "테마명은 비어있을 수 없
                            @NotNull(message = "썸네일은 비어있을 수 없습니다.") @NotBlank(message = "썸네일은 비어있을 수 없습니다.") String thumbnail) {
 
     public Theme toEntity() {
-        return new Theme(null, name, description, new Thumbnail(thumbnail));
+        return new Theme(name, description, new Thumbnail(thumbnail));
     }
 }

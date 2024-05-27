@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.dto.LoginMember;
+import roomescape.dto.TokenInfo;
 import roomescape.dto.request.TokenRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.dto.response.TokenResponse;
@@ -24,27 +25,24 @@ public class MemberService {
     public TokenResponse createToken(TokenRequest tokenRequest) {
         Member member = memberRepository.findByEmailAndPassword(tokenRequest.email(), tokenRequest.password())
                 .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-        String accessToken = tokenGenerator.createToken(tokenRequest.email(), member.getRole().name());
+        String accessToken = tokenGenerator.createToken(new TokenInfo(member));
         return TokenResponse.from(accessToken);
     }
 
     public MemberResponse loginCheck(LoginMember loginMember) {
-        Member member = memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
+        Member member = memberRepository.getMemberById(loginMember.id());
         return MemberResponse.from(member);
     }
 
     public LoginMember findLoginMemberByToken(String token) {
-        String email = tokenGenerator.getPayload(token);
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
+        TokenInfo tokenInfo = tokenGenerator.extract(token);
+        Member member = getMemberByEmail(tokenInfo.payload());
         return LoginMember.from(member);
     }
 
     public boolean hasAdminRole(String token) {
-        String email = tokenGenerator.getPayload(token);
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
+        TokenInfo tokenInfo = tokenGenerator.extract(token);
+        Member member = getMemberByEmail(tokenInfo.payload());
         return member.isAdmin();
     }
 
@@ -53,5 +51,10 @@ public class MemberService {
                 .stream()
                 .map(MemberResponse::from)
                 .toList();
+    }
+
+    private Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
     }
 }

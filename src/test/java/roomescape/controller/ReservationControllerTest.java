@@ -14,14 +14,14 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.TokenRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationControllerTest {
 
-    private static final String EMAIL = "testDB@email.com";
+    private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
 
     @LocalServerPort
@@ -44,7 +44,7 @@ class ReservationControllerTest {
     @Test
     void given_when_create_reservationByClient_then_statusCodeIsOk() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        MemberReservationRequest request = new MemberReservationRequest(
+        ReservationRequest request = new ReservationRequest(
                 tomorrow, 1L, 1L
         );
 
@@ -64,7 +64,7 @@ class ReservationControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(22));
+                .body("size()", is(28));
     }
 
     /* 예약 현황
@@ -89,5 +89,21 @@ class ReservationControllerTest {
                 .when().delete("/reservations/{id}", 1)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("예약 대기에 성공하면 201 Created를 반환한다.")
+    @Test
+    void createPendingReservation() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        ReservationRequest request = new ReservationRequest(
+                tomorrow, 1L, 1L
+        );
+
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/reservations/pending")
+                .then().statusCode(201);
     }
 }

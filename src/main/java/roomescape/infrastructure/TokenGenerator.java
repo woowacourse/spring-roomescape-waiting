@@ -1,13 +1,18 @@
 package roomescape.infrastructure;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import java.util.Date;
 import org.springframework.stereotype.Component;
+import roomescape.domain.MemberRole;
+import roomescape.dto.TokenInfo;
 
 @Component
 public class TokenGenerator {
+
+    private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_EMAIL = "email";
 
     private final JwtTokenProperties jwtTokenProperties;
 
@@ -15,25 +20,38 @@ public class TokenGenerator {
         this.jwtTokenProperties = jwtTokenProperties;
     }
 
-    public String createToken(String payload, String role) {
-        Claims claims = Jwts.claims().setSubject(payload);
+    public String createToken(TokenInfo tokenInfo) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtTokenProperties.getExpireLength());
 
-        return Jwts.builder()
-                .setClaims(claims)
-                .claim("role", role)
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, jwtTokenProperties.getSecretKey())
-                .compact();
+        return JWT.create()
+                .withClaim(CLAIM_EMAIL, tokenInfo.payload())
+                .withClaim(CLAIM_ROLE, tokenInfo.getRole())
+                .withExpiresAt(validity)
+                .sign(Algorithm.HMAC256(jwtTokenProperties.getSecretKey()));
     }
 
-    public String getPayload(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtTokenProperties.getSecretKey())
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public TokenInfo extract(String token) {
+        DecodedJWT decodeJWT = JWT.decode(token);
+        return getPayload(decodeJWT);
+    }
+
+    private TokenInfo getPayload(DecodedJWT decodedJWT) {
+        validateTokenExpired(decodedJWT);
+        try {
+            String payload = decodedJWT.getClaim(CLAIM_EMAIL).asString();
+            String role = decodedJWT.getClaim(CLAIM_ROLE).asString();
+            return new TokenInfo(payload, MemberRole.from(role));
+        } catch (IllegalArgumentException e) {
+            throw new SecurityException("유효하지 않는 토큰입니다.");
+        }
+    }
+
+    private void validateTokenExpired(DecodedJWT decodedJWT) {
+        Date now = new Date();
+        Date expiresAt = decodedJWT.getExpiresAt();
+        if (expiresAt == null || expiresAt.before(now)) {
+            throw new SecurityException("만료된 토큰입니다.");
+        }
     }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity
 public class TimeSlot {
@@ -18,8 +19,8 @@ public class TimeSlot {
     protected TimeSlot() {
     }
 
-    public TimeSlot(Long id, LocalTime startAt) {
-        this.id = id;
+    public TimeSlot(LocalTime startAt) {
+        this.id = null;
         this.startAt = startAt;
     }
 
@@ -34,5 +35,22 @@ public class TimeSlot {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TimeSlot other = (TimeSlot) o;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

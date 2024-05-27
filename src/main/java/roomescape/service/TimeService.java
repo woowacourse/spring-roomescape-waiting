@@ -5,18 +5,18 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.request.TimeSlotRequest;
 import roomescape.dto.response.TimeSlotResponse;
-import roomescape.repository.ReservationRepository;
 import roomescape.repository.TimeSlotRepository;
+import roomescape.validation.TimeSlotValidator;
 
 @Service
 public class TimeService {
 
     private final TimeSlotRepository timeSlotRepository;
-    private final ReservationRepository reservationRepository;
+    private final TimeSlotValidator timeSlotValidator;
 
-    public TimeService(TimeSlotRepository timeSlotRepository, ReservationRepository reservationRepository) {
+    public TimeService(TimeSlotRepository timeSlotRepository, TimeSlotValidator timeSlotValidator) {
         this.timeSlotRepository = timeSlotRepository;
-        this.reservationRepository = reservationRepository;
+        this.timeSlotValidator = timeSlotValidator;
     }
 
     public List<TimeSlotResponse> findAll() {
@@ -27,32 +27,15 @@ public class TimeService {
     }
 
     public TimeSlotResponse create(TimeSlotRequest timeSlotRequest) {
-        validateDuplicatedTime(timeSlotRequest);
         TimeSlot timeSlot = timeSlotRequest.toEntity();
+        timeSlotValidator.validateDuplicatedTime(timeSlot.getStartAt());
         TimeSlot createdTimeSlot = timeSlotRepository.save(timeSlot);
         return TimeSlotResponse.from(createdTimeSlot);
     }
 
     public void delete(Long id) {
-        validateExistReservation(id);
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(id);
+        timeSlotValidator.validateExistReservation(timeSlot);
         timeSlotRepository.deleteById(id);
-    }
-
-    private void validateDuplicatedTime(TimeSlotRequest timeSlotRequest) {
-        if (timeSlotRepository.existsByStartAt(timeSlotRequest.startAt())) {
-            throw new IllegalArgumentException("이미 등록된 시간입니다");
-        }
-    }
-
-    private void validateExistReservation(Long id) {
-        TimeSlot timeSlot = getTimeSlotById(id);
-        if (reservationRepository.existsByTime(timeSlot)) {
-            throw new IllegalArgumentException("예약이 등록된 시간은 제거할 수 없습니다");
-        }
-    }
-
-    private TimeSlot getTimeSlotById(long id) {
-        return timeSlotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다"));
     }
 }

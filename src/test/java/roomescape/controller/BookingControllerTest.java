@@ -21,7 +21,6 @@ class BookingControllerTest {
     @LocalServerPort
     private int port;
 
-
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
@@ -35,7 +34,7 @@ class BookingControllerTest {
         return timeSlots.size();
     }
 
-    @DisplayName("날짜와 테마를 선택하면 예약 가능한 시간들과 200OK 를 반환한다.")
+    @DisplayName("날짜와 테마를 선택하면 예약 가능한 시간들과 200 OK 를 반환한다.")
     @Test
     void given_dateThemeId_when_books_then_statusCodeIsOk() {
         LocalDate yesterday = LocalDate.now().minusDays(1);

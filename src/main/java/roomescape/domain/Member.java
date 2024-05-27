@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 
 @Entity
 public class Member {
@@ -20,6 +21,14 @@ public class Member {
     private MemberRole role;
 
     protected Member() {
+    }
+
+    public Member(String name, String email, String password, MemberRole role) {
+        this.id = null;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
     }
 
     public boolean isAdmin() {
@@ -44,5 +53,22 @@ public class Member {
 
     public MemberRole getRole() {
         return role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Member other = (Member) o;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

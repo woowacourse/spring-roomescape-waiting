@@ -23,7 +23,7 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<List<BookResponse>> read(@RequestParam LocalDate date,
                                                    @RequestParam Long themeId) {
-        List<BookResponse> books = bookService.findAvaliableBookList(date, themeId);
+        List<BookResponse> books = bookService.findAvailableBookList(date, themeId);
         return ResponseEntity.ok(books);
     }
 }
