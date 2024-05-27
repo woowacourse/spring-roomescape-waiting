@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
@@ -13,6 +14,7 @@ import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -37,6 +39,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findTrendingThemes(Long limit) {
         LocalDate now = LocalDate.now();
         LocalDate trendingStatsStart = now.minusDays(7);
@@ -50,6 +53,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findThemes() {
         return themeRepository.findAll()
                 .stream()

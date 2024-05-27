@@ -3,25 +3,26 @@ package roomescape.util;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Objects;
-import javax.naming.AuthenticationException;
+import roomescape.exceptions.AuthException;
+import roomescape.login.dto.TokenResponse;
 
 public class TokenExtractor {
 
     private TokenExtractor() {
     }
 
-    public static String extractTokenFromCookie(Cookie[] cookies) throws AuthenticationException {
+    public static TokenResponse extractTokenFromCookie(Cookie[] cookies) {
         validateNull(cookies);
         return Arrays.stream(cookies)
                 .filter(cookie -> Objects.equals(cookie.getName(), "token"))
                 .findFirst()
-                .orElseThrow(() -> new AuthenticationException("접근 권한 확인을 위한 쿠키가 없습니다."))
-                .getValue();
+                .map(optionalToken -> new TokenResponse(optionalToken.getValue()))
+                .orElseThrow(() -> new AuthException("접근 권한 확인을 위한 쿠키가 없습니다."));
     }
 
-    private static void validateNull(Cookie[] cookies) throws AuthenticationException {
+    private static void validateNull(Cookie[] cookies) {
         if (cookies == null) {
-            throw new AuthenticationException("접근 권한 확인을 위한 쿠키가 없습니다.");
+            throw new AuthException("접근 권한 확인을 위한 쿠키가 없습니다.");
         }
     }
 }

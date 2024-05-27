@@ -2,14 +2,17 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
+import static roomescape.InitialReservationFixture.PAGE_REQUEST;
 import static roomescape.InitialReservationFixture.RESERVATION_1;
 import static roomescape.InitialReservationFixture.RESERVATION_2;
 import static roomescape.InitialReservationTimeFixture.RESERVATION_TIME_1;
 import static roomescape.InitialThemeFixture.THEME_1;
 import static roomescape.InitialThemeFixture.THEME_2;
+import static roomescape.InitialWaitingFixture.WAITING_1;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,14 +24,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
 class ReservationServiceTest {
 
-    private final MemberRequest memberRequest = new MemberRequest(
+    private final MemberRequest member1Request = new MemberRequest(
             MEMBER_1.getId(),
             MEMBER_1.getName().name(),
             MEMBER_1.getEmail().email(),
@@ -38,6 +43,10 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -50,7 +59,7 @@ class ReservationServiceTest {
                 THEME_2.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, member1Request))
                 .isInstanceOf(ValidationException.class);
     }
 
@@ -63,7 +72,7 @@ class ReservationServiceTest {
                 RESERVATION_2.getTheme().getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, member1Request))
                 .isInstanceOf(ValidationException.class);
     }
 
@@ -77,7 +86,7 @@ class ReservationServiceTest {
         );
 
         ReservationResponse reservationResponse = reservationService.addReservation(
-                reservationRequest, memberRequest);
+                reservationRequest, member1Request);
 
         assertThat(reservationResponse.id()).isNotNull();
     }
@@ -91,17 +100,34 @@ class ReservationServiceTest {
                 THEME_1.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, member1Request))
                 .isInstanceOf(ValidationException.class);
     }
 
     @Test
     @DisplayName("id에 맞는 예약을 삭제한다.")
     void deleteReservation() {
-        reservationService.deleteReservation(RESERVATION_1.getId());
+        MemberRequest memberRequest = new MemberRequest(MEMBER_1);
+        reservationService.cancelReservation(RESERVATION_2.getId(), memberRequest);
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         assertThat(count).isEqualTo(INITIAL_RESERVATION_COUNT - 1);
+    }
+
+    @Test
+    @DisplayName("특정 예약에 대기가 있을 때, 예약을 삭제하면 1번째 예약 대기가 자동으로 예약된다.")
+    void makeFirstWaitingToReservationIfReservationDeleted() {
+        MemberRequest memberRequest = new MemberRequest(MEMBER_1);
+        reservationService.cancelReservation(RESERVATION_1.getId(), memberRequest);
+
+        assertAll(
+                () -> assertThat(waitingRepository.existsByReservationAndMember(
+                        WAITING_1.getReservation(),
+                        WAITING_1.getMember()))
+                        .isFalse(),
+                () -> assertThat(reservationRepository.findByMember(MEMBER_1, PAGE_REQUEST).getContent()
+                        .contains(RESERVATION_1.updateMember(WAITING_1.getMember())))
+        );
     }
 
     @Test

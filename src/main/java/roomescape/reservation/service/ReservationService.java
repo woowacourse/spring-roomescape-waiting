@@ -2,9 +2,12 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
+import roomescape.exceptions.AuthException;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
@@ -12,32 +15,38 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.dto.MemberReservationResponse;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.ReservationOrWaitingResponse;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository ReservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = ReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse addReservation(
@@ -112,14 +121,42 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> findReservationsByMember(Member member) {
-        return reservationRepository.findByMember(member)
+    @Transactional(readOnly = true)
+    public List<ReservationOrWaitingResponse> findReservationsByMember(MemberRequest memberRequest, int page,
+                                                                       int size) {
+        return reservationRepository.findByMember(
+                        memberRequest.toMember(), PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "date")))
                 .stream()
-                .map(MemberReservationResponse::new)
+                .map(ReservationOrWaitingResponse::new)
                 .toList();
     }
 
-    public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
+    @Transactional
+    public void cancelReservation(Long id, MemberRequest memberRequest) {
+        reservationRepository.findById(id)
+                .ifPresent(reservation -> {
+                            validateCancelAuth(memberRequest.toMember(), reservation);
+                            cancelReservation(reservation);
+                        }
+                );
+    }
+
+    private void validateCancelAuth(Member member, Reservation reservation) {
+        if (reservation.isNotDeletableBy(member)) {
+            throw new AuthException("예약을 취소할 권한이 없습니다.");
+        }
+    }
+
+    private void cancelReservation(Reservation reservation) {
+        waitingRepository.findFirstByReservationOrderByIdAsc(reservation)
+                .ifPresentOrElse(
+                        waiting -> changeWaitingToReservation(waiting, reservation),
+                        () -> reservationRepository.deleteById(reservation.getId())
+                );
+    }
+
+    private void changeWaitingToReservation(Waiting waiting, Reservation reservation) {
+        waitingRepository.deleteById(waiting.getId());
+        reservationRepository.save(reservation.updateMember(waiting.getMember()));
     }
 }

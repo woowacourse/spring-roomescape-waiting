@@ -1,0 +1,88 @@
+package roomescape.reservation.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.InitialReservationFixture.RESERVATION_2;
+import static roomescape.InitialWaitingFixture.MEMBER_2_INITIAL_WAITING_COUNT;
+import static roomescape.InitialWaitingFixture.PAGE_REQUEST;
+import static roomescape.InitialWaitingFixture.WAITING_1;
+import static roomescape.InitialWaitingFixture.WAITING_2;
+
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingWithRank;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
+class WaitingRepositoryTest {
+
+    @Autowired
+    private WaitingRepository waitingRepository;
+
+    @Test
+    @DisplayName("특정 회원이 특정 날짜, 시간, 테마에 이미 예약 대기를 걸었으면 true를 반환한다.")
+    void trueIfAlreadyWaiting() {
+        boolean isAlreadyWaiting = waitingRepository.existsByReservationAndMember(WAITING_1.getReservation(),
+                WAITING_1.getMember());
+
+        assertThat(isAlreadyWaiting).isTrue();
+    }
+
+    @Test
+    @DisplayName("특정 회원이 특정 날짜, 시간, 테마에 이미 예약 대기를 걸지 않았으면 false를 반환한다.")
+    void falseIfNotWaiting() {
+        boolean isAlreadyWaiting = waitingRepository.existsByReservationAndMember(RESERVATION_2, WAITING_1.getMember());
+
+        assertThat(isAlreadyWaiting).isFalse();
+    }
+
+    @Test
+    @DisplayName("특정 회원이 가진 예약 대기들을 대기 순번과 함께 조회한다.")
+    void findWaitingsWithRankByMemberId() {
+        List<WaitingWithRank> waitingsWithRanks = waitingRepository
+                .findWaitingsWithRankByMemberId(WAITING_1.getMember().getId(), PAGE_REQUEST)
+                .getContent();
+        WaitingWithRank waiting1WithRank = waitingsWithRanks.get(0);
+
+        assertAll(
+                () -> assertThat(waitingsWithRanks.size()).isEqualTo(MEMBER_2_INITIAL_WAITING_COUNT),
+                () -> assertThat(waiting1WithRank.rank()).isEqualTo(1)
+        );
+    }
+
+    @Test
+    @DisplayName("예약 대기를 삭제하면 뒤따라오는 예약 대기의 순번이 당겨진다.")
+    void WaitingReorderedByDeletingWaiting() {
+        waitingRepository.deleteById(WAITING_1.getId());
+
+        List<WaitingWithRank> waitingWithRank = waitingRepository
+                .findWaitingsWithRankByMemberId(WAITING_2.getMember().getId(), PAGE_REQUEST)
+                .getContent();
+        WaitingWithRank waiting2WithRank = waitingWithRank.get(0);
+
+        assertThat(waiting2WithRank.rank()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("특정 예약에 대해 1번 예약 대기를 가져온다.")
+    void findFirstWaiting() {
+        Optional<Waiting> firstWaiting = waitingRepository.findFirstByReservationOrderByIdAsc(
+                WAITING_1.getReservation());
+
+        assertThat(firstWaiting.get()).isEqualTo(WAITING_1);
+    }
+
+    @Test
+    @DisplayName("특정 예약에 대해 1번 예약 대기를 가져오려는데, 예약 대기가 없으면 비어있는 Optional을 반환한다.")
+    void findEmptyOptionalIfNoWaiting() {
+        Optional<Waiting> firstWaiting = waitingRepository.findFirstByReservationOrderByIdAsc(RESERVATION_2);
+
+        assertThat(firstWaiting.isEmpty()).isTrue();
+    }
+}

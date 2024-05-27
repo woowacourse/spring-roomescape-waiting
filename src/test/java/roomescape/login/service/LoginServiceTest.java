@@ -2,19 +2,20 @@ package roomescape.login.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
-import static roomescape.InitialMemberFixture.MEMBER_4;
 import static roomescape.InitialMemberFixture.NOT_SAVED_MEMBER;
 
-import javax.naming.AuthenticationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.exceptions.AuthException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
+import roomescape.login.dto.TokenResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
@@ -44,16 +45,16 @@ class LoginServiceTest {
         );
 
         assertThatThrownBy(() -> loginService.createMemberToken(loginRequest))
-                .isInstanceOf(AuthenticationException.class);
+                .isInstanceOf(AuthException.class);
     }
 
     @Test
     @DisplayName("로그인에 성공하면 토큰을 발행한다.")
-    void getTokenIfLoginSucceeds() throws AuthenticationException {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
+    void getTokenIfLoginSucceeds() {
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), ADMIN.getEmail().email());
 
-        String token = loginService.createMemberToken(loginRequest);
+        TokenResponse tokenResponse = loginService.createMemberToken(loginRequest);
 
-        assertThat(token).isNotNull();
+        assertThat(tokenResponse.token()).isNotNull();
     }
 }

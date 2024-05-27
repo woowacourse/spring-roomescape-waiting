@@ -2,11 +2,12 @@ package roomescape.member.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.MEMBER_3;
-import static roomescape.InitialMemberFixture.MEMBER_4;
 import static roomescape.InitialMemberFixture.NOT_SAVED_MEMBER;
+import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +30,7 @@ class MemberRepositoryTest {
     void findAll() {
         Iterable<Member> found = memberRepository.findAll();
 
-        assertThat(found).containsExactly(MEMBER_1, MEMBER_2, MEMBER_3, MEMBER_4);
+        assertThat(found).containsExactly(MEMBER_1, MEMBER_2, MEMBER_3, NO_RESERVATION_MEMBER, ADMIN);
     }
 
     @Test
@@ -82,8 +83,8 @@ class MemberRepositoryTest {
     @Test
     @DisplayName("id에 맞는 Member를 제거한다.")
     void delete() {
-        memberRepository.deleteById(MEMBER_3.getId());
+        memberRepository.deleteById(NO_RESERVATION_MEMBER.getId());
 
-        assertThat(memberRepository.findById(MEMBER_3.getId()).isEmpty()).isTrue();
+        assertThat(memberRepository.findById(NO_RESERVATION_MEMBER.getId()).isEmpty()).isTrue();
     }
 }

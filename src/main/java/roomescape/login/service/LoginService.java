@@ -6,10 +6,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
 import java.util.Date;
-import javax.naming.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import roomescape.exceptions.AuthException;
 import roomescape.login.dto.LoginRequest;
+import roomescape.login.dto.TokenResponse;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
@@ -30,20 +31,20 @@ public class LoginService {
         this.memberRepository = memberRepository;
     }
 
-    public String createMemberToken(LoginRequest loginRequest) throws AuthenticationException {
+    public TokenResponse createMemberToken(LoginRequest loginRequest) {
         Member member = memberRepository.getByEmail(new Email(loginRequest.email()));
 
         if (member.isPassword(new Password(loginRequest.password()))) {
             return parseToToken(member);
         }
-        throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
+        throw new AuthException("비밀번호가 일치하지 않습니다.");
     }
 
-    private String parseToToken(Member member) {
+    private TokenResponse parseToToken(Member member) {
         Instant issuedAt = Instant.now();
         Instant expiration = issuedAt.plusSeconds(validityInMilliseconds);
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(member.getId().toString())
                 .claim("name", member.getName().name())
                 .claim("email", member.getEmail().email())
@@ -53,20 +54,21 @@ public class LoginService {
                 .setExpiration(Date.from(expiration))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
+        return new TokenResponse(token);
     }
 
-    public MemberRequest getMemberRequestByToken(String token) throws AuthenticationException {
-        Member member = parseTokenToMember(token);
+    public MemberRequest getMemberRequestByToken(TokenResponse tokenResponse) {
+        Member member = parseTokenToMember(tokenResponse);
 
         return new MemberRequest(member);
     }
 
-    private Member parseTokenToMember(String token) throws AuthenticationException {
+    private Member parseTokenToMember(TokenResponse tokenResponse) {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
                     .build()
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(tokenResponse.token())
                     .getBody();
 
             return new Member(
@@ -77,7 +79,7 @@ public class LoginService {
                     (String) claims.get("password")
             );
         } catch (JwtException | IllegalArgumentException e) {
-            throw new AuthenticationException("유효하지 않은 토큰입니다.");
+            throw new AuthException("유효하지 않은 토큰입니다.");
         }
     }
 }

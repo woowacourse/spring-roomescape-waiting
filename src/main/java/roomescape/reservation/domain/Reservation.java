@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,12 +19,14 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private LocalDate date;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private ReservationTime reservationTime;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Theme theme;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -55,12 +58,24 @@ public class Reservation {
         }
     }
 
+    public Reservation updateMember(Member member) {
+        return new Reservation(id, date, reservationTime, theme, member);
+    }
+
     public boolean isBeforeNow() {
         return reservationTime.isBeforeNow(date);
     }
 
     public boolean isBetweenInclusive(LocalDate dateFrom, LocalDate dateTo) {
         return !date.isBefore(dateFrom) && !date.isAfter(dateTo);
+    }
+
+    public boolean isSameMember(Member member) {
+        return Objects.equals(this.member, member);
+    }
+
+    public boolean isNotDeletableBy(Member member) {
+        return !(member.isAdmin()) && !(Objects.equals(this.member, member));
     }
 
     public Long getId() {

@@ -1,7 +1,6 @@
 package roomescape.exceptions;
 
 import java.time.format.DateTimeParseException;
-import javax.naming.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,9 +30,9 @@ public class GlobalExceptionHandler {
         return "올바르지 않은 날짜 / 시간 형식입니다.";
     }
 
-    @ExceptionHandler(AuthenticationException.class)
+    @ExceptionHandler(AuthException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String handleException(AuthenticationException e) {
+    public String handleException(AuthException e) {
         return e.getMessage();
     }
 

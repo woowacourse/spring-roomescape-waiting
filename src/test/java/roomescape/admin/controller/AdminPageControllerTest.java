@@ -1,8 +1,8 @@
 package roomescape.admin.controller;
 
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
-import static roomescape.InitialMemberFixture.MEMBER_4;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -59,7 +59,7 @@ class AdminPageControllerTest {
     void AdminCanAccessAdminPage(String url) {
         Map<String, String> memberParam = new HashMap<>();
         memberParam.put("password", COMMON_PASSWORD.password());
-        memberParam.put("email", MEMBER_4.getEmail().email());
+        memberParam.put("email", ADMIN.getEmail().email());
 
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
