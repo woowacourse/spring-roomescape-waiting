@@ -24,14 +24,14 @@ class ReservationTimeAvailabilitiesTest {
         final ReservationTime reservationTime3 = new ReservationTime(3L, LocalTime.of(4, 30));
         final ReservationTime notBookedTime = new ReservationTime(4L, LocalTime.of(3, 30));
         final List<ReservationTime> reservationTimes = List.of(reservationTime1, reservationTime2, reservationTime3, notBookedTime);
-        final Theme theme = Theme.of(1L, "켈리의 두근두근", "안녕", "사진 링크");
-        final Member member = Member.createMemberWithId(1L, MemberRole.USER, "password1111", "kelly", "kelly6bf@mail.com");
+        final Theme theme = new Theme(1L, "켈리의 두근두근", "안녕", "사진 링크");
+        final Member member = new Member(1L, MemberRole.USER, "password1111", "kelly", "kelly6bf@mail.com");
 
         final LocalDate date = LocalDate.now().plusDays(3);
         final List<Reservation> reservations = List.of(
-                Reservation.of(1L, reservationStatus, date, reservationTime1, theme, member),
-                Reservation.of(2L, reservationStatus, date, reservationTime2, theme, member),
-                Reservation.of(3L, reservationStatus, date, reservationTime3, theme, member)
+                new Reservation(1L, reservationStatus, date, reservationTime1, theme, member),
+                new Reservation(2L, reservationStatus, date, reservationTime2, theme, member),
+                new Reservation(3L, reservationStatus, date, reservationTime3, theme, member)
         );
 
 

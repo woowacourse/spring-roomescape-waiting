@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.ThemeDto;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.Theme;
@@ -12,8 +11,8 @@ import roomescape.reservation.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-@Transactional
 @Service
 public class ThemeService {
 
@@ -31,12 +30,16 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeDto> getThemes() {
         return themeRepository.findAll()
                 .stream()
                 .map(ThemeDto::from)
                 .toList();
+    }
+
+    public Theme getTheme(final Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
     }
 
     public ThemeDto saveTheme(final SaveThemeRequest saveThemeRequest) {
@@ -55,7 +58,6 @@ public class ThemeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeDto> getPopularThemes() {
         final ReservationDate startAt = new ReservationDate(LocalDate.now().minusDays(7));
         final ReservationDate endAt = new ReservationDate(LocalDate.now().minusDays(1));

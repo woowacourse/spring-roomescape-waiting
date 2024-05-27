@@ -8,7 +8,7 @@ public class ThemeDescription {
 
     private static final int MAXIMUM_ENABLE_NAME_LENGTH = 80;
 
-    @Column(length = 500, nullable = false)
+    @Column(length = 150, nullable = false)
     private String description;
 
     protected ThemeDescription() {

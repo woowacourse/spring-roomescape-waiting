@@ -1,12 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
-  fetch('/reservations-mine') // 내 예약 목록 조회 API 호출
+document.addEventListener('DOMContentLoaded', async () => {
+  const data = [
+    ...await getMyReservations(),
+    ...await getMyReservationWaiting()
+  ];
+  render(data);
+});
+
+function getMyReservations() {
+  return fetch('/reservations-mine') // 내 예약 목록 조회 API 호출
     .then(response => {
       if (response.status === 200) return response.json();
       throw new Error('Read failed');
     })
-    .then(render)
     .catch(error => console.error('Error fetching reservations:', error));
-});
+}
+
+function getMyReservationWaiting() {
+  return fetch('/reservation-waiting-mine') // 내 예약 목록 조회 API 호출
+    .then(response => {
+      if (response.status === 200) return response.json();
+      throw new Error('Read failed');
+    })
+    .catch(error => console.error('Error fetching reservation waiting:', error));
+}
 
 function render(data) {
   const tableBody = document.getElementById('table-body');
@@ -17,16 +33,13 @@ function render(data) {
     const theme = item.theme;
     const date = item.date;
     const time = item.time;
-    const status = item.status;
+    const status = (item["order"] !== undefined) ? item.order + "번째 예약대기" : item.status;
 
     row.insertCell(0).textContent = theme;
     row.insertCell(1).textContent = date;
     row.insertCell(2).textContent = time;
     row.insertCell(3).textContent = status;
 
-    /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
-     */
     if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
       const cancelCell = row.insertCell(4);
       const cancelButton = document.createElement('button');
@@ -43,10 +56,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-  /*
-  TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
-   */
-  const endpoint = '';
+  const endpoint = `/reservation-waiting/${id}`;
   return fetch(endpoint, {
     method: 'DELETE'
   }).then(response => {

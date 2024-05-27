@@ -10,8 +10,11 @@ public record SaveMemberRequest(
         MemberRole role
 ) {
     public Member toMember(final String encodedPassword) {
-        return Member.createMemberWithoutId(
-                MemberRole.USER, encodedPassword, name, email
+        return new Member(
+                MemberRole.USER,
+                encodedPassword,
+                name,
+                email
         );
     }
 }

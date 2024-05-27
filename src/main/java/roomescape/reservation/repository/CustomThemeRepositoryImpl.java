@@ -45,7 +45,7 @@ public class CustomThemeRepositoryImpl implements CustomThemeRepository {
     }
 
     private RowMapper<Theme> itemRowMapper() {
-        return ((rs, rowNum) -> Theme.of(
+        return ((rs, rowNum) -> new Theme(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getString("description"),

@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.model.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.ReservationDto;
 import roomescape.reservation.dto.SaveReservationRequest;
 import roomescape.reservation.dto.SearchReservationsParams;
@@ -11,41 +11,42 @@ import roomescape.reservation.dto.SearchReservationsRequest;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.ReservationWaiting;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.CustomReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.ReservationWaitingRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Transactional
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final CustomReservationRepository customReservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+    private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
 
     public ReservationService(
             final CustomReservationRepository customReservationRepository,
             final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final ReservationWaitingRepository reservationWaitingRepository,
+            final MemberService memberService,
+            final ThemeService themeService,
+            final ReservationTimeService reservationTimeService
     ) {
         this.customReservationRepository = customReservationRepository;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
+        this.memberService = memberService;
+        this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationDto> getReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -53,7 +54,6 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationDto> searchReservations(final SearchReservationsRequest request) {
         final SearchReservationsParams searchReservationsParams = new SearchReservationsParams(
                 request.memberId(),
@@ -69,19 +69,15 @@ public class ReservationService {
     }
 
     public ReservationDto saveReservation(final SaveReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
-        final Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 회원이 존재하지 않습니다."));
-
+        final ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
+        final Theme theme = themeService.getTheme(request.themeId());
+        final Member member = memberService.getMember(request.memberId());
         final Reservation reservation = request.toReservation(reservationTime, theme, member);
-        validateReservationDateAndTime(reservation.getDate(), reservationTime);
-        validateReservationDuplication(reservation);
 
-        final Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationDto.from(savedReservation);
+        validateReservationDateAndTime(reservation.getDate(), reservationTime);
+        validateReservationDuplicated(reservation);
+
+        return ReservationDto.from(reservationRepository.save(reservation));
     }
 
     private static void validateReservationDateAndTime(final ReservationDate date, final ReservationTime time) {
@@ -91,7 +87,7 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationDuplication(final Reservation reservation) {
+    private void validateReservationDuplicated(final Reservation reservation) {
         if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(
                 reservation.getDate(),
                 reservation.getTime().getId(),
@@ -101,11 +97,24 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(final Long reservationId) {
-        reservationRepository.deleteById(reservationId);
+        final Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 정보입니다."));
+        reservationRepository.deleteById(reservation.getId());
+        reservationWaitingRepository.findTopByDateAndTimeAndThemeOrderByCreatedAtAsc(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme())
+                .ifPresent(this::saveReservationWithWaiting);
     }
 
-    @Transactional(readOnly = true)
+    private void saveReservationWithWaiting(final ReservationWaiting reservationWaiting) {
+        final Reservation reservation = reservationWaiting.makeReservation();
+        reservationRepository.save(reservation);
+        reservationWaitingRepository.delete(reservationWaiting);
+    }
+
     public List<ReservationDto> getMyReservations(final Long memberId) {
         return reservationRepository.findAllByMember_Id(memberId)
                 .stream()

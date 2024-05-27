@@ -5,8 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.reservation.dto.SaveReservationRequest;
 import roomescape.reservation.dto.ReservationDto;
+import roomescape.reservation.dto.SaveReservationRequest;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.ReservationWaiting;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationWaitingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,6 +27,10 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private ReservationWaitingRepository reservationWaitingRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @DisplayName("전체 예약 정보를 조회한다.")
     @Test
@@ -76,6 +84,23 @@ class ReservationServiceTest {
         // When & Then
         final List<ReservationDto> reservations = reservationService.getReservations();
         assertThat(reservations).hasSize(15);
+    }
+
+    @DisplayName("예약 정보를 삭제하면 가장 우선 순위가 빠른 예약 대기가 예약으로 등록된다.")
+    @Test
+    void changeWaitingToReservationWhenDeleteReservationTest() {
+        // When
+        final ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(1L).get();
+        reservationService.deleteReservation(13L);
+        final Reservation newReservation = reservationRepository.findById(17L).get();
+
+        // Then
+        assertAll(
+                () -> assertThat(reservationWaiting.getTheme().getId()).isEqualTo(newReservation.getTheme().getId()),
+                () -> assertThat(reservationWaiting.getMember().getId()).isEqualTo(newReservation.getMember().getId()),
+                () -> assertThat(reservationWaiting.getDate().getValue()).isEqualTo(newReservation.getDate().getValue()),
+                () -> assertThat(reservationWaiting.getTime().getStartAt()).isEqualTo(newReservation.getTime().getStartAt())
+        );
     }
 
     @DisplayName("현재 보다 이전 날짜/시간의 예약 정보를 저장하려고 하면 예외가 발생한다.")

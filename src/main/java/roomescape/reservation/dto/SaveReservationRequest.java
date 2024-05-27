@@ -19,7 +19,7 @@ public record SaveReservationRequest(LocalDate date, Long memberId, Long timeId,
             final Theme theme,
             final Member member
     ) {
-        return Reservation.of(
+        return new Reservation(
                 ReservationStatus.RESERVATION,
                 date,
                 reservationTime,

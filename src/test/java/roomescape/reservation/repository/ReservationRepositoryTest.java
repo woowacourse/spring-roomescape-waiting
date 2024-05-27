@@ -45,9 +45,9 @@ class ReservationRepositoryTest {
         final String clientName = "브라운";
         final LocalDate reservationDate = LocalDate.now().plusDays(10);
         final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 10));
-        final Theme theme = Theme.of(1L, "테바의 비밀친구", "테바의 은밀한 비밀친구", "대충 테바 사진 링크");
-        final Member member = Member.createMemberWithId(1L, MemberRole.USER, "password1111", "kelly", "kelly6bf@mail.com");
-        final Reservation reservation = Reservation.of(reservationStatus, reservationDate, reservationTime, theme, member);
+        final Theme theme = new Theme(1L, "테바의 비밀친구", "테바의 은밀한 비밀친구", "대충 테바 사진 링크");
+        final Member member = new Member(1L, MemberRole.USER, "password1111", "kelly", "kelly6bf@mail.com");
+        final Reservation reservation = new Reservation(reservationStatus, reservationDate, reservationTime, theme, member);
 
         // When
         final Reservation savedReservation = reservationRepository.save(reservation);
