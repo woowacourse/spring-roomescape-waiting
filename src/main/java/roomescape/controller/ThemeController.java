@@ -24,13 +24,6 @@ public class ThemeController {
         this.authService = authService;
     }
 
-    @PostMapping
-    public ResponseEntity<ThemeResponse> createTheme(@RequestBody @Valid ThemeRequest themeRequest, @LoginMemberId long memberId) {
-        authService.validateAdmin(memberId);
-        ThemeResponse themeResponse = themeService.create(themeRequest);
-        return ResponseEntity.created(URI.create("/themes/" + themeResponse.id())).body(themeResponse);
-    }
-
     @GetMapping
     public List<ThemeResponse> findAllThemes() {
         return themeService.findAll();
@@ -39,11 +32,5 @@ public class ThemeController {
     @GetMapping("/popular")
     public List<ThemeResponse> findPopularThemes() {
         return themeService.findPopularThemes();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") long themeId) {
-        themeService.deleteById(themeId);
-        return ResponseEntity.noContent().build();
     }
 }

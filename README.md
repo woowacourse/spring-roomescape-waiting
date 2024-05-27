@@ -447,10 +447,10 @@
 ### 테마 추가
 - http method: POST
 - cookie: token={token}
-- uri: /themes
+- uri: /admin/themes
 - request
   ```
-  POST /themes HTTP/1.1
+  POST /admin/themes HTTP/1.1
   cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
   content-type: application/json
   
@@ -464,7 +464,7 @@
   - 추가 성공
     ```
     HTTP/1.1 201
-    Location: /themes/1
+    Location: /admin/themes/1
     Content-Type: application/json
 
     {
@@ -554,7 +554,7 @@
 ### 테마 삭제
 - http method: DELETE
 - cookie: token={token}
-- uri: /themes/{id}
+- uri: /admin/themes/{id}
   - path variable
     - id: 테마 정보 식별자
 - response
