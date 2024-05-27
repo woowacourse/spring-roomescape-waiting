@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static roomescape.domain.ReservationStatus.RESERVE_NUMBER;
 import static roomescape.domain.ReservationStatus.Status.RESERVED;
 
 import java.util.List;
@@ -31,7 +32,6 @@ import roomescape.service.dto.response.reservation.ReservationResponse;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReservationService {
-    private static final long RESERVED_NUMBER = 0;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -42,7 +42,7 @@ public class ReservationService {
         List<ReservationWait> waits = waitRepository.findAll();
 
         return waits.stream()
-                .map(wait -> ReservationResponse.from(wait.getReservation(), wait.getMember()))
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -67,8 +67,8 @@ public class ReservationService {
         Reservation verifiedReservation = verifyReservation(request, time, theme);
         Reservation savedReservation = reservationRepository.save(verifiedReservation);
 
-        waitRepository.save(new ReservationWait(member, savedReservation, RESERVED_NUMBER));
-        return ReservationResponse.from(savedReservation, member);
+        ReservationWait wait = waitRepository.save(new ReservationWait(member, savedReservation, RESERVE_NUMBER));
+        return ReservationResponse.from(wait);
     }
 
     private Reservation verifyReservation(ReservationRequest request, ReservationTime time, Theme theme) {
