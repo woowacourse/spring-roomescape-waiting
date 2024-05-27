@@ -142,7 +142,7 @@ class ReservationServiceTest {
         final ReservationsMineResponse waitingMineResponse = service.findMemberReservations(member).getData().get(7);
         final String message = waitingMineResponse.status();
         //then
-        assertThat(message).contains("2");
+        assertThat(message).isEqualTo("2번째 예약대기");
     }
 
     @Test
