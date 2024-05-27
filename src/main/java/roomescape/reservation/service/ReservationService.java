@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -71,10 +70,21 @@ public class ReservationService {
 
     public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
         List<MemberReservationStatusResponse> memberReservationStatusResponses = new ArrayList<>();
+
+        findAllMembersReservedReservation(memberReservationStatusResponses, memberId);
+        findAllMembersWaitingReservation(memberReservationStatusResponses, memberId);
+
+        return memberReservationStatusResponses;
+    }
+
+    private void findAllMembersReservedReservation(List<MemberReservationStatusResponse> responses, Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllReservedByMemberId(memberId);
         for (Reservation reservation : reservations) {
-            memberReservationStatusResponses.add(new MemberReservationStatusResponse(reservation));
+            responses.add(new MemberReservationStatusResponse(reservation));
         }
+    }
+
+    private void findAllMembersWaitingReservation(List<MemberReservationStatusResponse> responses, Long memberId) {
         List<ReservationWaiting> reservationWaitings
                 = reservationRepository.findAllReservationWaitingByMemberId(memberId);
         for (ReservationWaiting reservationWaiting : reservationWaitings) {
@@ -84,13 +94,12 @@ public class ReservationService {
                     reservationWaiting.getTheme().getId(),
                     reservationWaiting.getCreatedAt()
             );
-            memberReservationStatusResponses.add(new MemberReservationStatusResponse(reservationWaiting, rank));
+            responses.add(new MemberReservationStatusResponse(reservationWaiting, rank));
         }
-        return memberReservationStatusResponses;
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        validateDuplicatedReservation(memberId, request);
+        validateDuplicatedReservation(request);
         return saveMemberReservation(memberId, request, Status.RESERVED);
     }
 
@@ -99,7 +108,7 @@ public class ReservationService {
         return saveMemberReservation(memberId, request, Status.WAITING);
     }
 
-    private void validateDuplicatedReservation(Long memberId, MemberReservationAddRequest request) {
+    private void validateDuplicatedReservation(MemberReservationAddRequest request) {
         if (reservationRepository.existsByDateValueAndTimeIdAndThemeId(request.date(), request.timeId(),
                 request.themeId())) {
             throw new DuplicateSaveException("중복되는 예약이 존재합니다.");

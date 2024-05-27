@@ -60,10 +60,6 @@ public class ReservationWaiting {
         this.createdAt = createdAt;
     }
 
-    public void updateStatus(Status status) {
-        this.status = status;
-    }
-
     public Long getId() {
         return id;
     }
