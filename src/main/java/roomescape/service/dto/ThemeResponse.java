@@ -1,6 +1,6 @@
 package roomescape.service.dto;
 
-import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.slot.Theme;
 
 public record ThemeResponse(
         Long id,

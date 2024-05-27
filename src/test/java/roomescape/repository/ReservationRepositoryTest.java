@@ -21,12 +21,14 @@ import roomescape.IntegrationTestSupport;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.dto.ReservationReadOnly;
+import roomescape.domain.reservation.slot.ReservationSlot;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.ReservationTimeRepository;
+import roomescape.domain.reservation.slot.Theme;
+import roomescape.domain.reservation.slot.ThemeRepository;
 import roomescape.service.dto.ReservationConditionRequest;
 
 @Transactional
@@ -44,6 +46,9 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @DisplayName("예약 생성")
     @Test
     void save() {
@@ -56,13 +61,15 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         Member member = Member.createUser("생강", "email@email.com", "1234");
         Member savedMember = memberRepository.save(member);
 
-        Reservation reservation = new Reservation(savedMember, LocalDate.parse("2025-01-01"), savedReservationTime,
+        ReservationSlot slot = new ReservationSlot(LocalDate.parse("2025-01-01"), savedReservationTime,
                 savedTheme);
+
+        Reservation reservation = new Reservation(savedMember, slot);
         Reservation savedReservation = reservationRepository.save(reservation);
         assertAll(() -> assertThat(savedReservation.getMember().getName()).isEqualTo("생강"),
-                () -> assertThat(savedReservation.getDate()).isEqualTo("2025-01-01"),
-                () -> assertThat(savedReservation.getTime()).isEqualTo(savedReservationTime),
-                () -> assertThat(savedReservation.getTheme()).isEqualTo(savedTheme));
+                () -> assertThat(savedReservation.getSlot().getDate()).isEqualTo("2025-01-01"),
+                () -> assertThat(savedReservation.getSlot().getTime()).isEqualTo(savedReservationTime),
+                () -> assertThat(savedReservation.getSlot().getTheme()).isEqualTo(savedTheme));
     }
 
     @DisplayName("존재하는 예약 삭제")
@@ -76,27 +83,31 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
     void findTimesByDateAndTheme() {
         // given
         Theme theme = themeRepository.findById(2L).get();
-        LocalDate date = LocalDate.parse("2024-05-13");
+        LocalDate date = LocalDate.parse("2024-05-30");
 
         // when
         List<ReservationTime> times = reservationRepository.findTimesByDateAndTheme(date, theme);
 
         // then
-        assertThat(times).hasSize(3).extracting("id", "startAt")
-                .contains(tuple(2L, LocalTime.parse("10:00")), tuple(3L, LocalTime.parse("11:00")),
-                        tuple(4L, LocalTime.parse("12:00")));
+        assertThat(times).hasSize(4).extracting("id", "startAt")
+                .contains(
+                        tuple(2L, LocalTime.parse("10:00")),
+                        tuple(3L, LocalTime.parse("11:00")),
+                        tuple(4L, LocalTime.parse("12:00")),
+                        tuple(7L, LocalTime.parse("15:00"))
+                );
     }
 
     @DisplayName("특정 기간 동안 예약이 많은 테마를 입력한 수 만큼 찾는다.")
     @Test
-    void findTopThemesDurationOrderByCount() {
+    void findPopularThemes() {
         // given
         LocalDate startDate = LocalDate.parse("2024-05-04");
         LocalDate endDate = LocalDate.parse("2024-05-30");
         Limit limit = Limit.of(2);
 
         // when
-        List<Theme> themes = reservationRepository.findTopThemesDurationOrderByCount(startDate, endDate, limit);
+        List<Theme> themes = reservationRepository.findPopularThemes(startDate, endDate, limit);
 
         // then
         assertThat(themes).hasSize(2)
@@ -123,7 +134,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         return Stream.of(
                 Arguments.of(
                         new ReservationConditionRequest(null, null, null, null),
-                        17
+                        18
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(1L, null, null, null),
@@ -135,7 +146,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(null, null, LocalDate.parse("2024-05-09"), null),
-                        8
+                        9
                 ),Arguments.of(
                         new ReservationConditionRequest(null, null, null, LocalDate.parse("2024-05-09")),
                         11
@@ -146,7 +157,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(2L, null, LocalDate.parse("2024-05-09"), null),
-                        5
+                        6
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(1L, 1L, LocalDate.parse("2024-05-09"), LocalDate.parse("2024-05-30")),
@@ -154,7 +165,5 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                 )
         );
     }
-
-
 }
 

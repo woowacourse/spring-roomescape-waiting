@@ -22,7 +22,8 @@ public record UserReservationSaveRequest(
         @Positive
         Long themeId
 ) {
-        public ReservationSaveRequest toReservationSaveRequest(Long memberId) {
-                return new ReservationSaveRequest(memberId, date, timeId, themeId);
-        }
+
+    public ReservationSaveRequest toReservationSaveRequest(Long memberId) {
+        return new ReservationSaveRequest(memberId, date, timeId, themeId);
+    }
 }

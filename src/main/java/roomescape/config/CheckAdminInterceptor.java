@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.reservation.Role;
+import roomescape.domain.member.Role;
 import roomescape.service.dto.LoginMember;
 
 public class CheckAdminInterceptor implements HandlerInterceptor {

@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.ReservationTimeRepository;
 
 @Transactional
 class ReservationTimeRepositoryTest extends IntegrationTestSupport {

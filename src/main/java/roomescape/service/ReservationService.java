@@ -1,88 +1,78 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.concurrency.AtomicQueue;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingRank;
+import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.dto.ReservationReadOnly;
+import roomescape.domain.reservation.slot.ReservationSlot;
+import roomescape.exception.AuthorizationException;
 import roomescape.exception.RoomEscapeBusinessException;
+import roomescape.service.dto.LoginMember;
+import roomescape.service.dto.ReservationBookedResponse;
 import roomescape.service.dto.ReservationConditionRequest;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
 import roomescape.service.dto.UserReservationResponse;
+import roomescape.service.dto.WaitingResponse;
 
 @Service
 public class ReservationService {
 
+    private final ReservationSlotService reservationSlotService;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
+    private final AtomicQueue<ReservationSlot, Member> atomicQueue;
 
     public ReservationService(
+            ReservationSlotService reservationSlotService,
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            WaitingRepository waitingRepository,
+            MemberRepository memberRepository,
+            AtomicQueue<ReservationSlot, Member> atomicQueue
     ) {
+        this.reservationSlotService = reservationSlotService;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
+        this.atomicQueue = atomicQueue;
     }
 
     @Transactional
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
-        Reservation reservation = createReservation(reservationSaveRequest);
+        Member member = findMemberById(reservationSaveRequest.memberId());
+        ReservationSlot slot = reservationSlotService.findSlot(reservationSaveRequest.toSlotRequest());
+        Reservation reservation = reservationRepository.findBySlot(slot);
 
-        validateUnique(reservation);
+        if (reservation == null) {
+            boolean isFirst = atomicQueue.ifFirstRunElseWait(member, slot,
+                    (m, s) -> reservationRepository.save(new Reservation(m, s)));
 
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return new ReservationResponse(savedReservation);
-    }
-
-    private Reservation createReservation(ReservationSaveRequest reservationSaveRequest) {
-        return new Reservation(
-                findMemberById(reservationSaveRequest.memberId()),
-                reservationSaveRequest.date(),
-                findTimeById(reservationSaveRequest.timeId()),
-                findThemeById(reservationSaveRequest.themeId())
-        );
-    }
-
-    private void validateUnique(Reservation reservation) {
-        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
-
-        if (isReservationExist) {
-            throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
+            reservation = reservationRepository.findBySlot(slot);
+            if (isFirst) {
+                return ReservationResponse.createByReservation(reservation);
+            }
         }
-    }
 
-    @Transactional
-    public void deleteReservation(Long id) {
-        Reservation foundReservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
-
-        reservationRepository.delete(foundReservation);
+        Waiting waiting = reservation.addWaiting(member);
+        waitingRepository.save(waiting);
+        return ReservationResponse.createByWaiting(waiting);
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
+    public List<ReservationBookedResponse> findReservationsByCondition(
+            ReservationConditionRequest reservationConditionRequest) {
         List<ReservationReadOnly> reservations = reservationRepository.findByConditions(
                 reservationConditionRequest.dateFrom(),
                 reservationConditionRequest.dateTo(),
@@ -91,36 +81,61 @@ public class ReservationService {
         );
 
         return reservations.stream()
-                .map(ReservationResponse::from)
+                .map(ReservationBookedResponse::from)
+                .sorted(Comparator.comparing(ReservationBookedResponse::dateTime))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<UserReservationResponse> findAllUserReservation(Long memberId) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
-                findMemberById(memberId),
-                LocalDate.now(),
-                Sort.by(Order.asc("date"), Order.asc("time.startAt"))
-        );
-
-        return reservations.stream()
-                .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
+    public List<WaitingResponse> findAllWaiting() {
+        return waitingRepository.findAllReadOnly().stream()
+                .map(WaitingResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserReservationResponse> findMyAllReservationAndWaiting(Long memberId, LocalDate date) {
+        Member member = findMemberById(memberId);
+        List<Reservation> reservations = reservationRepository.findByMemberAndSlot_DateGreaterThanEqual(member, date);
+
+        List<WaitingRank> waitingRanks = waitingRepository.findRankByMemberAndDateGreaterThanEqual(member, date);
+
+        return Stream.concat(
+                        UserReservationResponse.reservationsToResponseStream(reservations),
+                        UserReservationResponse.waitingsToResponseStream(waitingRanks)
+                )
+                .sorted(Comparator.comparing(UserReservationResponse::dateTime))
+                .toList();
+    }
+
+    @Transactional
+    public void cancelReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
+
+        if (reservation.hasNotWaiting()) {
+            reservationRepository.delete(reservation);
+            return;
+        }
+
+        reservation.approveWaiting();
+    }
+
+    @Transactional
+    public void cancelWaiting(Long id, LoginMember loginMember) {
+        Waiting foundWaiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 대기입니다."));
+
+        if (loginMember.isUser() && foundWaiting.isNotMemberId(loginMember.id())) {
+            throw new AuthorizationException();
+        }
+
+        waitingRepository.delete(foundWaiting);
     }
 
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
-    }
-
-    private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
-    }
-
-    private ReservationTime findTimeById(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
     }
 }
 

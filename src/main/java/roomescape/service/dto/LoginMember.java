@@ -1,6 +1,6 @@
 package roomescape.service.dto;
 
-import roomescape.domain.reservation.Role;
+import roomescape.domain.member.Role;
 
 public record LoginMember(
         Long id,
@@ -9,5 +9,13 @@ public record LoginMember(
 ) {
     public MemberResponse toMemberResponse() {
         return new MemberResponse(id, name, role.name());
+    }
+
+    public boolean isUser() {
+        return role == Role.USER;
+    }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
     }
 }

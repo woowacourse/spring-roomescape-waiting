@@ -1,7 +1,7 @@
-package roomescape.domain.reservation;
+package roomescape.service.dto;
 
 public enum ReservationStatus {
-    RESERVED("예약");
+    BOOKED("예약"), WAIT("예약대기");
 
     private final String value;
 

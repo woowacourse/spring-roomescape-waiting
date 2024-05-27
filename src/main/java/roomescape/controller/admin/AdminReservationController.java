@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.service.dto.ReservationStatus;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationBookedResponse;
 import roomescape.service.dto.ReservationConditionRequest;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
+import roomescape.service.dto.WaitingResponse;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -32,14 +35,18 @@ public class AdminReservationController {
             @RequestBody @Valid ReservationSaveRequest reservationSaveRequest
     ) {
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+        if (reservationResponse.status() == ReservationStatus.BOOKED) {
+            return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+                    .body(reservationResponse);
+        }
+        return ResponseEntity.created(URI.create("/reservations/waiting/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservations(
+    public ResponseEntity<List<ReservationBookedResponse>> getReservations(
             @ModelAttribute @Valid ReservationConditionRequest reservationConditionRequest) {
-        List<ReservationResponse> reservationResponses = reservationService.findReservationsByCondition(reservationConditionRequest);
+        List<ReservationBookedResponse> reservationResponses = reservationService.findReservationsByCondition(reservationConditionRequest);
 
         return ResponseEntity.ok()
                 .body(reservationResponses);
@@ -47,7 +54,15 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
-        reservationService.deleteReservation(id);
+        reservationService.cancelReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<WaitingResponse>> getAllWaiting() {
+         List<WaitingResponse> waitingResponses = reservationService.findAllWaiting();
+
+         return ResponseEntity.ok()
+                 .body(waitingResponses);
     }
 }

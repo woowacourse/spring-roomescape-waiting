@@ -5,8 +5,8 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.slot.Theme;
+import roomescape.domain.reservation.slot.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.PopularThemeRequest;
 import roomescape.service.dto.ThemeResponse;
@@ -39,7 +39,7 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes(PopularThemeRequest popularThemeRequest) {
-        List<Theme> popularThemes = reservationRepository.findTopThemesDurationOrderByCount(
+        List<Theme> popularThemes = reservationRepository.findPopularThemes(
                 popularThemeRequest.startDate(),
                 popularThemeRequest.endDate(),
                 Limit.of(popularThemeRequest.limit())
@@ -55,7 +55,7 @@ public class ThemeService {
         Theme foundTheme = themeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
 
-        if (reservationRepository.existsByTheme(foundTheme)) {
+        if (reservationRepository.existsBySlot_Theme(foundTheme)) {
             throw new RoomEscapeBusinessException("예약이 존재하는 테마입니다.");
         }
         themeRepository.delete(foundTheme);
