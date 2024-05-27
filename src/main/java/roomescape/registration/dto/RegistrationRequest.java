@@ -1,12 +1,15 @@
 package roomescape.registration.dto;
 
 import java.time.LocalDate;
+import roomescape.registration.domain.reservation.domain.Reservation;
 import roomescape.registration.domain.waiting.domain.Waiting;
 
 public record RegistrationRequest(LocalDate date, long themeId, long timeId, long memberId) {
 
     public static RegistrationRequest from(Waiting waiting) {
-        return new RegistrationRequest(waiting.getDate(), waiting.getTheme().getId(),
-                waiting.getReservationTime().getId(), waiting.getMember().getId());
+        Reservation reservation = waiting.getReservation();
+
+        return new RegistrationRequest(reservation.getDate(), reservation.getTheme().getId(),
+                reservation.getReservationTime().getId(), reservation.getMember().getId());
     }
 }

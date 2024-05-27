@@ -2,6 +2,7 @@ package roomescape.registration.domain.waiting.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import roomescape.registration.domain.waiting.domain.WaitingWithRank;
@@ -15,26 +16,28 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
             "    w, " +
             "    (SELECT COUNT(w2) + 1" +
             "     FROM Waiting w2 " +
-            "     WHERE w2.theme.name = w.theme.name " +
-            "       AND w2.date = w.date " +
-            "       AND w2.reservationTime.startAt = w.reservationTime.startAt " +
+            "     WHERE w2.reservation.theme.name = w.reservation.theme.name " +
+            "       AND w2.reservation.date = w.reservation.date " +
+            "       AND w2.reservation.reservationTime.startAt = w.reservation.reservationTime.startAt " +
             "       AND w2.id < w.id))" +
             "FROM Waiting w " +
             "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(long memberId);
 
-    Waiting findByDateAndThemeIdAndReservationTimeIdAndMemberId(
+    Waiting findByReservationDateAndReservationThemeIdAndReservationReservationTimeIdAndMemberId(
             LocalDate date,
             long themeId,
             long reservationTimeId,
             long memberId
     );
 
+    Optional<Waiting> findFirstByReservationIdOrderByCreatedAt(long reservationId);
+
     @Query("SELECT COUNT(w) "
             + "FROM Waiting w "
-            + "WHERE w.date = :date "
-            + "AND w.theme.id = :themeId "
-            + "AND w.reservationTime.id = :reservationTimeId "
+            + "WHERE w.reservation.date = :date "
+            + "AND w.reservation.theme.id = :themeId "
+            + "AND w.reservation.reservationTime.id = :reservationTimeId "
             + "AND w.id < :id")
     long countWaitingRankByDateAndThemeIdAndReservationTimeId(
             long id,
@@ -45,7 +48,7 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
 
     void deleteById(long id);
 
-    boolean existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
+    boolean existsByReservationDateAndReservationThemeIdAndReservationReservationTimeIdAndMemberId(
             LocalDate date,
             long themeId,
             long reservationTimeId,

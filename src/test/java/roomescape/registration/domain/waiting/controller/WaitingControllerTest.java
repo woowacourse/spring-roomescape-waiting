@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.model.ControllerTest;
+import roomescape.registration.domain.reservation.domain.Reservation;
 import roomescape.registration.domain.waiting.domain.Waiting;
 import roomescape.registration.domain.waiting.dto.WaitingResponse;
 import roomescape.registration.domain.waiting.service.WaitingService;
@@ -29,14 +31,19 @@ import roomescape.vo.Name;
 @WebMvcTest(WaitingController.class)
 class WaitingControllerTest extends ControllerTest {
 
-    private final Waiting waiting = new Waiting(
+    private final Reservation reservation = new Reservation(
             1L,
             LocalDate.now().plusDays(1),
-            new Theme(1L, new Name("레모네 테마"), "레모네가 숨겨둔 보물을 찾으세요!", "썸네일 링크"),
             new ReservationTime(1L, LocalTime.now()),
+            new Theme(1L, new Name("레모네 테마"), "레모네가 숨겨둔 보물을 찾으세요!", "썸네일 링크"),
             new Member(1L, new Name("폴라"), "polla@wooteco.com", "polla1234", MemberRole.MEMBER)
     );
-
+    private final Waiting waiting = new Waiting(
+            1L,
+            reservation,
+            new Member(2L, new Name("조앤"), "joen@wooteco.com", "joen1234", MemberRole.ADMIN),
+            LocalDateTime.now()
+    );
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,10 +61,10 @@ class WaitingControllerTest extends ControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(waiting.getId()))
                 .andExpect(jsonPath("$[0].memberName").value(waiting.getMember().getName()))
-                .andExpect(jsonPath("$[0].themeName").value(waiting.getTheme().getName()))
-                .andExpect(jsonPath("$[0].date").value(waiting.getDate().toString()))
+                .andExpect(jsonPath("$[0].themeName").value(waiting.getReservation().getTheme().getName()))
+                .andExpect(jsonPath("$[0].date").value(waiting.getReservation().getDate().toString()))
                 .andExpect(jsonPath("$[0].startAt")
-                        .value(waiting.getReservationTime().getStartAt().toString()));
+                        .value(waiting.getReservation().getReservationTime().getStartAt().toString()));
     }
 
     @Test
