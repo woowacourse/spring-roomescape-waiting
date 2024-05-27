@@ -9,9 +9,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import roomescape.common.model.BaseEntity;
 
 @Entity
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,6 +66,14 @@ public class Member {
         if (password == null) {
             throw new IllegalArgumentException("회원 생성 시 비밀번호는 필수입니다.");
         }
+    }
+
+    public boolean isNotAdmin() {
+        return this.role != Role.ADMIN;
+    }
+
+    public boolean isNotSameMember(final Long memberId) {
+        return !Objects.equals(id, memberId);
     }
 
     public boolean hasNotSamePassword(final String password) {

@@ -3,13 +3,16 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.request.CreateMyReservationRequest;
+import roomescape.reservation.dto.request.CreateReservationByAdminRequest;
 import roomescape.reservation.dto.request.CreateReservationRequest;
 import roomescape.reservation.dto.response.CreateReservationResponse;
+import roomescape.reservation.dto.response.FindAdminReservationResponse;
 import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.dto.response.FindReservationResponse;
 import roomescape.reservation.model.Reservation;
@@ -18,35 +21,56 @@ import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.model.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.WaitingService;
 
 @Service
 public class ReservationService {
 
+    private final WaitingService waitingService;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
+    public ReservationService(final WaitingService waitingService,
+                              final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository) {
+                              final MemberRepository memberRepository,
+                              final WaitingRepository waitingRepository) {
+        this.waitingService = waitingService;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
-    public CreateReservationResponse createReservation(final AuthInfo authInfo,
-                                                       final CreateReservationRequest createReservationRequest) {
-        ReservationTime reservationTime = findReservationTime(createReservationRequest.timeId());
-        Theme theme = findTheme(createReservationRequest.themeId());
-        Member member = findMember(authInfo.getMemberId());
+    public CreateReservationResponse createMyReservation(final AuthInfo authInfo,
+                                                         final CreateMyReservationRequest createMyReservationRequest) {
+        CreateReservationRequest createReservationRequest = CreateReservationRequest.of(authInfo.getMemberId(),
+                createMyReservationRequest);
+        return CreateReservationResponse.from(createReservation(createReservationRequest));
+    }
+
+    public CreateReservationResponse createReservationByAdmin(
+            final CreateReservationByAdminRequest createReservationByAdminRequest) {
+        CreateReservationRequest createReservationRequest = CreateReservationRequest.of(createReservationByAdminRequest);
+        return CreateReservationResponse.from(createReservation(createReservationRequest));
+    }
+
+    public Reservation createReservation(final CreateReservationRequest createReservationRequest) {
+        ReservationTime reservationTime = reservationTimeRepository.getById(createReservationRequest.timeId());
+        Theme theme = themeRepository.getById(createReservationRequest.themeId());
+        Member member = memberRepository.getById(createReservationRequest.memberId());
 
         checkAlreadyExistReservation(createReservationRequest, createReservationRequest.date(), theme.getName(),
                 reservationTime.getStartAt());
         Reservation reservation = createReservationRequest.toReservation(member, reservationTime, theme);
-        return CreateReservationResponse.from(reservationRepository.save(reservation));
+        return reservationRepository.save(reservation);
     }
 
     private void checkAlreadyExistReservation(final CreateReservationRequest createReservationRequest,
@@ -60,35 +84,21 @@ public class ReservationService {
         }
     }
 
-    private ReservationTime findReservationTime(final Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    private Theme findTheme(final Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    private Member findMember(final Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
-    }
-
-    public List<FindReservationResponse> getReservations() {
+    public List<FindAdminReservationResponse> getReservations() {
         return reservationRepository.findAll().stream()
-                .map(FindReservationResponse::from)
+                .map(FindAdminReservationResponse::from)
                 .toList();
     }
 
     public FindReservationResponse getReservation(final Long id) {
-        Reservation reservation = findReservation(id);
+        Reservation reservation = reservationRepository.getById(id);
         return FindReservationResponse.from(reservation);
     }
 
-    private Reservation findReservation(final Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
+    public List<FindReservationResponse> getReservations(final AuthInfo authInfo) {
+        return reservationRepository.findAllByMemberId(authInfo.getMemberId()).stream()
+                .map(FindReservationResponse::from)
+                .toList();
     }
 
     public List<FindAvailableTimesResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
@@ -114,21 +124,28 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteReservation(final Long id) {
-        validateExistReservation(id);
+    public void deleteReservation(final AuthInfo authInfo, final Long id) {
+        Reservation reservation = reservationRepository.getById(id);
+        checkCancelAuthorization(reservation, authInfo.getMemberId());
+
+        if (waitingRepository.existsByReservation(reservation)) {
+            updateReservationByMember(reservation);
+            return;
+        }
         reservationRepository.deleteById(id);
     }
 
-    private void validateExistReservation(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않습니다. 삭제가 불가능합니다.");
+    private void checkCancelAuthorization(final Reservation reservation, final Long memberId) {
+        Member member = memberRepository.getById(memberId);
+        if (member.isNotAdmin() && !reservation.isOwnedBy(member)) {
+            throw new ForbiddenException(
+                    "식별자 " + reservation.getId() + "인 예약에 대해 회원 식별자 " + memberId + "의 권한이 존재하지 않아, 삭제가 불가능합니다.");
         }
     }
 
-    public List<roomescape.member.dto.response.FindReservationResponse> getReservationsByMember(
-            final AuthInfo authInfo) {
-        return reservationRepository.findAllByMemberId(authInfo.getMemberId()).stream()
-                .map(roomescape.member.dto.response.FindReservationResponse::from)
-                .toList();
+    private void updateReservationByMember(final Reservation reservation) {
+        Waiting waiting = waitingRepository.getFirstByReservation(reservation);
+        reservation.updateMember(waiting.getMember());
+        waitingService.deleteWaitingForReservationUpgrade(waiting.getId());
     }
 }

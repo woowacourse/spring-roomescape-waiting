@@ -11,12 +11,13 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.common.model.BaseEntity;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.theme.model.Theme;
 
 @Entity
-public class Reservation {
+public class Reservation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -122,7 +123,15 @@ public class Reservation {
     }
 
     public boolean isSameTime(final ReservationTime reservationTime) {
-        return this.reservationTime.isSameTo(reservationTime.getId());
+        return this.reservationTime.isSameTo(reservationTime);
+    }
+
+    public boolean isOwnedBy(final Member member) {
+        return !this.member.isNotSameMember(member.getId());
+    }
+
+    public void updateMember(final Member member) {
+        this.member = member;
     }
 
     public Long getId() {

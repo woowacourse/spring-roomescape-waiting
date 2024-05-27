@@ -7,9 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.common.model.BaseEntity;
 
 @Entity
-public class ReservationTime {
+public class ReservationTime extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,8 +38,8 @@ public class ReservationTime {
         }
     }
 
-    public boolean isSameTo(final Long timeId) {
-        return Objects.equals(this.id, timeId);
+    public boolean isSameTo(final ReservationTime reservationTime) {
+        return Objects.equals(this, reservationTime);
     }
 
     public Long getId() {

@@ -10,12 +10,13 @@ import io.jsonwebtoken.SignatureException;
 import java.util.Date;
 import org.springframework.stereotype.Component;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.common.exception.UnAuthorizationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
-    private static final String MEMBER_ID_CLAIM = "memberId";
+    private static final String MEMBER_NAME_CLAIM = "memberName";
     private static final String MEMBER_ROLE_CLAIM = "memberRole";
 
     private final TokenProperties tokenProperties;
@@ -31,7 +32,7 @@ public class JwtTokenProvider implements TokenProvider {
                 .setSubject(member.getId().toString())
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .claim(MEMBER_ID_CLAIM, member.getName())
+                .claim(MEMBER_NAME_CLAIM, member.getName())
                 .claim(MEMBER_ROLE_CLAIM, member.getRole())
                 .signWith(SignatureAlgorithm.HS256, tokenProperties.getSecretKey())
                 .compact();
@@ -41,7 +42,7 @@ public class JwtTokenProvider implements TokenProvider {
         Claims claims = getClaims(token);
         return new AuthInfo(
                 Long.parseLong(claims.getSubject()),
-                claims.get(MEMBER_ID_CLAIM, String.class),
+                claims.get(MEMBER_NAME_CLAIM, String.class),
                 Role.valueOf(claims.get(MEMBER_ROLE_CLAIM, String.class)));
     }
 
@@ -51,13 +52,13 @@ public class JwtTokenProvider implements TokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (MalformedJwtException e) {
-            throw new SecurityException("토큰의 형식이 유효하지 않습니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰의 형식이 유효하지 않습니다. 다시 로그인해주세요.");
         } catch (SignatureException e) {
-            throw new SecurityException("토큰의 값을 인증할 수 없습니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰의 값을 인증할 수 없습니다. 다시 로그인해주세요.");
         } catch (ExpiredJwtException e) {
-            throw new SecurityException("토큰이 만료되었습니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰이 만료되었습니다. 다시 로그인해주세요.");
         } catch (JwtException e) {
-            throw new SecurityException("토큰 오류입니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰 오류입니다. 다시 로그인해주세요.");
         }
     }
 }

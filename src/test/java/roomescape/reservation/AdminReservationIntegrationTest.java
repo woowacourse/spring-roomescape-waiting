@@ -1,11 +1,14 @@
-package roomescape.member;
+package roomescape.reservation;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +21,9 @@ import roomescape.auth.dto.request.LoginRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.response.FindAdminReservationResponse;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
@@ -25,16 +31,22 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 
 @IntegrationTest
-class AdminIntegrationTest {
+class AdminReservationIntegrationTest {
+    private final MemberRepository memberRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
+    AdminReservationIntegrationTest(final MemberRepository memberRepository,
+                                    final ReservationTimeRepository reservationTimeRepository,
+                                    final ThemeRepository themeRepository,
+                                    final ReservationRepository reservationRepository) {
+        this.memberRepository = memberRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
+    }
 
     @LocalServerPort
     private int port;
@@ -54,9 +66,8 @@ class AdminIntegrationTest {
                 .then().log().cookies().extract().cookie("token");
     }
 
-
     @Test
-    @DisplayName("관리자 권한으로 예약을 생성한다.")
+    @DisplayName("관리자 권한 예약 생성 성공")
     void createReservationByAdmin() {
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
@@ -84,7 +95,7 @@ class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 날짜가 과거인 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 예약 날짜 과거")
     void createReservationByAdmin_WhenDimeIsPast() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2000-11-30");
@@ -104,7 +115,7 @@ class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 날짜가 없는 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 예약 날짜 없음")
     void createReservationByAdmin_WhenDimeIsNull() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", null);
@@ -125,7 +136,7 @@ class AdminIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(longs = {0, -1})
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 회원 식별자가 양수가 아닌 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 회원 식별자 자연수 아님")
     void createReservationByAdmin_WhenMemberIdIsInvalidType(Long memberId) {
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -145,7 +156,7 @@ class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 회원 식별자가 없는 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 회원 식별자 없음")
     void createReservationByAdmin_WhenMemberIdIsPast() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -166,7 +177,7 @@ class AdminIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(longs = {0, -1})
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 시간 식별자가 양수가 아닌 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 시간 식별자 자연수 아님")
     void createReservationByAdmin_WhenTimeIsInvalidType(Long timeId) {
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -186,7 +197,7 @@ class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 시간 식별자가 없는 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 시간 식별자 없음")
     void createReservationByAdmin_WhenTimeIsPast() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -207,7 +218,7 @@ class AdminIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(longs = {0, -1})
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 테마 식별자가 양수가 아닌 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 테마 식별자 자연수 아님")
     void createReservationByAdmin_WhenThemeIdIsInvalidType(Long themeId) {
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -227,7 +238,7 @@ class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자 권한으로 방탈출 예약 생성 시, 테마 식별자가 없는 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 테마 식별자 없음")
     void createReservationByAdmin_WhenThemeIdIsPast() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -247,7 +258,7 @@ class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자 권한으로 예약 생성 시 해당하는 테마가 없는 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 없는 테마")
     void createReservationByAdmin_WhenThemeNotExist() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
@@ -266,11 +277,11 @@ class AdminIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 테마가 존재하지 않습니다."));
     }
 
     @Test
-    @DisplayName("관리자 권한으로 예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 없는 시간")
     void createReservationByAdmin_WhenTimeNotExist() {
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
@@ -289,11 +300,11 @@ class AdminIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않습니다."));
     }
 
     @Test
-    @DisplayName("관리자 권한으로 예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
+    @DisplayName("관리자 권한 예약 생성 실패: 없는 회원")
     void createReservationByAdmin_WhenMemberNotExist() {
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
@@ -312,6 +323,39 @@ class AdminIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 2에 해당하는 사용자가 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 2에 해당하는 회원이 존재하지 않습니다."));
+    }
+
+    @Test
+    @DisplayName("관리자 방탈출 예약 목록 조회 성공")
+    void getReservations() {
+        // given
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+
+        // when
+        List<FindAdminReservationResponse> findReservationResponses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin())
+                .when().get("/admin/reservations")
+                .then().log().all()
+
+                .statusCode(200)
+                .extract().jsonPath()
+                .getList(".", FindAdminReservationResponse.class);
+
+        // then
+        assertThat(findReservationResponses).containsExactly(
+                FindAdminReservationResponse.from(reservation1),
+                FindAdminReservationResponse.from(reservation2)
+        );
     }
 }

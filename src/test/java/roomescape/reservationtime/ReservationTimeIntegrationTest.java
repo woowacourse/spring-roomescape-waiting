@@ -50,7 +50,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 시간대 생성 성공 시, 생성된 시간대의 정보를 반환한다.")
+    @DisplayName("방탈출 시간대 생성 성공")
     void createReservationTime() {
         Map<String, Object> params = new HashMap<>();
         params.put("startAt", "10:00");
@@ -67,7 +67,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 시간대 생성 시, 시간이 형식에 맞지 않을 경우 예외를 반환한다.")
+    @DisplayName("방탈출 시간대 생성 실패: 시간 형식 다름")
     void createReservationTime_WhenTimeIsInvalidType() {
         Map<String, Object> params = new HashMap<>();
         params.put("startAt", "10:0--");
@@ -83,7 +83,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 시간대 생성 시, 이미 존재하는 시간인 경우 예외를 반환한다.")
+    @DisplayName("방탈출 시간대 생성 실패: 중복 시간")
     void createReservationTime_WhenTimeIsExist() {
         createReservationTime();
         Map<String, Object> params = new HashMap<>();
@@ -100,7 +100,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 목록을 조회한다.")
+    @DisplayName("방탈출 테마 목록 조회 성공")
     void getReservationTimes() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
@@ -116,7 +116,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 시간 하나를 조회한다.")
+    @DisplayName("방탈출 시간 하나 조회 성공")
     void getReservationTime() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
 
@@ -131,7 +131,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
+    @DisplayName("방탈출 시간 조회 실패: 없는 시간")
     void getReservationTime_WhenTimeNotExist() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -139,11 +139,11 @@ class ReservationTimeIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 예약이 존재하지 않아 시간을 조회할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않습니다."));
     }
 
     @Test
-    @DisplayName("방탈출 시간 하나를 삭제한다.")
+    @DisplayName("방탈출 시간 하나 삭제 성공")
     void deleteReservationTime() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
 
@@ -156,7 +156,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
+    @DisplayName("방탈출 시간 조회 실패: 시간 없음")
     void deleteReservationTime_WhenTimeNotExist() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -168,7 +168,7 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
+    @DisplayName("방탈출 시간 조회 실패: 사용 중인 시간")
     void deleteReservationTime_WhenTimeInUsage() {
         Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         ReservationTime reservationTime = reservationTimeRepository.save(

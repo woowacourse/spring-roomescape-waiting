@@ -52,7 +52,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 생성 성공 시, 생성된 테마의 정보를 반환한다.")
+    @DisplayName("방탈출 테마 생성 성공")
     void createTheme() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "테마이름");
@@ -73,7 +73,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 생성 시, 테마의 이름이 공백인 경우 예외를 반환한다.")
+    @DisplayName("방탈출 테마 생성 실패: 테마의 이름 공백")
     void createTheme_WhenThemeNameIsBlank() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "");
@@ -91,7 +91,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 생성 시, 테마의 이름이 255글자 초과 경우 예외를 반환한다.")
+    @DisplayName("방탈출 테마 생성 실패: 테마의 이름 255글자 초과")
     void createTheme_WhenThemeNameOverLength() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "a".repeat(256));
@@ -109,7 +109,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 생성 시, 테마의 설명이 공백인 경우 예외를 반환한다.")
+    @DisplayName("방탈출 테마 생성 실패: 테마의 설명 공백")
     void createTheme_WhenThemeDescriptionIsBlank() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "테마이름");
@@ -127,7 +127,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 생성 시, 테마의 설명이 255글자 초과 경우 예외를 반환한다.")
+    @DisplayName("방탈출 테마 생성 실패: 테마의 설명 255글자 초과")
     void createTheme_WhenThemeDescriptionOverLength() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "테마이름");
@@ -145,7 +145,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 생성 시, 테마의 썸네일이 공백인 경우 예외를 반환한다.")
+    @DisplayName("방탈출 테마 생성 실패: 테마의 썸네일 공백")
     void createTheme_WhenThemeThumbnailIsBlank() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "테마이름");
@@ -163,7 +163,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 생성 시, 테마의 썸네일이 255글자 초과 경우 예외를 반환한다.")
+    @DisplayName("방탈출 테마 생성 실패: 테마의 썸네일이 255글자 초과")
     void createTheme_WhenThemeThumbnailOverLength() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "테마이름");
@@ -181,7 +181,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 목록을 조회한다.")
+    @DisplayName("방탈출 테마 목록 조회 성공")
     void getThemes() {
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         RestAssured.given().log().all()
@@ -197,7 +197,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("인기 방탈출 테마 목록을 조회한다.")
+    @DisplayName("인기 방탈출 테마 목록 성공")
     void getPopularThemes() {
         IntStream.rangeClosed(1, 20)
                 .forEach(index -> themeRepository.save(new Theme(index + "이름", "설명", "썸네일")));
@@ -220,7 +220,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마를 삭제한다.")
+    @DisplayName("방탈출 테마 삭제 성공")
     void deleteTheme() {
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         RestAssured.given().log().all()
@@ -232,7 +232,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 삭제 시, 해당 테마가 존재하지 않는다면 예외를 반환한다.")
+    @DisplayName("방탈출 테마 삭제 실패: 테마 없음")
     void deleteTheme_WhenAlreadyNotExist() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -244,7 +244,7 @@ class ThemeIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 테마 삭제 시, 해당 테마가 사용 중이라면 예외를 반환한다.")
+    @DisplayName("방탈출 테마 삭제 실패: 테마 사용 중")
     void deleteTheme_WhenThemeInUsage() {
 
         Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));

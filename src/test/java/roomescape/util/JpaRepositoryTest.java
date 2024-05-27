@@ -11,5 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 @Retention(RetentionPolicy.RUNTIME)
 @ActiveProfiles("test")
 @DataJpaTest
+@DatabaseIsolation
 public @interface JpaRepositoryTest {
 }

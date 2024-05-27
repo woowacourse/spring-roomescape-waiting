@@ -10,6 +10,16 @@ import roomescape.theme.model.Theme;
 
 public class ReservationFixture {
 
+    public static Reservation getOneWithId(Long id) {
+        return new Reservation(
+                id,
+                MemberFixture.getOne(),
+                LocalDate.parse("3000-10-10"),
+                ReservationTimeFixture.getOne(),
+                ThemeFixture.getOne()
+        );
+    }
+
     public static Reservation getOneWithTheme(final Theme theme) {
         return new Reservation(
                 null,

@@ -10,7 +10,7 @@ class EmailTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"asdasdf.com", "asdasdf@.com", "@com", "@naver.com", "qwer.com@naver"})
-    @DisplayName("예약 생성 시 이메일 형식이 아닐 경우, 예외를 반환한다.")
+    @DisplayName("이메일 객체 생성 실패: 이메일 형식 오류 ")
     void validateEmailInvalidType(String invalidEmail) {
         assertThatThrownBy(() -> new Member("몰리", Role.USER, invalidEmail, "pass"))
                 .isInstanceOf(IllegalArgumentException.class)

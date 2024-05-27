@@ -1,5 +1,6 @@
 let isEditing = false;
 const RESERVATION_API_ENDPOINT = '/reservations';
+const ADMIN_RESERVATION_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(ADMIN_RESERVATION_API_ENDPOINT)
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -28,10 +29,10 @@ function render(data) {
     const row = tableBody.insertRow();
 
     row.insertCell(0).textContent = item.id;              // 예약 id
-    row.insertCell(1).textContent = item.member.name;     // 사용자 name
-    row.insertCell(2).textContent = item.theme.name;      // 테마 name
+    row.insertCell(1).textContent = item.member;     // 사용자 name
+    row.insertCell(2).textContent = item.theme;      // 테마 name
     row.insertCell(3).textContent = item.date;            // date
-    row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
+    row.insertCell(4).textContent = item.startAt;    // 예약 시간 startAt
 
     const actionCell = row.insertCell(row.cells.length);
     actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));

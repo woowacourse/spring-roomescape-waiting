@@ -3,6 +3,7 @@ package roomescape.auth.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ class AuthServiceTest {
     private AuthService authService;
 
     @Test
-    @DisplayName("로그인 성공 시, 해당하는 회원의 정보를 담은 토큰을 반환한다. ")
+    @DisplayName("로그인 성공")
     void login() {
         String email = "asdf@naver.com";
         Member member = memberRepository.save(MemberFixture.getOne(email));
@@ -51,7 +52,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 시 비밀번호가 올바르지 않는 경우, 예외를 반환한다.")
+    @DisplayName("로그인 실패: 비밀번호 다름")
     void login_WhenNotSamePassword() {
         // given
         String email = "asdf@naver.com";
@@ -65,7 +66,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("회원 정보를 조회한다.")
+    @DisplayName("회원 정보 조회 성공")
     void getMemberAuthInfo() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());
@@ -77,7 +78,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("회원 정보 조회 시, 해당하는 회원이 없는 경우 예외를 반환한다.")
+    @DisplayName("회원 정보 조회 실패: 회원 없음")
     void getMemberAuthInfo_WhenMemberNotExist() {
         // given
         Member member = MemberFixture.getOneWithId(1L);
@@ -85,7 +86,7 @@ class AuthServiceTest {
 
         // when & then
         assertThatThrownBy(() -> authService.getMemberAuthInfo(authInfo))
-                .isInstanceOf(SecurityException.class)
-                .hasMessage("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요.");
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("식별자 1에 해당하는 회원이 존재하지 않습니다.");
     }
 }

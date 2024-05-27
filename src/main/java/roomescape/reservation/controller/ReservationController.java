@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.core.AuthenticationPrincipal;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.reservation.dto.request.CreateReservationRequest;
+import roomescape.reservation.dto.request.CreateMyReservationRequest;
 import roomescape.reservation.dto.response.CreateReservationResponse;
 import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.dto.response.FindReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
-@RequestMapping("/reservations")
+@RequestMapping
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -31,33 +31,28 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<CreateReservationResponse> createReservation(
             @AuthenticationPrincipal AuthInfo authInfo,
-            @Valid @RequestBody CreateReservationRequest createReservationRequest) {
+            @Valid @RequestBody CreateMyReservationRequest createReservationRequest) {
         CreateReservationResponse createReservationResponse =
-                reservationService.createReservation(authInfo, createReservationRequest);
+                reservationService.createMyReservation(authInfo, createReservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + createReservationResponse.id()))
                 .body(createReservationResponse);
     }
 
-    @GetMapping
-    public ResponseEntity<List<FindReservationResponse>> getReservations() {
-        return ResponseEntity.ok(reservationService.getReservations());
-    }
-
-    @GetMapping("/{id}")
+    @GetMapping("/reservations/{id}")
     public ResponseEntity<FindReservationResponse> getReservation(@PathVariable final Long id) {
         return ResponseEntity.ok(reservationService.getReservation(id));
     }
 
-    @GetMapping("/times")
+    @GetMapping("/reservations/times")
     public ResponseEntity<List<FindAvailableTimesResponse>> getAvailableTimes(@RequestParam LocalDate date,
                                                                               @RequestParam Long themeId) {
         return ResponseEntity.ok(reservationService.getAvailableTimes(date, themeId));
     }
 
-    @GetMapping("/search")
+    @GetMapping("/reservations/search")
     public ResponseEntity<List<FindReservationResponse>> searchBy(@RequestParam(required = false) Long themeId,
                                                                   @RequestParam(required = false) Long memberId,
                                                                   @RequestParam(required = false) LocalDate dateFrom,
@@ -65,9 +60,16 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.searchBy(themeId, memberId, dateFrom, dateTo));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> cancelReservation(@AuthenticationPrincipal AuthInfo authInfo,
+                                                  @PathVariable Long id) {
+        reservationService.deleteReservation(authInfo, id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/members/reservations")
+    public ResponseEntity<List<FindReservationResponse>> getReservations(
+            @AuthenticationPrincipal AuthInfo authInfo) {
+        return ResponseEntity.ok(reservationService.getReservations(authInfo));
     }
 }

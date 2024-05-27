@@ -10,19 +10,19 @@ import org.junit.jupiter.api.Test;
 class RoleTest {
 
     @Test
-    @DisplayName("문자열로부터, 해당하는 권한 Enum을 반환한다.")
+    @DisplayName("문자열과 동일한 권한 Enum 반환")
     void findMemberRole() {
         assertThat(Role.valueOf("USER")).isEqualTo(Role.USER);
     }
 
     @Test
-    @DisplayName("회원의 권한이 관리자가 아닌 경우, 참을 반환한다.")
+    @DisplayName("회원의 권한이 관리자가 아님: 참")
     void isNotAdmin() {
         assertTrue(Role.USER.isNotAdmin());
     }
 
     @Test
-    @DisplayName("회원의 권한이 관리자인 경우, 거짓을 반환한다.")
+    @DisplayName("회원의 권한이 관리자임: 거짓")
     void isAdmin() {
         assertFalse(Role.ADMIN.isNotAdmin());
     }
