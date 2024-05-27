@@ -9,9 +9,9 @@ public record WaitingResponse(Long id, String memberName, String themeName, Stri
         this(
                 waiting.getId(),
                 waiting.getMember().getName().name(),
-                waiting.getTheme().getName().name(),
-                waiting.getDate(DateTimeFormatter.ISO_DATE),
-                waiting.getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm"))
+                waiting.getReservation().getTheme().getName().name(),
+                waiting.getReservation().getDate(DateTimeFormatter.ISO_DATE),
+                waiting.getReservation().getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm"))
         );
     }
 }

@@ -24,7 +24,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -109,7 +108,7 @@ class ReservationServiceTest {
     @DisplayName("id에 맞는 예약을 삭제한다.")
     void deleteReservation() {
         MemberRequest memberRequest = new MemberRequest(MEMBER_1);
-        reservationService.deleteReservation(RESERVATION_2.getId(), memberRequest);
+        reservationService.cancelReservation(RESERVATION_2.getId(), memberRequest);
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         assertThat(count).isEqualTo(INITIAL_RESERVATION_COUNT - 1);
@@ -119,24 +118,15 @@ class ReservationServiceTest {
     @DisplayName("특정 예약에 대기가 있을 때, 예약을 삭제하면 1번째 예약 대기가 자동으로 예약된다.")
     void makeFirstWaitingToReservationIfReservationDeleted() {
         MemberRequest memberRequest = new MemberRequest(MEMBER_1);
-        reservationService.deleteReservation(RESERVATION_1.getId(), memberRequest);
-
-        waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
-                WAITING_1.getDate(),
-                WAITING_1.getReservationTime(),
-                WAITING_1.getTheme(),
-                WAITING_1.getMember()
-        );
+        reservationService.cancelReservation(RESERVATION_1.getId(), memberRequest);
 
         assertAll(
-                () -> assertThat(waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
-                        WAITING_1.getDate(),
-                        WAITING_1.getReservationTime(),
-                        WAITING_1.getTheme(),
-                        WAITING_1.getMember()
-                )).isFalse(),
+                () -> assertThat(waitingRepository.existsByReservationAndMember(
+                        WAITING_1.getReservation(),
+                        WAITING_1.getMember()))
+                        .isFalse(),
                 () -> assertThat(reservationRepository.findByMember(MEMBER_1, PAGE_REQUEST).getContent()
-                        .contains(new Reservation(WAITING_1)))
+                        .contains(RESERVATION_1.updateMember(WAITING_1.getMember())))
         );
     }
 

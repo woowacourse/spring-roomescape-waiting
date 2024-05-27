@@ -102,9 +102,10 @@ class WaitingServiceTest {
         assertThat(waitingsByMember).containsExactly(
                 new ReservationOrWaitingResponse(
                         WAITING_1.getId(),
-                        WAITING_1.getTheme().getName().name(),
-                        WAITING_1.getDate(DateTimeFormatter.ISO_DATE),
-                        WAITING_1.getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
+                        WAITING_1.getReservation().getTheme().getName().name(),
+                        WAITING_1.getReservation().getDate(DateTimeFormatter.ISO_DATE),
+                        WAITING_1.getReservation().getReservationTime()
+                                .getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
                         "1번째 예약대기"
                 )
         );
@@ -126,12 +127,8 @@ class WaitingServiceTest {
 
         waitingService.deleteWaiting(WAITING_1.getId(), memberRequest);
 
-        assertThat(waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
-                WAITING_1.getDate(),
-                WAITING_1.getReservationTime(),
-                WAITING_1.getTheme(),
-                WAITING_1.getMember()
-        )).isFalse();
+        assertThat(waitingRepository.existsByReservationAndMember(WAITING_1.getReservation(), WAITING_1.getMember()))
+                .isFalse();
     }
 
     @Test
@@ -141,11 +138,7 @@ class WaitingServiceTest {
 
         waitingService.deleteWaiting(WAITING_1.getId(), memberRequest);
 
-        assertThat(waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
-                WAITING_1.getDate(),
-                WAITING_1.getReservationTime(),
-                WAITING_1.getTheme(),
-                WAITING_1.getMember()
-        )).isFalse();
+        assertThat(waitingRepository.existsByReservationAndMember(WAITING_1.getReservation(), WAITING_1.getMember()))
+                .isFalse();
     }
 }

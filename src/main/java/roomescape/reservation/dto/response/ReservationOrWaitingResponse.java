@@ -25,9 +25,10 @@ public record ReservationOrWaitingResponse(
     public ReservationOrWaitingResponse(WaitingWithRank waitingWithRank) {
         this(
                 waitingWithRank.waiting().getId(),
-                waitingWithRank.waiting().getTheme().getName().name(),
-                waitingWithRank.waiting().getDate(DateTimeFormatter.ISO_DATE),
-                waitingWithRank.waiting().getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
+                waitingWithRank.waiting().getReservation().getTheme().getName().name(),
+                waitingWithRank.waiting().getReservation().getDate(DateTimeFormatter.ISO_DATE),
+                waitingWithRank.waiting().getReservation().getReservationTime()
+                        .getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
                 waitingWithRank.rank() + "번째 예약대기"
         );
     }

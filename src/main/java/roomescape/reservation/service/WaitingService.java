@@ -49,12 +49,7 @@ public class WaitingService {
 
         validateIsNotDuplicatedMember(reservation, member);
 
-        Waiting waiting = waitingRepository.save(new Waiting(
-                reservation.getDate(),
-                reservation.getReservationTime(),
-                reservation.getTheme(),
-                member)
-        );
+        Waiting waiting = waitingRepository.save(new Waiting(reservation, member));
         return new WaitingResponse(waiting);
     }
 
@@ -81,12 +76,7 @@ public class WaitingService {
     }
 
     private void validateIsNotAlreadyWaitingMember(Reservation reservation, Member member) {
-        boolean isAlreadyWaiting = waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
-                reservation.getDate(),
-                reservation.getReservationTime(),
-                reservation.getTheme(),
-                member
-        );
+        boolean isAlreadyWaiting = waitingRepository.existsByReservationAndMember(reservation, member);
 
         if (isAlreadyWaiting) {
             throw new DuplicationException("이미 예약 대기를 거셨습니다.");
@@ -96,7 +86,7 @@ public class WaitingService {
     @Transactional(readOnly = true)
     public List<ReservationOrWaitingResponse> findWaitingsByMember(MemberRequest memberRequest, int page, int size) {
         return waitingRepository.findWaitingsWithRankByMemberId(
-                        memberRequest.id(), PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "date")))
+                        memberRequest.id(), PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "reservation.date")))
                 .stream()
                 .map(ReservationOrWaitingResponse::new)
                 .toList();

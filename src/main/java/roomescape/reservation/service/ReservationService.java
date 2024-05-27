@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -133,33 +132,31 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id, MemberRequest memberRequest) {
+    public void cancelReservation(Long id, MemberRequest memberRequest) {
         reservationRepository.findById(id)
                 .ifPresent(reservation -> {
-                            validateDeleteAuth(memberRequest.toMember(), reservation);
-                            reservationRepository.deleteById(id);
-                            reorderWaitings(reservation);
+                            validateCancelAuth(memberRequest.toMember(), reservation);
+                            cancelReservation(reservation);
                         }
                 );
     }
 
-    private void validateDeleteAuth(Member member, Reservation reservation) {
+    private void validateCancelAuth(Member member, Reservation reservation) {
         if (reservation.isNotDeletableBy(member)) {
-            throw new AuthException("예약을 삭제할 권한이 없습니다.");
+            throw new AuthException("예약을 취소할 권한이 없습니다.");
         }
     }
 
-    private void reorderWaitings(Reservation reservation) {
-        Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndReservationTimeAndThemeOrderByIdAsc(
-                reservation.getDate(),
-                reservation.getReservationTime(),
-                reservation.getTheme()
-        );
+    private void cancelReservation(Reservation reservation) {
+        waitingRepository.findFirstByReservationOrderByIdAsc(reservation)
+                .ifPresentOrElse(
+                        waiting -> changeWaitingToReservation(waiting, reservation),
+                        () -> reservationRepository.deleteById(reservation.getId())
+                );
+    }
 
-        if (firstWaiting.isPresent()) {
-            Waiting waiting = firstWaiting.get();
-            waitingRepository.deleteById(waiting.getId());
-            reservationRepository.save(new Reservation(waiting));
-        }
+    private void changeWaitingToReservation(Waiting waiting, Reservation reservation) {
+        waitingRepository.deleteById(waiting.getId());
+        reservationRepository.save(reservation.updateMember(waiting.getMember()));
     }
 }

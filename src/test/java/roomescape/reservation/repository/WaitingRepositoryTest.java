@@ -28,12 +28,8 @@ class WaitingRepositoryTest {
     @Test
     @DisplayName("특정 회원이 특정 날짜, 시간, 테마에 이미 예약 대기를 걸었으면 true를 반환한다.")
     void trueIfAlreadyWaiting() {
-        boolean isAlreadyWaiting = waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
-                WAITING_1.getDate(),
-                WAITING_1.getReservationTime(),
-                WAITING_1.getTheme(),
-                WAITING_1.getMember()
-        );
+        boolean isAlreadyWaiting = waitingRepository.existsByReservationAndMember(WAITING_1.getReservation(),
+                WAITING_1.getMember());
 
         assertThat(isAlreadyWaiting).isTrue();
     }
@@ -41,12 +37,7 @@ class WaitingRepositoryTest {
     @Test
     @DisplayName("특정 회원이 특정 날짜, 시간, 테마에 이미 예약 대기를 걸지 않았으면 false를 반환한다.")
     void falseIfNotWaiting() {
-        boolean isAlreadyWaiting = waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
-                RESERVATION_2.getDate(),
-                RESERVATION_2.getReservationTime(),
-                RESERVATION_2.getTheme(),
-                WAITING_1.getMember()
-        );
+        boolean isAlreadyWaiting = waitingRepository.existsByReservationAndMember(RESERVATION_2, WAITING_1.getMember());
 
         assertThat(isAlreadyWaiting).isFalse();
     }
@@ -81,11 +72,8 @@ class WaitingRepositoryTest {
     @Test
     @DisplayName("특정 예약에 대해 1번 예약 대기를 가져온다.")
     void findFirstWaiting() {
-        Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndReservationTimeAndThemeOrderByIdAsc(
-                WAITING_1.getDate(),
-                WAITING_1.getReservationTime(),
-                WAITING_1.getTheme()
-        );
+        Optional<Waiting> firstWaiting = waitingRepository.findFirstByReservationOrderByIdAsc(
+                WAITING_1.getReservation());
 
         assertThat(firstWaiting.get()).isEqualTo(WAITING_1);
     }
@@ -93,11 +81,7 @@ class WaitingRepositoryTest {
     @Test
     @DisplayName("특정 예약에 대해 1번 예약 대기를 가져오려는데, 예약 대기가 없으면 비어있는 Optional을 반환한다.")
     void findEmptyOptionalIfNoWaiting() {
-        Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndReservationTimeAndThemeOrderByIdAsc(
-                RESERVATION_2.getDate(),
-                RESERVATION_2.getReservationTime(),
-                RESERVATION_2.getTheme()
-        );
+        Optional<Waiting> firstWaiting = waitingRepository.findFirstByReservationOrderByIdAsc(RESERVATION_2);
 
         assertThat(firstWaiting.isEmpty()).isTrue();
     }

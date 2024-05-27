@@ -14,20 +14,17 @@ public class InitialWaitingFixture {
     public static final int MEMBER_2_INITIAL_WAITING_COUNT = 1;
     public static final int PAGE_NUMBER = 0;
     public static final int PAGE_SIZE = 10;
-    public static final PageRequest PAGE_REQUEST = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "date"));
+    public static final PageRequest PAGE_REQUEST = PageRequest.of(0, 10,
+            Sort.by(Sort.Direction.ASC, "reservation.date"));
     public static Waiting WAITING_1 = new Waiting(
             1L,
-            RESERVATION_1.getDate(),
-            RESERVATION_1.getReservationTime(),
-            RESERVATION_1.getTheme(),
+            RESERVATION_1,
             MEMBER_2
     );
 
     public static Waiting WAITING_2 = new Waiting(
             2L,
-            RESERVATION_1.getDate(),
-            RESERVATION_1.getReservationTime(),
-            RESERVATION_1.getTheme(),
+            RESERVATION_1,
             MEMBER_3
     );
 }

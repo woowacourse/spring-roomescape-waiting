@@ -33,7 +33,7 @@ VALUES
     (2, DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
 
 -- waiting 테이블에 데이터 추가
-INSERT INTO waiting (date, reservation_time_id, theme_id, member_id)
+INSERT INTO waiting (reservation_id, member_id)
 VALUES
-    (DATEADD('DAY', -10, CURRENT_DATE), 1, 3, 2),
-    (DATEADD('DAY', -10, CURRENT_DATE), 1, 3, 3);
+    (1, 2),
+    (1, 3);

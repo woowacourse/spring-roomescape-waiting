@@ -1,17 +1,13 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import roomescape.member.domain.Member;
-import roomescape.theme.domain.Theme;
 
 @Entity
 public class Waiting {
@@ -20,14 +16,8 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private ReservationTime reservationTime;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private Theme theme;
+    private Reservation reservation;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Member member;
@@ -35,16 +25,14 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public Waiting(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+    public Waiting(Long id, Reservation reservation, Member member) {
         this.id = id;
-        this.date = date;
-        this.reservationTime = reservationTime;
-        this.theme = theme;
+        this.reservation = reservation;
         this.member = member;
     }
 
-    public Waiting(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
-        this(null, date, reservationTime, theme, member);
+    public Waiting(Reservation reservation, Member member) {
+        this(null, reservation, member);
     }
 
     public boolean isNotDeletableBy(Member member) {
@@ -55,20 +43,8 @@ public class Waiting {
         return id;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public String getDate(DateTimeFormatter formatter) {
-        return date.format(formatter);
-    }
-
-    public ReservationTime getReservationTime() {
-        return reservationTime;
-    }
-
-    public Theme getTheme() {
-        return theme;
+    public Reservation getReservation() {
+        return reservation;
     }
 
     public Member getMember() {

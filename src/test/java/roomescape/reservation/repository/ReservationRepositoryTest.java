@@ -185,7 +185,7 @@ class ReservationRepositoryTest {
     @Test
     @DisplayName("Reservation을 제거한다.")
     void delete() {
-        reservationRepository.deleteById(RESERVATION_1.getId());
+        reservationRepository.deleteById(RESERVATION_2.getId());
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
 
