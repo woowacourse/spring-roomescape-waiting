@@ -42,7 +42,7 @@ public class AdminController {
     }
 
     @GetMapping("/waitings")
-    public ApiResponses<ReservationResponse> getReservations() {
+    public ApiResponses<ReservationResponse> getReservationWaitings() {
         List<ReservationResponse> reservationWaitings = reservationWaitingService.getReservationWaitings();
         return new ApiResponses<>(reservationWaitings);
     }
