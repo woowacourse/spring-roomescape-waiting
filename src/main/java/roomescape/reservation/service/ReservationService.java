@@ -5,63 +5,38 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
-import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final ReservationFactoryService reservationFactoryService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            ReservationFactoryService reservationFactoryService
     ) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+        this.reservationFactoryService = reservationFactoryService;
     }
 
     @Transactional
     public ReservationResponse save(ReservationSaveRequest saveRequest) {
-        Reservation reservation = createReservation(saveRequest);
+        Reservation reservation = reservationFactoryService.createSuccess(saveRequest);
         validateMemberReservationUnique(reservation);
         validateReservationAvailable(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
-    }
-
-    private Reservation createReservation(ReservationSaveRequest saveRequest) {
-        Member member = memberRepository.findById(saveRequest.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-
-        Theme theme = themeRepository.findById(saveRequest.themeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
-
-        ReservationTime reservationTime = reservationTimeRepository.findById(saveRequest.timeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
-
-        return saveRequest.toReservation(member, theme, reservationTime);
     }
 
     private void validateMemberReservationUnique(Reservation reservation) {

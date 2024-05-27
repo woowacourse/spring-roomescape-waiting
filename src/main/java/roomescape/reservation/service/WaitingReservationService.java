@@ -4,62 +4,37 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.WaitingReservationSaveRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class WaitingReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final ReservationFactoryService reservationFactoryService;
 
     public WaitingReservationService(
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            ReservationFactoryService reservationFactoryService
     ) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+        this.reservationFactoryService = reservationFactoryService;
     }
 
     @Transactional
     public ReservationResponse save(WaitingReservationSaveRequest saveRequest) {
-        Reservation reservation = createWaitingReservation(saveRequest);
+        Reservation reservation = reservationFactoryService.createWaiting(saveRequest);
         validateMemberReservationUnique(reservation);
         validateWaitingAvailable(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
-    }
-
-    private Reservation createWaitingReservation(WaitingReservationSaveRequest saveRequest) {
-        Member member = memberRepository.findById(saveRequest.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-
-        Theme theme = themeRepository.findById(saveRequest.themeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
-
-        ReservationTime reservationTime = reservationTimeRepository.findById(saveRequest.timeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
-
-        return saveRequest.toWaitingReservation(member, theme, reservationTime);
     }
 
     private void validateMemberReservationUnique(Reservation reservation) {
