@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.model.theme.Name;
 import roomescape.model.theme.Theme;
 
@@ -10,6 +11,7 @@ import java.util.List;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
+    @Transactional
     @Query(value = """
                 select r.reservationInfo.theme
                 from Reservation r

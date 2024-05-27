@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.model.ReservationInfo;
 import roomescape.model.Waiting;
 import roomescape.model.WaitingWithRank;
@@ -12,6 +13,7 @@ import java.util.Optional;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
+    @Transactional
     @Query("""
             SELECT new roomescape.model.WaitingWithRank(w, (SELECT COUNT(w2) + 1
                         FROM Waiting w2
@@ -22,6 +24,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
+    @Transactional
     @Query("""
             SELECT w
             FROM Waiting w
