@@ -174,12 +174,12 @@ class ReservationControllerTest {
                 .statusCode(200).extract()
                 .jsonPath().getList("", ReservationResponse.class);
 
-        ReservationResponse promptedReservation = reservationResponses.stream()
+        ReservationResponse promotedReservation = reservationResponses.stream()
                 .filter(reservationResponse -> Objects.equals(reservationResponse.id(), response.id()))
                 .findAny()
                 .get();
 
-        assertThat(promptedReservation.member().id())
+        assertThat(promotedReservation.member().id())
                 .isEqualTo(MEMBER_BROWN.getId());
     }
 }

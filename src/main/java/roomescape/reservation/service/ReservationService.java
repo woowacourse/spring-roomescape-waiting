@@ -116,14 +116,14 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         waitingRepository.findFirstByReservation_idOrderByCreatedAtAsc(id)
-                .ifPresentOrElse(this::promptWaiting, () -> reservationRepository.deleteById(id));
+                .ifPresentOrElse(this::promoteWaiting, () -> reservationRepository.deleteById(id));
 
     }
 
-    private void promptWaiting(Waiting waiting) {
-        Reservation promptedReservation = waiting.promptToReservation();
+    private void promoteWaiting(Waiting waiting) {
+        Reservation promotedReservation = waiting.promoteToReservation();
 
-        reservationRepository.save(promptedReservation);
+        reservationRepository.save(promotedReservation);
         waitingRepository.deleteById(waiting.getId());
     }
 }
