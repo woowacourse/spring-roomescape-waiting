@@ -23,7 +23,7 @@ class ReservationTest {
     class createReservation {
 
         @Test
-        @DisplayName("예약 객체 생성 시 예약자가 없는 경우 예외를 반환한다.")
+        @DisplayName("예약 객체 생성 실패: 예약자가 없음")
         void createReservation_WhenNameIsBlank() {
             assertThatThrownBy(
                     () -> ReservationFixture.getOneWithMember(null))
@@ -32,7 +32,7 @@ class ReservationTest {
         }
 
         @Test
-        @DisplayName("예약 객체 생성 시 예약자 명이 공백인 경우 예외를 반환한다.")
+        @DisplayName("예약 객체 생성 실패: 예약자 명이 공백")
         void createReservation_WhenNameOverLength() {
             assertThatThrownBy(
                     () -> ReservationFixture.getOneWithMember(null))
@@ -41,7 +41,7 @@ class ReservationTest {
         }
 
         @Test
-        @DisplayName("예약 객체 생성 시 예약 날짜가 공백인 경우 예외를 반환한다.")
+        @DisplayName("예약 객체 생성 실패: 예약 날짜가 공백")
         void createReservation_WhenReservationDateIsNull() {
             assertThatThrownBy(
                     () -> ReservationFixture.getOneWithDateTimeTheme(null, ReservationTimeFixture.getOne(),
@@ -51,7 +51,7 @@ class ReservationTest {
         }
 
         @Test
-        @DisplayName("예약 객체 생성 시 예약 시간이 공백인 경우 예외를 반환한다.")
+        @DisplayName("예약 객체 생성 실패: 예약 시간이 공백")
         void createReservation_WhenReservationTimeIsNull() {
             assertThatThrownBy(
                     () -> ReservationFixture.getOneWithTimeTheme(null, ThemeFixture.getOne()))
@@ -60,7 +60,7 @@ class ReservationTest {
         }
 
         @Test
-        @DisplayName("예약 객체 생성 시 예약 테마가 공백인 경우 예외를 반환한다.")
+        @DisplayName("예약 객체 생성 실패: 예약 테마가 공백")
         void createReservation_WhenReservationThemeIsNull() {
             assertThatThrownBy(
                     () -> ReservationFixture.getOneWithTheme(null))
@@ -69,7 +69,7 @@ class ReservationTest {
         }
 
         @Test
-        @DisplayName("예약 객체 생성 시 예약하려는 날짜가 과거인 경우 예외를 반환한다.")
+        @DisplayName("예약 객체 생성 실패: 예약하려는 날짜가 과거")
         void createReservation_WhenReservationDateInPast() {
             assertThatThrownBy(
                     () -> Reservation.create(
@@ -82,7 +82,7 @@ class ReservationTest {
         }
 
         @Test
-        @DisplayName("예약 객체 생성 시 예약하려는 날짜가 과거인 경우 예외를 반환한다.")
+        @DisplayName("예약 객체 생성 실패: 예약하려는 시간이 과거")
         void createReservation_WhenReservationTimeInPast() {
             LocalDateTime now = LocalDateTime.now();
             assertThatThrownBy(
@@ -97,7 +97,7 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("같은 예약 시간 확인: 참")
+    @DisplayName("주어진 시간과 예약의 시간이 동일: 참")
     void isSameTime() {
         ReservationTime sameTime = new ReservationTime(1L, LocalTime.parse("10:00"));
         Reservation reservation = new Reservation(MemberFixture.getOne(), LocalDate.parse("2099-10-11"),
@@ -106,7 +106,7 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("같은 예약 시간 확인: 거짓")
+    @DisplayName("주어진 시간과 예약의 시간이 동일하지 않음: 거짓")
     void isSameTime_WhenNotSame() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
         ReservationTime otherTime = new ReservationTime(2L, LocalTime.parse("20:00"));
@@ -116,7 +116,7 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("같은 예약 시간 확인: 참")
+    @DisplayName("주어진 회원이 예약의 예약자가 동일: 참")
     void isOwnedBy() {
         Member member = MemberFixture.getOneWithId(1L);
         Reservation reservation = new Reservation(member, LocalDate.parse("2099-10-11"),
@@ -125,7 +125,7 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("같은 예약 시간 확인: 거짓")
+    @DisplayName("주어진 회원이 예약의 예약자가 동일하지 않음: 참")
     void isOwnedBy_WhenNotSame() {
         Member member = MemberFixture.getOneWithId(1L);
         Member otherMember = MemberFixture.getOneWithId(2L);
