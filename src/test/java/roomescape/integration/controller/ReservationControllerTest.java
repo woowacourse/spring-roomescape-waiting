@@ -6,9 +6,13 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
 import static roomescape.exception.ExceptionType.NO_QUERY_PARAMETER;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationFixture.ReservationOfDate;
+import static roomescape.fixture.ReservationFixture.ReservationOfDateAndTheme;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_RESERVATION_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,14 +28,12 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.Fixture;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
 import roomescape.dto.ReservationResponse;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
-import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.fixture.ThemeFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -39,8 +41,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.JwtGenerator;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 public class ReservationControllerTest {
 
     @LocalServerPort
@@ -56,11 +57,8 @@ public class ReservationControllerTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
-    private Theme defaultTheme1 = new Theme("theme1", "description", "thumbnail");
-    private Theme defaultTheme2 = new Theme("theme2", "description", "thumbnail");
 
-    private ReservationTime defaultTime = new ReservationTime(LocalTime.of(11, 30));
-    private Member defaultMember = Fixture.defaultMember;
+    private Theme theme = ThemeFixture.themeOfName("theme");
     private String token;
 
     @BeforeEach
@@ -68,16 +66,16 @@ public class ReservationControllerTest {
         RestAssured.port = port;
         token = JWT_GENERATOR.generateWith(
                 Map.of(
-                        "id", defaultMember.getId(),
-                        "name", defaultMember.getName(),
-                        "role", defaultMember.getRole().getTokenValue()
+                        "id", DEFAULT_MEMBER.getId(),
+                        "name", DEFAULT_MEMBER.getName(),
+                        "role", DEFAULT_MEMBER.getRole().getTokenValue()
                 )
         );
 
-        defaultTheme1 = themeRepository.save(defaultTheme1);
-        defaultTheme2 = themeRepository.save(defaultTheme2);
-        defaultTime = reservationTimeRepository.save(defaultTime);
-        defaultMember = memberRepository.save(defaultMember);
+        themeRepository.save(DEFAULT_THEME);
+        theme = themeRepository.save(theme);
+        reservationTimeRepository.save(DEFAULT_RESERVATION_TIME);
+        memberRepository.save(DEFAULT_MEMBER);
     }
 
     @DisplayName("예약이 10개 존재할 때")
@@ -96,36 +94,25 @@ public class ReservationControllerTest {
 
         @BeforeEach
         void initData() {
-            reservation1 = reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(5), defaultTime, defaultTheme1,
-                            defaultMember, ReservationStatus.BOOKED));
-            reservation2 = reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(4), defaultTime, defaultTheme1,
-                            defaultMember, ReservationStatus.BOOKED));
-            reservation3 = reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(3), defaultTime, defaultTheme1,
-                            defaultMember, ReservationStatus.BOOKED));
-            reservation4 = reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(2), defaultTime, defaultTheme1,
-                            defaultMember, ReservationStatus.BOOKED));
-            reservation5 = reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(1), defaultTime, defaultTheme1,
-                            defaultMember, ReservationStatus.BOOKED));
+            reservation1 = reservationRepository.save(ReservationOfDate(LocalDate.now().minusDays(5)));
+            reservation2 = reservationRepository.save(ReservationOfDate(LocalDate.now().minusDays(4)));
+            reservation3 = reservationRepository.save(ReservationOfDate(LocalDate.now().minusDays(3)));
+            reservation4 = reservationRepository.save(ReservationOfDate(LocalDate.now().minusDays(2)));
+            reservation5 = reservationRepository.save(ReservationOfDate(LocalDate.now().minusDays(1)));
+            reservation6 = reservationRepository.save(ReservationOfDate(LocalDate.now()));
 
-            reservation6 = reservationRepository.save(
-                    new Reservation(LocalDate.now(), defaultTime, defaultTheme1, defaultMember, ReservationStatus.BOOKED));
             reservation7 = reservationRepository.save(
-                    new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme2,
-                            defaultMember, ReservationStatus.BOOKED));
+                    ReservationOfDateAndTheme(LocalDate.now().plusDays(1), theme)
+            );
             reservation8 = reservationRepository.save(
-                    new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme2,
-                            defaultMember, ReservationStatus.BOOKED));
+                    ReservationOfDateAndTheme(LocalDate.now().plusDays(2), theme)
+            );
             reservation9 = reservationRepository.save(
-                    new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme2,
-                            defaultMember, ReservationStatus.BOOKED));
+                    ReservationOfDateAndTheme(LocalDate.now().plusDays(3), theme)
+            );
             reservation10 = reservationRepository.save(
-                    new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme2,
-                            defaultMember, ReservationStatus.BOOKED));
+                    ReservationOfDateAndTheme(LocalDate.now().plusDays(4), theme)
+            );
         }
 
         @DisplayName("존재하는 모든 예약을 조회할 수 있다.")
@@ -166,10 +153,10 @@ public class ReservationControllerTest {
                     .then().log().all()
                     .statusCode(201)
                     .body("id", is(11),
-                            "member.name", is(defaultMember.getName()),
+                            "member.name", is(DEFAULT_MEMBER.getName()),
                             "date", is(reservationParam.get("date")),
-                            "time.startAt", is(defaultTime.getStartAt().toString()),
-                            "theme.name", is(defaultTheme1.getName()));
+                            "time.startAt", is(DEFAULT_RESERVATION_TIME.getStartAt().toString()),
+                            "theme.name", is(DEFAULT_THEME.getName()));
 
             RestAssured.given().log().all()
                     .when().get("/reservations")

@@ -5,6 +5,9 @@ import static org.hamcrest.Matchers.is;
 
 import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_RESERVATION_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,21 +27,19 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.Fixture;
 import roomescape.domain.ReservationStatus;
 import roomescape.dto.AvailableTimeResponse;
-import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.fixture.ReservationFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 public class ReservationTimeControllerTest {
 
     @LocalServerPort
@@ -52,14 +53,11 @@ public class ReservationTimeControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    private Theme defaultTheme = new Theme("theme1", "description", "thumbnail");
-    private Member defaultMember = Fixture.defaultMember;
-
     @BeforeEach
     void initData() {
         RestAssured.port = port;
-        defaultTheme = themeRepository.save(defaultTheme);
-        defaultMember = memberRepository.save(defaultMember);
+        themeRepository.save(DEFAULT_THEME);
+        memberRepository.save(DEFAULT_MEMBER);
     }
 
     @DisplayName("여러 예약이 존재할 때 예약 가능 시간을 조회할 수 있다.")
@@ -69,14 +67,14 @@ public class ReservationTimeControllerTest {
         Theme theme = new Theme("name", "description", "thumbnail");
         theme = themeRepository.save(theme);
 
-        ReservationTime usedReservationTime = new ReservationTime(LocalTime.of(11, 30));
+        ReservationTime usedReservationTime = DEFAULT_RESERVATION_TIME;
         ReservationTime notUsedReservationTime = new ReservationTime(LocalTime.of(12, 30));
-        usedReservationTime = reservationTimeRepository.save(usedReservationTime);
+        reservationTimeRepository.save(usedReservationTime);
         notUsedReservationTime = reservationTimeRepository.save(notUsedReservationTime);
 
         LocalDate findDate = LocalDate.of(2024, 5, 4);
         reservationRepository.save(
-                new Reservation(findDate, usedReservationTime, theme, defaultMember, ReservationStatus.BOOKED));
+                new Reservation(findDate, usedReservationTime, theme, DEFAULT_MEMBER, ReservationStatus.BOOKED));
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = RestAssured.given().log().all()
@@ -96,12 +94,12 @@ public class ReservationTimeControllerTest {
     @DisplayName("예약 시간이 1개 존재할 때")
     @Nested
     class ExistReservationTime {
+        private final ReservationTime usedReservationTime = DEFAULT_RESERVATION_TIME;
         private final ReservationTime notUsedReservationTime = new ReservationTime(LocalTime.of(12, 30));
-        private ReservationTime usedReservationTime = new ReservationTime(LocalTime.of(11, 30));
 
         @BeforeEach
         void init() {
-            usedReservationTime = reservationTimeRepository.save(usedReservationTime);
+            reservationTimeRepository.save(usedReservationTime);
             reservationTimeRepository.save(notUsedReservationTime);
         }
 
@@ -161,7 +159,7 @@ public class ReservationTimeControllerTest {
         @Test
         void deleteUsedTimeTest() {
             reservationRepository.save(
-                    new Reservation(LocalDate.now(), usedReservationTime, defaultTheme, defaultMember, ReservationStatus.BOOKED)
+                    ReservationFixture.ReservationOfDate(LocalDate.now())
             );
 
             RestAssured.given().log().all()

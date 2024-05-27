@@ -10,9 +10,13 @@ import static roomescape.exception.ExceptionType.DUPLICATE_WAITING_RESERVATION;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
+import static roomescape.fixture.ReservationFixture.ReservationOfDate;
+import static roomescape.fixture.ReservationFixture.ReservationOfDateAndMemberAndStatus;
+import static roomescape.fixture.ReservationFixture.ReservationOfDateAndStatus;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_RESERVATION_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +29,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
-import roomescape.Fixture;
 import roomescape.domain.LoginMember;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Reservations;
@@ -37,9 +40,8 @@ import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
-import roomescape.entity.ReservationTime;
-import roomescape.entity.Theme;
 import roomescape.exception.RoomescapeException;
+import roomescape.fixture.MemberFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -50,8 +52,8 @@ import roomescape.service.ReservationService;
 @Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationServiceTest {
 
-    private final LoginMember loginMember = Fixture.defaultLoginuser;
-    private final Member member = Fixture.defaultMember;
+    private final LoginMember loginMember = MemberFixture.DEFAULT_LOGIN_MEMBER;
+    private final Member member = MemberFixture.DEFAULT_MEMBER;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -63,13 +65,10 @@ class ReservationServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    private ReservationTime defaultTime = new ReservationTime(LocalTime.of(0, 0));
-    private Theme defaultTheme = new Theme("name", "description", "thumbnail");
-
     @BeforeEach
     void initService() {
-        defaultTime = reservationTimeRepository.save(defaultTime);
-        defaultTheme = themeRepository.save(defaultTheme);
+        reservationTimeRepository.save(DEFAULT_RESERVATION_TIME);
+        themeRepository.save(DEFAULT_THEME);
         memberRepository.save(member);
     }
 
@@ -81,8 +80,8 @@ class ReservationServiceTest {
                 loginMember,
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
-                        defaultTime.getId(),
-                        defaultTheme.getId()
+                        DEFAULT_RESERVATION_TIME.getId(),
+                        DEFAULT_THEME.getId()
                 ));
 
         //then
@@ -100,8 +99,8 @@ class ReservationServiceTest {
                 loginMember,
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
-                        defaultTime.getId(),
-                        defaultTheme.getId()
+                        DEFAULT_RESERVATION_TIME.getId(),
+                        DEFAULT_THEME.getId()
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(PAST_TIME_RESERVATION.getMessage());
@@ -115,7 +114,7 @@ class ReservationServiceTest {
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
                         2L,
-                        defaultTheme.getId()
+                        DEFAULT_THEME.getId()
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(NOT_FOUND_RESERVATION_TIME.getMessage());
@@ -128,7 +127,7 @@ class ReservationServiceTest {
                 loginMember,
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
-                        defaultTime.getId(),
+                        DEFAULT_THEME.getId(),
                         2L
                 )))
                 .isInstanceOf(RoomescapeException.class)
@@ -139,14 +138,12 @@ class ReservationServiceTest {
     @Test
     void findAllReservationsTest() {
         //given
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
-                member, ReservationStatus.BOOKED));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
-                member, ReservationStatus.BOOKED));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme,
-                member, ReservationStatus.WAITING));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme,
-                member, ReservationStatus.BOOKED));
+        reservationRepository.save(ReservationOfDate(LocalDate.now().plusDays(1)));
+        reservationRepository.save(ReservationOfDate(LocalDate.now().plusDays(2)));
+        reservationRepository.save(
+                ReservationOfDateAndStatus(LocalDate.now().plusDays(3), ReservationStatus.WAITING)
+        );
+        reservationRepository.save(ReservationOfDate(LocalDate.now().plusDays(4)));
 
         //when
         List<ReservationResponse> reservationResponses = reservationService.findAllReservations();
@@ -161,14 +158,18 @@ class ReservationServiceTest {
         //given
         Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
         memberRepository.save(testMember);
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
-                testMember, ReservationStatus.BOOKED));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
-                member, ReservationStatus.WAITING));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
-                testMember, ReservationStatus.BOOKED));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
-                member, ReservationStatus.WAITING));
+        reservationRepository.save(
+                ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1), testMember, ReservationStatus.BOOKED)
+        );
+        reservationRepository.save(
+                ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1), member, ReservationStatus.WAITING)
+        );
+        reservationRepository.save(
+                ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(2), testMember, ReservationStatus.BOOKED)
+        );
+        reservationRepository.save(
+                ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(2), member, ReservationStatus.WAITING)
+        );
 
         //when
         List<AdminReservationDetailResponse> reservationResponses = reservationService.findAllWaitingReservations();
@@ -183,13 +184,13 @@ class ReservationServiceTest {
         //given
         Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
         memberRepository.save(testMember);
-        Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation1 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 testMember, ReservationStatus.BOOKED);
-        Reservation reservation2 = new Reservation(2L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation2 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 member, ReservationStatus.WAITING);
-        Reservation reservation3 = new Reservation(3L, LocalDate.now().plusDays(3), defaultTime, defaultTheme,
+        Reservation reservation3 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(3),
                 member, ReservationStatus.BOOKED);
-        Reservation reservation4 = new Reservation(4L, LocalDate.now().plusDays(4), defaultTime, defaultTheme,
+        Reservation reservation4 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(4),
                 member, ReservationStatus.BOOKED);
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -213,9 +214,9 @@ class ReservationServiceTest {
         //given
         Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
         memberRepository.save(testMember);
-        Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation1 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 testMember, ReservationStatus.BOOKED);
-        Reservation reservation2 = new Reservation(2L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation2 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 member, ReservationStatus.WAITING);
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -232,9 +233,9 @@ class ReservationServiceTest {
         //given
         Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
         memberRepository.save(testMember);
-        Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation1 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 testMember, ReservationStatus.BOOKED);
-        Reservation reservation2 = new Reservation(2L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation2 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 member, ReservationStatus.WAITING);
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -252,9 +253,9 @@ class ReservationServiceTest {
         //given
         Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
         memberRepository.save(testMember);
-        Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation1 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 testMember, ReservationStatus.BOOKED);
-        Reservation reservation2 = new Reservation(2L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+        Reservation reservation2 = ReservationOfDateAndMemberAndStatus(LocalDate.now().plusDays(1),
                 member, ReservationStatus.WAITING);
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -279,7 +280,7 @@ class ReservationServiceTest {
 
         @BeforeEach
         void addDefaultReservation() {
-            defaultReservation = new Reservation(defaultDate, defaultTime, defaultTheme, member, ReservationStatus.BOOKED);
+            defaultReservation = new Reservation(defaultDate, DEFAULT_RESERVATION_TIME, DEFAULT_THEME, member, ReservationStatus.BOOKED);
             defaultReservation = reservationRepository.save(defaultReservation);
         }
 
@@ -288,7 +289,7 @@ class ReservationServiceTest {
         void duplicatedReservationFailTest() {
             assertThatThrownBy(() -> reservationService.save(
                     loginMember,
-                    new ReservationRequest(defaultDate, defaultTime.getId(), defaultTheme.getId())))
+                    new ReservationRequest(defaultDate, DEFAULT_RESERVATION_TIME.getId(), DEFAULT_THEME.getId())))
                     .isInstanceOf(RoomescapeException.class)
                     .hasMessage(DUPLICATE_RESERVATION.getMessage());
         }
@@ -298,7 +299,7 @@ class ReservationServiceTest {
         void duplicatedWaitingReservationFailTest() {
             assertThatThrownBy(() -> reservationService.saveWaiting(
                     loginMember,
-                    new ReservationRequest(defaultDate, defaultTime.getId(), defaultTheme.getId())))
+                    new ReservationRequest(defaultDate, DEFAULT_RESERVATION_TIME.getId(), DEFAULT_THEME.getId())))
                     .isInstanceOf(RoomescapeException.class)
                     .hasMessage(DUPLICATE_WAITING_RESERVATION.getMessage());
         }

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
-import roomescape.Fixture;
+import roomescape.fixture.MemberFixture;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTimes;
 import roomescape.dto.AvailableTimeResponse;
@@ -52,12 +53,11 @@ class ReservationTimeServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    Theme defaultTheme = new Theme("name", "description", "thumbnail");
 
     @BeforeEach
     void setUp() {
-        defaultTheme = themeRepository.save(defaultTheme);
-        memberRepository.save(Fixture.defaultMember);
+        themeRepository.save(DEFAULT_THEME);
+        memberRepository.save(MemberFixture.DEFAULT_MEMBER);
     }
 
     @DisplayName("저장된 시간을 모두 조회할 수 있다.")
@@ -92,9 +92,9 @@ class ReservationTimeServiceTest {
         LocalDate selectedDate = LocalDate.of(2024, 1, 1);
 
         reservationRepository.save(new Reservation(selectedDate, reservationTime1, DEFUALT_THEME,
-                Fixture.defaultMember, ReservationStatus.BOOKED));
+                MemberFixture.DEFAULT_MEMBER, ReservationStatus.BOOKED));
         reservationRepository.save(new Reservation(selectedDate, reservationTime3, DEFUALT_THEME,
-                Fixture.defaultMember, ReservationStatus.BOOKED));
+                MemberFixture.DEFAULT_MEMBER, ReservationStatus.BOOKED));
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = reservationTimeService.findByThemeAndDate(selectedDate,
@@ -154,8 +154,8 @@ class ReservationTimeServiceTest {
             reservationRepository.save(new Reservation(
                     LocalDate.now(),
                     new ReservationTime(1L, SAVED_TIME),
-                    defaultTheme,
-                    Fixture.defaultMember, ReservationStatus.BOOKED
+                    DEFAULT_THEME,
+                    MemberFixture.DEFAULT_MEMBER, ReservationStatus.BOOKED
             ));
 
             //when & then

@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 
 import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER_BY_EMAIL;
 import static roomescape.exception.ExceptionType.WRONG_PASSWORD;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
 
 import java.util.Map;
 
@@ -20,26 +21,21 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.Fixture;
-import roomescape.entity.Member;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class LoginControllerTest {
 
     @LocalServerPort
     int port;
-    private Member defaultUser = Fixture.defaultMember;
     @Autowired
     private MemberRepository memberRepository;
 
     @BeforeEach
     void init() {
         RestAssured.port = port;
-        defaultUser = memberRepository.save(defaultUser);
-        System.out.println(defaultUser);
+        memberRepository.save(DEFAULT_MEMBER);
     }
 
     @DisplayName("올바른 로그인 요청에 대해 토큰 값을 가진 쿠키가 생성된다.")
@@ -47,8 +43,8 @@ class LoginControllerTest {
     void loginTest() {
         RestAssured.given().log().all()
                 .when().body(Map.of(
-                        "email", defaultUser.getEmail(),
-                        "password", defaultUser.getPassword()
+                        "email", DEFAULT_MEMBER.getEmail(),
+                        "password", DEFAULT_MEMBER.getPassword()
                 ))
                 .contentType(ContentType.JSON)
                 .post("/login")
@@ -65,7 +61,7 @@ class LoginControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "email", "wrongEmail",
-                        "password", defaultUser.getPassword()
+                        "password", DEFAULT_MEMBER.getPassword()
                 )).post("/login")
                 .then().log().all()
                 .statusCode(400)
@@ -79,7 +75,7 @@ class LoginControllerTest {
                 .when()
                 .contentType(ContentType.JSON
                 ).body(Map.of(
-                        "email", defaultUser.getEmail(),
+                        "email", DEFAULT_MEMBER.getEmail(),
                         "password", "wrongPassword"
                 )).post("/login")
                 .then().log().all()
@@ -96,8 +92,8 @@ class LoginControllerTest {
         void getToken() {
             token = RestAssured.given().log().all()
                     .when().body(Map.of(
-                            "email", defaultUser.getEmail(),
-                            "password", defaultUser.getPassword()
+                            "email", DEFAULT_MEMBER.getEmail(),
+                            "password", DEFAULT_MEMBER.getPassword()
                     ))
                     .contentType(ContentType.JSON)
                     .post("/login")
@@ -115,7 +111,7 @@ class LoginControllerTest {
                     .get("/login/check")
                     .then().log().all()
                     .statusCode(200)
-                    .body("name", is(defaultUser.getName()));
+                    .body("name", is(DEFAULT_MEMBER.getName()));
         }
     }
 }

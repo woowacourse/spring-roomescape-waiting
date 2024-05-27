@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import io.jsonwebtoken.Claims;
-import roomescape.Fixture;
+import roomescape.fixture.MemberFixture;
 import roomescape.domain.LoginMember;
 import roomescape.dto.LoginRequest;
 import roomescape.entity.Member;
@@ -40,7 +40,7 @@ class LoginServiceTest {
     @DisplayName("유저 데이터가 존재할 때")
     @Nested
     class MemberExistsTest {
-        private Member defaultUser = Fixture.defaultMember;
+        private Member defaultUser = MemberFixture.DEFAULT_MEMBER;
 
         @BeforeEach
         void addDefaultUser() {
