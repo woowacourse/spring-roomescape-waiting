@@ -202,7 +202,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### Request
 
-> DELETE /admin/reservations/waiting/11 HTTP/1.1
+> DELETE /admin/reservations/11 HTTP/1.1
 
 ### Response
 
