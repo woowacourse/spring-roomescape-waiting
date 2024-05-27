@@ -1,13 +1,14 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.util.Fixture.HORROR_DESCRIPTION;
-import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.HOUR_10;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
-import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.Fixture.HORROR_DESCRIPTION;
+import static roomescape.Fixture.HORROR_THEME_NAME;
+import static roomescape.Fixture.HOUR_10;
+import static roomescape.Fixture.KAKI_EMAIL;
+import static roomescape.Fixture.KAKI_NAME;
+import static roomescape.Fixture.KAKI_PASSWORD;
+import static roomescape.Fixture.RESERVATION_TIME_10_00;
+import static roomescape.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -95,5 +96,13 @@ class ReservationTimeRepositoryTest {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         assertThat(reservationTimes.size()).isEqualTo(0);
+    }
+
+    @DisplayName("startAt으로 예약 시간을 조회한다.")
+    @Test
+    void findFirstByStartAt() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+
+        assertThat(reservationTimeRepository.findFirstByStartAt(reservationTime.getStartAt())).isPresent();
     }
 }

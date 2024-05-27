@@ -5,7 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import roomescape.config.IntegrationTest;
+import roomescape.common.config.IntegrationTest;
 
 class MemberPageControllerTest extends IntegrationTest {
 

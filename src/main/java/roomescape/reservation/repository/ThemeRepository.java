@@ -10,9 +10,13 @@ import roomescape.reservation.domain.ThemeName;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    Optional<Theme> findByThemeName(ThemeName name);
-
-    @Query("select t from Theme t join Reservation r on t.id = r.theme.id where t.id = :id")
+    @Query("""
+            select t
+            from Theme t
+            join Reservation r
+            on t.id = r.theme.id
+            where t.id = :id
+            """)
     List<Theme> findThemesThatReservationReferById(Long id);
 
     @Query("""
@@ -26,4 +30,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             limit :limitCount
                """)
     List<Theme> findPopularThemesDescOfLastWeekForLimit(LocalDate dateFrom, int limitCount);
+
+    Optional<Theme> findFirstByThemeName(ThemeName name);
 }

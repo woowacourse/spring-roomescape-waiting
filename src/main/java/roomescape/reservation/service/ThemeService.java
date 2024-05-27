@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.dto.PopularThemeResponse;
-import roomescape.reservation.dto.ThemeResponse;
-import roomescape.reservation.dto.ThemeSaveRequest;
+import roomescape.reservation.dto.request.ThemeSaveRequest;
+import roomescape.reservation.dto.response.PopularThemeResponse;
+import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
@@ -32,7 +32,7 @@ public class ThemeService {
 
     private void validateUniqueThemeName(ThemeSaveRequest themeSaveRequest) {
         ThemeName name = new ThemeName(themeSaveRequest.name());
-        themeRepository.findByThemeName(name).ifPresent(empty -> {
+        themeRepository.findFirstByThemeName(name).ifPresent(empty -> {
             throw new IllegalArgumentException("이미 존재하는 테마 이름입니다.");
         });
     }

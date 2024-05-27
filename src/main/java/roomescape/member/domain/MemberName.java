@@ -9,14 +9,14 @@ public class MemberName {
     private static final Pattern MEMBER_NAME_FORMAT = Pattern.compile("^[가-힣]+$");
     private static final int NAME_LENGTH = 4;
 
-    private String name;
+    private String value;
 
     protected MemberName() {
     }
 
-    public MemberName(String name) {
-        validate(name);
-        this.name = name;
+    public MemberName(String value) {
+        validate(value);
+        this.value = value;
     }
 
     private void validate(String name) {
@@ -36,7 +36,7 @@ public class MemberName {
         }
     }
 
-    public String getName() {
-        return name;
+    public String getValue() {
+        return value;
     }
 }

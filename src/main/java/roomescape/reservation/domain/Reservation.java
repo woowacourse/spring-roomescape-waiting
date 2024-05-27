@@ -80,6 +80,25 @@ public class Reservation {
         }
     }
 
+    public void updateSuccessStatus() {
+        if (status.isSuccess()) {
+            throw new IllegalArgumentException("이미 확정된 예약입니다.");
+        }
+        status = Status.SUCCESS;
+    }
+
+    public boolean isSameMember(Member member) {
+        return this.member.equals(member);
+    }
+
+    public boolean isSuccessReservation() {
+        return status.isSuccess();
+    }
+
+    public boolean isWaitingReservation() {
+        return status.isWait();
+    }
+
     public Long getId() {
         return id;
     }
@@ -106,6 +125,10 @@ public class Reservation {
 
     public LocalTime getStartAt() {
         return reservationTime.getStartAt();
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     public String getStatusDisplayName() {

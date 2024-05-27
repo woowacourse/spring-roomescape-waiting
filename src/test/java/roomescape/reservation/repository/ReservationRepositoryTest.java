@@ -1,20 +1,28 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.util.Fixture.HORROR_DESCRIPTION;
-import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.HOUR_10;
-import static roomescape.util.Fixture.JOJO_EMAIL;
-import static roomescape.util.Fixture.JOJO_NAME;
-import static roomescape.util.Fixture.JOJO_PASSWORD;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
-import static roomescape.util.Fixture.THUMBNAIL;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.Fixture.HORROR_DESCRIPTION;
+import static roomescape.Fixture.HORROR_THEME;
+import static roomescape.Fixture.HORROR_THEME_NAME;
+import static roomescape.Fixture.HOUR_10;
+import static roomescape.Fixture.JOJO_EMAIL;
+import static roomescape.Fixture.JOJO_NAME;
+import static roomescape.Fixture.JOJO_PASSWORD;
+import static roomescape.Fixture.KAKI_EMAIL;
+import static roomescape.Fixture.KAKI_NAME;
+import static roomescape.Fixture.KAKI_PASSWORD;
+import static roomescape.Fixture.MEMBER_JOJO;
+import static roomescape.Fixture.MEMBER_KAKI;
+import static roomescape.Fixture.RESERVATION_TIME_10_00;
+import static roomescape.Fixture.THUMBNAIL;
+import static roomescape.Fixture.TODAY;
+import static roomescape.Fixture.TOMORROW;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +33,14 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.dto.ReservationSearchCondRequest;
+import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 
 @DataJpaTest
-public class ReservationRepositoryTest {
+class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -64,7 +73,7 @@ public class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAll();
 
-        assertThat(reservations.size()).isEqualTo(1);
+        assertThat(reservations).hasSize(1);
     }
 
     @DisplayName("회원 id로 예약 목록을 조회한다.")
@@ -88,7 +97,31 @@ public class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAllByMemberId(kaki.getId());
 
-        assertThat(reservations.size()).isEqualTo(1);
+        assertThat(reservations).hasSize(1);
+    }
+
+    @DisplayName("회원 id로 예약 대기 순번 목록을 조회한다.")
+    @Test
+    void findReservationWithRanksByMemberId() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
+        Member kaki = memberRepository.save(MEMBER_KAKI);
+
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, Status.WAIT));
+
+        List<ReservationWithRank> reservationWithRanks = reservationRepository.findReservationWithRanksByMemberId(
+                jojo.getId());
+
+        assertAll(
+                () -> assertThat(reservationWithRanks).hasSize(2),
+                () -> assertThat(reservationWithRanks.get(1)
+                        .getRank())
+                        .isEqualTo(2L)
+        );
     }
 
     @DisplayName("id 값을 받아 Reservation 반환")
@@ -137,28 +170,83 @@ public class ReservationRepositoryTest {
         assertThat(timeIds).containsExactly(reservationTime.getId());
     }
 
-    @DisplayName("이미 저장된 예약일 경우 true를 반환한다.")
+    @DisplayName("Status로 예약 목록을 조회한다.")
     @Test
-    void existReservationTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+    void findAllByStatus() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member member = memberRepository.save(MEMBER_JOJO);
 
-        Theme theme = themeRepository.save(
-                new Theme(
-                        new ThemeName(HORROR_THEME_NAME),
-                        new Description(HORROR_DESCRIPTION),
-                        THUMBNAIL
-                )
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
+
+        List<Reservation> reservations = reservationRepository.findAllByStatus(Status.WAIT);
+        assertThat(reservations).hasSize(1);
+    }
+
+    @DisplayName("날짜, 시간, 테마가 일치하는 예약 목록을 조회한다.")
+    @Test
+    void findAllByDateAndReservationTimeAndTheme() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
+        Member kaki = memberRepository.save(MEMBER_KAKI);
+
+        reservationRepository.save(new Reservation(jojo, TOMORROW, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TOMORROW, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.SUCCESS));
+
+        List<Reservation> reservations = reservationRepository.findAllByDateAndReservationTimeAndTheme(
+                TOMORROW,
+                reservationTime,
+                theme
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        assertThat(reservations).hasSize(2);
+    }
 
-        Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
+    @DisplayName("날짜, 시간, 테마가 일치하는 Reservation을 반환한다.")
+    @Test
+    void existReservationTest() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member member = memberRepository.save(MEMBER_JOJO);
 
-        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAt(savedReservation.getDate(),
-                savedReservation.getStartAt());
+        Reservation expected = reservationRepository.save(
+                new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
 
-        assertThat(exist).isTrue();
+        Optional<Reservation> actual = reservationRepository.findFirstByDateAndReservationTimeAndTheme(
+                TOMORROW,
+                reservationTime,
+                theme
+        );
+
+        assertThat(actual).isNotEmpty()
+                .get()
+                .extracting(Reservation::getId)
+                .isEqualTo(expected.getId());
+    }
+
+    @DisplayName("날짜, 시간, 테마, 회원 정보가 일치하는 Reservation을 반환한다.")
+    @Test
+    void findFirstByDateAndReservationTimeAndThemeAndMember() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member member = memberRepository.save(MEMBER_JOJO);
+
+        reservationRepository.save(new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
+
+        Optional<Reservation> savedReservation = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndMember(
+                TOMORROW,
+                reservationTime,
+                theme,
+                member
+        );
+
+        assertThat(savedReservation).isNotEmpty()
+                .get()
+                .extracting(Reservation::getStatus)
+                .isEqualTo(Status.SUCCESS);
     }
 
     @DisplayName("회원 아이디, 테마 아이디와 기간이 일치하는 Reservation을 반환한다.")
@@ -188,11 +276,12 @@ public class ReservationRepositoryTest {
                 tomorrow
         );
 
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenAndStatus(
                 request.themeId(),
                 request.memberId(),
                 request.dateFrom(),
-                request.dateTo()
+                request.dateTo(),
+                Status.SUCCESS
         );
 
         assertThat(reservations).hasSize(1);
@@ -220,6 +309,28 @@ public class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAll();
 
-        assertThat(reservations.size()).isEqualTo(0);
+        assertThat(reservations).isEmpty();
+    }
+
+    @DisplayName("날짜, 시간, 테마, 상태가 같은 Reservation을 반환한다.")
+    @Test
+    void findFirstByDateAndReservationTimeAndThemeAndStatus() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member member = memberRepository.save(MEMBER_JOJO);
+
+        Reservation expected = reservationRepository.save(
+                new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
+
+        Optional<Reservation> actual = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndStatus(
+                TOMORROW,
+                reservationTime,
+                theme,
+                Status.SUCCESS
+        );
+        assertThat(actual).isNotEmpty()
+                .get()
+                .extracting(Reservation::getId)
+                .isEqualTo(expected.getId());
     }
 }

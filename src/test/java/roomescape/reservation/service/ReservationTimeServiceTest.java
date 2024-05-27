@@ -2,13 +2,14 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.util.Fixture.HORROR_DESCRIPTION;
-import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.HOUR_10;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
-import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.Fixture.HORROR_DESCRIPTION;
+import static roomescape.Fixture.HORROR_THEME_NAME;
+import static roomescape.Fixture.HOUR_10;
+import static roomescape.Fixture.KAKI_EMAIL;
+import static roomescape.Fixture.KAKI_NAME;
+import static roomescape.Fixture.KAKI_PASSWORD;
+import static roomescape.Fixture.LOCAL_TIME_10_00;
+import static roomescape.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.config.DatabaseCleaner;
+import roomescape.common.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
@@ -29,7 +30,8 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.dto.AvailableReservationTimeResponse;
+import roomescape.reservation.dto.request.TimeSaveRequest;
+import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -97,6 +99,16 @@ class ReservationTimeServiceTest {
                 AvailableReservationTimeResponse.toResponse(hour10, true),
                 AvailableReservationTimeResponse.toResponse(hour11, false)
         );
+    }
+
+    @DisplayName("예약 시간 중복 저장 시 예외가 발생한다.")
+    @Test
+    void saveReservationTimeExceptionTest() {
+        TimeSaveRequest request = new TimeSaveRequest(LOCAL_TIME_10_00);
+        reservationTimeService.save(request);
+
+        assertThatThrownBy(() -> reservationTimeService.save(request))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("이미 해당 시간으로 예약 되있을 경우 삭제 시 예외가 발생한다.")
