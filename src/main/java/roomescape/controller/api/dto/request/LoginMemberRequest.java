@@ -10,4 +10,8 @@ public record LoginMemberRequest(long id, String email, String password, String 
     public Member toMember() {
         return new Member(id, new Name(name), new Email(email), new Password(password), Role.from(role));
     }
+
+    public boolean isAdmin() {
+        return this.role.equals(Role.ADMIN.getValue());
+    }
 }

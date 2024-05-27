@@ -1,12 +1,10 @@
 package roomescape.service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.controller.api.dto.request.LoginMemberRequest;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.user.Role;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.input.WaitingInput;
@@ -36,11 +34,14 @@ public class WaitingService {
 
     public void deleteWaiting(long id, LoginMemberRequest loginMemberRequest) {
         Optional<Waiting> waiting = waitingRepository.findById(id);
-        if (waiting.isPresent() &&
-                waiting.get().getMember().getId() != loginMemberRequest.id() &&
-                !Objects.equals(loginMemberRequest.role(), Role.ADMIN.getValue())) {
+        if (waiting.isPresent() && isNotSameMemberId(loginMemberRequest, waiting.get()) &&
+                !loginMemberRequest.isAdmin()) {
             throw new UnauthorizedException();
         }
         waitingRepository.deleteById(id);
+    }
+
+    private boolean isNotSameMemberId(LoginMemberRequest loginMemberRequest, Waiting waiting) {
+        return waiting.getMember().getId() != loginMemberRequest.id();
     }
 }
