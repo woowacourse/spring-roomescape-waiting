@@ -28,7 +28,7 @@ public record ReservationMineResponse(long id,
                 waiting.getWaiting().getTheme().getName(),
                 waiting.getWaiting().getDate(),
                 waiting.getWaiting().getTime().getStartAt(),
-                waiting.getWaiting().getStatus().getMessage(waiting.getRank())
+                waiting.getWaiting().getStatus().createStatusMessage(waiting.getRank())
         );
     }
 }
