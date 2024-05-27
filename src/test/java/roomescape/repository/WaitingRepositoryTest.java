@@ -45,7 +45,6 @@ class WaitingRepositoryTest {
 
     @DisplayName("특정 멤버의 예약을 조회한다.")
     @Test
-    @Transactional
     void should_find_by_memberId() {
         List<WaitingWithRank> waiting = waitingRepository.findWaitingWithRankByMemberId(2L);
         assertAll(

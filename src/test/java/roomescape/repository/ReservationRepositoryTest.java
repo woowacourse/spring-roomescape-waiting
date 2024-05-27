@@ -81,7 +81,6 @@ class ReservationRepositoryTest {
 
     @DisplayName("특정 멤버의 예약을 조회한다.")
     @Test
-    @Transactional
     void should_find_by_memberId() {
         List<Reservation> reservations = reservationRepository.findByMemberId(2L);
         assertAll(

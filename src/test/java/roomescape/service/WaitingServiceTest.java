@@ -84,7 +84,6 @@ class WaitingServiceTest {
 
     @DisplayName("예약 대기를 추가한다.")
     @Test
-    @Transactional
     void should_save_reservation_waiting() {
         WaitingDto waitingDto = new WaitingDto(LocalDate.of(9999, 9, 9), 1L, 1L, 3L);
         waitingService.saveWaiting(waitingDto);
