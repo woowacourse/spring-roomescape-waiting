@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final long ROW_LIMIT = 10;
@@ -26,6 +25,7 @@ public class ThemeService {
         this.themeJpaRepository = themeJpaRepository;
     }
 
+    @Transactional
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
         validateDuplicatedName(themeRequest);
         try {
@@ -42,6 +42,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ThemeResponse getTheme(Long id) {
         Theme theme = themeJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 id입니다. theme_id = " + id));
@@ -49,6 +50,7 @@ public class ThemeService {
         return new ThemeResponse(theme);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findTrendingThemes() {
         LocalDate now = LocalDate.now();
         LocalDate trendingStatsStart = now.minusDays(7);
@@ -66,6 +68,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findThemes() {
         return themeJpaRepository.findAll()
                 .stream()
@@ -73,10 +76,12 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteTheme(Long id) {
         themeJpaRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public Theme getById(Long themeId) {
         return themeJpaRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("id에 맞는 테마가 없습니다. themeId = " + themeId));

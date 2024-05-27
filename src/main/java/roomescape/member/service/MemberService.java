@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class MemberService {
 
     @Value("${security.jwt.token.secret-key}")
@@ -39,11 +38,13 @@ public class MemberService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional(readOnly = true)
     public Member getLoginMemberById(Long memberId) {
         return memberJpaRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원 id입니다. memberId = " + memberId));
     }
 
+    @Transactional(readOnly = true)
     public List<MemberIdNameResponse> findMembers() {
         return memberJpaRepository.findAll()
                 .stream()
@@ -51,6 +52,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public String createMemberToken(LoginRequest loginRequest) throws AuthenticationException {
         Member member = memberJpaRepository.findByEmail(new Email(loginRequest.email()))
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
@@ -109,11 +111,13 @@ public class MemberService {
         return new MemberRequest(member);
     }
 
+    @Transactional(readOnly = true)
     public Member getById(Long memberId) {
         return memberJpaRepository.findById(memberId).orElseThrow(() ->
                 new NotFoundException("id에 맞는 멤버가 없습니다. memberId = " + memberId));
     }
 
+    @Transactional
     public String signUp(SignUpRequest signUpRequest) {
         if (memberJpaRepository.existsByEmail(new Email(signUpRequest.email()))) {
             throw new DuplicationException("이미 존재하는 email 주소입니다.");

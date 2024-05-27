@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
-import roomescape.member.dto.MemberNameResponse;
+import roomescape.member.dto.MemberRequest;
 
 import javax.naming.AuthenticationException;
 
@@ -59,7 +59,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("유효하지 않은 형식의 토큰으로 로그인 시도 시 예외가 발생한다.")
     void throwExceptionIfInvalidTokenFormat() {
-        assertThatThrownBy(() -> memberService.getMemberNameResponseByToken("invalid token"))
+        assertThatThrownBy(() -> memberService.getLoginMemberRequestByToken("invalid token"))
                 .isInstanceOf(AuthenticationException.class);
     }
 
@@ -69,8 +69,8 @@ class MemberServiceTest {
         LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
         String token = memberService.createMemberToken(loginRequest);
 
-        MemberNameResponse memberNameResponse = memberService.getMemberNameResponseByToken(token);
+        MemberRequest memberRequest = memberService.getLoginMemberRequestByToken(token);
 
-        assertThat(memberNameResponse.name()).isEqualTo(MEMBER_4.getName().name());
+        assertThat(memberRequest.name()).isEqualTo(MEMBER_4.getName().name());
     }
 }

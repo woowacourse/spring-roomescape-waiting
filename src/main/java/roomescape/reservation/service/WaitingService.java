@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingJpaRepository waitingJpaRepository;
@@ -44,6 +43,7 @@ public class WaitingService {
         this.memberService = memberService;
     }
 
+    @Transactional
     public ReservationResponse addWaiting(WaitingRequest waitingRequest, MemberRequest memberRequest) {
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(waitingRequest.time());
         ThemeResponse themeResponse = themeService.getTheme(waitingRequest.theme());
@@ -78,10 +78,12 @@ public class WaitingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingWithRank> findWaitingsByMember(Member loginMember) {
         return waitingJpaRepository.findWaitingsWithRankByMemberId(loginMember.getId());
     }
 
+    @Transactional
     public void deleteById(Long id, Member member) {
         Waiting waiting = waitingJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id와 일치하는 대기를 찾을 수 없습니다."));
@@ -90,6 +92,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> findWaitings() {
         return waitingJpaRepository.findAll()
                 .stream()
@@ -97,7 +100,12 @@ public class WaitingService {
                 .toList();
     }
 
-    public Optional<Waiting> findWaitingByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime reservationTime, Theme theme) {
+    @Transactional(readOnly = true)
+    public Optional<Waiting> findWaitingByDateAndReservationTimeAndTheme(
+            LocalDate date,
+            ReservationTime reservationTime,
+            Theme theme
+    ) {
         return waitingJpaRepository.findTopByDateAndReservationTimeAndTheme(date, reservationTime, theme);
     }
 }

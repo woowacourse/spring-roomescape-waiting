@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationJpaRepository reservationJpaRepository;
@@ -48,6 +47,7 @@ public class ReservationService {
         this.waitingService = waitingService;
     }
 
+    @Transactional
     public ReservationResponse addReservation(
             ReservationRequest reservationRequest,
             MemberRequest memberRequest
@@ -67,6 +67,7 @@ public class ReservationService {
         return new ReservationResponse(reservationJpaRepository.save(reservation));
     }
 
+    @Transactional
     public ReservationResponse addReservation(AdminReservationRequest adminReservationRequest) {
         Member member = memberService.getLoginMemberById(adminReservationRequest.memberId());
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(adminReservationRequest.timeId());
@@ -100,6 +101,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservations() {
         return reservationJpaRepository.findAll()
                 .stream()
@@ -107,6 +109,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservations(
             Long themeId,
             Long memberId,
@@ -122,6 +125,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservationsByMember(MemberRequest memberRequest) {
         Stream<ReservationResponse> reservations =
                 reservationJpaRepository.findByMember(memberRequest.toLoginMember())
@@ -142,6 +146,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservation(Long id, Member member) {
         Reservation reservation = reservationJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id와 일치하는 예약을 찾을 수 없습니다."));

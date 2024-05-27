@@ -7,7 +7,6 @@ import roomescape.theme.dto.ThemeResponse;
 import java.time.format.DateTimeFormatter;
 
 public record ReservationResponse(
-//        @JsonInclude(JsonInclude.Include.NON_NULL)
         Long id,
         String name,
         String date,
