@@ -22,7 +22,7 @@ public class TimeDeleteService {
     public void deleteTime(Long timeId) {
         ReservationTime reservationTime = findTimeById(timeId);
         validateDeletable(reservationTime);
-        reservationRepository.deleteById(reservationTime.getId());
+        reservationTimeRepository.delete(reservationTime);
     }
 
     private ReservationTime findTimeById(Long timeId) {
@@ -41,5 +41,4 @@ public class TimeDeleteService {
             );
         }
     }
-
 }

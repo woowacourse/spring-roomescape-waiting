@@ -17,7 +17,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public List<MemberResponse> getAllMembers() {
+    public List<MemberResponse> findAllMembers() {
         return memberRepository.findAll()
                 .stream()
                 .map(MemberResponse::from)

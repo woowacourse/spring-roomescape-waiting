@@ -22,10 +22,10 @@ public class WaitingCancelService {
 
     public void cancelWaitingForUser(Long reservationId) {
         Waiting waiting = findWaitingByReservationId(reservationId);
-        deleteWaiting(waiting.getId());
+        cancelWaiting(waiting.getId());
     }
 
-    public void deleteWaiting(Long waitingId) {
+    public void cancelWaiting(Long waitingId) {
         Waiting waiting = findWaitingById(waitingId);
         Reservation reservation = waiting.getReservation();
 
@@ -48,18 +48,8 @@ public class WaitingCancelService {
         for (Reservation reservation : reservationsToAdjust) {
             Waiting waiting = findWaitingByReservationId(reservation.getId());
             if (waiting.isWaitingOrderGreaterThan(waitingOrderToDelete)) {
-                updateWaitingStatus(reservation, waiting);
+                waiting.decreaseWaitingOrderByOne();
             }
-        }
-    }
-
-    private void updateWaitingStatus(Reservation reservation, Waiting waiting) {
-        if (waiting.isFirstOrder()) {
-            waitingRepository.delete(waiting);
-            reservation.changeStatusToReserve();
-        }
-        if (!waiting.isFirstOrder()) {
-            waiting.decreaseWaitingOrderByOne();
         }
     }
 

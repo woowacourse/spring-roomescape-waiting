@@ -41,6 +41,6 @@ public class WaitingService {
     }
 
     public void cancelWaiting(Long waitingId) {
-        waitingCancelService.deleteWaiting(waitingId);
+        waitingCancelService.cancelWaiting(waitingId);
     }
 }
