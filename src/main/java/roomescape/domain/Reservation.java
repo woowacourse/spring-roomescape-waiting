@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import roomescape.service.exception.DeletingException;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -43,11 +44,13 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public boolean isOwn(final long memberId) {
+    public void validateOwn(final long memberId) {
         if (member == null) {
-            return false;
+            throw new DeletingException("회원 정보가 없습니다.");
         }
-        return Objects.equals(member.getId(), memberId);
+        if (!Objects.equals(member.getId(), memberId)) {
+            throw new DeletingException("다른 회원의 예약 대기는 취소 불가합니다.");
+        }
     }
 
     public Long getId() {

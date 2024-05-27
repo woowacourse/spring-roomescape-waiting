@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
-import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.controller.time.dto.IsMineRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -16,7 +15,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationRankResponse;
-import roomescape.service.exception.DeletingException;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
@@ -100,18 +99,17 @@ public class ReservationService {
 
     @Transactional
     public void deleteWaitReservation(final long reservationId, final long memberId) {
-        final Reservation fetchReservation = reservationRepository.fetchById(reservationId);
-        if (!fetchReservation.isOwn(memberId)) {
-            throw new DeletingException("다른 회원의 예약 대기는 취소 불가합니다.");
-        }
+        final Reservation reservation = reservationRepository.fetchById(reservationId);
+        reservation.validateOwn(memberId);
 
-        final boolean isWaitReservation = reservationRepository.existsByIdBeforeAndThemeIdAndTimeIdAndDate(reservationId,
-                fetchReservation.getTheme().getId(), fetchReservation.getTime().getId(), fetchReservation.getDate());
+        final boolean isWaitReservation = reservationRepository
+                .existsByIdBeforeAndThemeIdAndTimeIdAndDate(reservationId, reservation.getTheme().getId(),
+                        reservation.getTime().getId(), reservation.getDate());
 
         if (!isWaitReservation) {
             throw new UserDeleteReservationException("유저는 예약 대기만 삭제 가능합니다.");
         }
-        reservationRepository.deleteById(fetchReservation.getId());
+        reservationRepository.deleteById(reservation.getId());
     }
 
     @Transactional(readOnly = true)
