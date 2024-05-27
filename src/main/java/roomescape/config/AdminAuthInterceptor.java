@@ -37,12 +37,7 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
     }
 
     private boolean requiredAdmin(HandlerMethod handlerMethod) {
-        if (handlerMethod.hasMethodAnnotation(AdminOnly.class)) {
-            return true;
-        }
-        if (handlerMethod.getBeanType().isAnnotationPresent(AdminOnly.class)) {
-            return true;
-        }
-        return false;
+        return handlerMethod.hasMethodAnnotation(AdminOnly.class)
+                || handlerMethod.getBeanType().isAnnotationPresent(AdminOnly.class);
     }
 }
