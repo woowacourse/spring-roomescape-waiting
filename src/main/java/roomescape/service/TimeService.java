@@ -10,6 +10,8 @@ import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reservations;
+import roomescape.domain.Status;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.exception.DuplicateTimeException;
@@ -36,20 +38,24 @@ public class TimeService {
                 .toList();
     }
 
-    public List<AvailabilityTimeResponse> getAvailableTimes(final AvailabilityTimeRequest request) {
+    public List<AvailabilityTimeResponse> getAvailabilityTimes(
+            final AvailabilityTimeRequest request) {
         final LocalDate today = LocalDate.now();
-        if (request.date().isBefore(today)) {
+        final LocalDate reservationDate = request.date();
+        if (reservationDate.isBefore(today)) {
             return List.of();
         }
-        final Set<ReservationTime> bookedTimes
-                = reservationRepository.findBookedTimes(request.date(), request.themeId());
-        if (request.date().isEqual(today)) {
+        final Reservations reservations = new Reservations(
+                reservationRepository.findAllJoinTimeByStatusAndDateAndThemeId(
+                        Status.RESERVED, reservationDate, request.themeId()));
+        final Set<ReservationTime> bookedTimes = reservations.findBookedTimes();
+        if (reservationDate.isEqual(today)) {
             return getAvailabilityTimesToday(bookedTimes);
         }
-        return getAvailabilityTimes(bookedTimes);
+        return getAvailabilityTimesFuture(bookedTimes);
     }
 
-    private List<AvailabilityTimeResponse> getAvailabilityTimes(
+    private List<AvailabilityTimeResponse> getAvailabilityTimesFuture(
             final Set<ReservationTime> bookedTimes) {
         return timeRepository.findAll()
                 .stream()

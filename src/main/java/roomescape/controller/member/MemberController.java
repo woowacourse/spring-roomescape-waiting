@@ -2,9 +2,7 @@ package roomescape.controller.member;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,14 +21,6 @@ public class MemberController {
 
     public MemberController(final MemberService memberService) {
         this.memberService = memberService;
-    }
-
-    @GetMapping
-    public List<MemberLoginResponse> getMembers() {
-        final List<Member> members = memberService.findAll();
-        return members.stream()
-                .map(MemberLoginResponse::from)
-                .toList();
     }
 
     @PostMapping

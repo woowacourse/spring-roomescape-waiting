@@ -45,7 +45,7 @@ class MemberRepositoryTest {
     void findByIdOrThrowNotPresent() {
         final long id = 100L;
 
-        assertThatThrownBy(() -> memberRepository.findByEmailOrThrow(id)).isInstanceOf(
+        assertThatThrownBy(() -> memberRepository.findByIdOrThrow(id)).isInstanceOf(
                 MemberNotFoundException.class);
     }
 

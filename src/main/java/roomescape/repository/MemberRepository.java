@@ -13,7 +13,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         return findByEmail(email).orElseThrow(() -> new MemberNotFoundException("존재하지 않는 멤버입니다."));
     }
 
-    default Member findByEmailOrThrow(long id) {
+    default Member findByIdOrThrow(long id) {
         return findById(id).orElseThrow(() -> new MemberNotFoundException("존재하지 않는 멤버입니다."));
     }
 }

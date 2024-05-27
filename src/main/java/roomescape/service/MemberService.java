@@ -36,7 +36,6 @@ public class MemberService {
     }
 
     public Member find(final MemberLoginRequest request) {
-
         final Member foundMember = memberRepository.findByEmailOrThrow(request.email());
         final String encryptedPassword = encryptor.encryptPassword(request.password());
         if (encryptedPassword.equals(foundMember.getPassword())) {
@@ -50,6 +49,6 @@ public class MemberService {
     }
 
     public Member findMemberById(Long id) {
-        return memberRepository.findByEmailOrThrow(id);
+        return memberRepository.findByIdOrThrow(id);
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
 
 @DataJpaTest
 class ReservationRepositoryTest {
@@ -24,12 +23,14 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         final List<Reservation> expected = List.of(
-                new Reservation(1L, null, null, null, null),
-                new Reservation(2L, null, null, null, null),
-                new Reservation(3L, null, null, null, null),
-                new Reservation(4L, null, null, null, null),
-                new Reservation(5L, null, null, null, null),
-                new Reservation(6L, null, null, null, null)
+                new Reservation(1L, null, null, null, null, null),
+                new Reservation(2L, null, null, null, null, null),
+                new Reservation(3L, null, null, null, null, null),
+                new Reservation(4L, null, null, null, null, null),
+                new Reservation(5L, null, null, null, null, null),
+                new Reservation(6L, null, null, null, null, null),
+                new Reservation(7L, null, null, null, null, null),
+                new Reservation(8L, null, null, null, null, null)
         );
 
         assertThat(reservationRepository.findAll()).isEqualTo(expected);
@@ -63,32 +64,19 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("유명 테마 검색")
-    void findPopularTheme() {
-        //given
-        final LocalDate now = LocalDate.now();
-        final List<Theme> expected = List.of(
-                new Theme(2L, null, null, null),
-                new Theme(1L, null, null, null),
-                new Theme(3L, null, null, null)
-        );
-        //when
-        final List<Theme> popularThemes = reservationRepository
-                .findMostBookedThemesBetweenLimited(now.minusDays(8), now.minusDays(1), 10);
-        //then
-        assertThat(popularThemes).isEqualTo(expected);
-    }
-
-    @Test
     @DisplayName("조건에 따른 예약 조회")
     void searchReservations() {
         //given
         final LocalDate now = LocalDate.now();
         final ReservationSearchCondition condition = new ReservationSearchCondition(1L, 1L,
                 now.minusDays(7), now.minusDays(1));
-        final List<Reservation> expected = List.of(new Reservation(1L, null, null, null, null));
+        final List<Reservation> expected = List.of(
+                new Reservation(1L, null, null, null, null, null));
         //when
-        final List<Reservation> reservations = reservationRepository.searchReservations(condition);
+        final List<Reservation> reservations = reservationRepository
+                .findAllByThemeIdAndMemberIdAndDateBetween(
+                        condition.themeId(), condition.memberId(),
+                        condition.dateFrom(), condition.dateTo());
         //then
         assertThat(reservations).isEqualTo(expected);
     }

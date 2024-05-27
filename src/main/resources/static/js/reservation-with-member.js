@@ -1,8 +1,9 @@
 let isEditing = false;
 const RESERVATION_API_ENDPOINT = '/reservations';
+const ADMIN_RESERVATION_API_ENDPOINT = `/admin${RESERVATION_API_ENDPOINT}`
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
-const MEMBER_API_ENDPOINT = '/members';
+const ADMIN_MEMBER_API_ENDPOINT = '/admin/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(ADMIN_RESERVATION_API_ENDPOINT)
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -56,7 +57,7 @@ function fetchThemes() {
 }
 
 function fetchMembers() {
-  requestRead(MEMBER_API_ENDPOINT)
+  requestRead(ADMIN_MEMBER_API_ENDPOINT)
       .then(data => {
         membersOptions.push(...data);
         populateSelect('member', membersOptions, 'name');
@@ -192,7 +193,7 @@ function applyFilter(event) {
   const dateFrom = document.getElementById('date-from').value;
   const dateTo = document.getElementById('date-to').value;
 
-  fetch('/reservations/search?' + new URLSearchParams({themeId, memberId, dateFrom, dateTo}), { // 예약 검색 API 호출
+  fetch('/admin/reservations/search?' + new URLSearchParams({themeId, memberId, dateFrom, dateTo}), { // 예약 검색 API 호출
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

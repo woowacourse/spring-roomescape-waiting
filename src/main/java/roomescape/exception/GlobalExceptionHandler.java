@@ -18,14 +18,16 @@ public class GlobalExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(final AuthenticationException e) {
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(
+            final AuthenticationException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .build();
     }
 
     @ExceptionHandler(AuthorizationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthorizationException(final AuthorizationException e) {
+    public ResponseEntity<ErrorResponse> handleAuthorizationException(
+            final AuthorizationException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .build();
@@ -55,7 +57,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(final NoResourceFoundException e) {
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+            final NoResourceFoundException e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.notFound()
                 .build();

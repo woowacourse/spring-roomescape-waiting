@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -22,10 +21,6 @@ public class ReservationTime {
     public ReservationTime(final Long id, final LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
-    }
-
-    public boolean isSameTime(final ReservationTime target) {
-        return startAt.equals(target.startAt);
     }
 
     public Long getId() {

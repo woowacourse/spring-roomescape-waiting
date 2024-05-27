@@ -16,7 +16,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.MemberLoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(value = "/fixture.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(value = "/data.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminEndToEndTest {
 
     @LocalServerPort
@@ -45,7 +45,7 @@ class AdminEndToEndTest {
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201);
 
@@ -58,13 +58,13 @@ class AdminEndToEndTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/times/6")
+                .when().delete("/admin/times/6")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/times/6")
+                .when().delete("/admin/times/6")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -79,7 +79,7 @@ class AdminEndToEndTest {
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201);
 
@@ -92,13 +92,13 @@ class AdminEndToEndTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/themes/5")
+                .when().delete("/admin/themes/5")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/themes/5")
+                .when().delete("/admin/themes/5")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -121,20 +121,20 @@ class AdminEndToEndTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(7));
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/reservations/7")
+                .when().delete("/reservations/9")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/reservations/7")
+                .when().delete("/reservations/9")
                 .then().log().all()
                 .statusCode(400);
     }

@@ -22,9 +22,10 @@ public class AuthService {
         return new TokenResponse(accessToken);
     }
 
-    public Role findMemberRoleByToken(String token) {
+    public boolean IsMemberAdminByToken(String token) {
         validateToken(token);
-        return Role.valueOf(jwtTokenProvider.getRole(token));
+        Role role = Role.valueOf(jwtTokenProvider.getRole(token));
+        return role.isAdmin();
     }
 
     public Long findMemberIdByToken(String token) {
@@ -36,5 +37,9 @@ public class AuthService {
         if (!jwtTokenProvider.validateToken(token)) {
             throw new InvalidTokenException("유효하지 않은 토큰입니다.");
         }
+    }
+
+    public boolean isValidToken(final String token) {
+        return jwtTokenProvider.validateToken(token);
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.controller.reservation.dto.PopularThemeResponse;
 import roomescape.controller.theme.dto.CreateThemeRequest;
 import roomescape.controller.theme.dto.ThemeResponse;
+import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.InvalidRequestException;
 import roomescape.repository.ReservationRepository;
@@ -44,14 +45,16 @@ public class ThemeService {
         themeRepository.deleteById(findTheme.getId());
     }
 
-    public List<PopularThemeResponse> getPopularThemes(final LocalDate from, final LocalDate until,
-                                                       final int limit) {
+    public List<PopularThemeResponse> findMostBookedThemes(final LocalDate from,
+                                                           final LocalDate until,
+                                                           final int limit) {
         if (from.isAfter(until)) {
             throw new InvalidRequestException("유효하지 않은 날짜 범위입니다.");
         }
-        final List<Theme> reservations = reservationRepository
-                .findMostBookedThemesBetweenLimited(from, until, limit);
-        return reservations.stream()
+        final Reservations reservations = new Reservations(
+                reservationRepository.findAllJoinThemeByDateBetween(from, until));
+        return reservations.findMostBookedThemes(limit)
+                .stream()
                 .map(PopularThemeResponse::from)
                 .toList();
     }

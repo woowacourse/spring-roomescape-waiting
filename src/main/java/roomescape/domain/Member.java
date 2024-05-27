@@ -17,7 +17,7 @@ public class Member {
     private String name;
     private String email;
     private String password;
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     protected Member() {
