@@ -9,6 +9,7 @@ import roomescape.controller.member.dto.CookieMemberResponse;
 import roomescape.controller.member.dto.MemberLoginRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.TestFixture.USER_NAME;
 
 class UserPageControllerTest extends IntegrationTestSupport {
 

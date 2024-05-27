@@ -10,8 +10,8 @@ import roomescape.controller.member.dto.CookieMemberResponse;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.domain.Role;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.TestFixture.ADMIN_NAME;
 
 class AuthControllerTest extends IntegrationTestSupport {
 
