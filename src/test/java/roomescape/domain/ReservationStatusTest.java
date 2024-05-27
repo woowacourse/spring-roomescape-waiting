@@ -23,4 +23,16 @@ public class ReservationStatusTest {
         //when,then
         assertThat(ReservationStatus.WAITING.getMessageWithRank(rank)).contains(rank.toString());
     }
+
+
+    @DisplayName("예약 상태가 대기일 경우 참을 반환한다.")
+    @Test
+    void given_status_when_isWaiting_then_returnBoolean() {
+        //given
+        ReservationStatus waiting = ReservationStatus.WAITING;
+        //when
+        boolean isWaiting = waiting.isWaiting();
+        //then
+        assertThat(isWaiting).isTrue();
+    }
 }

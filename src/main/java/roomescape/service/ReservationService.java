@@ -72,9 +72,9 @@ public class ReservationService {
 
     private Reservation createReservation(final ReservationRequest reservationRequest, final Member member, final ReservationTime reservationTime, final Theme theme) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
-            return new Reservation(member, reservationRequest.date(), reservationTime, theme, ReservationStatus.WAITING);
+            return Reservation.waiting(member, reservationRequest.date(), reservationTime, theme);
         }
-        return new Reservation(member, reservationRequest.date(), reservationTime, theme, ReservationStatus.RESERVED);
+        return Reservation.reserved(member, reservationRequest.date(), reservationTime, theme);
     }
 
     private ReservationTime getReservationTime(final ReservationRequest reservationRequest) {
@@ -124,7 +124,7 @@ public class ReservationService {
         final Optional<Reservation> waitReservationResult = reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, ReservationStatus.WAITING);
         if (!waitReservationResult.isEmpty()) {
             final Reservation waitReservation = waitReservationResult.get();
-            waitReservation.setStatus(ReservationStatus.RESERVED);
+            waitReservation.changeToReserved();
         }
     }
 
@@ -149,7 +149,7 @@ public class ReservationService {
     }
 
     private ReservationsMineResponse buildReservationMineResponse(final Reservation reservation, final Member member) {
-        if (reservation.getStatus() == ReservationStatus.WAITING) {
+        if (reservation.isWaiting()) {
             return ReservationsMineResponse.from(reservation, calculateWaitingNumber(reservation, member));
         }
         return ReservationsMineResponse.from(reservation, 0);
@@ -170,9 +170,10 @@ public class ReservationService {
     }
 
     public void deleteWaitingById(final Long id) {
-        final Optional<Reservation> reservationResult = reservationRepository.findById(id);
-        if (reservationResult.isPresent() && reservationResult.get().getStatus() == ReservationStatus.WAITING) {
-            reservationRepository.deleteById(id);
-        }
+        reservationRepository.findById(id)
+                .stream()
+                .filter(Reservation::isWaiting)
+                .findFirst()
+                .ifPresent(reservation -> reservationRepository.deleteById(id));
     }
 }

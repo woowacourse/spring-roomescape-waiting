@@ -16,4 +16,8 @@ public enum ReservationStatus {
         }
         return message;
     }
+
+    public boolean isWaiting() {
+        return this == WAITING;
+    }
 }

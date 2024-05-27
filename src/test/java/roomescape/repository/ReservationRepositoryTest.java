@@ -38,12 +38,11 @@ class ReservationRepositoryTest {
     @Test
     void given_reservation_when_create_then_returnCreatedReservationId() {
         //given
-        Reservation expected = new Reservation(
+        Reservation expected = Reservation.reserved(
                 new Member("poke@test.com", new Password("password", "salt"), "poke", Role.USER),
                 LocalDate.parse("2099-01-11"),
                 new ReservationTime(1L, LocalTime.parse("10:00")),
-                new Theme(1L, "name", "description", "thumbnail"),
-                ReservationStatus.RESERVED);
+                new Theme(1L, "name", "description", "thumbnail"));
         //when
         final Reservation savedReservation = reservationRepository.save(expected);
         //then

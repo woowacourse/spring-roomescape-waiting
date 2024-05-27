@@ -129,7 +129,7 @@ class ClientReservationTest {
 
     @DisplayName("다른 사용자가 이미 예약된 시간에 예약을 할 경우 예약이 성공한다.")
     @Test
-    void given_differentMemberToken_when_createWaitWithAlreadyReserved_then_statusCodeIsCreated() {
+    void given_differentMemberToken_when_createWaitingWithAlreadyReserved_then_statusCodeIsCreated() {
         Map<String, String> params = new HashMap<>();
         params.put("date", "2099-04-30");
         params.put("themeId", "1");

@@ -30,7 +30,7 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, ReservationStatus status) {
+    private Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, ReservationStatus status) {
         this(null, member, date, time, theme, status);
     }
 
@@ -42,6 +42,22 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
+    }
+
+    public static Reservation reserved(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+        return new Reservation(member, date, time, theme, ReservationStatus.RESERVED);
+    }
+
+    public static Reservation waiting(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+        return new Reservation(member, date, time, theme, ReservationStatus.WAITING);
+    }
+
+    public void changeToReserved() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
+    public boolean isWaiting() {
+        return this.status.isWaiting();
     }
 
     public Member getMember() {
@@ -66,9 +82,5 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(ReservationStatus status) {
-        this.status = status;
     }
 }
