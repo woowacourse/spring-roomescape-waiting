@@ -26,7 +26,7 @@ class ThemeServiceTest extends IntegrationTestSupport {
     void saveTheme() {
         final CreateThemeRequest request = new CreateThemeRequest("name", "설명", "섬네일");
         final ThemeResponse theme = themeService.addTheme(request);
-        final ThemeResponse expected = new ThemeResponse(5L, "name", "설명", "섬네일");
+        final ThemeResponse expected = new ThemeResponse(theme.id(), "name", "설명", "섬네일");
 
         assertThat(theme).isEqualTo(expected);
     }

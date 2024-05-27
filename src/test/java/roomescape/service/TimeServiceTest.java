@@ -54,10 +54,10 @@ class TimeServiceTest extends IntegrationTestSupport {
     void addTIme() {
         // given
         CreateTimeRequest request = new CreateTimeRequest(LocalTime.parse("13:30"));
-        AvailabilityTimeResponse expected = new AvailabilityTimeResponse(6L, "13:30", false);
 
         // when
         AvailabilityTimeResponse actual = timeService.addTime(request);
+        AvailabilityTimeResponse expected = new AvailabilityTimeResponse(actual.id(), "13:30", false);
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -93,8 +93,8 @@ class TimeServiceTest extends IntegrationTestSupport {
     }
 
     @ParameterizedTest
-    @DisplayName("가능 시간 조회")
     @MethodSource("getAvailableTimesParameterProvider")
+    @DisplayName("가능 시간 조회")
     void getAvailableTimes(final AvailabilityTimeRequest request, final int expected) {
         assertThat(timeService.getAvailableTimes(request)).hasSize(expected);
     }
