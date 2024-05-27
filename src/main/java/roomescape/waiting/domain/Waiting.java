@@ -34,7 +34,7 @@ public class Waiting {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public Waiting() {
+    protected Waiting() {
     }
 
     public Waiting(Reservation reservation, Member member) {
