@@ -148,7 +148,7 @@ class ClientReservationTest {
     void given_memberToken_when_deleteWaiting_then_statusCodeIsNoContent() {
         RestAssured.given().log().all()
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
-                .when().delete("/reservations-mine/wait/10")
+                .when().delete("/reservations-mine/waiting/10")
                 .then().log().all()
                 .statusCode(204);
     }
