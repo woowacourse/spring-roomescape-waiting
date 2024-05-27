@@ -1,6 +1,7 @@
 package roomescape.reservation.domain.repository;
 
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -84,8 +85,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             SELECT mr
             FROM MemberReservation mr JOIN mr.reservationDetail r
             WHERE r = :reservationDetail AND mr.status = WAITING
-            GROUP BY mr.id
-            HAVING mr.id = MIN(mr.id)
+            ORDER BY mr.id ASC
             """)
-    List<MemberReservation> findFirstOrderWaitingMemberReservationByReservationDetail(ReservationDetail reservationDetail);
+    List<MemberReservation> findFirstOrderWaitingMemberReservationByReservationDetail(ReservationDetail reservationDetail, Pageable pageable);
 }

@@ -49,6 +49,10 @@ public class MemberReservation {
         }
     }
 
+    public boolean isMemberNotSame(final Member anotherMember) {
+        return this.member == anotherMember;
+    }
+
     public boolean isReservedStatus() {
         return status.isReserved();
     }

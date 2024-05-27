@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.error.ErrorType;
@@ -127,18 +128,17 @@ public class ReservationService {
     }
 
     private void validateMemberReservationIsFirstOrder(final MemberReservation memberReservationToApprove) {
-        int order = 0;
-        List<MemberReservation> memberReservationsOnReservationDetail = memberReservationRepository.findFirstOrderWaitingMemberReservationByReservationDetail(memberReservationToApprove.getReservationDetail());
-        for (MemberReservation memberReservation : memberReservationsOnReservationDetail) {
-            if (memberReservation.getId().equals(memberReservationToApprove.getId())) {
-                break;
-            }
-            order++;
-        }
+        Pageable limit = Pageable.ofSize(1);
+        List<MemberReservation> firstMemberReservationOnReservationDetail = memberReservationRepository
+                .findFirstOrderWaitingMemberReservationByReservationDetail(memberReservationToApprove.getReservationDetail(), limit);
 
-        if (order != 0) {
-            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA,
-                    "예약 승인을 요청한 대기 중인 예약이, 1순위 대기 상태가 아니어서 예약 대기 상태를 예약 상태로 변경 수 없습니다.");
+        if (!firstMemberReservationOnReservationDetail.isEmpty()) {
+            MemberReservation firstMemberReservation = firstMemberReservationOnReservationDetail.get(0);
+
+            if (!firstMemberReservation.isMemberNotSame(memberReservationToApprove.getMember())) {
+                throw new ValidateException(ErrorType.INVALID_REQUEST_DATA,
+                        "예약 승인을 요청한 대기 중인 예약이, 1순위 대기 상태가 아니어서 예약 대기 상태를 예약 상태로 변경 수 없습니다.");
+            }
         }
     }
 
