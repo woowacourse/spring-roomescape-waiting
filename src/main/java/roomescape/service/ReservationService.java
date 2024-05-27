@@ -111,20 +111,17 @@ public class ReservationService {
     }
 
     private void makeWaitingToReservation(Reservation reservation) {
-        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(
+        Optional<Waiting> opWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
                 ReservationStatus.WAITING
         );
 
-        if (waiting.isPresent()) {
-            Waiting firstWaiting = waiting.get();
-            waitingRepository.delete(firstWaiting);
-            Reservation autoReservation = new Reservation(firstWaiting.getDate(), firstWaiting.getMember(),
-                    firstWaiting.getTime(), firstWaiting.getTheme());
-            reservationRepository.save(autoReservation);
-        }
+        opWaiting.ifPresent(waiting -> {
+            waitingRepository.delete(waiting);
+            reservationRepository.save(new Reservation(waiting.getDate(), waiting.getMember(), waiting.getTime(), waiting.getTheme()));
+        });
     }
 
     private Reservation findReservationById(long id) {
