@@ -3,6 +3,7 @@ package roomescape.domain.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -129,12 +130,12 @@ class ReservationRepositoryTest {
         reservationRepository.save(reservation2);
 
         // when
-        List<Reservation> findReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
-                LocalDate.of(2023, 1, 1), savedTime.getId(), savedTheme1.getId());
+        Optional<Reservation> findReservations = reservationRepository.findByDateAndTimeAndTheme(
+                LocalDate.of(2023, 1, 1), savedTime, savedTheme1);
 
         // then
         Assertions.assertThat(findReservations)
-                .containsExactlyInAnyOrder(savedReservation1);
+                .hasValue(savedReservation1);
     }
 
     private Long createReservation(int dayOfMonth) {

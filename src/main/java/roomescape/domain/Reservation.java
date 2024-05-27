@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -52,11 +51,10 @@ public class Reservation {
         this(null, date, time, theme);
     }
 
-    public void validateDuplicateDateTime(List<Reservation> foundReservations) {
-        if (foundReservations.isEmpty()) {
-            return;
+    public void validateDuplicateDateTime(boolean isExist) {
+        if (isExist) {
+            throw new DuplicatedReservationException();
         }
-        throw new DuplicatedReservationException();
     }
 
     public void validateDateTimeReservation(ReservationDueTimePolicy timePolicy) {

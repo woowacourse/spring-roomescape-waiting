@@ -73,10 +73,9 @@ public class ReservationService {
 
     private Reservation verifyReservation(ReservationRequest request, ReservationTime time, Theme theme) {
         Reservation reservation = request.toReservation(time, theme);
-        List<Reservation> findReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId());
+        boolean isExist = reservationRepository.existsByDateAndTimeAndTheme(request.date(), time, theme);
         reservation.validateDateTimeReservation(new CurrentDueTimePolicy());
-        reservation.validateDuplicateDateTime(findReservations);
+        reservation.validateDuplicateDateTime(isExist);
         return reservation;
     }
 

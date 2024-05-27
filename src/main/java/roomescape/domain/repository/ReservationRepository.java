@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.repository.Repository;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {
@@ -18,7 +19,9 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
-    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     void delete(Reservation reservation);
 

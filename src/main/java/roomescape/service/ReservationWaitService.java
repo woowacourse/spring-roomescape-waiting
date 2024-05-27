@@ -69,20 +69,20 @@ public class ReservationWaitService {
     }
 
     private Reservation getReservation(WaitRequest request) {
-        List<Reservation> reservations = reservationRepository.findByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId());
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(NotFoundTimeException::new);
+        ReservationTime time = timeRepository.findById(request.timeId())
+                .orElseThrow(NotFoundTimeException::new);
 
-        if (reservations.isEmpty()) {
-            Theme theme = themeRepository.findById(request.themeId())
-                    .orElseThrow(NotFoundTimeException::new);
-            ReservationTime time = timeRepository.findById(request.timeId())
-                    .orElseThrow(NotFoundTimeException::new);
-            Reservation reservation = request.toReservation(time, theme);
-            reservationRepository.save(reservation);
-            return reservation;
-        }
+        return reservationRepository.findByDateAndTimeAndTheme(
+                        request.date(), time, theme)
+                .orElse(saveInitialReservation(request, time, theme));
+    }
 
-        return reservations.get(0);
+    private Reservation saveInitialReservation(WaitRequest request, ReservationTime time, Theme theme) {
+        Reservation reservation = request.toReservation(time, theme);
+        reservationRepository.save(reservation);
+        return reservation;
     }
 
     private void verifyWait(ReservationWait wait) {

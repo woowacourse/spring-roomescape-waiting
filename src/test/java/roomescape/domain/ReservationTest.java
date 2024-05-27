@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -21,11 +20,10 @@ class ReservationTest {
         ReservationTime time = new ReservationTime(LocalTime.of(1, 1));
         Theme theme = new Theme("a", "a", "a");
         LocalDate date = LocalDate.of(2023, 1, 1);
-        List<Reservation> reservations = List.of(new Reservation(date, time, theme));
         Reservation sut = new Reservation(date, time, theme);
 
         // when & them
-        Assertions.assertThatThrownBy(() -> sut.validateDuplicateDateTime(reservations))
+        Assertions.assertThatThrownBy(() -> sut.validateDuplicateDateTime(true))
                 .isInstanceOf(DuplicatedReservationException.class);
     }
 
@@ -40,7 +38,7 @@ class ReservationTest {
         Reservation sut = new Reservation(date, time, theme);
 
         // when & them
-        Assertions.assertThatCode(() -> sut.validateDuplicateDateTime(List.of()))
+        Assertions.assertThatCode(() -> sut.validateDuplicateDateTime(false))
                 .doesNotThrowAnyException();
     }
 
