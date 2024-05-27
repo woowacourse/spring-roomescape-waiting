@@ -10,6 +10,7 @@ import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.ReservationWaiting;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.CustomReservationWaitingRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationWaitingRepository;
 
@@ -20,21 +21,24 @@ import java.util.List;
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final CustomReservationWaitingRepository customReservationWaitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberService memberService;
     private final ThemeService themeService;
     private final ReservationTimeService reservationTimeService;
 
     public ReservationWaitingService(
-            final MemberService memberService,
+            final CustomReservationWaitingRepository customReservationWaitingRepository,
             final ReservationWaitingRepository reservationWaitingRepository,
             final ReservationRepository reservationRepository,
+            final MemberService memberService,
             final ThemeService themeService,
             final ReservationTimeService reservationTimeService
     ) {
-        this.memberService = memberService;
+        this.customReservationWaitingRepository = customReservationWaitingRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
+        this.memberService = memberService;
         this.themeService = themeService;
         this.reservationTimeService = reservationTimeService;
     }
@@ -47,21 +51,28 @@ public class ReservationWaitingService {
     }
 
     public List<ReservationWaitingWithOrderDto> getMyReservationWaiting(final Long memberId) {
-        final List<ReservationWaiting> reservationWaiting = reservationWaitingRepository.findAllByMemberId(memberId);
-        return reservationWaiting.stream()
-                .map(waiting -> ReservationWaitingWithOrderDto.from(waiting, parseReservationWaitingOrder(waiting)))
+        return customReservationWaitingRepository.findAllReservationWaitingWithOrdersByMemberId(memberId)
+                .stream()
+                .map(ReservationWaitingWithOrderDto::from)
                 .toList();
     }
 
-    private int parseReservationWaitingOrder(final ReservationWaiting reservationWaiting) {
-        final int beforeWaitingCount = reservationWaitingRepository.countAllByThemeAndDateAndTimeAndCreatedAtBefore(
-                reservationWaiting.getTheme(),
-                reservationWaiting.getDate(),
-                reservationWaiting.getTime(),
-                reservationWaiting.getCreatedAt()
-        );
-        return beforeWaitingCount + 1;
-    }
+//    public List<ReservationWaitingWithOrderDto> getMyReservationWaiting(final Long memberId) {
+//        final List<ReservationWaiting> reservationWaiting = reservationWaitingRepository.findAllByMemberId(memberId);
+//        return reservationWaiting.stream()
+//                .map(waiting -> ReservationWaitingWithOrderDto.from(waiting, parseReservationWaitingOrder(waiting)))
+//                .toList();
+//    }
+//
+//    private int parseReservationWaitingOrder(final ReservationWaiting reservationWaiting) {
+//        final int beforeWaitingCount = reservationWaitingRepository.countAllByThemeAndDateAndTimeAndCreatedAtBefore(
+//                reservationWaiting.getTheme(),
+//                reservationWaiting.getDate(),
+//                reservationWaiting.getTime(),
+//                reservationWaiting.getCreatedAt()
+//        );
+//        return beforeWaitingCount + 1;
+//    }
 
     public Long saveReservationWaiting(final SaveReservationWaitingRequest request) {
         final ReservationTime reservationTime = reservationTimeService.getReservationTime(request.time());
