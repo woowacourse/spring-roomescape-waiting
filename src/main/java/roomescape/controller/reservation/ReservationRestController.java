@@ -34,11 +34,14 @@ public class ReservationRestController {
         this.reservationService = reservationService;
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations")
-    public ReservationResponse createReservationMember(@AuthenticationPrincipal LoginMember loginMember,
-                                                       @Valid @RequestBody MemberReservationRequest request) {
-        return reservationService.createReservation(new ReservationCreate(loginMember, request));
+    public ResponseEntity<ReservationResponse> createReservationMember(@AuthenticationPrincipal LoginMember loginMember,
+                                                                       @Valid @RequestBody MemberReservationRequest request) {
+        ReservationResponse response = reservationService.createReservation(
+                new ReservationCreate(loginMember, request));
+        URI uri = UriComponentsBuilder.fromPath("/reservations/{id}").build(response.getId());
+
+        return ResponseEntity.created(uri).body(response);
     }
 
     @GetMapping("/reservations")
