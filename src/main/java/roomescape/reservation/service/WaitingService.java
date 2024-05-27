@@ -8,16 +8,18 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.WaitingResponse;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.repository.WaitingJpaRepository;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,11 +95,7 @@ public class WaitingService {
                 .toList();
     }
 
-    public Optional<Waiting> findWaitingByReservation(Reservation reservation) {
-        return waitingJpaRepository.findTopByDateAndReservationTimeAndTheme(
-                reservation.getDate(),
-                reservation.getReservationTime(),
-                reservation.getTheme()
-        );
+    public Optional<Waiting> findWaitingByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        return waitingJpaRepository.findTopByDateAndReservationTimeAndTheme(date, reservationTime, theme);
     }
 }

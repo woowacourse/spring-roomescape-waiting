@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.member.MemberArgumentResolver;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
@@ -40,7 +39,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationOfMemberResponse>> findReservationsByMember(
+    public ResponseEntity<List<ReservationResponse>> findReservationsByMember(
             @MemberArgumentResolver MemberRequest memberRequest) {
         return ResponseEntity.ok(reservationService.findReservationsByMember(memberRequest));
     }

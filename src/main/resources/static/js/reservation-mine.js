@@ -16,9 +16,9 @@ function render(data) {
   data.forEach(item => {
     const row = tableBody.insertRow();
 
-    const themeName = item.themeName;
+    const themeName = item.theme.name;
     const date = item.date;
-    const reservationTime = item.reservationTime;
+    const reservationTime = item.time.startAt;
     const status = item.status;
 
     row.insertCell(0).textContent = themeName;

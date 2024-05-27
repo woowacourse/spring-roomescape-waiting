@@ -10,7 +10,6 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
@@ -20,6 +19,7 @@ import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -120,18 +120,24 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationOfMemberResponse> findReservationsByMember(MemberRequest memberRequest) {
-        Stream<ReservationOfMemberResponse> reservations =
+    public List<ReservationResponse> findReservationsByMember(MemberRequest memberRequest) {
+        Stream<ReservationResponse> reservations =
                 reservationJpaRepository.findByMember(memberRequest.toLoginMember())
                 .stream()
-                .map(ReservationOfMemberResponse::from);
+                .map(ReservationResponse::new);
 
-        Stream<ReservationOfMemberResponse> waitings =
+        Stream<ReservationResponse> waitings =
                 waitingService.findWaitingsByMember(memberRequest.toLoginMember())
                 .stream()
-                .map(ReservationOfMemberResponse::from);
+                .map(ReservationResponse::fromWaitingWithRank);
 
-        return Stream.concat(reservations, waitings).toList();
+        return Stream.concat(reservations, waitings).
+                sorted(Comparator.comparing(ReservationResponse::date)
+                        .thenComparing(reservationResponse ->
+                                reservationResponse.time().toReservationTime().getStartAt()
+                        )
+                )
+                .toList();
     }
 
     public void deleteReservation(Long id, Member member) {
@@ -139,7 +145,11 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("id와 일치하는 예약을 찾을 수 없습니다."));
 
         if (reservation.getMember().equals(member)) {
-            waitingService.findWaitingByReservation(reservation)
+            waitingService.findWaitingByDateAndReservationTimeAndTheme(
+                        reservation.getDate(),
+                        reservation.getReservationTime(),
+                        reservation.getTheme()
+                    )
                     .ifPresentOrElse(
                             waiting -> updateReservationByWaiting(waiting, reservation, member),
                             () -> reservationJpaRepository.deleteById(id)
