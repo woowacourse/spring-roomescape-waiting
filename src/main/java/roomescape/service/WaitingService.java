@@ -56,7 +56,6 @@ public class WaitingService {
     }
 
     public WaitingResponses findAllWaitings() {
-        // TODO 배치 처리 고민해보기
         List<WaitingResponse> waitingResponses = waitingRepository.findAll()
                 .stream()
                 .map(WaitingResponse::new)

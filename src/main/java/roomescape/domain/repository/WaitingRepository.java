@@ -11,6 +11,18 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
+
+    @Query("""
+    select w
+    from Waiting w
+    join fetch w.member
+    join fetch w.reservation
+    """)
+    List<Waiting> findAll();
+
+    @Override
+    void delete(Waiting entity);
+
     boolean existsByMemberAndReservation(Member member, Reservation reservation);
 
     @Query("select exists(select 1 from Waiting w where w=:waiting and w.member = :member)")
