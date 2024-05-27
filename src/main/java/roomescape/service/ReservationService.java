@@ -102,8 +102,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findByStatus(ReservationStatus status) {
-        return reservationRepository.findAllByStatus(status)
+    public List<ReservationResponse> findByStatusPending() {
+        return reservationRepository.findAllByStatus(ReservationStatus.PENDING)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
