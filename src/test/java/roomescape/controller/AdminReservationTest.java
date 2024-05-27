@@ -14,12 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.dto.request.TokenRequest;
+import roomescape.domain.Role;
+import roomescape.infrastructure.TokenGenerator;
 
 import static roomescape.fixture.TestFixture.*;
 
@@ -28,8 +29,10 @@ import static roomescape.fixture.TestFixture.*;
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class AdminReservationTest {
 
+    @Autowired
+    TokenGenerator tokenGenerator;
+
     private static final String EMAIL = "testDB@email.com";
-    private static final String PASSWORD = "1234";
 
     @LocalServerPort
     private int port;
@@ -38,14 +41,7 @@ class AdminReservationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie(TOKEN);
+        accessToken = tokenGenerator.createToken(EMAIL, Role.ADMIN.name());
     }
 
     @DisplayName("reservation 페이지 조회 요청이 올바르게 연결된다.")

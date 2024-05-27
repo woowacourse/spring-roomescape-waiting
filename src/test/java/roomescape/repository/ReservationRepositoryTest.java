@@ -30,7 +30,7 @@ class ReservationRepositoryTest {
         assertAll(
                 () -> assertThat(reservations).hasSize(3),
                 () -> assertThat(reservations.get(0).getDate()).isEqualTo("2024-05-01"),
-                () -> assertThat(reservations.get(2).getDate()).isEqualTo("2024-05-18")
+                () -> assertThat(reservations.get(2).getDate()).isEqualTo("2024-05-24")
         );
     }
 

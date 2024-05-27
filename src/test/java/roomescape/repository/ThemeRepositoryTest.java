@@ -25,8 +25,8 @@ class ThemeRepositoryTest {
     @Test
     void findThemesWithReservationsBetweenDates() {
         //given
-        LocalDate fromDate = LocalDate.of(2024, 5, 18);
-        LocalDate toDate = LocalDate.of(2024, 5, 20);
+        LocalDate fromDate = LocalDate.of(2024, 5, 24);
+        LocalDate toDate = LocalDate.of(2024, 5, 26);
         Pageable pageable = PageRequest.of(0, 2);
 
         //when
