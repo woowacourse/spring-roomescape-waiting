@@ -18,7 +18,7 @@ class WaitingIntegrationTest extends IntegrationTest {
     void 예약_대기_목록을_조회할_수_있다() {
         RestAssured.given().log().all()
                 .cookies(cookieProvider.createCookies())
-                .when().get("/waitings")
+                .when().get("/admin/waitings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));

@@ -27,7 +27,7 @@ public class ReservationTimeController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @GetMapping("/times")
+    @GetMapping("/admin/times")
     public ResponseEntity<List<ReservationTimeResponse>> findAllReservationTime() {
         List<ReservationTimeResponse> response = reservationTimeService.findAllReservationTime();
         return ResponseEntity.ok().body(response);
@@ -42,14 +42,14 @@ public class ReservationTimeController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @PostMapping("/times")
+    @PostMapping("/admin/times")
     public ResponseEntity<ReservationTimeResponse> saveReservationTime(@RequestBody ReservationTimeRequest request) {
         ReservationTimeResponse response = reservationTimeService.saveReservationTime(request);
-        return ResponseEntity.created(URI.create("/times/" + response.id())).body(response);
+        return ResponseEntity.created(URI.create("/admin/times/" + response.id())).body(response);
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @DeleteMapping("/times/{timeId}")
+    @DeleteMapping("/admin/times/{timeId}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable Long timeId) {
         reservationTimeService.deleteReservationTime(timeId);
         return ResponseEntity.noContent().build();

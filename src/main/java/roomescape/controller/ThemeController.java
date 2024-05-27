@@ -36,14 +36,14 @@ public class ThemeController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @PostMapping("/themes")
+    @PostMapping("/admin/themes")
     public ResponseEntity<ThemeResponse> saveTheme(@RequestBody ThemeRequest request) {
         ThemeResponse response = themeService.saveTheme(request);
-        return ResponseEntity.created(URI.create("/themes/" + response.id())).body(response);
+        return ResponseEntity.created(URI.create("/admin/themes/" + response.id())).body(response);
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @DeleteMapping("/themes/{themeId}")
+    @DeleteMapping("/admin/themes/{themeId}")
     public ResponseEntity<Void> deleteTheme(@PathVariable Long themeId) {
         themeService.deleteTheme(themeId);
         return ResponseEntity.noContent().build();

@@ -22,7 +22,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations")
+                    .when().get("/admin/reservations")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(2));
@@ -32,7 +32,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_예약자별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations?member-id=1")
+                    .when().get("/admin/reservations?member-id=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
@@ -42,7 +42,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_테마별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations?theme-id=1")
+                    .when().get("/admin/reservations?theme-id=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(2));
@@ -52,7 +52,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_기간별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations?date-from=2024-08-05&date-to=2024-08-10")
+                    .when().get("/admin/reservations?date-from=2024-08-05&date-to=2024-08-10")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(2));
@@ -174,7 +174,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/reservations/3")
+                    .header("Location", "/admin/reservations/3")
                     .body("id", is(3));
         }
 
@@ -205,7 +205,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약을_삭제할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/reservations/1")
+                    .when().delete("/admin/reservations/1")
                     .then().log().all()
                     .statusCode(204);
 
@@ -218,7 +218,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 존재하지_않는_예약은_삭제할_수_없다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/reservations/10")
+                    .when().delete("/admin/reservations/10")
                     .then().log().all()
                     .statusCode(404);
         }
@@ -227,7 +227,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약을_삭제했을_때_대기가_있으면_첫번째가_자동으로_예약된다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/reservations/2")
+                    .when().delete("/admin/reservations/2")
                     .then().log().all()
                     .statusCode(204);
 

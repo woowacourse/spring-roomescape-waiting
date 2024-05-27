@@ -62,10 +62,10 @@ class ThemeIntegrationTest extends IntegrationTest {
                     .cookies(cookieProvider.createCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
-                    .when().post("/themes")
+                    .when().post("/admin/themes")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/themes/2")
+                    .header("Location", "/admin/themes/2")
                     .body("id", is(2));
         }
 
@@ -80,7 +80,7 @@ class ThemeIntegrationTest extends IntegrationTest {
                     .cookies(cookieProvider.createCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
-                    .when().post("/themes")
+                    .when().post("/admin/themes")
                     .then().log().all()
                     .statusCode(400);
         }
@@ -97,7 +97,7 @@ class ThemeIntegrationTest extends IntegrationTest {
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/themes/1")
+                    .when().delete("/admin/themes/1")
                     .then().log().all()
                     .statusCode(204);
         }
@@ -106,7 +106,7 @@ class ThemeIntegrationTest extends IntegrationTest {
         void 존재하지_않는_테마는_삭제할_수_없다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/themes/13")
+                    .when().delete("/admin/themes/13")
                     .then().log().all()
                     .statusCode(404);
         }

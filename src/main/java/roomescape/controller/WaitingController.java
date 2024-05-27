@@ -27,7 +27,7 @@ public class WaitingController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @GetMapping("/waitings")
+    @GetMapping("/admin/waitings")
     public ResponseEntity<List<WaitingResponse>> findAllWaitings() {
         List<WaitingResponse> response = waitingService.findAllWaitings();
         return ResponseEntity.ok().body(response);

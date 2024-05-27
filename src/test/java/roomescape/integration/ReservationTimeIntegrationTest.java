@@ -22,7 +22,7 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
         void 시간_목록을_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/times")
+                    .when().get("/admin/times")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
@@ -73,10 +73,10 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
                     .cookies(cookieProvider.createCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
-                    .when().post("/times")
+                    .when().post("/admin/times")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/times/2")
+                    .header("Location", "/admin/times/2")
                     .body("id", is(2));
         }
 
@@ -117,7 +117,7 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
                     .cookies(cookieProvider.createCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
-                    .when().post("/times")
+                    .when().post("/admin/times")
                     .then().log().all()
                     .statusCode(409);
         }
@@ -134,7 +134,7 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/times/1")
+                    .when().delete("/admin/times/1")
                     .then().log().all()
                     .statusCode(204);
 
@@ -147,7 +147,7 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
         void 존재하지_않는_시간은_삭제할_수_없다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/times/13")
+                    .when().delete("/admin/times/13")
                     .then().log().all()
                     .statusCode(404);
         }
