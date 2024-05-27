@@ -43,9 +43,9 @@ import roomescape.time.domain.Time;
                                   "security.jwt.token.expire-length=3600000"})
 class ReservationControllerTest {
 
-    private final Member member = new Member("tester", "test@email.com", "pass");
+    private static final Member MEMBER = new Member("tester", "test@email.com", "pass");
     private final Reservation reservation = new Reservation(
-            member,
+            MEMBER,
             LocalDate.MAX,
             new Time(1L, LocalTime.of(12, 0)),
             new Theme(1L, "도비", "도비 방탈출", "이미지~"));

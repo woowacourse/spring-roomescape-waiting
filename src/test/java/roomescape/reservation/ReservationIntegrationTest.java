@@ -30,9 +30,9 @@ import roomescape.time.domain.Time;
 class ReservationIntegrationTest {
 
     private static final Member MEMBER = new Member(1L, "켬미", "aaa@naver.com", "1111");
-    private static final Time TIME = new Time(1L, LocalTime.of(10, 0));
+    private static final Time TIME = new Time(1L, LocalTime.of(22, 59));
     private static final Theme THEME = new Theme(1L, "Harry Potter", "해리포터와 도비", "thumbnail.jpg");
-    private static final Reservation RESERVATION = new Reservation(1L, MEMBER, LocalDate.MAX, TIME, THEME);
+    private static final Reservation RESERVATION = new Reservation(MEMBER, LocalDate.MAX, TIME, THEME);
     @LocalServerPort
     private int port;
 
@@ -82,7 +82,7 @@ class ReservationIntegrationTest {
         }
 
         @Nested
-        @DisplayName("When the user is logged in")
+        @DisplayName("유저의 정상적인 로그인 시도는 성공한다.")
         class LoggedInUser {
 
             @BeforeEach
