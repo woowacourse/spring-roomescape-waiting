@@ -26,7 +26,10 @@ class ThemeRepositoryTest {
     @DisplayName("Db에 등록된 테마 목록을 조회할 수 있다.")
     @Test
     void given_when_findAll_then_ReturnThemes() {
-        assertThat(themeRepository.findAll().size()).isEqualTo(4);
+        //when
+        final List<Theme> themes = themeRepository.findAll();
+        //then
+        assertThat(themes).hasSize(4);
     }
 
     @DisplayName("Db에 테마 정보를 저장한다.")
@@ -56,7 +59,10 @@ class ThemeRepositoryTest {
     @DisplayName("Id를 통해 Theme 객체를 반환할 수 있다.")
     @Test
     void given_when_findById_then_returnOptionalTheme() {
-        assertThat(themeRepository.findById(1L).get().getId()).isEqualTo(1);
+        //when
+        Theme theme = themeRepository.findById(1L).get();
+        //then
+        assertThat(theme.getId()).isEqualTo(1);
     }
 
     @DisplayName("등록된 테마 중 시작과 종료 기간을 지정하면 예약이 많은 순서로 테마가 반환된다.")

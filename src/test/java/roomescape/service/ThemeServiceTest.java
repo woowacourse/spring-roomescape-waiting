@@ -30,15 +30,15 @@ class ThemeServiceTest {
         return service.findAll().getData().size();
     }
 
-    @Test
     @DisplayName("테마 목록을 반환한다.")
+    @Test
     void given_when_findAll_then_returnThemeResponses() {
         //when, then
         assertThat(service.findAll().getData().size()).isEqualTo(4);
     }
 
-    @Test
     @DisplayName("테마 등록이 성공하면 결과값과 함께 Db에 저장된다.")
+    @Test
     void given_themeRequestWithInitialSize_when_register_then_returnThemeResponseAndSaveDb() {
         //given
         long initialSize = getThemeSize();
@@ -53,8 +53,8 @@ class ThemeServiceTest {
         );
     }
 
-    @Test
     @DisplayName("존재하는 테마를 삭제하면 Db에도 삭제된다.")
+    @Test
     void given_initialSize_when_delete_then_deletedItemInDb() {
         //given
         long initialSize = getThemeSize();
@@ -65,8 +65,8 @@ class ThemeServiceTest {
         assertThat(afterCreateSize).isEqualTo(initialSize - 1);
     }
 
-    @Test
     @DisplayName("예약이 되어있는 테마를 지울 경우 예외를 발생시키고 Db에 반영하지 않는다.")
+    @Test
     void given_initialSize_when_registerWithNotExistThemeId_then_throwException() {
         //given
         long initialSize = getThemeSize();

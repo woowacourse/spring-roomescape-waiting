@@ -8,6 +8,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.ReservationTimeRequest;
 
 import java.time.LocalTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +24,10 @@ class ReservationTimeRepositoryTest {
     @DisplayName("Db에 등록된 시간 목록을 조회할 수 있다.")
     @Test
     void given_when_findAll_then_ReturnReservationTimes() {
-        assertThat(reservationTimeRepository.findAll().size()).isEqualTo(4);
+        //when
+        final List<ReservationTime> times = reservationTimeRepository.findAll();
+        //then
+        assertThat(times).hasSize(4);
     }
 
     @DisplayName("Db에 시간 정보를 저장한다.")
@@ -53,12 +57,16 @@ class ReservationTimeRepositoryTest {
     @DisplayName("시간이 Db에 이미 등록되어 있는지 확인할 수 있다.")
     @Test
     void given_when_isExist_then_returnExistResult() {
-        assertThat(reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"))).isTrue();
+        //when
+        boolean actual = reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"));
+        //then
+        assertThat(actual).isTrue();
     }
 
     @DisplayName("Id를 통해 시간 정보를 반환할 수 있다.")
     @Test
     void given_when_findById_then_returnOptionalReservationTime() {
-        assertThat(reservationTimeRepository.findById(1L).get().getId()).isEqualTo(1);
+        final ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
+        assertThat(reservationTime.getId()).isEqualTo(1);
     }
 }

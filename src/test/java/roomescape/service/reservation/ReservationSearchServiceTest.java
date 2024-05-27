@@ -12,7 +12,6 @@ import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
-import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 
@@ -22,18 +21,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ReservationSearchServiceTest {
     private final ReservationSearchService service;
-    private final ReservationRepository repository;
 
     @Autowired
-    public ReservationSearchServiceTest(final ReservationSearchService service, final ReservationRepository repository) {
+    public ReservationSearchServiceTest(final ReservationSearchService service) {
         this.service = service;
-        this.repository = repository;
     }
 
     @Test
     @DisplayName("예약 목록을 반환한다.")
     void given_when_findEntireReservations_then_returnReservationResponses() {
-        assertThat(service.findEntireReservations().getData().size()).isEqualTo(10);
+        //when
+        final ResponsesWrapper<ReservationResponse> reservations = service.findEntireReservations();
+        //then
+        assertThat(reservations.getData().size()).isEqualTo(10);
     }
 
     @Test
@@ -42,8 +42,10 @@ class ReservationSearchServiceTest {
         //given
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
-        //when, then
-        assertThat(service.findMemberReservations(member).getData()).hasSize(8);
+        //when
+        final ResponsesWrapper<ReservationsMineResponse> reservationResponse = service.findMemberReservations(member);
+        //then
+        assertThat(reservationResponse.getData()).hasSize(8);
     }
 
     @Test

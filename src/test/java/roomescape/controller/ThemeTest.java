@@ -39,7 +39,6 @@ class ThemeTest {
     @DisplayName("랭크를 조회하면 현재 날짜 기준 일주일 동안의 인기 테마를 확인할 수 있다.")
     @Test
     void given_startDateEndDateCount_when_rank_then_statusCodeIsOk() {
-        //given
         String startDate = "2024-04-30";
         String endDate = "2024-05-02";
         String size = "10";
@@ -57,7 +56,6 @@ class ThemeTest {
     @ParameterizedTest
     @ValueSource(strings = {" ", "", "2999-45-43"})
     void given_invalidStartDate_when_rank_then_statusCodeIsBadRequest(String invalidStartDate) {
-        //given
         String endDate = "2024-05-02";
         String count = "10";
         RestAssured.given().log().all()

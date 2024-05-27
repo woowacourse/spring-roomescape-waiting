@@ -52,12 +52,10 @@ class ClientReservationTest {
     @DisplayName("사용자 예약이 정상적으로 성공한다.")
     @Test
     void given_reservationRequest_when_create_statusCodeIsCreated() {
-        //given
         Map<String, String> params = new HashMap<>();
         params.put("date", "2099-01-01");
         params.put("themeId", "1");
         params.put("timeId", "2");
-        //when, then
         RestAssured.given().log().all()
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
                 .contentType(ContentType.JSON)
@@ -80,12 +78,10 @@ class ClientReservationTest {
     @DisplayName("사용자 예약 등록 시 부적절한 값이 들어올 경우 400오류를 반환한다.")
     @Test
     void given_memberToken_when_createWithInvalidParam_then_statusCodeIsBadRequest() {
-        //given
         Map<String, String> params = new HashMap<>();
         params.put("date", "2099-01-01");
         params.put("themeId", "1");
         params.put("timeId", "-2");
-        //when, then
         RestAssured.given().log().all()
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
                 .contentType(ContentType.JSON)

@@ -8,7 +8,6 @@ import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ThemeTest {
-
     @DisplayName("이름, 설명, 섬네일 중 하나라도 빈 값이 있을 경우 예외가 발생한다.")
     @CsvSource({",description,thumbnail", "name,,thumbnail", "name,description,"})
     @ParameterizedTest
@@ -16,5 +15,4 @@ class ThemeTest {
         assertThatThrownBy(() -> new Theme(1L, name, description, thumbnail))
                 .isInstanceOf(EmptyValueNotAllowedException.class);
     }
-
 }

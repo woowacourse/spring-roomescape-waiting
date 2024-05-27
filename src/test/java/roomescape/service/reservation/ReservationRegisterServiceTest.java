@@ -34,8 +34,8 @@ class ReservationRegisterServiceTest {
         return repository.findAll().size();
     }
 
-    @Test
     @DisplayName("예약이 성공하면 결과값과 함께 Db에 저장된다.")
+    @Test
     void given_reservationRequestWithInitialSize_when_register_then_returnReservationResponseAndSaveDb() {
         //given
         long initialSize = getReservationSize();
@@ -50,8 +50,8 @@ class ReservationRegisterServiceTest {
         );
     }
 
-    @Test
     @DisplayName("이전 날짜로 예약 할 경우 예외가 발생하고, Db에 저장하지 않는다.")
+    @Test
     void given_reservationRequestWithInitialSize_when_registerWithPastDate_then_throwException() {
         //given
         long initialSize = getReservationSize();
@@ -63,8 +63,8 @@ class ReservationRegisterServiceTest {
         );
     }
 
-    @Test
     @DisplayName("themeId가 존재하지 않을 경우 예외를 발생하고, Db에 저장하지 않는다.")
+    @Test
     void given_reservationRequestWithInitialSize_when_registerWithNotExistThemeId_then_throwException() {
         //given
         long initialSize = getReservationSize();
@@ -78,8 +78,8 @@ class ReservationRegisterServiceTest {
         );
     }
 
-    @Test
     @DisplayName("timeId 존재하지 않을 경우 예외를 발생하고, Db에 저장하지 않는다.")
+    @Test
     void given_reservationRequestWithInitialSize_when_registerWithNotExistTimeId_then_throwException() {
         //given
         long initialSize = getReservationSize();
@@ -93,8 +93,8 @@ class ReservationRegisterServiceTest {
         );
     }
 
-    @Test
     @DisplayName("memberId 존재하지 않을 경우 예외를 발생하고, Db에 저장하지 않는다.")
+    @Test
     void given_reservationRequestWithInitialSize_when_registerWithNotExistMemberId_then_throwException() {
         //given
         long initialSize = getReservationSize();
@@ -108,8 +108,8 @@ class ReservationRegisterServiceTest {
         );
     }
 
-    @Test
     @DisplayName("이미 예약이 되어있는 날짜와 시간 및 테마에 다른 사용자가 예약 등록을 할 경우 예약이 저장된다.")
+    @Test
     void given_reservationRequest_when_registerAlreadyReservedWithDifferentMemberId_then_createdWithStatusIsWaiting() {
         //given
         long initialSize = getReservationSize();

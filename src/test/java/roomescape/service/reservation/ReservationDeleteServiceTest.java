@@ -29,8 +29,8 @@ class ReservationDeleteServiceTest {
         return repository.findAll().size();
     }
 
-    @Test
     @DisplayName("존재하는 예약을 삭제하면 Db에도 삭제된다.")
+    @Test
     void given_initialSize_when_delete_then_deletedItemInDb() {
         //given
         long initialSize = getReservationSize();
@@ -42,8 +42,8 @@ class ReservationDeleteServiceTest {
     }
 
 
-    @Test
     @DisplayName("예약이 제거되면 우선 대기중인 상태의 예약이 예약 상태가 된다.")
+    @Test
     void given_when_deleteReservationHasWaitingReservation_then_stateChangedToReserved() {
         //when
         service.delete(8L);
@@ -51,8 +51,8 @@ class ReservationDeleteServiceTest {
         assertThat(repository.findById(9L).get().getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
-    @Test
     @DisplayName("소유자가 아닌 회원의 대기중인 예약을 제거할 수 없다.")
+    @Test
     void given_differentMemberId_when_deleteByIdAndOwner_then_notDeleted() {
         //given
         long initialSize = getReservationSize();
@@ -65,8 +65,8 @@ class ReservationDeleteServiceTest {
         assertThat(afterCreateSize).isEqualTo(initialSize);
     }
 
-    @Test
     @DisplayName("대기중인 예약을 제거할 수 있다.")
+    @Test
     void given_when_deleteWaitingById_then_deleted() {
         //given
         long initialSize = getReservationSize();

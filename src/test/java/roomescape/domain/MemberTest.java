@@ -10,7 +10,6 @@ import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MemberTest {
-
     @DisplayName("이메일, 이름이 공백이면 예외를 발생시킨다.")
     @CsvSource({"email@email.com,", ",test@test.com"})
     @ParameterizedTest

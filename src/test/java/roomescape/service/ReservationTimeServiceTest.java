@@ -85,6 +85,6 @@ class ReservationTimeServiceTest {
         final List<BookResponse> bookResponses = service.findAvailableBookList(LocalDate.parse("2099-05-08"), 1L)
                 .getData();
         //then
-        assertThat(bookResponses.size()).isEqualTo(4);
+        assertThat(bookResponses).hasSize(4);
     }
 }

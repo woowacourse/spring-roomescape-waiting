@@ -36,13 +36,18 @@ class MemberRepositoryTest {
     @DisplayName("email 주소를 통해 회원을 조회한다.")
     @Test
     void given_when_findByEmail_then_returnMember() {
+        //when
         final Member member = memberRepository.findByEmail("user@test.com").get();
+        //then
         assertThat(member.getEmail()).isEqualTo("user@test.com");
     }
 
     @DisplayName("email 주소를 통해 회원이 존재하는지 확인한다.")
     @Test
     void given_when_existsByEmail_then_returnBoolean() {
-        assertThat(memberRepository.existsByEmail("user@test.com")).isTrue();
+        //when
+        final boolean actual = memberRepository.existsByEmail("user@test.com");
+        //then
+        assertThat(actual).isTrue();
     }
 }

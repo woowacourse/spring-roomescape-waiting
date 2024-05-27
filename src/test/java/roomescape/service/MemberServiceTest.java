@@ -13,9 +13,11 @@ import roomescape.domain.Password;
 import roomescape.domain.PasswordEncoder;
 import roomescape.domain.dto.LoginRequest;
 import roomescape.domain.dto.SignupRequest;
+import roomescape.domain.dto.TokenResponse;
 import roomescape.exception.SignupFailException;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -71,14 +73,16 @@ class MemberServiceTest {
         );
     }
 
-    @DisplayName("로그인 정보가 일치하지 않으면 예외를 발생시킨다. ")
+    @DisplayName("로그인 정보가 일치하면 토큰을 반환한다.")
     @Test
     void given_LoginRequest_when_loginSuccess_then_doesNotAnyException() {
         //given
         when(passwordEncoder.encode(any(String.class), any(String.class))).thenReturn(
                 new Password("hashedpassword", "salt"));
         LoginRequest loginRequest = new LoginRequest("user@test.com", "password");
-        //when, then
-        assertThatCode(() -> service.login(loginRequest)).doesNotThrowAnyException();
+        //when
+        var response = service.login(loginRequest);
+        //then
+        assertThat(response).isInstanceOf(TokenResponse.class);
     }
 }
