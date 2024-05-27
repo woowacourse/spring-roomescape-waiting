@@ -48,7 +48,7 @@ public class ThemeService {
     }
 
     private void validateExistReservation(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByTheme_Id(id)) {
             throw new DeleteNotAllowException("예약이 등록된 테마는 제거할 수 없습니다.");
         }
     }

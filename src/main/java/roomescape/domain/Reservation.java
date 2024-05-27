@@ -91,4 +91,8 @@ public class Reservation {
     public Long getThemeId() {
         return theme.getId();
     }
+
+    public Long getMemberId() {
+        return member.getId();
+    }
 }

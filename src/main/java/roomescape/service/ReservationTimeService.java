@@ -52,14 +52,14 @@ public class ReservationTimeService {
     }
 
     private void validateExistReservation(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByTime_Id(id)) {
             throw new DeleteNotAllowException("예약이 등록된 시간은 제거할 수 없습니다.");
         }
     }
 
     public ResponsesWrapper<BookResponse> findAvailableBookList(final LocalDate date, final Long themeId) {
         List<ReservationTime> reservedReservationTimes = reservationRepository
-                .findByDateAndThemeId(date, themeId)
+                .findByDateAndTheme_Id(date, themeId)
                 .stream().map(Reservation::getTime).toList();
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 

@@ -69,7 +69,7 @@ public class ReservationService {
     }
 
     private Reservation createReservation(final ReservationRequest reservationRequest, final Member member, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
+        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
             return Reservation.waiting(member, reservationRequest.date(), reservationTime, theme);
         }
         return Reservation.reserved(member, reservationRequest.date(), reservationTime, theme);
@@ -91,7 +91,7 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(final ReservationRequest reservationRequest) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(reservationRequest.date(),
+        if (reservationRepository.existsByDateAndTime_IdAndTheme_IdAndMember_Id(reservationRequest.date(),
                 reservationRequest.timeId(),
                 reservationRequest.themeId(),
                 reservationRequest.memberId())) {
@@ -120,7 +120,7 @@ public class ReservationService {
         final LocalDate date = reservation.getDate();
         final Long timeId = reservation.getTimeId();
         final Long themeId = reservation.getThemeId();
-        reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, ReservationStatus.WAITING)
+        reservationRepository.findFirstByDateAndTime_IdAndTheme_IdAndStatus(date, timeId, themeId, ReservationStatus.WAITING)
                 .ifPresent(Reservation::changeToReserved);
     }
 
@@ -128,7 +128,7 @@ public class ReservationService {
     public ResponsesWrapper<ReservationResponse> findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                                                   final LocalDate dateTo) {
         final List<ReservationResponse> reservationResponses = reservationRepository
-                .findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo)
+                .findAllByTheme_IdAndMember_IdAndDateBetween(themeId, memberId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -152,14 +152,14 @@ public class ReservationService {
     }
 
     private Integer calculateWaitingNumber(final Reservation reservation, final Member member) {
-        final List<Reservation> reservations = reservationRepository.findByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        final List<Reservation> reservations = reservationRepository.findByDateAndTime_IdAndTheme_Id(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         return Math.toIntExact(reservations.stream()
-                .takeWhile(found -> !found.getMember().getId().equals(member.getId()))
+                .takeWhile(found -> !found.getMemberId().equals(member.getId()))
                 .count());
     }
 
     public void deleteByIdWithWaiting(final Long id, final Member member) {
-        if (reservationRepository.existsByIdAndMemberId(id, member.getId())) {
+        if (reservationRepository.existsByIdAndMember_Id(id, member.getId())) {
             deleteWaitingById(id);
         }
     }

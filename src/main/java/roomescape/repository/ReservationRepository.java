@@ -10,26 +10,26 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByDateAndTime_IdAndTheme_IdAndMember_Id(LocalDate date, Long timeId, Long themeId, Long memberId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTime_Id(Long timeId);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByTheme_Id(Long themeId);
 
-    boolean existsByIdAndMemberId(Long id, Long memberId);
+    boolean existsByIdAndMember_Id(Long id, Long memberId);
 
     List<Reservation> findByMember(Member member);
 
     List<Reservation> findByStatus(ReservationStatus reservationStatus);
 
-    List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findByDateAndTheme_Id(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
-                                                                LocalDate dateTo);
+    List<Reservation> findAllByTheme_IdAndMember_IdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
+                                                                  LocalDate dateTo);
 
-    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    List<Reservation> findByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
 
-    Optional<Reservation> findFirstByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId, ReservationStatus status);
+    Optional<Reservation> findFirstByDateAndTime_IdAndTheme_IdAndStatus(LocalDate date, Long timeId, Long themeId, ReservationStatus status);
 }
