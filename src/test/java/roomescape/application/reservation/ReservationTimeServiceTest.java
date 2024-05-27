@@ -41,9 +41,6 @@ class ReservationTimeServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private Clock clock;
-
     @Test
     @DisplayName("예약 시간을 생성한다.")
     void shouldReturnReservationTimeResponseWhenCreateReservationTime() {
@@ -90,7 +87,7 @@ class ReservationTimeServiceTest {
         Member member = MemberFixture.createMember("오리");
         Member savedMember = memberRepository.save(member);
         reservationRepository.save(new Reservation(
-                savedMember, LocalDate.parse("2024-01-01"), time, theme, LocalDateTime.now(clock)
+                savedMember, LocalDate.parse("2024-01-01"), time, theme
         ));
         assertThatCode(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(IllegalArgumentException.class)

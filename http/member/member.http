@@ -18,10 +18,10 @@ Content-Type: application/json
 }
 
 > {%
- client.test("Validate", function() {
-     client.assert((response.status === 200), "Response status is not 200");
- })
- %}
+    client.test("Validate", function () {
+        client.assert((response.status === 200), "Response status is not 200");
+    })
+%}
 
 ### 3. 로그아웃
 POST {{api}}/logout

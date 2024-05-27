@@ -6,8 +6,8 @@ import roomescape.domain.reservation.ReservationTime;
 
 public record ReservationTimeRequest(
         @NotNull(message = "시간을 입력해주세요.")
-        LocalTime startAt) {
-
+        LocalTime startAt
+) {
     public ReservationTime toReservationTime() {
         return new ReservationTime(startAt);
     }

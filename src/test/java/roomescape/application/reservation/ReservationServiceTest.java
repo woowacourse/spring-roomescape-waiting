@@ -53,9 +53,6 @@ class ReservationServiceTest {
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private Clock clock;
-
     @Test
     @DisplayName("정상적인 예약 요청을 받아서 저장한다.")
     void shouldReturnReservationResponseWhenValidReservationRequestSave() {
@@ -119,7 +116,7 @@ class ReservationServiceTest {
                 time.getId(),
                 theme.getId()
         );
-        reservationRepository.save(request.toReservation(member, time, theme, LocalDateTime.now(clock)));
+        reservationRepository.save(request.toReservation(member, time, theme));
 
         assertThatCode(() -> reservationService.create(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -192,6 +189,18 @@ class ReservationServiceTest {
                 .hasMessage("존재하지 않는 예약입니다.");
     }
 
+    @Test
+    @DisplayName("예약의 멤버 업데이트를 수행한다.")
+    void updateMemberById() {
+        Reservation reservation = saveReservation();
+        Member member = memberRepository.save(MemberFixture.createMember("시소"));
+        reservationService.updateMemberById(reservation.getId(),
+                reservation.getMember().getId(), member);
+
+        Reservation updatedReservation = reservationRepository.getById(reservation.getId());
+        assertThat(updatedReservation.getMember().getName()).isEqualTo("시소");
+    }
+
     private Reservation saveReservation() {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("test", "test", "test"));
@@ -200,8 +209,7 @@ class ReservationServiceTest {
                 member,
                 LocalDate.of(2024, 1, 1),
                 time,
-                theme,
-                LocalDateTime.now(clock)
+                theme
         );
         return reservationRepository.save(reservation);
     }

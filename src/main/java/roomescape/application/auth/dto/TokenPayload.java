@@ -4,7 +4,6 @@ import roomescape.domain.role.MemberRole;
 import roomescape.domain.role.Role;
 
 public record TokenPayload(long memberId, String name, Role role) {
-
     public static TokenPayload from(MemberRole memberRole) {
         return new TokenPayload(memberRole.getMemberId(), memberRole.getMemberName(), memberRole.getRole());
     }

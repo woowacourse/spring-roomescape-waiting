@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
-
     @Query("""
             select t from Theme as t
             left join Reservation as r on t.id = r.theme.id

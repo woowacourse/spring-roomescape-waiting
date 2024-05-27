@@ -2,31 +2,23 @@
 
 ### 요구사항
 
-- [x] 사용자 로그인
-    - [x] 사용자는 이름, 이메일, 비밀번호로 인증한다.
-    - [x] 이름은 `PlayerName`을 사용한다.
-    - [x] 이메일은 형식을 지켜야 하며, 50자 이내여야 한다.
-        - [x] 중복될 수 없다.
-    - [x] 비밀번호는 암호화해 저장한다.
+- [x] 화면 응답 파일을 수정한다.
+- [x] API 명세를 작성한다.
+- [x] 예약 대기 요청 기능을 구현한다.
+    - [x] 예약 대기 요청은 중복이 불가하다.
+    - [x] 예약 대기 요청은 예약과 중복이 불가하다.
+- [x] 예약 대기 취소 기능을 구현한다.
+    - [x] 해당 유저가 삭제할 수 있다.
+- [x] 내 예약 목록 조회 시 예약 대기 목록도 함께 포함한다.
+    - [x] 몇 번째 대기인지 함께 표기한다.
 
-- [x] 요청에 대한 적절한 상태코드를 반환하도록 수정
-    - 생성 시 201, 삭제 시 204
-
-- [x] 시간에서 발생할 수 있는 예외 사항 처리
-    - [x] 유효하지 않은 시작 시간
-    - [x] 중복되는 시작 시간
-    - [x] 초 단위 시간은 무시하도록 처리
-    - [x] 없는 id를 삭제하는 경우
-    - [x] 예약이 존재하는 시간을 삭제하는 경우
-
-- [x] 예약에서 발생할 수 있는 예외 사항 처리
-    - [x] 시간 id가 존재하지 않는 경우
-    - [x] 이름 제약조건 (길이 등)
-    - [x] 과거 시간을 예약하는 경우
-    - [x] 같은 날짜에 같은 시간을 예약하는 경우 중복 예약
-
-    - [x] 테마에서 발생할 수 있는 예외 사항 처리
-        - [x] 예약이 존재하는 테마를 삭제하는 경우
+- [x] API 명세를 작성한다.
+- [x] 어드민에서 예약 대기 관리 기능을 구현한다.
+  - [x] 어드민은 예약 대기 목록을 조회할 수 있다.
+  - [x] 어드민은 예약 대기를 취소시킬 수 있다.
+- [x] 예약 대기 승인 기능을 구현한다.
+  - [x] 예약이 취소되면 가장 빠른 예약 대기가 자동으로 승인된다.
+- [x] 화면 응답 파일을 수정한다.
 
 # 방탈출 API 명세
 
@@ -76,21 +68,21 @@
     "theme": "테마1",
     "date": "2024-03-01",
     "time": "10:00",
-    "status": "예약"
+    "status": "예약 완료"
   },
   {
     "reservationId": 2,
     "theme": "테마2",
     "date": "2024-03-01",
     "time": "12:00",
-    "status": "예약"
+    "status": "대기"
   },
   {
     "reservationId": 3,
     "theme": "테마3",
     "date": "2024-03-01",
     "time": "14:00",
-    "status": "예약"
+    "status": "예약 완료"
   }
 ]
 ```
@@ -147,6 +139,63 @@
 ### Request
 
 - DELETE /reservations/{id}
+
+### Response
+
+- 204 No Content
+
+---
+
+## 예약 대기 추가
+
+### Request
+
+- POST /waiting
+- cookie: token={token}
+- content-type: application/json
+
+```json
+{
+  "date": "2023-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+### Response
+
+- 201 Created
+- Location: /waiting/1
+- content-type: application/json
+
+```json
+{
+  "id": 1,
+  "member": {
+    "id": 1,
+    "name": "아루"
+  },
+  "date": "2024-12-25",
+  "time": {
+    "id": 1,
+    "startAt": "10:00:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "우테코에 어서오세요",
+    "description": "우테코를 탈출하세요",
+    "thumbnail": "https://avatars.githubusercontent.com/u/0"
+  }
+}
+```
+
+---
+
+## 예약 대기 삭제
+
+### Request
+
+- DELETE /waiting/{id}
 
 ### Response
 
@@ -397,3 +446,45 @@
 
 - 204 No Content
 - Set-Cookie: token=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/; HttpOnly
+
+---
+
+## 관리자 예약 대기 조회
+
+### Request
+
+- GET /waiting
+- cookie: token={token}
+- content-type: application/json
+-
+
+### Response
+
+- 200 OK
+- content-type: application/json
+
+```json
+[
+  {
+    "reservationId": 1,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "대기"
+  },
+  {
+    "reservationId": 2,
+    "theme": "테마2",
+    "date": "2024-03-01",
+    "time": "12:00",
+    "status": "대기"
+  },
+  {
+    "reservationId": 3,
+    "theme": "테마3",
+    "date": "2024-03-01",
+    "time": "14:00",
+    "status": "대기"
+  }
+]
+```

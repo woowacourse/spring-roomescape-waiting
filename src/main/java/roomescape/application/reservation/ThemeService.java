@@ -29,11 +29,13 @@ public class ThemeService {
         this.clock = clock;
     }
 
+    @Transactional
     public ThemeResponse create(ThemeRequest request) {
         Theme savedTheme = themeRepository.save(request.toTheme());
         return ThemeResponse.from(savedTheme);
     }
 
+    @Transactional
     public List<ThemeResponse> findAll() {
         return themeRepository.findAll()
                 .stream()
@@ -49,6 +51,7 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
+    @Transactional
     public List<ThemeResponse> findPopularThemes() {
         LocalDate today = LocalDate.now(clock);
         return themeRepository.findPopularThemesDateBetween(

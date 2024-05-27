@@ -41,4 +41,5 @@ public class AdminReservationController {
         List<ReservationResponse> responses = reservationService.findByFilter(request);
         return ResponseEntity.ok(responses);
     }
+
 }

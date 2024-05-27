@@ -10,13 +10,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.domain.BaseTimeEntity;
 import roomescape.domain.member.Member;
-import roomescape.domain.role.Role;
 
 @Entity
-public class Reservation {
+public class Reservation extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,33 +27,27 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(optional = false)
     private Theme theme;
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                       LocalDateTime createdAt) {
-        validateCreatedAtAfterReserveTime(date, time.getStartAt(), createdAt);
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.createdAt = createdAt;
         this.reservationStatus = ReservationStatus.COMPLETE;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
-        this(null, member, date, time, theme, createdAt);
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme);
     }
 
-    private void validateCreatedAtAfterReserveTime(LocalDate date, LocalTime startAt, LocalDateTime createdAt) {
-        LocalDateTime reservedDateTime = LocalDateTime.of(date, startAt);
+    public void validateCreatedAtAfterReserveTime(LocalDateTime createdAt) {
+        LocalDateTime reservedDateTime = LocalDateTime.of(date, time.getStartAt());
         if (reservedDateTime.isBefore(createdAt)) {
             throw new IllegalArgumentException("현재 시간보다 과거로 예약할 수 없습니다.");
         }
@@ -62,6 +55,10 @@ public class Reservation {
 
     public boolean isOwnedBy(long memberId) {
         return member.hasId(memberId);
+    }
+
+    public void updateMember(Member member) {
+        this.member = member;
     }
 
     @Override

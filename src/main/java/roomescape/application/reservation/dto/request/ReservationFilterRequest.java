@@ -6,5 +6,6 @@ public record ReservationFilterRequest(
         Long memberId,
         Long themeId,
         LocalDate startDate,
-        LocalDate endDate) {
+        LocalDate endDate
+) {
 }

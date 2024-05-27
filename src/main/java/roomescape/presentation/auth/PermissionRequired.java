@@ -10,7 +10,6 @@ import roomescape.domain.role.Role;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PermissionRequired {
-
     Role value() default Role.ADMIN;
 
     @AliasFor("value")

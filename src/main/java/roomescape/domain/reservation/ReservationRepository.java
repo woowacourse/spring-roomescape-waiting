@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
-
     List<Reservation> findAllByMemberId(Long id);
 
     boolean existsByTimeId(long timeId);
@@ -16,6 +15,8 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
     boolean existsByThemeId(long themeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
+    Reservation findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     @Query("""
             select r from Reservation as r
@@ -30,4 +31,13 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
     default Reservation getById(long id) {
         return findById(id).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약입니다."));
     }
+
+    default Reservation getByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+        Reservation reservation = findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        if (reservation == null) {
+            throw new NoSuchElementException("존재하지 않는 예약입니다.");
+        }
+        return reservation;
+    }
+
 }

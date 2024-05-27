@@ -9,8 +9,8 @@ public record ThemeRequest(
         @NotBlank(message = "테마 설명을 입력해주세요.")
         String description,
         @NotBlank(message = "썸네일 URL을 입력해주세요.")
-        String thumbnail) {
-
+        String thumbnail
+) {
     public Theme toTheme() {
         return new Theme(name, description, thumbnail);
     }

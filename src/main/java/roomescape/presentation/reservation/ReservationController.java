@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
+import roomescape.application.reservation.ReservationWaitingService;
+import roomescape.application.reservation.WaitingService;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
@@ -20,10 +22,13 @@ import roomescape.presentation.auth.LoginMemberId;
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
+    private final ReservationWaitingService reservationWaitingService;
     private final ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService,
+                                 ReservationWaitingService reservationWaitingService) {
         this.reservationService = reservationService;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @GetMapping
@@ -34,7 +39,7 @@ public class ReservationController {
 
     @GetMapping("/me")
     public ResponseEntity<List<ReservationStatusResponse>> findMyReservations(@LoginMemberId long memberId) {
-        List<ReservationStatusResponse> responses = reservationService.findAllByMemberId(memberId);
+        List<ReservationStatusResponse> responses = reservationWaitingService.findAllByMemberId(memberId);
         return ResponseEntity.ok(responses);
     }
 
@@ -48,7 +53,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@LoginMemberId long memberId, @PathVariable long id) {
-        reservationService.deleteById(memberId, id);
+        reservationWaitingService.deleteById(memberId, id);
         return ResponseEntity.noContent().build();
     }
 }
