@@ -8,6 +8,7 @@ import roomescape.model.theme.Name;
 import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ThemeDto;
 
 import java.time.LocalDate;
@@ -21,10 +22,14 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository,
+                        ReservationRepository reservationRepository,
+                        WaitingRepository waitingRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<Theme> findAllThemes() {
@@ -39,7 +44,8 @@ public class ThemeService {
 
     public void deleteTheme(long id) {
         validateExistence(id);
-        validateDependence(id);
+        validateDependenceOfReservation(id);
+        validateDependenceOfWaiting(id);
         themeRepository.deleteById(id);
     }
 
@@ -65,10 +71,17 @@ public class ThemeService {
         }
     }
 
-    private void validateDependence(Long id) {
+    private void validateDependenceOfReservation(Long id) {
         boolean isExist = reservationRepository.existsByReservationInfo_ThemeId(id);
         if (isExist) {
             throw new BadRequestException("[ERROR] 해당 테마를 사용하고 있는 예약이 있습니다.");
+        }
+    }
+
+    private void validateDependenceOfWaiting(Long id) {
+        boolean isExist = waitingRepository.existsByReservationInfo_ThemeId(id);
+        if (isExist) {
+            throw new BadRequestException("[ERROR] 해당 테마를 사용하고 있는 예약 대기가 있습니다.");
         }
     }
 }

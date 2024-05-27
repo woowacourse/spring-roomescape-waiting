@@ -3,7 +3,6 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
-import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationInfo;
 import roomescape.model.ReservationTime;
@@ -62,34 +61,37 @@ public class ReservationService {
 
     private ReservationTime findReservationTime(ReservationDto reservationDto) {
         long timeId = reservationDto.getTimeId();
-        Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
-        return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 시간에 대한 예약입니다."));
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 시간에 대한 예약입니다."));
     }
 
     private Theme findTheme(ReservationDto reservationDto) {
         long themeId = reservationDto.getThemeId();
-        Optional<Theme> theme = themeRepository.findById(themeId);
-        return theme.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 테마에 대한 예약입니다."));
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 테마에 대한 예약입니다."));
     }
 
     private Member findMember(ReservationDto reservationDto) {
         long memberId = reservationDto.getMemberId();
-        Optional<Member> member = memberRepository.findById(memberId);
-        return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 사용자에 대한 예약입니다."));
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 사용자에 대한 예약입니다."));
     }
 
     public void deleteReservation(long id, LoginMember member) {
-        validateExistence(id);
-        validateIsOwner(id, member);
+        Reservation reservation = findReservation(id);
+        validateIsOwner(reservation.getMember(), member);
 
-        findWaiting(id).ifPresent(this::approveWaiting);
+        findWaiting(reservation).ifPresent(this::approveWaiting);
         reservationRepository.deleteById(id);
     }
 
-    private Optional<Waiting> findWaiting(long id) {
-        ReservationInfo reservationInfo = reservationRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 예약입니다."))
-                .getReservationInfo();
+    private Reservation findReservation(long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 예약입니다."));
+    }
+
+    private Optional<Waiting> findWaiting(Reservation reservation) {
+        ReservationInfo reservationInfo = reservation.getReservationInfo();
         return waitingRepository.findFirstByReservationInfo(reservationInfo);
     }
 
@@ -100,7 +102,7 @@ public class ReservationService {
     }
 
     public ReservationTimeInfoDto findReservationTimesInformation(LocalDate date, long themeId) {
-        List<ReservationTime> bookedTimes = reservationRepository.findReservationTimeBooked(date, themeId);
+        List<ReservationTime> bookedTimes = reservationRepository.findReservationTimeByDateAndThemeId(date, themeId);
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
         return new ReservationTimeInfoDto(bookedTimes, allTimes);
     }
@@ -130,16 +132,8 @@ public class ReservationService {
         }
     }
 
-    private void validateExistence(long id) {
-        boolean isNotExist = !reservationRepository.existsById(id);
-        if (isNotExist) {
-            throw new NotFoundException("[ERROR] 존재하지 않는 예약입니다.");
-        }
-    }
-
-    private void validateIsOwner(long id, LoginMember member) {
-        boolean isNotOwner = !reservationRepository.existsByIdAndMemberId(id, member.getId());
-        if (isNotOwner) {
+    private void validateIsOwner(Member owner, LoginMember member) {
+        if (owner.getId() != member.getId()) {
             throw new BadRequestException("[ERROR] 해당 예약의 소유자가 아닙니다.");
         }
     }

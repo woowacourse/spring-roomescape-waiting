@@ -131,7 +131,7 @@ class ReservationServiceTest {
     @Test
     void should_throw_exception_when_not_exist_reservation() {
         assertThatThrownBy(() -> reservationService.deleteReservation(999L, loginMember))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("[ERROR] 존재하지 않는 예약입니다.");
     }
 

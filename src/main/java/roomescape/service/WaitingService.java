@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class WaitingService {
@@ -48,7 +47,7 @@ public class WaitingService {
         ReservationTime time = findReservationTime(waitingDto);
         Theme theme = findTheme(waitingDto);
         Member member = findMember(waitingDto);
-        Reservation reservation = findReservation(waitingDto.getDate(), time, theme);
+        Reservation reservation = findReservation(waitingDto, time, theme);
 
         validateIsFuture(date, time);
         validateDuplication(date, time, theme, member);
@@ -60,26 +59,27 @@ public class WaitingService {
 
     private ReservationTime findReservationTime(ReservationDto waitingDto) {
         long timeId = waitingDto.getTimeId();
-        Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
-        return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 시간에 대한 예약 대기입니다."));
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 시간에 대한 예약 대기입니다."));
     }
 
     private Theme findTheme(ReservationDto waitingDto) {
         long themeId = waitingDto.getThemeId();
-        Optional<Theme> theme = themeRepository.findById(themeId);
-        return theme.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 테마에 대한 예약 대기입니다."));
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 테마에 대한 예약 대기입니다."));
     }
 
     private Member findMember(ReservationDto waitingDto) {
         long memberId = waitingDto.getMemberId();
-        Optional<Member> member = memberRepository.findById(memberId);
-        return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 사용자에 대한 예약 대기입니다."));
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 사용자에 대한 예약 대기입니다."));
     }
 
-    private Reservation findReservation(LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation findReservation(ReservationDto waitingDto, ReservationTime time, Theme theme) {
+        LocalDate date = waitingDto.getDate();
         ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
-        Optional<Reservation> reservation = reservationRepository.findByReservationInfo(reservationInfo);
-        return reservation.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 예약에 대한 예약 대기입니다."));
+        return reservationRepository.findByReservationInfo(reservationInfo)
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 예약에 대한 예약 대기입니다."));
     }
 
     public List<WaitingWithRank> findWaitingByMember(LoginMember member) {
@@ -87,8 +87,8 @@ public class WaitingService {
     }
 
     public void deleteOwnWaiting(long id, LoginMember member) {
-        validateIsOwner(id, member);
         validateExistence(id);
+        validateIsOwner(id, member);
         waitingRepository.deleteById(id);
     }
 

@@ -19,7 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 from Reservation r join ReservationTime t on r.reservationInfo.time.id = t.id
                 where r.reservationInfo.date = ?1 and r.reservationInfo.theme.id = ?2
                 """)
-    List<ReservationTime> findReservationTimeBooked(LocalDate date, long themeId);
+    List<ReservationTime> findReservationTimeByDateAndThemeId(LocalDate date, long themeId);
 
     @Query(value = """
                 select r

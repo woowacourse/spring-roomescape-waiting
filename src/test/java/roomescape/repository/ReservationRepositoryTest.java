@@ -66,7 +66,7 @@ class ReservationRepositoryTest {
     @DisplayName("특정 날짜와 테마의 예약된 시간을 조회한다.")
     @Test
     void should_find_booked_reservation_time() {
-        List<ReservationTime> bookedTimes = reservationRepository.findReservationTimeBooked(LocalDate.of(2000, 1, 1), 1L);
+        List<ReservationTime> bookedTimes = reservationRepository.findReservationTimeByDateAndThemeId(LocalDate.of(2000, 1, 1), 1L);
         assertThat(bookedTimes).containsExactly(new ReservationTime(1L, LocalTime.of(1, 0)));
     }
 
