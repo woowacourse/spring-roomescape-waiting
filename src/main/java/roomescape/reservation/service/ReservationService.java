@@ -110,7 +110,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public void cancelReservation(final AuthInfo authInfo, final Long id) {
+    public void deleteReservation(final AuthInfo authInfo, final Long id) {
         Reservation reservation = reservationRepository.getById(id);
         checkCancelAuthorization(reservation, authInfo.getMemberId());
 

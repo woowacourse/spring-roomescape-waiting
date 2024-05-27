@@ -280,7 +280,7 @@ class ReservationServiceTest {
 
         // when
         AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getRole());
-        reservationService.cancelReservation(authInfo, reservation.getId());
+        reservationService.deleteReservation(authInfo, reservation.getId());
 
         // then
         assertThat(reservationRepository.findAllByMemberId(member.getId())).isEmpty();
@@ -299,7 +299,7 @@ class ReservationServiceTest {
 
         // when
         AuthInfo authInfo = new AuthInfo(admin.getId(), admin.getName(), admin.getRole());
-        reservationService.cancelReservation(authInfo, reservation.getId());
+        reservationService.deleteReservation(authInfo, reservation.getId());
 
         // then
         assertThat(reservationRepository.findAllByMemberId(member.getId())).isEmpty();
@@ -321,7 +321,7 @@ class ReservationServiceTest {
         // when
         AuthInfo authInfo = new AuthInfo(reservationMember.getId(), reservationMember.getName(),
                 reservationMember.getRole());
-        reservationService.cancelReservation(authInfo, reservation.getId());
+        reservationService.deleteReservation(authInfo, reservation.getId());
 
         // then
         assertThat(reservationRepository.getById(reservation.getId()).getMember()).isEqualTo(waitingMember);
@@ -342,7 +342,7 @@ class ReservationServiceTest {
         AuthInfo authInfo = new AuthInfo(otherMember.getId(), otherMember.getName(), otherMember.getRole());
 
         // then
-        assertThatThrownBy(() -> reservationService.cancelReservation(authInfo, reservation.getId()))
+        assertThatThrownBy(() -> reservationService.deleteReservation(authInfo, reservation.getId()))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("식별자 1인 예약에 대해 회원 식별자 2의 권한이 존재하지 않아, 삭제가 불가능합니다.");
     }
