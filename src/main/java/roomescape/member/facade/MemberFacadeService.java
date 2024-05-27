@@ -36,10 +36,10 @@ public class MemberFacadeService {
                 ReservationStatus.RESERVED);
         List<Waiting> waitings = reservationService.findWaitingWithRank(memberId);
 
-        List<MemberReservationResponse> memberReservationRespons = makeResponse(
+        List<MemberReservationResponse> memberReservationResponse = makeResponse(
                 reservations, waitings);
 
-        return memberReservationRespons.stream()
+        return memberReservationResponse.stream()
                 .sorted(Comparator.comparing(MemberReservationResponse::date))
                 .toList();
     }
