@@ -11,10 +11,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.repository.dto.WaitingWithRank;
 import roomescape.util.DatabaseCleaner;
 
 @SpringBootTest

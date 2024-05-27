@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.WaitingWithRank;
+import roomescape.repository.dto.WaitingWithRank;
 
 public record ReservationOutput(long id, ThemeOutput theme, String date, ReservationTimeOutput time,
                                 MemberOutput member, String reservationStatus) {

@@ -8,13 +8,13 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.WaitingWithRank;
+import roomescape.repository.dto.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByDateAndTimeIdAndMemberId(ReservationDate reservationDate, Long timeId, Long memberId);
 
-    @Query("SELECT new roomescape.domain.reservation.WaitingWithRank(" +
+    @Query("SELECT new roomescape.repository.dto.WaitingWithRank(" +
             "    w, " +
             "    (SELECT COUNT(w2) + 1 " +
             "     FROM Waiting w2 " +
