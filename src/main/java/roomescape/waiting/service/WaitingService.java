@@ -38,12 +38,6 @@ public class WaitingService {
                 .toList();
     }
 
-    private boolean isDuplicateWaiting(Waiting waiting) {
-        return waitingRepository.existsByReservation_idAndMember_id(
-                waiting.getReservation().getId(),
-                waiting.getMember().getId());
-    }
-
     public WaitingResponse createWaiting(WaitingCreateRequest request, Long waitingMemberId) {
         Reservation reservation =
                 findReservationByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId());
@@ -74,6 +68,12 @@ public class WaitingService {
         if (isDuplicateWaiting(waiting)) {
             throw new IllegalArgumentException("중복으로 예약 대기를 할 수 없습니다.");
         }
+    }
+
+    private boolean isDuplicateWaiting(Waiting waiting) {
+        return waitingRepository.existsByReservation_idAndMember_id(
+                waiting.getReservation().getId(),
+                waiting.getMember().getId());
     }
 
     public void deleteWait(Long id) {
