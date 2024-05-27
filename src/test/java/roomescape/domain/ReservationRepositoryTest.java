@@ -28,8 +28,8 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
         List<Long> results = reservationRepository.findMostReservedThemesId(from, to);
 
         assertThat(results).containsExactly(
-                THEME_3.getId(),
-                THEME_2.getId()
+                THEME_2.getId(),
+                THEME_3.getId()
         );
     }
 
