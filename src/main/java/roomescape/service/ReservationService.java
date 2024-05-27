@@ -116,8 +116,8 @@ public class ReservationService {
                 .findFirstByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme());
 
         firstWaiting.ifPresent(waiting -> {
-            Reservation newReservation =
-                    new Reservation(waiting.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+            Reservation newReservation = Reservation
+                    .createNewBooking(waiting.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
             waitingRepository.delete(waiting);
             reservationRepository.save(newReservation);
         });

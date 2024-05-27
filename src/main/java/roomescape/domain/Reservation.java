@@ -32,10 +32,6 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, TimeSlot time, Theme theme) {
-        this(null, member, date, time, theme, ReservationStatus.BOOKING);
-    }
-
     public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.member = member;
@@ -43,6 +39,10 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
+    }
+
+    public static Reservation createNewBooking(Member member, LocalDate date, TimeSlot time, Theme theme) {
+        return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
     }
 
     public Long getId() {
