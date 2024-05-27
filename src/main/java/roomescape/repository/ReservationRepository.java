@@ -48,11 +48,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByMemberId(long memberId);
 
     @Query("""
-            SELECT new roomescape.dto.service.ReservationWithRank(r1, COUNT(r1))
+            SELECT new roomescape.dto.service.ReservationWithRank(r1, COUNT(r2))
             FROM Reservation r1
-            JOIN Reservation r2
+            LEFT JOIN Reservation r2
             ON r2.date = r1.date AND r2.time = r1.time AND r2.theme = r1.theme AND r2.id < r1.id
-            WHERE r1.status = 'PENDING' AND r1.reservationMember.id = :memberId
+            WHERE r1.reservationMember.id = :memberId
             GROUP BY r1
             """)
     List<ReservationWithRank> findAllWithRankByMemberId(long memberId);
