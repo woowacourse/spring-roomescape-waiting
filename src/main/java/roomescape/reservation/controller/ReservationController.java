@@ -26,16 +26,16 @@ import roomescape.reservation.service.ReservationFindService;
 public class ReservationController {
     private final ReservationFindService findService;
     private final ReservationFindMineService findMineService;
-    private final ReservationCreateService updateService;
+    private final ReservationCreateService createService;
     private final ReservationDeleteService deleteService;
 
     public ReservationController(ReservationFindService findService,
                                  ReservationFindMineService findMineService,
-                                 ReservationCreateService updateService,
+                                 ReservationCreateService createService,
                                  ReservationDeleteService deleteService) {
         this.findService = findService;
         this.findMineService = findMineService;
-        this.updateService = updateService;
+        this.createService = createService;
         this.deleteService = deleteService;
     }
 
@@ -53,7 +53,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationCreateRequest request,
             LoggedInMember member) {
-        ReservationResponse response = updateService.execute(request, member.id());
+        ReservationResponse response = createService.execute(request, member.id());
 
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location)
