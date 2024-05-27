@@ -11,7 +11,7 @@ import roomescape.controller.response.WaitingResponse;
 import roomescape.model.Waiting;
 import roomescape.model.member.LoginMember;
 import roomescape.service.WaitingService;
-import roomescape.service.dto.ReservationDto;
+import roomescape.service.dto.WaitingDto;
 
 import java.net.URI;
 
@@ -28,8 +28,8 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody WaitingRequest request, LoginMember member) {
-        ReservationDto reservationDto = request.toDto(member.getId());
-        Waiting waiting = waitingService.saveWaiting(reservationDto);
+        WaitingDto waitingDto = request.toDto(member.getId());
+        Waiting waiting = waitingService.saveWaiting(waitingDto);
         WaitingResponse response = WaitingResponse.from(waiting);
         return ResponseEntity
                 .created(URI.create("/reservations/waiting/" + waiting.getId()))

@@ -21,7 +21,7 @@ import roomescape.model.theme.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.ReservationDto;
+import roomescape.service.dto.WaitingDto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -86,15 +86,15 @@ class WaitingServiceTest {
     @Test
     @Transactional
     void should_save_reservation_waiting() {
-        ReservationDto reservationDto = new ReservationDto(LocalDate.of(9999, 9, 9), 1L, 1L, 3L);
-        waitingService.saveWaiting(reservationDto);
+        WaitingDto waitingDto = new WaitingDto(LocalDate.of(9999, 9, 9), 1L, 1L, 3L);
+        waitingService.saveWaiting(waitingDto);
         assertThat(waitingRepository.count()).isEqualTo(INITIAL_WAITING_COUNT + 1);
     }
 
     @DisplayName("본인의 예약에 대한 대기를 저장하려 하면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_reservation_owner() {
-        ReservationDto waitingDto = new ReservationDto(
+        WaitingDto waitingDto = new WaitingDto(
                 LocalDate.of(9999, 9, 9), 1L, 1L, 1L);
 
         assertThatThrownBy(() -> waitingService.saveWaiting(waitingDto))
@@ -105,7 +105,7 @@ class WaitingServiceTest {
     @DisplayName("과거의 예약 대기를 저장하려 하면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_past_waiting() {
-        ReservationDto waitingDto = new ReservationDto(
+        WaitingDto waitingDto = new WaitingDto(
                 LocalDate.of(2000, 1, 1), 1L, 1L, 3L);
 
         assertThatThrownBy(() -> waitingService.saveWaiting(waitingDto))
@@ -116,7 +116,7 @@ class WaitingServiceTest {
     @DisplayName("중복된 예약 대기를 저장하려 하면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_duplicated_waiting() {
-        ReservationDto waitingDto = new ReservationDto(
+        WaitingDto waitingDto = new WaitingDto(
                 LocalDate.of(9999, 9, 9), 1L, 1L, 2L);
 
         assertThatThrownBy(() -> waitingService.saveWaiting(waitingDto))

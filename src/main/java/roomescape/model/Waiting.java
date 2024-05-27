@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
-import roomescape.service.dto.ReservationDto;
 
 import java.time.LocalDate;
 import java.util.Objects;

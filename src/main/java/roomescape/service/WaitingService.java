@@ -9,7 +9,7 @@ import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 import roomescape.repository.*;
-import roomescape.service.dto.ReservationDto;
+import roomescape.service.dto.WaitingDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,7 +42,7 @@ public class WaitingService {
         return waitingRepository.findAll();
     }
 
-    public Waiting saveWaiting(ReservationDto waitingDto) {
+    public Waiting saveWaiting(WaitingDto waitingDto) {
         LocalDate date = waitingDto.getDate();
         ReservationTime time = findReservationTime(waitingDto);
         Theme theme = findTheme(waitingDto);
@@ -57,25 +57,25 @@ public class WaitingService {
         return waitingRepository.save(waiting);
     }
 
-    private ReservationTime findReservationTime(ReservationDto waitingDto) {
+    private ReservationTime findReservationTime(WaitingDto waitingDto) {
         long timeId = waitingDto.getTimeId();
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 시간에 대한 예약 대기입니다."));
     }
 
-    private Theme findTheme(ReservationDto waitingDto) {
+    private Theme findTheme(WaitingDto waitingDto) {
         long themeId = waitingDto.getThemeId();
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 테마에 대한 예약 대기입니다."));
     }
 
-    private Member findMember(ReservationDto waitingDto) {
+    private Member findMember(WaitingDto waitingDto) {
         long memberId = waitingDto.getMemberId();
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 사용자에 대한 예약 대기입니다."));
     }
 
-    private Reservation findReservation(ReservationDto waitingDto, ReservationTime time, Theme theme) {
+    private Reservation findReservation(WaitingDto waitingDto, ReservationTime time, Theme theme) {
         LocalDate date = waitingDto.getDate();
         ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
         return reservationRepository.findByReservationInfo(reservationInfo)
