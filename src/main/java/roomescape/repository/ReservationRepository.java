@@ -1,5 +1,8 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Member;
@@ -8,10 +11,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.service.ReservationWithRank;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     @Query("""
@@ -49,16 +48,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByMemberId(long memberId);
 
     @Query("""
-            SELECT new roomescape.dto.service.ReservationWithRank(
-                r, 
-                (
-                    SELECT COUNT(r2)
-                    FROM Reservation r2
-                    WHERE r2.date = r.date AND r2.time = r.time AND r2.theme = r.theme AND r2.id < r.id
-                )
-            )
-            FROM Reservation r
-            WHERE r.reservationMember.id = :memberId
+            SELECT new roomescape.dto.service.ReservationWithRank(r1, COUNT(r1))
+            FROM Reservation r1
+            JOIN Reservation r2
+            ON r2.date = r1.date AND r2.time = r1.time AND r2.theme = r1.theme AND r2.id < r1.id
+            WHERE r1.status = 'PENDING' AND r1.reservationMember.id = :memberId
+            GROUP BY r1
             """)
     List<ReservationWithRank> findAllWithRankByMemberId(long memberId);
 
