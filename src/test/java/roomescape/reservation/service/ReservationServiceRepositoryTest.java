@@ -58,7 +58,7 @@ public class ReservationServiceRepositoryTest {
         WaitingResponse waitingReservation = reservationService.createWaitingReservation(request);
 
         //then
-        assertThat(waitingReservation.status()).isEqualTo("대기");
+        assertThat(waitingReservation.getStatus()).isEqualTo("대기");
     }
 
     @DisplayName("기존 예약이 없으면 대기를 생성할 수 없다.")
@@ -83,7 +83,7 @@ public class ReservationServiceRepositoryTest {
                 1L,
                 1L);
         Long reservationId = reservationService.createReservation(request).id();
-        Long waitingId = reservationService.createWaitingReservation(request).id();
+        Long waitingId = reservationService.createWaitingReservation(request).getId();
         reservationService.deleteReservation(reservationId);
 
         //when
@@ -104,7 +104,7 @@ public class ReservationServiceRepositoryTest {
                 1L,
                 1L);
         reservationService.createReservation(request);
-        Long waitingId = reservationService.createWaitingReservation(request).id();
+        Long waitingId = reservationService.createWaitingReservation(request).getId();
 
         //when, then
         assertThatThrownBy(() -> reservationService.approveWaiting(waitingId))
@@ -121,7 +121,7 @@ public class ReservationServiceRepositoryTest {
                 1L,
                 1L);
         reservationService.createReservation(request);
-        Long waitingId = reservationService.createWaitingReservation(request).id();
+        Long waitingId = reservationService.createWaitingReservation(request).getId();
 
         //when, then
         assertThatCode(() -> reservationService.deleteWaiting(waitingId))

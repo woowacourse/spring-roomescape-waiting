@@ -97,7 +97,7 @@ public class ReservationService {
         validateNoReservation(reservation);
 
         Reservation savedWaitingReservation = reservationRepository.save(reservation);
-        Long sequence = findSequence(savedWaitingReservation);
+        Long sequence = reservationRepository.findSequence(savedWaitingReservation);
 
         return WaitingResponse.of(savedWaitingReservation, sequence);
     }
@@ -126,9 +126,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> readMemberReservations(LoginMember loginMember) {
-        return reservationRepository.findByMemberId(loginMember.id()).stream()
-                .map(reservation -> MemberReservationResponse.of(reservation, findSequence(reservation)))
-                .toList();
+        return reservationRepository.getMemberReservationResponses(loginMember.id());
     }
 
     @Transactional(readOnly = true)
@@ -147,9 +145,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<WaitingResponse> readWaitings() {
-        return reservationRepository.findAllByStatusFetchJoin(ReservationStatus.WAITING).stream()
-                .map(waiting -> WaitingResponse.of(waiting, findSequence(waiting)))
-                .toList();
+        return reservationRepository.getWaitingResponses();
     }
 
     private void deleteById(Long id) {
@@ -236,15 +232,5 @@ public class ReservationService {
         if (requestedDateTime.isBefore(LocalDateTime.now())) {
             throw new BadRequestException("이미 지난 날짜는 예약할 수 없습니다.");
         }
-    }
-
-    private Long findSequence(Reservation reservation) {
-        List<Reservation> reservations = reservationRepository.findByDateAndThemeAndTimeOrderByCreatedAt(
-                reservation.getDate(),
-                reservation.getTheme(),
-                reservation.getTime()
-        );
-
-        return (long) reservations.indexOf(reservation);
     }
 }

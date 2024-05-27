@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.dto.MemberReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -42,4 +44,30 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Boolean existsByTimeId(Long timeId);
 
     Boolean existsByThemeId(Long themeId);
+
+    @Query("SELECT new roomescape.reservation.dto.WaitingResponse(r , " +
+            "(SELECT count(r1.id) FROM Reservation r1 " +
+            "WHERE r.createdAt <= r1.createdAt " +
+            "AND r.time = r1.time " +
+            "AND r.theme = r1.theme " +
+            "AND r.status = 'WAITING'))" +
+            "FROM Reservation r ")
+    List<WaitingResponse> getWaitingResponses();
+
+    @Query("SELECT new roomescape.reservation.dto.MemberReservationResponse(r , " +
+            "(SELECT count(r1.id) FROM Reservation r1 " +
+            "WHERE r.createdAt <= r1.createdAt " +
+            "AND r.time = r1.time " +
+            "AND r.theme = r1.theme))" +
+            "FROM Reservation r " +
+            "WHERE r.member.id = :memberId ")
+    List<MemberReservationResponse> getMemberReservationResponses(@Param("memberId") Long memberId);
+
+    @Query("SELECT count(r.id) " +
+            "FROM Reservation r " +
+            "WHERE r.date = :#{#reservation.date} " +
+            "AND r.time = :#{#reservation.time} " +
+            "AND r.theme = :#{#reservation.theme} " +
+            "AND r.createdAt <= :#{#reservation.createdAt} ")
+    Long findSequence(@Param("reservation") Reservation reservation);
 }
