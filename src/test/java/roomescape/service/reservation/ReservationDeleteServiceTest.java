@@ -15,12 +15,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class ReservationServiceTest {
-    private final ReservationService service;
+class ReservationDeleteServiceTest {
+    private final ReservationDeleteService service;
     private final ReservationRepository repository;
 
     @Autowired
-    public ReservationServiceTest(final ReservationService service, final ReservationRepository repository) {
+    public ReservationDeleteServiceTest(final ReservationDeleteService service, final ReservationRepository repository) {
         this.service = service;
         this.repository = repository;
     }

@@ -14,9 +14,9 @@ import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.ReservationTimeService;
+import roomescape.service.reservation.ReservationDeleteService;
 import roomescape.service.reservation.ReservationRegisterService;
 import roomescape.service.reservation.ReservationSearchService;
-import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -24,16 +24,16 @@ import java.time.LocalDate;
 @RestController
 public class ClientReservationController {
     private final ReservationTimeService reservationTimeService;
-    private final ReservationService reservationService;
+    private final ReservationDeleteService reservationDeleteService;
     private final ReservationRegisterService reservationRegisterService;
     private final ReservationSearchService reservationSearchService;
 
     public ClientReservationController(final ReservationTimeService reservationTimeService,
-                                       final ReservationService reservationService,
+                                       final ReservationDeleteService reservationDeleteService,
                                        final ReservationRegisterService reservationRegisterService,
                                        final ReservationSearchService reservationSearchService) {
         this.reservationTimeService = reservationTimeService;
-        this.reservationService = reservationService;
+        this.reservationDeleteService = reservationDeleteService;
         this.reservationRegisterService = reservationRegisterService;
         this.reservationSearchService = reservationSearchService;
     }
@@ -60,7 +60,7 @@ public class ClientReservationController {
 
     @DeleteMapping("/reservations-mine/waiting/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable(value = "id") Long id, Member member) {
-        reservationService.deleteByIdAndOwner(id, member);
+        reservationDeleteService.deleteByIdAndOwner(id, member);
         return ResponseEntity.noContent().build();
     }
 }

@@ -10,10 +10,10 @@ import roomescape.repository.ReservationRepository;
 import java.time.LocalDate;
 
 @Service
-public class ReservationService {
+public class ReservationDeleteService {
     private final ReservationRepository reservationRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository) {
+    public ReservationDeleteService(final ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 

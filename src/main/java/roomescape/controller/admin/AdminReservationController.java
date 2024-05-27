@@ -13,9 +13,9 @@ import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ResponsesWrapper;
+import roomescape.service.reservation.ReservationDeleteService;
 import roomescape.service.reservation.ReservationRegisterService;
 import roomescape.service.reservation.ReservationSearchService;
-import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -23,14 +23,14 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
-    private final ReservationService reservationService;
+    private final ReservationDeleteService reservationDeleteService;
     private final ReservationRegisterService reservationRegisterService;
     private final ReservationSearchService reservationSearchService;
 
-    public AdminReservationController(final ReservationService reservationService,
+    public AdminReservationController(final ReservationDeleteService reservationDeleteService,
                                       final ReservationRegisterService reservationRegisterService,
                                       final ReservationSearchService reservationSearchService) {
-        this.reservationService = reservationService;
+        this.reservationDeleteService = reservationDeleteService;
         this.reservationRegisterService = reservationRegisterService;
         this.reservationSearchService = reservationSearchService;
     }
@@ -53,7 +53,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationService.delete(id);
+        reservationDeleteService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -64,7 +64,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
-        reservationService.deleteWaitingById(id);
+        reservationDeleteService.deleteWaitingById(id);
         return ResponseEntity.noContent().build();
     }
 }
