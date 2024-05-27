@@ -42,7 +42,8 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository,
                               MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -50,8 +51,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse save(LoginMember loginMember,
-                                    ReservationRequest reservationRequest) {
+    public ReservationResponse save(LoginMember loginMember, ReservationRequest reservationRequest) {
 
         Reservation reservation = getReservation(loginMember.getId(), reservationRequest, ReservationStatus.BOOKED);
 
@@ -67,8 +67,7 @@ public class ReservationService {
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
-    public ReservationResponse saveWaiting(LoginMember loginMember,
-                                           ReservationRequest reservationRequest) {
+    public ReservationResponse saveWaiting(LoginMember loginMember, ReservationRequest reservationRequest) {
 
         Reservation reservation = getReservation(loginMember.getId(), reservationRequest, ReservationStatus.WAITING);
         Reservations reservations = new Reservations(reservationRepository.findAllByMemberId(loginMember.getId()));
@@ -85,7 +84,8 @@ public class ReservationService {
 
     public ReservationResponse saveByAdmin(AdminReservationRequest reservationRequest) {
 
-        Reservation beforeSaveReservation = getReservation(reservationRequest.memberId(),
+        Reservation beforeSaveReservation = getReservation(
+                reservationRequest.memberId(),
                 new ReservationRequest(
                         reservationRequest.date(),
                         reservationRequest.timeId(),
@@ -132,8 +132,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> searchReservation(Long themeId, Long memberId, LocalDate dateFrom,
-                                                       LocalDate dateTo) {
+    public List<ReservationResponse> searchReservation(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         Reservations reservations = new Reservations(reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
         return reservations.booked().stream()
                 .map(ReservationResponse::from)
@@ -144,7 +143,8 @@ public class ReservationService {
     public List<ReservationDetailResponse> findAllByMemberId(long memberId) {
         Reservations reservations = new Reservations(reservationRepository.findAllByMemberId(memberId));
         List<Waiting> waitings = reservations.waiting().stream()
-                .map(reservation -> new Waiting(reservation,
+                .map(reservation -> new Waiting(
+                        reservation,
                         reservationRepository.findAndCountWaitingNumber(
                                 reservation.getDate(),
                                 reservation.getReservationTime(),
@@ -169,8 +169,9 @@ public class ReservationService {
     public List<AdminReservationDetailResponse> findAllWaitingReservations() {
         List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
         return reservations.stream()
-                .map(reservation ->
-                        new Waiting(reservation, reservationRepository.findAndCountWaitingNumber(
+                .map(reservation -> new Waiting(
+                        reservation,
+                        reservationRepository.findAndCountWaitingNumber(
                                 reservation.getDate(),
                                 reservation.getReservationTime(),
                                 reservation.getTheme(),
