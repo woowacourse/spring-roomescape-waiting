@@ -9,20 +9,23 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.TestFixture;
+import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.auth.LoginMember;
-import roomescape.dto.reservation.MyReservationWithRankResponse;
-import roomescape.dto.reservation.ReservationFilterParam;
-import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.reservation.ReservationTimeResponse;
+import roomescape.dto.reservation.*;
 import roomescape.dto.theme.ReservedThemeResponse;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -35,6 +38,15 @@ class ReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Mock
+    private ThemeRepository themeRepository;
+
     @InjectMocks
     private ReservationService reservationService;
 
@@ -42,14 +54,23 @@ class ReservationServiceTest {
     @DisplayName("예약을 생성한다.")
     void create() {
         // given
-        final Reservation reservation = new Reservation(MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Member member = MEMBER_TENNY(1L);
+        final String date = DATE_MAY_EIGHTH;
+        final ReservationTime time = RESERVATION_TIME_SIX(1L);
+        final Theme theme = THEME_HORROR(1L);
+        final Reservation reservation = new Reservation(member, LocalDate.parse(date),
+                time, theme, ReservationStatus.RESERVED);
+        final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
+        final ReservationDto reservationDto = ReservationDto.of(request, 1L);
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.save(reservation))
                 .willReturn(new Reservation(1L, reservation.getMember(), reservation.getDate(),
                         reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED));
 
         // when
-        final ReservationResponse response = reservationService.create(reservation);
+        final ReservationResponse response = reservationService.createReservation(reservationDto);
 
         // then
         assertThat(response).isNotNull();
@@ -59,10 +80,11 @@ class ReservationServiceTest {
     @ValueSource(ints = {1, 0})
     @DisplayName("이전 날짜 혹은 당일 예약을 할 경우 예외가 발생한다.")
     void throwExceptionWhenCreateReservationAtInvalidDate(final int days) {
-        final Reservation reservation = new Reservation(MEMBER_TENNY(), LocalDate.now().minusDays(days),
-                RESERVATION_TIME_SIX(), THEME_HORROR(1L), ReservationStatus.RESERVED);
+        final LocalDate date = LocalDate.now().minusDays(days);
+        final ReservationSaveRequest request = new ReservationSaveRequest(date.toString(), 1L, 1L);
+        final ReservationDto reservationDto = ReservationDto.of(request, 1L);
 
-        assertThatThrownBy(() -> reservationService.create(reservation))
+        assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -70,15 +92,20 @@ class ReservationServiceTest {
     @DisplayName("동일한 테마, 날짜, 시간에 예약이 초과된 경우 예외가 발생한다.")
     void throwExceptionWhenCreateDuplicatedReservation() {
         // given
+        final Member member = MEMBER_TENNY(1L);
+        final String date = DATE_MAY_EIGHTH;
+        final ReservationTime time = RESERVATION_TIME_SIX(1L);
         final Theme theme = THEME_HORROR(1L);
-        final Reservation reservation = new Reservation(MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), theme, ReservationStatus.RESERVED);
-        given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX().getId(), theme.getId()))
+        final ReservationSaveRequest request = new ReservationSaveRequest(date, time.getId(), theme.getId());
+        final ReservationDto reservationDto = ReservationDto.of(request, member.getId());
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(date), time.getId(), theme.getId()))
                 .willReturn(1);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(reservation))
+        assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

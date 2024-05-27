@@ -7,10 +7,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.TestFixture;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.dto.reservation.ReservationDto;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.ReservationSaveRequest;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,20 +35,44 @@ class WaitingServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Mock
+    private ThemeRepository themeRepository;
+
     @InjectMocks
     private WaitingService waitingService;
 
     @Test
     @DisplayName("예약 대기를 등록한다.")
     void createReservationWaiting() {
-        final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final Member member = MEMBER_TENNY(1L);
+        final String date = DATE_MAY_EIGHTH;
+        final ReservationTime time = RESERVATION_TIME_SIX(1L);
+        final Theme theme = THEME_HORROR(1L);
+        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
+                time, theme, ReservationStatus.WAITING);
+        final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
+        final ReservationDto reservationDto = ReservationDto.of(request, 1L);
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED))
                 .willReturn(true);
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED, waiting.getMember()))
+                .willReturn(false);
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.WAITING, waiting.getMember()))
+                .willReturn(false);
         given(reservationRepository.save(any())).willReturn(waiting);
 
-        final ReservationResponse actual = waitingService.createReservationWaiting(waiting);
+        final ReservationResponse actual = waitingService.createReservationWaiting(reservationDto);
 
         assertThat(actual.id()).isNotNull();
     }
@@ -48,21 +80,39 @@ class WaitingServiceTest {
     @Test
     @DisplayName("사용자가 예약이 없는 건에 대해 예약 대기를 등록하려는 경우 예외가 발생한다.")
     void throwExceptionWhenDoesNotExistReservation() {
-        final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final Member member = MEMBER_TENNY(1L);
+        final String date = DATE_MAY_EIGHTH;
+        final ReservationTime time = RESERVATION_TIME_SIX(1L);
+        final Theme theme = THEME_HORROR(1L);
+        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
+                time, theme, ReservationStatus.WAITING);
+        final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
+        final ReservationDto reservationDto = ReservationDto.of(request, 1L);
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED
         )).willReturn(false);
 
-        assertThatThrownBy(() -> waitingService.createReservationWaiting(waiting))
+        assertThatThrownBy(() -> waitingService.createReservationWaiting(reservationDto))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     @DisplayName("사용자가 이미 예약한 건에 대해 예약 대기를 등록하려는 경우 예외가 발생한다.")
     void throwExceptionWhenAlreadyReserved() {
-        final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final Member member = MEMBER_TENNY(1L);
+        final String date = DATE_MAY_EIGHTH;
+        final ReservationTime time = RESERVATION_TIME_SIX(1L);
+        final Theme theme = THEME_HORROR(1L);
+        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
+                time, theme, ReservationStatus.WAITING);
+        final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
+        final ReservationDto reservationDto = ReservationDto.of(request, 1L);
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED
         )).willReturn(true);
@@ -70,15 +120,25 @@ class WaitingServiceTest {
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED, waiting.getMember()
         )).willReturn(true);
 
-        assertThatThrownBy(() -> waitingService.createReservationWaiting(waiting))
+
+        assertThatThrownBy(() -> waitingService.createReservationWaiting(reservationDto))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     @DisplayName("사용자가 중복해서 예약 대기를 등록하려는 경우 예외가 발생한다. ")
     void throwExceptionWhenDuplicatedWaiting() {
-        final Reservation waiting = new Reservation(2L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final Member member = MEMBER_TENNY(1L);
+        final String date = DATE_MAY_EIGHTH;
+        final ReservationTime time = RESERVATION_TIME_SIX(1L);
+        final Theme theme = THEME_HORROR(1L);
+        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
+                time, theme, ReservationStatus.WAITING);
+        final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
+        final ReservationDto reservationDto = ReservationDto.of(request, 1L);
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED
         )).willReturn(true);
@@ -89,7 +149,7 @@ class WaitingServiceTest {
                 waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.WAITING, waiting.getMember()
         )).willReturn(true);
 
-        assertThatThrownBy(() -> waitingService.createReservationWaiting(waiting))
+        assertThatThrownBy(() -> waitingService.createReservationWaiting(reservationDto))
                 .isInstanceOf(IllegalStateException.class);
     }
 

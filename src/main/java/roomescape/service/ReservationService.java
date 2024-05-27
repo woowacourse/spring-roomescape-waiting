@@ -2,13 +2,20 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.MyReservationWithRankResponse;
+import roomescape.dto.reservation.ReservationDto;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,12 +29,30 @@ public class ReservationService {
     private static final int INCREMENT_VALUE_FOR_RANK = 1;
 
     private final ReservationRepository reservationRepository;
+    private final MemberRepository memberRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(
+            final ReservationRepository reservationRepository,
+            final MemberRepository memberRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
     }
 
-    public ReservationResponse create(final Reservation reservation) {
+    public ReservationResponse createReservation(final ReservationDto reservationDto) {
+        final Member member = memberRepository.findById(reservationDto.memberId())
+                .orElseThrow(() -> new IllegalArgumentException(reservationDto.memberId() + "에 해당하는 사용자가 없습니다."));
+        final ReservationTime time = reservationTimeRepository.findById(reservationDto.timeId())
+                .orElseThrow(() -> new IllegalArgumentException(reservationDto.timeId() + "에 해당하는 예약 시간이 없습니다."));
+        final Theme theme = themeRepository.findById(reservationDto.themeId())
+                .orElseThrow(() -> new IllegalArgumentException(reservationDto.themeId() + "에 해당하는 테마가 없습니다."));
+
+        final Reservation reservation = reservationDto.toModel(member, time, theme, ReservationStatus.RESERVED);
         validateDate(reservation.getDate());
         validateDuplicatedReservation(reservation);
         return ReservationResponse.from(reservationRepository.save(reservation));
