@@ -7,6 +7,8 @@ import static roomescape.time.fixture.DateTimeFixture.YESTERDAY;
 import static roomescape.time.fixture.ReservationTimeFixture.RESERVATION_TIME_10_00_ID_1;
 import static roomescape.time.fixture.ReservationTimeFixture.RESERVATION_TIME_11_00_ID_2;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
@@ -30,7 +32,9 @@ public class ReservationFixture {
             TOMORROW,
             RESERVATION_TIME_10_00_ID_1,
             THEME_1,
-            Status.RESERVED);
+            Status.RESERVED,
+            LocalDateTime.of(TOMORROW, LocalTime.parse("00:00"))
+    );
 
     public static final Reservation SAVED_RESERVATION_2 = new Reservation(
             2L,
@@ -38,7 +42,9 @@ public class ReservationFixture {
             TOMORROW,
             RESERVATION_TIME_10_00_ID_1,
             THEME_2,
-            Status.RESERVED);
+            Status.RESERVED,
+            LocalDateTime.of(TOMORROW, LocalTime.parse("00:01"))
+    );
 
     public static final Reservation SAVED_RESERVATION_3 = new Reservation(
             3L,
@@ -46,7 +52,9 @@ public class ReservationFixture {
             TOMORROW,
             RESERVATION_TIME_11_00_ID_2,
             THEME_1,
-            Status.RESERVED);
+            Status.RESERVED,
+            LocalDateTime.of(TOMORROW, LocalTime.parse("00:02"))
+    );
 
     public static final Reservation SAVED_WAITING_RESERVATION_1 = new Reservation(
             4L,
@@ -54,5 +62,7 @@ public class ReservationFixture {
             TOMORROW,
             RESERVATION_TIME_10_00_ID_1,
             THEME_1,
-            Status.WAITING);
+            Status.WAITING,
+            LocalDateTime.of(TOMORROW, LocalTime.parse("00:02"))
+    );
 }

@@ -2,7 +2,6 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -17,8 +16,7 @@ import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
-@Entity
-public class Reservation {
+public class ReservationWaiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,16 +41,16 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public Reservation() {
+    public ReservationWaiting() {
     }
 
-    public Reservation(Long id,
-                       Member member,
-                       LocalDate date,
-                       ReservationTime time,
-                       Theme theme,
-                       Status status,
-                       LocalDateTime createdAt) {
+    public ReservationWaiting(Long id,
+                              Member member,
+                              LocalDate date,
+                              ReservationTime time,
+                              Theme theme,
+                              Status status,
+                              LocalDateTime createdAt) {
         this.id = id;
         this.member = member;
         this.date = new ReservationDate(date);
@@ -62,33 +60,8 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
-    public Reservation(Member member,
-                       LocalDate date,
-                       ReservationTime time,
-                       Theme theme,
-                       Status status,
-                       LocalDateTime createdAt) {
-        this(null, member, date, time, theme, status, createdAt);
-    }
-
-    public Reservation(Long id, Reservation reservation) {
-        this(
-                id,
-                reservation.getMember(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                reservation.getStatus(),
-                reservation.getCreatedAt()
-        );
-    }
-
     public void updateStatus(Status status) {
         this.status = status;
-    }
-
-    public boolean isReserved() {
-        return this.status == Status.RESERVED;
     }
 
     public Long getId() {
@@ -131,11 +104,11 @@ public class Reservation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Reservation that = (Reservation) o;
+        ReservationWaiting that = (ReservationWaiting) o;
         return Objects.equals(id, that.id) && Objects.equals(member, that.member)
                 && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme) && status == that.status
-                && Objects.equals(createdAt, that.createdAt);
+                && Objects.equals(theme, that.theme) && status == that.status && Objects.equals(
+                createdAt, that.createdAt);
     }
 
     @Override

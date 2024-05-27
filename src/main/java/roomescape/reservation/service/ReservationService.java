@@ -1,11 +1,11 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.DuplicateSaveException;
@@ -15,6 +15,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.MemberReservationStatusResponse;
@@ -55,7 +56,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllWaitingReservation() {
-        return reservationRepository.findAllByStatus(Status.WAITING).stream()
+        return reservationRepository.findAllReservationWaiting().stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
@@ -69,28 +70,23 @@ public class ReservationService {
     }
 
     public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-
         List<MemberReservationStatusResponse> memberReservationStatusResponses = new ArrayList<>();
+        List<Reservation> reservations = reservationRepository.findAllReservedByMemberId(memberId);
         for (Reservation reservation : reservations) {
-            String reservationStatus = parseReservationStatus(reservation);
-            memberReservationStatusResponses.add(new MemberReservationStatusResponse(reservation, reservationStatus));
+            memberReservationStatusResponses.add(new MemberReservationStatusResponse(reservation));
+        }
+        List<ReservationWaiting> reservationWaitings
+                = reservationRepository.findAllReservationWaitingByMemberId(memberId);
+        for (ReservationWaiting reservationWaiting : reservationWaitings) {
+            int rank = reservationRepository.countWaitingRank(
+                    reservationWaiting.getDate(),
+                    reservationWaiting.getTime().getId(),
+                    reservationWaiting.getTheme().getId(),
+                    reservationWaiting.getCreatedAt()
+            );
+            memberReservationStatusResponses.add(new MemberReservationStatusResponse(reservationWaiting, rank));
         }
         return memberReservationStatusResponses;
-    }
-
-    private String parseReservationStatus(Reservation reservation) {
-        String reservationStatus = reservation.getStatus().getValue();
-        if (reservation.isWaiting()) {
-            int reservationRank = reservationRepository.countWaitingRank(
-                    reservation.getDate(),
-                    reservation.getTime().getId(),
-                    reservation.getTheme().getId(),
-                    reservation.getId()
-            );
-            reservationStatus = reservationRank + "번째 " + reservationStatus;
-        }
-        return reservationStatus;
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
@@ -119,7 +115,8 @@ public class ReservationService {
         validateReservingPastTime(request.date(), reservationTime.getStartAt());
         Theme theme = getTheme(request.themeId());
 
-        Reservation reservation = new Reservation(member, request.date(), reservationTime, theme, status);
+        Reservation reservation
+                = new Reservation(member,request.date(), reservationTime, theme, status, LocalDateTime.now());
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
     }
@@ -154,12 +151,11 @@ public class ReservationService {
     }
 
     private void updateWaitingReservationStatus(Reservation reservationForDelete) {
-        Optional<Reservation> reservation = reservationRepository.findFirstByDateValueAndTimeIdAndThemeIdAndStatus(
+        reservationRepository.findFirstByDateValueAndTimeIdAndThemeIdAndStatus(
                 reservationForDelete.getDate(),
                 reservationForDelete.getTime().getId(),
                 reservationForDelete.getTheme().getId(),
                 Status.WAITING
-        );
-        reservation.ifPresent(value -> value.updateStatus(Status.RESERVED));
+        ).ifPresent(value -> value.updateStatus(Status.RESERVED));
     }
 }
