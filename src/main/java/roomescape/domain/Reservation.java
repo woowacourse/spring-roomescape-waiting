@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +13,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-public class Reservation {
+public class Reservation extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,23 +30,40 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
-        validate(member, date, reservationTime, theme);
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus reservationStatus;
+
+    public Reservation(Long id,
+                       Member member,
+                       LocalDate date,
+                       ReservationTime reservationTime,
+                       Theme theme,
+                       ReservationStatus reservationStatus) {
+        validate(member, date, reservationTime, theme, reservationStatus);
         this.id = id;
         this.member = member;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
+        this.reservationStatus = reservationStatus;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
-        this(null, member, date, reservationTime, theme);
+    public Reservation(Member member,
+                       LocalDate date,
+                       ReservationTime reservationTime,
+                       Theme theme,
+                       ReservationStatus reservationStatus) {
+        this(null, member, date, reservationTime, theme, reservationStatus);
     }
 
     protected Reservation() {
     }
 
-    private void validate(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+    private void validate(Member member,
+                          LocalDate date,
+                          ReservationTime reservationTime,
+                          Theme theme,
+                          ReservationStatus reservationStatus) {
         if (member == null) {
             throw new IllegalArgumentException("예약하려는 사용자를 선택해주세요.");
         }
@@ -57,6 +76,21 @@ public class Reservation {
         if (theme == null) {
             throw new IllegalArgumentException("예약하려는 테마를 선택해주세요.");
         }
+        if (reservationStatus == null) {
+            throw new IllegalArgumentException("예약상태가 지정되지 않았습니다.");
+        }
+    }
+
+    public boolean isReserved() {
+        return reservationStatus.isReserved();
+    }
+
+    public boolean isNotOwnedBy(Member member) {
+        return !this.member.equals(member);
+    }
+
+    public void changeReservationStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
     }
 
     public Long getId() {
@@ -77,6 +111,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getReservationStatus() {
+        return reservationStatus;
     }
 
     @Override

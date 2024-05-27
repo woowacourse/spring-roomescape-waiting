@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public class Member {
+public class Member extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,12 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member(Long id, String name, String email, String password, Role role) {
+    public Member(Long id,
+                  String name,
+                  String email,
+                  String password,
+                  Role role
+    ) {
         validate(name, email, password, role);
         this.id = id;
         this.name = name;
@@ -32,14 +37,20 @@ public class Member {
         this.role = role;
     }
 
-    public Member(String name, String email, String password, Role role) {
+    public Member(String name,
+                  String email,
+                  String password,
+                  Role role) {
         this(null, name, email, password, role);
     }
 
     protected Member() {
     }
 
-    private void validate(String name, String email, String password, Role role) {
+    private void validate(String name,
+                          String email,
+                          String password,
+                          Role role) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("사용자의 이름을 입력해주세요.");
         }

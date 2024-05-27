@@ -18,10 +18,10 @@ class MemberApiControllerTest {
     void selectMembers_Success() {
         RestAssured.given().log().all()
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().get("/admin/members")
+                .when().get("/api/admin/members")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(3));
     }
 
     @Test
@@ -30,7 +30,7 @@ class MemberApiControllerTest {
         RestAssured.given().log().all()
                 .body(new SignupRequest("test@naver.com", "1234", "test"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/members")
+                .when().post("/api/members")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -41,7 +41,7 @@ class MemberApiControllerTest {
         RestAssured.given().log().all()
                 .body(new SignupRequest("user@naver.com", "1234", "test"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/members")
+                .when().post("/api/members")
                 .then().log().all()
                 .statusCode(400);
     }

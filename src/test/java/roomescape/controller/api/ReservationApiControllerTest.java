@@ -1,20 +1,24 @@
 package roomescape.controller.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.ReservationStatus;
+import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.util.TokenGenerator;
+
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -24,43 +28,24 @@ public class ReservationApiControllerTest {
     private ReservationApiController reservationApiController;
 
     @Test
-    @DisplayName("관리자 예약 페이지 요청이 정상적으로 수행된다.")
-    void moveToReservationPage_Success() {
-        RestAssured.given().log().all()
-                .cookie("token", TokenGenerator.makeAdminToken())
-                .when().get("/admin/reservation")
-                .then().log().all()
-                .statusCode(200);
-    }
-
-    @Test
-    @DisplayName("관리자 예약 페이지에 권한이 없는 유저는 401을 받는다.")
-    void moveToReservationPage_Failure() {
-        RestAssured.given().log().all()
-                .when().get("/admin/reservation")
-                .then().log().all()
-                .statusCode(401);
-    }
-
-    @Test
     @DisplayName("예약 목록 조회 요청이 정상석으로 수행된다.")
     void selectReservationListRequest_Success() {
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/api/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(6));
     }
 
     @Test
     @DisplayName("유저 예약 목록 조회를 정상적으로 수행한다.")
     void selectUserReservationListRequest_Success() {
         RestAssured.given().log().all()
-                .cookie("token", TokenGenerator.makeUserToken())
-                .when().get("/reservations-mine")
+                .cookie("token", TokenGenerator.makeMemberToken())
+                .when().get("/api/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 
     @Test
@@ -69,37 +54,39 @@ public class ReservationApiControllerTest {
         Map<String, Object> reservation = Map.of("name", "브라운",
                 "date", LocalDate.now().plusDays(2L).toString(),
                 "timeId", 1,
-                "themeId", 1
+                "themeId", 1,
+                "reservationStatus", "RESERVED"
         );
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", TokenGenerator.makeUserToken())
+                .cookie("token", TokenGenerator.makeMemberToken())
                 .body(reservation)
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/api/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(7));
     }
 
     @Test
     @DisplayName("DB에 저장된 예약을 정상적으로 삭제한다.")
     void deleteReservation_InDatabase_Success() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/api/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/api/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(0));
+                .body("size()", is(5));
     }
 
     @Test
@@ -115,5 +102,51 @@ public class ReservationApiControllerTest {
         }
 
         assertThat(isJdbcTemplateInjected).isFalse();
+    }
+
+    @Test
+    @DisplayName("예약 대기 요청을 정상적으로 수행한다.")
+    void createWaiting_Success() {
+        RestAssured.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(new ReservationSaveRequest(LocalDate.now().plusDays(1L), 1L, 2L, ReservationStatus.WAITING))
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().post("/api/reservations")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("이미 사용자 본인이 예약 대기 요청을 한 경우 예외를 반환한다.")
+    void alreadyWaitedByUser() {
+        RestAssured.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(new ReservationSaveRequest(LocalDate.now().plusDays(1L), 1L, 1L, ReservationStatus.WAITING))
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().post("/api/reservations")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("모든 예약 대기 목록을 가져온다.")
+    void selectWaitings() {
+        RestAssured.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().get("/api/admin/reservations/waiting-list")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(4));
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제를 정상적으로 수행한다.")
+    void deleteWaiting() {
+        RestAssured.given().log().all()
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/api/reservations/2")
+                .then().log().all()
+                .statusCode(204);
     }
 }

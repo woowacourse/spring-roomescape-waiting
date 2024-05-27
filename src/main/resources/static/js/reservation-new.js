@@ -1,7 +1,7 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
-const TIME_API_ENDPOINT = '/times';
-const THEME_API_ENDPOINT = '/themes';
+const RESERVATION_API_ENDPOINT = '/api/reservations';
+const TIME_API_ENDPOINT = '/api/times';
+const THEME_API_ENDPOINT = '/api/themes';
 const timesOptions = [];
 const themesOptions = [];
 
@@ -179,7 +179,7 @@ function requestDelete(id) {
         method: 'DELETE',
     };
 
-    return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+    return fetch(`/api/reservations/${id}`, requestOptions)
         .then(response => {
             if (response.status !== 204) throw new Error('Delete failed');
         });

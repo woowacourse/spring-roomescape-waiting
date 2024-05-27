@@ -1,49 +1,21 @@
 package roomescape.domain;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+public enum ReservationStatus {
 
-public class ReservationStatus {
+    RESERVED("예약"),
+    WAITING("예약대기");
 
-    private final Map<ReservationTime, Boolean> reservationStatus;
+    private final String status;
 
-    private ReservationStatus(Map<ReservationTime, Boolean> reservationStatus) {
-        this.reservationStatus = reservationStatus;
+    ReservationStatus(String status) {
+        this.status = status;
     }
 
-    public static ReservationStatus of(List<ReservationTime> reservedTimes, List<ReservationTime> reservationTimes) {
-        Map<ReservationTime, Boolean> reservationStatus = new HashMap<>();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationStatus.put(reservationTime, isReserved(reservedTimes, reservationTime));
-        }
-        return new ReservationStatus(reservationStatus);
+    public boolean isReserved() {
+        return this == RESERVED;
     }
 
-    private static boolean isReserved(List<ReservationTime> reservedTimes, ReservationTime reservationTime) {
-        return reservedTimes.stream()
-                .anyMatch(reservedTime -> reservedTime.equals(reservationTime));
-    }
-
-    public Map<ReservationTime, Boolean> getReservationStatus() {
-        return reservationStatus;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
-        ReservationStatus that = (ReservationStatus) object;
-        return Objects.equals(reservationStatus, that.reservationStatus);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(reservationStatus);
+    public String getStatus() {
+        return status;
     }
 }

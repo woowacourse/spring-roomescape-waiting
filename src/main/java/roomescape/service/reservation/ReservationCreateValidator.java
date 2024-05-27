@@ -1,15 +1,17 @@
 package roomescape.service.reservation;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Member;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 public class ReservationCreateValidator {
@@ -40,20 +42,35 @@ public class ReservationCreateValidator {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다."));
     }
 
-    public void validateAlreadyBooked(LocalDate date, long timeId, long themeId) {
-        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
+    public void validateAlreadyBooked(LocalDate date,
+                                      long timeId,
+                                      long themeId,
+                                      ReservationStatus reservationStatus) {
+        if (reservationStatus.isReserved()
+            && reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
             throw new IllegalArgumentException("해당 시간에 이미 예약된 테마입니다.");
         }
     }
 
-    public void validateDateIsFuture(LocalDate date, ReservationTime reservationTime) {
+    public void validateOwnReservationExist(Member member,
+                                            Theme theme,
+                                            ReservationTime reservationTime,
+                                            LocalDate date) {
+        if (reservationRepository.hasBookedReservation(member, theme, reservationTime, date)) {
+            throw new IllegalArgumentException("요청하신 예약 또는 예약 대기가 이미 존재합니다.");
+        }
+    }
+
+    public void validateDateIsFuture(LocalDate date,
+                                     ReservationTime reservationTime) {
         LocalDateTime localDateTime = toLocalDateTime(date, reservationTime);
         if (localDateTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("지나간 날짜와 시간에 대한 예약 생성은 불가능합니다.");
         }
     }
 
-    private LocalDateTime toLocalDateTime(LocalDate date, ReservationTime reservationTime) {
+    private LocalDateTime toLocalDateTime(LocalDate date,
+                                          ReservationTime reservationTime) {
         return LocalDateTime.of(date, reservationTime.getStartAt());
     }
 

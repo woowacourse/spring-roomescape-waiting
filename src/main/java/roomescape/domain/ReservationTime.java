@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-public class ReservationTime {
+public class ReservationTime extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,8 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime(Long id, LocalTime startAt) {
+    public ReservationTime(Long id,
+                           LocalTime startAt) {
         validate(startAt);
         this.id = id;
         this.startAt = startAt;

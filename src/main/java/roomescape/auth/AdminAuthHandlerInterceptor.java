@@ -17,7 +17,8 @@ public class AdminAuthHandlerInterceptor implements HandlerInterceptor {
     private final AuthService authService;
     private final TokenProvider tokenProvider;
 
-    public AdminAuthHandlerInterceptor(AuthService authService, TokenProvider tokenProvider) {
+    public AdminAuthHandlerInterceptor(AuthService authService,
+                                       TokenProvider tokenProvider) {
         this.authService = authService;
         this.tokenProvider = tokenProvider;
     }

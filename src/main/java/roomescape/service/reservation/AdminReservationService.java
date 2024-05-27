@@ -3,18 +3,20 @@ package roomescape.service.reservation;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.request.ReservationAdminSaveRequest;
 
 @Service
-public class AdminReservationCreateService {
+public class AdminReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationCreateValidator reservationCreateValidator;
 
-    public AdminReservationCreateService(ReservationRepository reservationRepository, ReservationCreateValidator reservationCreateValidator) {
+    public AdminReservationService(ReservationRepository reservationRepository,
+                                   ReservationCreateValidator reservationCreateValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationCreateValidator = reservationCreateValidator;
     }
@@ -23,10 +25,25 @@ public class AdminReservationCreateService {
         ReservationTime reservationTime = reservationCreateValidator.getValidReservationTime(request.timeId());
         reservationCreateValidator.validateDateIsFuture(request.date(), reservationTime);
         Theme theme = reservationCreateValidator.getValidTheme(request.themeId());
-        reservationCreateValidator.validateAlreadyBooked(request.date(), request.timeId(), request.themeId());
+        reservationCreateValidator.validateAlreadyBooked(
+                request.date(),
+                request.timeId(),
+                request.themeId(),
+                ReservationStatus.RESERVED
+        );
         Member member = reservationCreateValidator.getValidMember(request.memberId());
-
-        Reservation reservation = request.toEntity(request, reservationTime, theme, member);
+        reservationCreateValidator.validateOwnReservationExist(
+                member,
+                theme,
+                reservationTime,
+                request.date()
+        );
+        Reservation reservation = request.toEntity(
+                request,
+                reservationTime,
+                theme,
+                member
+        );
         return reservationRepository.save(reservation);
     }
 }

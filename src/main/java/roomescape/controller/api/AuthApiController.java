@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
@@ -14,6 +15,7 @@ import roomescape.service.auth.AuthService;
 import roomescape.service.dto.request.LoginRequest;
 import roomescape.service.dto.response.MemberIdAndNameResponse;
 
+@RequestMapping("/api")
 @RestController
 public class AuthApiController {
 
@@ -29,7 +31,9 @@ public class AuthApiController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> login(@RequestBody @Valid
+                                      LoginRequest request,
+                                      HttpServletResponse response) {
         String accessToken = authService.login(request);
         Cookie cookie = new Cookie("token", accessToken);
         cookie.setHttpOnly(true);
