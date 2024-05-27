@@ -2,7 +2,6 @@ package roomescape.service;
 
 
 import static roomescape.domain.ReservationStatus.RESERVE_NUMBER;
-import static roomescape.domain.ReservationStatus.Status.RESERVED;
 
 import java.util.List;
 
@@ -104,7 +103,7 @@ public class ReservationWaitService {
     }
 
     private void proceedAutoScheduling(ReservationWait wait, Long reservationId) {
-        if (wait.getStatus().isSameAs(RESERVED)) {
+        if (wait.isReserved()) {
             waitRepository.findTopPriorityByReservationId(reservationId)
                     .ifPresent(ReservationWait::reserve);
         }

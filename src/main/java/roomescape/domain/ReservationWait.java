@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import static roomescape.domain.ReservationStatus.Status.RESERVED;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -59,6 +61,10 @@ public class ReservationWait {
 
     public long getPriority() {
         return status.getPriority();
+    }
+
+    public boolean isReserved() {
+        return status.isSameAs(RESERVED);
     }
 
     @Override
