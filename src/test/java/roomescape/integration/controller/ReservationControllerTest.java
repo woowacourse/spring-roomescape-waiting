@@ -177,17 +177,24 @@ public class ReservationControllerTest {
                             "role", testMember.getRole().getTokenValue()
                     )
             );
+            Map<String, Object> reservationParam = Map.of(
+                    "date", reservation7.getDate().toString(),
+                    "timeId", reservation7.getReservationTime().getId(),
+                    "themeId", reservation7.getTheme().getId());
+
             RestAssured.given().log().all()
                     .when()
                     .cookie("token", newToken)
                     .contentType(ContentType.JSON)
-                    .body(Map.of(
-                            "date", reservation7.getDate().toString(),
-                            "timeId", reservation7.getReservationTime().getId(),
-                            "themeId", reservation7.getTheme().getId()))
+                    .body(reservationParam)
                     .post("/reservations-waiting")
                     .then().log().all()
-                    .statusCode(201);
+                    .statusCode(201)
+                    .body("id", is(11),
+                            "member.name", is(testMember.getName()),
+                            "date", is(reservationParam.get("date")),
+                            "time.startAt", is(reservation7.getReservationTime().getStartAt().toString()),
+                            "theme.name", is(reservation7.getTheme().getName()));
         }
 
         @DisplayName("지난 시간에 예약을 생성할 수 없다.")
