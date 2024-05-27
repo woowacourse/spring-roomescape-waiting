@@ -70,7 +70,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception exception) {
         logger.error(exception.getMessage(), exception);
-        System.out.println();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("서버 장애 오류입니다.");
     }
