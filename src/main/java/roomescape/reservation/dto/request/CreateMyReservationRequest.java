@@ -4,10 +4,6 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
-import roomescape.member.domain.Member;
-import roomescape.reservation.model.Reservation;
-import roomescape.reservationtime.model.ReservationTime;
-import roomescape.theme.model.Theme;
 
 public record CreateMyReservationRequest(
         @FutureOrPresent(message = "예약 날짜는 현재보다 과거일 수 없습니다.")
