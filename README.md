@@ -1,19 +1,50 @@
 ## 기능 요구사항
+
+### 1단계
+
 - [x] JPA를 활용하여 데이터베이스에 접근하도록 수정하세요.
-  - [x] gradle 의존성 추가  
-    - to be: spring-boot-starter-data-jpa
-  - [x] 엔티티 매핑  
-      - Member 
-      - ReservationTime
-      - Theme 
-      - Reservation
+    - [x] gradle 의존성 추가
+        - to be: spring-boot-starter-data-jpa
+    - [x] 엔티티 매핑
+        - Member
+        - ReservationTime
+        - Theme
+        - Reservation
 - [x] 연관관계 매핑
-  - Member : Reservation = 1 : N
-  - Theme : Reservation = 1 : N
-  - ReservationTime : Reservation = 1 : N
-  
+    - Member : Reservation = 1 : N
+    - Theme : Reservation = 1 : N
+    - ReservationTime : Reservation = 1 : N
+
 <br>
 
+### 2단계
+
 - [x] 내 예약 목록 조회 API
-  - [x] `/reservation/mine` 호출 시 내 예약 목록 조회 페이지 응답
-  - [x] 테마, 날짜, 시간, 상태 조회
+    - [x] `/reservation/mine` 호출 시 내 예약 목록 조회 페이지 응답
+    - [x] 테마, 날짜, 시간, 상태 조회
+
+<br>
+
+### 3단계
+
+- [x] 예약 대기 요청 기능을 구현하세요.
+    - [x] 예약이 존재할 때 예약 요청을 보내면 예외를 반환합니다.
+    - [x] 예약이 존재할 때 예약 대기 요청을 보내면 정상적으로 예약 대기에 성공합니다.
+    - [x] 예약이 존재하지 않을 때 예약 요청을 보내면 예약에 성공합니다.
+    - [x] 예약이 존재하지 않을 때 예약 대기 요청을 보내면 예약 대기 대신 예약 성공합니다.
+- [x] 예약 대기 취소 기능도 함께 구현하세요.
+- [x] 내 예약 목록 조회 시 예약 대기 목록도 함께 포함하세요.
+    - 예약번호는 같은 테마, 날짜, 시간의 예약 대기 중 내 예약 대기 보다 빨리 생성된 갯수
+- [x] 중복 예약이 불가능 하도록 구현하세요.
+
+<br>
+
+### 4단계
+
+- [x] GET `/admin/waiting` 요청 시 `/admin/waiting.html`을 반환합니다.
+- [ ] 어드민에서 예약 대기 관리 기능을 구현하세요.
+    - [x] 어드민은 예약 대기 목록을 조회할 수 있다.
+    - [x] 어드민은 예약 대기를 취소시킬 수 있다.
+- [x] 예약 대기 승인 기능을 구현하세요.
+- [x] 예약 취소가 발생 시 예약 대기자가 있는 경우 예약 승인이 되는 기능을 구현하세요.
+    - 자동으로 승인 : 예약 취소가 발생하는 경우 예약 대기가 있을 때 우선순위에 따라 자동으로 예약이 되도록 할 수 있다.

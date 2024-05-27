@@ -8,14 +8,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.MEMBER_MIA_NAME;
+import static roomescape.TestFixture.MEMBER_CAT_NAME;
 
 class NameTest {
-    
+
     @Test
     @DisplayName("예약자 이름을 생성한다.")
     void createName() {
-        assertThatCode(() -> new Name(MEMBER_MIA_NAME))
+        assertThatCode(() -> new Name(MEMBER_CAT_NAME))
                 .doesNotThrowAnyException();
     }
 

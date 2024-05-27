@@ -22,7 +22,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     int countByTime_Id(final Long timeId);
 
-    int countByDateAndTime_IdAndTheme_Id(final LocalDate date, final Long timeId, final Long themeId);
+    boolean existsByDateAndTime_IdAndTheme_Id(final LocalDate date, final Long timeId, final Long themeId);
 
     boolean existsById(final Long id);
 }

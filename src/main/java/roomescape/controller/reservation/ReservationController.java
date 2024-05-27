@@ -13,16 +13,20 @@ import roomescape.controller.auth.AuthenticationPrincipal;
 import roomescape.domain.reservation.Reservation;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
+import roomescape.dto.reservation.AutoReservedFilter;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
 import roomescape.dto.reservation.MyReservationResponse;
+import roomescape.dto.reservation.MyReservationsResponse;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
+import roomescape.service.AutoReserveService;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
+import roomescape.service.WaitingService;
 
 import java.util.List;
 
@@ -32,17 +36,23 @@ public class ReservationController {
 
     private final MemberService memberService;
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final AutoReserveService autoReserveService;
 
     public ReservationController(final MemberService memberService,
                                  final ReservationService reservationService,
+                                 final WaitingService waitingService,
                                  final ReservationTimeService reservationTimeService,
-                                 final ThemeService themeService) {
+                                 final ThemeService themeService,
+                                 final AutoReserveService autoReserveService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.autoReserveService = autoReserveService;
     }
 
     @PostMapping
@@ -54,7 +64,7 @@ public class ReservationController {
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
-        final Reservation reservation = saveRequest.toModel(memberResponse, themeResponse, reservationTimeResponse);
+        final Reservation reservation = saveRequest.toReservation(memberResponse, themeResponse, reservationTimeResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.create(reservation));
     }
 
@@ -65,12 +75,17 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable final Long id) {
-        reservationService.delete(id);
+        final ReservationResponse response = reservationService.delete(id);
+        final AutoReservedFilter filter = AutoReservedFilter.from(response);
+        autoReserveService.reserveWaiting(filter);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthenticationPrincipal final LoginMember loginMember) {
-        return ResponseEntity.ok(reservationService.findMyReservations(loginMember));
+        final List<MyReservationResponse> myReservations = reservationService.findMyReservations(loginMember.id());
+        final List<MyReservationResponse> myWaitings = waitingService.findMyWaitings(loginMember.id());
+        final List<MyReservationResponse> responses = MyReservationsResponse.combine(myReservations, myWaitings);
+        return ResponseEntity.ok(responses);
     }
 }

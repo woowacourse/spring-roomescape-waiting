@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static roomescape.TestFixture.ADMIN;
-import static roomescape.TestFixture.MEMBER_MIA;
+import static roomescape.TestFixture.MEMBER_CAT;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -32,7 +32,7 @@ class MemberServiceTest {
     @DisplayName("id에 해당하는 사용자를 조회한다.")
     void findById() {
         // given
-        final Member expectedMember = MEMBER_MIA(1L);
+        final Member expectedMember = MEMBER_CAT(1L);
         given(memberRepository.findById(anyLong()))
                 .willReturn(Optional.of(expectedMember));
 
@@ -47,7 +47,7 @@ class MemberServiceTest {
     @DisplayName("모든 사용자를 조회한다.")
     void findAll() {
         // given
-        final Member member1 = MEMBER_MIA(1L);
+        final Member member1 = MEMBER_CAT(1L);
         final Member member2 = ADMIN(2L);
         final List<Member> initial_members = List.of(member1, member2);
         given(memberRepository.findAll()).willReturn(initial_members);

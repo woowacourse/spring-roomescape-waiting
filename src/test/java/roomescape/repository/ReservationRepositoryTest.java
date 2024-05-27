@@ -4,8 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.TestFixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -19,10 +20,8 @@ import static roomescape.TestFixture.DATE_MAY_EIGHTH;
 import static roomescape.TestFixture.DATE_MAY_NINTH;
 import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_SIX;
-import static roomescape.TestFixture.THEME_HORROR;
 
-@Transactional
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DataJpaTest
 class ReservationRepositoryTest {
 
     @Autowired
@@ -37,6 +36,9 @@ class ReservationRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private TestEntityManager testEntityManager;
+
     private Member member;
     private ReservationTime reservationTime;
     private Theme theme;
@@ -46,8 +48,9 @@ class ReservationRepositoryTest {
     void setUp() {
         member = memberRepository.save(MEMBER_BROWN());
         reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SIX());
-        theme = themeRepository.save(THEME_HORROR());
+        theme = themeRepository.save(TestFixture.THEME_COMIC());
         reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme));
+        testEntityManager.clear();
     }
 
     @Test
@@ -76,15 +79,15 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("동일 시간대의 예약 건수를 조회한다.")
+    @DisplayName("동일 시간대의 예약이 존재한다면 참이다.")
     void countByDateAndTime() {
         // when
-        final int actual = reservationRepository.countByDateAndTime_IdAndTheme_Id(
+        final boolean isReserved = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
                 DATE_MAY_EIGHTH, reservationTime.getId(), theme.getId()
         );
 
         // then
-        assertThat(actual).isEqualTo(1);
+        assertThat(isReserved).isTrue();
     }
 
     @Test
@@ -125,7 +128,7 @@ class ReservationRepositoryTest {
     @DisplayName("timeId에 해당하는 예약 건수를 조회한다.")
     void countByTimeId() {
         // given
-        final long timeId = 2L;
+        final long timeId = 0L;
 
         // when
         final int actual = reservationRepository.countByTime_Id(timeId);
