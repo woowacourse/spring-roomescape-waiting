@@ -26,7 +26,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationWaitSaveRequest;
 
-class ReservationWaitDeleteServiceTest extends BaseServiceTest {
+class ReservationWaitUpdateServiceTest extends BaseServiceTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -41,7 +41,7 @@ class ReservationWaitDeleteServiceTest extends BaseServiceTest {
     private ReservationWaitRepository reservationWaitRepository;
 
     @Autowired
-    private ReservationWaitDeleteService reservationWaitDeleteService;
+    private ReservationWaitUpdateService reservationWaitUpdateService;
 
     @BeforeEach
     void setUp() {
@@ -59,7 +59,7 @@ class ReservationWaitDeleteServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("예약 대기를 삭제한다.")
     void deleteReservationWait_Success() {
-        reservationWaitDeleteService.cancelById(1L);
+        reservationWaitUpdateService.cancelById(1L);
 
         assertThat(reservationWaitRepository.findAllByStatus(ReservationWaitStatus.WAITING)).hasSize(0);
     }
@@ -67,7 +67,7 @@ class ReservationWaitDeleteServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 대기 삭제 시 예외가 발생한다.")
     void deleteReservationWaitByUndefinedId_Failure() {
-        assertThatThrownBy(() -> reservationWaitDeleteService.cancelById(2L))
+        assertThatThrownBy(() -> reservationWaitUpdateService.cancelById(2L))
                 .isInstanceOf(InvalidRequestException.class);
     }
 }

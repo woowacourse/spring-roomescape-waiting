@@ -7,11 +7,11 @@ import roomescape.exception.InvalidRequestException;
 import roomescape.repository.ReservationWaitRepository;
 
 @Service
-public class ReservationWaitDeleteService {
+public class ReservationWaitUpdateService {
 
     private final ReservationWaitRepository reservationWaitRepository;
 
-    public ReservationWaitDeleteService(ReservationWaitRepository reservationWaitRepository) {
+    public ReservationWaitUpdateService(ReservationWaitRepository reservationWaitRepository) {
         this.reservationWaitRepository = reservationWaitRepository;
     }
 

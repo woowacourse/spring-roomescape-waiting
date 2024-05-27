@@ -8,19 +8,19 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservationwait.ReservationWait;
 import roomescape.service.dto.response.reservationwait.ReservationWaitResponses;
-import roomescape.service.reservationwait.ReservationWaitDeleteService;
+import roomescape.service.reservationwait.ReservationWaitUpdateService;
 import roomescape.service.reservationwait.ReservationWaitFindService;
 
 @RestController
 public class AdminReservationWaitApiController {
 
     private final ReservationWaitFindService reservationWaitFindService;
-    private final ReservationWaitDeleteService reservationWaitDeleteService;
+    private final ReservationWaitUpdateService reservationWaitUpdateService;
 
     public AdminReservationWaitApiController(ReservationWaitFindService reservationWaitFindService,
-                                             ReservationWaitDeleteService reservationWaitDeleteService) {
+                                             ReservationWaitUpdateService reservationWaitUpdateService) {
         this.reservationWaitFindService = reservationWaitFindService;
-        this.reservationWaitDeleteService = reservationWaitDeleteService;
+        this.reservationWaitUpdateService = reservationWaitUpdateService;
     }
 
     @GetMapping("/admin/reservations/wait")
@@ -31,7 +31,7 @@ public class AdminReservationWaitApiController {
 
     @PutMapping("/admin/reservations/{reservationWaitId}")
     public ResponseEntity<Void> cancelReservationWait(@PathVariable long reservationWaitId) {
-        reservationWaitDeleteService.cancelById(reservationWaitId);
+        reservationWaitUpdateService.cancelById(reservationWaitId);
         return ResponseEntity.noContent().build();
     }
 }

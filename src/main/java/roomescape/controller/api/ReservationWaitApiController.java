@@ -14,18 +14,18 @@ import roomescape.domain.member.Member;
 import roomescape.service.dto.request.ReservationWaitSaveRequest;
 import roomescape.service.dto.response.reservationwait.ReservationWaitResponse;
 import roomescape.service.reservationwait.ReservationWaitCreateService;
-import roomescape.service.reservationwait.ReservationWaitDeleteService;
+import roomescape.service.reservationwait.ReservationWaitUpdateService;
 
 @RestController
 public class ReservationWaitApiController {
 
     private final ReservationWaitCreateService reservationWaitCreateService;
-    private final ReservationWaitDeleteService reservationWaitDeleteService;
+    private final ReservationWaitUpdateService reservationWaitUpdateService;
 
     public ReservationWaitApiController(ReservationWaitCreateService reservationWaitCreateService,
-                                        ReservationWaitDeleteService reservationWaitDeleteService) {
+                                        ReservationWaitUpdateService reservationWaitUpdateService) {
         this.reservationWaitCreateService = reservationWaitCreateService;
-        this.reservationWaitDeleteService = reservationWaitDeleteService;
+        this.reservationWaitUpdateService = reservationWaitUpdateService;
     }
 
     @PostMapping("/reservations/wait")
@@ -39,7 +39,7 @@ public class ReservationWaitApiController {
 
     @PutMapping("/reservations/wait/{reservationWaitId}")
     public ResponseEntity<Void> cancelReservationWait(@PathVariable long reservationWaitId) {
-        reservationWaitDeleteService.cancelById(reservationWaitId);
+        reservationWaitUpdateService.cancelById(reservationWaitId);
         return ResponseEntity.noContent().build();
     }
 }
