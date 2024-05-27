@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -53,9 +54,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                                     r.status,
                                                                     r.createdAt)
         FROM Reservation AS r
-        WHERE r.status = 'WAITING'
+        WHERE r.status = :status
         """)
-    List<ReservationWaiting> findAllReservationWaiting();
+    List<ReservationWaiting> findAllReservationByStatus(@Param("status") Status status);
 
     Optional<Reservation> findFirstByDateValueAndTimeIdAndThemeIdAndStatus(LocalDate date,
                                                                            Long timeId,

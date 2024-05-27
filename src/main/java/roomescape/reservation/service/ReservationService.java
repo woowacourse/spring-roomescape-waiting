@@ -55,8 +55,8 @@ public class ReservationService {
         return new MemberReservationStatusResponse(foundReservation);
     }
 
-    public List<ReservationResponse> findAllWaitingReservation() {
-        return reservationRepository.findAllReservationWaiting().stream()
+    public List<ReservationResponse> findAllWaitingReservation(Status status) {
+        return reservationRepository.findAllReservationByStatus(status).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
