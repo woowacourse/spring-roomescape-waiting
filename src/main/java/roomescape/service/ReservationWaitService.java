@@ -1,6 +1,8 @@
 package roomescape.service;
 
-import static roomescape.domain.ReservationStatus.RESERVED;
+
+import static roomescape.domain.ReservationStatus.RESERVE_NUMBER;
+import static roomescape.domain.ReservationStatus.Status.RESERVED;
 
 import java.util.List;
 
@@ -60,7 +62,7 @@ public class ReservationWaitService {
                 .orElseThrow(AuthenticationFailureException::new);
 
         long waitCount = waitRepository.findPriorityIndex()
-                .orElse(RESERVED.getStartIndex());
+                .orElse(RESERVE_NUMBER);
 
         ReservationWait wait = new ReservationWait(member, reservation, waitCount + 1L);
         verifyWait(wait);
@@ -102,7 +104,7 @@ public class ReservationWaitService {
     }
 
     private void proceedAutoScheduling(ReservationWait wait, Long reservationId) {
-        if (wait.getStatus().isReserved()) {
+        if (wait.getStatus().isSameAs(RESERVED)) {
             waitRepository.findTopPriorityByReservationId(reservationId)
                     .ifPresent(ReservationWait::reserve);
         }

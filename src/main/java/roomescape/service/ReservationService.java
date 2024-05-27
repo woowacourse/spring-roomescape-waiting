@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import static roomescape.domain.ReservationStatus.RESERVED;
+import static roomescape.domain.ReservationStatus.Status.RESERVED;
 
 import java.util.List;
 

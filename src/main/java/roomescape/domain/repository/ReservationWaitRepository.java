@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.ReservationWait;
 
 public interface ReservationWaitRepository extends Repository<ReservationWait, Long> {
@@ -25,19 +25,19 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
             JOIN w.reservation r
             WHERE r.date >= :start AND r.date <= :end
             AND m.name = :memberName
-            AND w.status = :status
+            AND w.status.status = :status
             AND r.theme.name = :themeName
             """)
     List<ReservationWait> findByPeriodAndMemberAndThemeAndStatus(@Param("start") LocalDate start,
                                                                  @Param("end") LocalDate end,
                                                                  @Param("memberName") String memberName,
                                                                  @Param("themeName") String themeName,
-                                                                 @Param("status") ReservationStatus status);
+                                                                 @Param("status") Status status);
 
     @Query("""
-            SELECT w.priority
+            SELECT w.status.priority
             FROM ReservationWait w
-            ORDER BY w.priority DESC
+            ORDER BY w.status.priority DESC
             LIMIT 1
             """)
     Optional<Long> findPriorityIndex();
@@ -46,7 +46,7 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
             SELECT w
             FROM ReservationWait w
             WHERE w.reservation.id = :reservationId
-            ORDER BY w.priority
+            ORDER BY w.status.priority
             LIMIT 1
             """)
     Optional<ReservationWait> findTopPriorityByReservationId(@Param("reservationId") Long reservationId);
@@ -55,7 +55,12 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
 
     List<ReservationWait> findAllByMember(Member member);
 
-    long countByPriorityBefore(long priority);
+    @Query("""
+            SELECT COUNT(w)
+            FROM ReservationWait w
+            WHERE w.status.priority < :priority
+            """)
+    long countByPriorityBefore(@Param("priority") long priority);
 
     void deleteById(Long id);
 

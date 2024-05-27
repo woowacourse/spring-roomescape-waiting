@@ -1,6 +1,7 @@
 package roomescape.domain.repository;
 
-import static roomescape.domain.ReservationStatus.RESERVED;
+
+import static roomescape.domain.ReservationStatus.Status.RESERVED;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

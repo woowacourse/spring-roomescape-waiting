@@ -1,6 +1,6 @@
 package roomescape.service.dto.response.wait;
 
-import static roomescape.domain.ReservationStatus.RESERVED;
+import static roomescape.domain.ReservationStatus.Status.RESERVED;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,7 +25,7 @@ public record WaitResponse(
     }
 
     public static WaitResponse from(ReservationWait wait, long rank) {
-        if (wait.getStatus().equals(RESERVED)) {
+        if (wait.getStatus().isSameAs(RESERVED)) {
             return new WaitResponse(wait, "예약");
         }
         return new WaitResponse(wait, rank + "번째 예약대기");

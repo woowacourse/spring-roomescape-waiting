@@ -1,29 +1,58 @@
 package roomescape.domain;
 
+import static roomescape.domain.ReservationStatus.Status.RESERVED;
+import static roomescape.domain.ReservationStatus.Status.WAITING;
+
+import java.util.function.LongFunction;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import roomescape.exception.wait.InvalidPriorityException;
 
 @Getter
-public enum ReservationStatus {
-    WAITING(1L),
-    RESERVED(0L);
-
-    private final long startIndex;
-
-    ReservationStatus(long startIndex) {
-        this.startIndex = startIndex;
+@Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
+public class ReservationStatus {
+    public enum Status {
+        RESERVED, WAITING
     }
 
-    public static ReservationStatus valueOf(long priority) {
-        if (priority == RESERVED.startIndex) {
-            return RESERVED;
-        }
-        if (priority >= WAITING.startIndex) {
-            return WAITING;
-        }
-        throw new IllegalArgumentException("우선순위는 %d보다는 작을 수 없습니다.".formatted(RESERVED.startIndex));
+    
+    public static final long RESERVE_NUMBER = 0L;
+    private static final LongFunction<Status> STATUS_GENERATOR = insertPriority -> insertPriority > 0 ? WAITING
+            : RESERVED;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
+    @Column(name = "priority", nullable = false)
+    private long priority;
+
+    public ReservationStatus(long priority) {
+        validatePriority(priority);
+        this.priority = priority;
+        this.status = STATUS_GENERATOR.apply(priority);
     }
 
-    public boolean isReserved() {
-        return this == RESERVED;
+    private void validatePriority(long priority) {
+        if (priority < RESERVE_NUMBER) {
+            throw new InvalidPriorityException();
+        }
+    }
+
+    public void reserve() {
+        status = RESERVED;
+        priority = RESERVE_NUMBER;
+    }
+
+    public boolean isSameAs(Status other) {
+        return status == other;
     }
 }
