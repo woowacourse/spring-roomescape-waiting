@@ -17,10 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.ConflictException;
+import roomescape.exception.IllegalAuthorizationException;
 import roomescape.exception.IllegalReservationDateTimeRequestException;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
+import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dao.ReservationContentRepository;
 import roomescape.reservation.dao.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
@@ -38,7 +39,7 @@ class ReservationServiceTest {
     private final Time time = new Time(1L, LocalTime.of(12, 0));
     private final Theme theme = new Theme(1L, "그켬미", "켬미 방탈출", "thumbnail");
     private final ReservationContent reservationContent = new ReservationContent(LocalDate.MAX, time, theme);
-    private final Member member = new Member("켬미", "kyummi@email.com", "pass");
+    private final Member member = new Member(1L,"켬미", "kyummi@email.com", "pass");
     private final Reservation reservation = new Reservation(1L, member, reservationContent, LocalDateTime.now());
 
     @InjectMocks
@@ -106,13 +107,30 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약을 지운다.")
-    void removeReservations() {
+    @DisplayName("자신이 요청한 예약을 정상적으로 지운다.")
+    void removeReservation_ShouldRemoveReservation_WhenRequestFromReservationOwner() {
         Mockito.doNothing()
                 .when(reservationRepository)
                 .deleteById(reservation.getId());
+        Mockito.when(reservationRepository.findAllByMember_Id(reservation.getMemberId()))
+                .thenReturn(List.of(reservation));
 
-        assertThatCode(() -> reservationService.removeReservations(reservation.getId())).doesNotThrowAnyException();
+        assertThatCode(() -> reservationService.removeReservation(reservation.getId(),
+                new MemberProfileInfo(member.getId(), member.getName(), member.getEmail()))).doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("자신의 요청하지 않은 예약을 취소 요청할 경우, 예외를 던진다.")
+    void removeReservation_ShouldThrowException_WhenRequestNotFromReservationOwner() {
+
+        Mockito.when(reservationRepository.findAllByMember_Id(any(Long.class)))
+                .thenReturn(List.of());
+        MemberProfileInfo memberProfileInfo = new MemberProfileInfo(0L, member.getName(), member.getEmail());
+
+        Long reservationId = reservation.getId();
+        assertThatThrownBy(() -> reservationService.removeReservation(reservationId,
+                memberProfileInfo)).isInstanceOf(
+                IllegalAuthorizationException.class);
     }
 
 }

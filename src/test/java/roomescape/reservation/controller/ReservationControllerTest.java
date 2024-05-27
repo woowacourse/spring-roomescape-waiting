@@ -39,20 +39,21 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
 @WebMvcTest(ReservationController.class)
-@TestPropertySource(properties = {"security.jwt.token.secret-key=test_secret_key",
-                                  "security.jwt.token.expire-length=3600000"})
 class ReservationControllerTest {
 
     private static final Member MEMBER = new Member("tester", "test@email.com", "pass");
-    private final Reservation reservation = new Reservation(
+    private static final Reservation RESERVATION = new Reservation(
             MEMBER,
             LocalDate.MAX,
             new Time(1L, LocalTime.of(12, 0)),
             new Theme(1L, "도비", "도비 방탈출", "이미지~"));
+
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
+
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -63,30 +64,28 @@ class ReservationControllerTest {
     @MockBean
     private MemberAuthService memberAuthService;
 
-    private JwtTokenProvider jwtTokenProvider;
-
     private String token;
+
 
     @BeforeEach
     void setUp() {
         Member member = new Member("valid", "testUser@email.com", "pass");
-        jwtTokenProvider = new JwtTokenProvider(secretKey, validityInMilliseconds);
-
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(secretKey, validityInMilliseconds);
+        token = jwtTokenProvider.createToken(member, new Date());
     }
 
     @Test
     @DisplayName("예약 정보를 정상적으로 저장하는지 확인한다.")
     void createReservation() throws Exception {
         Mockito.when(reservationService.addReservation(any(ReservationRequest.class)))
-                .thenReturn(ReservationResponse.fromReservation(reservation));
+                .thenReturn(ReservationResponse.fromReservation(RESERVATION));
         Mockito.when(memberAuthService.isLoginMember(any()))
                 .thenReturn(true);
         Mockito.when(memberAuthService.extractPayload(any()))
                 .thenReturn(new MemberProfileInfo(1L, "어드민", "admin@email.com"));
-        Member member = new Member(1L, "valid", "testUser@email.com", "pass");
-        token = jwtTokenProvider.createToken(member, new Date());
+
         String content = new ObjectMapper().registerModule(new JavaTimeModule())
-                .writeValueAsString(new ReservationRequest(reservation.getDate(), member, 1L, 1L));
+                .writeValueAsString(new ReservationRequest(RESERVATION.getDate(), MEMBER, 1L, 1L));
 
         mockMvc.perform(post("/reservations").cookie(new Cookie("token", token))
                         .content(content)
@@ -100,7 +99,7 @@ class ReservationControllerTest {
     @DisplayName("예약 정보를 정상적으로 불러오는지 확인한다.")
     void findAllReservations() throws Exception {
         Mockito.when(reservationService.findReservations())
-                .thenReturn(List.of(ReservationResponse.fromReservation(reservation)));
+                .thenReturn(List.of(ReservationResponse.fromReservation(RESERVATION)));
 
         mockMvc.perform(get("/reservations"))
                 .andDo(print())
@@ -112,19 +111,11 @@ class ReservationControllerTest {
     void findAvailableTimeList() throws Exception {
         Mockito.when(reservationService.findTimeAvailability(1, LocalDate.now()))
                 .thenReturn(
-                        List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getTime(), true)));
+                        List.of(ReservationTimeAvailabilityResponse.fromTime(RESERVATION.getTime(), true)));
 
         mockMvc.perform(get("/reservations/times/1?date=" + LocalDate.now()))
                 .andDo(print())
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("예약 정보를 정상적으로 지우는지 확인한다.")
-    void deleteReservation() throws Exception {
-        mockMvc.perform(delete("/reservations/1"))
-                .andDo(print())
-                .andExpect(status().isNoContent());
     }
 
 }

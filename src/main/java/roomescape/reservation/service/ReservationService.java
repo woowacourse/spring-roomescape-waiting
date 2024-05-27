@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.IllegalAuthorizationException;
 import roomescape.exception.IllegalReservationDateTimeRequestException;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
+import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dao.ReservationContentRepository;
 import roomescape.reservation.dao.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
@@ -139,8 +141,15 @@ public class ReservationService {
                 .toList();
     }
 
-    public void removeReservations(long reservationId) {
-        reservationRepository.deleteById(reservationId);
+    public void removeReservation(long reservationId, MemberProfileInfo memberProfileInfo) throws IllegalAuthorizationException {
+        List<Reservation> myReservations = reservationRepository.findAllByMember_Id(memberProfileInfo.id());
+        myReservations.stream()
+                .filter(reservation -> reservation.getId().equals(reservationId))
+                .findFirst()
+                .ifPresentOrElse(
+                        reservation -> reservationRepository.deleteById(reservationId),
+                        () -> { throw new IllegalAuthorizationException("자신의 예약만 삭제할 수 있습니다."); }
+                );
     }
 
 }
