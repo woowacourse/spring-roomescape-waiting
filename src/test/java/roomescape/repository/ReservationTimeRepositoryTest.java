@@ -13,8 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.model.member.Member;
-import roomescape.model.theme.Theme;
+import roomescape.service.dto.ReservationDto;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -32,15 +31,8 @@ public class ReservationTimeRepositoryTest {
                 new ReservationTime(LocalTime.of(2, 0))));
 
         reservationRepository.saveAll(List.of(
-                new Reservation(
-                        LocalDate.of(2000, 1, 1),
-                        new ReservationTime(1, null),
-                        new Theme(1, null, null, null),
-                        new Member(1, null, null, null, null)),
-                new Reservation(LocalDate.of(2000, 1, 2),
-                        new ReservationTime(2, null),
-                        new Theme(2, null, null, null),
-                        new Member(2, null, null, null, null))));
+                new Reservation(new ReservationDto(LocalDate.of(2000, 1, 1), 1L, 1L, 1L)),
+                new Reservation(new ReservationDto(LocalDate.of(2000, 1, 2), 2L, 2L, 2L))));
     }
 
     @DisplayName("특정 startAt을 가진 예약 시간이 존재하는 경우 참을 반환한다.")

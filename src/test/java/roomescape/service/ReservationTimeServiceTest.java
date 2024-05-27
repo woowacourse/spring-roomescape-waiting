@@ -18,10 +18,9 @@ import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.model.member.Member;
-import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeDto;
 
 @Sql("/init.sql")
@@ -45,14 +44,8 @@ class ReservationTimeServiceTest {
                 new ReservationTime(LocalTime.of(3, 0))));
 
         reservationRepository.saveAll(List.of(
-                new Reservation(LocalDate.of(2000, 1, 1),
-                        new ReservationTime(1L, null),
-                        new Theme(1L, null, null, null),
-                        new Member(1L, null, null, null, null)),
-                new Reservation(LocalDate.of(2000, 1, 2),
-                        new ReservationTime(2L, null),
-                        new Theme(2L, null, null, null),
-                        new Member(2L, null, null, null, null))));
+                new Reservation(new ReservationDto(LocalDate.of(2000, 1, 1), 1L, 1L, 1L)),
+                new Reservation(new ReservationDto(LocalDate.of(2000, 1, 2), 2L, 2L, 2L))));
     }
 
     @DisplayName("모든 예약 시간을 조회한다.")

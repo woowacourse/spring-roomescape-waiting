@@ -17,10 +17,10 @@ import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ThemeDto;
 
 @Sql("/init.sql")
@@ -44,14 +44,8 @@ class ThemeServiceTest {
                 new ReservationTime(LocalTime.of(3, 0))));
 
         reservationRepository.saveAll(List.of(
-                new Reservation(LocalDate.now().minusDays(1),
-                        new ReservationTime(1L, null),
-                        new Theme(1L, null, null, null),
-                        new Member(1L, null, null, null, null)),
-                new Reservation(LocalDate.now().minusDays(8),
-                        new ReservationTime(2L, null),
-                        new Theme(2L, null, null, null),
-                        new Member(2L, null, null, null, null))));
+                new Reservation(new ReservationDto(LocalDate.now().minusDays(1), 1L, 1L, 1L)),
+                new Reservation(new ReservationDto(LocalDate.now().minusDays(8), 2L, 2L, 2L))));
     }
 
     @DisplayName("모든 테마를 조회한다.")

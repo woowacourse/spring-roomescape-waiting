@@ -21,8 +21,6 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
 import roomescape.model.member.LoginMember;
-import roomescape.model.member.Member;
-import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.WaitingRepository;
@@ -51,23 +49,10 @@ class WaitingServiceTest {
                 new ReservationTime(LocalTime.now())));
 
         reservationRepository.saveAll(List.of(
-                new Reservation(LocalDate.of(2000, 1, 1),
-                        new ReservationTime(1L, null),
-                        new Theme(1L, null, null, null),
-                        new Member(1L, null, null, null, null)),
-                new Reservation(LocalDate.of(2000, 1, 2),
-                        new ReservationTime(2L, null),
-                        new Theme(2L, null, null, null),
-                        new Member(2L, null, null, null, null)),
-                new Reservation(LocalDate.of(9999, 9, 9),
-                        new ReservationTime(1L, null),
-                        new Theme(1L, null, null, null),
-                        new Member(2L, null, null, null, null)),
-                new Reservation(LocalDate.now(),
-                        new ReservationTime(3L, null),
-                        new Theme(3L, null, null, null),
-                        new Member(1L, null, null, null, null))
-        ));
+                new Reservation(new ReservationDto(LocalDate.of(2000, 1, 1), 1L, 1L, 1L)),
+                new Reservation(new ReservationDto(LocalDate.of(2000, 1, 2), 2L, 2L, 2L)),
+                new Reservation(new ReservationDto(LocalDate.of(9999, 9, 9), 1L, 1L, 2L)),
+                new Reservation(new ReservationDto(LocalDate.now(), 3L, 3L, 1L))));
 
         waitingRepository.saveAll(List.of(
                 new Waiting(new ReservationDto(LocalDate.of(9999, 9, 9), 1L, 1L, 3L))));
