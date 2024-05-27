@@ -13,8 +13,9 @@ import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
-import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
+import roomescape.service.reservation.ReservationRegisterService;
+import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -23,11 +24,14 @@ import java.time.LocalDate;
 public class ClientReservationController {
     private final ReservationTimeService reservationTimeService;
     private final ReservationService reservationService;
+    private final ReservationRegisterService reservationRegisterService;
 
     public ClientReservationController(final ReservationTimeService reservationTimeService,
-                                       final ReservationService reservationService) {
+                                       final ReservationService reservationService,
+                                       final ReservationRegisterService reservationRegisterService) {
         this.reservationTimeService = reservationTimeService;
         this.reservationService = reservationService;
+        this.reservationRegisterService = reservationRegisterService;
     }
 
     @GetMapping("/books/{date}/{theme_id}")
@@ -40,7 +44,7 @@ public class ClientReservationController {
     public ResponseEntity<ReservationResponse> register(@RequestBody ReservationRequest reservationRequest,
                                                         Member member) {
         final ReservationResponse reservationResponse =
-                reservationService.register(reservationRequest.with(member.getId()));
+                reservationRegisterService.register(reservationRequest.with(member.getId()));
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }

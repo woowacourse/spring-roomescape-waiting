@@ -13,7 +13,8 @@ import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ResponsesWrapper;
-import roomescape.service.ReservationService;
+import roomescape.service.reservation.ReservationRegisterService;
+import roomescape.service.reservation.ReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -22,9 +23,12 @@ import java.time.LocalDate;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationService reservationService;
+    private final ReservationRegisterService reservationRegisterService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(final ReservationService reservationService,
+                                      final ReservationRegisterService reservationRegisterService) {
         this.reservationService = reservationService;
+        this.reservationRegisterService = reservationRegisterService;
     }
 
     @GetMapping
@@ -39,7 +43,7 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> register(@RequestBody ReservationRequest reservationRequest) {
-        ReservationResponse reservationResponse = reservationService.register(reservationRequest);
+        ReservationResponse reservationResponse = reservationRegisterService.register(reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
     }
 
