@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 
 @Service
@@ -24,6 +25,12 @@ public class ReservationSchedulerService {
         validateWaitingAvailable(reservation);
     }
 
+    public void validateApproveReservation(Reservation reservation) {
+        if (findSuccessReservation(reservation).isPresent()) {
+            throw new IllegalArgumentException("이미 확정된 예약이 있습니다.");
+        }
+    }
+
     private void validateMemberReservationUnique(Reservation reservation) {
         findMemberReservation(reservation).ifPresent(this::throwExceptionByStatus);
     }
@@ -39,13 +46,13 @@ public class ReservationSchedulerService {
 
     private void validateReservationAvailable(Reservation reservation) {
         if (findReservation(reservation).isPresent()) {
-            throw new IllegalArgumentException("예약이 다 찼습니다. 예약 대기를 걸어주세요.");
+            throw new IllegalArgumentException("이미 예약이 다 찼습니다. 예약 대기를 걸어주세요.");
         }
     }
 
     private void validateWaitingAvailable(Reservation reservation) {
         if (findReservation(reservation).isEmpty()) {
-            throw new IllegalArgumentException("추가된 예약이 없어 대기 등록을 할 수 없습니다. 예약을 추가해 주세요.");
+            throw new IllegalArgumentException("추가된 예약이 없어 대기 등록을 할 수 없습니다.");
         }
     }
 
@@ -63,6 +70,15 @@ public class ReservationSchedulerService {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme()
+        );
+    }
+
+    private Optional<Reservation> findSuccessReservation(Reservation reservation) {
+        return reservationRepository.findFirstByDateAndReservationTimeAndThemeAndStatus(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                Status.SUCCESS
         );
     }
 }
