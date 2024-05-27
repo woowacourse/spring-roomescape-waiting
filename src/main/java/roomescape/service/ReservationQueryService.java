@@ -42,8 +42,9 @@ public class ReservationQueryService {
     private MyReservationResponse getMyReservationsWithWaitRank(Reservation reservation) {
         long waitingRank = 0L;
         if (reservation.getReservationStatus().isWaiting()) {
-            waitingRank = reservationRepository
+            long waitingCountsInFrontOfMe = reservationRepository
                     .countPreviousReservationsWithSameDateThemeTimeAndStatus(reservation.getId(), ReservationStatus.WAITING);
+            waitingRank = waitingCountsInFrontOfMe + 1;
         }
 
         return MyReservationResponse.of(reservation, waitingRank);

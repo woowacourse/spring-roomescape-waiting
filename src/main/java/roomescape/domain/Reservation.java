@@ -49,6 +49,10 @@ public class Reservation {
         this.reservationStatus = reservationStatus;
     }
 
+    public void setStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
