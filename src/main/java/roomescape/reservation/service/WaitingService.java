@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.DuplicationException;
+import roomescape.exceptions.NotFoundException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
@@ -77,8 +78,12 @@ public class WaitingService {
         return waitingJpaRepository.findWaitingsWithRankByMemberId(loginMember.getId());
     }
 
-    public void deleteById(Long id) {
-        waitingJpaRepository.deleteById(id);
+    public void deleteById(Long id, Member member) {
+        Waiting waiting = waitingJpaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id와 일치하는 대기를 찾을 수 없습니다."));
+        if (waiting.getMember().equals(member)) {
+            waitingJpaRepository.delete(waiting);
+        }
     }
 
     public List<WaitingResponse> findWaitings() {

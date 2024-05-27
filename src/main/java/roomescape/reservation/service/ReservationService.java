@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.DuplicationException;
+import roomescape.exceptions.NotFoundException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
@@ -20,7 +21,6 @@ import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -134,19 +134,20 @@ public class ReservationService {
         return Stream.concat(reservations, waitings).toList();
     }
 
-    public void deleteReservation(Long id) {
-        Optional<Reservation> optionalReservation = reservationJpaRepository.findById(id);
+    public void deleteReservation(Long id, Member member) {
+        Reservation reservation = reservationJpaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id와 일치하는 예약을 찾을 수 없습니다."));
 
-        optionalReservation.ifPresent(reservation -> {
+        if (reservation.getMember().equals(member)) {
             waitingService.findWaitingByReservation(reservation)
                     .ifPresentOrElse(
-                            waiting -> updateReservationByWaiting(waiting, reservation),
+                            waiting -> updateReservationByWaiting(waiting, reservation, member),
                             () -> reservationJpaRepository.deleteById(id)
                     );
-        });
+        }
     }
 
-    private void updateReservationByWaiting(Waiting waiting, Reservation reservation) {
+    private void updateReservationByWaiting(Waiting waiting, Reservation reservation, Member member) {
         Reservation changedReservation = new Reservation(reservation.getId(),
                 reservation.getDate(),
                 reservation.getReservationTime(),
@@ -154,6 +155,6 @@ public class ReservationService {
                 waiting.getMember()
                 );
         reservationJpaRepository.save(changedReservation);
-        waitingService.deleteById(waiting.getId());
+        waitingService.deleteById(waiting.getId(), member);
     }
 }

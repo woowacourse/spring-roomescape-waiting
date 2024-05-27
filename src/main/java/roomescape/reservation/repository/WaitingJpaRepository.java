@@ -34,4 +34,6 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
 
     Optional<Waiting> findTopByDateAndReservationTimeAndTheme(
             LocalDate date, ReservationTime reservationTime, Theme theme);
+
+    List<Waiting> findByMember(Member member);
 }

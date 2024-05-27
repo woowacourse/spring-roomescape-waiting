@@ -63,7 +63,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("id에 맞는 예약 가능 시간을 삭제한다.")
     void deleteGetTime() {
-        reservationTimeService.deleteTime(NOT_RESERVATED_TIME.getId());
+        reservationTimeService.deleteTime(NOT_RESERVATED_TIME.getId(), memberRequest.toLoginMember());
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_time", Integer.class);
 
