@@ -1,25 +1,19 @@
 package roomescape.reservation.dto;
 
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.entity.MemberReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record MemberReservationResponse(
-        Long reservationId,
-        String theme,
-        LocalDate date,
-        LocalTime time,
-        String status
-) {
+public record MemberReservationResponse(Long id, String memberName, LocalDate date, LocalTime startAt, String themeName) {
 
-    public static MemberReservationResponse from(Reservation reservation) {
+    public static MemberReservationResponse from(MemberReservation memberReservation) {
         return new MemberReservationResponse(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                reservation.getStatus().getStatusName()
+                memberReservation.getId(),
+                memberReservation.getMember().getName(),
+                memberReservation.getReservation().getDate(),
+                memberReservation.getReservation().getTime().getStartAt(),
+                memberReservation.getReservation().getTheme().getName()
         );
     }
 }

@@ -1,9 +1,11 @@
 package roomescape.time.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.reservation.domain.Reservation;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.reservation.domain.entity.Reservation;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.ReservationTimeCreateRequest;
@@ -20,13 +22,16 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final MemberReservationRepository memberReservationRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+                                  ReservationRepository reservationRepository, MemberReservationRepository memberReservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.memberReservationRepository = memberReservationRepository;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ReservationTimeResponse createTime(ReservationTimeCreateRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
 
@@ -43,12 +48,14 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> readReservationTimes() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> readReservationTimes(LocalDate date, Long themeId) {
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         Set<Long> alreadyBookedTimes = reservations.stream()
@@ -65,19 +72,21 @@ public class ReservationTimeService {
         return ReservationTimeResponse.of(time, alreadyBooked);
     }
 
+    @Transactional(readOnly = true)
     public ReservationTimeResponse readReservationTime(Long id) {
         ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약 시간입니다."));
         return ReservationTimeResponse.from(reservationTime);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTime(Long id) {
         validateReservationExists(id);
         reservationTimeRepository.deleteById(id);
     }
 
     private void validateReservationExists(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (memberReservationRepository.existsByReservationTimeId(id)) {
             throw new BadRequestException("해당 시간대에 예약이 존재합니다.");
         }
     }

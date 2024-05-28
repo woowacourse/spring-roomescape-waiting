@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.service.TokenCookieService;
+import roomescape.reservation.domain.entity.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ class AdminReservationControllerTest {
                 .split(TokenCookieService.COOKIE_TOKEN_KEY + "=")[1];
     }
 
-    @DisplayName("어드민 예약 컨트롤러는 예약 조회 시 값을 200을 응답한다.")
+    @DisplayName("어드민 예약 컨트롤러는 예약 조회 시 200을 응답한다.")
     @Test
     void readReservations() {
         RestAssured.given().log().all()
@@ -56,7 +57,18 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(11));
+    }
+
+    @DisplayName("어드민 예약 컨트롤러는 예약 대기 조회 시 200을 응답한다.")
+    @Test
+    void readWaitingReservations() {
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(3));
     }
 
     @DisplayName("어드민 예약 컨트롤러는 기간, 사용자, 테마로 예약 조회 시 200을 응답한다.")
@@ -82,6 +94,7 @@ class AdminReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -89,7 +102,7 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(11));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -105,7 +118,7 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(10));
+                .body("size()", is(12));
     }
 
     @DisplayName("어드민 예약 컨트롤러는 사용자 id 없이 예약을 생성할 경우 400을 응답한다.")
@@ -116,6 +129,7 @@ class AdminReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         // when
         String detailMessage = RestAssured.given().log().all()
@@ -140,7 +154,7 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(11));
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
@@ -153,6 +167,77 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(8));
+                .body("size()", is(10));
+    }
+
+    @DisplayName("어드민 예약 컨트롤러는 예약 대기 승인시 200을 응답한다.")
+    @Test
+    void confirmWaitingReservation() {
+        // given
+        long id = 11L;
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().put("/admin/reservations/waiting/" + id)
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("어드민 예약 컨트롤러는 대기 상태가 아닌 예약을 승인할 경우 400을 응답한다.")
+    @Test
+    void confirmNotWaitingReservation() {
+        // given
+        long id = 1L;
+
+        // when
+        String detailMessage = RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().put("/admin/reservations/waiting/" + id)
+                .then().log().all()
+                .statusCode(400)
+                .extract()
+                .jsonPath().get("detail");
+
+        // then
+        assertThat(detailMessage).isEqualTo("해당 예약은 대기 상태가 아닙니다.");
+    }
+
+    @DisplayName("어드민 예약 컨트롤러는 첫 번째 예약 대기가 아닌 대기를 승인하려고 하면 400을 응답한다.")
+    @Test
+    void confirmNotFirstWaitingReservation() {
+        // given
+        long id = 12L;
+
+        // when
+        String detailMessage = RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().put("/admin/reservations/waiting/" + id)
+                .then().log().all()
+                .statusCode(400)
+                .extract()
+                .jsonPath().get("detail");
+
+        // then
+        assertThat(detailMessage).isEqualTo("예약 대기는 순서대로 승인할 수 있습니다.");
+    }
+
+    @DisplayName("어드민 예약 컨트롤러는 이미 예약이 존재하는 대기를 승인하려고 하는 경우 400을 응답한다.")
+    @Test
+    void confirmAlreadyConfirmReservation() {
+        // given
+        long id = 14L;
+
+        // when
+        String detailMessage = RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().put("/admin/reservations/waiting/" + id)
+                .then().log().all()
+                .statusCode(400)
+                .extract()
+                .jsonPath().get("detail");
+
+        // then
+        assertThat(detailMessage).isEqualTo("이미 예약이 존재해 대기를 승인할 수 없습니다.");
     }
 }

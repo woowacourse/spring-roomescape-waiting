@@ -6,6 +6,9 @@ import roomescape.exception.BadRequestException;
 @Entity
 public class Theme {
 
+    public static final long POPULAR_THEME_PERIOD = 7L;
+    public static final long POPULAR_THEME_COUNT = 10L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

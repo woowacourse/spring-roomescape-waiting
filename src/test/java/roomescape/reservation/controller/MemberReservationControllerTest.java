@@ -12,6 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.service.TokenCookieService;
+import roomescape.reservation.domain.entity.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -69,6 +70,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         // when
         String name = RestAssured.given().log().all()
@@ -95,6 +97,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         // when & then
         RestAssured.given().log().all()
@@ -135,6 +138,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MIN);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         String detailMessage = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -156,6 +160,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MAX);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -175,7 +180,25 @@ class MemberReservationControllerTest {
                 .extract()
                 .jsonPath().get("detail");
 
-        assertThat(detailMessage).isEqualTo("중복된 예약입니다.");
+        assertThat(detailMessage).isEqualTo("이미 예약한 테마입니다.");
+    }
+
+    @DisplayName("사용자 예약 컨트롤러는 예약 대기시 200을 반환한다.")
+    @Test
+    void createWaitingReservation() {
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", "2099-12-31");
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.WAITING);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(200);
     }
 
     @DisplayName("사용자 예약 컨트롤러는 존재하지 않는 시간으로 예약 생성을 요청할 경우 404를 응답한다.")
@@ -185,6 +208,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MIN);
         reservation.put("timeId", Integer.MAX_VALUE);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         String detailMessage = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -206,6 +230,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MIN);
         reservation.put("timeId", 1);
         reservation.put("themeId", Integer.MAX_VALUE);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         String detailMessage = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -237,14 +262,61 @@ class MemberReservationControllerTest {
         assertThat(detailMessage).isEqualTo("요청에 잘못된 형식의 값이 있습니다.");
     }
 
-    @DisplayName("내 예약 조회 요청 시 본인의 예약만 응답한다.")
+    @DisplayName("사용자 예약 컨트롤러는 내 예약 조회 요청 시 본인의 예약만 응답한다.")
     @Test
     void readMemberReservations() {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
-                .when().get("/reservations/mine")
+                .when().get("/reservations/my")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
+    }
+
+    @DisplayName("사용자 예약 컨트롤러는 예약 대기 삭제 요청시 204를 응답한다.")
+    @Test
+    void deleteMemberReservation() {
+        // given
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", LocalDate.MAX);
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.WAITING);
+
+        Long id = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .body(reservation)
+                .when().post("/reservations")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getLong("id");
+
+        // when & then
+        RestAssured.given()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().delete("/reservations/" + id)
+                .then()
+                .statusCode(204);
+    }
+
+    @DisplayName("사용자 예약 컨트롤러는 본인것이 아닌 예약 대기 삭제 요청시 403을 응답한다.")
+    @Test
+    void deleteMemberReservationNotOwner() {
+        // given
+        long id = 2L;
+
+        // when
+        String detailMessage = RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().delete("/reservations/" + id)
+                .then()
+                .statusCode(403).log().all()
+                .extract()
+                .jsonPath().get("detail");
+
+        // then
+        assertThat(detailMessage).isEqualTo("본인의 예약 대기만 삭제할 수 있습니다.");
     }
 }

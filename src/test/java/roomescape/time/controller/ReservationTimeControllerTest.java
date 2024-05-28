@@ -41,7 +41,7 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(4));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -55,7 +55,7 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(5));
     }
 
     @DisplayName("시간 컨트롤러는 중복된 시간 추가 요청이 들어오면 400을 반환한다.")
@@ -129,7 +129,7 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(4));
     }
 
     @DisplayName("시간 컨트롤러는 특정 날짜와 테마에 대한 시간 조회 요청이 들어오면 저장된 시간을 반환한다.")
@@ -141,7 +141,7 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(4));
     }
 
     @DisplayName("시간 컨트롤러는 시간 삭제 요청이 들어오면 삭제 후 200을 반환한다.")
@@ -152,7 +152,7 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(4));
 
         RestAssured.given().log().all()
                 .when().delete("/times/3")
@@ -164,6 +164,6 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(3));
     }
 }

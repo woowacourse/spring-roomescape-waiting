@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.auth.dto.*;
 import roomescape.exception.BadRequestException;
@@ -24,6 +25,7 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 멤버입니다."));
     }
 
+    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         Member member = findMemberByEmail(request.email());
         member.validatePassword(request.password());
@@ -32,11 +34,13 @@ public class AuthService {
         return new LoginResponse(accessToken);
     }
 
+    @Transactional(readOnly = true)
     public LoginCheckResponse checkLogin(LoginMember loginMember) {
         Member member = findMemberByEmail(loginMember.email());
         return LoginCheckResponse.from(member);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public LoginCheckResponse signup(SignupRequest request) {
         Member member = request.toMember();
 

@@ -1,9 +1,10 @@
-package roomescape.reservation.domain;
+package roomescape.reservation.domain.entity;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.Fixtures;
 import roomescape.exception.BadRequestException;
+import roomescape.reservation.domain.entity.Reservation;
 
 import java.time.LocalDate;
 
@@ -18,7 +19,6 @@ class ReservationTest {
         // given
         Reservation reservation = new Reservation(
                 1L,
-                Fixtures.memberFixture,
                 LocalDate.now().minusDays(6),
                 Fixtures.reservationTimeFixture,
                 Fixtures.themeFixture
