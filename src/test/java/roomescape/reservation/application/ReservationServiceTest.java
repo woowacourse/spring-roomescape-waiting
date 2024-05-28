@@ -166,7 +166,8 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.createReservation(reservation);
 
         assertThatThrownBy(() -> reservationService.createWaitingReservation(reservation))
-                .isInstanceOf(ViolationException.class);
+                .isInstanceOf(ViolationException.class)
+                .hasMessageContaining("이미 예약 또는 대기를 신청하셨습니다.");
     }
 
     @Test
@@ -177,6 +178,45 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.createWaitingReservation(reservation);
 
         assertThatThrownBy(() -> reservationService.createWaitingReservation(reservation))
-                .isInstanceOf(ViolationException.class);
+                .isInstanceOf(ViolationException.class)
+                .hasMessageContaining("이미 예약 또는 대기를 신청하셨습니다.");
+    }
+
+    @Test
+    @DisplayName("예약 대기를 요청한 사용자가 예약 대기를 삭제할 수 있다.")
+    void deleteWaitingReservation() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        Reservation createdReservation = reservationService.createWaitingReservation(reservation);
+
+        reservationService.deleteWaitingReservation(createdReservation.getId(), mia);
+        List<Reservation> reservations = reservationService.findAllByMember(mia);
+
+        assertThat(reservations).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("관리자가 특정 사용자의 예약 대기를 삭제할 수 있다.")
+    void deleteWaitingReservationByAdmin() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        Reservation createdReservation = reservationService.createWaitingReservation(reservation);
+
+        reservationService.deleteWaitingReservation(createdReservation.getId(), USER_ADMIN());
+        List<Reservation> reservations = reservationService.findAllByMember(mia);
+
+        assertThat(reservations).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제 시 예약 요청한 사용자가 아니라면 예외가 발생한다.")
+    void invalidDeleteWaitingReservation() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        Reservation createdReservation = reservationService.createWaitingReservation(reservation);
+
+        assertThatThrownBy(() -> reservationService.deleteWaitingReservation(createdReservation.getId(), tommy))
+                .isInstanceOf(ViolationException.class)
+                .hasMessageContaining("예약 대기 삭제는 예약을 한 사용자 또는 관리자만 가능합니다.");
     }
 }

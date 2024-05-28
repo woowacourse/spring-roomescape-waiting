@@ -62,6 +62,10 @@ public class Reservation {
         return status.isBooking();
     }
 
+    public boolean isMemberMatch(Member member) {
+        return this.member.equals(member);
+    }
+
     public String getMemberName() {
         return member.getName();
     }

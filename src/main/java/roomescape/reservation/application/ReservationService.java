@@ -91,8 +91,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteWaitingReservation(final Long id) {
+    public void deleteWaitingReservation(Long id, Member loginMember) {
         Reservation reservation = findReservation(id);
+        validateDeletePermission(reservation, loginMember);
         reservationRepository.deleteById(id);
 
         waitingRepository.deleteByMemberAndDateAndTimeAndTheme(
@@ -102,5 +103,11 @@ public class ReservationService {
     private Reservation findReservation(final Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 ID의 예약이 없습니다."));
+    }
+
+    private void validateDeletePermission(Reservation reservation, Member loginMember) {
+        if (!loginMember.isAdmin() && !reservation.isMemberMatch(loginMember)) {
+            throw new ViolationException("예약 대기 삭제는 예약을 한 사용자 또는 관리자만 가능합니다.");
+        }
     }
 }
