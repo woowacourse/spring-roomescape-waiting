@@ -25,10 +25,11 @@ import roomescape.service.dto.response.ThemeResponse;
 @RequestMapping("/themes")
 public class ThemeController {
 
-    public static final int POPULAR_THEME_END_DATE_OFFSET = 1;
+    private static final int POPULAR_THEME_END_DATE_OFFSET = 1;
     private static final String POPULAR_THEME_LIMIT = "10";
     private static final int POPULAR_THEME_MIN_LIMIT = 1;
     private static final int POPULAR_THEME_DAYS_AGO = 6;
+
     private final ThemeService themeService;
     private final Clock clock;
 
