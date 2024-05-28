@@ -7,10 +7,11 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.Role;
 
+@Sql("/member-test-data.sql")
 @DataJpaTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class MemberRepositoryTest {
@@ -21,12 +22,12 @@ class MemberRepositoryTest {
     @Test
     void 등록된_이메일로_멤버_조회() {
         //given
-        Member sevedMember = memberRepository.save(new Member("ted", "ted@email.com", "123456", Role.USER));
+        Email email = new Email("test@email.com");
 
         //when
-        Member findMember = memberRepository.findByEmail(new Email(sevedMember.getEmail())).orElseThrow();
+        Member member = memberRepository.findByEmail(email).orElseThrow();
 
         //then
-        assertThat(findMember.getEmail()).isEqualTo(sevedMember.getEmail());
+        assertThat(member.getEmail()).isEqualTo(email.getEmail());
     }
 }

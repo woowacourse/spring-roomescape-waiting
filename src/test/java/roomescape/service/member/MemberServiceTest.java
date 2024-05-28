@@ -1,5 +1,6 @@
-package roomescape.service;
+package roomescape.service.member;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.member.MemberResponse;
 
 @Sql("/member-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class MemberServiceTest {
 
@@ -21,9 +22,18 @@ class MemberServiceTest {
     MemberService memberService;
 
     @Test
+    void 모든_멤버_조회() {
+        //when
+        List<MemberResponse> allMembers = memberService.findAllMembers();
+
+        //then
+        assertThat(allMembers).hasSize(2);
+    }
+
+    @Test
     void 존재하지_않는_id로_조회할_경우_예외_발생() {
         //given, when, then
-        List<MemberResponse> allMembers = memberService.getAllMembers();
+        List<MemberResponse> allMembers = memberService.findAllMembers();
         Long notExistId = allMembers.size() + 1L;
 
         //when, then

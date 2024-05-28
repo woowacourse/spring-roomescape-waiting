@@ -2,11 +2,12 @@ package roomescape.api;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -70,7 +71,7 @@ class ReservationTimeApiTest {
 
     @Sql("/all-test-data.sql")
     @Test
-    void 예약_가능한_시간_조회() {
+    void 예약_가능_여부가_포함된_시간_조회() {
         String targetDay = LocalDate.now().plusDays(2).toString();
 
         RestAssured.given().log().all()
@@ -78,7 +79,7 @@ class ReservationTimeApiTest {
                 .when().get("/times/available?date=" + targetDay + "&themeId=1")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("alreadyBooked", notNullValue());
     }
 
     @Test

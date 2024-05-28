@@ -1,17 +1,15 @@
-package roomescape.service;
+package roomescape.service.booking.reservation.module;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
-import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
-import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.reservation.UserReservationResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -19,18 +17,18 @@ import roomescape.repository.ThemeRepository;
 import roomescape.util.DateUtil;
 
 @Service
-public class ReservationService {
+@Transactional
+public class ReservationRegisterService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository timeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository
+    public ReservationRegisterService(ReservationRepository reservationRepository,
+                                      ReservationTimeRepository timeRepository,
+                                      ThemeRepository themeRepository,
+                                      MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
@@ -38,60 +36,17 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Long addReservation(ReservationRequest request) {
+    public Long registerReservation(ReservationRequest request) {
         Reservation reservation = convertReservation(request);
-        validateAddable(reservation);
+        validateReservationAvailability(reservation);
         return reservationRepository.save(reservation).getId();
-    }
-
-    public List<ReservationResponse> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public ReservationResponse getReservation(Long id) {
-        Reservation reservation = findReservationById(id);
-        return ReservationResponse.from(reservation);
-    }
-
-    public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
-        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
-        return reservations.stream().map(UserReservationResponse::from)
-                .toList();
-    }
-
-    public List<ReservationResponse> getReservationsByFilter(ReservationFilter filter) {
-        List<Reservation> reservations = reservationRepository.findByMemberOrThemeOrDateRange(
-                filter.getMemberId(),
-                filter.getThemeId(),
-                filter.getStartDate(),
-                filter.getEndDate()
-        );
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public void deleteReservation(Long id) {
-        Reservation reservation = findReservationById(id);
-        reservationRepository.deleteById(reservation.getId());
     }
 
     private Reservation convertReservation(ReservationRequest request) {
         ReservationTime reservationTime = findReservationTime(request.timeId());
         Theme theme = findTheme(request.themeId());
         Member member = findMember(request.memberId());
-        return request.toEntity(reservationTime, theme, member);
-    }
-
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 예약 정보 입니다.",
-                        new Throwable("reservation_id : " + id)
-                ));
+        return request.toEntity(reservationTime, theme, member, Status.RESERVED);
     }
 
     private ReservationTime findReservationTime(Long timeId) {
@@ -118,9 +73,18 @@ public class ReservationService {
                 ));
     }
 
-    private void validateAddable(Reservation reservation) {
-        validateReservationNotDuplicate(reservation);
+    private void validateReservationAvailability(Reservation reservation) {
         validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
+        validateReservationNotDuplicate(reservation);
+    }
+
+    private void validateUnPassedDate(LocalDate date, LocalTime time) {
+        if (DateUtil.isPastDateTime(date, time)) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
+                    new Throwable("생성 예약 시간 : " + date + " " + time)
+            );
+        }
     }
 
     private void validateReservationNotDuplicate(Reservation reservation) {
@@ -132,15 +96,6 @@ public class ReservationService {
             throw new IllegalArgumentException(
                     "[ERROR] 해당 시간에 동일한 테마가 예약되어있어 예약이 불가능합니다.",
                     new Throwable("생성 예약 정보 : " + reservation)
-            );
-        }
-    }
-
-    private void validateUnPassedDate(LocalDate date, LocalTime time) {
-        if (DateUtil.isPastDateTime(date, time)) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
-                    new Throwable("생성 예약 시간 : " + date + " " + time)
             );
         }
     }
