@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
-import roomescape.domain.Theme;
+import roomescape.entity.Member;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -81,9 +81,7 @@ class ReservationTimeServiceTest {
 
         reservationRepository.save(new Reservation(
                 new Member(1L, "asd", "asd@email.com", "password", Role.USER),
-                searchDate,
-                reservedTime,
-                savedTheme
+                searchDate, reservedTime, savedTheme
         ));
 
         List<AvailableTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(

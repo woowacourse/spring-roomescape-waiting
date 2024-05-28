@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import roomescape.domain.ThemeName;
 
 @Entity
 public class Theme {
@@ -19,8 +20,10 @@ public class Theme {
     @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private ThemeName name;
 
+    @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
     private String thumbnail;
 
     protected Theme() {

@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -9,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import roomescape.domain.MemberName;
+import roomescape.domain.Role;
 
 @Entity
 public class Member {
@@ -21,11 +23,14 @@ public class Member {
     @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private MemberName name;
 
+    @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     protected Member() {

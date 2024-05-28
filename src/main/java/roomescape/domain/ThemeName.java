@@ -22,7 +22,7 @@ public class ThemeName {
     }
 
     private void validateLength(String name) {
-        if (name.isEmpty() || name.length() > MAX_NAME_LENGTH) {
+        if (name.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException(String.format("테마 이름은 %s 이하로 입력해야 합니다.", MAX_NAME_LENGTH));
         }
     }

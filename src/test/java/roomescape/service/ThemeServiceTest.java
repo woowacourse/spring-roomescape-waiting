@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Theme;
+import roomescape.entity.Theme;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;

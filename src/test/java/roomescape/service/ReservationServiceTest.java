@@ -14,20 +14,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
-import roomescape.domain.Theme;
+import roomescape.entity.Member;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
+import roomescape.entity.Waiting;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.response.MemberResponse;
-import roomescape.service.dto.response.MyReservationResponse;
+import roomescape.service.dto.response.MyReservationEntryResponse;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.service.dto.response.ThemeResponse;
@@ -41,6 +43,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -98,7 +103,8 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 new ReservationTime(LocalTime.of(10, 0)));
 
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(1999, 12, 12), reservationTime.getId(),
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(1999, 12, 12),
+                reservationTime.getId(),
                 theme.getId(), 1L);
 
         assertThatThrownBy(
@@ -111,8 +117,8 @@ class ReservationServiceTest {
     @Test
     void findAllReservations() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
+                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
+                new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
 
         reservationRepository.saveAll(reservations);
 
@@ -124,17 +130,40 @@ class ReservationServiceTest {
     @DisplayName("예약 삭제 테스트")
     @Test
     void deleteReservation() {
-        List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
+
+        reservationService.deleteReservation(reservation.getId());
+
+        List<Reservation> findReservations = reservationRepository.findAll();
+        assertThat(findReservations).isEmpty();
+    }
+
+    @DisplayName("예약이 삭제되면 첫번째 예약 대기는 예약으로 전환된다.")
+    @Test
+    void convertFirstWaitingToReservation() {
+        Member otherMember = memberRepository.save(new Member("deock", "deock@email.com", "deock", Role.USER));
+
+        Reservation reservation1 = new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme);
+        Reservation reservation2 = new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme);
+        List<Reservation> reservations = List.of(reservation1, reservation2);
+
+        List<Waiting> waitings = List.of(
+                new Waiting(otherMember, reservation1),
+                new Waiting(member, reservation2));
 
         reservationRepository.saveAll(reservations);
+        waitingRepository.saveAll(waitings);
 
         reservationService.deleteReservation(1L);
 
-        List<Reservation> findReservations = reservationRepository.findAll();
+        List<Reservation> allReservations = reservationRepository.findAll();
+        List<Waiting> allWaitings = waitingRepository.findAll();
 
-        assertThat(findReservations).hasSize(1);
+        assertAll(
+                () -> assertThat(allReservations.get(0).getMember()).isEqualTo(otherMember),
+                () -> assertThat(allWaitings.get(0).getMember()).isNotEqualTo(otherMember)
+        );
     }
 
     @DisplayName("사용자별 모든 예약 조회 테스트")
@@ -150,10 +179,10 @@ class ReservationServiceTest {
         Member member2 = memberRepository.save(
                 new Member("rush", "rush@email.com", "rush", Role.ADMIN));
 
-        reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12),reservationTime1, theme));
-        reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12),reservationTime2, theme));
+        reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12), reservationTime1, theme));
+        reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12), reservationTime2, theme));
 
-        List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.getId());
+        List<MyReservationEntryResponse> reservations = reservationService.findAllByMemberId(member1.getId());
 
         assertThat(reservations).hasSize(1);
     }

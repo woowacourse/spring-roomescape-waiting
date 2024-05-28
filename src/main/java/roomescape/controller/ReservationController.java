@@ -18,7 +18,7 @@ import roomescape.service.ReservationService;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.UserReservationRequest;
-import roomescape.service.dto.response.MyReservationResponse;
+import roomescape.service.dto.response.MyReservationEntryResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 
@@ -30,6 +30,23 @@ public class ReservationController {
 
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReservationResponse>> getReservations() {
+        return ResponseEntity.ok(reservationService.findAllReservations());
+    }
+
+    @GetMapping(params = {"themeId", "memberId", "dateFrom", "dateTo"})
+    public ResponseEntity<List<ReservationResponse>> getReservations(
+            @ModelAttribute ReservationConditionRequest request
+    ) {
+        return ResponseEntity.ok(reservationService.findAllReservationsByCondition(request));
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationEntryResponse>> getMyReservations(@MemberId Long id) {
+        return ResponseEntity.ok(reservationService.findAllByMemberId(id));
     }
 
     @PostMapping
@@ -48,25 +65,8 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservationsByCondition() {
-        return ResponseEntity.ok(reservationService.findAllReservations());
-    }
-
-    @GetMapping(params = {"themeId", "memberId", "dateFrom", "dateTo"})
-    public ResponseEntity<List<ReservationResponse>> getReservationsByCondition(
-            @ModelAttribute ReservationConditionRequest request
-    ) {
-        return ResponseEntity.ok(reservationService.findAllReservationsByCondition(request));
-    }
-
-    @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservation(@MemberId Long id) {
-        return ResponseEntity.ok(reservationService.findAllByMemberId(id));
-    }
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteReservations(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent()
                 .build();

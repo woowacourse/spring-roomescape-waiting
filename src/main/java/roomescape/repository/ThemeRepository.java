@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.domain.Theme;
+import roomescape.entity.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query("""
@@ -16,5 +16,4 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             LIMIT :limit
             """)
     List<Theme> findTopReservedThemesByDateRangeAndLimit(LocalDate start, LocalDate end, int limit);
-
 }

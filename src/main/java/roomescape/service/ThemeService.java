@@ -4,12 +4,14 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Theme;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.entity.Theme;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
