@@ -187,7 +187,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 }
 ```
 
-## 예약 취소 API
+## 예약 취소 API - 사용자
 
 ### Request
 
@@ -195,8 +195,18 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### Response
 
+#### 예약 취소 삭제 성공
+
 > HTTP/1.1 204
 
+#### 로그인이 필요할 경우
+
+> HTTP/1.1 401
+
+#### 다른 사람의 예약일 경우
+
+> HTTP/1.1 403
+> message : 삭제 권한이 없습니다.
 
 ## 예약대기 취소 API - 관리자
 
