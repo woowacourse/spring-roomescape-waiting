@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import roomescape.domain.Member;
 
 @Component
 public class JwtProvider {
@@ -23,23 +22,24 @@ public class JwtProvider {
 
     protected JwtProvider() {}
 
-    public String createToken(Member member) {
+    public String createToken(long memberId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
-                .subject(member.getId().toString())
+                .subject(String.valueOf(memberId))
                 .expiration(expiration)
                 .signWith(secretKey())
                 .compact();
     }
 
-    public String getSubject(String token) {
-        return Jwts.parser()
+    public long getMemberIdFrom(String token) {
+        return Long.parseLong(Jwts.parser()
                 .verifyWith(secretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .getSubject();
+                .getSubject()
+        );
     }
 
     private SecretKey secretKey() {

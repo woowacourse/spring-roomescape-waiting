@@ -10,23 +10,32 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final CheckRoleInterceptor checkRoleInterceptor;
-    private final LoginMemberArgumentResolver loginMemberArgumentResolver;
+    private final LoginCheckInterceptor loginCheckInterceptor;
+    private final AdminCheckInterceptor adminCheckInterceptor;
+    private final LoginArgumentResolver loginArgumentResolver;
 
-    public WebConfig(CheckRoleInterceptor checkRoleInterceptor,
-                     LoginMemberArgumentResolver loginMemberArgumentResolver) {
-        this.checkRoleInterceptor = checkRoleInterceptor;
-        this.loginMemberArgumentResolver = loginMemberArgumentResolver;
+    public WebConfig(
+            LoginCheckInterceptor loginCheckInterceptor,
+            AdminCheckInterceptor adminCheckInterceptor,
+            LoginArgumentResolver loginArgumentResolver
+    ) {
+        this.loginCheckInterceptor = loginCheckInterceptor;
+        this.adminCheckInterceptor = adminCheckInterceptor;
+        this.loginArgumentResolver = loginArgumentResolver;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(loginMemberArgumentResolver);
+        resolvers.add(loginArgumentResolver);
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(checkRoleInterceptor)
-                .addPathPatterns("/admin/**");
+        registry.addInterceptor(loginCheckInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/", "/login", "/themes", "/themes/**", "/times/available")
+                .excludePathPatterns("/**/*.html", "/**/*.css", "/**/*.js");
+        registry.addInterceptor(adminCheckInterceptor)
+                .addPathPatterns("/admin", "/admin/**");
     }
 }

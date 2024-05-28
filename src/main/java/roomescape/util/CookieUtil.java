@@ -2,12 +2,10 @@ package roomescape.util;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import jakarta.servlet.http.Cookie;
 
-import roomescape.exception.BaseException;
+import roomescape.exception.TokenValidationFailureException;
 
 public class CookieUtil {
 
@@ -22,11 +20,15 @@ public class CookieUtil {
         return cookie;
     }
 
-    public static Optional<String> extractToken(Cookie[] cookies) {
+    public static String extractToken(Cookie[] cookies) {
+        if (cookies == null) {
+            throw new TokenValidationFailureException();
+        }
         return Arrays.stream(cookies)
                 .filter(cookie -> Objects.equals(TOKEN_NAME, cookie.getName()))
                 .map(Cookie::getValue)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(TokenValidationFailureException::new);
     }
 
     public static Cookie expired() {
@@ -35,12 +37,5 @@ public class CookieUtil {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         return cookie;
-    }
-
-    public static <X extends BaseException> Cookie[] requireNonnull(Cookie[] cookies, Supplier<X> exception) {
-        if (cookies != null) {
-            return cookies;
-        }
-        throw exception.get();
     }
 }
