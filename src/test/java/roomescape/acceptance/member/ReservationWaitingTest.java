@@ -47,7 +47,7 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
 
         // 조회
         TypeRef<List<MemberReservationResponse>> reservationResponse = new TypeRef<>() {};
-        List<MemberReservationResponse> responses = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .cookie("token", Fixture.customerToken)
                 .contentType(ContentType.JSON)
                 .when().get("/reservations/my")

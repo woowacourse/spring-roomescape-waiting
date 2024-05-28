@@ -16,7 +16,6 @@ import roomescape.config.Authorization;
 import roomescape.dto.MemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/reservations")
@@ -24,11 +23,9 @@ import roomescape.service.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final MemberService memberService;
 
-    public ReservationController(ReservationService reservationService, MemberService memberService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.memberService = memberService;
     }
 
     @GetMapping("/my")
