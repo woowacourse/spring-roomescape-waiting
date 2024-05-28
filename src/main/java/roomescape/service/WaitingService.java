@@ -98,10 +98,23 @@ public class WaitingService {
     }
 
     public void rejectReservationWaiting(final Long id) {
-        final boolean isExist = reservationRepository.existsById(id);
-        if (!isExist) {
+        validateExistsWaiting(id);
+        validateIsReservation(id);
+        reservationRepository.deleteById(id);
+    }
+
+    private void validateExistsWaiting(final Long id) {
+        final boolean exists = reservationRepository.existsById(id);
+        if (!exists) {
             throw new IllegalArgumentException("해당 ID의 예약 대기가 없습니다.");
         }
-        reservationRepository.deleteById(id);
+    }
+
+    private void validateIsReservation(final Long id) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 예약 대기가 없습니다."));
+        if (reservation.isReserved()) {
+            throw new IllegalArgumentException("확정된 예약 건은 거절할 수 없습니다.");
+        }
     }
 }

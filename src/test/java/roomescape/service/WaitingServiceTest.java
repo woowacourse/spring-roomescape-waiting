@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static roomescape.TestFixture.*;
 
@@ -207,10 +208,10 @@ class WaitingServiceTest {
     @DisplayName("예약 대기를 거절한다.")
     void rejectReservationWaiting() {
         // given
-        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation waiting = new Reservation(1L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
-        given(reservationRepository.existsById(waiting.getId()))
-                .willReturn(true);
+        given(reservationRepository.existsById(waiting.getId())).willReturn(true);
+        given(reservationRepository.findById(anyLong())).willReturn(Optional.of(waiting));
 
         // when & then
         assertThatCode(() -> waitingService.rejectReservationWaiting(waiting.getId()))
@@ -227,6 +228,21 @@ class WaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> waitingService.rejectReservationWaiting(notExistingId))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("예약 확정 건을 거절하려는 경우 예외가 발생한다.")
+    void throwExceptionWhenRejectReservation() {
+        // given
+        final Long waitingId = 1L;
+        final Reservation reservation = new Reservation(waitingId, TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        given(reservationRepository.existsById(waitingId)).willReturn(true);
+        given(reservationRepository.findById(anyLong())).willReturn(Optional.of(reservation));
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.rejectReservationWaiting(waitingId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
