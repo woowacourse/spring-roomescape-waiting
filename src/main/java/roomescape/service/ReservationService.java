@@ -4,20 +4,25 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.dto.MemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.dto.ReservationWaitingResponse;
 import roomescape.exception.OperationNotAllowedException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
@@ -25,17 +30,20 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
+            ReservationWaitingRepository reservationWaitingRepository,
             ThemeRepository themeRepository,
             MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
@@ -72,6 +80,24 @@ public class ReservationService {
 
     public void deleteById(Long id) {
         reservationRepository.delete(getReservationById(id));
+    }
+
+    public List<MemberReservationResponse> findReservationsByMemberId(long memberId) {
+        Member member = getMemberById(memberId);
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+        return reservations.stream()
+                .map(reservation -> MemberReservationResponse.of(reservation, getReservationWaiting(member, reservation)))
+                .toList();
+    }
+
+    private ReservationWaitingResponse getReservationWaiting(Member member, Reservation reservation) {
+        Optional<ReservationWaiting> waiting = reservationWaitingRepository.findByMemberAndReservation(member, reservation);
+        if (waiting.isEmpty()) {
+            return null;
+        }
+        List<ReservationWaiting> reservations = reservationWaitingRepository.findAllByReservation(reservation);
+        int rank = reservations.indexOf(waiting.get()) + 1;
+        return ReservationWaitingResponse.of(waiting.get(), rank);
     }
 
     public boolean checkReservationExists(LocalDate date, Long timeId, Long themeId) {

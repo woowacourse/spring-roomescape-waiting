@@ -56,4 +56,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             Long reservationTimeId,
             Long themeId
     );
+
+    List<Reservation> findAllByMemberId(long memberId);
 }

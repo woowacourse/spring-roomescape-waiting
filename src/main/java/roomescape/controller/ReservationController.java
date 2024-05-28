@@ -33,7 +33,7 @@ public class ReservationController {
 
     @GetMapping("/my")
     public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@Authorization long memberId) {
-        List<MemberReservationResponse> response = memberService.findReservationsByMemberId(memberId);
+        List<MemberReservationResponse> response = reservationService.findReservationsByMemberId(memberId);
         return ResponseEntity.ok(response);
     }
 
