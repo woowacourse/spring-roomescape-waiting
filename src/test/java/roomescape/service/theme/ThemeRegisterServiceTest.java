@@ -17,7 +17,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.theme.module.ThemeRegisterService;
 
 @Sql("/all-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ThemeRegisterServiceTest {
 

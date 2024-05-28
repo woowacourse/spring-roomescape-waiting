@@ -15,7 +15,7 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.repository.WaitingRepository;
 
 @Sql("/waiting-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class WaitingCancelServiceTest {
 

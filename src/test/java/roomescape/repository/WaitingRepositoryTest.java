@@ -20,7 +20,7 @@ class WaitingRepositoryTest {
 
     @Test
     void 예약_id로_대기_조회() {
-        //given, when
+        //when
         Waiting waiting = waitingRepository.findByReservationId(2L).orElseThrow();
 
         //then

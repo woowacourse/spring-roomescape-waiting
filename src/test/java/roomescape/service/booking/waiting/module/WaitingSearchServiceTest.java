@@ -13,7 +13,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.waiting.WaitingResponse;
 
 @Sql("/waiting-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class WaitingSearchServiceTest {
 

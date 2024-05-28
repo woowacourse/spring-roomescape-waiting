@@ -14,7 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.member.MemberResponse;
 
 @Sql("/member-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class MemberServiceTest {
 

@@ -20,7 +20,7 @@ import roomescape.repository.WaitingRepository;
 import roomescape.service.booking.reservation.module.ReservationCancelService;
 
 @Sql("/all-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ReservationCancelServiceTest {
 

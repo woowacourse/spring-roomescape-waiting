@@ -18,7 +18,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.booking.time.module.TimeRegisterService;
 
 @Sql("/all-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class TimeRegisterServiceTest {
 

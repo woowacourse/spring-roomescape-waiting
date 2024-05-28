@@ -16,7 +16,7 @@ import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.theme.module.ThemeSearchService;
 
 @Sql("/popular-theme-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ThemeSearchServiceTest {
 
