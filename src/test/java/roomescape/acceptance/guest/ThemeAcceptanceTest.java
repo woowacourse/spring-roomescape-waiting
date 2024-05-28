@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.dto.ThemeResponse;
 
 class ThemeAcceptanceTest extends BaseAcceptanceTest {
 

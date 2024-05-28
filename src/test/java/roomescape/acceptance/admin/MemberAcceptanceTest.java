@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.MemberPreviewResponse;
+import roomescape.dto.MemberPreviewResponse;
 
 class MemberAcceptanceTest extends BaseAcceptanceTest {
 

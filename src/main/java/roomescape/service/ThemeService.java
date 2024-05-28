@@ -6,13 +6,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ThemeResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.dto.ThemeRequest;
+import roomescape.dto.ThemeResponse;
+import roomescape.exception.OperationNotAllowedException;
+import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeService {

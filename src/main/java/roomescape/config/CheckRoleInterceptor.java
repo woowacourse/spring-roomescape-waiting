@@ -8,9 +8,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import roomescape.config.exception.ForbiddenAccessException;
-import roomescape.config.exception.TokenValidationFailureException;
 import roomescape.domain.Member;
+import roomescape.exception.ForbiddenAccessException;
+import roomescape.exception.TokenValidationFailureException;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 import roomescape.util.JwtProvider;

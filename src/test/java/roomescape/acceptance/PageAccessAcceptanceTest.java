@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
-import roomescape.controller.exception.CustomExceptionResponse;
+import roomescape.exception.CustomExceptionResponse;
 
 class PageAccessAcceptanceTest extends BaseAcceptanceTest {
 

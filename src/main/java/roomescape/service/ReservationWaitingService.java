@@ -6,14 +6,14 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.ReservationWaitingRepository;
-import roomescape.dto.request.ReservationWaitingRequest;
-import roomescape.dto.response.ReservationWaitingResponse;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.dto.ReservationWaitingRequest;
+import roomescape.dto.ReservationWaitingResponse;
+import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationWaitingRepository;
 
 @Service
 public class ReservationWaitingService {

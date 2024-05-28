@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.ReservationResponse;
 
 @DisplayName("관리자가 예약을 필터링해서 조회한다.")
 class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {

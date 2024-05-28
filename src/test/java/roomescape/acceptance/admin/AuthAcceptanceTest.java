@@ -18,8 +18,8 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.request.LoginRequest;
-import roomescape.dto.response.MemberPreviewResponse;
+import roomescape.dto.LoginRequest;
+import roomescape.dto.MemberPreviewResponse;
 import roomescape.util.JwtProvider;
 
 class AuthAcceptanceTest extends BaseAcceptanceTest {

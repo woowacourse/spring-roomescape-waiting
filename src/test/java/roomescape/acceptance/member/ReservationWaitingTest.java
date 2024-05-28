@@ -16,9 +16,9 @@ import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.Fixture;
-import roomescape.dto.request.ReservationWaitingRequest;
-import roomescape.dto.response.MemberReservationResponse;
-import roomescape.dto.response.ReservationWaitingResponse;
+import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.ReservationWaitingRequest;
+import roomescape.dto.ReservationWaitingResponse;
 import roomescape.util.JwtProvider;
 
 public class ReservationWaitingTest extends BaseAcceptanceTest {

@@ -3,7 +3,8 @@ package roomescape.dto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dto.exception.InputNotAllowedException;
+
+import roomescape.exception.InputNotAllowedException;
 
 class InputValidatorTest {
 

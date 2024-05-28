@@ -13,8 +13,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import roomescape.config.exception.TokenValidationFailureException;
 import roomescape.domain.Member;
+import roomescape.exception.TokenValidationFailureException;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 import roomescape.util.JwtProvider;

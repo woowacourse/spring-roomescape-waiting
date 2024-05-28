@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.AvailableReservationTimeResponse;
+import roomescape.dto.AvailableReservationTimeResponse;
 
 class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 

@@ -17,7 +17,7 @@ import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.MemberReservationResponse;
+import roomescape.dto.MemberReservationResponse;
 
 public class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
 

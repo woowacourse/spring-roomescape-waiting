@@ -8,19 +8,19 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.request.MemberReservationRequest;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.ReservationResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.MemberReservationRequest;
+import roomescape.dto.ReservationRequest;
+import roomescape.dto.ReservationResponse;
+import roomescape.exception.OperationNotAllowedException;
+import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ReservationService {

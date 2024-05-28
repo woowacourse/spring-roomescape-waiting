@@ -27,9 +27,9 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
-import roomescape.controller.exception.CustomExceptionResponse;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.ReservationResponse;
+import roomescape.exception.CustomExceptionResponse;
 
 class ReservationAcceptanceTest extends BaseAcceptanceTest {
 

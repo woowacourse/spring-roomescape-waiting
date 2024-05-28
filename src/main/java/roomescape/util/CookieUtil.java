@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 import jakarta.servlet.http.Cookie;
 
-import roomescape.controller.exception.BaseException;
+import roomescape.exception.BaseException;
 
 public class CookieUtil {
 
