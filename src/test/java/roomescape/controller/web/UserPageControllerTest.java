@@ -5,20 +5,29 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Sql(value = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(value = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class UserPageControllerTest {
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     private String userToken;
 
     @BeforeEach
-    void login() {
+    void setUpToken() {
+        memberRepository.save(new Member("관리자", "admin@a.com", "123a!", Role.ADMIN));
+        memberRepository.save(new Member("사용자", "user@a.com", "123a!", Role.USER));
+
         LoginRequest user = new LoginRequest("user@a.com", "123a!");
 
         userToken = RestAssured.given()

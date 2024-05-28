@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public record CreateUserReservationRequest(
+public record CreateUserReservationStandbyRequest(
     @NotNull(message = "null일 수 없습니다.")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @FutureOrPresent(message = "과거 날짜로는 예약할 수 없습니다.")

@@ -15,13 +15,16 @@ VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN'),
        ('수달', 'a@a.com', '123a!', 'ADMIN'),
        ('트레', 'b@b.com', '123b!', 'USER'),
        ('테니', 'c@c.com', '123c!', 'ADMIN'),
-       ('우주', 'space@woowahan.com', '123', 'USER'),
-       ('에버', 'ever@woowahan.com', '123', 'ADMIN'),
-       ('도도', 'dodo@woowahan.com', '123', 'USER'),
-       ('제리', 'jerry@woowahan.com', '123', 'ADMIN');
+       ('우주', 'space@woowahan.com', '123a!', 'USER'),
+       ('에버', 'ever@woowahan.com', '123a!', 'ADMIN'),
+       ('도도', 'dodo@woowahan.com', '123a!', 'USER'),
+       ('제리', 'jerry@woowahan.com', '123a!', 'ADMIN');
 
-INSERT INTO reservation(member_id, date, time_id, theme_id, status)
-VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 'RESERVED'),
-       (2, TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 1, 'RESERVED'),
-       (3, TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 1, 'RESERVED'),
-       (4, TIMESTAMPADD(DAY, -4, CURRENT_DATE), 1, 3, 'RESERVED');
+INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
+VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (2, TIMESTAMPADD(DAY, -2, CURRENT_DATE), TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (3, TIMESTAMPADD(DAY, -3, CURRENT_DATE), TIMESTAMPADD(DAY, -4, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (4, TIMESTAMPADD(DAY, -4, CURRENT_DATE), TIMESTAMPADD(DAY, -5, CURRENT_DATE), 1, 3, 'RESERVED'),
+       (5, TIMESTAMPADD(DAY, 2, CURRENT_DATE), TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 3, 'RESERVED'),
+       (6, TIMESTAMPADD(DAY, 2, CURRENT_DATE), TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 3, 'STANDBY'),
+       (7, TIMESTAMPADD(DAY, 2, CURRENT_DATE), TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 3, 'STANDBY');

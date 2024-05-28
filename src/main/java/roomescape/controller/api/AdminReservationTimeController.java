@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.CreateTimeRequest;
 import roomescape.controller.dto.CreateTimeResponse;
 import roomescape.controller.dto.FindTimeResponse;
-import roomescape.domain.reservation.ReservationTime;
 import roomescape.service.ReservationTimeService;
 
 @RestController
@@ -29,27 +28,20 @@ public class AdminReservationTimeController {
 
     @PostMapping
     public ResponseEntity<CreateTimeResponse> save(@Valid @RequestBody CreateTimeRequest request) {
-        ReservationTime newReservationTime = reservationTimeService.save(request.startAt());
-        Long id = newReservationTime.getId();
-
-        return ResponseEntity.created(URI.create("/times/" + id))
-            .body(new CreateTimeResponse(id, newReservationTime.getStartAt()));
+        CreateTimeResponse response = reservationTimeService.save(request.startAt());
+        return ResponseEntity.created(URI.create("/times/" + response.id()))
+            .body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationTimeService.delete(id);
-
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<FindTimeResponse>> findAll() {
-        List<FindTimeResponse> response = reservationTimeService.findAll()
-            .stream()
-            .map(FindTimeResponse::from)
-            .toList();
-
+        List<FindTimeResponse> response = reservationTimeService.findAll();
         return ResponseEntity.ok(response);
     }
 }

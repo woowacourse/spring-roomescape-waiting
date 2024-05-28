@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.FindMemberNameResponse;
+import roomescape.controller.dto.FindMemberResponse;
 import roomescape.service.MemberService;
 
 @RestController
@@ -19,11 +19,8 @@ public class MemberController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FindMemberNameResponse>> findAll() {
-        List<FindMemberNameResponse> response = memberService.findAll()
-            .stream()
-            .map(FindMemberNameResponse::from)
-            .toList();
+    public ResponseEntity<List<FindMemberResponse>> findAll() {
+        List<FindMemberResponse> response = memberService.findAll();
         return ResponseEntity.ok(response);
     }
 }

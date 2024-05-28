@@ -6,25 +6,46 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateThemeRequest;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
+import roomescape.service.AdminReservationService;
+import roomescape.service.ReservationTimeService;
+import roomescape.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminThemeControllerTest {
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeService themeService;
+
+    @Autowired
+    private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private AdminReservationService adminReservationService;
 
     private String adminToken;
 
     @BeforeEach
-    void login() {
+    void setUpToken() {
+        memberRepository.save(new Member("관리자", "admin@a.com", "123a!", Role.ADMIN));
+
         LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
 
         adminToken = RestAssured.given()
@@ -37,7 +58,7 @@ class AdminThemeControllerTest {
     @DisplayName("성공: 테마 생성 -> 201")
     @Test
     void save() {
-        CreateThemeRequest request = new CreateThemeRequest("theme4", "desc4", "https://url4");
+        CreateThemeRequest request = new CreateThemeRequest("t1", "d1", "https://test.com/test.jpg");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -46,15 +67,19 @@ class AdminThemeControllerTest {
             .when().post("/admin/themes")
             .then().log().all()
             .statusCode(201)
-            .body("id", is(4))
-            .body("name", is("theme4"))
-            .body("description", is("desc4"))
-            .body("thumbnail", is("https://url4"));
+            .body("id", is(1))
+            .body("name", is("t1"))
+            .body("description", is("d1"))
+            .body("thumbnail", is("https://test.com/test.jpg"));
     }
 
     @DisplayName("성공: 테마 삭제 -> 204")
     @Test
     void delete() {
+        themeService.save("t1", "d1", "https://test.com/test1.jpg");
+        themeService.save("t2", "d2", "https://test.com/test2.jpg");
+        themeService.save("t3", "d3", "https://test.com/test3.jpg");
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .when().delete("/admin/themes/2")
@@ -87,7 +112,9 @@ class AdminThemeControllerTest {
     @DisplayName("실패: 중복 테마 추가 -> 400")
     @Test
     void save_Duplicate() {
-        CreateThemeRequest request = new CreateThemeRequest("theme1", "It's so fun", "https://url1");
+        themeService.save("t1", "d1", "https://test.com/test.jpg");
+
+        CreateThemeRequest request = new CreateThemeRequest("t1", "d2", "https://test2.com/test.jpg");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -102,6 +129,10 @@ class AdminThemeControllerTest {
     @DisplayName("실패: 예약에서 사용되는 테마 삭제 -> 400")
     @Test
     void delete_ReservationExists() {
+        reservationTimeService.save("10:00");
+        themeService.save("테마1", "설명1", "https://test.com/test.jpg");
+        adminReservationService.reserve(1L, LocalDate.parse("2060-01-01"), 1L, 1L);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .when().delete("/admin/themes/1")
