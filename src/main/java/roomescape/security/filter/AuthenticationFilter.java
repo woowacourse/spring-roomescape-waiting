@@ -12,6 +12,7 @@ import org.springframework.web.util.WebUtils;
 import roomescape.security.authentication.AnonymousAuthentication;
 import roomescape.security.authentication.Authentication;
 import roomescape.security.authentication.AuthenticationHolder;
+import roomescape.security.exception.UnauthorizedException;
 import roomescape.service.AuthService;
 
 @Component
@@ -32,6 +33,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = createAuthentication(request);
             AuthenticationHolder.setAuthentication(authentication);
             filterChain.doFilter(request, response);
+        } catch (UnauthorizedException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(e.getMessage());
         } finally {
             AuthenticationHolder.clear();
         }
