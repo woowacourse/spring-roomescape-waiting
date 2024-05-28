@@ -30,7 +30,7 @@ function render(data) {
         row.insertCell(0).textContent = item.id;              // 예약 id
         row.insertCell(1).textContent = item.memberResponse.name;     // 사용자 name
         row.insertCell(2).textContent = item.theme.name;      // 테마 name
-        row.insertCell(3).textContent = item.date.date;            // date
+        row.insertCell(3).textContent = item.date;            // date
         row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
 
         const actionCell = row.insertCell(row.cells.length);
@@ -229,7 +229,7 @@ function requestDelete(id) {
         method: 'DELETE',
     };
 
-    return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+    return fetch(`/admin/reservations/${id}`, requestOptions)
         .then(response => {
             if (response.status !== 204) throw new Error('Delete failed');
         });

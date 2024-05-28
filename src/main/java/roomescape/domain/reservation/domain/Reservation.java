@@ -1,14 +1,14 @@
-package roomescape.domain.reservation.domain.reservation;
+package roomescape.domain.reservation.domain;
 
 import jakarta.persistence.*;
 import roomescape.domain.member.domain.Member;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.theme.domain.Theme;
+import roomescape.domain.time.domain.ReservationTime;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
+@Table(name = "reservation")
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +17,10 @@ public class Reservation {
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ReservationStatus status;
 
     @ManyToOne
     @JoinColumn(name = "time_id")
@@ -34,12 +38,17 @@ public class Reservation {
 
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id, LocalDate date, ReservationStatus status, ReservationTime time, Theme theme, Member member) {
         this.id = id;
-        this.member = member;
         this.date = date;
+        this.status = status;
         this.time = time;
         this.theme = theme;
+        this.member = member;
+    }
+
+    public boolean isStatusReservation() {
+        return status.isReservation();
     }
 
     public Long getId() {
@@ -48,6 +57,10 @@ public class Reservation {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public ReservationTime getTime() {
@@ -63,29 +76,11 @@ public class Reservation {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme)
-                && Objects.equals(member, that.member);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, date, time, theme, member);
-    }
-
-    @Override
     public String toString() {
         return "Reservation{" +
                 "id=" + id +
                 ", date=" + date +
+                ", status=" + status +
                 ", time=" + time +
                 ", theme=" + theme +
                 ", member=" + member +

@@ -1,10 +1,10 @@
-package roomescape.domain.reservation.domain.reservationTime;
+package roomescape.domain.time.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
-import java.util.Objects;
+import java.util.List;
 
 @Entity
 @Table(name = "reservation_time")
@@ -14,7 +14,7 @@ public class ReservationTime {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "startAt", nullable = false)
+    @Column(name = "start_at", nullable = false)
     private LocalTime startAt;
 
     protected ReservationTime() {
@@ -26,6 +26,12 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
+    public boolean isBooked(List<ReservationTime> bookedTimes) {
+        return bookedTimes.stream()
+                .map(ReservationTime::getId)
+                .anyMatch(bookedTimeId -> bookedTimeId.equals(this.id));
+    }
+
     public Long getId() {
         return id;
     }
@@ -33,23 +39,6 @@ public class ReservationTime {
     @JsonFormat(pattern = "HH:mm")
     public LocalTime getStartAt() {
         return startAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ReservationTime that = (ReservationTime) o;
-        return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, startAt);
     }
 
     @Override

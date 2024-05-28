@@ -47,7 +47,7 @@ class ThemeControllerTest extends ControllerTest {
     @Test
     void should_response_theme_ranking() {
         RestAssured.given().log().all()
-                .when().get("/theme-ranking")
+                .when().get("/theme/ranking")
                 .then().log().all()
                 .statusCode(200);
     }

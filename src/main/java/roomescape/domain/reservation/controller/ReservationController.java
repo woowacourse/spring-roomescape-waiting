@@ -4,12 +4,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.domain.login.controller.MemberResolver;
 import roomescape.domain.member.domain.Member;
-import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.domain.Reservation;
 import roomescape.domain.reservation.dto.*;
 import roomescape.domain.reservation.service.ReservationService;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -55,21 +54,28 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
     }
 
-    @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> removeReservation(@PathVariable("id") Long id) {
-        reservationService.removeReservation(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/bookable-times")
-    public ResponseEntity<List<BookableTimeResponse>> getTimesWithStatus(
-            @RequestParam("date") LocalDate date,
-            @RequestParam("themeId") Long themeId) {
-        return ResponseEntity.ok(reservationService.findBookableTimes(new BookableTimesRequest(date, themeId)));
-    }
-
-    @GetMapping("/reservations-mine")
+    @GetMapping("/reservations/all")
     public ResponseEntity<List<ReservationMineResponse>> findSpecificMemberReservation(@MemberResolver Member member) {
         return ResponseEntity.ok(reservationService.findReservationByMemberId(member.getId()));
+    }
+
+    @PostMapping("/reservations/wait")
+    public ResponseEntity<ReservationResponse> addReservationWait(@RequestBody ReservationWaitAddRequest reservationWaitAddRequest,
+                                                                  @MemberResolver Member member) {
+        reservationWaitAddRequest = new ReservationWaitAddRequest(
+                reservationWaitAddRequest.date(),
+                reservationWaitAddRequest.timeId(),
+                reservationWaitAddRequest.themeId(),
+                member.getId()
+        );
+        Reservation reservation = reservationService.addReservationWait(reservationWaitAddRequest);
+        ReservationResponse reservationResponse = ReservationResponse.from(reservation);
+        return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
+    }
+
+    @DeleteMapping("/reservations/wait/{id}")
+    public ResponseEntity<Void> removeReservationWait(@PathVariable("id") Long id) {
+        reservationService.removeReservationWait(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -2,8 +2,6 @@ package roomescape.domain.member.domain;
 
 import jakarta.persistence.*;
 
-import java.util.Objects;
-
 @Entity
 @Table(name = "member")
 public class Member {
@@ -60,19 +58,6 @@ public class Member {
 
     public boolean isAdmin() {
         return role.isAdmin();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Member member = (Member) o;
-        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password) && role == member.role;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, email, password, role);
     }
 
     @Override

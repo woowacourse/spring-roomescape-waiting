@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.repository;
+package roomescape.domain.time.repository;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +11,7 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class AdminReservationTimeRepositoryTest extends RepositoryTest {
+class AdminReservationTimeRepositoryTest extends RepositoryTest {
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;

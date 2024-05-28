@@ -1,7 +1,7 @@
-package roomescape.domain.reservation.repository;
+package roomescape.domain.time.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.time.domain.ReservationTime;
 
 import java.time.LocalTime;
 

@@ -1,11 +1,12 @@
-package roomescape.domain.member.contorller;
+package roomescape.domain.member.controller;
 
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.member.dto.MemberResponse;
 import roomescape.domain.member.service.MemberService;
+
+import java.util.List;
 
 @RestController
 public class MemberController {
