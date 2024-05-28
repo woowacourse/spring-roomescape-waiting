@@ -23,7 +23,7 @@ public class MemberController {
     }
 
     @GetMapping("/members/reservations")
-    public List<MemberReservationResponse> memberReservationList(@LoginMemberId long id) {
+    public List<MemberReservationResponse> memberReservationList(@LoginMemberId Long id) {
         return memberFacadeService.findMemberReservations(id);
     }
 }

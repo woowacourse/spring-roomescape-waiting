@@ -96,7 +96,7 @@ class ReservationServiceTest {
     @DisplayName("최소 예약 취소 날짜를 넘어가는 경우 취소가 불가능하다.")
     void shouldThrowException_whenIsOverMinCancelDate() {
         Throwable overMinCancelDate = assertThrows(RoomEscapeException.class,
-                () -> reservationService.removeReservation(1));
+                () -> reservationService.removeReservation(1L));
 
         assertEquals(overMinCancelDate.getMessage(),
                 ReservationExceptionCode.CAN_NOT_CANCEL_AFTER_MIN_CANCEL_DATE.getMessage());

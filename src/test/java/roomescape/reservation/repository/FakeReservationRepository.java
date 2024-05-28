@@ -28,9 +28,9 @@ public class FakeReservationRepository implements ReservationRepository {
     public FakeReservationRepository() {
         reservations.put(0L, makeReservation(
                 Reservation.of(LocalDate.now().plusDays(1), TIME_MOCK_DATA, THEME_MOCK_DATA, MEMBER_MOCK_DATA,
-                        ReservationStatus.RESERVED), 0));
+                        ReservationStatus.RESERVED), 0L));
 
-        long reservationId = id.incrementAndGet();
+        Long reservationId = id.incrementAndGet();
         reservations.put(reservationId, makeReservation(
                 Reservation.of(LocalDate.now().plusDays(1), TIME_MOCK_DATA, THEME_MOCK_DATA, MEMBER_MOCK_DATA,
                         ReservationStatus.WAITING), reservationId));
@@ -38,7 +38,7 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        long reservationId = id.incrementAndGet();
+        Long reservationId = id.incrementAndGet();
         reservations.put(reservationId, makeReservation(reservation, reservationId));
         return reservation;
     }
@@ -52,7 +52,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByThemeIdAndDate(long themeId, Date date) {
+    public List<Reservation> findAllByThemeIdAndDate(Long themeId, Date date) {
         return reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))
                 .filter(reservation -> isSameDate(date, reservation))
@@ -60,7 +60,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId, Date fromDate,
+    public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, Date fromDate,
                                                                        Date toDate) {
         return reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))
@@ -70,15 +70,15 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByTimeId(long timeId) {
+    public List<Reservation> findByTimeId(Long timeId) {
         return reservations.values().stream()
                 .filter(reservation -> isSameTimeId(timeId, reservation))
                 .toList();
     }
 
     @Override
-    public Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeId(Date date, long memberId, long themeId,
-                                                                          long timeId) {
+    public Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeId(Date date, Long memberId, Long themeId,
+                                                                          Long timeId) {
         return reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))
                 .filter(reservation -> isSameDate(date, reservation))
@@ -88,8 +88,8 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(Date date, long memberId,
-                                                                                              long themeId, long timeId,
+    public Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(Date date, Long memberId,
+                                                                                              Long themeId, Long timeId,
                                                                                               ReservationStatus reservationStatus) {
         return reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))
@@ -101,7 +101,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeId(long themeId) {
+    public List<Reservation> findByThemeId(Long themeId) {
         return reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))
                 .toList();
@@ -125,7 +125,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(long id) {
+    public Optional<Reservation> findById(Long id) {
         return Optional.ofNullable(reservations.get(id));
     }
 
@@ -141,7 +141,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, long waitingId) {
+    public int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, Long waitingId) {
         return (int) reservations.values().stream()
                 .filter(reservation -> isSameThemeId(theme.getId(), reservation))
                 .filter(reservation -> isSameTimeId(time.getId(), reservation))
@@ -151,12 +151,12 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(long reservationId) {
+    public void deleteById(Long reservationId) {
         reservations.remove((reservationId));
     }
 
     @Override
-    public List<Reservation> findAllByMemberIdAndReservationStatus(long id, ReservationStatus reservationStatus) {
+    public List<Reservation> findAllByMemberIdAndReservationStatus(Long id, ReservationStatus reservationStatus) {
         return reservations.values().stream()
                 .filter(reservation -> isSameMember(id, reservation))
                 .filter(reservation -> isSameStatus(reservationStatus, reservation))
@@ -164,7 +164,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int countByThemeIdAndDateAndTimeIdAndReservationStatus(long themeId, Date date, long timeId,
+    public int countByThemeIdAndDateAndTimeIdAndReservationStatus(Long themeId, Date date, Long timeId,
                                                                   ReservationStatus status) {
         return (int) reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))
@@ -174,11 +174,11 @@ public class FakeReservationRepository implements ReservationRepository {
                 .count();
     }
 
-    private boolean isSameMember(long memberId, Reservation reservation) {
+    private boolean isSameMember(Long memberId, Reservation reservation) {
         return reservation.getMember().getId() == memberId;
     }
 
-    private boolean isSameThemeId(long themeId, Reservation reservation) {
+    private boolean isSameThemeId(Long themeId, Reservation reservation) {
         return reservation.getTheme().getId() == themeId;
     }
 
@@ -186,7 +186,7 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservation.getDate().equals(date.getDate());
     }
 
-    private boolean isSameTimeId(long timeId, Reservation reservation) {
+    private boolean isSameTimeId(Long timeId, Reservation reservation) {
         return reservation.getReservationTime().getId() == timeId;
     }
 
@@ -199,7 +199,7 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservationStatus.getStatus().equals(reservation.getReservationStatus());
     }
 
-    private Reservation makeReservation(Reservation reservation, long id) {
+    private Reservation makeReservation(Reservation reservation, Long id) {
         ReflectionTestUtils.setField(reservation, "id", id);
         return reservation;
     }

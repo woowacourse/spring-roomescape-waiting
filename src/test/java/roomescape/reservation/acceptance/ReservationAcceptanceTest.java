@@ -37,17 +37,17 @@ public class ReservationAcceptanceTest {
     @DisplayName("예약이 취소될때 대기가 있는 경우 자동으로 첫번째의 대기자가 예약 상태가 된다.")
     Stream<DynamicTest> changeToReservationStatus_WhenReservationIsDeleted() {
         List<ReservationResponse> reservations = reservationService.findReservations();
-        long reservationId = reservations.size();
+        Long reservationId = (long) reservations.size();
 
         LocalDate date = LocalDate.now().plusDays(3);
 
         return Stream.of(
                 dynamicTest("예약을 진행한다.", () -> {
                     ReservationRequest reservationRequest = new ReservationRequest(
-                            date, 1, 5);
+                            date, 1L, 5L);
 
                     ReservationResponse reservationResponse = reservationService.addReservation(
-                            reservationRequest, 3);
+                            reservationRequest, 3L);
 
                     assertAll(
                             () -> assertEquals(reservationResponse.date(), date),
@@ -57,10 +57,10 @@ public class ReservationAcceptanceTest {
                 }),
                 dynamicTest("대기를 추가한다.", () -> {
                     ReservationRequest reservationRequest = new ReservationRequest(
-                            date, 1, 5);
+                            date, 1L, 5L);
 
                     ReservationResponse reservationResponse = reservationService.addWaitingReservation(
-                            reservationRequest, 7);
+                            reservationRequest, 7L);
 
                     assertAll(
                             () -> assertEquals(reservationResponse.date(), date),

@@ -19,7 +19,7 @@ public class AuthFacadeService {
         this.memberService = memberService;
     }
 
-    public MemberLoginCheckResponse findLoginMemberInfo(long memberId) {
+    public MemberLoginCheckResponse findLoginMemberInfo(Long memberId) {
         Member member = memberService.findMember(memberId);
 
         return new MemberLoginCheckResponse(member.getName());

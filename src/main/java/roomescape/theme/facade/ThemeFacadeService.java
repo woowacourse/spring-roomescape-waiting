@@ -43,7 +43,7 @@ public class ThemeFacadeService {
                 .toList();
     }
 
-    public void removeTheme(long themeId) {
+    public void removeTheme(Long themeId) {
         reservationService.validateBeforeRemoveTheme(themeId);
 
         themeService.removeTheme(themeId);

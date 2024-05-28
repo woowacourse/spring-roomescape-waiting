@@ -36,7 +36,7 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> reservationSave(@RequestBody ReservationRequest reservationRequest,
-                                                               @LoginMemberId long id) {
+                                                               @LoginMemberId Long id) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(reservationService.addReservation(reservationRequest, id));
@@ -54,7 +54,7 @@ public class ReservationController {
     @PostMapping("/reservations/waiting")
     public ResponseEntity<ReservationResponse> reservationWaitingSave(
             @RequestBody ReservationRequest reservationRequest,
-            @LoginMemberId long id) {
+            @LoginMemberId Long id) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(reservationService.addWaitingReservation(reservationRequest, id));
@@ -66,7 +66,7 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations/{themeId}")
-    public List<ReservationTimeAvailabilityResponse> reservationTimeList(@PathVariable long themeId,
+    public List<ReservationTimeAvailabilityResponse> reservationTimeList(@PathVariable Long themeId,
                                                                          @RequestParam LocalDate date) {
         return reservationService.findTimeAvailability(themeId, date);
     }
@@ -86,13 +86,13 @@ public class ReservationController {
 
     @DeleteMapping("/reservations/{reservationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void reservationRemove(@PathVariable long reservationId) {
+    public void reservationRemove(@PathVariable Long reservationId) {
         reservationService.removeReservation(reservationId);
     }
 
     @DeleteMapping("/reservations/waiting/{waitingId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void reservationWaitingRemove(@PathVariable long waitingId) {
+    public void reservationWaitingRemove(@PathVariable Long waitingId) {
         reservationService.removeWaitingReservation(waitingId);
     }
 }

@@ -31,7 +31,7 @@ public class TimeService {
         return timeRepository.findAllByOrderByStartAt();
     }
 
-    public Time findTime(long timeId) {
+    public Time findTime(Long timeId) {
         return timeRepository.findById(timeId)
                 .orElseThrow(TimeNotFoundException::new);
     }
@@ -40,7 +40,7 @@ public class TimeService {
         return timeRepository.findAllByOrderByStartAt();
     }
 
-    public void removeReservationTime(long reservationTimeId) {
+    public void removeReservationTime(Long reservationTimeId) {
         timeRepository.deleteById(reservationTimeId);
     }
 

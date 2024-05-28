@@ -19,7 +19,7 @@ public class Time {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "start_at", nullable = false)
     private LocalTime startAt;
@@ -27,17 +27,17 @@ public class Time {
     protected Time() {
     }
 
-    private Time(long id, LocalTime startAt) {
+    private Time(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
     public static Time from(LocalTime startAt) {
         validation(startAt);
-        return new Time(0, startAt);
+        return new Time(null, startAt);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

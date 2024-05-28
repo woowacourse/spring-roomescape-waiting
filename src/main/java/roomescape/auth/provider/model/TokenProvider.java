@@ -4,7 +4,7 @@ import roomescape.auth.domain.Token;
 
 public interface TokenProvider {
 
-    Token getAccessToken(long principal);
+    Token getAccessToken(Long principal);
 
     String resolveToken(String token);
 }

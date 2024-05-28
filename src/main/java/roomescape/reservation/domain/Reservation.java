@@ -23,7 +23,7 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Embedded
     private Date date;
@@ -46,7 +46,7 @@ public class Reservation {
     protected Reservation() {
     }
 
-    private Reservation(long id, Date date, Time time, Theme theme, Member member,
+    private Reservation(Long id, Date date, Time time, Theme theme, Member member,
                         ReservationStatus reservationStatus) {
         this.id = id;
         this.date = date;
@@ -59,10 +59,10 @@ public class Reservation {
     public static Reservation of(LocalDate date, Time time, Theme theme, Member member,
                                  ReservationStatus reservationStatus) {
         validateAtSaveDateAndTime(date, time);
-        return new Reservation(0, Date.saveFrom(date), time, theme, member, reservationStatus);
+        return new Reservation(null, Date.saveFrom(date), time, theme, member, reservationStatus);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

@@ -22,14 +22,14 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
-    public MemberRole findMemberRole(long id) {
+    public MemberRole findMemberRole(Long id) {
         Member member = memberRepository.findMemberById(id)
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_ROLE_NOT_EXIST_EXCEPTION));
 
         return MemberRole.findMemberRole(member.getRole().name());
     }
 
-    public Member findMember(long memberId) {
+    public Member findMember(Long memberId) {
         return memberRepository.findMemberById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
     }

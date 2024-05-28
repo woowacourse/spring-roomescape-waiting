@@ -2,5 +2,5 @@ package roomescape.time.dto;
 
 import java.time.LocalTime;
 
-public record TimeResponse(long id, LocalTime startAt) {
+public record TimeResponse(Long id, LocalTime startAt) {
 }

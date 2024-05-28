@@ -17,25 +17,25 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findAllByOrderByDateAscTimeAsc();
 
-    List<Reservation> findAllByThemeIdAndDate(long themeId, Date date);
+    List<Reservation> findAllByThemeIdAndDate(Long themeId, Date date);
 
-    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId, Date fromDate,
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, Date fromDate,
                                                                 Date toDate);
 
-    Optional<Reservation> findById(long id);
+    Optional<Reservation> findById(Long id);
 
     Optional<Reservation> findFirstByDateAndThemeAndTimeAndReservationStatus(Date date, Theme theme, Time time,
                                                                              ReservationStatus status);
 
-    List<Reservation> findByTimeId(long timeId);
+    List<Reservation> findByTimeId(Long timeId);
 
-    Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeId(Date date, long memberId, long themeId, long timeId);
+    Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeId(Date date, Long memberId, Long themeId, Long timeId);
 
-    Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(Date date, long memberId,
-                                                                                       long themeId, long timeId,
+    Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(Date date, Long memberId,
+                                                                                       Long themeId, Long timeId,
                                                                                        ReservationStatus reservationStatus);
 
-    List<Reservation> findByThemeId(long themeId);
+    List<Reservation> findByThemeId(Long themeId);
 
     List<Reservation> findByReservationStatus(ReservationStatus reservationStatus);
 
@@ -48,12 +48,12 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
     )
     List<Theme> findAllByDateOrderByThemeIdCountLimit(LocalDate startDate, LocalDate endDate, int limitCount);
 
-    int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, long waitingId);
+    int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, Long waitingId);
 
-    int countByThemeIdAndDateAndTimeIdAndReservationStatus(long themeId, Date date, long timeId,
+    int countByThemeIdAndDateAndTimeIdAndReservationStatus(Long themeId, Date date, Long timeId,
                                                            ReservationStatus status);
 
-    void deleteById(long reservationId);
+    void deleteById(Long reservationId);
 
-    List<Reservation> findAllByMemberIdAndReservationStatus(long id, ReservationStatus reservationStatus);
+    List<Reservation> findAllByMemberIdAndReservationStatus(Long id, ReservationStatus reservationStatus);
 }

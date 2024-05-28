@@ -19,7 +19,7 @@ public class ThemeServiceTest {
     @DisplayName("존재하는 테마가 없을 경우 에러가 발생한다.")
     void notExistThemeReservation() {
         Throwable notExistTheme = assertThrows(ThemeNotFoundException.class,
-                () -> themeService.findTheme(1000));
+                () -> themeService.findTheme(1000L));
         assertEquals(notExistTheme.getMessage(), new ThemeNotFoundException().getMessage());
     }
 }

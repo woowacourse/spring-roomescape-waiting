@@ -43,7 +43,7 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public Reservation addWaitingReservation(ReservationAddRequest reservationAddRequest, long memberId) {
+    public Reservation addWaitingReservation(ReservationAddRequest reservationAddRequest, Long memberId) {
         validateDuplicateReservation(reservationAddRequest, memberId);
         validateIsOverMaxWaitingCount(reservationAddRequest);
 
@@ -57,7 +57,7 @@ public class ReservationService {
         return reservationRepository.findAllByOrderByDateAscTimeAsc();
     }
 
-    public List<Time> findBookedTimes(long themeId, LocalDate date) {
+    public List<Time> findBookedTimes(Long themeId, LocalDate date) {
         Date findDate = Date.dateFrom(date);
         List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate(themeId, findDate);
 
@@ -73,7 +73,7 @@ public class ReservationService {
                 filterInfo.getThemeId(), filterInfo.getFromDate(), filterInfo.getToDate());
     }
 
-    public List<Reservation> findStatusReservations(long memberId, ReservationStatus reservationStatus) {
+    public List<Reservation> findStatusReservations(Long memberId, ReservationStatus reservationStatus) {
         return reservationRepository.findAllByMemberIdAndReservationStatus(memberId, reservationStatus);
     }
 
@@ -81,7 +81,7 @@ public class ReservationService {
         return reservationRepository.findByReservationStatus(ReservationStatus.WAITING);
     }
 
-    public List<Waiting> findWaitingWithRank(long memberId) {
+    public List<Waiting> findWaitingWithRank(Long memberId) {
         List<Reservation> waitingReservations = reservationRepository.findAllByMemberIdAndReservationStatus(memberId,
                 ReservationStatus.WAITING);
 
@@ -104,7 +104,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void removeReservation(long reservationId) {
+    public void removeReservation(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(ReservationNotFoundException::new);
 
@@ -116,11 +116,11 @@ public class ReservationService {
         waitingToReservation(reservation);
     }
 
-    public void removeWaitingReservations(long waitingId) {
+    public void removeWaitingReservations(Long waitingId) {
         reservationRepository.deleteById(waitingId);
     }
 
-    public void validateBeforeRemoveTheme(long themeId) {
+    public void validateBeforeRemoveTheme(Long themeId) {
         List<Reservation> reservation = reservationRepository.findByThemeId(themeId);
 
         if (!reservation.isEmpty()) {
@@ -128,7 +128,7 @@ public class ReservationService {
         }
     }
 
-    public void validateReservationExistence(long timeId) {
+    public void validateReservationExistence(Long timeId) {
         List<Reservation> reservation = reservationRepository.findByTimeId(timeId);
 
         if (!reservation.isEmpty()) {
@@ -168,7 +168,7 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicateReservation(ReservationAddRequest reservationRequest, long memberId) {
+    private void validateDuplicateReservation(ReservationAddRequest reservationRequest, Long memberId) {
         Optional<Reservation> duplicateReservation = reservationRepository.findByDateAndMemberIdAndThemeIdAndTimeId(
                 Date.saveFrom(reservationRequest.date()), memberId, reservationRequest.theme().getId(),
                 reservationRequest.time().getId());

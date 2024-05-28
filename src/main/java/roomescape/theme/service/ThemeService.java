@@ -25,12 +25,12 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
-    public Theme findTheme(long themeId) {
+    public Theme findTheme(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(ThemeNotFoundException::new);
     }
 
-    public void removeTheme(long id) {
+    public void removeTheme(Long id) {
         themeRepository.deleteById(id);
     }
 }

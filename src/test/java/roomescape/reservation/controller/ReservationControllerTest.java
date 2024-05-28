@@ -62,7 +62,7 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     @DisplayName("예약 가능한 시간을 잘 불러오는지 확인한다.")
     void findAvailableTimeList() throws Exception {
-        when(reservationService.findTimeAvailability(1, TOMORROW))
+        when(reservationService.findTimeAvailability(1L, TOMORROW))
                 .thenReturn(
                         List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getReservationTime(), true)));
 

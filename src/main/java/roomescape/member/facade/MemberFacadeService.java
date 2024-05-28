@@ -31,7 +31,7 @@ public class MemberFacadeService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> findMemberReservations(long memberId) {
+    public List<MemberReservationResponse> findMemberReservations(Long memberId) {
         List<Reservation> reservations = reservationService.findStatusReservations(memberId,
                 ReservationStatus.RESERVED);
         List<Waiting> waitings = reservationService.findWaitingWithRank(memberId);

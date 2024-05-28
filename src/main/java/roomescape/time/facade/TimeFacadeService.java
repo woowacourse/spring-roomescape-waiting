@@ -32,7 +32,7 @@ public class TimeFacadeService {
                 .toList();
     }
 
-    public void removeTime(long timeId) {
+    public void removeTime(Long timeId) {
         reservationService.validateReservationExistence(timeId);
         timeService.removeReservationTime(timeId);
     }

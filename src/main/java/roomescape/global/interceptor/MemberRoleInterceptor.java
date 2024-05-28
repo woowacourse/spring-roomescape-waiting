@@ -36,7 +36,7 @@ public class MemberRoleInterceptor implements HandlerInterceptor {
         }
 
         String token = CookieProvider.getCookieValue("token", request.getCookies());
-        long memberId = Long.parseLong(tokenProvider.resolveToken(token));
+        Long memberId = Long.parseLong(tokenProvider.resolveToken(token));
 
         if (!isSameRole(auth, memberId)) {
             throw new RoomEscapeException(MemberExceptionCode.MEMBER_ROLE_UN_AUTHORIZED_EXCEPTION);
@@ -44,7 +44,7 @@ public class MemberRoleInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private boolean isSameRole(Auth auth, long memberId) {
+    private boolean isSameRole(Auth auth, Long memberId) {
         MemberRole[] permittedRole = auth.roles();
         return memberService.findMemberRole(memberId).hasSameRoleFrom(permittedRole);
     }

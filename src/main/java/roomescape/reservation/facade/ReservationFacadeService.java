@@ -35,13 +35,13 @@ public class ReservationFacadeService {
         this.timeService = timeService;
     }
 
-    public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
+    public ReservationResponse addReservation(ReservationRequest reservationRequest, Long memberId) {
         ReservationAddRequest reservationAddRequest = makeReservation(reservationRequest, memberId);
 
         return ReservationResponse.fromReservation(reservationService.addReservation(reservationAddRequest));
     }
 
-    public ReservationResponse addWaitingReservation(ReservationRequest reservationRequest, long memberId) {
+    public ReservationResponse addWaitingReservation(ReservationRequest reservationRequest, Long memberId) {
         ReservationAddRequest reservationAddRequest = makeReservation(reservationRequest, memberId);
         Reservation reservation = reservationService.addWaitingReservation(reservationAddRequest, memberId);
 
@@ -76,7 +76,7 @@ public class ReservationFacadeService {
                 .toList();
     }
 
-    public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long timeId, LocalDate date) {
+    public List<ReservationTimeAvailabilityResponse> findTimeAvailability(Long timeId, LocalDate date) {
         List<Time> allTimes = timeService.findTimesOrderByStartAt();
         List<Time> bookedTimes = reservationService.findBookedTimes(timeId, date);
 
@@ -94,15 +94,15 @@ public class ReservationFacadeService {
     }
 
 
-    public void removeReservation(long reservationId) {
+    public void removeReservation(Long reservationId) {
         reservationService.removeReservation(reservationId);
     }
 
-    public void removeWaitingReservation(long waitingId) {
+    public void removeWaitingReservation(Long waitingId) {
         reservationService.removeWaitingReservations(waitingId);
     }
 
-    private ReservationAddRequest makeReservation(ReservationRequest reservationRequest, long memberId) {
+    private ReservationAddRequest makeReservation(ReservationRequest reservationRequest, Long memberId) {
         Time time = timeService.findTime(reservationRequest.timeId());
         Theme theme = themeService.findTheme(reservationRequest.themeId());
         Member member = memberService.findMember(memberId);

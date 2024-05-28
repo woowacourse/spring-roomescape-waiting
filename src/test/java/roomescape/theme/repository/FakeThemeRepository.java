@@ -14,13 +14,13 @@ public class FakeThemeRepository implements ThemeRepository {
     private final AtomicLong id = new AtomicLong(0);
 
     public FakeThemeRepository() {
-        long increasedId = id.incrementAndGet();
+        Long increasedId = id.incrementAndGet();
         themes.put(increasedId, makeTheme(Theme.of("pollaBang", "폴라 방탈출", "thumbnail"), increasedId));
     }
 
     @Override
     public Theme save(Theme theme) {
-        long increasedId = id.incrementAndGet();
+        Long increasedId = id.incrementAndGet();
         themes.put(increasedId, makeTheme(theme, increasedId));
         return theme;
     }
@@ -32,16 +32,16 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(long id) {
+    public Optional<Theme> findById(Long id) {
         return Optional.ofNullable(themes.get(id));
     }
 
     @Override
-    public void deleteById(long themeId) {
+    public void deleteById(Long themeId) {
         themes.remove(themeId);
     }
 
-    private Theme makeTheme(Theme theme, long id) {
+    private Theme makeTheme(Theme theme, Long id) {
         ReflectionTestUtils.setField(theme, "id", id);
         return theme;
     }

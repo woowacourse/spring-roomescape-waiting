@@ -16,7 +16,7 @@ public class FakeTokenProvider implements TokenProvider {
     }
 
     @Override
-    public Token getAccessToken(long principal) {
+    public Token getAccessToken(Long principal) {
         String token = makeRandomToken();
         tokenStorage.put(principal, token);
         return new Token(token);

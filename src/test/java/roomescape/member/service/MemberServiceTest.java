@@ -20,7 +20,7 @@ public class MemberServiceTest {
     @DisplayName("존재하는 멤버가 없을 경우 에러가 발생한다.")
     void notExistMemberReservation() {
         Throwable notExistMember = assertThrows(MemberNotFoundException.class,
-                () -> memberService.findMember(100));
+                () -> memberService.findMember(100L));
         assertEquals(notExistMember.getMessage(), new MemberNotFoundException().getMessage());
     }
 

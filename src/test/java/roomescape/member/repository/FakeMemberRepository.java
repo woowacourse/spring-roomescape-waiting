@@ -16,7 +16,7 @@ public class FakeMemberRepository implements MemberRepository {
     private final AtomicLong id = new AtomicLong(0);
 
     public FakeMemberRepository() {
-        long increasedId = id.incrementAndGet();
+        Long increasedId = id.incrementAndGet();
         members.put(increasedId, makeMember(Member.of("kyunellroll@gmail.com", "polla99"), increasedId));
     }
 
@@ -29,7 +29,7 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findMemberById(long id) {
+    public Optional<Member> findMemberById(Long id) {
         return Optional.ofNullable(members.get(id));
     }
 
@@ -39,7 +39,7 @@ public class FakeMemberRepository implements MemberRepository {
                 .toList();
     }
 
-    private Member makeMember(Member member, long id) {
+    private Member makeMember(Member member, Long id) {
         ReflectionTestUtils.setField(member, "id", id);
         return member;
     }

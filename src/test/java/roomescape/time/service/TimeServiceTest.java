@@ -44,7 +44,7 @@ class TimeServiceTest {
     @DisplayName("존재하는 시간이 없을 경우 에러가 발생한다.")
     void notExistTimeReservation() {
         Throwable notExistTime = assertThrows(TimeNotFoundException.class,
-                () -> timeService.findTime(100));
+                () -> timeService.findTime(100L));
         assertEquals(notExistTime.getMessage(), new TimeNotFoundException().getMessage());
     }
 

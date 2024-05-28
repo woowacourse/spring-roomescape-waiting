@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 import roomescape.waiting.domain.Waiting;
 
-public record MemberReservationResponse(long id, String themeName, LocalDate date, LocalTime time, String status) {
+public record MemberReservationResponse(Long id, String themeName, LocalDate date, LocalTime time, String status) {
 
     public static MemberReservationResponse from(Reservation reservation) {
         return new MemberReservationResponse(reservation.getId(), reservation.getTheme().getName(),
