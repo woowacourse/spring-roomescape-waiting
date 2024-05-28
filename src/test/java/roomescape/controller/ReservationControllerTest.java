@@ -1,10 +1,5 @@
 package roomescape.controller;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.ReservationFixture.DEFAULT_REQUEST;
-import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
-import static roomescape.fixture.ReservationFixture.DEFAULT_RESPONSE;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +11,11 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.ReservationFixture.DEFAULT_REQUEST;
+import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
+import static roomescape.fixture.ReservationFixture.DEFAULT_RESPONSE;
 
 @SpringBootTest
 class ReservationControllerTest {
@@ -40,14 +40,5 @@ class ReservationControllerTest {
                 () -> Assertions.assertThat(response.getBody())
                         .isEqualTo(DEFAULT_RESPONSE)
         );
-    }
-
-    @Test
-    @DisplayName("예약 삭제 정상 동작 시 API 명세대로 응답이 생성되는지 확인")
-    void delete() {
-        ResponseEntity<Void> response = reservationController.delete(DEFAULT_RESERVATION.getId());
-
-        Assertions.assertThat(response.getStatusCode())
-                .isEqualTo(HttpStatusCode.valueOf(204));
     }
 }

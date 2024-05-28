@@ -1,23 +1,20 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
-import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
-import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
-import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSearchCondition;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.LoginMemberReservationResponse;
+import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -45,38 +42,52 @@ public class ReservationService {
 
     public ReservationResponse save(ReservationRequest reservationRequest) {
         ReservationTime time = reservationTimeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
-
+                .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_RESERVATION_TIME));
         Theme theme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-
+                .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_THEME));
         Member member = memberRepository.findById(reservationRequest.memberId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_MEMBER));
+        LocalDate date = reservationRequest.date();
 
-        Reservation beforeSave = new Reservation(member, reservationRequest.date(), time, theme);
+        validatePastTimeReservation(date, time);
+        validateDuplicateReservation(date, time, theme, member);
 
-        validateDuplicateReservation(time, theme, beforeSave.getDate());
-        validatePastTimeReservation(beforeSave);
+        ReservationStatus status = determineStatus(time, theme, date);
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .status(status)
+                .build();
+        Reservation saved = reservationRepository.save(reservation);
 
-        Reservation saved = reservationRepository.save(beforeSave);
         return ReservationResponse.from(saved);
     }
 
-    private void validateDuplicateReservation(ReservationTime requestedTime, Theme requestedTheme, LocalDate date) {
-        boolean isDuplicate = reservationRepository.existsByThemeAndDateAndTime(requestedTheme, date, requestedTime);
-        if (isDuplicate) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION);
+    private void validateDuplicateReservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        if (reservationRepository.existsByThemeAndDateAndTimeAndReservationMember(theme, date, time, member)) {
+            throw new RoomescapeException(ExceptionType.DUPLICATE_RESERVATION);
         }
     }
 
-    private void validatePastTimeReservation(Reservation beforeSave) {
-        if (beforeSave.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
+    private void validatePastTimeReservation(LocalDate date, ReservationTime time) {
+        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+            throw new RoomescapeException(ExceptionType.PAST_TIME_RESERVATION);
         }
+    }
+
+    private ReservationStatus determineStatus(ReservationTime requestedTime, Theme requestedTheme, LocalDate date) {
+        boolean isAlreadyBooked = reservationRepository.existsByThemeAndDateAndTime(requestedTheme, date, requestedTime);
+        if (isAlreadyBooked) {
+            return ReservationStatus.PENDING;
+        }
+        return ReservationStatus.APPROVED;
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll().stream()
+        return reservationRepository.findAll()
+                .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -84,21 +95,44 @@ public class ReservationService {
     public List<ReservationResponse> findByMemberAndThemeBetweenDates(ReservationSearchCondition condition) {
         List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 condition.memberId(), condition.themeId(), condition.start(), condition.end());
-        
-        return reservations
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<MyReservationResponse> findByMemberId(long memberId) {
+        return reservationRepository.findAllWithRankByMemberId(memberId)
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> findByStatusPending() {
+        return reservationRepository.findAllByStatus(ReservationStatus.PENDING)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<LoginMemberReservationResponse> findByMemberId(long memberId) {
-        return reservationRepository.findAllByMemberId(memberId)
-                .stream()
-                .map(LoginMemberReservationResponse::from)
-                .toList();
+    @Transactional
+    public void delete(long reservationId, long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_MEMBER));
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_RESERVATION));
+
+        if (member.isAdmin() || reservation.isAuthor(member)) {
+            reservationRepository.deleteById(reservationId);
+            approveNextReservationAutomatically(reservation);
+            return;
+        }
+        throw new RoomescapeException(ExceptionType.NO_AUTHORITY);
     }
 
-    public void delete(long id) {
-        reservationRepository.deleteById(id);
+    private void approveNextReservationAutomatically(Reservation reservation) {
+        reservationRepository.findFirstByDateAndAndTimeAndTheme(
+                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())
+                .ifPresent(firstReservation -> firstReservation.approve());
     }
 }

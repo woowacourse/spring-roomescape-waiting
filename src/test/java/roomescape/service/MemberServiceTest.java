@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.domain.Sha256Encryptor;
 import roomescape.dto.LoginRequest;
 import roomescape.dto.MemberInfo;
@@ -35,7 +36,8 @@ class MemberServiceTest {
     @Test
     @DisplayName("잘못된 이메일이나 비밀번호로 로그인 시도할 경우 예외 발생하는지 확인")
     void loginWithInvalidRequest() {
-        memberRepository.save(new Member("member", "email@email.com", SHA_256_ENCRYPTOR.encrypt("password")));
+        memberRepository.save(new Member(
+                1L, "member", "email@email.com", SHA_256_ENCRYPTOR.encrypt("password"), Role.MEMBER));
 
         assertThatThrownBy(() -> memberService.login(new LoginRequest("invalid@email.com", "invalid")))
                 .isInstanceOf(RoomescapeException.class)
@@ -45,8 +47,8 @@ class MemberServiceTest {
     @Test
     @DisplayName("사용자 아이디로 사용자 정보를 잘 조회하는지 확인")
     void findByMemberId() {
-        Member member = memberRepository.save(
-                new Member("member", "email@email.com", SHA_256_ENCRYPTOR.encrypt("password")));
+        Member member = memberRepository.save(new Member(
+                1L, "member", "email@email.com", SHA_256_ENCRYPTOR.encrypt("password"), Role.MEMBER));
 
         MemberInfo memberInfo = memberService.findByMemberId(member.getId());
 

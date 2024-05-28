@@ -67,7 +67,13 @@ class ReservationTimeServiceTest {
         ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
         Theme theme = themeRepository.save(DEFAULT_THEME);
 
-        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().plusDays(1))
+                        .time(time)
+                        .theme(theme)
+                        .build());
 
         assertThatCode(() -> reservationTimeService.delete(time.getId()))
                 .isInstanceOf(RoomescapeException.class)

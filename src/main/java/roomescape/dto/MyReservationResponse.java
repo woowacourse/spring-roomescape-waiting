@@ -2,22 +2,22 @@ package roomescape.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.Reservation;
+import roomescape.dto.service.ReservationWithRank;
 
-public record LoginMemberReservationResponse(
-        long reservationId,
+public record MyReservationResponse(
+        long id,
         String theme,
         LocalDate date,
         LocalTime time,
         String status
 ) {
-    public static LoginMemberReservationResponse from(Reservation reservation) {
-        return new LoginMemberReservationResponse(
+    public static MyReservationResponse from(ReservationWithRank reservation) {
+        return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                "예약"
+                reservation.getStatusMessage()
         );
     }
 }

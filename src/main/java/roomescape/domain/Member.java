@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import static roomescape.exception.ExceptionType.EMPTY_NAME;
+
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,9 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import roomescape.exception.RoomescapeException;
-
-import static roomescape.domain.Role.MEMBER;
-import static roomescape.exception.ExceptionType.EMPTY_NAME;
 
 @Entity
 public class Member {
@@ -32,16 +31,9 @@ public class Member {
     protected Member() {
     }
 
-    public Member(String name, String email, String encryptedPassword) {
-        this(null, name, email, encryptedPassword, MEMBER);
-    }
-
-    public Member(Long id, String name, String email, String encryptedPassword) {
-        this(id, name, email, encryptedPassword, MEMBER);
-    }
-
     public Member(Long id, String name, String email, String encryptedPassword, Role role) {
         validateName(name);
+
         this.id = id;
         this.name = name;
         this.email = new Email(email);
@@ -53,6 +45,10 @@ public class Member {
         if (name == null || name.isBlank()) {
             throw new RoomescapeException(EMPTY_NAME);
         }
+    }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
     }
 
     public Long getId() {

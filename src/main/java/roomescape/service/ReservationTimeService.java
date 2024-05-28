@@ -1,9 +1,5 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
-
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.ReservationTimeRequest;
@@ -11,6 +7,11 @@ import roomescape.dto.ReservationTimeResponse;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+
+import java.util.List;
+
+import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
+import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
 
 @Service
 public class ReservationTimeService {
@@ -26,12 +27,17 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse save(ReservationTimeRequest reservationTimeRequest) {
+        validateDuplicateReservationTime(reservationTimeRequest);
+        ReservationTime reservationTime = new ReservationTime(reservationTimeRequest.startAt());
+        ReservationTime saved = reservationTimeRepository.save(reservationTime);
+
+        return ReservationTimeResponse.from(saved);
+    }
+
+    private void validateDuplicateReservationTime(ReservationTimeRequest reservationTimeRequest) {
         if (reservationTimeRepository.existsByStartAt(reservationTimeRequest.startAt())) {
             throw new RoomescapeException(DUPLICATE_RESERVATION_TIME);
         }
-        ReservationTime reservationTime = new ReservationTime(reservationTimeRequest.startAt());
-        ReservationTime saved = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponse.from(saved);
     }
 
     public List<ReservationTimeResponse> findAll() {
