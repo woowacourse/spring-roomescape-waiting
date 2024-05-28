@@ -2,7 +2,7 @@ package roomescape.service.reservationtime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.exception.InvalidRequestException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;

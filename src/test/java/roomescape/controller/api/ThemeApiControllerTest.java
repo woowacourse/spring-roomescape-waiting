@@ -8,16 +8,22 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.controller.BaseControllerTest;
 
 public class ThemeApiControllerTest extends BaseControllerTest {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     @BeforeEach
     public void setUp() {
         super.setUp();
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES ('방탈출1', '1번 방탈출', '썸네일1')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES ('방탈출2', '2번 방탈출', '썸네일2')");
+
     }
 
     @Test

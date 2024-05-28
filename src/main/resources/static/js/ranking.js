@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function render(data) {
     const container = document.getElementById('theme-ranking');
 
-    data.forEach(theme => {
+    data.themes.forEach(theme => {
         const name = theme.name;
         const thumbnail = theme.thumbnail;
         const description = theme.description;

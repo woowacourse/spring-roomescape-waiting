@@ -13,16 +13,16 @@ public class MemberEmail {
             "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String value;
-
-    public MemberEmail() {
-    }
 
     public MemberEmail(String value) {
         validateNullOrBlank(value);
         validateEmailPattern(value);
         this.value = value;
+    }
+
+    protected MemberEmail() {
     }
 
     private void validateNullOrBlank(String value) {

@@ -25,10 +25,10 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors()
                 .forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
+                    String fieldName = ((FieldError) error).getField();
+                    String errorMessage = error.getDefaultMessage();
+                    errors.put(fieldName, errorMessage);
+                });
         return ResponseEntity.badRequest()
                 .body(new ApiExceptionResponse<>(HttpStatus.BAD_REQUEST, errors));
     }
@@ -54,6 +54,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     ResponseEntity<ApiExceptionResponse<String>> handleRuntimeException() {
         return ResponseEntity.internalServerError()
-                .body(new ApiExceptionResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 예기치 못한 오류가 발생했습니다. 문제가 지속되는 경우 관리자에게 문의해주세요."));
+                .body(new ApiExceptionResponse<>(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "서버에서 예기치 못한 오류가 발생했습니다. 문제가 지속되는 경우 관리자에게 문의해주세요."));
     }
 }

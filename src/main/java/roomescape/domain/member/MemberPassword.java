@@ -8,15 +8,15 @@ import roomescape.exception.InvalidRequestException;
 @Embeddable
 public class MemberPassword {
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String value;
-
-    public MemberPassword() {
-    }
 
     public MemberPassword(String value) {
         validateNullOrBlank(value);
         this.value = value;
+    }
+
+    protected MemberPassword() {
     }
 
     public static void validateNullOrBlank(String value) {

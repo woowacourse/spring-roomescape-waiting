@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
-import roomescape.controller.api.validator.IdPositive;
-import roomescape.domain.Reservation;
+import roomescape.service.dto.validator.IdPositive;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationwait.ReservationWaitWithRank;
 import roomescape.domain.member.Member;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.reservation.ReservationResponse;
@@ -21,6 +22,7 @@ import roomescape.service.dto.response.reservation.UserReservationResponses;
 import roomescape.service.reservation.ReservationCreateService;
 import roomescape.service.reservation.ReservationDeleteService;
 import roomescape.service.reservation.ReservationFindService;
+import roomescape.service.reservationwait.ReservationWaitFindService;
 
 @Validated
 @RestController
@@ -29,19 +31,24 @@ public class ReservationApiController {
     private final ReservationFindService reservationFindService;
     private final ReservationCreateService reservationCreateService;
     private final ReservationDeleteService reservationDeleteService;
+    private final ReservationWaitFindService reservationWaitFindService;
 
     public ReservationApiController(ReservationFindService reservationFindService,
                                     ReservationCreateService reservationCreateService,
-                                    ReservationDeleteService reservationDeleteService) {
+                                    ReservationDeleteService reservationDeleteService,
+                                    ReservationWaitFindService reservationWaitFindService) {
         this.reservationFindService = reservationFindService;
         this.reservationCreateService = reservationCreateService;
         this.reservationDeleteService = reservationDeleteService;
+        this.reservationWaitFindService = reservationWaitFindService;
     }
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<UserReservationResponses> getUserReservations(@AuthenticatedMember Member member) {
         List<Reservation> userReservations = reservationFindService.findUserReservations(member.getId());
-        return ResponseEntity.ok(UserReservationResponses.from(userReservations));
+        List<ReservationWaitWithRank> userReservationWaits = reservationWaitFindService.findUserReservationWaits(
+                member.getId());
+        return ResponseEntity.ok(UserReservationResponses.of(userReservations, userReservationWaits));
     }
 
     @PostMapping("/reservations")
