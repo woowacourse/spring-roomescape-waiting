@@ -1,11 +1,16 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.Waiting;
 import roomescape.domain.user.Member;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.WaitingRepository;
+import roomescape.repository.dto.WaitingWithRank;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationSearchInput;
 import roomescape.service.dto.output.ReservationOutput;
@@ -14,16 +19,19 @@ import roomescape.service.dto.output.ReservationOutput;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationCreateValidator reservationCreateValidator;
+    private final WaitingRepository waitingRepository;
+    private final CreateValidator createValidator;
 
     public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationCreateValidator reservationCreateValidator) {
+                              final WaitingRepository waitingRepository,
+                              final CreateValidator createValidator) {
         this.reservationRepository = reservationRepository;
-        this.reservationCreateValidator = reservationCreateValidator;
+        this.waitingRepository = waitingRepository;
+        this.createValidator = createValidator;
     }
 
     public ReservationOutput createReservation(final ReservationInput input) {
-        final Reservation reservation = reservationCreateValidator.validateReservationInput(input);
+        final Reservation reservation = createValidator.validateReservationInput(input);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationOutput.toOutput(savedReservation);
     }
@@ -35,7 +43,8 @@ public class ReservationService {
 
     public List<ReservationOutput> getAllMyReservations(final Member member) {
         final List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return ReservationOutput.toOutputs(reservations);
+        final List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(member.getId());
+        return ReservationOutput.toOutputs(reservations, waitings);
     }
 
     public List<ReservationOutput> searchReservation(final ReservationSearchInput input) {
@@ -45,7 +54,28 @@ public class ReservationService {
         return ReservationOutput.toOutputs(themeReservations);
     }
 
+    @Transactional
     public void deleteReservation(final long id) {
-        reservationRepository.deleteById(id);
+        Optional<Reservation> reservation = reservationRepository.findById(id);
+        if (reservation.isPresent()) {
+            reservationRepository.deleteById(id);
+            approveWaiting(reservation.get());
+        }
+    }
+
+    private void approveWaiting(Reservation reservation) {
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAt(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
+        waiting.ifPresent(value -> reservationRepository.save(new Reservation(
+                null,
+                value.getDate(),
+                value.getTime(),
+                value.getTheme(),
+                value.getMember()
+        )));
+        waiting.ifPresent(waitingRepository::delete);
     }
 }

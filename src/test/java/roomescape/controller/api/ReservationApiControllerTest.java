@@ -2,6 +2,8 @@ package roomescape.controller.api;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,9 +23,6 @@ import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationTimeInput;
 import roomescape.util.DatabaseCleaner;
 import roomescape.util.TokenProvider;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationApiControllerTest {
@@ -51,7 +50,8 @@ class ReservationApiControllerTest {
         RestAssured.port = port;
         databaseCleaner.initialize();
         final var output = memberService.createMember(new MemberCreateInput("조이선", "joyson@gmail.com", "password1234"));
-        token = tokenProvider.generateToken(Member.fromMember(output.id(), output.name(), output.email(), output.password()));
+        token = tokenProvider.generateToken(
+                Member.fromMember(output.id(), output.name(), output.email(), output.password()));
     }
 
     @Test

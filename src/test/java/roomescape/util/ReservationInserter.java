@@ -2,7 +2,10 @@ package roomescape.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import roomescape.domain.reservation.*;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
 import roomescape.domain.user.Member;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -20,15 +23,18 @@ public class ReservationInserter {
     @Autowired
     MemberRepository memberRepository;
 
-    public Reservation addNewReservation(final String date,final Theme theme, final Member member, final ReservationTime reservationTime) {
+    public Reservation addNewReservation(final String date, final Theme theme, final Member member,
+                                         final ReservationTime reservationTime) {
         final var newTheme = themeRepository.save(theme);
         final var newMember = memberRepository.save(member);
         final var newTime = timeRepository.save(reservationTime);
-        return reservationRepository.save(new Reservation(null, ReservationDate.from(date), newTime, newTheme, newMember, ReservationStatus.COMPLETE));
+        return reservationRepository.save(
+                new Reservation(null, ReservationDate.from(date), newTime, newTheme, newMember));
     }
 
-    public void addExistReservation(final String date,final Theme theme, final Member member, final ReservationTime time) {
-        reservationRepository.save(new Reservation(null, ReservationDate.from(date), time, theme, member,ReservationStatus.COMPLETE));
+    public void addExistReservation(final String date, final Theme theme, final Member member,
+                                    final ReservationTime time) {
+        reservationRepository.save(new Reservation(null, ReservationDate.from(date), time, theme, member));
     }
 
 }
