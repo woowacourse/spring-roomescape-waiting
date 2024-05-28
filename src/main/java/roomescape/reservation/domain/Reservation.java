@@ -16,6 +16,7 @@ import jakarta.persistence.UniqueConstraint;
 
 import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
@@ -45,16 +46,23 @@ public class Reservation {
     }
 
     public Reservation(Long id, Member member, ReservationDetail detail) {
-        validate(member, detail);
+        validateNotNull(member, detail);
         this.id = id;
         this.member = member;
         this.detail = detail;
     }
 
-    private void validate(Member member, ReservationDetail detail) {
-        if (member == null || detail == null) {
-            throw new BadRequestException("예약 정보가 부족합니다.");
+    private void validateNotNull(Member member, ReservationDetail detail) {
+        try {
+            Objects.requireNonNull(member, "사용자 정보가 존재하지 않습니다.");
+            Objects.requireNonNull(detail, "예약 정보가 존재하지 않습니다.");
+        } catch (NullPointerException e) {
+            throw new BadRequestException(e.getMessage());
         }
+    }
+
+    public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
+        return detail.isReservedAtPeriod(start, end);
     }
 
     public Long getId() {
@@ -105,10 +113,6 @@ public class Reservation {
         return status;
     }
 
-    public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
-        return detail.isReservedAtPeriod(start, end);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -131,7 +135,7 @@ public class Reservation {
         return "Reservation{" +
                "id=" + id +
                ", member=" + member +
-               ", " + detail +
+               ", detail=" + detail +
                '}';
     }
 }

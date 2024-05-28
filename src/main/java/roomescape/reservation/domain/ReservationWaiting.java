@@ -49,16 +49,19 @@ public class ReservationWaiting {
     }
 
     public ReservationWaiting(Long id, Member member, ReservationDetail detail) {
-        validate(member, detail);
+        validateNotNull(member, detail);
         this.id = id;
         this.member = member;
         this.detail = detail;
         this.createAt = LocalDateTime.now();
     }
 
-    private void validate(Member member, ReservationDetail detail) {
-        if (member == null || detail == null) {
-            throw new BadRequestException("예약 정보가 부족합니다.");
+    private void validateNotNull(Member member, ReservationDetail detail) {
+        try {
+            Objects.requireNonNull(member, "사용자 정보가 존재하지 않습니다.");
+            Objects.requireNonNull(detail, "예약 정보가 존재하지 않습니다.");
+        } catch (NullPointerException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -104,10 +107,6 @@ public class ReservationWaiting {
 
     public Long getThemeId() {
         return detail.getThemeId();
-    }
-
-    public LocalDateTime getCreateAt() {
-        return createAt;
     }
 
     public String getStatus() {

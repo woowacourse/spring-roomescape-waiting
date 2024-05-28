@@ -44,17 +44,25 @@ public class ReservationDetail {
     }
 
     public ReservationDetail(Long id, Theme theme, Time time, LocalDate date) {
-        validate(date, time, theme);
+        validateNotNull(theme, time, date);
         this.id = id;
         this.theme = theme;
         this.time = time;
         this.date = date;
     }
 
-    private void validate(LocalDate date, Time time, Theme theme) {
-        if (date == null || time == null || theme == null) {
-            throw new BadRequestException("예약 정보가 부족합니다.");
+    private void validateNotNull(Theme theme, Time time, LocalDate date) {
+        try {
+            Objects.requireNonNull(theme, "예약 테마가 선택되지 않았습니다.");
+            Objects.requireNonNull(time, "예약 시간이 선택되지 않았습니다.");
+            Objects.requireNonNull(date, "예약 날짜가 선택되지 않았습니다.");
+        } catch (NullPointerException e) {
+            throw new BadRequestException(e.getMessage());
         }
+    }
+
+    public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
+        return date.isAfter(start) && date.isBefore(end);
     }
 
     public Long getId() {
@@ -79,10 +87,6 @@ public class ReservationDetail {
 
     public Long getThemeId() {
         return theme.getId();
-    }
-
-    public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
-        return date.isAfter(start) && date.isBefore(end);
     }
 
     @Override
