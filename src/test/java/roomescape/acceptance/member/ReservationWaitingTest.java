@@ -2,6 +2,8 @@ package roomescape.acceptance.member;
 
 import static org.hamcrest.Matchers.containsString;
 
+import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,8 +18,9 @@ import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.Fixture;
+import roomescape.domain.Reservation;
 import roomescape.dto.MemberReservationResponse;
-import roomescape.dto.ReservationWaitingRequest;
+import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.util.JwtProvider;
 
@@ -29,7 +32,7 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
     @DisplayName("예약 대기를 추가, 조회, 취소한다.")
     @Test
     void test() {
-        ReservationWaitingRequest request = new ReservationWaitingRequest(LocalDate.parse("2024-05-01"), 2L, 2L);
+        ReservationRequest request = new ReservationRequest(null, LocalDate.parse("2024-05-01"), 2L, 2L);
 
         // 추가
         ReservationWaitingResponse createdWaiting = RestAssured.given().log().all()
@@ -64,22 +67,22 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
     @Nested
     class CheckReservationExists {
 
-//        @Test
-//        void checkExists() {
-//            Reservation savedReservation = PRE_INSERTED_RESERVATION_1;
-//            String requestParams = selectedReservationParameters(
-//                    savedReservation.getDate().toString(),
-//                    savedReservation.getReservationTime().getId(),
-//                    savedReservation.getTheme().getId()
-//            );
-//
-//            RestAssured.given().log().all()
-//                    .cookie("token", Fixture.customerToken)
-//                    .contentType(ContentType.JSON)
-//                    .when().get("/reservations/" + requestParams)
-//                    .then().log().all()
-//                    .statusCode(HttpStatus.SC_OK);
-//        }
+        @Test
+        void checkExists() {
+            Reservation savedReservation = PRE_INSERTED_RESERVATION_1;
+            String requestParams = selectedReservationParameters(
+                    savedReservation.getDate().toString(),
+                    savedReservation.getReservationTime().getId(),
+                    savedReservation.getTheme().getId()
+            );
+
+            RestAssured.given().log().all()
+                    .cookie("token", Fixture.customerToken)
+                    .contentType(ContentType.JSON)
+                    .when().get("/reservations/check" + requestParams)
+                    .then().log().all()
+                    .statusCode(HttpStatus.SC_OK);
+        }
 
         @Test
         void checkNotExists() {
@@ -88,9 +91,9 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
             RestAssured.given().log().all()
                     .cookie("token", Fixture.customerToken)
                     .contentType(ContentType.JSON)
-                    .when().get("/reservations/" + requestParams)
+                    .when().get("/reservations/check" + requestParams)
                     .then().log().all()
-                    .statusCode(HttpStatus.SC_NOT_FOUND);
+                    .statusCode(HttpStatus.SC_NO_CONTENT);
         }
 
         String selectedReservationParameters(String date, Long timeId, Long themeId) {

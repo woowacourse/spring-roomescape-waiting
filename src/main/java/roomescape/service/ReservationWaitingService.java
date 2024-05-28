@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
-import roomescape.dto.ReservationWaitingRequest;
+import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.MemberRepository;
@@ -20,15 +20,19 @@ public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
-            ReservationRepository reservationRepository, MemberRepository memberRepository
+            ReservationRepository reservationRepository, MemberRepository memberRepository,
+            MemberRepository memberRepository1
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository1;
     }
 
-    public ReservationWaitingResponse create(ReservationWaitingRequest request, Member member) {
+    public ReservationWaitingResponse save(ReservationRequest request) {
+        Member member = getMemberById(request.memberId());
         Reservation reservation = getReservationByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         validateWaitingNotExists(member, reservation);
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(member, reservation));
@@ -44,6 +48,11 @@ public class ReservationWaitingService {
     public void deleteReservationWaiting(Long id) {
         reservationWaitingRepository.deleteById(id);
     }
+
+    private Member getMemberById(long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+    } 
 
     private Reservation getReservationByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)

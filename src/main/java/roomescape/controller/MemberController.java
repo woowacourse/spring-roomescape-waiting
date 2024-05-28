@@ -22,7 +22,7 @@ public class MemberController {
 
     @GetMapping
     public ResponseEntity<List<MemberPreviewResponse>> getMembers() {
-        List<MemberPreviewResponse> response = memberService.getAllMemberPreview();
+        List<MemberPreviewResponse> response = memberService.findAllMembers();
         return ResponseEntity.ok(response);
     }
 }
