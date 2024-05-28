@@ -42,6 +42,7 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.exception.RoomescapeException;
 import roomescape.fixture.MemberFixture;
+import roomescape.repository.CanceledReservationRepository;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -64,6 +65,8 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private CanceledReservationRepository canceledReservationRepository;
 
     @BeforeEach
     void initService() {
@@ -224,7 +227,10 @@ class ReservationServiceTest {
         //when
         reservationService.deleteByMemberIdAndId(loginMember, 2);
         //then
-        assertThat(reservationService.findAllByMemberId(1L)).isEqualTo(List.of());
+        assertAll(
+                () -> assertThat(reservationService.findAllByMemberId(1L)).isEqualTo(List.of()),
+                () -> assertThat(canceledReservationRepository.findAll().size()).isEqualTo(1)
+        );
     }
 
     @DisplayName("관리자는 예약 대기를 취소할 수 있다.")
@@ -243,7 +249,10 @@ class ReservationServiceTest {
         //when
         reservationService.deleteById(2);
         //then
-        assertThat(reservationService.findAllByMemberId(1L)).isEqualTo(List.of());
+        assertAll(
+                () -> assertThat(reservationService.findAllByMemberId(1L)).isEqualTo(List.of()),
+                () -> assertThat(canceledReservationRepository.findAll().size()).isEqualTo(1)
+        );
     }
 
 
@@ -312,6 +321,16 @@ class ReservationServiceTest {
 
             //then
             assertThat(new Reservations(reservationRepository.findAll()).getReservations()).isEmpty();
+        }
+
+        @DisplayName("예약을 삭제할 경우 예약 삭제 목록에 저장된다.")
+        @Test
+        void deleteReservationAndSaveCanceledReservationTest() {
+            //when
+            reservationService.deleteById(1L);
+
+            //then
+            assertThat(canceledReservationRepository.findAll().size()).isEqualTo(1);
         }
 
         @DisplayName("존재하지 않는 예약에 대한 삭제 요청은 정상 요청으로 간주한다.")

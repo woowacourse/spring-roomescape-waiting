@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS RESERVATION;
+DROP TABLE IF EXISTS CANCELED_RESERVATION;
 DROP TABLE IF EXISTS RESERVATION_TIME;
 DROP TABLE IF EXISTS THEME;
 DROP TABLE IF EXISTS MEMBER;
@@ -42,4 +43,17 @@ CREATE TABLE IF NOT EXISTS reservation
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
+CREATE TABLE IF NOT EXISTS canceled_reservation
+(
+    id        BIGINT NOT NULL AUTO_INCREMENT,
+    reservation_id        BIGINT NOT NULL,
+    date      DATE   NOT NULL,
+    created_at      TIMESTAMP   NOT NULL,
+    time_id   BIGINT NOT NULL,
+    theme_id  BIGINT NOT NULL,
+    member_id BIGINT NOT NULL,
+    status    VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
 );

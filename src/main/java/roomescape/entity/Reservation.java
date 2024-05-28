@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +24,10 @@ import roomescape.domain.Duration;
 import roomescape.domain.LoginMember;
 import roomescape.domain.ReservationStatus;
 import roomescape.exception.RoomescapeException;
+import roomescape.service.ReservationListener;
 
 @Entity
+@EntityListeners(ReservationListener.class)
 public class Reservation extends BaseEntity implements Comparable<Reservation> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -155,6 +158,10 @@ public class Reservation extends BaseEntity implements Comparable<Reservation> {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public Member getMember() {
+        return member;
     }
 
     public ReservationStatus getStatus() {
