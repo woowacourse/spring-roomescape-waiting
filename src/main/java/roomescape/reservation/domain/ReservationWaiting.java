@@ -1,14 +1,5 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -18,34 +9,22 @@ import roomescape.time.domain.ReservationTime;
 
 public class ReservationWaiting {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private final Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
+    private final Member member;
 
-    @Embedded
-    @Column(nullable = false)
-    private ReservationDate date;
+    private final ReservationDate date;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
+    private final ReservationTime time;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
+    private final Theme theme;
 
-    @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private final Status status;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private final LocalDateTime createdAt;
 
-    @Column
-    private Long rank;
+    private final Long rank;
 
-    public ReservationWaiting() {
-    }
 
     public ReservationWaiting(Long id,
                               Member member,
