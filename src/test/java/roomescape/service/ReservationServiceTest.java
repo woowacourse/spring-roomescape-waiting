@@ -23,7 +23,10 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +50,9 @@ class ReservationServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
+    @Mock
+    private Clock clock;
+
     @InjectMocks
     private ReservationService reservationService;
 
@@ -65,6 +71,8 @@ class ReservationServiceTest {
         given(memberRepository.findById(1L)).willReturn(Optional.of(member));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(clock.instant()).willReturn(Instant.parse("2024-05-10T19:19:00Z"));
+        given(clock.getZone()).willReturn(ZoneId.of("Asia/Seoul"));
         given(reservationRepository.save(reservation))
                 .willReturn(new Reservation(1L, reservation.getMember(), reservation.getDate(),
                         reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED));
@@ -101,6 +109,8 @@ class ReservationServiceTest {
         given(memberRepository.findById(1L)).willReturn(Optional.of(member));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(clock.instant()).willReturn(Instant.parse("2024-05-10T19:19:00Z"));
+        given(clock.getZone()).willReturn(ZoneId.of("Asia/Seoul"));
         given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(date), time.getId(), theme.getId()))
                 .willReturn(1);
 
