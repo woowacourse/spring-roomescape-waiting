@@ -12,10 +12,5 @@ import roomescape.member.domain.MemberRole;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
-    @Query("""
-            SELECT m
-            FROM Member m
-            WHERE m.role = :role
-            """)
     List<Member> findAllByRole(MemberRole role);
 }
