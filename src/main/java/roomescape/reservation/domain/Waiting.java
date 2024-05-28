@@ -41,6 +41,10 @@ public class Waiting {
         this.theme = theme;
     }
 
+    public static Waiting from(Reservation reservation) {
+        return new Waiting(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+    }
+
     public Long getId() {
         return id;
     }

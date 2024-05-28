@@ -48,7 +48,7 @@ public class ReservationService {
         validateReservationDate(reservation);
         validateDuplicatedWaitingReservation(reservation);
 
-        Waiting waiting = new Waiting(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        Waiting waiting = Waiting.from(reservation);
         waitingRepository.save(waiting);
 
         return reservationRepository.save(reservation);
