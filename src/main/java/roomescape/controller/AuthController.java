@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import roomescape.config.Authorization;
 import roomescape.domain.Member;
 import roomescape.dto.LoginRequest;
 import roomescape.dto.MemberPreviewResponse;
@@ -33,7 +34,8 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<MemberPreviewResponse> loginCheck(Member member) {
+    public ResponseEntity<MemberPreviewResponse> loginCheck(@Authorization long memberId) {
+        Member member = memberService.getMemberById(memberId);
         MemberPreviewResponse name = MemberPreviewResponse.from(member);
         return ResponseEntity.ok().body(name);
     }

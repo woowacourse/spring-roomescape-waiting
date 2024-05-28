@@ -38,10 +38,9 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
         return Stream.of(
                 dynamicTest("로그인한다.", () -> {
                             String token = sendLoginRequest(customerRequest);
-                            String subject = jwtProvider.getSubject(token);
+                            long id = jwtProvider.getMemberIdFrom(token);
 
-                            assertThat(subject)
-                                    .isEqualTo(PRE_INSERTED_CUSTOMER_1.getId().toString());
+                            assertThat(id).isEqualTo(PRE_INSERTED_CUSTOMER_1.getId());
                         }
                 ),
                 dynamicTest("로그인 정보를 확인한다.", () -> {
