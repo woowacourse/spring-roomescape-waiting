@@ -133,7 +133,7 @@ public class ReservationService {
                 target.getDate(),
                 target.getTime().getStartAt()
         ).ifPresent(firstWaiting -> {
-            reservationRepository.save(new Reservation(firstWaiting));
+            reservationRepository.save(firstWaiting.toReservation());
             waitingRepository.delete(firstWaiting);
         });
 

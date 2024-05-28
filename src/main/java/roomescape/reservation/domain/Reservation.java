@@ -37,10 +37,6 @@ public class Reservation {
         this.reservationTime = reservationTime;
     }
 
-    public Reservation(final Waiting waiting) {
-        this(null, waiting.getMember(), waiting.getDate(), waiting.getTheme(), waiting.getReservationTime());
-    }
-
     public Long getId() {
         return id;
     }
