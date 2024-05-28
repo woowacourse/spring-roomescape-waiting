@@ -41,7 +41,7 @@ class ReservationRegisterServiceTest {
     void 예약_등록() {
         //given
         ReservationRequest reservationRequest = new ReservationRequest(
-                LocalDate.now(), 1L, 1L, 1L);
+                LocalDate.now().plusDays(7), 1L, 1L, 1L);
 
         //when
         Long reservationId = reservationRegisterService.registerReservation(reservationRequest);
