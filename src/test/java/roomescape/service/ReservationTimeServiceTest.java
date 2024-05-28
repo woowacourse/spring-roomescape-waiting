@@ -15,7 +15,6 @@ import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -103,9 +102,9 @@ class ReservationTimeServiceTest {
         // given
         final ReservationTime reservedTime = RESERVATION_TIME_SIX(1L);
         final AvailableReservationTimeSearch availableReservationTimeSearch
-                = new AvailableReservationTimeSearch(LocalDate.parse(DATE_MAY_EIGHTH), 1L);
-        final Reservation reservation = new Reservation(MEMBER_TENNY(1L), LocalDate.parse(DATE_MAY_EIGHTH), reservedTime, THEME_HORROR(1L), ReservationStatus.RESERVED);
-        given(reservationRepository.findByDateAndThemeId(LocalDate.parse(DATE_MAY_EIGHTH), 1L))
+                = new AvailableReservationTimeSearch(DATE_MAY_EIGHTH, 1L);
+        final Reservation reservation = new Reservation(MEMBER_TENNY(1L), DATE_MAY_EIGHTH, reservedTime, THEME_HORROR(1L), ReservationStatus.RESERVED);
+        given(reservationRepository.findByDateAndThemeId(DATE_MAY_EIGHTH, 1L))
                 .willReturn(List.of(reservation));
         given(reservationTimeRepository.findAll()).willReturn(List.of(reservedTime, RESERVATION_TIME_SEVEN(2L)));
 

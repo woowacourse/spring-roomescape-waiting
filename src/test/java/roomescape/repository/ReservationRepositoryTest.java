@@ -13,7 +13,6 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,14 +44,14 @@ class ReservationRepositoryTest {
         member = memberRepository.save(MEMBER_MIA());
         reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SIX());
         theme = themeRepository.save(THEME_HORROR());
-        reservation = reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.RESERVED));
+        reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.RESERVED));
     }
 
     @Test
     @DisplayName("예약을 저장한다.")
     void save() {
         // given
-        final Reservation reservation = new Reservation(member, LocalDate.parse(DATE_MAY_NINTH), reservationTime, theme, ReservationStatus.RESERVED);
+        final Reservation reservation = new Reservation(member, DATE_MAY_NINTH, reservationTime, theme, ReservationStatus.RESERVED);
 
         // when
         final Reservation actual = reservationRepository.save(reservation);
@@ -76,7 +75,7 @@ class ReservationRepositoryTest {
     @DisplayName("특정 사용자의 예약 목록 및 대기 목록을 조회한다.")
     void findByReservationsMemberId() {
         final Long memberId = member.getId();
-        reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
+        reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.WAITING));
 
         final List<Reservation> actual = reservationRepository.findByMemberId(memberId);
 
@@ -91,8 +90,7 @@ class ReservationRepositoryTest {
     @DisplayName("날짜와 테마 Id에 해당하는 예약 목록을 조회한다.")
     void findAllByDateAndThemeId() {
         // when
-        final List<Reservation> actual = reservationRepository.findByDateAndThemeId(
-                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId());
+        final List<Reservation> actual = reservationRepository.findByDateAndThemeId(DATE_MAY_EIGHTH, theme.getId());
 
         // then
         assertThat(actual).hasSize(1);
@@ -103,8 +101,7 @@ class ReservationRepositoryTest {
     void findAllByFilterParameter() {
         // when
         final List<Reservation> actual = reservationRepository.findByThemeIdAndMemberIdAndDateBetweenAndStatus(
-                theme.getId(), member.getId(),
-                LocalDate.parse(DATE_MAY_EIGHTH), LocalDate.parse(DATE_MAY_NINTH), ReservationStatus.RESERVED
+                theme.getId(), member.getId(), DATE_MAY_EIGHTH, DATE_MAY_NINTH, ReservationStatus.RESERVED
         );
 
         // then
@@ -138,7 +135,7 @@ class ReservationRepositoryTest {
     void countByDateAndTimeIdAndThemeId() {
         // when
         final int actual = reservationRepository.countByDateAndTimeIdAndThemeId(
-                LocalDate.parse(DATE_MAY_EIGHTH), reservationTime.getId(), theme.getId()
+                DATE_MAY_EIGHTH, reservationTime.getId(), theme.getId()
         );
 
         // then
@@ -150,15 +147,15 @@ class ReservationRepositoryTest {
     void countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan() {
         final Member tenny = memberRepository.save(MEMBER_TENNY());
         final Member brown = memberRepository.save(MEMBER_BROWN());
-        final Reservation tennyWaiting = reservationRepository.save(new Reservation(tenny, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
-        final Reservation brownWaiting = reservationRepository.save(new Reservation(brown, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
+        final Reservation tennyWaiting = reservationRepository.save(new Reservation(tenny, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.WAITING));
+        final Reservation brownWaiting = reservationRepository.save(new Reservation(brown, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.WAITING));
 
         final Long tennyRank = reservationRepository.countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
-                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId(), reservationTime.getId(),
+                DATE_MAY_EIGHTH, theme.getId(), reservationTime.getId(),
                 ReservationStatus.WAITING, tennyWaiting.getId()
         );
         final Long brownRank = reservationRepository.countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
-                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId(), reservationTime.getId(),
+                DATE_MAY_EIGHTH, theme.getId(), reservationTime.getId(),
                 ReservationStatus.WAITING, brownWaiting.getId()
         );
 
@@ -195,7 +192,7 @@ class ReservationRepositoryTest {
     @DisplayName("테마, 날짜, 시간에 해당하는 예약이 있는지 확인한다.")
     void existsByThemeAndDateAndTimeAndStatus() {
         final boolean actual = reservationRepository.existsByThemeAndDateAndTimeAndStatus(
-                theme, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, ReservationStatus.RESERVED);
+                theme, DATE_MAY_EIGHTH, reservationTime, ReservationStatus.RESERVED);
 
         assertThat(actual).isTrue();
     }
@@ -204,7 +201,7 @@ class ReservationRepositoryTest {
     @DisplayName("테마, 날짜, 시간, 멤버에 해당하는 예약이 있는지 확인한다.")
     void existsByThemeAndDateAndTimeAndStatusAndMember() {
         final boolean actual = reservationRepository.existsByThemeAndDateAndTimeAndStatusAndMember(
-                theme, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, ReservationStatus.RESERVED, member);
+                theme, DATE_MAY_EIGHTH, reservationTime, ReservationStatus.RESERVED, member);
 
         assertThat(actual).isTrue();
     }

@@ -52,11 +52,10 @@ class WaitingServiceTest {
     @DisplayName("예약 대기를 등록한다.")
     void createReservationWaiting() {
         final Member member = MEMBER_TENNY(1L);
-        final String date = DATE_MAY_EIGHTH;
+        final LocalDate date = DATE_MAY_EIGHTH;
         final ReservationTime time = RESERVATION_TIME_SIX(1L);
         final Theme theme = THEME_HORROR(1L);
-        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
-                time, theme, ReservationStatus.WAITING);
+        final Reservation waiting = new Reservation(2L, member, date, time, theme, ReservationStatus.WAITING);
         final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
         final ReservationDto reservationDto = ReservationDto.of(request, 1L);
         given(memberRepository.findById(1L)).willReturn(Optional.of(member));
@@ -82,11 +81,11 @@ class WaitingServiceTest {
     @DisplayName("사용자가 예약이 없는 건에 대해 예약 대기를 등록하려는 경우 예외가 발생한다.")
     void throwExceptionWhenDoesNotExistReservation() {
         final Member member = MEMBER_TENNY(1L);
-        final String date = DATE_MAY_EIGHTH;
+        final LocalDate date = DATE_MAY_EIGHTH;
+        //final String date = DATE_MAY_EIGHTH;
         final ReservationTime time = RESERVATION_TIME_SIX(1L);
         final Theme theme = THEME_HORROR(1L);
-        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
-                time, theme, ReservationStatus.WAITING);
+        final Reservation waiting = new Reservation(2L, member, date, time, theme, ReservationStatus.WAITING);
         final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
         final ReservationDto reservationDto = ReservationDto.of(request, 1L);
         given(memberRepository.findById(1L)).willReturn(Optional.of(member));
@@ -104,11 +103,11 @@ class WaitingServiceTest {
     @DisplayName("사용자가 이미 예약한 건에 대해 예약 대기를 등록하려는 경우 예외가 발생한다.")
     void throwExceptionWhenAlreadyReserved() {
         final Member member = MEMBER_TENNY(1L);
-        final String date = DATE_MAY_EIGHTH;
+        //final String date = DATE_MAY_EIGHTH;
+        final LocalDate date = DATE_MAY_EIGHTH;
         final ReservationTime time = RESERVATION_TIME_SIX(1L);
         final Theme theme = THEME_HORROR(1L);
-        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
-                time, theme, ReservationStatus.WAITING);
+        final Reservation waiting = new Reservation(2L, member, date, time, theme, ReservationStatus.WAITING);
         final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
         final ReservationDto reservationDto = ReservationDto.of(request, 1L);
         given(memberRepository.findById(1L)).willReturn(Optional.of(member));
@@ -130,11 +129,11 @@ class WaitingServiceTest {
     @DisplayName("사용자가 중복해서 예약 대기를 등록하려는 경우 예외가 발생한다. ")
     void throwExceptionWhenDuplicatedWaiting() {
         final Member member = MEMBER_TENNY(1L);
-        final String date = DATE_MAY_EIGHTH;
+        final LocalDate date = DATE_MAY_EIGHTH;
+        //final String date = DATE_MAY_EIGHTH;
         final ReservationTime time = RESERVATION_TIME_SIX(1L);
         final Theme theme = THEME_HORROR(1L);
-        final Reservation waiting = new Reservation(2L, member, LocalDate.parse(date),
-                time, theme, ReservationStatus.WAITING);
+        final Reservation waiting = new Reservation(2L, member, date, time, theme, ReservationStatus.WAITING);
         final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
         final ReservationDto reservationDto = ReservationDto.of(request, 1L);
         given(memberRepository.findById(1L)).willReturn(Optional.of(member));
@@ -158,7 +157,7 @@ class WaitingServiceTest {
     @DisplayName("예약 대기 목록을 조회한다.")
     void findReservationWaitings() {
         // given
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findByStatus(ReservationStatus.WAITING))
                 .willReturn(List.of(reservation));
@@ -174,7 +173,7 @@ class WaitingServiceTest {
     @DisplayName("예약 대기를 승인한다.")
     void approveReservationWaiting() {
         // given
-        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findById(waiting.getId())).willReturn(Optional.of(waiting));
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(waiting.getTheme(), waiting.getDate(),
@@ -192,7 +191,7 @@ class WaitingServiceTest {
     @DisplayName("이미 예약이 있는 상태에서 승인을 할 경우 예외가 발생한다.")
     void throwExceptionWhenAlreadyExistsReservation() {
         // given
-        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findById(waiting.getId())).willReturn(Optional.of(waiting));
         given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(waiting.getTheme(), waiting.getDate(),
@@ -208,7 +207,7 @@ class WaitingServiceTest {
     @DisplayName("예약 대기를 거절한다.")
     void rejectReservationWaiting() {
         // given
-        final Reservation waiting = new Reservation(1L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation waiting = new Reservation(1L, MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.existsById(waiting.getId())).willReturn(true);
         given(reservationRepository.findById(anyLong())).willReturn(Optional.of(waiting));
@@ -236,7 +235,7 @@ class WaitingServiceTest {
     void throwExceptionWhenRejectReservation() {
         // given
         final Long waitingId = 1L;
-        final Reservation reservation = new Reservation(waitingId, TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation reservation = new Reservation(waitingId, TestFixture.MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
         given(reservationRepository.existsById(waitingId)).willReturn(true);
         given(reservationRepository.findById(anyLong())).willReturn(Optional.of(reservation));

@@ -18,7 +18,7 @@ public record ReservationDto(
     public static ReservationDto of(ReservationSaveRequest request, Long memberId) {
         return new ReservationDto(
                 memberId,
-                LocalDateConverter.toLocalDate(request.date()),
+                request.date(),
                 request.timeId(),
                 request.themeId()
         );
@@ -27,7 +27,7 @@ public record ReservationDto(
     public static ReservationDto of(AdminReservationSaveRequest request) {
         return new ReservationDto(
                 request.memberId(),
-                LocalDateConverter.toLocalDate(request.date()),
+                request.date(),
                 request.timeId(),
                 request.themeId()
         );

@@ -66,7 +66,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("예약 가능한 시간 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFindAvailableReservationTimes() {
-        final String date = DATE_MAY_EIGHTH;
+        final String date = DATE_MAY_EIGHTH.toString();
         final Long themeId = saveTheme();
 
         final JsonPath jsonPath = RestAssured.given().log().all()

@@ -88,7 +88,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         assertAll(() -> {
             assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_TENNY_NAME);
-            assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH);
+            assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH.toString());
             assertThat(jsonPath.getString("time[0].startAt")).isEqualTo(START_AT_SIX);
             assertThat(jsonPath.getString("theme[0].name")).isEqualTo(THEME_HORROR_NAME);
         });
@@ -115,7 +115,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         assertAll(() -> {
             assertThat(jsonPath.getString("name[0]")).isEqualTo(MEMBER_TENNY_NAME);
-            assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH);
+            assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH.toString());
             assertThat(jsonPath.getString("time[0].startAt")).isEqualTo(START_AT_SIX);
             assertThat(jsonPath.getString("theme[0].name")).isEqualTo(THEME_HORROR_NAME);
         });
@@ -155,7 +155,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         assertAll(() -> {
             assertThat(jsonPath.getString("theme[0]")).isEqualTo(THEME_HORROR_NAME);
-            assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH);
+            assertThat(jsonPath.getString("date[0]")).isEqualTo(DATE_MAY_EIGHTH.toString());
             assertThat(jsonPath.getString("time[0]")).isEqualTo(START_AT_SIX);
             assertThat(jsonPath.getString("status[0]")).isEqualTo(ReservationStatus.WAITING.getValue());
         });

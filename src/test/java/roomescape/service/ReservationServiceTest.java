@@ -61,10 +61,10 @@ class ReservationServiceTest {
     void create() {
         // given
         final Member member = MEMBER_TENNY(1L);
-        final String date = DATE_MAY_EIGHTH;
+        final LocalDate date = DATE_MAY_EIGHTH;
         final ReservationTime time = RESERVATION_TIME_SIX(1L);
         final Theme theme = THEME_HORROR(1L);
-        final Reservation reservation = new Reservation(member, LocalDate.parse(date),
+        final Reservation reservation = new Reservation(member, date,
                 time, theme, ReservationStatus.RESERVED);
         final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
         final ReservationDto reservationDto = ReservationDto.of(request, 1L);
@@ -89,7 +89,7 @@ class ReservationServiceTest {
     @DisplayName("이전 날짜 혹은 당일 예약을 할 경우 예외가 발생한다.")
     void throwExceptionWhenCreateReservationAtInvalidDate(final int days) {
         final LocalDate date = LocalDate.now().minusDays(days);
-        final ReservationSaveRequest request = new ReservationSaveRequest(date.toString(), 1L, 1L);
+        final ReservationSaveRequest request = new ReservationSaveRequest(date, 1L, 1L);
         final ReservationDto reservationDto = ReservationDto.of(request, 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
@@ -101,7 +101,7 @@ class ReservationServiceTest {
     void throwExceptionWhenCreateDuplicatedReservation() {
         // given
         final Member member = MEMBER_TENNY(1L);
-        final String date = DATE_MAY_EIGHTH;
+        final LocalDate date = DATE_MAY_EIGHTH;
         final ReservationTime time = RESERVATION_TIME_SIX(1L);
         final Theme theme = THEME_HORROR(1L);
         final ReservationSaveRequest request = new ReservationSaveRequest(date, time.getId(), theme.getId());
@@ -111,7 +111,7 @@ class ReservationServiceTest {
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(clock.instant()).willReturn(Instant.parse("2024-05-10T19:19:00Z"));
         given(clock.getZone()).willReturn(ZoneId.of("Asia/Seoul"));
-        given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(date), time.getId(), theme.getId()))
+        given(reservationRepository.countByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId()))
                 .willReturn(1);
 
         // when & then
@@ -123,9 +123,9 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 목록을 조회한다.")
     void findAllReservations() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
-        final Reservation reservation2 = new Reservation(ADMIN(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SEVEN(), THEME_DETECTIVE(), ReservationStatus.RESERVED);
         given(reservationRepository.findAll())
                 .willReturn(List.of(reservation1, reservation2));
@@ -139,7 +139,7 @@ class ReservationServiceTest {
                     .extracting(ReservationResponse::name)
                     .containsExactly(TestFixture.MEMBER_TENNY_NAME, ADMIN_NAME);
             assertThat(reservations).extracting(ReservationResponse::date)
-                    .containsExactly(LocalDate.parse(DATE_MAY_EIGHTH), LocalDate.parse(DATE_MAY_EIGHTH));
+                    .containsExactly(DATE_MAY_EIGHTH, DATE_MAY_EIGHTH);
             assertThat(reservations).extracting(ReservationResponse::time)
                     .extracting(ReservationTimeResponse::startAt)
                     .containsExactly(START_AT_SIX, START_AT_SEVEN);
@@ -153,9 +153,9 @@ class ReservationServiceTest {
     @DisplayName("검색 조건에 따른 예약 목록을 조회한다.")
     void findAllByFilterParameter() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
-        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_TENNY(), LocalDate.parse(DATE_MAY_NINTH),
+        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_TENNY(), DATE_MAY_NINTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
         final ReservationFilterParam reservationFilterParam
                 = new ReservationFilterParam(1L, 1L,
@@ -211,9 +211,9 @@ class ReservationServiceTest {
     void findMyReservations() {
         // given
         final LoginMember loginMember = new LoginMember(1L, MEMBER_TENNY_NAME, MEMBER_TENNY_EMAIL, Role.MEMBER);
-        final Reservation memberReservation = new Reservation(1L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
+        final Reservation memberReservation = new Reservation(1L, MEMBER_TENNY(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
-        final Reservation memberWaiting = new Reservation(4L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_NINTH),
+        final Reservation memberWaiting = new Reservation(4L, MEMBER_TENNY(), DATE_MAY_NINTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findByMemberId(loginMember.id()))
                 .willReturn(List.of(memberReservation, memberWaiting));
