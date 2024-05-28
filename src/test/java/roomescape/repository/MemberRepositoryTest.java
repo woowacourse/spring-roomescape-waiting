@@ -18,8 +18,7 @@ class MemberRepositoryTest {
     @DisplayName("Db에 등록된 모든 회원 목록을 조회한다.")
     @Test
     void given_when_findAll_then_returnMembers() {
-        //given, when, then
-        assertThat(memberRepository.findAll()).hasSize(2);
+        assertThat(memberRepository.findAll()).hasSize(3);
     }
 
     @DisplayName("Db에 회원 정보를 저장한다.")
@@ -37,8 +36,18 @@ class MemberRepositoryTest {
     @DisplayName("email 주소를 통해 회원을 조회한다.")
     @Test
     void given_when_findByEmail_then_returnMember() {
-        //given, when, then
+        //when
         final Member member = memberRepository.findByEmail("user@test.com").get();
+        //then
         assertThat(member.getEmail()).isEqualTo("user@test.com");
+    }
+
+    @DisplayName("email 주소를 통해 회원이 존재하는지 확인한다.")
+    @Test
+    void given_when_existsByEmail_then_returnBoolean() {
+        //when
+        final boolean actual = memberRepository.existsByEmail("user@test.com");
+        //then
+        assertThat(actual).isTrue();
     }
 }

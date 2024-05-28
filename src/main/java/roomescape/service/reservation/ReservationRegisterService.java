@@ -1,15 +1,12 @@
-package roomescape.service;
+package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
-import roomescape.domain.dto.ReservationResponses;
-import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.exception.ReservationFailException;
 import roomescape.exception.clienterror.InvalidIdException;
 import roomescape.repository.MemberRepository;
@@ -17,44 +14,41 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
-public class ReservationService {
+public class ReservationRegisterService {
+
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationTimeRepository reservationTimeRepository,
-                              final ReservationRepository reservationRepository,
-                              final ThemeRepository themeRepository, final MemberRepository memberRepository) {
+    public ReservationRegisterService(final ReservationTimeRepository reservationTimeRepository,
+                                      final ReservationRepository reservationRepository,
+                                      final ThemeRepository themeRepository, final MemberRepository memberRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
 
-    @Transactional(readOnly = true)
-    public ReservationResponses findEntireReservationList() {
-        final List<ReservationResponse> reservationResponses = reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-        return new ReservationResponses(reservationResponses);
-    }
-
-    public ReservationResponse create(final ReservationRequest reservationRequest) {
+    public ReservationResponse register(final ReservationRequest reservationRequest) {
         validateDuplicatedReservation(reservationRequest);
         final ReservationTime reservationTime = getReservationTime(reservationRequest);
         final Theme theme = getTheme(reservationRequest);
         final Member member = getMember(reservationRequest);
         validatePastDate(reservationRequest, reservationTime);
-        final Reservation reservation = new Reservation(member, reservationRequest.date(), reservationTime, theme);
+        final Reservation reservation = createReservation(reservationRequest, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
+    }
+
+    private Reservation createReservation(final ReservationRequest reservationRequest, final Member member, final ReservationTime reservationTime, final Theme theme) {
+        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
+            return Reservation.waiting(member, reservationRequest.date(), reservationTime, theme);
+        }
+        return Reservation.reserved(member, reservationRequest.date(), reservationTime, theme);
     }
 
     private ReservationTime getReservationTime(final ReservationRequest reservationRequest) {
@@ -73,9 +67,10 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(final ReservationRequest reservationRequest) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationRequest.date(),
+        if (reservationRepository.existsByDateAndTime_IdAndTheme_IdAndMember_Id(reservationRequest.date(),
                 reservationRequest.timeId(),
-                reservationRequest.themeId())) {
+                reservationRequest.themeId(),
+                reservationRequest.memberId())) {
             throw new ReservationFailException("이미 예약이 등록되어 있습니다.");
         }
     }
@@ -85,28 +80,5 @@ public class ReservationService {
         if (LocalDateTime.now().isAfter(reservationDateTime)) {
             throw new ReservationFailException("지나간 날짜와 시간으로 예약할 수 없습니다.");
         }
-    }
-
-    public void delete(final Long id) {
-        reservationRepository.deleteById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public ReservationResponses findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
-                                                 final LocalDate dateTo) {
-        final List<ReservationResponse> reservationResponses = reservationRepository
-                .findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo)
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-        return new ReservationResponses(reservationResponses);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationsMineResponse> findReservationsByMember(final Member member) {
-        return reservationRepository.findByMember(member)
-                .stream()
-                .map(ReservationsMineResponse::from)
-                .toList();
     }
 }

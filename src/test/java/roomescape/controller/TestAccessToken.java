@@ -19,4 +19,8 @@ public class TestAccessToken {
     public String getUserToken() {
         return jwtTokenProvider.createToken(USER);
     }
+
+    public String getUserToken(String email) {
+        return jwtTokenProvider.createToken(email);
+    }
 }

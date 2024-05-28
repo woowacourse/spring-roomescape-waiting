@@ -14,7 +14,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @Column(nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,13 +24,14 @@ public class Reservation {
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private ReservationStatus status;
 
     protected Reservation() {
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme, ReservationStatus.RESERVED);
+    private Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
@@ -41,6 +42,22 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
+    }
+
+    public static Reservation reserved(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+        return new Reservation(member, date, time, theme, ReservationStatus.RESERVED);
+    }
+
+    public static Reservation waiting(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+        return new Reservation(member, date, time, theme, ReservationStatus.WAITING);
+    }
+
+    public void changeToReserved() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
+    public boolean isWaiting() {
+        return this.status.isWaiting();
     }
 
     public Member getMember() {
@@ -65,5 +82,17 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public Long getTimeId() {
+        return time.getId();
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public Long getMemberId() {
+        return member.getId();
     }
 }

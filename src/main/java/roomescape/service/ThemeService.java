@@ -3,9 +3,9 @@ package roomescape.service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.domain.dto.ThemeRequest;
 import roomescape.domain.dto.ThemeResponse;
-import roomescape.domain.dto.ThemeResponses;
 import roomescape.exception.DeleteNotAllowException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -23,15 +23,15 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ThemeResponses findAll() {
+    public ResponsesWrapper<ThemeResponse> findAll() {
         final List<ThemeResponse> themeResponses = themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
-        return new ThemeResponses(themeResponses);
+        return new ResponsesWrapper<>(themeResponses);
     }
 
-    public ThemeResponse create(final ThemeRequest themeRequest) {
+    public ThemeResponse register(final ThemeRequest themeRequest) {
         final Theme theme = themeRepository.save(themeRequest.toEntity());
         return ThemeResponse.from(theme);
     }
@@ -41,14 +41,14 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public ThemeResponses getPopularThemeList(final LocalDate startDate, final LocalDate endDate, final Long count) {
+    public ResponsesWrapper<ThemeResponse> findPopularTheme(final LocalDate startDate, final LocalDate endDate, final Long count) {
         final List<Theme> themes = themeRepository.findPopularThemeByDate(startDate, endDate, PageRequest.of(0, count.intValue()));
         final List<ThemeResponse> themeResponses = themes.stream().map(ThemeResponse::from).toList();
-        return new ThemeResponses(themeResponses);
+        return new ResponsesWrapper<>(themeResponses);
     }
 
     private void validateExistReservation(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByTheme_Id(id)) {
             throw new DeleteNotAllowException("예약이 등록된 테마는 제거할 수 없습니다.");
         }
     }

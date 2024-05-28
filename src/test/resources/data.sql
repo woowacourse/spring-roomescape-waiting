@@ -1,15 +1,23 @@
 -- initialize data
-DELETE FROM reservation;
-ALTER TABLE reservation ALTER COLUMN id RESTART;
+DELETE
+FROM reservation;
+ALTER TABLE reservation
+    ALTER COLUMN id RESTART;
 
-DELETE FROM reservation_time;
-ALTER TABLE reservation_time ALTER COLUMN id RESTART;
+DELETE
+FROM reservation_time;
+ALTER TABLE reservation_time
+    ALTER COLUMN id RESTART;
 
-DELETE FROM theme;
-ALTER TABLE theme ALTER COLUMN id RESTART;
+DELETE
+FROM theme;
+ALTER TABLE theme
+    ALTER COLUMN id RESTART;
 
-DELETE FROM member;
-ALTER TABLE member ALTER COLUMN id RESTART;
+DELETE
+FROM member;
+ALTER TABLE member
+    ALTER COLUMN id RESTART;
 
 -- reservation_time
 INSERT INTO reservation_time(start_at)
@@ -33,6 +41,8 @@ VALUES ('레벨4 탈출', '우테코 레벨5를 탈출하는 내용입니다.', 
 INSERT INTO member(email, password, salt, name, role)
 VALUES ('user@test.com', 'hashedpassword', 'salt', 'poke', 'USER');
 INSERT INTO member(email, password, salt, name, role)
+VALUES ('user2@test.com', 'hashedpassword', 'salt', 'duck', 'USER');
+INSERT INTO member(email, password, salt, name, role)
 VALUES ('admin@test.com', 'yAD5RFQKSwFkOImAX+hDr1RSlsR7MBBSFr/xni5sGOE=', 'SZj5iqlnmc4cLvpOAS0a1g==', 'wedge', 'ADMIN');
 -- reservation
 INSERT INTO reservation(date, time_id, theme_id, member_id, status)
@@ -51,4 +61,7 @@ INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2099-04-30', 1, 1, 1, 'RESERVED');
 INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2999-04-30', 1, 1, 2, 'RESERVED');
-
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2999-04-30', 1, 1, 3, 'WAITING');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2999-04-30', 1, 1, 1, 'WAITING');

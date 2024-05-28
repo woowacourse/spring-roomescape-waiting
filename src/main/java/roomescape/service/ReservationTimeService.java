@@ -4,10 +4,9 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.BookResponse;
-import roomescape.domain.dto.BookResponses;
 import roomescape.domain.dto.ReservationTimeRequest;
 import roomescape.domain.dto.ReservationTimeResponse;
-import roomescape.domain.dto.ReservationTimeResponses;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.exception.DeleteNotAllowException;
 import roomescape.exception.DuplicateNotAllowException;
 import roomescape.repository.ReservationRepository;
@@ -27,15 +26,15 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ReservationTimeResponses findAll() {
+    public ResponsesWrapper<ReservationTimeResponse> findAll() {
         final List<ReservationTimeResponse> reservationTimeRespons = reservationTimeRepository.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
-        return new ReservationTimeResponses(reservationTimeRespons);
+        return new ResponsesWrapper<>(reservationTimeRespons);
     }
 
-    public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
+    public ReservationTimeResponse register(ReservationTimeRequest reservationTimeRequest) {
         validateDuplicatedTime(reservationTimeRequest);
         final ReservationTime reservationTime = reservationTimeRepository.save(reservationTimeRequest.toEntity());
         return ReservationTimeResponse.from(reservationTime);
@@ -53,21 +52,21 @@ public class ReservationTimeService {
     }
 
     private void validateExistReservation(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByTime_Id(id)) {
             throw new DeleteNotAllowException("예약이 등록된 시간은 제거할 수 없습니다.");
         }
     }
 
-    public BookResponses findAvailableBookList(final LocalDate date, final Long themeId) {
+    public ResponsesWrapper<BookResponse> findAvailableBookList(final LocalDate date, final Long themeId) {
         List<ReservationTime> reservedReservationTimes = reservationRepository
-                .findByDateAndThemeId(date, themeId)
+                .findByDateAndTheme_Id(date, themeId)
                 .stream().map(Reservation::getTime).toList();
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         final List<BookResponse> bookResponses = reservationTimes.stream()
                 .map(reservationTime -> getBookResponse(reservationTime, reservedReservationTimes))
                 .toList();
-        return new BookResponses(bookResponses);
+        return new ResponsesWrapper<>(bookResponses);
     }
 
     private BookResponse getBookResponse(final ReservationTime reservationTime,

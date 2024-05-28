@@ -82,4 +82,14 @@ public class AdminPageTest {
                 .then().log().all()
                 .statusCode(401);
     }
+
+    @DisplayName("waiting 페이지 URL 요청이 올바르게 연결된다.")
+    @Test
+    void given_adminToken_when_GetWaitingPage_then_statusCodeIsOk() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
