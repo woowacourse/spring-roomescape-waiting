@@ -16,7 +16,7 @@ import roomescape.dto.token.TokenDto;
 import roomescape.repository.MemberRepository;
 
 @Sql("/member-test-data.sql")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class AuthServiceTest {
 
