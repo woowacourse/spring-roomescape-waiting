@@ -2,8 +2,5 @@ package roomescape.dto;
 
 import java.time.LocalDate;
 
-public interface ReservationRequest {
-    LocalDate date();
-    Long timeId();
-    Long themeId();
+public record ReservationRequest(Long memberId, LocalDate date, long timeId, long themeId) {
 }

@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import roomescape.domain.Member;
-import roomescape.dto.MemberReservationRequest;
+import roomescape.config.Authorization;
 import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
@@ -32,22 +32,24 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<MemberReservationResponse>> getMyReservations(Member member) {
-        List<MemberReservationResponse> response = memberService.getReservationsOf(member);
+    public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@Authorization long memberId) {
+        List<MemberReservationResponse> response = memberService.findReservationsByMemberId(memberId);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(
-            @RequestBody MemberReservationRequest request,
-            Member member
+            @Authorization long memberId,
+            @RequestBody ReservationRequest request
     ) {
-        ReservationResponse response = reservationService.addMemberReservation(request, member);
+        ReservationRequest requestWithMemberId = new ReservationRequest(memberId, request.date(), request.timeId(),
+                request.themeId());
+        ReservationResponse response = reservationService.save(requestWithMemberId);
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 
-    @GetMapping
+    @GetMapping("/check")
     public ResponseEntity<Void> checkReservationExists(
             @RequestParam LocalDate date,
             @RequestParam Long timeId,

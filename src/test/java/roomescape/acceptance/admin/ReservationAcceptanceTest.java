@@ -27,7 +27,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
-import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.CustomExceptionResponse;
 
@@ -54,7 +54,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         @DisplayName("정상 작동")
         @Test
         void addReservation_success() {
-            AdminReservationRequest requestBody = getRequestBody(
+            ReservationRequest requestBody = getRequestBody(
                     LocalDate.parse("2099-12-30")
             );
 
@@ -72,7 +72,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         @DisplayName("예외 발생 - 과거 시간에 대한 예약 추가한다.")
         @Test
         void addReservation_forPastTime_fail() {
-            AdminReservationRequest reservationForPast = getRequestBody(
+            ReservationRequest reservationForPast = getRequestBody(
                     LocalDate.now().minusDays(1)
             );
 
@@ -89,7 +89,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         @DisplayName("예외 발생 - 이미 있는 예약을 추가한다.")
         @TestFactory
         Stream<DynamicTest> addReservation_alreadyExist_fail() {
-            AdminReservationRequest requestBody = getRequestBody(
+            ReservationRequest requestBody = getRequestBody(
                     LocalDate.parse("2099-12-31")
             );
 
@@ -109,8 +109,8 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
             );
         }
 
-        private AdminReservationRequest getRequestBody(LocalDate date) {
-            return new AdminReservationRequest(
+        private ReservationRequest getRequestBody(LocalDate date) {
+            return new ReservationRequest(
                     PRE_INSERTED_CUSTOMER_1.getId(),
                     date,
                     PRE_INSERTED_RESERVATION_TIME_1.getId(),
@@ -118,7 +118,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
             );
         }
 
-        private ValidatableResponse sendPostRequest(AdminReservationRequest requestBody) {
+        private ValidatableResponse sendPostRequest(ReservationRequest requestBody) {
             return RestAssured.given().log().all()
                     .cookie("token", adminToken)
                     .contentType(ContentType.JSON)

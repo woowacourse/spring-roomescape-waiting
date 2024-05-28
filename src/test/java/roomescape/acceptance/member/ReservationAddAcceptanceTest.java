@@ -21,7 +21,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.MemberReservationRequest;
+import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.CustomExceptionResponse;
 
@@ -31,7 +31,7 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("정상 작동")
     @Test
     void addReservation_success() {
-        MemberReservationRequest requestBody = getRequestBody(
+        ReservationRequest requestBody = getRequestBody(
                 LocalDate.parse("2099-01-11")
         );
 
@@ -44,7 +44,7 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("예외 발생 - 과거 시간에 대한 예약 추가한다.")
     @Test
     void addReservation_forPastTime_fail() {
-        MemberReservationRequest reservationForPast = getRequestBody(
+        ReservationRequest reservationForPast = getRequestBody(
                 LocalDate.now().minusDays(1)
         );
 
@@ -61,7 +61,7 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("예외 발생 - 이미 있는 예약을 추가한다.")
     @TestFactory
     Stream<DynamicTest> addReservation_alreadyExist_fail() {
-        MemberReservationRequest requestBody = getRequestBody(
+        ReservationRequest requestBody = getRequestBody(
                 LocalDate.parse("2099-01-11")
         );
 
@@ -82,15 +82,16 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
         );
     }
 
-    private MemberReservationRequest getRequestBody(LocalDate date) {
-        return new MemberReservationRequest(
+    private ReservationRequest getRequestBody(LocalDate date) {
+        return new ReservationRequest(
+                null,
                 date,
                 PRE_INSERTED_RESERVATION_TIME_1.getId(),
                 PRE_INSERTED_THEME_1.getId()
         );
     }
 
-    private ValidatableResponse sendPostRequest(MemberReservationRequest requestBody) {
+    private ValidatableResponse sendPostRequest(ReservationRequest requestBody) {
         return RestAssured.given().log().ifValidationFails()
                 .cookie("token", customerToken)
                 .contentType(ContentType.JSON)
