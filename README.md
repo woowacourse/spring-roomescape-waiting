@@ -4,53 +4,21 @@
 - http method: GET
 - uri: /admin
 - file path: templates/admin/index.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 어드민 예약 페이지 접근
 - http method: GET
 - uri: /admin/reservation
 - file path: templates/admin/reservation-new.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 어드민 시간 페이지 접근
 - http method: GET
 - uri: /admin/time
 - file path: templates/admin/time.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 어드민 테마 페이지 접근
 - http method: GET
 - uri: /admin/theme
 - file path: templates/admin/theme.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 사용자 예약 페이지 접근
 - http method: GET
@@ -72,37 +40,84 @@
 - uri: /member/reservation
 - file path: templates/reservation-mine.html
 
+### 권한 없는 페이지 접근 시도
+- 회원이 아닌 사용자: 로그인 페이지, 회원가입 페이지 접근 가능
+- 일반 회원: 어드민 권한 페이지 외 접근 가능
+- 어드민: 모든 페이지 접근 가능
+- 사용자는 권한 없음
+  ```
+    HTTP/1.1 403
 
-### 모든 예약 조회
+    {
+    "message": "권한이 없는 접근입니다."
+    }
+  ```
+
+### 모든 예약 조회 - 어드민
 - http method: GET
 - uri: /reservations
-- response
-  ```
-  HTTP/1.1 200 
-  Content-Type: application/json
+  - response
+    ```
+    HTTP/1.1 200 
+    Content-Type: application/json
   
-  [
-      {
-          "id": 1,
-          "date": "2023-01-01",
-          "time": {
-            "id": 1.
-            "startAt": "10:00"
-          },
-          "theme": {
+    [
+        {
             "id": 1,
-            "name": "레벨2 탈출",
-            "description": "우테코 레벨2를 탈출하는 내용입니다.",
-            "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-          },
-          "member": {
+            "date": "2023-01-01",
+            "time": {
+              "id": 1.
+              "startAt": "10:00"
+            },
+            "theme": {
+              "id": 1,
+              "name": "레벨2 탈출",
+              "description": "우테코 레벨2를 탈출하는 내용입니다.",
+              "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+            },
+            "member": {
+              "id": 1,
+              "name": "lini",
+              "email": "lini@email.com",
+              "role": "GUEST"
+            },
+            "status": "예약"
+        }
+    ]
+    ```
+    
+### 모든 예약 대기 조회 - 어드민
+- http method: GET
+- uri: /waitings
+  - response
+    ```
+    HTTP/1.1 200 
+    Content-Type: application/json
+  
+    [
+        {
             "id": 1,
-            "name": "lini",
-            "email": "lini@email.com"
-          }
-      }
-  ]
-  ```
+            "date": "2023-01-01",
+            "time": {
+              "id": 1.
+              "startAt": "10:00"
+            },
+            "theme": {
+              "id": 1,
+              "name": "레벨2 탈출",
+              "description": "우테코 레벨2를 탈출하는 내용입니다.",
+              "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+            },
+            "member": {
+              "id": 1,
+              "name": "lini",
+              "email": "lini@email.com",
+              "role": "GUEST"
+            },
+            "status": "예약대기"
+        }
+    ]
+    ```
 
 ### 조건별 예약 조회 - 어드민
 - http method: GET
@@ -133,8 +148,10 @@
           "member": {
             "id": 1,
             "name": "lini",
-            "email": "lini@email.com"
-          }
+            "email": "lini@email.com",
+            "role": "GUEST"
+          },
+          "status": "예약"
       }
   ]
   ```
@@ -155,9 +172,10 @@
   }
   ```
   
-### 예약 추가 - 사용자
+### 예약 및 예약 대기 추가 - 사용자
 - http method: POST
 - uri: /reservations
+- description: 예약이 이미 존재한다면, 자동으로 예약 대기로 추가된다.
 - request
   ```
   POST /reservations HTTP/1.1
@@ -181,10 +199,11 @@
     {
         "id": 1,
         "date": "2023-08-05",
+        "status": "예약",
         "time" : {
             "id": 1.
             "startAt": "10:00"
-        }
+        },
         "theme": {
             "id": 1,
             "name": "레벨2 탈출",
@@ -195,7 +214,8 @@
           "id": 1,
           "name": "lini",
           "email": "lini@email.com"
-        }
+        },
+        "status": "예약"
     }
     ```
   - 추가 실패: 중복 예약 불가능 오류
@@ -241,10 +261,19 @@
     "message": "더이상 존재하지 않는 테마입니다."
     }
     ```
+  - 추가 실패 : 이미 예약 혹은 예약 대기가 존재 오류
+    ```
+    HTTP/1.1 400
 
-### 예약 삭제
+    {
+    "message": "이미 예약(대기) 상태입니다."
+    }
+    ```
+
+### 예약 삭제 - 어드민
 - http method: DELETE
-- uri: /reservations/{id}
+- cookie: token={token}
+- uri: /admin/reservations/{id}
   - path variable
     - id: 예약 정보 식별자
 - response
@@ -252,21 +281,59 @@
     ```
     HTTP/1.1 204
     ```
-  - 삭제 실패: 어드민 권한이 아닌 일반 사용자가 본인 예약 외의 것을 삭제 시도
+  - 삭제 실패: 일정이 지난 예약을 삭제 시도
     ```
-    HTTP/1.1 401
+    HTTP/1.1 400
 
     {
-    "message": "예약을 삭제할 권한이 없습니다."
+    "message": "이미 지난 예약은 삭제할 수 없습니다."
     }
     ```
-  
+  - 삭제 실패: 관리자 외 예약 삭제 시도
+    ```
+    HTTP/1.1 403
+
+    {
+    "message": "예약 대기를 삭제할 권한이 없습니다."
+    }
+    ```
+    
+### 예약 대기 삭제
+- http method: DELETE
+- cookie: token={token}
+- uri: /waitings/{id}
+  - path variable
+    - id: 예약 정보 식별자
+- response
+  - 존재하는 id로 삭제 요청
+    ```
+    HTTP/1.1 204
+    ```
+  - 삭제 실패: 예약으로 전환된 예약 대기를 삭제할 수 없다.
+    ```
+    HTTP/1.1 400
+
+    {
+    "message": "예약은 삭제할 수 없습니다\. 관리자에게 문의해주세요."
+    }
+    ```
+  - 삭제 실패: 일반 사용자가 본인 예약 대기 외의 것을 삭제 시도
+    ```
+    HTTP/1.1 403
+
+    {
+    "message": "예약 대기를 삭제할 권한이 없습니다."
+    }
+    ```
+    
 ### 시간 추가
 - http method: POST
+- cookie: token={token}
 - uri: /times
 - request
   ```
   POST /times HTTP/1.1
+  cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
   Content-Type: application/json
    
   {
@@ -299,6 +366,14 @@
   
     {
       "message": "이미 같은 시간이 존재합니다."
+    }
+    ```  
+  - 추가 실패: 관리자 외 추가 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+    "message": "권한이 없습니다. 관리자에게 문의해주세요."
     }
     ```
 
@@ -343,6 +418,7 @@
 
 ### 시간 삭제
 - http method: DELETE
+- cookie: token = {token}
 - uri: /times/{id}
   - path variable
     - id: 시간 정보 식별자
@@ -356,16 +432,26 @@
     HTTP/1.1 400
 
     {
-      "message": "해당 시간에 예약이 존재해서 삭제할 수 없습니다."
+      "message": "해당 시간에 예약(대기)이 존재해서 삭제할 수 없습니다."
+    }
+    ```  
+  - 삭제 실패: 관리자 외 삭제 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+      "message": "권한이 없습니다. 관리자에게 문의해주세요."
     }
     ```
 
 ### 테마 추가
 - http method: POST
-- uri: /themes
+- cookie: token={token}
+- uri: /admin/themes
 - request
   ```
-  POST /themes HTTP/1.1
+  POST /admin/themes HTTP/1.1
+  cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
   content-type: application/json
   
   {
@@ -378,7 +464,7 @@
   - 추가 성공
     ```
     HTTP/1.1 201
-    Location: /themes/1
+    Location: /admin/themes/1
     Content-Type: application/json
 
     {
@@ -420,6 +506,14 @@
     {
       "message": "설명은 100자를 초과할 수 없습니다."
     }
+    ```  
+  - 추가 실패: 관리자 외 추가 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+      "message": "권한이 없습니다. 관리자에게 문의해주세요."
+    }
     ```
 
 ### 테마 조회
@@ -459,7 +553,8 @@
 
 ### 테마 삭제
 - http method: DELETE
-- uri: /themes/{id}
+- cookie: token={token}
+- uri: /admin/themes/{id}
   - path variable
     - id: 테마 정보 식별자
 - response
@@ -472,10 +567,18 @@
     HTTP/1.1 400
 
     {
-      "message": "해당 테마로 예약이 존재해서 삭제할 수 없습니다."
+      "message": "해당 테마로 예약(대기)이 존재해서 삭제할 수 없습니다."
     }
     ```
-    
+  - 삭제 실패: 관리자 외 삭제 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+      "message": "권한이 없습니다. 관리자에게 문의해주세요."
+    }
+    ```
+      
 ### 사용자 회원가입
 - http method: POST
 - uri: /members

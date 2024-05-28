@@ -1,4 +1,4 @@
-package roomescape.controller.page;
+package roomescape.acceptance.page;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -7,13 +7,13 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.controller.ControllerTest;
+import roomescape.acceptance.AcceptanceTest;
 import roomescape.service.auth.dto.LoginRequest;
 
 import java.util.stream.Stream;
 
 @Sql("/truncate-with-admin-and-guest.sql")
-class AdminPageControllerTest extends ControllerTest {
+class AdminPageAcceptanceTest extends AcceptanceTest {
     private String token;
 
     @DisplayName("Admin Page 홈화면 접근 성공 테스트")

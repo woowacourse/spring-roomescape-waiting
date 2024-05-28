@@ -12,6 +12,8 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationdetail.ReservationDetail;
+import roomescape.domain.reservationdetail.ReservationDetailRepository;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
@@ -26,7 +28,6 @@ import roomescape.service.schedule.dto.ReservationTimeResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,12 +47,15 @@ class ReservationTimeServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationDetailRepository reservationDetailRepository;
 
     @DisplayName("새로운 예약 시간을 저장한다.")
     @Test
     void create() {
         //given
-        LocalTime startAt = LocalTime.now();
+        LocalTime startAt = LocalTime.of(10, 0);
+        ;
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(startAt);
 
         //when
@@ -68,7 +72,7 @@ class ReservationTimeServiceTest {
     @Test
     void findAll() {
         //given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
 
         //when
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.findAll();
@@ -81,7 +85,8 @@ class ReservationTimeServiceTest {
     @Test
     void duplicatedTime() {
         //given
-        LocalTime time = LocalTime.now();
+        LocalTime time = LocalTime.of(10, 0);
+        ;
         reservationTimeRepository.save(new ReservationTime(time));
 
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(time);
@@ -96,40 +101,41 @@ class ReservationTimeServiceTest {
     @Test
     void cannotDeleteTime() {
         //given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        ReservationDetail reservationDetail = reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, reservationTime), theme));
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when&then
         long timeId = reservationTime.getId();
         assertThatThrownBy(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(InvalidReservationException.class)
-                .hasMessage("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
+                .hasMessage("해당 시간에 예약(대기)이 존재해서 삭제할 수 없습니다.");
     }
 
     @DisplayName("해당 테마와 날짜에 예약이 가능한 시간 목록을 조회한다.")
     @Test
     void findAvailableTimes() {
         //given
-        LocalDate date = LocalDate.MAX;
-        LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+        ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
+        LocalTime time = LocalTime.of(10, 0);
         ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime(time));
         ReservationTime notBookedReservationTime = reservationTimeRepository.save(
                 new ReservationTime(time.plusHours(5)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        Schedule schedule = new Schedule(ReservationDate.of(date), bookedReservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        ReservationDetail reservationDetail = reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, bookedReservationTime), theme));
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when
         List<AvailableReservationTimeResponse> result = reservationTimeService.findAvailableTimes(
-                new ReservationTimeReadRequest(date, theme.getId()));
+                new ReservationTimeReadRequest(reservationDate.getValue(), theme.getId()));
 
         //then
         boolean isBookedOfBookedTime = result.stream()

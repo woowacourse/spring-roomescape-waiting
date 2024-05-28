@@ -1,6 +1,7 @@
 package roomescape.service.theme;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
     private static final long LIMIT = 10;
     private static final LocalDate START_DATE = LocalDate.now().minusDays(7);
@@ -26,6 +28,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ThemeResponse create(ThemeRequest themeRequest) {
         Theme theme = themeRequest.toTheme();
         validateDuplicated(theme.getName());
@@ -45,14 +48,15 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(long id) {
         validateByReservation(id);
         themeRepository.deleteById(id);
     }
 
     private void validateByReservation(long id) {
-        if (reservationRepository.existsByThemeId(id)) {
-            throw new InvalidReservationException("해당 테마로 예약이 존재해서 삭제할 수 없습니다.");
+        if (reservationRepository.existsByDetailThemeId(id)) {
+            throw new InvalidReservationException("해당 테마로 예약(대기)이 존재해서 삭제할 수 없습니다.");
         }
     }
 

@@ -28,10 +28,14 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new MemberHandlerInterceptor(tokenProvider, memberService))
                 .addPathPatterns("/reservations/**")
                 .addPathPatterns("/reservation/**")
-                .addPathPatterns("/logout");
+                .addPathPatterns("/members/reservations")
+                .addPathPatterns("/logout")
+                .addPathPatterns("/waitings/**");
         registry.addInterceptor(new AdminRoleHandlerInterceptor(tokenProvider, memberService))
                 .addPathPatterns("/admin/**")
-                .addPathPatterns("/members");
+                .addPathPatterns("/members")
+                .addPathPatterns("/times/**")
+                .excludePathPatterns("/times/available");
     }
 
     @Override

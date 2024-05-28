@@ -1,9 +1,11 @@
+const MEMBER_RESERVATION_API_ENDPOINT = '/members/reservations';
+const WAITING_API_ENDPOINT = '/waitings';
 document.addEventListener('DOMContentLoaded', () => {
     /*
     TODO: [2단계] 내 예약 목록 조회 기능
           endpoint 설정
      */
-    fetch('/members/reservations') // 내 예약 목록 조회 API 호출
+    fetch(MEMBER_RESERVATION_API_ENDPOINT) // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -26,7 +28,9 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        const status = item.reservationStatus.status === '예약'
+            ? item.reservationStatus.status
+            : (item.reservationStatus.rank + '번째 ' + item.reservationStatus.status);
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
@@ -42,7 +46,7 @@ function render(data) {
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
-                requestDeleteWaiting(item.id).then(() => window.location.reload());
+                requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때
@@ -55,11 +59,12 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = `${WAITING_API_ENDPOINT}/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
-        if (response.status === 204) return;
-        throw new Error('Delete failed');
+        if (response.status !== 204) return response.json().then(data => {
+            throw new Error(data.message || 'Delete failed');
+        });
     });
 }

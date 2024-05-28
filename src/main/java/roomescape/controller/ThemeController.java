@@ -1,13 +1,11 @@
 package roomescape.controller;
 
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.theme.ThemeService;
-import roomescape.service.theme.dto.ThemeRequest;
 import roomescape.service.theme.dto.ThemeResponse;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -20,12 +18,6 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
-    @PostMapping
-    public ResponseEntity<ThemeResponse> createTheme(@RequestBody @Valid ThemeRequest themeRequest) {
-        ThemeResponse themeResponse = themeService.create(themeRequest);
-        return ResponseEntity.created(URI.create("/themes/" + themeResponse.id())).body(themeResponse);
-    }
-
     @GetMapping
     public List<ThemeResponse> findAllThemes() {
         return themeService.findAll();
@@ -34,11 +26,5 @@ public class ThemeController {
     @GetMapping("/popular")
     public List<ThemeResponse> findPopularThemes() {
         return themeService.findPopularThemes();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") long id) {
-        themeService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

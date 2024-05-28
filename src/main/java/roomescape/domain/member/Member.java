@@ -2,6 +2,8 @@ package roomescape.domain.member;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 public class Member {
     @Id
@@ -43,6 +45,18 @@ public class Member {
 
     public boolean isAdmin() {
         return role.isAdmin();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Member other)) return false;
+        return Objects.equals(id, other.id);
     }
 
     public Long getId() {
