@@ -52,7 +52,7 @@ public class ReservationController {
     @GetMapping("/reservations/my")
     public ResponseEntity<List<MemberReservationStatusResponse>> findMemberReservationStatus(
             @Authenticated Accessor accessor) {
-        return ResponseEntity.ok(reservationService.findAllByMemberWithStatus(accessor.id()));
+        return ResponseEntity.ok(reservationService.findAllByMemberId(accessor.id()));
     }
 
     @PostMapping("/reservations")

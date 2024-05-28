@@ -65,7 +65,7 @@ class ReservationServiceTest {
     void should_return_response_when_my_reservations_requested_all() {
         when(reservationRepository.findAllReservedByMemberId(1L)).thenReturn(List.of(SAVED_RESERVATION_1));
 
-        assertThat(reservationService.findAllByMemberWithStatus(1L))
+        assertThat(reservationService.findAllByMemberId(1L))
                 .containsExactly(new MemberReservationStatusResponse(SAVED_RESERVATION_1));
     }
 

@@ -67,7 +67,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
+    public List<MemberReservationStatusResponse> findAllByMemberId(Long memberId) {
         List<MemberReservationStatusResponse> memberReservationStatusResponses = new ArrayList<>();
 
         findAllMembersReservedReservation(memberReservationStatusResponses, memberId);
