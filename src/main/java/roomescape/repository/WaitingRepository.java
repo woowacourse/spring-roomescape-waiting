@@ -15,12 +15,12 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Transactional
     @Query("""
-            SELECT new roomescape.model.WaitingWithRank(w, (SELECT COUNT(w2) + 1
-                        FROM Waiting w2
-                        WHERE w2.reservationInfo = w.reservationInfo
-                            AND w2.id < w.id))
-            FROM Waiting w
-            WHERE w.member.id = ?1
+            SELECT new roomescape.model.WaitingWithRank(w1, COUNT(w2) + 1)
+            FROM Waiting w1
+                LEFT JOIN Waiting w2
+                    ON w1.reservationInfo = w2.reservationInfo AND w2.id < w1.id
+            WHERE w1.member.id = ?1
+            GROUP BY w1
             """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
