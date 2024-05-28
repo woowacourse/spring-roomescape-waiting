@@ -7,7 +7,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.theme.Theme;
 
-public record CreateReservationRequest(LocalDate date, long timeId, long themeId, long memberId) {
+public record ReservationCreationRequest(LocalDate date, long timeId, long themeId, long memberId) {
 
     public Reservation toReservation(ReservationTime time, Theme theme, Member member) {
         return new Reservation(date, member, time, theme);

@@ -21,7 +21,7 @@ import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.domain.reservationwaiting.WaitingWithRank;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.service.dto.request.CreateReservationRequest;
+import roomescape.service.dto.request.ReservationCreationRequest;
 import roomescape.service.dto.response.PersonalReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
@@ -67,7 +67,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse addReservation(CreateReservationRequest request) {
+    public ReservationResponse addReservation(ReservationCreationRequest request) {
         Reservation reservation = createReservation(request);
         reservation.validateFutureReservation(LocalDateTime.now(clock));
         validateDuplicatedReservation(reservation);
@@ -75,7 +75,7 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    private Reservation createReservation(CreateReservationRequest request) {
+    private Reservation createReservation(ReservationCreationRequest request) {
         Member member = getMember(request.memberId());
         ReservationTime reservationTime = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());

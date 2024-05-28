@@ -2,7 +2,7 @@ package roomescape.controller.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import roomescape.service.dto.request.CreateTokenRequest;
+import roomescape.service.dto.request.TokenCreationRequest;
 
 public record LoginRequest(
         @NotBlank(message = "이메일은 필수 입력 값입니다.")
@@ -13,7 +13,7 @@ public record LoginRequest(
         String password
 ) {
 
-    public CreateTokenRequest toCreateTokenRequest() {
-        return new CreateTokenRequest(email, password);
+    public TokenCreationRequest toTokenCreationRequest() {
+        return new TokenCreationRequest(email, password);
     }
 }

@@ -15,7 +15,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.service.dto.request.CreateThemeRequest;
+import roomescape.service.dto.request.ThemeCreationRequest;
 import roomescape.service.dto.response.ThemeResponse;
 import roomescape.support.fixture.MemberFixture;
 import roomescape.support.fixture.ReservationFixture;
@@ -57,7 +57,7 @@ class ThemeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("테마를 추가한다.")
     void addTheme() {
-        CreateThemeRequest request = new CreateThemeRequest("테마", "테마 설명", "https://example.com");
+        ThemeCreationRequest request = new ThemeCreationRequest("테마", "테마 설명", "https://example.com");
 
         ThemeResponse themeResponse = themeService.addTheme(request);
 

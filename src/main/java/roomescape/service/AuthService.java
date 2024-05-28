@@ -9,7 +9,7 @@ import roomescape.security.authentication.AnonymousAuthentication;
 import roomescape.security.authentication.Authentication;
 import roomescape.security.authentication.DefaultAuthentication;
 import roomescape.security.provider.TokenProvider;
-import roomescape.service.dto.request.CreateTokenRequest;
+import roomescape.service.dto.request.TokenCreationRequest;
 import roomescape.service.dto.response.TokenResponse;
 
 @Service
@@ -30,9 +30,9 @@ public class AuthService {
         this.tokenProvider = tokenProvider;
     }
 
-    public TokenResponse authenticateMember(CreateTokenRequest createTokenRequest) {
-        Member member = getMember(createTokenRequest.email());
-        validatePassword(createTokenRequest.password(), member);
+    public TokenResponse authenticateMember(TokenCreationRequest request) {
+        Member member = getMember(request.email());
+        validatePassword(request.password(), member);
         String token = tokenProvider.createToken(Long.toString(member.getId()));
         return new TokenResponse(token);
     }

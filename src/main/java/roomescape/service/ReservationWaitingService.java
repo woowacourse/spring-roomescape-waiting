@@ -16,7 +16,7 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.service.dto.request.CreateReservationRequest;
+import roomescape.service.dto.request.ReservationCreationRequest;
 import roomescape.service.dto.response.ReservationResponse;
 
 @Service
@@ -47,7 +47,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public ReservationResponse addReservationWaiting(CreateReservationRequest request) {
+    public ReservationResponse addReservationWaiting(ReservationCreationRequest request) {
         Reservation reservation = getReservation(request);
         Member waitingMember = getMember(request.memberId());
         reservation.validateOwnerNotSameAsWaitingMember(waitingMember);
@@ -60,7 +60,7 @@ public class ReservationWaitingService {
         return ReservationResponse.from(reservationWaiting);
     }
 
-    private Reservation getReservation(CreateReservationRequest request) {
+    private Reservation getReservation(ReservationCreationRequest request) {
         ReservationTime time = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
         return reservationRepository.findByDateAndTimeAndTheme(request.date(), time, theme)

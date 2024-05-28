@@ -54,7 +54,8 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid ReservationRequest request,
                                                               @Auth Authentication authentication) {
         long memberId = authentication.getId();
-        ReservationResponse response = reservationService.addReservation(request.toCreateReservationRequest(memberId));
+        ReservationResponse response = reservationService.addReservation(
+                request.toReservationCreationRequest(memberId));
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);
     }

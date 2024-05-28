@@ -7,7 +7,7 @@ import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.service.dto.request.CreateMemberRequest;
+import roomescape.service.dto.request.MemberCreationRequest;
 import roomescape.service.dto.response.MemberResponse;
 
 @Service
@@ -23,7 +23,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse createMember(CreateMemberRequest request) {
+    public MemberResponse createMember(MemberCreationRequest request) {
         Member member = request.toMember(passwordEncoder.encode(request.password()), Role.USER);
         validateDuplicatedEmail(member.getEmail());
         Member savedMember = memberRepository.save(member);

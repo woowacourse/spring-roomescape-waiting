@@ -35,7 +35,7 @@ public class ReservationWaitingController {
                                                                         @Auth Authentication authentication) {
         long memberId = authentication.getId();
         ReservationResponse response = reservationWaitingService.addReservationWaiting(
-                request.toCreateReservationRequest(memberId));
+                request.toReservationCreationRequest(memberId));
         URI location = URI.create("/waitings/" + response.id());
         return ResponseEntity.created(location).body(response);
     }

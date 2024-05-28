@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import roomescape.security.authentication.Authentication;
 import roomescape.security.provider.TokenProvider;
-import roomescape.service.dto.request.CreateMemberRequest;
-import roomescape.service.dto.request.CreateTokenRequest;
+import roomescape.service.dto.request.MemberCreationRequest;
+import roomescape.service.dto.request.TokenCreationRequest;
 import roomescape.service.dto.response.TokenResponse;
 
 class AuthServiceTest extends BaseServiceTest {
@@ -33,7 +33,7 @@ class AuthServiceTest extends BaseServiceTest {
 
     @BeforeEach
     void setUp() {
-        CreateMemberRequest request = new CreateMemberRequest(EMAIL, PASSWORD, NICKNAME);
+        MemberCreationRequest request = new MemberCreationRequest(EMAIL, PASSWORD, NICKNAME);
         memberService.createMember(request);
     }
 
@@ -41,7 +41,7 @@ class AuthServiceTest extends BaseServiceTest {
     @DisplayName("인증 후 토큰을 생성한다.")
     void createToken() {
         doReturn("created_token").when(tokenProvider).createToken(any());
-        CreateTokenRequest request = new CreateTokenRequest(EMAIL, PASSWORD);
+        TokenCreationRequest request = new TokenCreationRequest(EMAIL, PASSWORD);
 
         TokenResponse response = authService.authenticateMember(request);
 
@@ -51,7 +51,7 @@ class AuthServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("비밀번호가 일치하지 않을 경우 예외를 발생시킨다.")
     void validatePassword_fail_when_password_not_matched() {
-        CreateTokenRequest request = new CreateTokenRequest(EMAIL, "wrong_password");
+        TokenCreationRequest request = new TokenCreationRequest(EMAIL, "wrong_password");
 
         assertThatThrownBy(() -> authService.authenticateMember(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class)

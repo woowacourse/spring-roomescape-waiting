@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.service.dto.request.CreateMemberRequest;
+import roomescape.service.dto.request.MemberCreationRequest;
 import roomescape.service.dto.response.MemberResponse;
 import roomescape.support.fixture.MemberFixture;
 
@@ -22,7 +22,7 @@ class MemberServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("회원을 생성한다.")
     void createMember() {
-        CreateMemberRequest request = new CreateMemberRequest("new@gmail.com", "password", "nickname");
+        MemberCreationRequest request = new MemberCreationRequest("new@gmail.com", "password", "nickname");
 
         MemberResponse memberResponse = memberService.createMember(request);
 

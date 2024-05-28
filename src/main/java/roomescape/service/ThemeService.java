@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.service.dto.request.CreateThemeRequest;
+import roomescape.service.dto.request.ThemeCreationRequest;
 import roomescape.service.dto.response.ThemeResponse;
 
 @Service
@@ -32,7 +32,7 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponse addTheme(CreateThemeRequest request) {
+    public ThemeResponse addTheme(ThemeCreationRequest request) {
         Theme theme = request.toTheme();
         validateDuplicateName(theme);
         Theme savedTheme = themeRepository.save(theme);

@@ -18,7 +18,7 @@ import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationwaiting.ReservationWaitingRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.service.dto.request.CreateReservationRequest;
+import roomescape.service.dto.request.ReservationCreationRequest;
 import roomescape.service.dto.response.PersonalReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.support.fixture.MemberFixture;
@@ -84,7 +84,7 @@ class ReservationServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("예약을 추가한다.")
     void addReservation() {
-        CreateReservationRequest request = new CreateReservationRequest(
+        ReservationCreationRequest request = new ReservationCreationRequest(
                 LocalDate.of(2024, 4, 9),
                 time.getId(),
                 theme.getId(),

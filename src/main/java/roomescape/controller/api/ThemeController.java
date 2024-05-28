@@ -46,7 +46,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> addTheme(@RequestBody @Valid ThemeRequest request) {
-        ThemeResponse themeResponse = themeService.addTheme(request.toCreateThemeRequest());
+        ThemeResponse themeResponse = themeService.addTheme(request.toThemeCreationRequest());
         return ResponseEntity.created(URI.create("/themes/" + themeResponse.id()))
                 .body(themeResponse);
     }

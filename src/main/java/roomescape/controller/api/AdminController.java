@@ -36,7 +36,7 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addAdminReservation(
             @RequestBody @Valid AdminReservationRequest request) {
-        ReservationResponse response = reservationService.addReservation(request.toCreateReservationRequest());
+        ReservationResponse response = reservationService.addReservation(request.toReservationCreationRequest());
         return ResponseEntity.created(URI.create("/reservation/" + response.id()))
                 .body(response);
     }

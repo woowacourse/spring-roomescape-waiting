@@ -29,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request) {
-        TokenResponse response = authService.authenticateMember(request.toCreateTokenRequest());
+        TokenResponse response = authService.authenticateMember(request.toTokenCreationRequest());
         ResponseCookie cookie = ResponseCookie.from(TOKEN_KEY_NAME, response.token())
                 .httpOnly(true)
                 .path("/")

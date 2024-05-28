@@ -3,7 +3,7 @@ package roomescape.controller.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import roomescape.service.dto.request.CreateThemeRequest;
+import roomescape.service.dto.request.ThemeCreationRequest;
 
 public record ThemeRequest(
         @NotBlank(message = "테마 이름을 입력해주세요.")
@@ -20,7 +20,7 @@ public record ThemeRequest(
         String thumbnail
 ) {
 
-    public CreateThemeRequest toCreateThemeRequest() {
-        return new CreateThemeRequest(name, description, thumbnail);
+    public ThemeCreationRequest toThemeCreationRequest() {
+        return new ThemeCreationRequest(name, description, thumbnail);
     }
 }

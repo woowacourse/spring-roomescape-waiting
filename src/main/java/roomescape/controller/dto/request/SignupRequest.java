@@ -3,7 +3,7 @@ package roomescape.controller.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import roomescape.service.dto.request.CreateMemberRequest;
+import roomescape.service.dto.request.MemberCreationRequest;
 
 public record SignupRequest(
         @NotBlank(message = "이메일은 필수 입력 값입니다.")
@@ -20,7 +20,7 @@ public record SignupRequest(
         String name
 ) {
 
-    public CreateMemberRequest toCreateMemberRequest() {
-        return new CreateMemberRequest(email, password, name);
+    public MemberCreationRequest toMemberCreationRequest() {
+        return new MemberCreationRequest(email, password, name);
     }
 }

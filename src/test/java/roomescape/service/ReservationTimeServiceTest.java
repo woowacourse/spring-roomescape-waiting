@@ -16,7 +16,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.service.dto.request.CreateReservationTimeRequest;
+import roomescape.service.dto.request.ReservationTimeCreationRequest;
 import roomescape.service.dto.response.AvailableReservationTimeResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.support.fixture.MemberFixture;
@@ -59,7 +59,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("예약 시간을 추가한다.")
     void addReservationTime() {
-        CreateReservationTimeRequest request = new CreateReservationTimeRequest(LocalTime.of(10, 30));
+        ReservationTimeCreationRequest request = new ReservationTimeCreationRequest(LocalTime.of(10, 30));
         ReservationTimeResponse response = reservationTimeService.addReservationTime(request);
 
         assertThat(response.startAt()).isEqualTo("10:30");
