@@ -19,7 +19,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.LoginRequest;
-import roomescape.dto.MemberPreviewResponse;
+import roomescape.dto.MemberResponse;
 import roomescape.util.JwtProvider;
 
 class AuthAcceptanceTest extends BaseAcceptanceTest {
@@ -45,7 +45,7 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
                 ),
                 dynamicTest("로그인 정보를 확인한다.", () -> {
                             String token = sendLoginRequest(customerRequest);
-                            MemberPreviewResponse response = sendCheckNameRequest(token);
+                            MemberResponse response = sendCheckNameRequest(token);
 
                             assertThat(response.name())
                                     .isEqualTo(PRE_INSERTED_CUSTOMER_1.getName());
@@ -64,13 +64,13 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
                 .extract().cookie("token");
     }
 
-    private MemberPreviewResponse sendCheckNameRequest(String token) {
+    private MemberResponse sendCheckNameRequest(String token) {
         return RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(MemberPreviewResponse.class);
+                .extract().as(MemberResponse.class);
     }
 
     @DisplayName("고객이 로그아웃 한다.")

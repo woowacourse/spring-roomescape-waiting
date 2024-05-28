@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.config.Authorization;
 import roomescape.domain.Member;
 import roomescape.dto.LoginRequest;
-import roomescape.dto.MemberPreviewResponse;
+import roomescape.dto.MemberResponse;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 
@@ -34,9 +34,9 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<MemberPreviewResponse> loginCheck(@Authorization long memberId) {
+    public ResponseEntity<MemberResponse> loginCheck(@Authorization long memberId) {
         Member member = memberService.getMemberById(memberId);
-        MemberPreviewResponse name = MemberPreviewResponse.from(member);
+        MemberResponse name = MemberResponse.from(member);
         return ResponseEntity.ok().body(name);
     }
 
