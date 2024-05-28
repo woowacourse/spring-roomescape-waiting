@@ -62,6 +62,43 @@ class ReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Id에 해당하는 예약을 삭제한다.")
+    void deleteById() {
+        // when
+        reservationRepository.deleteById(reservation.getId());
+
+        // then
+        final List<Reservation> actual = reservationRepository.findAll();
+        assertThat(actual).doesNotContain(reservation);
+    }
+
+    @Test
+    @DisplayName("특정 사용자의 예약 목록 및 대기 목록을 조회한다.")
+    void findByReservationsMemberId() {
+        final Long memberId = member.getId();
+        reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
+
+        final List<Reservation> actual = reservationRepository.findByMemberId(memberId);
+
+        assertAll(
+                () -> assertThat(actual).hasSize(2),
+                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.RESERVED),
+                () -> assertThat(actual.get(1).getStatus()).isEqualTo(ReservationStatus.WAITING)
+        );
+    }
+
+    @Test
+    @DisplayName("날짜와 테마 Id에 해당하는 예약 목록을 조회한다.")
+    void findAllByDateAndThemeId() {
+        // when
+        final List<Reservation> actual = reservationRepository.findByDateAndThemeId(
+                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId());
+
+        // then
+        assertThat(actual).hasSize(1);
+    }
+
+    @Test
     @DisplayName("검색 조건에 따른 예약 목록을 조회한다.")
     void findAllByFilterParameter() {
         // when
@@ -74,9 +111,31 @@ class ReservationRepositoryTest {
         assertThat(actual).hasSize(1);
     }
 
+    @ParameterizedTest
+    @EnumSource(ReservationStatus.class)
+    @DisplayName("예약 상태에 따른 예약 목록을 조회한다.")
+    void findByStatus(final ReservationStatus status) {
+        final List<Reservation> actual = reservationRepository.findByStatus(status);
+
+        assertThat(actual).allSatisfy(reservation -> assertThat(reservation.getStatus()).isEqualTo(status));
+    }
+
     @Test
-    @DisplayName("동일 시간대의 예약 건수를 조회한다.")
-    void countByDateAndTime() {
+    @DisplayName("timeId에 해당하는 예약 건수를 조회한다.")
+    void countByTimeId() {
+        // given
+        final long timeId = 2L;
+
+        // when
+        final int actual = reservationRepository.countByTimeId(timeId);
+
+        // then
+        assertThat(actual).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("날짜, 시간 Id, 테마 Id로 예약 건수를 조회한다.")
+    void countByDateAndTimeIdAndThemeId() {
         // when
         final int actual = reservationRepository.countByDateAndTimeIdAndThemeId(
                 LocalDate.parse(DATE_MAY_EIGHTH), reservationTime.getId(), theme.getId()
@@ -84,6 +143,29 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(actual).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("날짜, 테마, 시간, 상태, 예약 대기 id로 rank를 카운트한다.")
+    void countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan() {
+        final Member tenny = memberRepository.save(MEMBER_TENNY());
+        final Member brown = memberRepository.save(MEMBER_BROWN());
+        final Reservation tennyWaiting = reservationRepository.save(new Reservation(tenny, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
+        final Reservation brownWaiting = reservationRepository.save(new Reservation(brown, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
+
+        final Long tennyRank = reservationRepository.countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
+                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId(), reservationTime.getId(),
+                ReservationStatus.WAITING, tennyWaiting.getId()
+        );
+        final Long brownRank = reservationRepository.countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
+                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId(), reservationTime.getId(),
+                ReservationStatus.WAITING, brownWaiting.getId()
+        );
+
+        assertAll(
+                () -> assertThat(tennyRank).isEqualTo(0L),
+                () -> assertThat(brownRank).isEqualTo(1L)
+        );
     }
 
     @Test
@@ -107,65 +189,6 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(actual).isFalse();
-    }
-
-    @Test
-    @DisplayName("Id에 해당하는 예약을 삭제한다.")
-    void deleteById() {
-        // when
-        reservationRepository.deleteById(reservation.getId());
-
-        // then
-        final List<Reservation> actual = reservationRepository.findAll();
-        assertThat(actual).doesNotContain(reservation);
-    }
-
-    @Test
-    @DisplayName("timeId에 해당하는 예약 건수를 조회한다.")
-    void countByTimeId() {
-        // given
-        final long timeId = 2L;
-
-        // when
-        final int actual = reservationRepository.countByTimeId(timeId);
-
-        // then
-        assertThat(actual).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("날짜와 테마 Id에 해당하는 예약 목록을 조회한다.")
-    void findAllByDateAndThemeId() {
-        // when
-        final List<Reservation> actual = reservationRepository.findByDateAndThemeId(
-                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId());
-
-        // then
-        assertThat(actual).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("특정 사용자의 예약 목록 및 대기 목록을 조회한다.")
-    void findByReservationsMemberId() {
-        final Long memberId = member.getId();
-        reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
-
-        final List<Reservation> actual = reservationRepository.findByMemberId(memberId);
-
-        assertAll(
-                () -> assertThat(actual).hasSize(2),
-                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.RESERVED),
-                () -> assertThat(actual.get(1).getStatus()).isEqualTo(ReservationStatus.WAITING)
-        );
-    }
-    
-    @ParameterizedTest
-    @EnumSource(ReservationStatus.class)
-    @DisplayName("예약 상태에 따른 예약 목록을 조회한다.")
-    void findByStatus(final ReservationStatus status) {
-        final List<Reservation> actual = reservationRepository.findByStatus(status);
-
-        assertThat(actual).allSatisfy(reservation -> assertThat(reservation.getStatus()).isEqualTo(status));
     }
 
     @Test

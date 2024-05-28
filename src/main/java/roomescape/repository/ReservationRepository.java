@@ -42,6 +42,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     int countByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
 
+    Long countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
+            final LocalDate date,
+            final Long themeId,
+            final Long timeId,
+            final ReservationStatus status,
+            final Long id
+    );
+
     boolean existsById(final Long id);
 
     boolean existsByThemeAndDateAndTimeAndStatus(final Theme theme, final LocalDate date,

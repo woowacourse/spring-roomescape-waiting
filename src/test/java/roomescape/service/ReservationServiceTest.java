@@ -213,16 +213,18 @@ class ReservationServiceTest {
         final LoginMember loginMember = new LoginMember(1L, MEMBER_TENNY_NAME, MEMBER_TENNY_EMAIL, Role.MEMBER);
         final Reservation memberReservation = new Reservation(1L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
-        final Reservation reservation = new Reservation(2L, ADMIN(), LocalDate.parse(DATE_MAY_NINTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
-        final Reservation waiting = new Reservation(3L, MEMBER_MIA(), LocalDate.parse(DATE_MAY_NINTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         final Reservation memberWaiting = new Reservation(4L, MEMBER_TENNY(), LocalDate.parse(DATE_MAY_NINTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findByMemberId(loginMember.id()))
                 .willReturn(List.of(memberReservation, memberWaiting));
-        given(reservationRepository.findAll())
-                .willReturn(List.of(memberReservation, reservation, waiting, memberWaiting));
+        given(reservationRepository.countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
+                memberReservation.getDate(), memberReservation.getTheme().getId(),
+                memberReservation.getTime().getId(), memberReservation.getStatus(), memberReservation.getId()))
+                .willReturn(0L);
+        given(reservationRepository.countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
+                memberWaiting.getDate(), memberWaiting.getTheme().getId(),
+                memberWaiting.getTime().getId(), memberWaiting.getStatus(), memberWaiting.getId()))
+                .willReturn(1L);
 
         // when
         final List<MyReservationWithRankResponse> actual = reservationService.findMyReservationsAndWaitings(loginMember);
