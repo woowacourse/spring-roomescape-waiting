@@ -1,4 +1,4 @@
 package roomescape.member.domain;
 
-public record Password(String password) {
+public record Password(String encodedPassword) {
 }

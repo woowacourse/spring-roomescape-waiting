@@ -56,7 +56,7 @@ public class MemberService {
         Member member = memberJpaRepository.findByEmail(new Email(loginRequest.email()))
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
-        if (passwordEncoder.matches(loginRequest.password(), member.getPassword().password())) {
+        if (passwordEncoder.matches(loginRequest.password(), member.getPassword().encodedPassword())) {
             return parseToToken(member);
         }
         throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
@@ -71,7 +71,7 @@ public class MemberService {
                 .claim("name", member.getName().name())
                 .claim("email", member.getEmail().email())
                 .claim("role", member.getRole().name())
-                .claim("password", member.getPassword().password())
+                .claim("password", member.getPassword().encodedPassword())
                 .setIssuedAt(Date.from(issuedAt))
                 .setExpiration(Date.from(expiration))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))

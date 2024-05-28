@@ -25,6 +25,7 @@ public class Member {
     private Role role;
 
     @Embedded
+    @AttributeOverride(name = "encodedPassword", column = @Column(name = "password"))
     private Password password;
 
     protected Member() {

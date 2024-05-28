@@ -26,7 +26,7 @@ class MemberServiceTest {
     @DisplayName("존재하지 않는 회원 email로 로그인을 시도할 경우 예외가 발생한다.")
     void throwExceptionIfNotExistEmail() {
         LoginRequest loginRequest = new LoginRequest(
-                COMMON_PASSWORD.password(),
+                COMMON_PASSWORD.encodedPassword(),
                 NOT_SAVED_MEMBER.getEmail().email()
         );
 
@@ -38,7 +38,7 @@ class MemberServiceTest {
     @DisplayName("존재하는 회원 email이지만 틀린 비밀번호로 로그인을 시도할 경우 예외가 발생한다.")
     void throwExceptionIfInvalidPassword() {
         LoginRequest loginRequest = new LoginRequest(
-                COMMON_PASSWORD.password() + "123",
+                COMMON_PASSWORD.encodedPassword() + "123",
                 MEMBER_1.getEmail().email()
         );
 
@@ -49,7 +49,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("로그인에 성공하면 토큰을 발행한다.")
     void getTokenIfLoginSucceeds() throws AuthenticationException {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.encodedPassword(), MEMBER_4.getEmail().email());
 
         String token = memberService.createMemberToken(loginRequest);
 
@@ -66,7 +66,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("토큰에 대응하는 멤버 정보를 가져온다.")
     void getMemberMember() throws AuthenticationException {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.encodedPassword(), MEMBER_4.getEmail().email());
         String token = memberService.createMemberToken(loginRequest);
 
         Member member = memberService.getLoginMemberByToken(token);

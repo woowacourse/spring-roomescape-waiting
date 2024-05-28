@@ -42,7 +42,7 @@ class AdminReservationControllerTest {
     @DisplayName("관리자가 아닌 사용자가 관리자 예약을 시도하면 예외가 발생한다.")
     void throwExceptionWhenNormalUserAddAdminReservation() {
         Map<String, String> memberParam = new HashMap<>();
-        memberParam.put("password", COMMON_PASSWORD.password());
+        memberParam.put("password", COMMON_PASSWORD.encodedPassword());
         memberParam.put("email", MEMBER_1.getEmail().email());
 
         String token = RestAssured.given().log().all()
@@ -72,7 +72,7 @@ class AdminReservationControllerTest {
     @DisplayName("관리자가 예약 요칭 시, 요청 Body에 담긴 정보를 바탕으로 예약을 추가한다.")
     void AdminAddReservationFromRequestBody() {
         Map<String, String> memberParam = new HashMap<>();
-        memberParam.put("password", COMMON_PASSWORD.password());
+        memberParam.put("password", COMMON_PASSWORD.encodedPassword());
         memberParam.put("email", MEMBER_4.getEmail().email());
 
         String token = RestAssured.given().log().all()

@@ -24,7 +24,7 @@ class LoginControllerTest {
     @DisplayName("저장된 회원 정보로 로그인을 시도하면 응답 쿠키에 토큰 값이 반환된다")
     void login() {
         Map<String, String> memberParam = new HashMap<>();
-        memberParam.put("password", COMMON_PASSWORD.password());
+        memberParam.put("password", COMMON_PASSWORD.encodedPassword());
         memberParam.put("email", MEMBER_1.getEmail().email());
 
         RestAssured.given().log().all()

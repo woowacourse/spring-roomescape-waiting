@@ -30,7 +30,7 @@ class ReservationServiceTest {
             MEMBER_1.getName().name(),
             MEMBER_1.getEmail().email(),
             MEMBER_1.getRole().name(),
-            COMMON_PASSWORD.password()
+            COMMON_PASSWORD.encodedPassword()
     );
 
     @Autowired
