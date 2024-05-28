@@ -2,6 +2,7 @@ package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static roomescape.exception.ExceptionType.*;
 import static roomescape.exception.ExceptionType.FORBIDDEN_DELETE;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
@@ -149,9 +150,9 @@ public class ReservationControllerTest {
                     .body("size()", is(2));
         }
 
-        @DisplayName("예약이 이미 존재해도 예약을 추가로 생성할 수 있다. -> 예약 대기")
+        @DisplayName("같은 사람이 동일한 테마를 여러 번 저장할 수 없다.")
         @Test
-        void createReservationWaitTest() {
+        void createDuplicatedReservationFailTest() {
             Map<String, Object> reservationParam = Map.of(
                     "date", savedReservation.getDate().toString(),
                     "timeId", savedReservation.getReservationTime().getId(),
@@ -164,9 +165,34 @@ public class ReservationControllerTest {
                     .body(reservationParam)
                     .post("/reservations")
                     .then().log().all()
+                    .statusCode(400)
+                    .body("message", is(MULTIPLE_RESERVATION_FOR_MEMBER.getMessage()));
+
+            RestAssured.given().log().all()
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
+        }
+
+        @DisplayName("예약이 이미 존재해도 예약을 추가로 생성할 수 있다. -> 예약 대기")
+        @Test
+        void createReservationWaitTest() {
+            Map<String, Object> reservationParam = Map.of(
+                    "date", savedReservation.getDate().toString(),
+                    "timeId", savedReservation.getReservationTime().getId(),
+                    "themeId", savedReservation.getTheme().getId());
+
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", othersToken)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParam)
+                    .post("/reservations")
+                    .then().log().all()
                     .statusCode(201)
                     .body("id", is((int) savedReservation.getId() + 1),
-                            "member.name", is(defaultMember.getName().getValue()),
+                            "member.name", is(otherMember.getName().getValue()),
                             "date", is(reservationParam.get("date")),
                             "time.startAt", is(savedReservation.getReservationTime().getStartAt().toString()),
                             "theme.name", is(savedReservation.getTheme().getName()));
@@ -225,7 +251,7 @@ public class ReservationControllerTest {
 
             int waitingId = RestAssured.given().log().all()
                     .when()
-                    .cookie("token", token)
+                    .cookie("token", othersToken)
                     .contentType(ContentType.JSON)
                     .body(reservationParam)
                     .post("/reservations")
@@ -235,7 +261,7 @@ public class ReservationControllerTest {
             //when & then
             RestAssured.given().log().all()
                     .when()
-                    .cookie("token", token)
+                    .cookie("token", othersToken)
                     .delete("/reservations/" + waitingId)
                     .then().log().all()
                     .statusCode(204);
@@ -291,7 +317,7 @@ public class ReservationControllerTest {
 
             int waitingId = RestAssured.given().log().all()
                     .when()
-                    .cookie("token", token)
+                    .cookie("token", othersToken)
                     .contentType(ContentType.JSON)
                     .body(reservationParam)
                     .post("/reservations")
@@ -341,7 +367,7 @@ public class ReservationControllerTest {
 
             int waitingId = RestAssured.given().log().all()
                     .when()
-                    .cookie("token", token)
+                    .cookie("token", othersToken)
                     .contentType(ContentType.JSON)
                     .body(reservationParam)
                     .post("/reservations")

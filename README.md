@@ -119,6 +119,8 @@
 
 ### Response
 
+#### 예약 추가 성공
+
 > HTTP/1.1 201
 >
 > Content-Type: application/json
@@ -141,6 +143,11 @@
   }
 }
 ```
+
+#### 예약자에 대한 동일한 예약이 존재하는 경우
+
+> HTTP/1.1 400
+> message : 동일한 테마를 두 번 이상 예매할 수 없습니다.
 
 ## 예약 추가 API - 관리자
 
@@ -164,6 +171,8 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### response
 
+#### 예약 추가 성공
+
 > HTTP/1.1 201
 >
 > Content-Type: application/json
@@ -186,6 +195,11 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
   }
 }
 ```
+
+#### 예약자에 대한 동일한 예약이 존재하는 경우
+
+> HTTP/1.1 400
+> message : 동일한 테마를 두 번 이상 예매할 수 없습니다.
 
 ## 예약 취소 API - 사용자
 

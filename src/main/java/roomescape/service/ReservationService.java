@@ -20,6 +20,7 @@ import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -54,7 +55,7 @@ public class ReservationService {
         Member requestedMember = memberRepository.findById(loginMemberRequest.id())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
 
-        return save(reservationRequest.toReservation(
+        return save(requestedMember, reservationRequest.toReservation(
                 requestedMember, requestedTime, requestedTheme));
     }
 
@@ -66,16 +67,28 @@ public class ReservationService {
         Member requestedMember = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
 
-        return save(new Reservation(
+        return save(requestedMember, new Reservation(
                 reservationRequest.date(), requestedTime, requestedTheme, requestedMember));
     }
 
-    private ReservationResponse save(Reservation beforeSaveReservation) {
+    private ReservationResponse save(Member requestedMember, Reservation beforeSaveReservation) {
         if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
             throw new RoomescapeException(PAST_TIME_RESERVATION);
         }
+        if (isMultipleReservationForMember(requestedMember, beforeSaveReservation)) {
+            throw new RoomescapeException(ExceptionType.MULTIPLE_RESERVATION_FOR_MEMBER);
+        }
         Reservation savedReservation = reservationRepository.save(beforeSaveReservation);
         return ReservationResponse.from(savedReservation);
+    }
+
+    private boolean isMultipleReservationForMember(Member requestedMember, Reservation beforeSaveReservation) {
+        return reservationRepository.findByMemberAndThemeAndDateAndTime(
+                requestedMember,
+                beforeSaveReservation.getTheme(),
+                beforeSaveReservation.getDate(),
+                beforeSaveReservation.getReservationTime()
+        ).isPresent();
     }
 
     public List<ReservationResponse> findAll() {
