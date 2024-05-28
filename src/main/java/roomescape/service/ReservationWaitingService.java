@@ -22,18 +22,20 @@ public class ReservationWaitingService {
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
-            ReservationRepository reservationRepository, MemberRepository memberRepository,
-            MemberRepository memberRepository1
+    public ReservationWaitingService(
+            ReservationWaitingRepository reservationWaitingRepository,
+            ReservationRepository reservationRepository,
+            MemberRepository memberRepository
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
-        this.memberRepository = memberRepository1;
+        this.memberRepository = memberRepository;
     }
 
     public ReservationWaitingResponse save(ReservationRequest request) {
         Member member = getMemberById(request.memberId());
-        Reservation reservation = getReservationByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
+        Reservation reservation = getReservationByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
+                request.themeId());
         validateWaitingNotExists(member, reservation);
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(member, reservation));
         List<ReservationWaiting> reservations = reservationWaitingRepository.findAllByReservation(reservation);
@@ -52,7 +54,7 @@ public class ReservationWaitingService {
     private Member getMemberById(long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
-    } 
+    }
 
     private Reservation getReservationByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)
