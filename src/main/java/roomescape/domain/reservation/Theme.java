@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
 
@@ -47,11 +47,11 @@ public class Theme {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !(o instanceof Theme)) {
             return false;
         }
         Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+        return Objects.equals(this.getId(), theme.getId());
     }
 
     @Override

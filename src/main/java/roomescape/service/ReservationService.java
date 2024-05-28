@@ -1,90 +1,95 @@
 package roomescape.service;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import roomescape.domain.*;
-import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.repository.ThemeRepository;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.member.Member;
+import roomescape.domain.repository.*;
+import roomescape.domain.reservation.*;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
-import roomescape.service.dto.response.UserReservationResponses;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ReservationService {
-
+    private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationTimeRepository timeRepository;
 
     public ReservationService(
+            WaitingRepository waitingRepository,
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
+            MemberRepository memberRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            ReservationTimeRepository timeRepository
     ) {
+        this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
+        this.timeRepository = timeRepository;
     }
 
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Reservation reservation = createReservation(reservationSaveRequest);
-
         validateUnique(reservation);
-
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
 
-    private Reservation createReservation(ReservationSaveRequest reservationSaveRequest) {
-        return new Reservation(
-                findMemberById(reservationSaveRequest.memberId()),
-                reservationSaveRequest.date(),
-                findTimeById(reservationSaveRequest.timeId()),
-                findThemeById(reservationSaveRequest.themeId())
-        );
-    }
-
     private void validateUnique(Reservation reservation) {
-        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
-
-        if (isReservationExist) {
+        if (reservationRepository.existsByReservationSlot(reservation.getReservationSlot())) {
             throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
         }
     }
 
-    public void deleteReservation(Long id) {
-        Reservation foundReservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
+    public void deleteReservation(long id) {
+        Reservation reservation = findReservation(id);
+        List<Waiting> waitings = waitingRepository.findByReservationOrderById(reservation);
 
-        reservationRepository.delete(foundReservation);
+        if (!waitings.isEmpty()) {
+            acceptWaiting(waitings, reservation);
+            return;
+        }
+
+        reservationRepository.delete(reservation);
+    }
+
+    private Reservation findReservation(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("예약이 존재하지 않습니다."));
+    }
+
+    private void acceptWaiting(List<Waiting> waitings, Reservation reservation) {
+        Waiting nextWaiting = Collections.min(waitings);
+        reservation.acceptWaiting(nextWaiting);
+        reservationRepository.save(reservation);
+        waitingRepository.delete(nextWaiting);
     }
 
     public ReservationResponses findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
-        List<Reservation> reservations = reservationRepository.findByConditions(
+        List<Reservation> reservations = findByConditions(reservationConditionRequest);
+        return toReservationResponses(reservations);
+    }
+
+    private List<Reservation> findByConditions(ReservationConditionRequest reservationConditionRequest) {
+        return reservationRepository.findByConditions(
                 Optional.ofNullable(reservationConditionRequest.dateFrom()),
                 Optional.ofNullable(reservationConditionRequest.dateTo()),
                 reservationConditionRequest.themeId(),
                 reservationConditionRequest.memberId()
         );
-
-        return toReservationResponses(reservations);
     }
 
     private ReservationResponses toReservationResponses(List<Reservation> reservations) {
@@ -94,29 +99,40 @@ public class ReservationService {
         return new ReservationResponses(reservationResponses);
     }
 
-    public UserReservationResponses findAllUserReservation(Long memberId) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
-                findMemberById(memberId),
-                LocalDate.now(),
-                dateAscAndTimeAsc()
+    public List<UserReservationResponse> findAllUserReservation(Long memberId) {
+        Member user = findMemberById(memberId);
+        return getAllReservationAndWaiting(user);
+    }
+
+    private List<UserReservationResponse> getAllReservationAndWaiting(Member user) {
+        List<UserReservationResponse> allReservations = new ArrayList<>();
+        allReservations.addAll(findUserReservations(user));
+        allReservations.addAll(findUserWaitings(user));
+        return allReservations;
+    }
+
+    private List<UserReservationResponse> findUserReservations(Member user) {
+        return reservationRepository.findByMemberAndDateGreaterThanEqual(user, LocalDate.now())
+                .stream()
+                .map(UserReservationResponse::reserved)
+                .toList();
+    }
+
+    private List<UserReservationResponse> findUserWaitings(Member user) {
+        return waitingRepository.findMemberWaitingWithRankAndDateGreaterThanEqual(user, LocalDate.now())
+                .stream()
+                .map(UserReservationResponse::from)
+                .toList();
+    }
+
+    public Reservation createReservation(ReservationSaveRequest request) {
+        ReservationSlot slot = new ReservationSlot(
+                request.date(),
+                findTimeById(request.timeId()),
+                findThemeById(request.themeId())
         );
 
-        return makeUserReservationResponses(reservations);
-    }
-
-    private UserReservationResponses makeUserReservationResponses(List<Reservation> reservations) {
-        List<UserReservationResponse> userReservationResponses = reservations.stream()
-                .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
-                .toList();
-
-        return new UserReservationResponses(userReservationResponses);
-    }
-
-    private Sort dateAscAndTimeAsc() {
-        Sort.TypedSort<Reservation> sort = Sort.sort(Reservation.class);
-        Sort dateSort = sort.by(Reservation::getDate).ascending();
-        Sort timeSort = sort.by(Reservation::getTime).ascending();
-        return dateSort.and(timeSort);
+        return new Reservation(findMemberById(request.memberId()), slot);
     }
 
     private Member findMemberById(Long memberId) {
@@ -130,7 +146,7 @@ public class ReservationService {
     }
 
     private ReservationTime findTimeById(Long id) {
-        return reservationTimeRepository.findById(id)
+        return timeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
     }
 }

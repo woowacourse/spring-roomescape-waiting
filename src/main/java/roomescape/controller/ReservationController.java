@@ -8,13 +8,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.controller.dto.UserReservationSaveRequest;
+import roomescape.controller.dto.UserReservationViewResponse;
+import roomescape.controller.dto.UserReservationViewResponses;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.request.LoginMember;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.UserReservationResponses;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 public class ReservationController {
@@ -37,8 +39,12 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<UserReservationResponses> findAllUserReservation(@Login LoginMember member) {
-        UserReservationResponses reservationResponses = reservationService.findAllUserReservation(member.id());
-        return ResponseEntity.ok(reservationResponses);
+    public ResponseEntity<UserReservationViewResponses> findAllUserReservation(@Login LoginMember member) {
+        List<UserReservationViewResponse> reservationResponses = reservationService.findAllUserReservation(member.id())
+                .stream()
+                .map(UserReservationViewResponse::from)
+                .toList();
+        UserReservationViewResponses response = new UserReservationViewResponses(reservationResponses);
+        return ResponseEntity.ok(response);
     }
 }

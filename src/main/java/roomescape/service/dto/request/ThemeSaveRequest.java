@@ -2,7 +2,7 @@ package roomescape.service.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.Theme;
 
 public record ThemeSaveRequest(
         @NotBlank(message = "테마 이름을 입력해주세요")

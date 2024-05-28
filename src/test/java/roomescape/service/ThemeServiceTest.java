@@ -1,30 +1,32 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.PopularThemeRequest;
-import roomescape.service.dto.response.ThemeResponse;
 import roomescape.service.dto.request.ThemeSaveRequest;
+import roomescape.service.dto.response.ThemeResponse;
 import roomescape.service.dto.response.ThemeResponses;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Transactional
 class ThemeServiceTest extends IntegrationTestSupport {
@@ -96,7 +98,7 @@ class ThemeServiceTest extends IntegrationTestSupport {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
         Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
         Member member = memberRepository.save(Member.createUser("생강", "email@email.com", "1234"));
-        reservationRepository.save(new Reservation(member, LocalDate.parse("2025-05-13"), time, theme));
+        reservationRepository.save(new Reservation(member, new ReservationSlot(LocalDate.parse("2025-05-13"), time, theme)));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))

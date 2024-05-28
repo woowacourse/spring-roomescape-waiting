@@ -2,7 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.domain.Role;
+import roomescape.domain.member.Role;
 import roomescape.exception.customexception.AuthenticationException;
 import roomescape.service.dto.request.LoginMember;
 import roomescape.service.dto.response.MemberResponse;

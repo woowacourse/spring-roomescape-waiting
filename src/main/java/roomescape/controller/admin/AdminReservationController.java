@@ -10,7 +10,6 @@ import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationResponses;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin/reservations")

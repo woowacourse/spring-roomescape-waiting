@@ -1,33 +1,34 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
+import roomescape.domain.member.Member;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
+@Table
 public class Reservation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-    private LocalDate date;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    @Embedded
+    private ReservationSlot reservationSlot;
+
+    public Reservation(Member member, ReservationSlot reservationSlot) {
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservationSlot = reservationSlot;
     }
 
     protected Reservation() {
+    }
+
+    public void acceptWaiting(Waiting waiting){
+        this.member = waiting.getMember();
     }
 
     public Long getId() {
@@ -38,16 +39,24 @@ public class Reservation {
         return member;
     }
 
+    public void setMember(Member member) {
+        this.member = member;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return reservationSlot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return reservationSlot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationSlot.getTheme();
+    }
+
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
     }
 
     @Override
@@ -55,11 +64,11 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !(o instanceof Reservation)) {
             return false;
         }
         Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
+        return Objects.equals(this.getId(), that.getId());
     }
 
     @Override

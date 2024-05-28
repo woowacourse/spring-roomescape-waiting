@@ -1,29 +1,31 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
-import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.request.ReservationSaveRequest;
+import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.UserReservationResponse;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 
 @Transactional
 class ReservationServiceTest extends IntegrationTestSupport {
@@ -79,11 +81,19 @@ class ReservationServiceTest extends IntegrationTestSupport {
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 
-    @DisplayName("예약 삭제")
+    @DisplayName("대기가 있는 예약 삭제 요청 시 대기가 자동 승인된다")
     @Test
-    void deleteReservation() {
+    void should_AcceptWaiting_When_ReservationHasWaiting() {
         int size = reservationRepository.findAll().size();
         reservationService.deleteReservation(1L);
+        assertThat(reservationRepository.findAll()).hasSize(size);
+    }
+
+    @DisplayName("대기가 없는 예약 삭제 요청시, 예약이 삭제된다")
+    @Test
+    void should_DeleteReservation_When_ReservationHasNotWaiting() {
+        int size = reservationRepository.findAll().size();
+        reservationService.deleteReservation(4L);
         assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 
@@ -108,20 +118,21 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void findAllMyReservations() {
         // given
-        long memberId = 2L;
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L);
+        long memberId = 1L;
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now().plusDays(1L), 1L, 1L);
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         // when
-        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(memberId).userReservationResponses();
+        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(memberId);
 
         // then
+        ReservationSlot slot = allUserReservation.get(0).reservationSlot();
         assertAll(
                 () -> assertThat(allUserReservation).hasSize(1),
-                () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationSaveRequest.date()),
-                () -> assertThat(allUserReservation.get(0).time()).isEqualTo(reservationResponse.time().startAt()),
-                () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name()),
-                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatus.RESERVED.getValue())
+                () -> assertThat(slot.getDate()).isEqualTo(reservationSaveRequest.date()),
+                () -> assertThat(slot.getTime().getStartAt()).isEqualTo(reservationResponse.time().startAt()),
+                () -> assertThat(slot.getTheme().getName()).isEqualTo(reservationResponse.theme().name()),
+                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(RESERVED)
         );
     }
 }

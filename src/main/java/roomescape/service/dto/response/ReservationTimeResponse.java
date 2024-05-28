@@ -1,6 +1,6 @@
 package roomescape.service.dto.response;
 
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservation.ReservationTime;
 
 import java.time.LocalTime;
 

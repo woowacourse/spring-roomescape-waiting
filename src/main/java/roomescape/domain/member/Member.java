@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import jakarta.persistence.*;
 
@@ -50,8 +50,8 @@ public class Member {
         return password;
     }
 
-    public Role getRole() {
-        return role;
+    public String getRole() {
+        return role.name();
     }
 
     @Override
@@ -59,11 +59,11 @@ public class Member {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !(o instanceof Member)) {
             return false;
         }
         Member member = (Member) o;
-        return Objects.equals(id, member.id);
+        return this.getId() != null && Objects.equals(this.getId(), member.getId());
     }
 
     @Override

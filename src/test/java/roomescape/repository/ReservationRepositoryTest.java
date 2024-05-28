@@ -1,24 +1,26 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Transactional
 class ReservationRepositoryTest extends IntegrationTestSupport {
@@ -47,7 +49,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         Member member = Member.createUser("생강", "email@email.com", "1234");
         Member savedMember = memberRepository.save(member);
 
-        Reservation reservation = new Reservation(savedMember, LocalDate.parse("2025-01-01"), savedReservationTime, savedTheme);
+        Reservation reservation = new Reservation(savedMember, new ReservationSlot(LocalDate.parse("2025-01-01"), savedReservationTime, savedTheme));
         Reservation savedReservation = reservationRepository.save(reservation);
         assertAll(
                 () -> assertThat(savedReservation.getMember().getName()).isEqualTo("생강"),
