@@ -15,8 +15,6 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
 
     Optional<ReservationWaiting> findByMemberAndReservation(Member member, Reservation reservation);
 
-    List<ReservationWaiting> findAllByMember(Member member);
-
     List<ReservationWaiting> findAllByReservation(Reservation reservation);
 
     boolean existsByMemberAndReservation(Member member, Reservation reservation);

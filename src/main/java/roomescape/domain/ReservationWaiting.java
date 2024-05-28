@@ -28,12 +28,6 @@ public class ReservationWaiting {
         this.reservation = reservation;
     }
 
-    public ReservationWaiting(Long id, Member member, Reservation reservation) {
-        this.id = id;
-        this.member = member;
-        this.reservation = reservation;
-    }
-
     public Long getId() {
         return id;
     }
