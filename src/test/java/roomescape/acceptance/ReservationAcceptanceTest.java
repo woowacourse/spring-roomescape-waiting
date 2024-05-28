@@ -44,7 +44,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, BOOKING.getIdentifier());
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -78,8 +78,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, tommyToken, BOOKING);
 
-        ReservationSaveRequest request = new ReservationSaveRequest(
-                MIA_RESERVATION_DATE, timeId, themeId, WAITING.getIdentifier());
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
         Cookie cookie = new Cookie.Builder("token", miaToken).build();
 
         // when
@@ -87,7 +86,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookie(cookie)
                 .body(request)
-                .when().post("/reservations")
+                .when().post("/reservations/waiting")
                 .then().log().all()
                 .extract();
         ReservationResponse reservationResponse = response.as(ReservationResponse.class);
@@ -110,7 +109,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
 
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, BOOKING.getIdentifier());
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -139,7 +138,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, BOOKING.getIdentifier());
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
 
         // when
         for (int i = 0; i < threadCount; i++) {
@@ -195,8 +194,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         String adminToken = createTestToken(ADMIN_EMAIL);
 
         Cookie miaCookie = new Cookie.Builder("token", miaToken).build();
-        ReservationSaveRequest waitingReservationSaveRequest = new ReservationSaveRequest(
-                MIA_RESERVATION_DATE, timeId, themeId, WAITING.getIdentifier());
+        ReservationSaveRequest waitingReservationSaveRequest = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
         Cookie adminCookie = new Cookie.Builder("token", adminToken).build();
 
         // when
@@ -210,7 +208,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookie(miaCookie)
                 .body(waitingReservationSaveRequest)
-                .when().post("/reservations")
+                .when().post("/reservations/waiting")
                 .then().log().all()
         ).start();
 
@@ -253,8 +251,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(
-                MIA_RESERVATION_DATE, timeId, themeId, WAITING.getIdentifier());
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -262,7 +259,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookie(cookie)
                 .body(request)
-                .when().post("/reservations")
+                .when().post("/reservations/waiting")
                 .then().log().all()
                 .extract();
         ReservationResponse reservationResponse = response.as(ReservationResponse.class);
@@ -283,7 +280,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(null, timeId, themeId, BOOKING.getIdentifier());
+        ReservationSaveRequest request = new ReservationSaveRequest(null, timeId, themeId);
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -312,8 +309,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long notExistingTimeId = 1L;
         Long themeId = createTestTheme();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(
-                MIA_RESERVATION_DATE, notExistingTimeId, themeId, BOOKING.getIdentifier());
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, notExistingTimeId, themeId);
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -374,13 +370,13 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> createThenDeleteTheme() {
         return Stream.of(
                 dynamicTest("대기 예약을 하나 생성한다.", this::createWaitingReservation),
-                dynamicTest("대기 예약이 하나 생성된 나의 예약 목록을 조회한다.", () -> findAllWaitingReservationsWithSize(1)),
+                dynamicTest("대기 예약이 하나 생성된 나의 예약 목록을 조회한다.", () -> findAllMyReservationsWithSize(1)),
                 dynamicTest("대기 예약을 취소한다.", this::deleteWaitingReservation),
-                dynamicTest("대기 예약이 없는 나의 예약 목록을 조회한다.", () -> findAllWaitingReservationsWithSize(0))
+                dynamicTest("대기 예약이 없는 나의 예약 목록을 조회한다.", () -> findAllMyReservationsWithSize(0))
         );
     }
 
-    private void findAllWaitingReservationsWithSize(int expectedSize) {
+    private void findAllMyReservationsWithSize(int expectedSize) {
         // given
         String miaToken = createTestToken(MIA_EMAIL);
         Cookie cookie = new Cookie.Builder("token", miaToken).build();

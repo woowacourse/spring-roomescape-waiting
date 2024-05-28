@@ -186,8 +186,7 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
         String miaToken = createTestToken(MIA_EMAIL);
 
         createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, adminToken, BOOKING);
-        Long waitingReservationId =
-                createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, miaToken, WAITING);
+        Long waitingReservationId = createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, miaToken, WAITING);
 
         Cookie cookie = new Cookie.Builder("token", adminToken).build();
 

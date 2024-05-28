@@ -18,6 +18,7 @@ import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
 import roomescape.reservation.application.WaitingQueryService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
@@ -54,23 +55,27 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationSaveRequest request,
                                                                  Member loginMember) {
-        Reservation newReservation = toNewReservation(request, loginMember);
-        if (newReservation.isBooking()) {
-            Reservation createdReservation= bookingScheduler.create(newReservation);
-            Reservation scheduledReservation = bookingScheduler.scheduleRecentReservation(createdReservation);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ReservationResponse.from(scheduledReservation));
-        }
+        Reservation newReservation = toNewReservation(request, loginMember, ReservationStatus.BOOKING);
+        Reservation createdReservation = bookingScheduler.create(newReservation);
+        Reservation scheduledReservation = bookingScheduler.scheduleRecentReservation(createdReservation);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ReservationResponse.from(scheduledReservation));
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(@RequestBody @Valid ReservationSaveRequest request,
+                                                                        Member loginMember) {
+        Reservation newReservation = toNewReservation(request, loginMember, ReservationStatus.WAITING);
         Reservation createdReservation = waitingScheduler.create(newReservation);
         Reservation scheduledReservation = waitingScheduler.scheduleRecentReservation(createdReservation);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationResponse.from(scheduledReservation));
     }
 
-    private Reservation toNewReservation(ReservationSaveRequest request, Member loginMember) {
+    private Reservation toNewReservation(ReservationSaveRequest request, Member loginMember, ReservationStatus status) {
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
-        return request.toModel(theme, reservationTime, loginMember);
+        return new Reservation(loginMember, request.date(), reservationTime, theme, status);
     }
 
     @GetMapping("/mine")

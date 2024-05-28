@@ -1,5 +1,6 @@
 const THEME_API_ENDPOINT = '/themes';
 const RESERVATION_API_ENDPOINT = '/reservations';
+const WAITING_RESERVATION_API_ENDPOINT = '/reservations/waiting';
 
 document.addEventListener('DOMContentLoaded', () => {
   requestRead(THEME_API_ENDPOINT)
@@ -143,8 +144,7 @@ function onReservationButtonClick() {
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
-      timeId: selectedTimeId,
-      status: 'BOOKING'
+      timeId: selectedTimeId
     };
 
     fetch(RESERVATION_API_ENDPOINT, {
@@ -180,11 +180,10 @@ function onWaitButtonClick() {
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
-      timeId: selectedTimeId,
-      status: 'WAITING'
+      timeId: selectedTimeId
     };
 
-    fetch(RESERVATION_API_ENDPOINT, {
+    fetch(WAITING_RESERVATION_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

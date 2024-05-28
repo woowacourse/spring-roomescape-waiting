@@ -92,14 +92,30 @@ public abstract class AcceptanceTest {
     }
 
     protected Long createTestReservation(LocalDate date, Long timeId, Long themeId, String token, ReservationStatus status) {
-        ReservationSaveRequest request = new ReservationSaveRequest(date, timeId, themeId, status.name());
+        ReservationSaveRequest request = new ReservationSaveRequest(date, timeId, themeId);
         Cookie cookie = new Cookie.Builder("token", token).build();
-        System.out.println("createTestReservation: ");
+        if (status.isBooking()) {
+            return createTestBooking(request, cookie);
+        }
+        return createTestWaiting(request, cookie);
+    }
+
+    protected Long createTestBooking(ReservationSaveRequest request, Cookie cookie) {
         return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .cookie(cookie)
                 .body(request)
                 .when().post("/reservations")
+                .then().extract().as(ReservationResponse.class)
+                .id();
+    }
+
+    protected Long createTestWaiting(ReservationSaveRequest request, Cookie cookie) {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(request)
+                .when().post("/reservations/waiting")
                 .then().extract().as(ReservationResponse.class)
                 .id();
     }
