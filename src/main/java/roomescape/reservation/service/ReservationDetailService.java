@@ -33,10 +33,7 @@ public class ReservationDetailService {
                 request.themeId(),
                 request.timeId());
 
-        if (id.isPresent()) {
-            return id.get();
-        }
-        return addReservationDetail(request).id();
+        return id.orElseGet(() -> addReservationDetail(request).id());
     }
 
     private ReservationDetailResponse addReservationDetail(ReservationCreateRequest reservationRequest) {
