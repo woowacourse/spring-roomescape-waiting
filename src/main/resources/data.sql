@@ -40,11 +40,11 @@ VALUES ('10:00'),
        ('18:00');
 
 INSERT INTO member (name, email, password, role)
-VALUES ('어드민', 'admin@admin.com', 'adminadmin', 'ADMIN'),
-       ('테드', 'ted@admin.com', 'adminadmin', 'MEMBER'),
-       ('종이', 'jonge@admin.com', 'adminadmin', 'MEMBER'),
-       ('호돌', 'hodol@admin.com', 'adminadmin', 'MEMBER'),
-       ('제이', 'jay@admin.com', 'adminadmin', 'MEMBER');
+VALUES ('어드민', 'admin@gmail.com', '12341234', 'ADMIN'),
+       ('종이', 'jonge@gmail.com', '12341234', 'MEMBER'),
+       ('이든', 'eden@gmail.com', '12341234', 'MEMBER'),
+       ('스티치', 'stich@gmail.com', '12341234', 'MEMBER'),
+       ('조앤', 'joanne@gmail.com', '12341234', 'MEMBER');
 
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id, reservation_status)
 VALUES (2, CURRENT_DATE() - INTERVAL '1' DAY, 1, 1, 'RESERVED'),

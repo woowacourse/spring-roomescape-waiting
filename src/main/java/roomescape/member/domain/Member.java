@@ -6,6 +6,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.hibernate.tool.schema.TargetType;
+import org.springframework.core.ResolvableType;
+import org.springframework.validation.DataBinder;
 import roomescape.system.exception.error.ErrorType;
 import roomescape.system.exception.model.ValidateException;
 

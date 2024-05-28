@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class AuthControllerTest {
+class AuthControllerTest {
 
     @Autowired
     private AuthService authService;

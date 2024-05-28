@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
@@ -17,6 +18,7 @@ import roomescape.reservation.domain.repository.ReservationSpecification;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.request.ReservationSearchRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfoResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
@@ -92,6 +94,7 @@ public class ReservationService {
                         String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
     }
 
+    @Transactional
     public void removeReservationById(final Long targetReservationId, final Long myMemberId) {
         final Member requestMember = memberService.findMemberById(myMemberId);
         final Reservation requestReservation = findReservationById(targetReservationId);
@@ -172,7 +175,7 @@ public class ReservationService {
         return requestDate.isEqual(today) && requestReservationTime.getStartAt().isBefore(nowTime);
     }
 
-    public ReservationsResponse findFilteredReservations(final FilteredReservationRequest request) {
+    public ReservationsResponse findFilteredReservations(final ReservationSearchRequest request) {
         final Specification<Reservation> specification = getReservationSpecification(request);
 
         final List<ReservationResponse> response = reservationRepository.findAll(specification)
@@ -184,7 +187,7 @@ public class ReservationService {
     }
 
     private Specification<Reservation> getReservationSpecification(
-            final FilteredReservationRequest request
+            final ReservationSearchRequest request
     ) {
         Specification<Reservation> specification = (root, query, criteriaBuilder) -> null;
         if (request.themeId() != null) {
