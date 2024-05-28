@@ -5,23 +5,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.Arrays;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.AuthConstants;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.auth.AuthService;
 import roomescape.service.auth.dto.LoginCheckResponse;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.auth.dto.SignUpRequest;
 import roomescape.service.member.dto.MemberResponse;
+import roomescape.util.CookieUtil;
 
 @RestController
 public class AuthController {
-
-    private static final String KEY = "token";
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -36,33 +35,25 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
-        Cookie cookie = new Cookie(KEY, authService.login(loginRequest).token());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
+        String token = authService.login(loginRequest).token();
+        Cookie cookie = CookieUtil.createCookie(AuthConstants.AUTH_COOKIE_NAME, token);
+
         httpServletResponse.addCookie(cookie);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse httpServletResponse) {
-        Cookie cookie = new Cookie(KEY, null);
-        cookie.setMaxAge(0);
-        httpServletResponse.addCookie(cookie);
+        httpServletResponse.addCookie(CookieUtil.expiredCookie(AuthConstants.AUTH_COOKIE_NAME));
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/login/check")
     public LoginCheckResponse check(HttpServletRequest httpServletRequest) {
         Cookie[] cookies = httpServletRequest.getCookies();
-        String token = extractTokenFromCookie(cookies);
-        return authService.check(token);
-    }
 
-    private String extractTokenFromCookie(Cookie[] cookies) {
-        return Arrays.stream(cookies)
-                .filter(cookie -> cookie.getName().equals(KEY))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElseThrow(() -> new UnauthorizedException("권한이 없는 접근입니다."));
+        return CookieUtil.searchValueFromKey(cookies, AuthConstants.AUTH_COOKIE_NAME)
+                .map(authService::check)
+                .orElseThrow(() -> new UnauthorizedException("로그인 정보를 찾을 수 없습니다."));
     }
 }

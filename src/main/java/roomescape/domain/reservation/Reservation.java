@@ -1,7 +1,5 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,14 +8,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.member.Member;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.UnauthorizedException;
 
 @Entity
+@Table(name = "reservation")
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +28,6 @@ public class Reservation {
     private Member member;
 
     @Embedded
-    @AttributeOverride(name = "date.value", column = @Column(name = "DATE"))
     private Schedule schedule;
 
     @ManyToOne
@@ -39,20 +39,17 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, Schedule schedule, Theme theme, ReservationStatus status) {
-        this.id = id;
+    public Reservation(Member member, Schedule schedule, Theme theme, ReservationStatus status) {
         this.member = member;
         this.schedule = schedule;
         this.theme = theme;
         this.status = status;
     }
 
-    public Reservation(Member member, Schedule schedule, Theme theme, ReservationStatus status) {
-        this(null, member, schedule, theme, status);
-    }
-
-    public boolean isReservationOf(Long memberId) {
-        return memberId.equals(member.getId());
+    public void checkCancelAuthority(long memberId) {
+        if (memberId != member.getId()) {
+            throw new UnauthorizedException("예약을 삭제할 권한이 없습니다.");
+        }
     }
 
     public Long getId() {
@@ -81,5 +78,9 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public Schedule getSchedule() {
+        return schedule;
     }
 }

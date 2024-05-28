@@ -7,26 +7,19 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlMergeMode;
+import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql("/truncate-with-admin-and-guest.sql")
-class AdminReservationControllerTest {
-    @LocalServerPort
-    private int port;
-
+class AdminReservationControllerTest extends DataInitializedControllerTest {
     private LocalDate date;
     private long timeId;
     private long themeId;
@@ -36,32 +29,30 @@ class AdminReservationControllerTest {
 
     @BeforeEach
     void init() {
-        RestAssured.port = port;
-
         date = LocalDate.now().plusDays(1);
-        timeId = (int) RestAssured.given()
+        timeId = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times")
-                .then().extract().response().jsonPath().get("id");
+                .then().extract().response().jsonPath().getLong("id");
 
         ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
-        themeId = (int) RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+        themeId = RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
-                .then().extract().response().jsonPath().get("id");
+                .then().extract().response().jsonPath().getLong("id");
 
         adminToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("admin123", "admin@email.com"))
+                .body(new LoginRequest("admin@email.com", "admin123"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         guestToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("guest123", "guest@email.com"))
+                .body(new LoginRequest("guest@email.com", "guest123"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         memberId = 2;
     }
@@ -71,7 +62,7 @@ class AdminReservationControllerTest {
     void createReservation() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .body(new AdminReservationRequest(date, memberId, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -83,20 +74,20 @@ class AdminReservationControllerTest {
     void deleteReservationSuccess() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", guestToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, guestToken)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().extract().body().jsonPath().get("id");
 
         //when
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .when().delete("/admin/reservations/" + id)
                 .then().log().all()
                 .assertThat().statusCode(204);
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().body("size()", is(0));
@@ -108,7 +99,7 @@ class AdminReservationControllerTest {
     void findByMemberAndTheme() {
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .queryParam("memberId", 1)
                 .queryParam("themeId", 2)
                 .when().get("/admin/reservations/search")
@@ -122,7 +113,7 @@ class AdminReservationControllerTest {
     void findByDateFrom() {
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .queryParam("dateFrom", LocalDate.now().minusDays(7).toString())
                 .when().get("/admin/reservations/search")
                 .then().log().all()
@@ -135,7 +126,7 @@ class AdminReservationControllerTest {
     void findByTheme() {
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .queryParam("themeId", 1)
                 .when().get("/admin/reservations/search")
                 .then().log().all()

@@ -1,15 +1,18 @@
 package roomescape.service.member.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.config.DateFormatConstraint;
+import roomescape.config.TimeFormatConstraint;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationWaiting;
+import roomescape.domain.reservation.WaitingWithRank;
 
 public record MemberReservationResponse(
         Long reservationId,
         String theme,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul") LocalDate date,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "Asia/Seoul") LocalTime time,
+        @DateFormatConstraint LocalDate date,
+        @TimeFormatConstraint LocalTime time,
         String status
 ) {
     public static MemberReservationResponse from(Reservation reservation) {
@@ -19,6 +22,17 @@ public record MemberReservationResponse(
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getStatus().getDescription()
+        );
+    }
+
+    public static MemberReservationResponse from(WaitingWithRank waitingWithRank) {
+        ReservationWaiting waiting = waitingWithRank.waiting();
+        return new MemberReservationResponse(
+                waiting.getId(),
+                waiting.getTheme().getName().getValue(),
+                waiting.getDate(),
+                waiting.getSchedule().getTime(),
+                waitingWithRank.rank() + "번째 예약대기"
         );
     }
 }

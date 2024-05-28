@@ -4,26 +4,13 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.auth.dto.SignUpRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql("/truncate-with-guests.sql")
-class AuthControllerTest {
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void init() {
-        RestAssured.port = port;
-    }
-
+class AuthControllerTest extends DataInitializedControllerTest {
     @DisplayName("로그인 성공 테스트")
     @Test
     void login() {
@@ -37,7 +24,7 @@ class AuthControllerTest {
         //when&then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("lini123", "lini@email.com"))
+                .body(new LoginRequest("lini@email.com", "lini123"))
                 .when().post("/login")
                 .then().log().all()
                 .assertThat().statusCode(200);
@@ -73,13 +60,13 @@ class AuthControllerTest {
 
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("lini123", "lini@email.com"))
+                .body(new LoginRequest("lini@email.com", "lini123"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         //when&then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/login/check")
                 .then().log().all()
                 .assertThat().statusCode(200).body("name", is("lini"));

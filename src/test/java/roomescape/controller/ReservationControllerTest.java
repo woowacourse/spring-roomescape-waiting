@@ -7,50 +7,43 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql("/truncate-with-guests.sql")
-class ReservationControllerTest {
-    @LocalServerPort
-    private int port;
 
+class ReservationControllerTest extends DataInitializedControllerTest {
     private LocalDate date;
     private long timeId;
     private long themeId;
     private String token;
 
     @BeforeEach
-    void init() {
-        RestAssured.port = port;
-
+    void setUp() {
         date = LocalDate.now().plusDays(1);
-        timeId = (int) RestAssured.given()
+        timeId = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times")
-                .then().extract().response().jsonPath().get("id");
+                .then().extract().response().jsonPath().getLong("id");
 
         ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
-        themeId = (int) RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+        themeId = RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
-                .then().extract().response().jsonPath().get("id");
+                .then().extract().response().jsonPath().getLong("id");
 
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("guest123", "guest@email.com"))
+                .body(new LoginRequest("guest@email.com", "guest123"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
     }
 
     @DisplayName("예약 추가 성공 테스트")
@@ -58,7 +51,7 @@ class ReservationControllerTest {
     void createReservation() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -71,14 +64,14 @@ class ReservationControllerTest {
         //given
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations");
 
         //when&then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -95,7 +88,7 @@ class ReservationControllerTest {
         //when&then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(invalidDate, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -107,13 +100,13 @@ class ReservationControllerTest {
     void findAllReservations() {
         //given
         RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations");
 
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().statusCode(200).body("size()", is(1));
@@ -124,20 +117,20 @@ class ReservationControllerTest {
     void deleteReservationSuccess() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().extract().body().jsonPath().get("id");
 
         //when
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().delete("/reservations/" + id)
                 .then().log().all()
                 .assertThat().statusCode(204);
 
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().body("size()", is(0));
@@ -148,26 +141,26 @@ class ReservationControllerTest {
     void cannotDeleteReservationSuccess() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().extract().body().jsonPath().get("id");
 
         String wrongToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("guest123", "guest2@email.com"))
+                .body(new LoginRequest("guest2@email.com", "guest123"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         //when
         RestAssured.given().log().all()
-                .cookie("token", wrongToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, wrongToken)
                 .when().delete("/reservations/" + id)
                 .then().log().all()
                 .assertThat().statusCode(401);
 
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().body("size()", is(1));

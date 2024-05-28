@@ -7,8 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "theme")
 public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,15 +31,14 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(Long id, ThemeName name, Description description, Thumbnail thumbnail) {
-        this.id = id;
+    public Theme(ThemeName name, Description description, Thumbnail thumbnail) {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
     public Theme(String name, String description, String thumbnail) {
-        this(null, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
+        this(new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
     }
 
     public Long getId() {

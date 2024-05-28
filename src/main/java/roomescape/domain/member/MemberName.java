@@ -1,5 +1,6 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.exception.InvalidReservationException;
@@ -11,6 +12,7 @@ public class MemberName {
     private static final String INVALID_NAME_LENGTH = String.format("이름은 %d자 이상, %d자 이하여야 합니다.", MINIMUM_NAME_LENGTH,
             MAXIMUM_NAME_LENGTH);
 
+    @Column(name = "name")
     private String value;
 
     protected MemberName() {

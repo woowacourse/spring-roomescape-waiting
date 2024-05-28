@@ -8,33 +8,19 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import org.junit.jupiter.api.BeforeEach;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlMergeMode;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql("/truncate-with-guests.sql")
-class ReservationTimeControllerTest {
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void initPort() {
-        RestAssured.port = port;
-    }
-
+class ReservationTimeControllerTest extends DataInitializedControllerTest {
     @DisplayName("시간 정보를 추가한다.")
     @Test
     void createReservationTime() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times")
                 .then().log().all().statusCode(201).body("id", is(greaterThan(0)));
     }
@@ -43,7 +29,7 @@ class ReservationTimeControllerTest {
     @Test
     void createDuplicateTime() {
         //given
-        LocalTime time = LocalTime.now();
+        LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(new ReservationTimeCreateRequest(time))
@@ -61,7 +47,8 @@ class ReservationTimeControllerTest {
     @Test
     void findAllReservationTime() {
         //given
-        RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest(LocalTime.now()))
+        RestAssured.given().contentType(ContentType.JSON)
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times");
 
         //when&then
@@ -75,7 +62,7 @@ class ReservationTimeControllerTest {
     void deleteReservationTimeById() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times")
                 .then().log().all().extract().response().jsonPath().get("id");
 

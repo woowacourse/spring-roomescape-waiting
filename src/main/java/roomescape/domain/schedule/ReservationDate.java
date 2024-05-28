@@ -1,11 +1,13 @@
 package roomescape.domain.schedule;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Embeddable
 public class ReservationDate {
+    @Column(name = "VISIT_DATE")
     private LocalDate value;
 
     protected ReservationDate() {
