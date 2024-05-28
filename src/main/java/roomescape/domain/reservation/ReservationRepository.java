@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
@@ -31,5 +32,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
+    @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findAllByMember(Member member);
 }
