@@ -2,17 +2,13 @@ package roomescape.controller.theme;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.controller.member.dto.MemberLoginRequest;
+import roomescape.IntegrationTestSupport;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,33 +19,14 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.is;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ThemeControllerTest {
-
-    @LocalServerPort
-    int port;
-
-    String accessToken;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new MemberLoginRequest("redddy@gmail.com", "0000"))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
-    }
+class ThemeControllerTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("테마 조회")
     void getThemes() {
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
@@ -65,7 +42,7 @@ class ThemeControllerTest {
         params.put("thumbnail", "https://google.png");
 
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/themes")
@@ -82,7 +59,7 @@ class ThemeControllerTest {
         params.put("thumbnail", "https://redddy.png");
 
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/themes")
@@ -90,20 +67,20 @@ class ThemeControllerTest {
                 .statusCode(201);
 
         final List<Object> values = RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
                 .extract().jsonPath().getList("$");
 
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .when().delete("/themes/" + values.size())
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .when().delete("/themes/" + values.size())
                 .then().log().all()
                 .statusCode(400);
@@ -117,7 +94,7 @@ class ThemeControllerTest {
         final String until = now.minusDays(1).format(DateTimeFormatter.ISO_DATE);
 
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .when().get("/themes/popular?from=" + from + "&until=" + until + "&limit=10")
                 .then().log().all()
                 .statusCode(200)
@@ -134,7 +111,7 @@ class ThemeControllerTest {
         params.put("thumbnail", thumbnail);
 
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", ADMIN_TOKEN)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/themes")

@@ -2,25 +2,30 @@ package roomescape.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.IntegrationTestSupport;
+import roomescape.controller.time.dto.AvailabilityTimeRequest;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
 import roomescape.service.exception.TimeNotFoundException;
 import roomescape.service.exception.TimeUsedException;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
-class TimeServiceTest {
+class TimeServiceTest extends IntegrationTestSupport {
 
     @Autowired
     private TimeService timeService;
@@ -49,10 +54,10 @@ class TimeServiceTest {
     void addTIme() {
         // given
         CreateTimeRequest request = new CreateTimeRequest(LocalTime.parse("13:30"));
-        AvailabilityTimeResponse expected = new AvailabilityTimeResponse(6L, "13:30", false);
 
         // when
         AvailabilityTimeResponse actual = timeService.addTime(request);
+        AvailabilityTimeResponse expected = new AvailabilityTimeResponse(actual.id(), "13:30", false);
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -85,5 +90,20 @@ class TimeServiceTest {
     void invalidDelete() {
         assertThatThrownBy(() -> timeService.deleteTime(2L))
                 .isInstanceOf(TimeUsedException.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getAvailableTimesParameterProvider")
+    @DisplayName("가능 시간 조회")
+    void getAvailableTimes(final AvailabilityTimeRequest request, final int expected) {
+        assertThat(timeService.getAvailableTimes(request)).hasSize(expected);
+    }
+
+    static Stream<Arguments> getAvailableTimesParameterProvider() {
+        final LocalDate now = LocalDate.now();
+        return Stream.of(
+                Arguments.of(new AvailabilityTimeRequest(now.minusDays(3), 1L), 0),
+                Arguments.of(new AvailabilityTimeRequest(now.plusDays(1), 1L), 5)
+        );
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
@@ -19,8 +21,8 @@ public class JwtTokenProvider {
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
-    public String generateToken(final String userId) {
-        final Claims claims = Jwts.claims().setSubject(userId);
+    public String generateToken(final Map<String, Object> payload) {
+        final Claims claims = Jwts.claims(new HashMap<>(payload));
         final Date now = new Date();
         final Date validity = new Date(now.getTime() + validityInMilliseconds);
 
@@ -32,12 +34,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getPayload(final String token) {
+    public Map<String, Object> getPayload(final String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
     }
 
     public boolean validateToken(final String token) {

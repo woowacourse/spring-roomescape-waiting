@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.TokenResponse;
 import roomescape.controller.member.dto.CookieMemberResponse;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.member.dto.MemberLoginRequest;
 import roomescape.service.MemberService;
-import roomescape.controller.dto.TokenResponse;
 
 @RestController
 @RequestMapping("/login")
@@ -44,7 +44,6 @@ public class AuthController {
         if (loginMember != null) {
             return ResponseEntity.ok(new CookieMemberResponse(loginMember.name()));
         }
-        return ResponseEntity.ok()
-                .build();
+        return ResponseEntity.ok(CookieMemberResponse.NON_LOGIN);
     }
 }

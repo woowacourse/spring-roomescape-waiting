@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.time.dto.AvailabilityTimeRequest;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
@@ -29,12 +30,14 @@ public class TimeService {
         this.timeRepository = timeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReadTimeResponse> getTimes() {
         return timeRepository.findAll().stream()
                 .map(ReadTimeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailabilityTimeResponse> getAvailableTimes(final AvailabilityTimeRequest request) {
         final List<ReservationTime> times = timeRepository.findAll();
         final Set<ReservationTime> bookedTimes = reservationRepository
@@ -64,15 +67,15 @@ public class TimeService {
                 .toList();
     }
 
+    @Transactional
     public AvailabilityTimeResponse addTime(final CreateTimeRequest createTimeRequest) {
         final ReservationTime time = createTimeRequest.toDomain();
-        final List<ReservationTime> times = timeRepository.findAll();
-        validateDuplicate(times, time);
-
+        validateDuplicate(time);
         final ReservationTime savedTime = timeRepository.save(time);
         return AvailabilityTimeResponse.from(savedTime, false);
     }
 
+    @Transactional
     public void deleteTime(final long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new TimeUsedException("예약된 시간은 삭제할 수 없습니다.");
@@ -81,10 +84,8 @@ public class TimeService {
         timeRepository.deleteById(findTime.getId());
     }
 
-    private void validateDuplicate(final List<ReservationTime> times, final ReservationTime parsedTime) {
-        final boolean hasSameTime = times.stream()
-                .anyMatch(time -> time.isSameTime(parsedTime));
-        if (hasSameTime) {
+    private void validateDuplicate(final ReservationTime time) {
+        if (timeRepository.existsByStartAt(time.getStartAt())) {
             throw new DuplicateTimeException("중복된 시간은 생성이 불가합니다.");
         }
     }
