@@ -29,6 +29,7 @@ import roomescape.registration.domain.reservation.repository.ReservationReposito
 import roomescape.registration.domain.reservation.service.ReservationService;
 import roomescape.registration.domain.waiting.domain.Waiting;
 import roomescape.registration.domain.waiting.repository.WaitingRepository;
+import roomescape.registration.dto.RegistrationDto;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -84,8 +85,12 @@ class ReservationServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
                 reservation.getReservationTime().getId(), reservation.getTheme().getId());
 
-        ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest,
-                reservation.getMember().getId());
+        ReservationResponse reservationResponse = reservationService
+                .addReservation(new RegistrationDto(
+                        reservationRequest.date(),
+                        reservationRequest.themeId(),
+                        reservationRequest.timeId(),
+                        reservation.getMember().getId()));
 
         assertThat(reservationResponse.id()).isEqualTo(1);
     }
@@ -144,7 +149,12 @@ class ReservationServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(BEFORE, 1L, 1L);
 
         Throwable pastDateReservation = assertThrows(RoomEscapeException.class,
-                () -> reservationService.addReservation(reservationRequest, 1L));
+                () -> reservationService.addReservation(new RegistrationDto(
+                        reservationRequest.date(),
+                        reservationRequest.themeId(),
+                        reservationRequest.timeId(),
+                        reservation.getMember().getId()
+                )));
 
         assertEquals(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION.getMessage(),
                 pastDateReservation.getMessage());

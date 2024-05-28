@@ -17,6 +17,7 @@ import roomescape.registration.domain.reservation.service.ReservationService;
 import roomescape.registration.domain.reservation.dto.ReservationRequest;
 import roomescape.registration.domain.reservation.dto.ReservationResponse;
 import roomescape.registration.domain.reservation.dto.ReservationTimeAvailabilityResponse;
+import roomescape.registration.dto.RegistrationDto;
 
 @RestController
 @RequestMapping("/reservations")
@@ -31,9 +32,15 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> reservationSave(@RequestBody ReservationRequest reservationRequest,
                                                                @LoginMemberId long id) {
+        RegistrationDto registrationDto = new RegistrationDto(
+                reservationRequest.date(),
+                reservationRequest.themeId(),
+                reservationRequest.timeId(),
+                id);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(reservationService.addReservation(reservationRequest, id));
+                .body(reservationService.addReservation(registrationDto));
     }
 
     @GetMapping
