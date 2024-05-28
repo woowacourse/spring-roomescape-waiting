@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.login.dto.LoginRequest;
 import roomescape.member.MemberArgumentResolver;
+import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberNameResponse;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
 
 import javax.naming.AuthenticationException;
@@ -38,7 +38,7 @@ public class LoginController {
 
     @GetMapping("/check")
     public ResponseEntity<MemberNameResponse> getLoginMemberName(
-            @MemberArgumentResolver MemberRequest memberRequest) {
-        return ResponseEntity.ok(new MemberNameResponse(memberRequest.toLoginMember()));
+            @MemberArgumentResolver Member member) {
+        return ResponseEntity.ok(new MemberNameResponse(member));
     }
 }

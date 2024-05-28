@@ -7,7 +7,6 @@ import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
@@ -20,9 +19,8 @@ import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -50,7 +48,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse addReservation(
             ReservationRequest reservationRequest,
-            MemberRequest memberRequest
+            Member member
     ) {
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(reservationRequest.timeId());
         ThemeResponse themeResponse = themeService.getTheme(reservationRequest.themeId());
@@ -59,7 +57,7 @@ public class ReservationService {
                 reservationRequest.date(),
                 timeResponse.toReservationTime(),
                 themeResponse.toTheme(),
-                memberRequest.toLoginMember()
+                member
         );
         validateIsBeforeNow(reservation);
         validateIsDuplicated(reservation);
@@ -126,24 +124,19 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findReservationsByMember(MemberRequest memberRequest) {
-        Stream<ReservationResponse> reservations =
-                reservationJpaRepository.findByMember(memberRequest.toLoginMember())
-                .stream()
-                .map(ReservationResponse::new);
+    public List<ReservationResponse> findReservationsByMember(Member member) {
+        List<ReservationResponse> reservations =
+                reservationJpaRepository.findByMember(member)
+                        .stream()
+                        .map(ReservationResponse::new)
+                        .collect(Collectors.toList());
 
-        Stream<ReservationResponse> waitings =
-                waitingService.findWaitingsByMember(memberRequest.toLoginMember())
-                .stream()
-                .map(ReservationResponse::fromWaitingWithRank);
+                waitingService.findWaitingsByMember(member)
+                        .stream()
+                        .map(ReservationResponse::fromWaitingWithRank)
+                        .forEach(reservations::add);
 
-        return Stream.concat(reservations, waitings).
-                sorted(Comparator.comparing(ReservationResponse::date)
-                        .thenComparing(reservationResponse ->
-                                reservationResponse.time().toReservationTime().getStartAt()
-                        )
-                )
-                .toList();
+        return reservations;
     }
 
     @Transactional

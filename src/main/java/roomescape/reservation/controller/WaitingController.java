@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.member.MemberArgumentResolver;
+import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingRequest;
@@ -35,9 +36,9 @@ public class WaitingController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelWaiting(
             @PathVariable("id") Long id,
-            @MemberArgumentResolver MemberRequest memberRequest
+            @MemberArgumentResolver Member member
     ) {
-        waitingService.deleteById(id, memberRequest.toLoginMember());
+        waitingService.deleteById(id, member);
         return ResponseEntity.noContent().build();
     }
 }

@@ -13,7 +13,6 @@ import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.*;
 import roomescape.member.dto.MemberIdNameResponse;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.SignUpRequest;
 import roomescape.member.repository.MemberJpaRepository;
 
@@ -105,10 +104,8 @@ public class MemberService {
         }
     }
 
-    public MemberRequest getLoginMemberRequestByToken(String token) throws AuthenticationException {
-        Member member = parseTokenToLoginMember(token);
-
-        return new MemberRequest(member);
+    public Member getLoginMemberByToken(String token) throws AuthenticationException {
+        return parseTokenToLoginMember(token);
     }
 
     @Transactional(readOnly = true)
