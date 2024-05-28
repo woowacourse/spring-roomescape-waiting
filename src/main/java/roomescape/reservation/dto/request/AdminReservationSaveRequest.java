@@ -19,7 +19,7 @@ public record AdminReservationSaveRequest(
         @NotNull(message = "사용자 Id는 비어있을 수 없습니다.")
         Long memberId) {
 
-    public Reservation toModel(Theme theme, ReservationTime time, Member member) {
+    public Reservation toApprovedReservation(Theme theme, ReservationTime time, Member member) {
         return new Reservation(member, date, time, theme, ReservationStatus.BOOKING);
     }
 }
