@@ -89,4 +89,19 @@ class WaitingServiceTest extends ServiceTest {
 
         assertThat(waitings).hasSize(1);
     }
+
+    @Test
+    @DisplayName("예약 대기를 예약 상태로 승인할 수 있다.")
+    void approveWaitingToBooking() {
+        Reservation sudalReservation = new Reservation(sudal, tomorrow, reservationTime, theme, ReservationStatus.BOOKING);
+        Reservation roroReservation = new Reservation(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        reservationService.createReservation(sudalReservation);
+        reservationService.createWaitingReservation(roroReservation);
+
+        Reservation deletedReservation = reservationService.deleteReservation(sudalReservation.getId());
+        waitingService.approveWaitingAsBooking(deletedReservation);
+
+        Reservation reservation = reservationService.findAllByMember(roro).get(0);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.BOOKING);
+    }
 }

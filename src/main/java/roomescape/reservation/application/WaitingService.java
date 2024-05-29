@@ -2,10 +2,7 @@ package roomescape.reservation.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingRepository;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.domain.*;
 
 import java.util.List;
 
@@ -13,9 +10,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class WaitingService {
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
 
-    public WaitingService(WaitingRepository waitingRepository) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public Long findRankByReservation(Reservation reservation) {
@@ -33,5 +32,18 @@ public class WaitingService {
     @Transactional
     public void delete(Long id) {
         waitingRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void approveWaitingAsBooking(Reservation deletedReservation) {
+        waitingRepository.findFistByDateAndTimeAndThemeOrderByIdAsc(deletedReservation.getDate(), deletedReservation.getTime(), deletedReservation.getTheme())
+                .ifPresent(this::changeWaitingToBooking);
+    }
+
+    private void changeWaitingToBooking(Waiting waiting) {
+        waitingRepository.delete(waiting);
+        Reservation reservation = reservationRepository.findByMemberAndDateAndTimeAndTheme(
+                waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
+        reservation.setStatus(ReservationStatus.BOOKING);
     }
 }

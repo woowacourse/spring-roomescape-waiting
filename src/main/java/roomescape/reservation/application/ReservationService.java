@@ -75,19 +75,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
+    public Reservation deleteReservation(Long id) {
         Reservation reservation = findReservation(id);
         reservationRepository.deleteById(id);
 
-        waitingRepository.findFistByDateAndTimeAndThemeOrderByIdAsc(reservation.getDate(), reservation.getTime(), reservation.getTheme())
-                .ifPresent(this::changeWaitingToBooking);
-    }
-
-    private void changeWaitingToBooking(Waiting waiting) {
-        waitingRepository.delete(waiting);
-        Reservation reservation = reservationRepository.findByMemberAndDateAndTimeAndTheme(
-                waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
-        reservation.setStatus(ReservationStatus.BOOKING);
+        return reservation;
     }
 
     @Transactional

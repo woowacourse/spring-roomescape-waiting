@@ -146,19 +146,6 @@ class ReservationServiceTest extends ServiceTest {
     }
 
     @Test
-    @DisplayName("예약 삭제 시 예약 대기가 있다면 첫번째 예약 대기 순서가 예약 확정된다.")
-    void changeWaitingToBooking() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        Reservation miaReservation = reservationService.createReservation(new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.BOOKING));
-        reservationService.createWaitingReservation(new Reservation(tommy, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING));
-
-        reservationService.deleteReservation(miaReservation.getId());
-        Reservation reservation = reservationService.findAllByMember(tommy).get(0);
-
-        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.BOOKING);
-    }
-
-    @Test
     @DisplayName("이미 예약이 된 테마를 예약 대기를 신청하면 예외가 발생한다.")
     void invalidWaitingReservation1() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
