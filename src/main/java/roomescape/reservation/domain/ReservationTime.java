@@ -39,11 +39,10 @@ public class ReservationTime {
     }
 
     public boolean isBeforeNow(LocalDate date) {
-        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
-        ZonedDateTime dateTimeAtSeoul = dateTime.atZone(ZoneId.of("Asia/Seoul"));
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-
-        return dateTimeAtSeoul.isBefore(now);
+        Instant instantToCompare = LocalDateTime.of(date, startAt)
+                .atZone(ZoneId.of("Asia/Seoul"))
+                .toInstant();
+        return instantToCompare.isBefore(Instant.now());
     }
 
     public boolean isBelongTo(List<Long> timeIds) {
