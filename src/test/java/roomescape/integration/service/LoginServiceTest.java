@@ -1,13 +1,14 @@
-package roomescape.service;
+package roomescape.integration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
+
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER_BY_EMAIL;
 import static roomescape.exception.ExceptionType.WRONG_PASSWORD;
 
-import io.jsonwebtoken.Claims;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,12 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.Fixture;
+
+import io.jsonwebtoken.Claims;
+import roomescape.fixture.MemberFixture;
 import roomescape.domain.LoginMember;
-import roomescape.domain.Member;
 import roomescape.dto.LoginRequest;
+import roomescape.entity.Member;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
+import roomescape.service.JwtGenerator;
+import roomescape.service.LoginService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class LoginServiceTest {
@@ -35,7 +40,7 @@ class LoginServiceTest {
     @DisplayName("유저 데이터가 존재할 때")
     @Nested
     class MemberExistsTest {
-        private Member defaultUser = Fixture.defaultMember;
+        private Member defaultUser = MemberFixture.DEFAULT_MEMBER;
 
         @BeforeEach
         void addDefaultUser() {
@@ -67,7 +72,7 @@ class LoginServiceTest {
                     defaultUser.getPassword()
             )))
                     .isInstanceOf(RoomescapeException.class)
-                    .hasMessage(NOT_FOUND_MEMBER.getMessage());
+                    .hasMessage(NOT_FOUND_MEMBER_BY_EMAIL.getMessage());
         }
 
         @DisplayName("잘못된 비밀번호로 요청을 하면 예외가 발생한다.")

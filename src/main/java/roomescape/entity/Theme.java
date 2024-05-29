@@ -1,20 +1,23 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import static roomescape.exception.ExceptionType.EMPTY_DESCRIPTION;
 import static roomescape.exception.ExceptionType.EMPTY_NAME;
 import static roomescape.exception.ExceptionType.EMPTY_THUMBNAIL;
+
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Objects;
+
 import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Theme {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String name;
@@ -23,7 +26,7 @@ public class Theme {
     @Column(nullable = false)
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
 
     }
 

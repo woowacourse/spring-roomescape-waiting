@@ -1,53 +1,57 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import static roomescape.exception.ExceptionType.EMPTY_DATE;
 import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_THEME;
 import static roomescape.exception.ExceptionType.EMPTY_TIME;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Objects;
-import jdk.jshell.Snippet.Status;
+
+import roomescape.domain.Duration;
+import roomescape.domain.LoginMember;
+import roomescape.domain.ReservationStatus;
 import roomescape.exception.RoomescapeException;
+import roomescape.service.ReservationListener;
 
 @Entity
-public class Reservation implements Comparable<Reservation> {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@EntityListeners(ReservationListener.class)
+public class Reservation extends BaseEntity implements Comparable<Reservation> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private LocalDate date;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ReservationTime time;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(long id, Reservation reservationBeforeSave) {
-        this(id,
-                reservationBeforeSave.date,
-                reservationBeforeSave.time,
-                reservationBeforeSave.theme,
-                reservationBeforeSave.member);
+    protected Reservation() {
+
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, ReservationStatus status) {
+        this(null, date, time, theme, member, status);
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member, ReservationStatus status) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
@@ -57,11 +61,7 @@ public class Reservation implements Comparable<Reservation> {
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = ReservationStatus.BOOKED;
-    }
-
-    public Reservation() {
-
+        this.status = status;
     }
 
     private void validateTheme(Theme theme) {
@@ -121,6 +121,10 @@ public class Reservation implements Comparable<Reservation> {
         return this.theme.equals(reservation.theme);
     }
 
+    public void confirm() {
+        this.status = ReservationStatus.BOOKED;
+    }
+
     @Override
     public int compareTo(Reservation other) {
         LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
@@ -156,31 +160,30 @@ public class Reservation implements Comparable<Reservation> {
         return theme;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
     public ReservationStatus getStatus() {
         return status;
     }
 
     @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (member != null ? member.hashCode() : 0);
-        result = 31 * result + (date != null ? date.hashCode() : 0);
-        result = 31 * result + (time != null ? time.hashCode() : 0);
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reservation that = (Reservation) o;
+        return Objects.equals(id, that.id)
+                && Objects.equals(date, that.date)
+                && Objects.equals(time, that.time)
+                && Objects.equals(theme, that.theme)
+                && Objects.equals(member, that.member)
+                && status == that.status;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Reservation that = (Reservation) o;
-
-        return Objects.equals(id, that.id);
+    public int hashCode() {
+        return Objects.hash(id, date, time, theme, member, status);
     }
 
     @Override
@@ -191,6 +194,7 @@ public class Reservation implements Comparable<Reservation> {
                 ", time=" + time +
                 ", theme=" + theme +
                 ", member=" + member +
+                ", status=" + status +
                 '}';
     }
 }

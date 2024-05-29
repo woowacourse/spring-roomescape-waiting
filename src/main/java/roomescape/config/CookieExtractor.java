@@ -2,10 +2,12 @@ package roomescape.config;
 
 import static roomescape.exception.ExceptionType.REQUIRED_LOGIN;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Optional;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+
 import roomescape.exception.RoomescapeException;
 
 public class CookieExtractor {

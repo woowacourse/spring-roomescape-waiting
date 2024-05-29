@@ -1,16 +1,19 @@
-package roomescape.service;
+package roomescape.integration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.Fixture.defaultLoginuser;
-import static roomescape.Fixture.defaultMember;
+
 import static roomescape.exception.ExceptionType.DELETE_USED_THEME;
 import static roomescape.exception.ExceptionType.DUPLICATE_THEME;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationFixture.ReservationOfDateAndTheme;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_RESERVATION_TIME;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,24 +23,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Themes;
 import roomescape.dto.ThemeRequest;
 import roomescape.dto.ThemeResponse;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
 import roomescape.exception.RoomescapeException;
+import roomescape.fixture.ThemeFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ThemeServiceTest {
 
-    private static final Member DEFAULT_MEMBER = defaultMember;
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired
@@ -52,10 +57,10 @@ class ThemeServiceTest {
     @DisplayName("테마가 여러개 있으면 ")
     @Nested
     class MultipleTheme {
-        private Theme theme1 = new Theme("name1", "description1", "thumbnail1");
-        private Theme theme2 = new Theme("name2", "description2", "thumbnail2");
-        private Theme theme3 = new Theme("name3", "description3", "thumbnail3");
-        private Theme theme4 = new Theme("name4", "description4", "thumbnail4");
+        private Theme theme1 = ThemeFixture.themeOfName("name1");
+        private Theme theme2 = ThemeFixture.themeOfName("name2");
+        private Theme theme3 = ThemeFixture.themeOfName("name3");
+        private Theme theme4 = ThemeFixture.themeOfName("name4");
 
         @BeforeEach
         void init() {
@@ -63,7 +68,7 @@ class ThemeServiceTest {
             theme2 = themeRepository.save(theme2);
             theme3 = themeRepository.save(theme3);
             theme4 = themeRepository.save(theme4);
-            memberRepository.save(defaultMember);
+            memberRepository.save(DEFAULT_MEMBER);
         }
 
         @DisplayName("테마를 모두 조회할 수 있다.")
@@ -80,34 +85,22 @@ class ThemeServiceTest {
         @Test
         void findPopularTest() {
             //when
-            ReservationTime reservationTime = new ReservationTime(LocalTime.of(11, 30));
-            reservationTime = reservationTimeRepository.save(reservationTime);
+            reservationTimeRepository.save(DEFAULT_RESERVATION_TIME);
 
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(1), reservationTime, theme1, DEFAULT_MEMBER));
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(2), reservationTime, theme1, DEFAULT_MEMBER));
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(3), reservationTime, theme1, DEFAULT_MEMBER));
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(4), reservationTime, theme1, DEFAULT_MEMBER));
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(5), reservationTime, theme1, DEFAULT_MEMBER));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(1), theme1));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(2), theme1));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(3), theme1));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(4), theme1));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(5), theme1));
 
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(1), reservationTime, theme3, DEFAULT_MEMBER));
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(2), reservationTime, theme3, DEFAULT_MEMBER));
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(3), reservationTime, theme3, DEFAULT_MEMBER));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(1), theme3));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(2), theme3));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(3), theme3));
 
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(1), reservationTime, theme2, DEFAULT_MEMBER));
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(3), reservationTime, theme2, DEFAULT_MEMBER));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(1), theme2));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(3), theme2));
 
-            reservationRepository.save(
-                    new Reservation(LocalDate.now().minusDays(3), reservationTime, theme4, DEFAULT_MEMBER));
+            reservationRepository.save(ReservationOfDateAndTheme(LocalDate.now().minusDays(3), theme4));
 
             //when
             List<ThemeResponse> popularThemes = themeService.findAndOrderByPopularity(5);
@@ -131,7 +124,7 @@ class ThemeServiceTest {
         void addDefaultData() {
             defaultTime = reservationTimeRepository.save(defaultTime);
             defaultTheme = themeRepository.save(defaultTheme);
-            memberRepository.save(defaultMember);
+            memberRepository.save(DEFAULT_MEMBER);
         }
 
         @DisplayName("동일한 이름의 테마를 예약할 수 없다.")
@@ -165,7 +158,8 @@ class ThemeServiceTest {
         void removeFailTest() {
             //given
             reservationRepository.save(
-                    new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme, defaultMember));
+                    new Reservation(LocalDate.now()
+                            .plusDays(1), defaultTime, defaultTheme, DEFAULT_MEMBER, ReservationStatus.BOOKED));
 
             //when & then
             assertThatThrownBy(() -> themeService.delete(1L))

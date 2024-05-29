@@ -28,8 +28,12 @@
     - [x] 로그아웃 기능 추가
     - [x] 인증 정보 확인 기능 추가
 - [x] 테마 검색 기능 추가
+
 - [x] 자신의 예약 목록 조회 기능 추가
 
+- [x] 예약 대기 생성/조회/삭제 기능 추가
+
+- [x] 예약 대기 관리 조회/삭제 기능 추가
 
 # API 명세
 
@@ -103,9 +107,8 @@
 
 > POST /reservations HTTP/1.1  
 > content-type: application/json  
-> cookie:
->
-token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI  
+> cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+> 
 > host: localhost:8080
 
 ```JSON
@@ -147,9 +150,8 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 > POST /admin/reservations HTTP/1.1  
 > content-type: application/json  
-> cookie:
->
-token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI  
+> cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+> 
 > host: localhost:8080
 
 ```JSON
@@ -355,9 +357,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 > HTTP/1.1 200 OK  
 > Content-Type: application/json  
 > Keep-Alive: timeout=60  
-> Set-Cookie:
->
-token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI;
+> Set-Cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI;
 > Path=/; HttpOnly
 
 ## 인증 정보 조회
@@ -365,10 +365,11 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 ### request
 
 > GET /login/check HTTP/1.1  
+> 
 > cookie: _ga=GA1.1.48222725.1666268105; _ga_QD3BVX7MKT=GS1.1.1687746261.15.1.1687747186.0.0.0;
 > Idea-25a74f9c=3cbc3411-daca-48c1-8201-51bdcdd93164;
->
-token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM  
+> token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+> 
 > host: localhost:8080
 
 ### response
@@ -386,12 +387,14 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBR
 }
 ```
 
-API 응답 예시
+## 내 예약 목록 조회
 
 ### request
 
 > GET /reservations-mine HTTP/1.1
+> 
 > cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+> 
 > host: localhost:8080
 
 ### response
@@ -424,3 +427,111 @@ API 응답 예시
   }
 ]
 ```
+
+## 예약 대기 추가 기능
+
+### Request
+
+> POST /reservations-waiting HTTP/1.1  
+> content-type: application/json  
+> cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+>
+> host: localhost:8080
+
+```JSON
+{
+  "date": "2023-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+### Response
+
+> HTTP/1.1 201
+>
+> Content-Type: application/json
+> Location: /reservations-waiting/{id}
+
+```JSON
+{
+  "id": 1,
+  "name": "브라운",
+  "date": "2023-08-05",
+  "time": {
+    "id": 1,
+    "startAt": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "이름",
+    "description": "설명",
+    "thumbnail": "썸네일"
+  }
+}
+```
+
+## 예약 대기 삭제 기능
+
+### request
+
+> DELETE /reservations-waiting/1 HTTP/1.1
+
+### response
+
+> HTTP/1.1 204
+
+## 예약 대기 관리 조회 기능
+
+### request
+
+> GET /admin/reservations-waiting HTTP/1.1
+>
+> cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+>
+> host: localhost:8080
+
+### response
+
+> HTTP/1.1 200
+> Content-Type: application/json
+
+``` json
+[
+  {
+    "id": 1,
+    "waitingNumber": 1,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "예약"
+  },
+  {
+    "id": 2,
+    "waitingNumber": 2,
+    "theme": "테마2",
+    "date": "2024-03-01",
+    "time": "12:00",
+    "status": "예약"
+  },
+  {
+    "id": 2,
+    "waitingNumber": 3,
+    "theme": "테마3",
+    "date": "2024-03-01",
+    "time": "14:00",
+    "status": "예약"
+  }
+]
+```
+
+
+## 예약 대기 관리 삭제 기능
+
+### request
+
+> DELETE /admin/reservations-waiting/1 HTTP/1.1
+
+### response
+
+> HTTP/1.1 204
