@@ -11,6 +11,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.registration.domain.reservation.domain.Reservation;
 import roomescape.registration.domain.reservation.repository.ReservationRepository;
 import roomescape.registration.domain.waiting.domain.Waiting;
+import roomescape.registration.domain.waiting.dto.WaitingDto;
 import roomescape.registration.domain.waiting.service.WaitingService;
 import roomescape.registration.dto.RegistrationDto;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -63,7 +64,14 @@ public class RegistrationService {
             throw new RoomEscapeException(ReservationExceptionCode.SAME_RESERVATION_EXCEPTION);
         }
 
-        long rank = waitingService.countWaitingRank(registrationDto);
+        long rank = waitingService.countWaitingRank(
+                new WaitingDto(
+                        registrationDto.date(),
+                        registrationDto.themeId(),
+                        registrationDto.timeId(),
+                        registrationDto.memberId()
+                )
+        );
         if (rank != 0) {
             throw new RoomEscapeException(WaitingExceptionCode.APPROVE_ORDER_EXCEPTION);
         }
