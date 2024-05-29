@@ -3,9 +3,11 @@ package roomescape.repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemePopularFilter;
@@ -18,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.*;
 
 
-class ThemeRepositoryTest extends RepositoryTest {
+@DataJpaTest
+class ThemeRepositoryTest {
 
     @Autowired
     private TestEntityManager testEntityManager;
@@ -96,7 +99,7 @@ class ThemeRepositoryTest extends RepositoryTest {
     }
 
     private void loadPopularThemeData() {
-        final Member member = MEMBER_MIA();
+        final Member member = MEMBER_TENNY();
         testEntityManager.persist(member);
 
         final ReservationTime reservationTimeSix = RESERVATION_TIME_SIX();
@@ -127,31 +130,31 @@ class ThemeRepositoryTest extends RepositoryTest {
         testEntityManager.flush();
 
 
-        testEntityManager.persist(new Reservation(member, "2034-05-08", reservationTimeSix, horror2));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSix, horror2));
-        testEntityManager.persist(new Reservation(member, "2034-05-10", reservationTimeSix, horror2));
-        testEntityManager.persist(new Reservation(member, "2034-05-11", reservationTimeSix, horror2));
-        testEntityManager.persist(new Reservation(member, "2034-05-12", reservationTimeSix, horror2));
-        testEntityManager.persist(new Reservation(member, "2034-05-08", reservationTimeSix, horror1));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSix, horror1));
-        testEntityManager.persist(new Reservation(member, "2034-05-10", reservationTimeSix, horror1));
-        testEntityManager.persist(new Reservation(member, "2034-05-11", reservationTimeSix, horror1));
-        testEntityManager.persist(new Reservation(member, "2034-05-08", reservationTimeSix, horror3));
-        testEntityManager.persist(new Reservation(member, "2034-05-08", reservationTimeSeven, horror3));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSeven, horror3));
-        testEntityManager.persist(new Reservation(member, "2034-05-08", reservationTimeSeven, horror4));
-        testEntityManager.persist(new Reservation(member, "2034-05-08", reservationTimeSix, horror4));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSix, horror4));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSix, horror5));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSeven, horror5));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSix, detective1));
-        testEntityManager.persist(new Reservation(member, "2034-05-09", reservationTimeSeven, detective1));
-        testEntityManager.persist(new Reservation(member, "2034-05-10", reservationTimeSix, detective2));
-        testEntityManager.persist(new Reservation(member, "2034-05-10", reservationTimeSeven, detective2));
-        testEntityManager.persist(new Reservation(member, "2034-05-10", reservationTimeSeven, detective3));
-        testEntityManager.persist(new Reservation(member, "2034-05-10", reservationTimeSeven, detective3));
-        testEntityManager.persist(new Reservation(member, "2034-05-11", reservationTimeSix, detective4));
-        testEntityManager.persist(new Reservation(member, "2034-05-11", reservationTimeSeven, detective4));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-08"), reservationTimeSix, horror2, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSix, horror2, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-10"), reservationTimeSix, horror2, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-11"), reservationTimeSix, horror2, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-12"), reservationTimeSix, horror2, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-08"), reservationTimeSix, horror1, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSix, horror1, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-10"), reservationTimeSix, horror1, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-11"), reservationTimeSix, horror1, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-08"), reservationTimeSix, horror3, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-08"), reservationTimeSeven, horror3, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSeven, horror3, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-08"), reservationTimeSeven, horror4, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-08"), reservationTimeSix, horror4, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSix, horror4, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSix, horror5, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSeven, horror5, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSix, detective1, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-09"), reservationTimeSeven, detective1, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-10"), reservationTimeSix, detective2, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-10"), reservationTimeSeven, detective2, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-10"), reservationTimeSeven, detective3, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-10"), reservationTimeSeven, detective3, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-11"), reservationTimeSix, detective4, ReservationStatus.RESERVED));
+        testEntityManager.persist(new Reservation(member, LocalDate.parse("2034-05-11"), reservationTimeSeven, detective4, ReservationStatus.RESERVED));
         testEntityManager.flush();
     }
 }

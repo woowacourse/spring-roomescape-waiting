@@ -6,19 +6,23 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 
+import java.time.LocalDate;
+
 public class TestFixture {
 
     public static final String ADMIN_NAME = "냥인";
     public static final String ADMIN_EMAIL = "nyangin@email.com";
     public static final String ADMIN_PASSWORD = "1234";
+    public static final String MEMBER_TENNY_NAME = "테니";
+    public static final String MEMBER_TENNY_EMAIL = "tenny@email.com";
     public static final String MEMBER_MIA_NAME = "미아";
     public static final String MEMBER_MIA_EMAIL = "mia@email.com";
-    public static final String MEMBER_BROWN_NAME = "브라운";
+    public static final String MEMBER_BROWN_NAME= "브라운";
     public static final String MEMBER_BROWN_EMAIL = "brown@email.com";
     public static final String MEMBER_PASSWORD = "1234";
 
-    public static final String DATE_MAY_EIGHTH = "2034-05-08";
-    public static final String DATE_MAY_NINTH = "2034-05-09";
+    public static final LocalDate DATE_MAY_EIGHTH = LocalDate.parse("2034-05-08");
+    public static final LocalDate DATE_MAY_NINTH = LocalDate.parse("2034-05-09");
 
     public static final String START_AT_SIX = "18:00";
     public static final String START_AT_SEVEN = "19:00";
@@ -39,12 +43,16 @@ public class TestFixture {
         return new Member(id, new Name(ADMIN_NAME), ADMIN_EMAIL, ADMIN_PASSWORD, Role.ADMIN);
     }
 
-    public static Member MEMBER_MIA() {
-        return new Member(new Name(MEMBER_MIA_NAME), MEMBER_MIA_EMAIL, MEMBER_PASSWORD, Role.MEMBER);
+    public static Member MEMBER_TENNY() {
+        return new Member(new Name(MEMBER_TENNY_NAME), MEMBER_TENNY_EMAIL, MEMBER_PASSWORD, Role.MEMBER);
     }
 
-    public static Member MEMBER_MIA(final Long id) {
-        return new Member(id, new Name(MEMBER_MIA_NAME), MEMBER_MIA_EMAIL, MEMBER_PASSWORD, Role.MEMBER);
+    public static Member MEMBER_TENNY(final Long id) {
+        return new Member(id, new Name(MEMBER_TENNY_NAME), MEMBER_TENNY_EMAIL, MEMBER_PASSWORD, Role.MEMBER);
+    }
+
+    public static Member MEMBER_MIA() {
+        return new Member(new Name(MEMBER_MIA_NAME), MEMBER_MIA_EMAIL, MEMBER_PASSWORD, Role.MEMBER);
     }
 
     public static Member MEMBER_BROWN() {
@@ -81,5 +89,8 @@ public class TestFixture {
 
     public static Theme THEME_DETECTIVE(final Long id) {
         return new Theme(id, THEME_DETECTIVE_NAME, THEME_DETECTIVE_DESCRIPTION, THEME_DETECTIVE_THUMBNAIL);
+    }
+
+    private TestFixture() {
     }
 }

@@ -28,7 +28,7 @@ class LocalConnectionTest {
     }
 
     @Test
-    @DisplayName("[Step4] 로컬 DB 커넥션을 얻는다.")
+    @DisplayName("로컬 DB 커넥션을 얻는다.")
     void getConnection() {
         try (final Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();

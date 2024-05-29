@@ -6,7 +6,6 @@ import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 @Entity
@@ -38,61 +37,27 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme);
-    }
-
-    public Reservation(final Long id, final Member member, final String date,
-                       final ReservationTime time, final Theme theme) {
-        this(id, member, convertToLocalDate(date), time, theme);
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time,
+                       final Theme theme, final ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
     public Reservation(final Long id, final Member member, final LocalDate date,
-                       final ReservationTime time, final Theme theme) {
-        validateDate(date);
+                       final ReservationTime time, final Theme theme, final ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.WAITING;
-    }
-
-    private static LocalDate convertToLocalDate(final String date) {
-        if (date == null || date.isEmpty()) {
-            throw new IllegalArgumentException("예약 날짜가 비어있습니다.");
-        }
-        try {
-            return LocalDate.parse(date);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("유효하지 않은 예약 날짜입니다.");
-        }
-    }
-
-    private void validateDate(final LocalDate date) {
-        if (date.isBefore(LocalDate.now()) || date.equals(LocalDate.now())) {
-            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
-        }
-    }
-
-    public boolean hasSameDateTime(final LocalDate date, final ReservationTime time) {
-        return this.time.equals(time) && this.date.equals(date);
+        this.status = status;
     }
 
     public void toReserved() {
         this.status = ReservationStatus.RESERVED;
     }
 
-    public Long getReservationTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
-    public String getThemeName() {
-        return theme.getName();
+    public boolean isReserved() {
+        return this.status == ReservationStatus.RESERVED;
     }
 
     public Long getId() {
@@ -123,8 +88,12 @@ public class Reservation {
         return theme;
     }
 
-    public String getStatus() {
-        return status.getValue();
+    public String getThemeName() {
+        return theme.getName();
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override

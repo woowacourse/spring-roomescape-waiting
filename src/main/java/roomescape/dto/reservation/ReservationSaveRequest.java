@@ -2,7 +2,7 @@ package roomescape.dto.reservation;
 
 import java.time.LocalDate;
 
-public record ReservationExistenceCheck(
+public record ReservationSaveRequest(
         LocalDate date,
         Long timeId,
         Long themeId

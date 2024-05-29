@@ -3,8 +3,11 @@ package roomescape.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.dto.reservation.AvailableReservationTimeSearch;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,17 +15,50 @@ import java.util.List;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByMember_Id(final Long memberId);
+    List<Reservation> findByMemberId(final Long memberId);
 
-    @Query("SELECT r.time.id FROM Reservation r WHERE r.date = :#{#availableReservationTimeSearch.date} " +
-            "AND r.theme.id = :#{#availableReservationTimeSearch.themeId}")
-    List<Long> findTimeIds(final AvailableReservationTimeSearch availableReservationTimeSearch);
+    List<Reservation> findByDateAndThemeId(final LocalDate date, final Long themeId);
 
-    List<Reservation> findByTheme_IdAndMember_IdAndDateBetween(final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo);
+    @Query(
+            """
+            SELECT r FROM Reservation AS r
+            WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+            AND (:memberId IS NULL OR r.member.id = :memberId)
+            AND (:dateFrom IS NULL OR r.date >= :dateFrom)
+            AND (:dateTo IS NULL OR r.date <= :dateTo)
+            AND r.status = :status
+            """
+    )
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetweenAndStatus(
+            final Long themeId,
+            final Long memberId,
+            final LocalDate dateFrom,
+            final LocalDate dateTo,
+            final ReservationStatus status);
 
-    int countByTime_Id(final Long timeId);
+    List<Reservation> findByStatus(final ReservationStatus status);
 
-    int countByDateAndTime_IdAndTheme_Id(final LocalDate date, final Long timeId, final Long themeId);
+    int countByTimeId(final Long timeId);
+
+    int countByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
+
+    Long countByDateAndThemeIdAndTimeIdAndStatusAndIdLessThan(
+            final LocalDate date,
+            final Long themeId,
+            final Long timeId,
+            final ReservationStatus status,
+            final Long id
+    );
 
     boolean existsById(final Long id);
+
+    boolean existsByThemeAndDateAndTimeAndStatus(final Theme theme, final LocalDate date,
+                                                 final ReservationTime time, final ReservationStatus status);
+
+    boolean existsByThemeAndDateAndTimeAndStatusAndMember(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime time,
+            final ReservationStatus status,
+            final Member member);
 }

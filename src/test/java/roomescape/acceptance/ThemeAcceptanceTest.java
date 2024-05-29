@@ -1,9 +1,13 @@
 package roomescape.acceptance;
 
+import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.dto.theme.ThemeResponse;
 import roomescape.dto.theme.ThemeSaveRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.*;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
@@ -14,7 +18,14 @@ class ThemeAcceptanceTest extends AcceptanceTest {
         final ThemeSaveRequest request
                 = new ThemeSaveRequest(THEME_HORROR_NAME, THEME_HORROR_DESCRIPTION, THEME_HORROR_THUMBNAIL);
 
-        assertCreateResponse(request, "/themes", 201);
+        final ThemeResponse response = assertPostResponse(request, "/themes", 201)
+                .extract().as(ThemeResponse.class);
+
+        assertAll(() -> {
+            assertThat(response.name()).isEqualTo(THEME_HORROR_NAME);
+            assertThat(response.description()).isEqualTo(THEME_HORROR_DESCRIPTION);
+            assertThat(response.thumbnail()).isEqualTo(THEME_HORROR_THUMBNAIL);
+        });
     }
 
     @Test
@@ -22,7 +33,14 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     void respondOkWhenFindThemes() {
         saveTheme();
 
-        assertGetResponse("/themes", 200);
+        final JsonPath jsonPath = assertGetResponse("/themes", 200)
+                .extract().response().jsonPath();
+
+        assertAll(() -> {
+            assertThat(jsonPath.getString("name[0]")).isEqualTo(THEME_HORROR_NAME);
+            assertThat(jsonPath.getString("description[0]")).isEqualTo(THEME_HORROR_DESCRIPTION);
+            assertThat(jsonPath.getString("thumbnail[0]")).isEqualTo(THEME_HORROR_THUMBNAIL);
+        });
     }
 
     @Test
@@ -30,7 +48,14 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     void respondOkWhenFindPopularThemes() {
         saveTheme();
 
-        assertGetResponse("/themes/popular", 200);
+        final JsonPath jsonPath = assertGetResponse("/themes/popular", 200)
+                .extract().response().jsonPath();
+
+        assertAll(() -> {
+            assertThat(jsonPath.getString("name[0]")).isEqualTo(THEME_HORROR_NAME);
+            assertThat(jsonPath.getString("description[0]")).isEqualTo(THEME_HORROR_DESCRIPTION);
+            assertThat(jsonPath.getString("thumbnail[0]")).isEqualTo(THEME_HORROR_THUMBNAIL);
+        });
     }
 
     @Test
