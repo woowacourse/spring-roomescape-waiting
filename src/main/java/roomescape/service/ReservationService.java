@@ -104,8 +104,12 @@ public class ReservationService {
             List<Reservation> waitingReservations = findWaitingReservation(reservation);
             confirmReservation(waitingReservations);
         }
+        cancelReservation(reservation);
+    }
+
+    private void cancelReservation(Reservation reservation) {
         deletedReservationRepository.save(reservation.toDeletedReservation());
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteById(reservation.getId());
     }
 
     private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {

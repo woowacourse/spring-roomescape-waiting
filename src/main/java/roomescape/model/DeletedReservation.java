@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,6 +21,8 @@ public class DeletedReservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
+    @Enumerated(EnumType.STRING)
+    DeletedReservationStatus status;
     @Timestamp
     private LocalDateTime createdAt;
     @ManyToOne
@@ -51,6 +55,19 @@ public class DeletedReservation {
         this.time = reservation.getTime();
         this.theme = reservation.getTheme();
         this.member = reservation.getMember();
+        this.status = mapToStatus(reservation.getStatus());
+    }
+
+    private DeletedReservationStatus mapToStatus(ReservationStatus status) {
+        switch (status) {
+            case ACCEPT -> {
+                return DeletedReservationStatus.ACCEPT_DELETED;
+            }
+            case WAITING -> {
+                return DeletedReservationStatus.WAIT_DELETED;
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + status);
+        }
     }
 
     public Long getId() {

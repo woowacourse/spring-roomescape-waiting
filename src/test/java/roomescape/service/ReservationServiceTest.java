@@ -7,6 +7,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import static roomescape.model.DeletedReservationStatus.ACCEPT_DELETED;
+import static roomescape.model.DeletedReservationStatus.WAIT_DELETED;
 import static roomescape.model.ReservationStatus.ACCEPT;
 import static roomescape.model.ReservationStatus.WAITING;
 import static roomescape.service.fixture.TestMemberFactory.createAdmin;
@@ -34,6 +36,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.DeletedReservation;
+import roomescape.model.DeletedReservationStatus;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -205,6 +208,7 @@ class ReservationServiceTest {
             assertions.assertThat(reservations).hasSize(1);
             assertions.assertThat(deletedReservations).hasSize(1);
             assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT);
+            assertions.assertThat(deletedReservations).extracting("status").containsExactly(ACCEPT_DELETED);
         });
     }
 
@@ -237,6 +241,7 @@ class ReservationServiceTest {
             assertions.assertThat(reservations).hasSize(2);
             assertions.assertThat(deletedReservations).hasSize(1);
             assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
+            assertions.assertThat(deletedReservations).extracting("status").containsExactly(ACCEPT_DELETED);
             assertions.assertThat(reservations).extracting("id").containsExactly(2L, 3L);
         });
     }
@@ -256,6 +261,7 @@ class ReservationServiceTest {
         SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(reservations).isEmpty();
             assertions.assertThat(deletedReservations).hasSize(1);
+            assertions.assertThat(deletedReservations).extracting("status").containsExactly(ACCEPT_DELETED);
         });
     }
 
@@ -280,6 +286,7 @@ class ReservationServiceTest {
             assertions.assertThat(reservations).hasSize(2);
             assertions.assertThat(deletedReservations).hasSize(1);
             assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
+            assertions.assertThat(deletedReservations).extracting("status").containsExactly(WAIT_DELETED);
         });
     }
 
