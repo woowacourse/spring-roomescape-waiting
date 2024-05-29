@@ -1,9 +1,7 @@
 package roomescape;
 
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -58,6 +56,10 @@ public class TestFixture {
         return new Reservation(member, MIA_RESERVATION_DATE, time, theme);
     }
 
+    public static Reservation MIA_RESERVATION(ReservationTime time, Theme theme, Member member, ReservationStatus status) {
+        return new Reservation(member, MIA_RESERVATION_DATE, time, theme, status);
+    }
+
     public static Reservation TOMMY_RESERVATION() {
         return new Reservation(USER_TOMMY(), TOMMY_RESERVATION_DATE, new ReservationTime(TOMMY_RESERVATION_TIME),
                 WOOTECO_THEME());
@@ -65,6 +67,18 @@ public class TestFixture {
 
     public static Reservation TOMMY_RESERVATION(ReservationTime time, Theme theme, Member member) {
         return new Reservation(member, TOMMY_RESERVATION_DATE, time, theme);
+    }
+
+    public static Reservation TOMMY_RESERVATION(ReservationTime time, Theme theme, Member member, ReservationStatus status) {
+        return new Reservation(member, TOMMY_RESERVATION_DATE, time, theme, status);
+    }
+
+    public static Reservation USER_RESERVATION(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(member, date, time, theme);
+    }
+
+    public static Reservation USER_RESERVATION(Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+        return new Reservation(member, date, time, theme, status);
     }
 
     public static Theme WOOTECO_THEME() {
@@ -81,5 +95,9 @@ public class TestFixture {
 
     public static Theme HORROR_THEME(Long id) {
         return new Theme(id, HORROR_THEME_NAME, HORROR_THEME_DESCRIPTION, THEME_THUMBNAIL);
+    }
+
+    public static Waiting WAITING_RESERVATION(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Waiting(member, date, time, theme);
     }
 }

@@ -2,11 +2,10 @@ package roomescape.reservation.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,13 +14,15 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
-    public Reservation create(Reservation reservation) {
+    public Reservation createReservation(Reservation reservation) {
         validateReservationDate(reservation);
         validateDuplicatedReservation(reservation);
         return reservationRepository.save(reservation);
@@ -42,6 +43,25 @@ public class ReservationService {
         }
     }
 
+    @Transactional
+    public Reservation createWaitingReservation(Reservation reservation) {
+        validateReservationDate(reservation);
+        validateDuplicatedWaitingReservation(reservation);
+
+        Waiting waiting = Waiting.from(reservation);
+        waitingRepository.save(waiting);
+
+        return reservationRepository.save(reservation);
+    }
+
+    private void validateDuplicatedWaitingReservation(Reservation reservation) {
+        boolean existReservationInSameTime = reservationRepository.existsByMemberAndDateAndTimeAndTheme(
+                reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        if (existReservationInSameTime) {
+            throw new ViolationException("이미 예약 또는 대기를 신청하셨습니다.");
+        }
+    }
+
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
@@ -55,7 +75,31 @@ public class ReservationService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public Reservation deleteReservation(Long id) {
+        Reservation reservation = findReservation(id);
         reservationRepository.deleteById(id);
+
+        return reservation;
+    }
+
+    @Transactional
+    public void deleteWaitingReservation(Long id, Member loginMember) {
+        Reservation reservation = findReservation(id);
+        validateDeletePermission(reservation, loginMember);
+        reservationRepository.deleteById(id);
+
+        waitingRepository.deleteByMemberAndDateAndTimeAndTheme(
+                reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+    }
+
+    private Reservation findReservation(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 ID의 예약이 없습니다."));
+    }
+
+    private void validateDeletePermission(Reservation reservation, Member loginMember) {
+        if (!loginMember.isAdmin() && !reservation.isMemberMatch(loginMember)) {
+            throw new ViolationException("예약 대기 삭제는 예약을 한 사용자 또는 관리자만 가능합니다.");
+        }
     }
 }

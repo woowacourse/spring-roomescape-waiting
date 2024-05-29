@@ -9,7 +9,9 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
+import roomescape.reservation.application.WaitingService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
@@ -26,13 +28,15 @@ public class ReservationController {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberService memberService;
+    private final WaitingService waitingService;
 
     public ReservationController(ReservationService reservationService, ReservationTimeService reservationTimeService,
-                                 ThemeService themeService, MemberService memberService) {
+                                 ThemeService themeService, MemberService memberService, WaitingService waitingService) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -40,8 +44,8 @@ public class ReservationController {
                                                                  Member loginMember) {
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
-        Reservation newReservation = request.toModel(theme, reservationTime, loginMember);
-        Reservation createReservation = reservationService.create(newReservation);
+        Reservation newReservation = request.toModel(theme, reservationTime, loginMember, ReservationStatus.BOOKING);
+        Reservation createReservation = reservationService.createReservation(newReservation);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationResponse.from(createReservation));
     }
@@ -69,7 +73,8 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.delete(id);
+        Reservation deletedReservation = reservationService.deleteReservation(id);
+        waitingService.approveWaitingAsBooking(deletedReservation);
         return ResponseEntity.noContent().build();
     }
 
@@ -77,7 +82,24 @@ public class ReservationController {
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(Member loginMember) {
         List<Reservation> reservations = reservationService.findAllByMember(loginMember);
         return ResponseEntity.ok(reservations.stream()
-                .map(MyReservationResponse::from)
+                .map(reservation -> MyReservationResponse.of(reservation, waitingService.findRankByReservation(reservation)))
                 .toList());
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(@RequestBody @Valid ReservationSaveRequest request,
+                                                                        Member loginMember) {
+        final ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
+        final Theme theme = themeService.findById(request.themeId());
+        final Reservation newReservation = request.toModel(theme, reservationTime, loginMember, ReservationStatus.WAITING);
+        final Reservation createReservation = reservationService.createWaitingReservation(newReservation);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ReservationResponse.from(createReservation));
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable("id") Long id, Member loginMember) {
+        reservationService.deleteWaitingReservation(id, loginMember);
+        return ResponseEntity.noContent().build();
     }
 }
