@@ -1,5 +1,7 @@
 package roomescape.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -8,6 +10,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @ControllerAdvice
 public class RoomescapeExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(RoomescapeExceptionHandler.class);
+
     private static class ErrorResponse {
         private static final boolean ERROR_STATUS = false;
         private final String message;
@@ -80,6 +84,8 @@ public class RoomescapeExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ErrorResponse> handleException(final Exception exception) {
+        logger.error("Error : ", exception);
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(exception));
     }

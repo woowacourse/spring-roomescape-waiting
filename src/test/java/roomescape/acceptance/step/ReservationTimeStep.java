@@ -19,7 +19,16 @@ public class ReservationTimeStep {
                 .when().post("/times")
                 .then().assertThat().statusCode(201).extract().as(ReservationTimeResponse.class);
         //@formatter:on
+    }
+    public static ReservationTimeResponse 예약_시간_생성(final String time) {
+        final ReservationTimeRequest request = new ReservationTimeRequest(
+                time
+        );
 
-
+        //@formatter:off
+        return RestAssured.given().body(request).contentType(ContentType.JSON)
+                .when().post("/times")
+                .then().assertThat().statusCode(201).extract().as(ReservationTimeResponse.class);
+        //@formatter:on
     }
 }

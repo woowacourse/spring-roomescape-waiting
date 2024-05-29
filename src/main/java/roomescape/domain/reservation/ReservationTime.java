@@ -12,6 +12,7 @@ public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true)
     private LocalTime startAt;
 
@@ -52,5 +53,13 @@ public class ReservationTime {
     @Override
     public int hashCode() {
         return Objects.hashCode(startAt);
+    }
+
+    @Override
+    public String toString() {
+        return "ReservationTime{" +
+                "id=" + id +
+                ", startAt=" + startAt +
+                '}';
     }
 }

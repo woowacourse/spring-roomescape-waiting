@@ -2,23 +2,8 @@ package roomescape.fixture;
 
 import roomescape.domain.user.Member;
 import roomescape.domain.user.Role;
-import roomescape.service.dto.input.MemberCreateInput;
 
 public class MemberFixture {
-    public static MemberCreateInput getUserCreateInput() {
-        return new MemberCreateInput("조이썬",
-                "joyson5582@gmail.com",
-                "password1234",
-                Role.USER);
-    }
-
-    public static MemberCreateInput getAdminCreateInput() {
-        return new MemberCreateInput("조이썬",
-                "joyson5582@gmail.com",
-                "password1234",
-                Role.ADMIN);
-    }
-
     public static Member getDomain() {
         return Member.from(
                 "조이썬",

@@ -19,6 +19,6 @@ public class MemberApiController {
     @GetMapping
     public ResponseEntity<MembersResponse> getAllMembers() {
         final var output = memberService.getAllMembers();
-        return ResponseEntity.ok(MembersResponse.toResponse(output));
+        return ResponseEntity.ok(MembersResponse.from(output));
     }
 }

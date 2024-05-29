@@ -8,8 +8,10 @@ import roomescape.controller.api.dto.response.MemberReservationsResponse;
 import roomescape.controller.api.dto.response.ReservationResponse;
 import roomescape.controller.api.dto.response.ReservationsResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.dto.input.ReservationSearchInput;
 import roomescape.service.dto.output.ReservationOutput;
+import roomescape.service.dto.output.WaitingOutput;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -20,9 +22,11 @@ import java.util.List;
 public class ReservationApiController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationApiController(final ReservationService reservationService) {
+    public ReservationApiController(final ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -30,13 +34,13 @@ public class ReservationApiController {
                                                                  final LoginMemberRequest loginMemberRequest) {
         final ReservationOutput output = reservationService.createReservation(reservationRequest.toInput(loginMemberRequest.id()));
         return ResponseEntity.created(URI.create("/reservations/" + output.id()))
-                .body(ReservationResponse.toResponse(output));
+                .body(ReservationResponse.from(output));
     }
 
     @GetMapping
     public ResponseEntity<ReservationsResponse> getAllReservations() {
         final List<ReservationOutput> outputs = reservationService.getAllReservations();
-        return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
+        return ResponseEntity.ok(ReservationsResponse.from(outputs));
     }
 
     @GetMapping("/search")
@@ -46,18 +50,20 @@ public class ReservationApiController {
             @RequestParam final LocalDate fromDate,
             @RequestParam final LocalDate toDate) {
         final List<ReservationOutput> outputs = reservationService.searchReservation(new ReservationSearchInput(themeId, memberId, fromDate, toDate));
-        return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
+        return ResponseEntity.ok(ReservationsResponse.from(outputs));
     }
 
     @GetMapping("/mine")
     public ResponseEntity<MemberReservationsResponse> getMyReservations(final LoginMemberRequest loginMemberRequest) {
         final List<ReservationOutput> outputs = reservationService.getAllMyReservations(loginMemberRequest.id());
-        return ResponseEntity.ok(MemberReservationsResponse.toResponse(outputs));
+        final List<WaitingOutput> waitingOutputs = waitingService.getAllMyWaiting(loginMemberRequest.id());
+        final var result = MemberReservationsResponse.toResponse(outputs,waitingOutputs);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable final long id) {
-        reservationService.deleteReservation(id);
+    public ResponseEntity<Void> deleteReservation(@PathVariable final long id,final LoginMemberRequest loginMemberRequest) {
+        reservationService.deleteReservation(id,loginMemberRequest.id());
         return ResponseEntity.noContent()
                 .build();
     }

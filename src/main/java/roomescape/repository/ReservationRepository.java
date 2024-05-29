@@ -3,20 +3,22 @@ package roomescape.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationInfo;
+import roomescape.domain.user.Member;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    boolean existsByTimeId(Long timeId);
+    boolean existsByReservationInfo(ReservationInfo reservationInfo);
+    default boolean notExistsByReservationInfo(final ReservationInfo reservationInfo) {
+        return !existsByReservationInfo(reservationInfo);
+    }
+    boolean existsByMemberAndReservationInfo(Member member, ReservationInfo reservationInfo);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByReservationInfoThemeId(Long themeId);
 
-    boolean existsByDateAndTimeId(ReservationDate reservationDate, Long timeId);
-
-    List<Reservation> getReservationByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, ReservationDate start, ReservationDate end);
+    List<Reservation> getReservationByReservationInfoThemeIdAndMemberIdAndReservationInfoDateBetween(Long themeId, Long memberId, ReservationDate start, ReservationDate end);
 
     List<Reservation> findAllByMemberId(Long memberId);
 
-    List<Reservation> getReservationByThemeIdAndDateValue(Long themeId, LocalDate date);
 }

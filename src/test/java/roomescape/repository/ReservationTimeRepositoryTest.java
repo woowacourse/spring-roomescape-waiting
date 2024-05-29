@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.util.DatabaseCleaner;
-import roomescape.util.ReservationInserter;
 
 import java.time.LocalTime;
 
@@ -16,8 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReservationTimeRepositoryTest {
     @Autowired
     ReservationTimeRepository sut;
-    @Autowired
-    ReservationInserter reservationInserter;
     @Autowired
     DatabaseCleaner databaseCleaner;
     @Autowired
