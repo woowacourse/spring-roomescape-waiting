@@ -9,76 +9,132 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.BaseRepositoryTest;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.support.fixture.MemberFixture;
+import roomescape.support.fixture.ReservationFixture;
+import roomescape.support.fixture.ReservationTimeFixture;
+import roomescape.support.fixture.ThemeFixture;
 
-@DataJpaTest
-@Sql("/reservation.sql")
-class ReservationRepositoryTest {
+class ReservationRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
 
     private Member member;
-    private ReservationTime time;
+
     private Theme theme;
+
+    private ReservationTime time;
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.findById(1L).orElseThrow();
-        time = reservationTimeRepository.findById(1L).orElseThrow();
-        theme = themeRepository.findById(1L).orElseThrow();
+        member = save(MemberFixture.user());
+        theme = save(ThemeFixture.theme());
+        time = save(ReservationTimeFixture.ten());
     }
 
     @Test
     @DisplayName("조건에 해당하는 모든 예약들을 조회한다.")
     void findAll() {
+        save(ReservationFixture.create("2024-04-09", member, time, theme));
+        save(ReservationFixture.create("2024-04-10", member, time, theme));
+        save(ReservationFixture.create("2024-04-11", member, time, theme));
+
         List<Reservation> reservations = reservationRepository.findAllByConditions(
                 member.getId(),
                 theme.getId(),
-                LocalDate.of(2024, 4, 8),
+                LocalDate.of(2024, 4, 9),
                 LocalDate.of(2024, 4, 10)
         );
-        Reservation reservation = reservations.get(0);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(2);
-            softly.assertThat(reservation.getMember().getId()).isEqualTo(member.getId());
-            softly.assertThat(reservation.getTheme().getId()).isEqualTo(theme.getId());
+            softly.assertThat(reservations.get(0).getDate()).isEqualTo("2024-04-09");
+            softly.assertThat(reservations.get(1).getDate()).isEqualTo("2024-04-10");
         });
     }
 
     @Test
-    @DisplayName("예약 시간 id에 해당하는 예약이 존재하는지 확인한다.")
-    void existsByTimeId() {
-        assertThat(reservationRepository.existsByTimeId(time.getId())).isTrue();
+    @DisplayName("예약 시간을 사용하는 예약이 존재하는지 확인한다.")
+    void existsByTime() {
+        save(ReservationFixture.create(member, time, theme));
+
+        assertThat(reservationRepository.existsByTime(time)).isTrue();
     }
 
     @Test
-    @DisplayName("테마 id에 해당하는 예약이 존재하는지 확인한다.")
-    void existsByThemeId() {
-        assertThat(reservationRepository.existsByThemeId(theme.getId())).isTrue();
+    @DisplayName("테마를 사용하는 예약이 존재하는지 확인한다.")
+    void existsByTheme() {
+        save(ReservationFixture.create(member, time, theme));
+
+        assertThat(reservationRepository.existsByTheme(theme)).isTrue();
     }
 
     @Test
-    @DisplayName("날짜와 시간 id, 테마 id에 해당하는 예약이 존재하는지 확인한다.")
-    void existsByReservation() {
-        LocalDate existsDate = LocalDate.of(2024, 4, 8);
-        LocalDate notExistsDate = LocalDate.of(2024, 5, 5);
+    @DisplayName("날짜, 시간, 테마로 예약을 조회한다.")
+    void findByDateAndTimeAndTheme() {
+        LocalDate date = LocalDate.parse("2024-04-09");
+        save(ReservationFixture.create(date, member, time, theme));
 
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(existsDate, 1L, 1L)).isTrue();
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(notExistsDate, 1L, 1L)).isFalse();
+        Reservation reservation = reservationRepository.findByDateAndTimeAndTheme(date, time, theme).orElseThrow();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservation.getDate()).isEqualTo("2024-04-09");
+            softly.assertThat(reservation.getMember()).isEqualTo(member);
+            softly.assertThat(reservation.getTime()).isEqualTo(time);
+            softly.assertThat(reservation.getTheme()).isEqualTo(theme);
+        });
+    }
+
+    @Test
+    @DisplayName("날짜와 시간, 테마가 다르면 조회된 예약이 없다. [다른 날짜]")
+    void findByOtherDate() {
+        save(ReservationFixture.create("2024-04-09", member, time, theme));
+
+        LocalDate otherDate = LocalDate.parse("2024-04-10");
+        assertThat(reservationRepository.findByDateAndTimeAndTheme(otherDate, time, theme)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("날짜와 시간, 테마가 다르면 조회된 예약이 없다. [다른 시간]")
+    void findByOtherTime() {
+        LocalDate date = LocalDate.parse("2024-04-09");
+        save(ReservationFixture.create(date, member, time, theme));
+
+        ReservationTime otherTime = save(ReservationTimeFixture.create("11:00"));
+        assertThat(reservationRepository.findByDateAndTimeAndTheme(date, otherTime, theme)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("날짜와 시간, 테마가 다르면 조회된 예약이 없다. [다른 테마]")
+    void findByOtherTheme() {
+        LocalDate date = LocalDate.parse("2024-04-09");
+        save(ReservationFixture.create(date, member, time, theme));
+
+        Theme otherTheme = save(ThemeFixture.create("다른 테마"));
+        assertThat(reservationRepository.findByDateAndTimeAndTheme(date, time, otherTheme)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("멤버의 모든 예약을 조회한다.")
+    void findAllByMember() {
+        save(ReservationFixture.create("2024-04-09", member, time, theme));
+        save(ReservationFixture.create("2024-04-10", member, time, theme));
+        save(ReservationFixture.create("2024-04-11", member, time, theme));
+
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservations).hasSize(3);
+            softly.assertThat(reservations.get(0).getMember()).isEqualTo(member);
+            softly.assertThat(reservations.get(0).getDate()).isEqualTo("2024-04-09");
+            softly.assertThat(reservations.get(1).getMember()).isEqualTo(member);
+            softly.assertThat(reservations.get(1).getDate()).isEqualTo("2024-04-10");
+            softly.assertThat(reservations.get(2).getMember()).isEqualTo(member);
+            softly.assertThat(reservations.get(2).getDate()).isEqualTo("2024-04-11");
+        });
     }
 }

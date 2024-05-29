@@ -14,9 +14,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.BaseControllerTest;
-import roomescape.domain.member.Role;
-import roomescape.dto.request.SignupRequest;
-import roomescape.dto.response.MemberResponse;
+import roomescape.controller.dto.request.SignupRequest;
+import roomescape.service.dto.response.MemberResponse;
 
 class MemberControllerTest extends BaseControllerTest {
 
@@ -46,7 +45,6 @@ class MemberControllerTest extends BaseControllerTest {
             softly.assertThat(response.header("Location")).isEqualTo("/members/" + memberResponse.id());
             softly.assertThat(memberResponse.id()).isNotNull();
             softly.assertThat(memberResponse.name()).isEqualTo("new");
-            softly.assertThat(memberResponse.role()).isEqualTo(Role.USER);
         });
     }
 
@@ -57,13 +55,13 @@ class MemberControllerTest extends BaseControllerTest {
                 .extract();
 
         List<MemberResponse> memberResponses = response.jsonPath()
-                .getList(".", MemberResponse.class);
+                .getList("list", MemberResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-            softly.assertThat(memberResponses).hasSize(1);
-            softly.assertThat(memberResponses.get(0))
-                    .isEqualTo(new MemberResponse(1L, "new", Role.USER));
+            softly.assertThat(memberResponses).hasSize(3);
+            softly.assertThat(memberResponses.get(2))
+                    .isEqualTo(new MemberResponse(3L, "new"));
         });
     }
 }

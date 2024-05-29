@@ -4,17 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.BaseControllerTest;
-import roomescape.dto.request.LoginRequest;
+import roomescape.controller.dto.request.LoginRequest;
 
 class AuthControllerTest extends BaseControllerTest {
 
@@ -22,7 +19,6 @@ class AuthControllerTest extends BaseControllerTest {
 
     @TestFactory
     @DisplayName("로그인, 로그인 상태 확인, 로그아웃을 한다.")
-    @Sql("/member.sql")
     Stream<DynamicTest> authControllerTests() {
         return Stream.of(
                 DynamicTest.dynamicTest("로그인한다.", this::login),
@@ -36,48 +32,41 @@ class AuthControllerTest extends BaseControllerTest {
     void checkLoginFailWhenNotLoggedIn() {
         String token = "invalid token";
 
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().get("/login/check")
                 .then().log().all()
-                .extract();
-
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     void login() {
         LoginRequest request = new LoginRequest(ADMIN_EMAIL, ADMIN_PASSWORD);
 
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
+        token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/login")
                 .then().log().all()
-                .extract();
-
-        token = response.cookie("token");
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .cookie("token");
 
         assertThat(token).isNotNull();
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
     }
 
     void checkLogin() {
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().get("/login/check")
                 .then().log().all()
-                .extract();
-
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+                .statusCode(HttpStatus.OK.value());
     }
 
     void logout() {
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().post("/logout")
                 .then().log().all()
-                .extract();
-
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+                .statusCode(HttpStatus.OK.value());
     }
 }

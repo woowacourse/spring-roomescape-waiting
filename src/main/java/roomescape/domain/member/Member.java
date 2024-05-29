@@ -13,8 +13,6 @@ import java.util.Objects;
 @Entity
 public class Member {
 
-    private static final int NAME_MAX_LENGTH = 30;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -55,16 +53,19 @@ public class Member {
         }
     }
 
+    public boolean isNotAdmin() {
+        return role.isNotAdmin();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Member member)) {
             return false;
         }
-        Member member = (Member) o;
-        return Objects.equals(id, member.id);
+        return getId() != null && Objects.equals(getId(), member.getId());
     }
 
     @Override

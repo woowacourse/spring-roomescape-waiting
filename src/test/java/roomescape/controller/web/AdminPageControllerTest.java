@@ -10,11 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.BaseControllerTest;
 import roomescape.controller.exception.ErrorResponse;
 
-@Sql("/member.sql")
 class AdminPageControllerTest extends BaseControllerTest {
 
     @ParameterizedTest(name = "{0} 페이지를 조회한다.")
@@ -22,7 +20,8 @@ class AdminPageControllerTest extends BaseControllerTest {
             "/admin",
             "/admin/reservation",
             "/admin/time",
-            "/admin/theme"
+            "/admin/theme",
+            "/admin/waiting"
     })
     void pageTest(String path) {
         adminLogin();

@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.service.dto.request.ThemeCreationRequest;
+import roomescape.service.dto.response.ThemeResponse;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,13 +32,10 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponse addTheme(ThemeRequest themeRequest) {
-        Theme theme = themeRequest.toTheme();
-
+    public ThemeResponse addTheme(ThemeCreationRequest request) {
+        Theme theme = request.toTheme();
         validateDuplicateName(theme);
-
         Theme savedTheme = themeRepository.save(theme);
-
         return ThemeResponse.from(savedTheme);
     }
 
@@ -50,15 +47,20 @@ public class ThemeService {
 
     @Transactional
     public void deleteThemeById(Long id) {
-        if (!themeRepository.existsById(id)) {
-            throw new NoSuchElementException("해당 id의 테마가 존재하지 않습니다.");
-        }
+        Theme theme = getThemeById(id);
+        validateReservedTheme(theme);
+        themeRepository.delete(theme);
+    }
 
-        if (reservationRepository.existsByThemeId(id)) {
+    private Theme getThemeById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
+    }
+
+    private void validateReservedTheme(Theme theme) {
+        if (reservationRepository.existsByTheme(theme)) {
             throw new IllegalArgumentException("해당 테마를 사용하는 예약이 존재합니다.");
         }
-
-        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponse> getPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {

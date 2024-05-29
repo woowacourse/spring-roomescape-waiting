@@ -5,7 +5,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 import org.assertj.core.api.SoftAssertions;
@@ -16,21 +15,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.BaseControllerTest;
-import roomescape.domain.member.Role;
+import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.MemberResponse;
-import roomescape.dto.response.PersonalReservationResponse;
-import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.service.dto.response.PersonalReservationResponse;
+import roomescape.service.dto.response.ReservationResponse;
+import roomescape.support.fixture.ReservationTimeFixture;
+import roomescape.support.fixture.ThemeFixture;
 
-@Sql("/member.sql")
 class ReservationControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -39,10 +34,14 @@ class ReservationControllerTest extends BaseControllerTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    private ReservationTime time;
+
+    private Theme theme;
+
     @BeforeEach
     void setUp() {
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-        themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
+        time = reservationTimeRepository.save(ReservationTimeFixture.ten());
+        theme = themeRepository.save(ThemeFixture.theme());
 
         userLogin();
     }
@@ -81,7 +80,7 @@ class ReservationControllerTest extends BaseControllerTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-            softly.assertThat(response.body().asString()).contains("지나간 날짜/시간에 대한 예약은 불가능합니다.");
+            softly.assertThat(response.body().asString()).contains("예약은 최소 1일 전에 해야합니다.");
         });
     }
 
@@ -94,18 +93,16 @@ class ReservationControllerTest extends BaseControllerTest {
                 .extract();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
-            softly.assertThat(response.body().asString()).contains("해당 id의 예약이 존재하지 않습니다.");
+            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            softly.assertThat(response.body().asString()).contains("존재하지 않는 예약입니다.");
         });
     }
 
     @Test
     @DisplayName("나의 예약들을 조회한다")
     void getMyReservations() {
-        LocalDate reservationDate = LocalDate.of(2024, 4, 9);
-        long timeId = 1L;
-        long themeId = 1L;
-        ReservationRequest saveRequest = new ReservationRequest(reservationDate, timeId, themeId);
+        LocalDate date = LocalDate.of(2024, 4, 9);
+        ReservationRequest saveRequest = new ReservationRequest(date, time.getId(), theme.getId());
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
@@ -121,20 +118,21 @@ class ReservationControllerTest extends BaseControllerTest {
                 .statusCode(200)
                 .extract()
                 .jsonPath()
-                .getList(".", PersonalReservationResponse.class);
+                .getList("list", PersonalReservationResponse.class);
         PersonalReservationResponse personalReservationResponse = personalReservationResponses.get(0);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(personalReservationResponses).hasSize(1);
-            softly.assertThat(personalReservationResponse.date()).isEqualTo(reservationDate);
-            softly.assertThat(personalReservationResponse.time().id()).isEqualTo(timeId);
-            softly.assertThat(personalReservationResponse.theme().id()).isEqualTo(themeId);
-            softly.assertThat(personalReservationResponse.status()).isEqualTo("예약 대기");
+            softly.assertThat(personalReservationResponse.date()).isEqualTo(date);
+            softly.assertThat(personalReservationResponse.time()).isEqualTo(time.getStartAt());
+            softly.assertThat(personalReservationResponse.theme()).isEqualTo(theme.getRawName());
+            softly.assertThat(personalReservationResponse.status()).isEqualTo("예약");
         });
     }
 
     private void addReservation() {
-        ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
+        LocalDate date = LocalDate.of(2024, 4, 9);
+        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId());
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
@@ -145,18 +143,14 @@ class ReservationControllerTest extends BaseControllerTest {
                 .extract();
 
         ReservationResponse reservationResponse = response.as(ReservationResponse.class);
-        MemberResponse memberResponse = reservationResponse.member();
-        ReservationTimeResponse reservationTimeResponse = reservationResponse.time();
-        ThemeResponse themeResponse = reservationResponse.theme();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
             softly.assertThat(response.header("Location")).isEqualTo("/reservations/1");
 
-            softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "유저", Role.USER));
-            softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
-            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
+            softly.assertThat(reservationResponse.date()).isEqualTo(date);
+            softly.assertThat(reservationResponse.theme()).isEqualTo(theme.getRawName());
+            softly.assertThat(reservationResponse.startAt()).isEqualTo(time.getStartAt());
         });
     }
 
@@ -167,22 +161,15 @@ class ReservationControllerTest extends BaseControllerTest {
                 .extract();
 
         List<ReservationResponse> reservationResponses = response.jsonPath()
-                .getList(".", ReservationResponse.class);
+                .getList("list", ReservationResponse.class);
 
         ReservationResponse reservationResponse = reservationResponses.get(0);
-
-        MemberResponse memberResponse = reservationResponse.member();
-        ReservationTimeResponse reservationTimeResponse = reservationResponse.time();
-        ThemeResponse themeResponse = reservationResponse.theme();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
             softly.assertThat(reservationResponses).hasSize(1);
 
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "유저", Role.USER));
-            softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
-            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
         });
     }
 

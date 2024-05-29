@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.BaseControllerTest;
+import roomescape.controller.dto.request.ReservationTimeRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -26,9 +27,8 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.request.ReservationTimeRequest;
-import roomescape.dto.response.AvailableReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.response.AvailableReservationTimeResponse;
+import roomescape.service.dto.response.ReservationTimeResponse;
 
 class ReservationTimeControllerTest extends BaseControllerTest {
 
@@ -72,7 +72,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
                 .extract();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             softly.assertThat(response.body().asString()).contains("해당 id의 시간이 존재하지 않습니다.");
         });
     }
@@ -108,7 +108,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
                 .extract();
 
         List<AvailableReservationTimeResponse> responses = extractResponse.jsonPath()
-                .getList(".", AvailableReservationTimeResponse.class);
+                .getList("list", AvailableReservationTimeResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(responses).hasSize(4);
@@ -173,7 +173,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
                 .extract();
 
         List<ReservationTimeResponse> reservationTimeResponses = response.jsonPath()
-                .getList(".", ReservationTimeResponse.class);
+                .getList("list", ReservationTimeResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
