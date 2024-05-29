@@ -13,23 +13,25 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Theme;
-import roomescape.handler.exception.CustomException;
-import roomescape.handler.exception.ExceptionCode;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.Theme;
+import roomescape.global.handler.exception.NotFoundException;
+import roomescape.global.handler.exception.ValidationException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.request.ReservationRequest;
-import roomescape.service.dto.response.MemberResponse;
-import roomescape.service.dto.response.MyReservationResponse;
-import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.ReservationTimeResponse;
-import roomescape.service.dto.response.ThemeResponse;
+import roomescape.service.member.dto.MemberResponse;
+import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.dto.request.ReservationRequest;
+import roomescape.service.reservation.dto.response.MyReservationResponse;
+import roomescape.service.reservation.dto.response.ReservationResponse;
+import roomescape.service.reservation.dto.response.ReservationTimeResponse;
+import roomescape.service.reservation.dto.response.ThemeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -68,8 +70,7 @@ class ReservationServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12),
                 reservationTime.getId(), theme.getId(), member.getId());
 
-        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest,
-                reservationRequest.memberId());
+        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest);
 
         assertAll(
                 () -> assertThat(reservationResponse.name()).isEqualTo(member.getName()),
@@ -87,9 +88,8 @@ class ReservationServiceTest {
                 1L);
 
         assertThatThrownBy(
-                () -> reservationService.createReservation(reservationRequest, reservationRequest.memberId()))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ExceptionCode.NOT_FOUND_RESERVATION_TIME.getErrorMessage());
+                () -> reservationService.createReservation(reservationRequest))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @DisplayName("과거 시간을 예약하는 경우 예외가 발생한다.")
@@ -99,21 +99,19 @@ class ReservationServiceTest {
                 new ReservationTime(LocalTime.of(10, 0)));
 
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(1999, 12, 12), reservationTime.getId(),
-                theme.getId(), 1L);
+                theme.getId(), member.getId());
 
         assertThatThrownBy(
-                () -> reservationService.createReservation(reservationRequest, reservationRequest.memberId()))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ExceptionCode.PAST_TIME_SLOT_RESERVATION.getErrorMessage());
+                () -> reservationService.createReservation(reservationRequest))
+                .isInstanceOf(ValidationException.class);
     }
-
 
     @DisplayName("모든 예약 조회 테스트")
     @Test
     void findAllReservations() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,12), reservationTime, theme)),
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,13), reservationTime, theme)));
 
         reservationRepository.saveAll(reservations);
 
@@ -126,8 +124,8 @@ class ReservationServiceTest {
     @Test
     void deleteReservation() {
         List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,12), reservationTime, theme)),
+                new Reservation(member, new Schedule(LocalDate.of(2999,12,13), reservationTime, theme)));
 
         reservationRepository.saveAll(reservations);
 
@@ -136,6 +134,13 @@ class ReservationServiceTest {
         List<Reservation> findReservations = reservationRepository.findAll();
 
         assertThat(findReservations).hasSize(1);
+    }
+
+    @DisplayName("존재 하지 않는 예약 삭제 테스트")
+    @Test
+    void deleteNonExistReservation() {
+        assertThatThrownBy(() -> reservationService.deleteReservation(999L))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @DisplayName("사용자별 모든 예약 조회 테스트")
@@ -151,8 +156,8 @@ class ReservationServiceTest {
         Member member2 = memberRepository.save(
                 new Member("rush", "rush@email.com", "password", Role.ADMIN));
 
-        reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12),reservationTime1, theme));
-        reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12),reservationTime2, theme));
+        reservationRepository.save(new Reservation(member1, new Schedule(LocalDate.of(2030, 12, 12),reservationTime1, theme)));
+        reservationRepository.save(new Reservation(member2, new Schedule(LocalDate.of(2030, 12, 12),reservationTime2, theme)));
 
 
         List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.getId());

@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.domain.member.Password;
 
 class PasswordTest {
 
@@ -21,6 +22,6 @@ class PasswordTest {
     @ParameterizedTest
     void invalidPasswordLength(String password) {
         Assertions.assertThatThrownBy(() -> new Password(password))
-                .isInstanceOf(IllegalArgumentException.class);    }
-
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

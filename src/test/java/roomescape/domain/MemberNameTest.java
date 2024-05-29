@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.domain.member.MemberName;
 
 class MemberNameTest {
 
@@ -20,11 +21,10 @@ class MemberNameTest {
     @DisplayName("예약자명이 1자 미만, 10자 초과일 경우 예외처리")
     @ValueSource(strings = {"", " ", "abcdefghijk"})
     @ParameterizedTest
-    void nameLength2(String name) {
+    void invalidNameLength(String name) {
         assertThatThrownBy(() -> new MemberName(name))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-
 
     @DisplayName("예약자명은 한글 또는 영어이다.")
     @ValueSource(strings = {"러쉬!", "rush1", "1수달", "1", "!@", "수1달"})
@@ -33,6 +33,4 @@ class MemberNameTest {
         assertThatThrownBy(() -> new MemberName(name))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-
-
 }

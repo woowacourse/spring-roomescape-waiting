@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.Theme;
 
 @DataJpaTest
 class ThemeRepositoryTest {
@@ -19,7 +20,7 @@ class ThemeRepositoryTest {
     private ThemeRepository themeRepository;
 
     @DisplayName("인기테마 조회 테스트")
-    @Sql("/init_data/reservationData.sql")
+    @Sql(value = "/init_data/reservationData.sql", executionPhase = BEFORE_TEST_METHOD)
     @Test
     void findTopReservedThemesByDateRangeAndLimit() {
         LocalDate startDate = LocalDate.parse("2024-04-25");

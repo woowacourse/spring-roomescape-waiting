@@ -1,0 +1,94 @@
+package roomescape.service.auth;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import java.util.Arrays;
+import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.global.handler.exception.AuthenticationException;
+
+@Component
+public class TokenProvider {
+
+    private static final String TOKEN_COOKIE_NAME = "token";
+    private static final String AUTHENTICATION_PAYLOAD = "name";
+    private static final String AUTHENTICATION_ROLE = "role";
+
+    private final SecretKey secretKey;
+
+    public TokenProvider(@Value("${jwt.secret.random.value}") String randomValue) {
+        secretKey = Keys.hmacShaKeyFor(randomValue.getBytes());
+    }
+
+    public String generateTokenOf(Member member) {
+        return Jwts.builder()
+                .subject(member.getId().toString())
+                .claim(AUTHENTICATION_PAYLOAD, member.getName())
+                .claim(AUTHENTICATION_ROLE, member.getRole())
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public String parseAuthenticationInfoFromCookies(Cookie[] cookies) {
+        String token = extractTokenFromCookie(cookies);
+        return parseAuthenticationInfo(token);
+    }
+
+    private String parseAuthenticationInfo(String token) {
+        String authenticationInfo = parsePayload(token).get(AUTHENTICATION_PAYLOAD, String.class);
+        if (authenticationInfo == null) {
+            throw new AuthenticationException("권한 정보가 없는 토큰입니다.");
+        }
+        return authenticationInfo;
+    }
+
+    public Role parseAuthenticationRoleFromCookies(Cookie[] cookies) {
+        String token = extractTokenFromCookie(cookies);
+        return parseAuthenticationRole(token);
+    }
+
+    private Role parseAuthenticationRole(String token) {
+        String authenticationInfo = parsePayload(token).get(AUTHENTICATION_ROLE, String.class);
+        if (authenticationInfo == null) {
+            throw new AuthenticationException("권한 정보가 없는 토큰입니다.");
+        }
+        return Role.of(authenticationInfo);
+    }
+
+    public long parseMemberIdFromCookies(Cookie[] cookies) {
+        String token = extractTokenFromCookie(cookies);
+        return parseMemberId(token);
+    }
+
+    public long parseMemberId(String token) {
+        String authenticationInfo = parsePayload(token).getSubject();
+        if (authenticationInfo == null) {
+            throw new AuthenticationException("권한 정보가 없는 토큰입니다.");
+        }
+        return Long.parseLong(authenticationInfo);
+    }
+
+    public String extractTokenFromCookie(Cookie[] cookies) {
+        if (cookies == null) {
+            throw new AuthenticationException("토큰을 찾을 수 없습니다.");
+        }
+        return Arrays.stream(cookies)
+                .filter(cookie -> cookie.getName().equals(TOKEN_COOKIE_NAME))
+                .findAny()
+                .orElseThrow(() -> new AuthenticationException("토큰을 찾을 수 없습니다."))
+                .getValue();
+    }
+
+    private Claims parsePayload(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+}

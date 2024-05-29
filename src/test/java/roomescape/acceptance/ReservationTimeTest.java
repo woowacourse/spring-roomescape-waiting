@@ -11,15 +11,16 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import roomescape.service.dto.request.ReservationTimeRequest;
-import roomescape.service.dto.request.ThemeRequest;
+import roomescape.service.reservation.dto.request.ReservationTimeRequest;
+import roomescape.service.reservation.dto.request.ThemeRequest;
 
 class ReservationTimeTest extends AcceptanceTest {
 
     @DisplayName("ADMIN 예약 시간 CRUD 테스트")
     @TestFactory
-    Stream<DynamicTest> reservationByAdmin() {
+    Stream<DynamicTest> reservationTimeByAdmin() {
         return Stream.of(
                 dynamicTest("예약 시간을 추가한다.", () -> {
                     ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(10, 0));
@@ -64,7 +65,7 @@ class ReservationTimeTest extends AcceptanceTest {
 
     @DisplayName("시간 예약 가능 여부를 조회한다.")
     @TestFactory
-    Stream<DynamicTest> availabilityTime() {
+    Stream<DynamicTest> findAvailabilityTime() {
         return Stream.of(
                 dynamicTest("테마를 추가한다.", () -> {
                     ThemeRequest themeRequest = new ThemeRequest("hi", "happy", "abcd.html");
@@ -93,5 +94,16 @@ class ReservationTimeTest extends AcceptanceTest {
                             .body("size()", is(1));
                 })
         );
+    }
+
+    @DisplayName("존재하지 않는 예약 시간에 대한 삭제")
+    @Test
+    void deleteNonExistReservationTime() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", adminToken)
+                .when().delete("times/999")
+                .then().log().all()
+                .statusCode(404);
     }
 }

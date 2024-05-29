@@ -15,9 +15,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import roomescape.service.dto.request.ReservationRequest;
-import roomescape.service.dto.request.ReservationTimeRequest;
-import roomescape.service.dto.request.ThemeRequest;
+import roomescape.service.reservation.dto.request.ReservationRequest;
+import roomescape.service.reservation.dto.request.ReservationTimeRequest;
+import roomescape.service.reservation.dto.request.ThemeRequest;
 
 class ReservationTest extends AcceptanceTest {
 
@@ -28,9 +28,14 @@ class ReservationTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookies("token", adminToken)
                 .body(reservationTimeRequest)
-                .post("/times")
-                .then().log().all()
-                .extract();
+                .post("/times");
+
+        ReservationTimeRequest reservationTimeRequest2 = new ReservationTimeRequest(LocalTime.of(10, 10));
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", adminToken)
+                .body(reservationTimeRequest)
+                .post("/times");
 
         ThemeRequest themeRequest = new ThemeRequest("hi", "happy", "abcd.html");
         RestAssured.given().log().all()
@@ -136,7 +141,6 @@ class ReservationTest extends AcceptanceTest {
     @TestFactory
     Stream<DynamicTest> duplicateReservation() {
         Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "2030-12-12");
         reservationRequest.put("timeId", "1");
         reservationRequest.put("themeId", "1");
@@ -156,7 +160,7 @@ class ReservationTest extends AcceptanceTest {
                 dynamicTest("중복된 예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
-                            .cookies("token", userToken)
+                            .cookies("token", adminToken)
                             .body(reservationRequest)
                             .when().post("/reservations")
                             .then().log().all()
@@ -165,32 +169,49 @@ class ReservationTest extends AcceptanceTest {
         );
     }
 
+    @DisplayName("회원은 동일 날짜에 테마당 하나의 예약 생성 가능하다")
+    @TestFactory
+    Stream<DynamicTest> validateMemberAlreadyReservedThemeOnDate() {
+        Map<String, String> reservationRequest = new HashMap<>();
+        reservationRequest.put("date", "2030-12-12");
+        reservationRequest.put("timeId", "1");
+        reservationRequest.put("themeId", "1");
+
+        Map<String, String> reservationRequest2 = new HashMap<>();
+        reservationRequest.put("date", "2030-12-12");
+        reservationRequest.put("timeId", "2");
+        reservationRequest.put("themeId", "1");
+
+        return Stream.of(
+                dynamicTest("예약을 추가한다.", () -> {
+
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", userToken)
+                            .body(reservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(201);
+                }),
+
+                dynamicTest("동일 날짜, 테마의 다른 시간 예약을 시도한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", userToken)
+                            .body(reservationRequest2)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(400);
+                })
+        );
+    }
 
     @DisplayName("올바르지 않은 날짜 형식으로 입력시 예외처리")
     @Test
     void invalidDateFormat() {
         Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "2025-aa-bb");
         reservationRequest.put("timeId", "1");
-        reservationRequest.put("themeId", "1");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", userToken)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @DisplayName("올바르지 않은 예약자명 형식으로 입력시 예외처리")
-    @Test
-    void invalidTimeIdFormat() {
-        Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "12345678900");
-        reservationRequest.put("date", "2030-12-12");
-        reservationRequest.put("timeId", "a");
         reservationRequest.put("themeId", "1");
 
         RestAssured.given().log().all()
@@ -206,7 +227,6 @@ class ReservationTest extends AcceptanceTest {
     @Test
     void pastTimeSlotReservation() {
         Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
         reservationRequest.put("date", "1999-12-12");
         reservationRequest.put("timeId", "1");
         reservationRequest.put("themeId", "1");
@@ -218,5 +238,16 @@ class ReservationTest extends AcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @DisplayName("존재하지 않는 예약에 대한 삭제")
+    @Test
+    void deleteNonExistReservation() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", adminToken)
+                .when().delete("reservations/999")
+                .then().log().all()
+                .statusCode(404);
     }
 }
