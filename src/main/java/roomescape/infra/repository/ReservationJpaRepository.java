@@ -6,28 +6,19 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
-import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationWithRank;
-import roomescape.domain.reservation.Status;
 import roomescape.domain.reservationdetail.ReservationDetail;
+import roomescape.exception.reservation.NotFoundReservationException;
 
-public interface ReservationJpaRepository extends
-        ReservationRepository,
-        Repository<Reservation, Long> {
-
-    @Override
-    Reservation save(Reservation reservation);
+public interface ReservationJpaRepository extends ReservationRepository, Repository<Reservation, Long> {
 
     @Override
-    Optional<Reservation> findById(Long id);
-
-    @Override
-    List<Reservation> findAll();
-
-    @Override
-    List<Reservation> findAllByStatus(Status status);
+    default Reservation getById(Long id) {
+        return findById(id)
+                .orElseThrow(NotFoundReservationException::new);
+    }
 
     @Override
     @Query(""" 
@@ -69,10 +60,4 @@ public interface ReservationJpaRepository extends
                 and mine.detail.time.startAt > current_time))
             """)
     List<ReservationWithRank> findWithRank(@Param("memberId") Long memberId);
-
-    @Override
-    boolean existsByDetailAndMemberAndStatusNot(ReservationDetail detail, Member member, Status status);
-
-    @Override
-    boolean existsByDetailAndStatus(ReservationDetail reservationDetail, Status status);
 }

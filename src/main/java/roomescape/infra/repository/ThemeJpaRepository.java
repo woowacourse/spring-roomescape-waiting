@@ -1,21 +1,21 @@
 package roomescape.infra.repository;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.domain.reservationdetail.Theme;
 import roomescape.domain.reservationdetail.ThemeRepository;
+import roomescape.exception.theme.NotFoundThemeException;
 
 public interface ThemeJpaRepository extends
         ThemeRepository,
         Repository<Theme, Long> {
 
     @Override
-    Theme save(Theme theme);
-
-    @Override
-    Optional<Theme> findById(Long id);
+    default Theme getById(Long id) {
+        return findById(id)
+                .orElseThrow(NotFoundThemeException::new);
+    }
 
     @Override
     @Query(value = """
@@ -28,10 +28,4 @@ public interface ThemeJpaRepository extends
             limit ?;
             """, nativeQuery = true)
     List<Theme> findThemesByPeriodWithLimit(String startDate, String endDate, int limit);
-
-    @Override
-    List<Theme> findAll();
-
-    @Override
-    void deleteById(Long themeId);
 }

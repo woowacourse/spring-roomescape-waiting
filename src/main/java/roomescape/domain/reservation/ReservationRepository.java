@@ -5,15 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationdetail.ReservationDetail;
-import roomescape.exception.reservation.NotFoundReservationException;
 
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
 
-    default Reservation getById(Long id) {
-        return findById(id)
-                .orElseThrow(NotFoundReservationException::new);
-    }
+    Reservation getById(Long id);
 
     Optional<Reservation> findById(Long id);
 

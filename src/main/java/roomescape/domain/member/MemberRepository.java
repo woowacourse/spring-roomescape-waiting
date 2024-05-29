@@ -2,15 +2,11 @@ package roomescape.domain.member;
 
 import java.util.List;
 import java.util.Optional;
-import roomescape.exception.member.AuthenticationFailureException;
 
 public interface MemberRepository {
     Member save(Member user);
 
-    default Member getById(Long id) {
-        return findById(id)
-                .orElseThrow(AuthenticationFailureException::new);
-    }
+    Member getById(Long id);
 
     Optional<Member> findById(Long id);
 

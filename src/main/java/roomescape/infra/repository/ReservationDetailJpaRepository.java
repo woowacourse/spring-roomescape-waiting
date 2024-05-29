@@ -1,8 +1,6 @@
 package roomescape.infra.repository;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.repository.Repository;
 import roomescape.domain.reservationdetail.ReservationDetail;
 import roomescape.domain.reservationdetail.ReservationDetailRepository;
@@ -14,14 +12,8 @@ public interface ReservationDetailJpaRepository extends
         Repository<ReservationDetail, Long> {
 
     @Override
-    ReservationDetail save(ReservationDetail reservationDetail);
-
-    @Override
-    Optional<ReservationDetail> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
-
-    @Override
-    List<ReservationDetail> findAll();
-
-    @Override
-    void delete(ReservationDetail reservationDetail);
+    default ReservationDetail getByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
+        return findByDateAndTimeAndTheme(date, time, theme)
+                .orElseGet(() -> save(new ReservationDetail(date, time, theme)));
+    }
 }

@@ -7,10 +7,7 @@ import java.util.Optional;
 public interface ReservationDetailRepository {
     ReservationDetail save(ReservationDetail reservationDetail);
 
-    default ReservationDetail getByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
-        return findByDateAndTimeAndTheme(date, time, theme)
-                .orElseGet(() -> save(new ReservationDetail(date, time, theme)));
-    }
+    ReservationDetail getByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     Optional<ReservationDetail> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
