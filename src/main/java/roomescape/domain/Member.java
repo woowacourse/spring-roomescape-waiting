@@ -46,6 +46,10 @@ public class Member {
         return role.isAdmin();
     }
 
+    public boolean isNotAdmin() {
+        return !this.isAdmin();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
