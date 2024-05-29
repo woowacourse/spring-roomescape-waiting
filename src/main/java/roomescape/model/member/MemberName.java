@@ -15,7 +15,7 @@ public class MemberName {
         this.name = name;
     }
 
-    public MemberName() {
+    protected MemberName() {
     }
 
     public String getName() {

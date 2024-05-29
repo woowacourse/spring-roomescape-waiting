@@ -46,6 +46,7 @@ class ReservationTimeControllerTest {
         jdbcTemplate.execute("ALTER TABLE reservation_time SET REFERENTIAL_INTEGRITY FALSE");
         jdbcTemplate.execute("TRUNCATE TABLE reservation_time RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE reservation RESTART IDENTITY");
+        jdbcTemplate.execute("TRUNCATE TABLE waiting RESTART IDENTITY");
     }
 
     private void insertReservationTime(String startAt) {

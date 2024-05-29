@@ -1,6 +1,7 @@
 package roomescape.controller.request;
 
 import jakarta.validation.constraints.NotNull;
+import roomescape.service.dto.ReservationTimeDto;
 
 import java.time.LocalTime;
 
@@ -11,6 +12,10 @@ public class ReservationTimeRequest {
 
     public ReservationTimeRequest(LocalTime startAt) {
         this.startAt = startAt;
+    }
+
+    public ReservationTimeDto toDto() {
+        return new ReservationTimeDto(this.startAt);
     }
 
     private ReservationTimeRequest() {

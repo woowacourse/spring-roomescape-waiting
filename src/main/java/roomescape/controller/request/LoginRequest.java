@@ -2,6 +2,7 @@ package roomescape.controller.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import roomescape.service.dto.AuthDto;
 
 public class LoginRequest {
 
@@ -14,6 +15,10 @@ public class LoginRequest {
     public LoginRequest(String email, String password) {
         this.email = email;
         this.password = password;
+    }
+
+    public AuthDto toDto() {
+        return new AuthDto(this.email, this.password);
     }
 
     public String getEmail() {

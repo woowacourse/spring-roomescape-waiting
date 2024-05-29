@@ -16,19 +16,17 @@ public class ReservationTime {
     private Long id;
     @NotNull
     private LocalTime startAt;
-    @OneToMany(mappedBy = "time")
-    private Set<Reservation> reservations;
 
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
-    public ReservationTime() {
+    public ReservationTime(LocalTime startAt) {
+        this(null, startAt);
     }
 
-    public static ReservationTime from(ReservationTimeDto reservationTimeDto) {
-        return new ReservationTime(0L, reservationTimeDto.getStartAt());
+    protected ReservationTime() {
     }
 
     public Long getId() {

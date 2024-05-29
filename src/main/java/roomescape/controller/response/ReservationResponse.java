@@ -2,6 +2,7 @@ package roomescape.controller.response;
 
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.model.Waiting;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 
@@ -27,7 +28,9 @@ public class ReservationResponse {
         ReservationTime time = reservation.getTime();
         Theme theme = reservation.getTheme();
         Member member = reservation.getMember();
-        return new ReservationResponse(reservation.getId(), reservation.getDate(),
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getDate(),
                 ReservationTimeResponse.from(time),
                 ThemeResponse.from(theme),
                 MemberResponse.from(member));

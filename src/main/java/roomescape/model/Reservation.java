@@ -1,10 +1,10 @@
 package roomescape.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
-import roomescape.service.dto.ReservationDto;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -16,34 +16,28 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
-    private LocalDate date;
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+    @Valid
+    @NotNull
+    @Embedded
+    private ReservationInfo reservationInfo;
 
-    private Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    private Reservation(Long id, Member member, ReservationInfo reservationInfo) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
         this.member = member;
+        this.reservationInfo = reservationInfo;
     }
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(0L, date, time, theme, member);
+        this(null, member, new ReservationInfo(date, time, theme));
     }
 
-    public Reservation() {
+    public Reservation(Member member, ReservationInfo reservationInfo) {
+        this(null, member, reservationInfo);
     }
 
-    public static Reservation of(ReservationDto reservationDto, ReservationTime time, Theme theme, Member member) {
-        return new Reservation(0L, reservationDto.getDate(), time, theme, member);
+    protected Reservation() {
     }
 
     public Long getId() {
@@ -51,19 +45,23 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return reservationInfo.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return reservationInfo.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationInfo.getTheme();
     }
 
     public Member getMember() {
         return member;
+    }
+
+    public ReservationInfo getReservationInfo() {
+        return reservationInfo;
     }
 
     @Override
@@ -80,6 +78,6 @@ public class Reservation {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, time, theme, member);
+        return Objects.hash(id, reservationInfo, member);
     }
 }

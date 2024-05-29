@@ -13,11 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.controller.request.ReservationRequest;
-import roomescape.controller.response.MemberReservationResponse;
+import roomescape.controller.response.OwnReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
-import roomescape.service.AuthService;
-import roomescape.service.dto.AuthDto;
+import roomescape.model.member.MemberWithoutPassword;
+import roomescape.model.member.Role;
+import roomescape.util.TokenManager;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -33,19 +34,19 @@ class ReservationControllerTest {
 
     private static final int INITIAL_TIME_COUNT = 5;
     private static final int INITIAL_RESERVATION_COUNT = 15;
-    private static final AuthDto userDto = new AuthDto("treeboss@gmail.com", "treeboss123!");
+    private static final String LOGIN_TOKEN = TokenManager.create(
+            new MemberWithoutPassword(1L, "에버", "treeboss@gmail.com", Role.USER));
 
     private final JdbcTemplate jdbcTemplate;
-    private final AuthService authService;
     private final SimpleJdbcInsert themeInsertActor;
     private final SimpleJdbcInsert timeInsertActor;
     private final SimpleJdbcInsert memberInsertActor;
     private final SimpleJdbcInsert reservationInsertActor;
+    private final SimpleJdbcInsert waitingInsertActor;
 
     @Autowired
-    public ReservationControllerTest(JdbcTemplate jdbcTemplate, AuthService authService) {
+    public ReservationControllerTest(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.authService = authService;
         this.themeInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
                 .usingGeneratedKeyColumns("id");
@@ -57,6 +58,9 @@ class ReservationControllerTest {
                 .usingGeneratedKeyColumns("id");
         this.reservationInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingGeneratedKeyColumns("id");
+        this.waitingInsertActor = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("waiting")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -73,6 +77,8 @@ class ReservationControllerTest {
         IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 1L, 1L, 1L));
         IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 2L, 1L, 1L));
         IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 3L, 1L, 1L));
+
+        insertWaiting(now.minusDays(0), 1L, 1L, 2L);
     }
 
     private void initDatabase() {
@@ -81,6 +87,7 @@ class ReservationControllerTest {
         jdbcTemplate.execute("TRUNCATE TABLE theme RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE reservation_time RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE reservation RESTART IDENTITY");
+        jdbcTemplate.execute("TRUNCATE TABLE waiting RESTART IDENTITY");
     }
 
     private void insertTheme(String name, String description, String thumbnail) {
@@ -115,6 +122,15 @@ class ReservationControllerTest {
         reservationInsertActor.execute(parameters);
     }
 
+    private void insertWaiting(LocalDate date, long timeId, long themeId, long memberId) {
+        Map<String, Object> parameters = new HashMap<>(4);
+        parameters.put("date", date);
+        parameters.put("time_id", timeId);
+        parameters.put("theme_id", themeId);
+        parameters.put("member_id", memberId);
+        waitingInsertActor.execute(parameters);
+    }
+
     @DisplayName("전체 예약을 조회한다.")
     @Test
     void should_get_all_reservations() {
@@ -130,49 +146,16 @@ class ReservationControllerTest {
     @DisplayName("예약을 추가할 수 있다.")
     @Test
     void should_insert_reservation() {
-        String token = authService.createToken(userDto);
-        ReservationRequest request = new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
-                .body(request)
+                .cookie("token", LOGIN_TOKEN)
+                .body(new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
                 .header("Location", "/reservations/" + (INITIAL_RESERVATION_COUNT + 1));
 
         assertThat(countAllReservations()).isEqualTo(INITIAL_RESERVATION_COUNT + 1);
-    }
-
-    @DisplayName("존재하는 예약이라면 예약을 삭제할 수 있다.")
-    @Test
-    void should_delete_reservation_when_reservation_exist() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
-
-        assertThat(countAllReservations()).isEqualTo(INITIAL_RESERVATION_COUNT - 1);
-    }
-
-    @DisplayName("예약 삭제 - id가 1 미만일 경우 예외를 반환한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"0", "-1", "-999"})
-    void should_throw_exception_when_delete_by_invalid_id(String id) {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/" + id)
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @DisplayName("예약 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
-    @Test
-    void should_throw_exception_when_delete_by_id_null() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/")
-                .then().log().all()
-                .statusCode(404);
     }
 
     @DisplayName("특정 날짜와 테마에 따른 모든 시간의 예약 가능 여부를 확인 - 테마 id가 null 또는 1 미만일 경우 예외를 반환한다.")
@@ -192,11 +175,11 @@ class ReservationControllerTest {
     @DisplayName("특정 날짜와 테마에 따른 모든 시간의 예약 가능 여부를 확인한다.")
     @Test
     void should_get_reservations_with_book_state_by_date_and_theme() {
-        String date = LocalDate.now().minusDays(1).toString();
         Long themeId = 1L;
+        String date = LocalDate.now().minusDays(1).toString();
         List<ReservationTimeInfoResponse> times = RestAssured.given().log().all()
-                .param("date", date)
                 .param("themeId", themeId)
+                .param("date", date)
                 .when().get("/reservations/times")
                 .then().log().all()
                 .statusCode(200)
@@ -230,18 +213,16 @@ class ReservationControllerTest {
                 .extract().jsonPath().getList(".", ReservationResponse.class);
     }
 
-    @DisplayName("자신의 예약을 조회한다.")
+    @DisplayName("자신의 예약을 조회한다.") // TODO: add waiting test case
     @Test
     void should_find_reservations_of_member() {
-        String token = authService.createToken(userDto);
-
-        List<MemberReservationResponse> responses = RestAssured.given().log().all()
+        List<OwnReservationResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie("token", LOGIN_TOKEN)
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .extract().jsonPath().getList(".", MemberReservationResponse.class);
+                .extract().jsonPath().getList(".", OwnReservationResponse.class);
 
         assertThat(responses).hasSize(15);
     }

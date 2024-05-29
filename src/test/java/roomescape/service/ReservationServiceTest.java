@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
-import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.LoginMember;
@@ -34,6 +33,7 @@ class ReservationServiceTest {
 
     private static final int INITIAL_RESERVATION_COUNT = 3;
     private static final int INITIAL_TIME_COUNT = 2;
+    private static final LoginMember loginMember = new LoginMember(1L);
 
     @Autowired
     private ReservationService reservationService;
@@ -121,16 +121,16 @@ class ReservationServiceTest {
 
     @DisplayName("존재하는 예약을 삭제하려 하면 예외가 발생하지 않는다.")
     @Test
-    void should_not_throw_exception_when_exist_reservation_time() {
+    void should_not_throw_exception_when_exist_reservation() {
         assertThatCode(() -> reservationService.deleteReservation(1L))
                 .doesNotThrowAnyException();
     }
 
     @DisplayName("존재하지 않는 예약을 삭제하려 하면 예외가 발생한다.")
     @Test
-    void should_throw_exception_when_not_exist_reservation_time() {
+    void should_throw_exception_when_not_exist_reservation() {
         assertThatThrownBy(() -> reservationService.deleteReservation(999L))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("[ERROR] 존재하지 않는 예약입니다.");
     }
 
@@ -148,7 +148,7 @@ class ReservationServiceTest {
     @DisplayName("특정 멤버, 테마, 날짜 조건에 따라 예약을 조회한다.")
     @Test
     void should_find_reservations_by_memberId_and_themeId_and_date() {
-        List<Reservation> reservations = reservationService.findReservationsByConditions(1L, 1L, LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
+        List<Reservation> reservations = reservationService.searchReservationsByConditions(1L, 1L, LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
         assertAll(
                 () -> assertThat(reservations).hasSize(1),
                 () -> assertThat(reservations.get(0).getId()).isEqualTo(1L));
@@ -157,8 +157,7 @@ class ReservationServiceTest {
     @DisplayName("특정 멤버의 예약을 조회한다.")
     @Test
     void should_find_reservations_by_member() {
-        LoginMember member = new LoginMember(1L);
-        List<Reservation> reservations = reservationService.findReservationsByMember(member);
+        List<Reservation> reservations = reservationService.findReservationsByMember(loginMember);
         assertAll(
                 () -> assertThat(reservations).hasSize(1),
                 () -> assertThat(reservations.get(0).getId()).isEqualTo(1L));

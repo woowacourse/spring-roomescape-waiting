@@ -15,7 +15,7 @@ public class Description {
         this.description = description;
     }
 
-    public Description() {
+    protected Description() {
     }
 
     public String getDescription() {

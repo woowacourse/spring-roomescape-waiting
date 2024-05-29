@@ -7,6 +7,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ReservationTimeDto;
 
 import java.time.LocalTime;
@@ -18,10 +19,14 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ReservationRepository reservationRepository) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+                                  ReservationRepository reservationRepository,
+                                  WaitingRepository waitingRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationTime> findAllReservationTimes() {
@@ -29,24 +34,25 @@ public class ReservationTimeService {
     }
 
     public ReservationTime saveReservationTime(ReservationTimeDto timeDto) {
-        validateDuplication(timeDto.getStartAt());
-        ReservationTime time = ReservationTime.from(timeDto);
+        validateDuplication(timeDto);
+        ReservationTime time = timeDto.toReservationTime();
         return reservationTimeRepository.save(time);
     }
 
     public ReservationTime findReservationTime(long id) {
-        validateExistence(id);
-        Optional<ReservationTime> time = reservationTimeRepository.findById(id);
-        return time.orElseThrow(() -> new NotFoundException("[ERROR] 존재하지 않는 데이터입니다."));
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("[ERROR] 존재하지 않는 시간입니다."));
     }
 
     public void deleteReservationTime(long id) {
         validateExistence(id);
-        validateDependence(id);
+        validateDependenceOfReservation(id);
+        validateDependenceOfWaiting(id);
         reservationTimeRepository.deleteById(id);
     }
 
-    private void validateDuplication(LocalTime startAt) {
+    private void validateDuplication(ReservationTimeDto timeDto) {
+        LocalTime startAt = timeDto.getStartAt();
         boolean isExist = reservationTimeRepository.existsByStartAt(startAt);
         if (isExist) {
             throw new DuplicatedException("[ERROR] 중복된 시간은 추가할 수 없습니다.");
@@ -60,10 +66,17 @@ public class ReservationTimeService {
         }
     }
 
-    private void validateDependence(Long id) {
-        boolean isExist = reservationRepository.existsByTimeId(id);
+    private void validateDependenceOfReservation(Long id) {
+        boolean isExist = reservationRepository.existsByReservationInfo_TimeId(id);
         if (isExist) {
             throw new BadRequestException("[ERROR] 해당 시간을 사용하고 있는 예약이 있습니다.");
+        }
+    }
+
+    private void validateDependenceOfWaiting(Long id) {
+        boolean isExist = waitingRepository.existsByReservationInfo_TimeId(id);
+        if (isExist) {
+            throw new BadRequestException("[ERROR] 해당 시간을 사용하고 있는 예약 대기가 있습니다.");
         }
     }
 }

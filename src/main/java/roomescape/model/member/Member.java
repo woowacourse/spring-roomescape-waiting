@@ -29,8 +29,6 @@ public class Member {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations;
 
     private Member(Long id, MemberName name, MemberEmail email, MemberPassword password, Role role) {
         this.id = id;
@@ -40,11 +38,15 @@ public class Member {
         this.role = role;
     }
 
+    public Member(String name, String email, String password, Role role) {
+        this(null, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
+    }
+
     public Member(Long id, String name, String email, String password, Role role) {
         this(id, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
     }
 
-    public Member() {
+    protected Member() {
     }
 
     public Long getId() {
@@ -65,10 +67,6 @@ public class Member {
 
     public Role getRole() {
         return role;
-    }
-
-    public Set<Reservation> getReservations() {
-        return reservations;
     }
 
     @Override

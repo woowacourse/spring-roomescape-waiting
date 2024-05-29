@@ -184,7 +184,10 @@ function deleteRow(event) {
   const reservationId = row.cells[0].textContent;
 
   requestDelete(reservationId)
-      .then(() => row.remove())
+      .then(() => {
+        row.remove();
+        location.reload();
+      })
       .catch(error => console.error('Error:', error));
 }
 
@@ -231,7 +234,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+  return fetch(`/admin${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
         if (response.status !== 204) throw new Error('Delete failed');
       });

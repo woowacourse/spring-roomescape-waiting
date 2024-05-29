@@ -1,21 +1,17 @@
 package roomescape.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+import roomescape.exception.AuthorizationException;
 import roomescape.model.member.Member;
-import roomescape.model.member.Role;
+import roomescape.model.member.MemberEmail;
+import roomescape.model.member.MemberPassword;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.AuthDto;
-import roomescape.service.dto.MemberInfo;
-
-import java.util.NoSuchElementException;
+import roomescape.model.member.MemberWithoutPassword;
+import roomescape.util.TokenManager;
 
 @Service
 public class AuthService {
-
-    private static final String SECRET_KEY = "AttoAndEverInWoowacourseMadeThisApplicationSoHardAndFunny";
 
     private final MemberRepository memberRepository;
 
@@ -23,28 +19,16 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
-    public String createToken(AuthDto authDto) {
-        Member member = memberRepository.findByEmailAndPassword(authDto.getEmail(), authDto.getPassword())
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당하는 계정이 없습니다."));
-        return Jwts.builder()
-                .subject(String.valueOf(member.getId()))
-                .claim("name", member.getName())
-                .claim("email", member.getEmail())
-                .claim("role", member.getRole())
-                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
-                .compact();
+    public String tryLogin(AuthDto authDto) {
+        MemberEmail email = authDto.getEmail();
+        MemberPassword password = authDto.getPassword();
+        Member member = memberRepository.findByEmailAndPassword(email, password)
+                .orElseThrow(() -> new AuthorizationException("[ERROR] 해당 이메일과 비밀번호에 일치하는 계정이 없습니다."));
+        MemberWithoutPassword loginMember = MemberWithoutPassword.from(member);
+        return TokenManager.create(loginMember);
     }
 
-    public MemberInfo checkToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        long memberId = Long.parseLong(claims.getSubject());
-        String memberName = claims.get("name").toString();
-        String memberEmail = claims.get("email").toString();
-        Role memberRole = Role.asRole(claims.get("role").toString());
-        return new MemberInfo(memberId, memberName, memberEmail, memberRole);
+    public MemberWithoutPassword extractLoginMember(String token) {
+        return TokenManager.parse(token);
     }
 }

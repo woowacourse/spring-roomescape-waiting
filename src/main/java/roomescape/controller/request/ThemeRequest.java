@@ -1,6 +1,7 @@
 package roomescape.controller.request;
 
 import jakarta.validation.constraints.NotBlank;
+import roomescape.service.dto.ThemeDto;
 
 public class ThemeRequest {
 
@@ -15,6 +16,10 @@ public class ThemeRequest {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    public ThemeDto toDto() {
+        return new ThemeDto(this.name, this.description, this.thumbnail);
     }
 
     public String getName() {

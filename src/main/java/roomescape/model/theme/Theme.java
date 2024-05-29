@@ -27,8 +27,6 @@ public class Theme {
     @Valid
     @Embedded
     private Thumbnail thumbnail;
-    @OneToMany(mappedBy = "theme")
-    private Set<Reservation> reservations;
 
     private Theme(Long id, Name name, Description description, Thumbnail thumbnail) {
         this.id = id;
@@ -37,15 +35,19 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme(Long id, String name, String description, String thumbnail) {
+    public Theme(Name name, Description description, Thumbnail thumbnail) {
+        this(null, name, description, thumbnail);
+    }
+
+    public Theme(String name, String description, String thumbnail) {
+        this(null, new Name(name), new Description(description), new Thumbnail(thumbnail));
+    }
+
+    public Theme(Long id, String name, String description, String thumbnail) { // TODO: for test?
         this(id, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
 
-    public Theme() {
-    }
-
-    public static Theme from(ThemeDto themeDto) {
-        return new Theme(0L, themeDto.getName(), themeDto.getDescription(), themeDto.getThumbnail());
+    protected Theme() {
     }
 
     public Long getId() {

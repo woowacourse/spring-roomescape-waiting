@@ -27,4 +27,9 @@ public class AdminPageController {
     public String getTheme() {
         return "admin/theme";
     }
+
+    @GetMapping("/waiting")
+    public String getWaiting() {
+        return "admin/waiting";
+    }
 }
