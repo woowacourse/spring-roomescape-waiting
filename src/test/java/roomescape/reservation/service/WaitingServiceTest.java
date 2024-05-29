@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ class WaitingServiceTest {
     @Autowired
     private WaitingService waitingService;
 
-    @AfterEach
+    @BeforeEach
     void init() {
         databaseCleaner.cleanUp();
     }
@@ -149,7 +149,7 @@ class WaitingServiceTest {
     @DisplayName("같은 날짜, 지나간 시간에 대한 예약 대기를 저장하면 예외가 발생한다.")
     void saveTest_Fail5() {
         final LocalDate date = LocalDate.now();
-        final LocalTime time = LocalTime.now().minusHours(1);
+        final LocalTime time = LocalTime.now().minusMinutes(1);
         final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
         final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
         final Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));

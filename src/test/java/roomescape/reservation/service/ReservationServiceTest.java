@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-    @AfterEach
+    @BeforeEach
     void init() {
         databaseCleaner.cleanUp();
     }
@@ -99,7 +100,7 @@ class ReservationServiceTest {
     @DisplayName("지난 시간에 예약을 하면 예외가 발생한다.")
     void pastTimeExceptionTest() {
         Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now().minusHours(1)));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now().minusMinutes(1)));
         Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "1234"));
         LocalDate date = LocalDate.now();
         ReservationCreateRequest request = new ReservationCreateRequest(date, theme.getId(), time.getId());
@@ -163,7 +164,7 @@ class ReservationServiceTest {
     @DisplayName("본인의 예약만 취소할 수 있다.")
     void deleteTest_Fail1() {
         Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(1)));
         Member member = memberRepository.save(new Member("마크", "mark@woowa.com", "1234"));
         LocalDate date = LocalDate.now().plusYears(1);
         ReservationCreateRequest request = new ReservationCreateRequest(date, theme.getId(), time.getId());

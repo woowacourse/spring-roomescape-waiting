@@ -25,11 +25,6 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public Waiting(final Member member, final LocalDate date, final Theme theme,
-            final ReservationTime reservationTime) {
-        this(null, member, date, theme, reservationTime);
-    }
-
     public Waiting(final Long id, final Member member, final LocalDate date, final Theme theme,
             final ReservationTime reservationTime) {
         this.id = id;
@@ -39,8 +34,13 @@ public class Waiting {
         this.reservationTime = reservationTime;
     }
 
+    public Waiting(final Member member, final LocalDate date, final Theme theme,
+            final ReservationTime reservationTime) {
+        this(null, member, date, theme, reservationTime);
+    }
+
     public Reservation toReservation() {
-        return new Reservation(id, member, date, theme, reservationTime);
+        return new Reservation(null, member, date, theme, reservationTime);
     }
 
     public Long getId() {
