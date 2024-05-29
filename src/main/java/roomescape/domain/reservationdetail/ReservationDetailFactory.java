@@ -2,7 +2,9 @@ package roomescape.domain.reservationdetail;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
 public class ReservationDetailFactory {
     private final ReservationDetailRepository reservationDetailRepository;

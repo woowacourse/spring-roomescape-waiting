@@ -5,10 +5,11 @@ import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 
-
+@Component
 @RequiredArgsConstructor
 public class ReservationEventHandler {
     private final TaskScheduler taskScheduler;
