@@ -10,6 +10,8 @@ import roomescape.member.domain.Member;
 import static roomescape.TestFixture.USER_MIA;
 
 public class StubLoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
+    public static final Member STUBBED_LOGIN_MEMBER = USER_MIA(1L);
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().equals(Member.class);
@@ -18,6 +20,6 @@ public class StubLoginMemberArgumentResolver implements HandlerMethodArgumentRes
     @Override
     public Member resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        return USER_MIA(1L);
+        return STUBBED_LOGIN_MEMBER;
     }
 }

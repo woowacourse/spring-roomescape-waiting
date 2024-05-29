@@ -2,6 +2,7 @@ package roomescape.global.presentation;
 
 import com.fasterxml.jackson.databind.JsonMappingException.Reference;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import jakarta.validation.ConstraintDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -21,6 +22,7 @@ import roomescape.auth.exception.AuthorizationException;
 import roomescape.global.dto.ErrorResponse;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
+import roomescape.reservation.exception.DataNotConvertedException;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -84,7 +86,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return parameterName + String.format("(type: %s) 파라미터의 타입이 올바르지 않습니다.", type);
     }
 
-    @ExceptionHandler(ViolationException.class)
+    @ExceptionHandler({ViolationException.class, ConstraintDefinitionException.class})
     public ResponseEntity<ErrorResponse> handleViolationException(ViolationException e) {
         logErrorMessage(e);
         return ResponseEntity.badRequest()
@@ -105,7 +107,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(DataAccessException.class)
+    @ExceptionHandler({DataAccessException.class, DataNotConvertedException.class})
     public ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException e) {
         logErrorMessage(e);
         return ResponseEntity.internalServerError()

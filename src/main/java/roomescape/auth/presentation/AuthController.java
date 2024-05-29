@@ -36,4 +36,14 @@ public class AuthController {
     public ResponseEntity<AuthInformationResponse> checkAuthInformation(Member loginMember) {
         return ResponseEntity.ok(new AuthInformationResponse(loginMember.getName()));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie cookie = ResponseCookie.from(TOKEN_COOKIE_KEY, "expired")
+                .maxAge(0)
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
+    }
 }

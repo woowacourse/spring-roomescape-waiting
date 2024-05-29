@@ -5,21 +5,23 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import roomescape.global.exception.ViolationException;
 
 @Entity
+@Table(name = "theme")
 public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "name")
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "description")
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "thumbnail")
     private String thumbnail;
 
     protected Theme() {

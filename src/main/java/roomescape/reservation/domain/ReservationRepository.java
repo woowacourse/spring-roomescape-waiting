@@ -1,17 +1,21 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+@Transactional(readOnly = true)
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-
-    @Query("SELECT r FROM Reservation r JOIN FETCH r.time JOIN FETCH r.theme JOIN FETCH r.member")
-    List<Reservation> findAllWithDetails();
 
     @Query("""
             SELECT r FROM Reservation r
@@ -32,12 +36,44 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT r FROM Reservation r
             JOIN FETCH r.time
             JOIN FETCH r.theme
-            JOIN FETCH r.member
-            WHERE r.member = :member
+            WHERE r.member = :member AND r.status = :status
             """)
-    List<Reservation> findAllByMemberWithDetails(@Param(value = "member") Member member);
-
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    List<Reservation> findAllByMemberAndStatusWithDetails(@Param(value = "member") Member member,
+                                                          @Param(value = "status") ReservationStatus status);
 
     int countByTime(ReservationTime time);
+
+    @Query("""
+            SELECT new roomescape.reservation.domain.WaitingReservation(
+                r,
+                (SELECT COUNT(w) FROM Reservation w
+                    WHERE w.theme = r.theme
+                        AND w.date = r.date
+                        AND w.time = r.time
+                        AND w.status = r.status
+                        AND w.id < r.id))
+            FROM Reservation r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            WHERE r.member = :member AND r.status = roomescape.reservation.domain.ReservationStatus.WAITING
+            """)
+    List<WaitingReservation> findWaitingReservationsByMemberWithDetails(@Param(value = "member") Member member);
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.member
+            JOIN FETCH r.theme
+            JOIN FETCH r.time
+            WHERE r.status = :status
+            """)
+    List<Reservation> findAllByStatusWithDetails(@Param(value = "status") ReservationStatus status);
+
+    Optional<Reservation> findFirstByDateAndTimeAndThemeAndStatusOrderById(LocalDate date, ReservationTime time,
+                                                                           Theme theme, ReservationStatus status);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "10000")})
+    List<Reservation> findAllByDateAndTimeAndThemeAndStatus(LocalDate date, ReservationTime time, Theme theme, ReservationStatus status);
+
+    boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 }

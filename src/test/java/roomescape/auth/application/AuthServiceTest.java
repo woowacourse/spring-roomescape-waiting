@@ -8,7 +8,9 @@ import roomescape.common.ServiceTest;
 import roomescape.member.application.MemberService;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.TEST_PASSWORD;
+import static roomescape.TestFixture.USER_MIA;
 
 class AuthServiceTest extends ServiceTest {
     @Autowired

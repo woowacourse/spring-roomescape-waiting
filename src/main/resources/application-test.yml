@@ -1,5 +1,5 @@
 spring:
-  sql:
-    init:
-      schema-locations: optional:classpath*:test-schema.sql
-      data-locations: optional:classpath*:test-data.sql
+  datasource:
+    url: jdbc:mysql://localhost:23306/roomescape_test?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: test
+    password: test

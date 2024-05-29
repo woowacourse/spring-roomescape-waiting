@@ -14,14 +14,15 @@ import roomescape.member.domain.Member;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.TEST_PASSWORD;
 
 public class AuthAcceptanceTest extends AcceptanceTest {
     @Test
-    @DisplayName("[2 - Step4] 사용자가 로그인한다.")
+    @DisplayName("사용자가 로그인한다.")
     void login() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
         LoginRequest request = new LoginRequest(member.getEmail().getValue(), member.getPassword());
 
         // when
@@ -41,7 +42,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[2 - Step4] 존재하지 않는 이메일로 사용자가 로그인한다.")
+    @DisplayName("존재하지 않는 이메일로 사용자가 로그인한다.")
     void loginNotExistingMember() {
         // given
         LoginRequest request = new LoginRequest("anonymous@google.com", TEST_PASSWORD);
@@ -63,10 +64,10 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[2 - Step4] 틀린 비밀번호로 사용자가 로그인한다.")
+    @DisplayName("틀린 비밀번호로 사용자가 로그인한다.")
     void loginWithInvalidPassword() {
         // given
-        createTestMember();
+        createTestMember(MIA_EMAIL, MIA_NAME);
         LoginRequest request = new LoginRequest(MIA_EMAIL, "invalid-password");
 
         // when
@@ -87,11 +88,11 @@ public class AuthAcceptanceTest extends AcceptanceTest {
 
 
     @Test
-    @DisplayName("[2 - Step4] 사용자 인증 정보를 조회한다.")
+    @DisplayName("사용자 인증 정보를 조회한다.")
     void checkAuthInformation() {
         // given
-        Member member = createTestMember();
-        String token = createTestToken(member);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
+        String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -111,7 +112,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[2 - Step4] 유효하지 않은 토큰으로 사용자 인증 정보를 조회한다.")
+    @DisplayName("유효하지 않은 토큰으로 사용자 인증 정보를 조회한다.")
     void checkAuthInformationWithInvalidToken() {
         // given
         String invalidToken = "invalid-token";

@@ -1,4 +1,6 @@
 const THEME_API_ENDPOINT = '/themes';
+const RESERVATION_API_ENDPOINT = '/reservations';
+const WAITING_RESERVATION_API_ENDPOINT = '/reservations/waiting';
 
 document.addEventListener('DOMContentLoaded', () => {
   requestRead(THEME_API_ENDPOINT)
@@ -30,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
+  document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
 function renderTheme(themes) {
@@ -47,9 +50,6 @@ function createSlot(type, text, id, booked) {
   div.setAttribute('data-' + type + '-id', id);
   if (type === 'time') {
     div.setAttribute('data-time-booked', booked);
-    if (booked) {
-      div.classList.add('disabled');
-    }
   }
   return div;
 }
@@ -115,18 +115,22 @@ function checkDateAndThemeAndTime() {
   const selectedThemeElement = document.querySelector('.theme-slot.active');
   const selectedTimeElement = document.querySelector('.time-slot.active');
   const reserveButton = document.getElementById("reserve-button");
+  const waitButton = document.getElementById("wait-button");
 
   if (selectedDate && selectedThemeElement && selectedTimeElement) {
     if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
       // 선택된 시간이 이미 예약된 경우
       reserveButton.classList.add("disabled");
+      waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
     } else {
       // 선택된 시간이 예약 가능한 경우
       reserveButton.classList.remove("disabled");
+      waitButton.classList.add("disabled"); // 예약 대기 버튼 비활성화
     }
   } else {
     // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
     reserveButton.classList.add("disabled");
+    waitButton.classList.add("disabled");
   }
 }
 
@@ -143,7 +147,7 @@ function onReservationButtonClick() {
       timeId: selectedTimeId
     };
 
-    fetch('/reservations', {
+    fetch(RESERVATION_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -164,6 +168,42 @@ function onReservationButtonClick() {
         });
   } else {
     alert("Please select a date, theme, and time before making a reservation.");
+  }
+}
+
+function onWaitButtonClick() {
+  const selectedDate = document.getElementById("datepicker").value;
+  const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
+  const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+
+  if (selectedDate && selectedThemeId && selectedTimeId) {
+    const reservationData = {
+      date: selectedDate,
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
+    };
+
+    fetch(WAITING_RESERVATION_API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reservationData)
+    })
+        .then(response => {
+          if (!response.ok) throw new Error('Reservation waiting failed');
+          return response.json();
+        })
+        .then(data => {
+          alert('Reservation waiting successful!');
+          window.location.href = "/";
+        })
+        .catch(error => {
+          alert("An error occurred while making the reservation waiting.");
+          console.error(error);
+        });
+  } else {
+    alert("Please select a date, theme, and time before making a reservation waiting.");
   }
 }
 

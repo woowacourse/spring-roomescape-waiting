@@ -10,7 +10,8 @@ import roomescape.member.domain.Member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.TEST_PASSWORD;
+import static roomescape.TestFixture.TOMMY_NAME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.member.domain.Role.USER;
 

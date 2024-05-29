@@ -3,13 +3,17 @@ package roomescape.member.domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.common.RepositoryTest;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.USER_TOMMY;
 
 class MemberRepositoryTest extends RepositoryTest {
     @Autowired
@@ -26,6 +30,17 @@ class MemberRepositoryTest extends RepositoryTest {
 
         // then
         assertThat(savedMember.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("사용자의 이메일은 중복될 수 없다.")
+    void saveWithDuplicatedEmail() {
+        // given
+        memberRepository.save(USER_MIA());
+
+        // when & then
+        assertThatThrownBy(() -> memberRepository.save(USER_MIA()))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test

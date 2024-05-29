@@ -1,21 +1,24 @@
 spring:
   jpa:
-    defer-datasource-initialization: true
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: create-drop
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+      ddl-auto: create
   datasource:
-    url: jdbc:h2:mem:database
-
+    url: jdbc:mysql://localhost:23306/roomescape?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: dev
+    password: dev
 security:
   jwt:
     token:
       secret-key: YzbMlPH7Bt4HXEjizwC2RxFtcWGLxSgZKDt9XOZm0IAyUv3yD5rth1sf7fw9NRFWgIe3aOeYgTEaMBYOd7iE4jIvS1f5SEaMJDUrI
       expire-length: 3600000
+logging:
+  level:
+    org:
+      springframework:
+        transaction:
+          interceptor: TRACE

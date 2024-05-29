@@ -24,7 +24,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 class ReservationTimeAcceptanceTest extends AcceptanceTest {
 
     @Test
-    @DisplayName("[Step7] 예약 시간을 추가한다.")
+    @DisplayName("예약 시간을 추가한다.")
     void createReservationTime() {
         // given
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(MIA_RESERVATION_TIME);
@@ -47,7 +47,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step7] 잘못된 형식의 예약 시간을 추가한다.")
+    @DisplayName("잘못된 형식의 예약 시간을 추가한다.")
     void createReservationTime2() {
         // given
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(15, 3));
@@ -69,7 +69,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step7] 예약 시간 목록을 조회한다.")
+    @DisplayName("예약 시간 목록을 조회한다.")
     void findReservationTimes() {
         // given & when
         ExtractableResponse<Response> response = RestAssured.given().log().all()
@@ -87,7 +87,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     }
 
     @TestFactory
-    @DisplayName("[Step7] 예약 시간을 추가하고 삭제한다.")
+    @DisplayName("예약 시간을 추가하고 삭제한다.")
     Stream<DynamicTest> createThenDeleteReservationTime() {
         return Stream.of(
                 dynamicTest("예약 시간을 하나 생성한다.", this::createReservationTime),

@@ -8,9 +8,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import roomescape.global.exception.ViolationException;
 
 @Entity
+@Table(name = "member")
 public class Member {
 
     @Id
@@ -23,10 +25,10 @@ public class Member {
     @Embedded
     private Email email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "password")
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "role")
     @Enumerated(value = EnumType.STRING)
     private Role role;
 

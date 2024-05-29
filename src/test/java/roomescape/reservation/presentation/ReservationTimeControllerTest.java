@@ -23,7 +23,9 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -96,7 +98,11 @@ class ReservationTimeControllerTest extends ControllerTest {
     @DisplayName("예약 시간 POST 요청 시 시간 형식이 올바르지 않을 경우 상태코드 400을 반환한다.")
     void createReservationTimeWithInvalidFormat() throws Exception {
         // given
-        String invalidFormatRequest = "{\"startAt\": \"invalid-time\"}";
+        String invalidFormatRequest = """
+                {
+                    "startAt": "invalid-time"
+                }
+                """;
 
         // when & then
         mockMvc.perform(post("/times")

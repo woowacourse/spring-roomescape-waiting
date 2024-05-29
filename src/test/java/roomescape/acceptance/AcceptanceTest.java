@@ -6,17 +6,19 @@ import io.restassured.http.Cookie;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.assertj.core.api.StandardSoftAssertionsProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.request.LoginRequest;
+import roomescape.common.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.request.MemberJoinRequest;
 import roomescape.member.dto.response.MemberResponse;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservation.dto.request.ThemeSaveRequest;
@@ -24,26 +26,41 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.ThemeResponse;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.ADMIN_EMAIL;
+import static roomescape.TestFixture.ADMIN_NAME;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.TEST_PASSWORD;
+import static roomescape.TestFixture.THEME_THUMBNAIL;
+import static roomescape.TestFixture.WOOTECO_THEME_DESCRIPTION;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 import static roomescape.member.domain.Role.ADMIN;
 import static roomescape.member.domain.Role.USER;
 
-@Sql("/test-schema.sql")
 @ActiveProfiles(value = "test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AcceptanceTest {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
     }
 
+    @AfterEach
+    void tearDown() {
+        databaseCleaner.clear();
+    }
+
     protected Long createTestTheme() {
         ThemeSaveRequest request = new ThemeSaveRequest(WOOTECO_THEME_NAME, WOOTECO_THEME_DESCRIPTION, THEME_THUMBNAIL);
-        return RestAssured.given().log().all()
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/themes")
@@ -54,7 +71,7 @@ public abstract class AcceptanceTest {
 
     protected Long createTestReservationTime() {
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(MIA_RESERVATION_TIME);
-        return RestAssured.given().log().all()
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/times")
@@ -63,9 +80,9 @@ public abstract class AcceptanceTest {
                 .id();
     }
 
-    protected Member createTestMember() {
-        MemberJoinRequest request = new MemberJoinRequest(MIA_EMAIL, TEST_PASSWORD, MIA_NAME);
-        MemberResponse response = RestAssured.given().log().all()
+    protected Member createTestMember(String email, String name) {
+        MemberJoinRequest request = new MemberJoinRequest(email, TEST_PASSWORD, name);
+        MemberResponse response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/members/join")
@@ -74,22 +91,38 @@ public abstract class AcceptanceTest {
         return new Member(response.id(), response.name(), response.email(), request.password(), USER);
     }
 
-    protected Long createTestReservation(Long timeId, Long themeId, String token) {
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
+    protected Long createTestReservation(LocalDate date, Long timeId, Long themeId, String token, ReservationStatus status) {
+        ReservationSaveRequest request = new ReservationSaveRequest(date, timeId, themeId);
         Cookie cookie = new Cookie.Builder("token", token).build();
-        return RestAssured.given().log().all()
+        if (status.isBooking()) {
+            return createTestBooking(request, cookie);
+        }
+        return createTestWaiting(request, cookie);
+    }
+
+    protected Long createTestBooking(ReservationSaveRequest request, Cookie cookie) {
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .cookie(cookie)
                 .body(request)
                 .when().post("/reservations")
-                .then().log().all()
-                .extract().as(ReservationResponse.class)
+                .then().extract().as(ReservationResponse.class)
+                .id();
+    }
+
+    protected Long createTestWaiting(ReservationSaveRequest request, Cookie cookie) {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(request)
+                .when().post("/reservations/waiting")
+                .then().extract().as(ReservationResponse.class)
                 .id();
     }
 
     protected Member createTestAdmin() {
         MemberJoinRequest request = new MemberJoinRequest(ADMIN_EMAIL, TEST_PASSWORD, ADMIN_NAME);
-        MemberResponse response = RestAssured.given().log().all()
+        MemberResponse response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/members/join/admin")
@@ -98,9 +131,9 @@ public abstract class AcceptanceTest {
         return new Member(response.id(), response.name(), response.email(), request.password(), ADMIN);
     }
 
-    protected String createTestToken(Member member) {
-        LoginRequest request = new LoginRequest(member.getEmail().getValue(), member.getPassword());
-        return RestAssured.given().log().all()
+    protected String createTestToken(String email) {
+        LoginRequest request = new LoginRequest(email, TEST_PASSWORD);
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/login")

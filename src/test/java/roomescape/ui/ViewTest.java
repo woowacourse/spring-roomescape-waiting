@@ -7,10 +7,13 @@ import org.junit.jupiter.api.Test;
 import roomescape.acceptance.AcceptanceTest;
 import roomescape.member.domain.Member;
 
+import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.MIA_NAME;
+
 class ViewTest extends AcceptanceTest {
 
     @Test
-    @DisplayName("[Step1] 어드민 메인 페이지를 조회한다.")
+    @DisplayName("어드민 메인 페이지를 조회한다.")
     void getAdminMainPage() {
         RestAssured.given().log().all()
                 .when().get("/admin")
@@ -19,10 +22,10 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step2] 어드민 예약 페이지를 조회한다.")
+    @DisplayName("어드민 예약 페이지를 조회한다.")
     void getAdminReservationPage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -33,7 +36,7 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step2] 토큰 없이 어드민 예약 페이지를 조회한다.")
+    @DisplayName("토큰 없이 어드민 예약 페이지를 조회한다.")
     void getAdminReservationPageWithoutToken() {
         RestAssured.given().log().all()
                 .when().get("/admin/reservation")
@@ -42,10 +45,10 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step2] 일반 사용자 권한으로 어드민 예약 페이지를 조회한다.")
+    @DisplayName("일반 사용자 권한으로 어드민 예약 페이지를 조회한다.")
     void getAdminReservationPageWithoutAuthority() {
-        Member member = createTestMember();
-        String token = createTestToken(member);
+        Member member = createTestMember(MIA_EMAIL, MIA_NAME);
+        String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -56,10 +59,10 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step7] 어드민 시간 관리 페이지를 조회한다.")
+    @DisplayName("어드민 시간 관리 페이지를 조회한다.")
     void getTimePage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -70,10 +73,10 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[2 - Step2] 어드민 테마 관리 페이지를 조회한다.")
+    @DisplayName("어드민 테마 관리 페이지를 조회한다.")
     void getThemePage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -84,7 +87,7 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[2 - Step3] 사용자 예약 페이지를 조회한다.")
+    @DisplayName("사용자 예약 페이지를 조회한다.")
     void getReservationPage() {
         RestAssured.given().log().all()
                 .when().get("/reservation")
@@ -93,7 +96,7 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[2 - Step3] 사용자 메인 페이지를 조회한다.")
+    @DisplayName("사용자 메인 페이지를 조회한다.")
     void getMainPage() {
         RestAssured.given().log().all()
                 .when().get("/")
@@ -102,10 +105,10 @@ class ViewTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[3 - Step2] 사용자 예약 목록 페이지를 조회한다.")
+    @DisplayName("사용자 예약 목록 페이지를 조회한다.")
     void getMyReservationsPage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()

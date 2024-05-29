@@ -1,8 +1,7 @@
 package roomescape.member.application;
 
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
@@ -11,7 +10,6 @@ import roomescape.member.domain.MemberRepository;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
 
@@ -19,12 +17,11 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional
     public Member create(Member member) {
         validateDuplicatedEmail(member);
         try {
             return memberRepository.save(member);
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new ViolationException("중복된 이메일입니다.");
         }
     }
