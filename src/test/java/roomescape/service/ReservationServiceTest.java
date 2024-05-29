@@ -7,8 +7,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import static roomescape.model.DeletedReservationStatus.ACCEPT_DELETED;
-import static roomescape.model.DeletedReservationStatus.WAIT_DELETED;
+import static roomescape.model.CancelReservationStatus.ACCEPT_CANCEL;
+import static roomescape.model.CancelReservationStatus.WAIT_CANCEL;
 import static roomescape.model.ReservationStatus.ACCEPT;
 import static roomescape.model.ReservationStatus.WAITING;
 import static roomescape.service.fixture.TestMemberFactory.createAdmin;
@@ -35,8 +35,7 @@ import roomescape.controller.request.ReservationRequest;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
-import roomescape.model.DeletedReservation;
-import roomescape.model.DeletedReservationStatus;
+import roomescape.model.CancelReservation;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -203,12 +202,12 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
-        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
+        List<CancelReservation> cancelReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(reservations).hasSize(1);
-            assertions.assertThat(deletedReservations).hasSize(1);
+            assertions.assertThat(cancelReservations).hasSize(1);
             assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT);
-            assertions.assertThat(deletedReservations).extracting("status").containsExactly(ACCEPT_DELETED);
+            assertions.assertThat(cancelReservations).extracting("status").containsExactly(ACCEPT_CANCEL);
         });
     }
 
@@ -236,12 +235,12 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
-        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
+        List<CancelReservation> cancelReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(reservations).hasSize(2);
-            assertions.assertThat(deletedReservations).hasSize(1);
+            assertions.assertThat(cancelReservations).hasSize(1);
             assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
-            assertions.assertThat(deletedReservations).extracting("status").containsExactly(ACCEPT_DELETED);
+            assertions.assertThat(cancelReservations).extracting("status").containsExactly(ACCEPT_CANCEL);
             assertions.assertThat(reservations).extracting("id").containsExactly(2L, 3L);
         });
     }
@@ -257,11 +256,11 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
-        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
+        List<CancelReservation> cancelReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(reservations).isEmpty();
-            assertions.assertThat(deletedReservations).hasSize(1);
-            assertions.assertThat(deletedReservations).extracting("status").containsExactly(ACCEPT_DELETED);
+            assertions.assertThat(cancelReservations).hasSize(1);
+            assertions.assertThat(cancelReservations).extracting("status").containsExactly(ACCEPT_CANCEL);
         });
     }
 
@@ -281,12 +280,12 @@ class ReservationServiceTest {
         reservationService.deleteReservation(2L);
 
         List<Reservation> reservations = reservationRepository.findAll();
-        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
+        List<CancelReservation> cancelReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(reservations).hasSize(2);
-            assertions.assertThat(deletedReservations).hasSize(1);
+            assertions.assertThat(cancelReservations).hasSize(1);
             assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
-            assertions.assertThat(deletedReservations).extracting("status").containsExactly(WAIT_DELETED);
+            assertions.assertThat(cancelReservations).extracting("status").containsExactly(WAIT_CANCEL);
         });
     }
 

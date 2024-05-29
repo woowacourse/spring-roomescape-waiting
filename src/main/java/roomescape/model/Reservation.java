@@ -72,8 +72,8 @@ public class Reservation {
         this.status = ACCEPT;
     }
 
-    public DeletedReservation toDeletedReservation() {
-        return new DeletedReservation(this);
+    public CancelReservation toDeletedReservation() {
+        return new CancelReservation(this);
     }
 
     public boolean isAcceptReservation() {

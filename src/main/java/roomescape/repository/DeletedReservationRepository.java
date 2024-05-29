@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import roomescape.model.DeletedReservation;
+import roomescape.model.CancelReservation;
 
-public interface DeletedReservationRepository extends CrudRepository<DeletedReservation, Long> {
+public interface DeletedReservationRepository extends CrudRepository<CancelReservation, Long> {
 
-    List<DeletedReservation> findAll();
+    List<CancelReservation> findAll();
 }

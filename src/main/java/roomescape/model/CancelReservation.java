@@ -15,14 +15,14 @@ import jakarta.persistence.ManyToOne;
 import jdk.jfr.Timestamp;
 
 @Entity
-public class DeletedReservation {
+public class CancelReservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
     @Enumerated(EnumType.STRING)
-    DeletedReservationStatus status;
+    CancelReservationStatus status;
     @Timestamp
     private LocalDateTime createdAt;
     @ManyToOne
@@ -32,15 +32,15 @@ public class DeletedReservation {
     @ManyToOne
     private Member member;
 
-    protected DeletedReservation() {
+    protected CancelReservation() {
     }
 
-    public DeletedReservation(Long id,
-                              LocalDate date,
-                              LocalDateTime createdAt,
-                              ReservationTime time,
-                              Theme theme,
-                              Member member) {
+    public CancelReservation(Long id,
+                             LocalDate date,
+                             LocalDateTime createdAt,
+                             ReservationTime time,
+                             Theme theme,
+                             Member member) {
         this.id = id;
         this.date = date;
         this.createdAt = createdAt;
@@ -49,7 +49,7 @@ public class DeletedReservation {
         this.member = member;
     }
 
-    public DeletedReservation(Reservation reservation) {
+    public CancelReservation(Reservation reservation) {
         this.date = reservation.getDate();
         this.createdAt = reservation.getCreatedAt();
         this.time = reservation.getTime();
@@ -58,13 +58,13 @@ public class DeletedReservation {
         this.status = mapToStatus(reservation.getStatus());
     }
 
-    private DeletedReservationStatus mapToStatus(ReservationStatus status) {
+    private CancelReservationStatus mapToStatus(ReservationStatus status) {
         switch (status) {
             case ACCEPT -> {
-                return DeletedReservationStatus.ACCEPT_DELETED;
+                return CancelReservationStatus.ACCEPT_CANCEL;
             }
             case WAITING -> {
-                return DeletedReservationStatus.WAIT_DELETED;
+                return CancelReservationStatus.WAIT_CANCEL;
             }
             default -> throw new IllegalStateException("Unexpected value: " + status);
         }
@@ -102,7 +102,7 @@ public class DeletedReservation {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        DeletedReservation that = (DeletedReservation) object;
+        CancelReservation that = (CancelReservation) object;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getDate(), that.getDate())
                 && Objects.equals(getCreatedAt(), that.getCreatedAt()) && Objects.equals(getTime(),
                 that.getTime()) && Objects.equals(getTheme(), that.getTheme()) && Objects.equals(
