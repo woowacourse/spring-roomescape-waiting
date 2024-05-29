@@ -12,15 +12,21 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.test.RepositoryTest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeName;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.TimeRepository;
 
-class ThemeRepositoryTest extends RepositoryTest {
+@DataJpaTest
+@Sql(scripts = "/init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+class ThemeRepositoryTest {
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired

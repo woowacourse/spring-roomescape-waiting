@@ -12,11 +12,14 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.test.RepositoryTest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -24,7 +27,10 @@ import roomescape.time.repository.TimeRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithOrder;
 
-class WaitingRepositoryTest extends RepositoryTest {
+@DataJpaTest
+@Sql(scripts = "/init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+class WaitingRepositoryTest {
     @Autowired
     private TimeRepository timeRepository;
     @Autowired
