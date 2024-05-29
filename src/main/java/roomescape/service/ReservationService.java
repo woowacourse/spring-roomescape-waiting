@@ -80,7 +80,7 @@ public class ReservationService {
     private ReservationTime findReservationTime(ReservationDto reservationDto) {
         long timeId = reservationDto.getTimeId();
         Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
-        return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+        return time.orElseThrow(() -> new NotFoundException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
     private void validateIsFuture(LocalDate date, LocalTime time) {
