@@ -13,7 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +25,6 @@ import roomescape.exception.reservation.CancelReservationException;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
 public class Reservation {
@@ -50,7 +48,9 @@ public class Reservation {
     private LocalDateTime createdAt;
 
     public Reservation(Member member, ReservationDetail detail, Status status) {
-        this(null, member, detail, status, null);
+        this.member = member;
+        this.detail = detail;
+        this.status = status;
     }
 
     public Reservation approve() {
