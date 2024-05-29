@@ -36,7 +36,7 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
 
-    private static final LocalTime CURRENT_TIME = LocalTime.now();
+    private static final LocalTime CURRENT_TIME = LocalTime.of(13, 13, 13);
 
     private final ReservationTime time = new ReservationTime(1L, LocalTime.of(17, 3));
 
@@ -99,7 +99,7 @@ class ReservationTimeServiceTest {
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
         List<Reservation> reservations = List.of(new Reservation(
                 LocalDate.now().plusDays(1),
-                new ReservationTime(1L, LocalTime.now()),
+                new ReservationTime(1L, LocalTime.of(13,13,13)),
                 new Theme(1L, new Name("테스트 테마"), "테마 설명", "썸네일"),
                 new Member(1L, new Name("레모네"), "lemone@gmail.com", "lemon12", MemberRole.MEMBER))
         );

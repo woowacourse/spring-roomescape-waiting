@@ -34,7 +34,7 @@ class WaitingControllerTest extends ControllerTest {
     private final Reservation reservation = new Reservation(
             1L,
             LocalDate.now().plusDays(1),
-            new ReservationTime(1L, LocalTime.now()),
+            new ReservationTime(1L, LocalTime.of(13,13, 13)),
             new Theme(1L, new Name("레모네 테마"), "레모네가 숨겨둔 보물을 찾으세요!", "썸네일 링크"),
             new Member(1L, new Name("폴라"), "polla@wooteco.com", "polla1234", MemberRole.MEMBER)
     );

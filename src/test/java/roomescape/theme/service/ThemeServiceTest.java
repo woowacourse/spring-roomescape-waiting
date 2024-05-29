@@ -36,7 +36,7 @@ class ThemeServiceTest {
     void validateReservationExistence_ShouldThrowException_WhenReservationExist() {
         List<Reservation> reservations = List.of(new Reservation(
                 LocalDate.now().plusDays(1),
-                new ReservationTime(1L, LocalTime.now()),
+                new ReservationTime(1L, LocalTime.of(13, 13, 13)),
                 new Theme(1L, new Name("테스트 테마"), "테마 설명", "썸네일"),
                 new Member(1L, new Name("레모네"), "lemone@gmail.com", "lemon12", MemberRole.MEMBER))
         );
