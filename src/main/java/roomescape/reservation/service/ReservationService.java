@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,9 +116,10 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        waitingRepository.findFirstByReservation_idOrderByCreatedAtAsc(id)
+        waitingRepository.findByReservation_id(id)
+                .stream()
+                .min(Comparator.comparing(Waiting::getCreatedAt))
                 .ifPresentOrElse(this::promoteWaiting, () -> reservationRepository.deleteById(id));
-
     }
 
     private void promoteWaiting(Waiting waiting) {

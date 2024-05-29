@@ -8,6 +8,7 @@ import static roomescape.fixture.ThemeFixture.THEME_1;
 import static roomescape.fixture.TimeFixture.TIME_1;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ class WaitingRepositoryTest extends RepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @DisplayName("예약 대기 중 첫번째 예약 대기를 가져올 수 있다.")
+    @DisplayName("예약 id로 예약 대기들을 조회할 수 있다.")
     @Test
     void findFirstByReservation_idOrderByCreatedAtAscTest() {
         ReservationTime time = timeRepository.save(TIME_1);
@@ -46,9 +47,9 @@ class WaitingRepositoryTest extends RepositoryTest {
         Waiting firstWaiting = waitingRepository.save(new Waiting(reservation, MEMBER_BROWN));
         Waiting secondWaiting = waitingRepository.save(new Waiting(reservation, MEMBER_DUCK));
 
-        Waiting actual = waitingRepository.findFirstByReservation_idOrderByCreatedAtAsc(1L).get();
+        List<Waiting> actual = waitingRepository.findByReservation_id(1L);
 
-        assertThat(firstWaiting).isEqualTo(firstWaiting);
+        assertThat(actual).containsExactlyInAnyOrder(firstWaiting, secondWaiting);
     }
 
     @DisplayName("나의 예약 대기들을 조회할 수 있다.")

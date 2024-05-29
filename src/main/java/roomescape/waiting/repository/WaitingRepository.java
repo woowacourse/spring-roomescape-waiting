@@ -1,7 +1,6 @@
 package roomescape.waiting.repository;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.waiting.domain.Waiting;
@@ -9,7 +8,7 @@ import roomescape.waiting.domain.WaitingWithOrder;
 
 public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
 
-    Optional<Waiting> findFirstByReservation_idOrderByCreatedAtAsc(Long reservationId);
+    List<Waiting> findByReservation_id(Long reservationId);
 
     @Query("""
             SELECT new roomescape.waiting.domain.WaitingWithOrder(
