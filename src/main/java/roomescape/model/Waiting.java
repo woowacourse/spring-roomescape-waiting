@@ -17,6 +17,8 @@ import roomescape.service.dto.ReservationDto;
 @Entity
 public class Waiting {
 
+    private static final int INITIAL_STATE_ID = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -48,7 +50,7 @@ public class Waiting {
     }
 
     public Waiting(ReservationDto reservationDto) {
-        this(0,
+        this(INITIAL_STATE_ID,
                 reservationDto.getDate(),
                 LocalDateTime.now(),
                 new ReservationTime(reservationDto.getTimeId(), null),
