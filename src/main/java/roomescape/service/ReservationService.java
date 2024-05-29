@@ -24,6 +24,7 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.repository.DeletedReservationRepository;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -37,15 +38,18 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final DeletedReservationRepository deletedReservationRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+                              MemberRepository memberRepository,
+                              DeletedReservationRepository deletedReservationRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.deletedReservationRepository = deletedReservationRepository;
     }
 
     public List<Reservation> findAllReservations() {
@@ -100,7 +104,8 @@ public class ReservationService {
             List<Reservation> waitingReservations = findWaitingReservation(reservation);
             confirmReservation(waitingReservations);
         }
-        reservation.cancel();
+        deletedReservationRepository.save(reservation.toDeletedReservation());
+        reservationRepository.deleteById(id);
     }
 
     private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {

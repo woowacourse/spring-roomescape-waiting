@@ -31,6 +31,28 @@ public class DeletedReservation {
     protected DeletedReservation() {
     }
 
+    public DeletedReservation(Long id,
+                              LocalDate date,
+                              LocalDateTime createdAt,
+                              ReservationTime time,
+                              Theme theme,
+                              Member member) {
+        this.id = id;
+        this.date = date;
+        this.createdAt = createdAt;
+        this.time = time;
+        this.theme = theme;
+        this.member = member;
+    }
+
+    public DeletedReservation(Reservation reservation) {
+        this.date = reservation.getDate();
+        this.createdAt = reservation.getCreatedAt();
+        this.time = reservation.getTime();
+        this.theme = reservation.getTheme();
+        this.member = reservation.getMember();
+    }
+
     public Long getId() {
         return id;
     }

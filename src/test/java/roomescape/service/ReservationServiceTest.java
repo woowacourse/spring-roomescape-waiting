@@ -8,7 +8,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import static roomescape.model.ReservationStatus.ACCEPT;
-import static roomescape.model.ReservationStatus.CANCEL;
 import static roomescape.model.ReservationStatus.WAITING;
 import static roomescape.service.fixture.TestMemberFactory.createAdmin;
 import static roomescape.service.fixture.TestMemberFactory.createMember;
@@ -34,10 +33,12 @@ import roomescape.controller.request.ReservationRequest;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
+import roomescape.model.DeletedReservation;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.repository.DeletedReservationRepository;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -54,6 +55,8 @@ class ReservationServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private DeletedReservationRepository deletedReservationRepository;
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
@@ -197,9 +200,11 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
+        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
-            assertions.assertThat(reservations).hasSize(2);
-            assertions.assertThat(reservations).extracting("status").containsExactly(CANCEL, ACCEPT);
+            assertions.assertThat(reservations).hasSize(1);
+            assertions.assertThat(deletedReservations).hasSize(1);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT);
         });
     }
 
@@ -211,7 +216,7 @@ class ReservationServiceTest {
                 .hasMessage("[ERROR] 해당 id:[1000000] 값으로 예약된 내역이 존재하지 않습니다.");
     }
 
-    @DisplayName("승인된 예약을 취소하면 제일 먼저 예약된 대기가 승인으로 바뀐다.")
+    @DisplayName("승인된 예약을 취소하면 해당 예약이 삭제 예약에 저장되고, 제일 먼저 예약된 대기가 승인으로 바뀐다 ")
     @Test
     void should_confirm_first_waiting_reservation_when_delete_waiting_reservation() {
         Theme theme = themeRepository.save(createTheme(1L));
@@ -227,14 +232,16 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
+        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
-            assertions.assertThat(reservations).hasSize(3);
-            assertions.assertThat(reservations).extracting("status").containsExactly(CANCEL, ACCEPT, WAITING);
-            assertions.assertThat(reservations).extracting("id").containsExactly(1L, 2L, 3L);
+            assertions.assertThat(reservations).hasSize(2);
+            assertions.assertThat(deletedReservations).hasSize(1);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
+            assertions.assertThat(reservations).extracting("id").containsExactly(2L, 3L);
         });
     }
 
-    @DisplayName("승인된 예약을 취소하고 이후 대기가 없으면 단순히 취소만 한다.")
+    @DisplayName("승인된 예약을 취소하면 취소된 예약이 삭제 테이블에 저장되고 이후 대기가 없으면 단순히 취소만 한다.")
     @Test
     void should_only_cancel_reservation_when_no_waiting_reservations() {
         Theme theme = themeRepository.save(createTheme(1L));
@@ -245,9 +252,10 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         List<Reservation> reservations = reservationRepository.findAll();
+        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
-            assertions.assertThat(reservations).hasSize(1);
-            assertions.assertThat(reservations).extracting("status").containsExactly(CANCEL);
+            assertions.assertThat(reservations).isEmpty();
+            assertions.assertThat(deletedReservations).hasSize(1);
         });
     }
 
@@ -267,9 +275,11 @@ class ReservationServiceTest {
         reservationService.deleteReservation(2L);
 
         List<Reservation> reservations = reservationRepository.findAll();
+        List<DeletedReservation> deletedReservations = deletedReservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
-            assertions.assertThat(reservations).hasSize(3);
-            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, CANCEL, WAITING);
+            assertions.assertThat(reservations).hasSize(2);
+            assertions.assertThat(deletedReservations).hasSize(1);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
         });
     }
 

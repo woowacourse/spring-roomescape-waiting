@@ -1,7 +1,6 @@
 package roomescape.model;
 
 import static roomescape.model.ReservationStatus.ACCEPT;
-import static roomescape.model.ReservationStatus.CANCEL;
 import static roomescape.model.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
@@ -73,8 +72,8 @@ public class Reservation {
         this.status = ACCEPT;
     }
 
-    public void cancel() {
-        this.status = CANCEL;
+    public DeletedReservation toDeletedReservation() {
+        return new DeletedReservation(this);
     }
 
     public boolean isAcceptReservation() {
