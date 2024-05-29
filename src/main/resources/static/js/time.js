@@ -1,5 +1,5 @@
 let isEditing = false;
-const API_ENDPOINT = '/times';
+const API_ENDPOINT = '/admin/times';
 const cellFields = ['id', 'startAt'];
 const createCellFields = ['', createInput()];
 function createBody(inputs) {
@@ -115,7 +115,7 @@ function requestCreate(data) {
 }
 
 function requestRead() {
-  return fetch(API_ENDPOINT)
+  return fetch(`/times`)
       .then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');

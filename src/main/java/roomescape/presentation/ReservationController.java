@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
+import roomescape.config.LoginMemberConverter;
+import roomescape.domain.reservation.Status;
 import roomescape.dto.LoginMember;
 import roomescape.dto.MyReservationResponse;
-import roomescape.dto.ReservationCriteria;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.config.AuthenticationPrincipal;
 
 @RestController
 public class ReservationController {
@@ -26,34 +26,28 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        List<ReservationResponse> responses = reservationService.findAll();
+    public ResponseEntity<List<ReservationResponse>> findAllByReservation() {
+        List<ReservationResponse> responses = reservationService.findAllByStatus(Status.RESERVATION);
         return ResponseEntity.ok(responses);
     }
 
-    @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> create(
-            @AuthenticationPrincipal LoginMember loginMember,
-            @RequestBody ReservationRequest request) {
-        ReservationResponse response = reservationService.create(loginMember, request);
+    @PostMapping(value = {"/reservations", "/waitings"})
+    public ResponseEntity<ReservationResponse> saveReservationByClient(
+            @LoginMemberConverter LoginMember loginMember,
+            @RequestBody ReservationRequest reservationRequest) {
+        ReservationResponse response = reservationService.saveByClient(loginMember, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
-    @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
+    @DeleteMapping(value = {"/reservations/{id}", "/waitings/{id}"})
+    public ResponseEntity<Void> deleteByReservation(@PathVariable long id) {
         reservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/admin/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAllForAdmin(ReservationCriteria reservationCriteria) {
-        List<ReservationResponse> responses = reservationService.findByCriteria(reservationCriteria);
-        return ResponseEntity.ok(responses);
-    }
-
     @GetMapping("/reservations/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(
-            @AuthenticationPrincipal LoginMember loginMember) {
+            @LoginMemberConverter LoginMember loginMember) {
         List<MyReservationResponse> responses = reservationService.findMyReservations(loginMember.id());
         return ResponseEntity.ok(responses);
     }

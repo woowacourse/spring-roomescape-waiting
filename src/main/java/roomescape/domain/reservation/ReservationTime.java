@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.RoomescapeErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.RoomescapeException;
 
 @Entity
@@ -27,7 +27,7 @@ public class ReservationTime {
 
     public ReservationTime(Long id, LocalTime startAt) {
         if (startAt == null) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 시간은 필수 입력값 입니다.");
+            throw new RoomescapeException(HttpStatus.BAD_REQUEST, "예약 시간은 필수 입력값 입니다.");
         }
         this.id = id;
         this.startAt = startAt;
