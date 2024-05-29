@@ -7,6 +7,7 @@ import static roomescape.exception.ExceptionType.EMPTY_TIME;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,9 +16,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import roomescape.exception.RoomescapeException;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Reservation implements Comparable<Reservation> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +35,7 @@ public class Reservation implements Comparable<Reservation> {
     @ManyToOne
     private Member member;
     @Column(nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     protected Reservation() {
@@ -64,7 +69,6 @@ public class Reservation implements Comparable<Reservation> {
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.createdAt = createdAt;
     }
 
     private void validateTheme(Theme theme) {
