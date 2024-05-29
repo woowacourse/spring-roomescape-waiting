@@ -79,7 +79,7 @@ class ReservationControllerE2ETest {
                 dynamicTest("예약을 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams)
-                            .when().cookie("token", token).post("/reservations")
+                            .when().cookie("token", token).post("/reservations?status=RESERVED")
                             .then().log().all()
                             .statusCode(201)
                             .header("Location", "/reservations/6");
@@ -87,7 +87,7 @@ class ReservationControllerE2ETest {
 
                 dynamicTest("예약이 정상적으로 추가되었는지 확인한다", () -> {
                     RestAssured.given().log().all()
-                            .when().cookie("token", token).get("/reservations")
+                            .when().cookie("token", token).get("/reservations?status=RESERVED")
                             .then().log().all()
                             .statusCode(200).body("size()", is(6));
                 }),
@@ -154,7 +154,7 @@ class ReservationControllerE2ETest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservationParams)
-                .when().cookie("token", token).post("/reservations")
+                .when().cookie("token", token).post("/reservations?status=RESERVED")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -180,7 +180,7 @@ class ReservationControllerE2ETest {
                 dynamicTest("예약을 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams1)
-                            .when().cookie("token", token).post("/reservations")
+                            .when().cookie("token", token).post("/reservations?status=RESERVED")
                             .then().log().all()
                             .statusCode(201);
                 }),
@@ -188,7 +188,7 @@ class ReservationControllerE2ETest {
                 dynamicTest("중복된 시간에 예약을 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams2)
-                            .when().cookie("token", token).post("/reservations")
+                            .when().cookie("token", token).post("/reservations?status=RESERVED")
                             .then().log().all()
                             .statusCode(400);
                 })
@@ -224,7 +224,7 @@ class ReservationControllerE2ETest {
                 dynamicTest("예약 대기를 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams)
-                            .when().cookie("token", token).post("/reservations/waiting")
+                            .when().cookie("token", token).post("/reservations?status=WAITING")
                             .then().log().all()
                             .statusCode(201)
                             .header("Location", "/reservations/6");
@@ -275,7 +275,7 @@ class ReservationControllerE2ETest {
                 dynamicTest("예약 대기를 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams)
-                            .when().cookie("token", token).post("/reservations/waiting")
+                            .when().cookie("token", token).post("/reservations?status=WAITING")
                             .then().log().all()
                             .statusCode(201)
                             .header("Location", "/reservations/6");
@@ -291,7 +291,7 @@ class ReservationControllerE2ETest {
                 dynamicTest("중복된 날짜, 시각, 테마에 예약 대기를 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams)
-                            .when().cookie("token", token).post("/reservations/waiting")
+                            .when().cookie("token", token).post("/reservations?status=WAITING")
                             .then().log().all()
                             .statusCode(400);
                 })

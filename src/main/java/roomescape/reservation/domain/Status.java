@@ -11,6 +11,14 @@ public enum Status {
         this.value = value;
     }
 
+    public boolean isReserved() {
+        return this == RESERVED;
+    }
+
+    public boolean isWaiting() {
+        return this == WAITING;
+    }
+
     public String getValue() {
         return value;
     }

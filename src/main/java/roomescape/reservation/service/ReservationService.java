@@ -90,14 +90,12 @@ public class ReservationService {
                 .forEach(responses::add);
     }
 
-    public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        validateDuplicatedReservation(request);
-        return saveMemberReservation(memberId, request, Status.RESERVED);
-    }
-
-    public ReservationResponse saveMemberWaitingReservation(Long memberId, MemberReservationAddRequest request) {
+    public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request, Status status) {
+        if (status.isReserved()) {
+            validateDuplicatedReservation(request);
+        }
         validateDuplicatedWaitingReservation(memberId, request);
-        return saveMemberReservation(memberId, request, Status.WAITING);
+        return createMemberReservation(memberId, request, status);
     }
 
     private void validateDuplicatedReservation(MemberReservationAddRequest request) {
@@ -114,9 +112,9 @@ public class ReservationService {
         }
     }
 
-    private ReservationResponse saveMemberReservation(Long memberId,
-                                                      MemberReservationAddRequest request,
-                                                      Status status) {
+    private ReservationResponse createMemberReservation(Long memberId,
+                                                        MemberReservationAddRequest request,
+                                                        Status status) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
         ReservationTime reservationTime = getReservationTime(request.timeId());

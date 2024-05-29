@@ -27,6 +27,7 @@ import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.theme.domain.ThemeRepository;
@@ -78,7 +79,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(THEME_1));
 
         ReservationResponse savedReservation = reservationService.saveMemberReservation(1L,
-                RESERVATION_REQUEST_1);
+                RESERVATION_REQUEST_1, Status.RESERVED);
 
         assertThat(savedReservation).isEqualTo(new ReservationResponse(SAVED_RESERVATION_1));
     }
@@ -90,7 +91,7 @@ class ReservationServiceTest {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
+                () -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1, Status.RESERVED))
                 .isInstanceOf(NoSuchRecordException.class);
     }
 
@@ -102,7 +103,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
+                () -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1, Status.RESERVED))
                 .isInstanceOf(NoSuchRecordException.class);
     }
 
@@ -114,7 +115,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(
                 () -> reservationService.saveMemberReservation(1L,
-                        PAST_DATE_RESERVATION_REQUEST))
+                        PAST_DATE_RESERVATION_REQUEST, Status.RESERVED))
                 .isInstanceOf(IllegalReservationDateException.class);
     }
 
@@ -124,7 +125,7 @@ class ReservationServiceTest {
         when(reservationRepository.existsByDateValueAndTimeIdAndThemeId(TOMORROW, 1L, 1L)).thenReturn(true);
 
         assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
+                () -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1, Status.RESERVED))
                 .isInstanceOf(DuplicateSaveException.class);
     }
 
@@ -136,7 +137,8 @@ class ReservationServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(
-                () -> reservationService.saveMemberWaitingReservation(1L, RESERVATION_REQUEST_1))
+                () -> reservationService.saveMemberReservation(
+                        1L, RESERVATION_REQUEST_1, Status.WAITING))
                 .isInstanceOf(DuplicateSaveException.class);
     }
 }

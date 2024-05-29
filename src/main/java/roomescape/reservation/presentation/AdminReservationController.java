@@ -34,10 +34,12 @@ public class AdminReservationController {
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> saveReservation(
             @Authenticated Accessor accessor,
-            @Valid @RequestBody AdminReservationAddRequest adminReservationAddRequest) {
+            @Valid @RequestBody AdminReservationAddRequest adminReservationAddRequest,
+            @RequestParam(name = "status") Status status) {
         ReservationResponse saveResponse = reservationService.saveMemberReservation(
                 adminReservationAddRequest.memberId(),
-                adminReservationAddRequest.toMemberRequest());
+                adminReservationAddRequest.toMemberRequest(),
+                status);
         URI createdUri = URI.create("/reservations/" + saveResponse.id());
         return ResponseEntity.created(createdUri).body(saveResponse);
     }
