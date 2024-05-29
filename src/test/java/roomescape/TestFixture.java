@@ -1,10 +1,7 @@
 package roomescape;
 
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -76,6 +73,14 @@ public class TestFixture {
         return new Reservation(member, TOMMY_RESERVATION_DATE, time, theme, status);
     }
 
+    public static Reservation USER_RESERVATION(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(member, date, time, theme);
+    }
+
+    public static Reservation USER_RESERVATION(Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+        return new Reservation(member, date, time, theme, status);
+    }
+
     public static Theme WOOTECO_THEME() {
         return new Theme(WOOTECO_THEME_NAME, WOOTECO_THEME_DESCRIPTION, THEME_THUMBNAIL);
     }
@@ -90,5 +95,9 @@ public class TestFixture {
 
     public static Theme HORROR_THEME(Long id) {
         return new Theme(id, HORROR_THEME_NAME, HORROR_THEME_DESCRIPTION, THEME_THUMBNAIL);
+    }
+
+    public static Waiting WAITING_RESERVATION(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Waiting(member, date, time, theme);
     }
 }

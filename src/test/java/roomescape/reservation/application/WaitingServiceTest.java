@@ -14,8 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.MIA_RESERVATION_TIME;
-import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.TestFixture.*;
 
 class WaitingServiceTest extends ServiceTest {
     @Autowired
@@ -51,8 +50,8 @@ class WaitingServiceTest extends ServiceTest {
     @Test
     @DisplayName("예약 대기 순서를 알 수 있다.")
     void findRankByReservation() {
-        Reservation roroReservation = new Reservation(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
-        Reservation sudalReservation = new Reservation(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation roroReservation = USER_RESERVATION(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation sudalReservation = USER_RESERVATION(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
         reservationService.createWaitingReservation(roroReservation);
         reservationService.createWaitingReservation(sudalReservation);
 
@@ -66,8 +65,8 @@ class WaitingServiceTest extends ServiceTest {
     @Test
     @DisplayName("전체 예약 대기를 조회할 수 있다.")
     void findAll() {
-        Reservation roroReservation = new Reservation(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
-        Reservation sudalReservation = new Reservation(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation roroReservation = USER_RESERVATION(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation sudalReservation = USER_RESERVATION(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
         reservationService.createWaitingReservation(roroReservation);
         reservationService.createWaitingReservation(sudalReservation);
 
@@ -79,8 +78,8 @@ class WaitingServiceTest extends ServiceTest {
     @Test
     @DisplayName("예약 대기를 삭제할 수 있다.")
     void delete() {
-        Reservation roroReservation = new Reservation(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
-        Reservation sudalReservation = new Reservation(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation roroReservation = USER_RESERVATION(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation sudalReservation = USER_RESERVATION(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
         reservationService.createWaitingReservation(roroReservation);
         reservationService.createWaitingReservation(sudalReservation);
 
@@ -93,8 +92,8 @@ class WaitingServiceTest extends ServiceTest {
     @Test
     @DisplayName("예약 대기를 예약 상태로 승인할 수 있다.")
     void approveWaitingToBooking() {
-        Reservation sudalReservation = new Reservation(sudal, tomorrow, reservationTime, theme, ReservationStatus.BOOKING);
-        Reservation roroReservation = new Reservation(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation sudalReservation = USER_RESERVATION(sudal, tomorrow, reservationTime, theme, ReservationStatus.BOOKING);
+        Reservation roroReservation = USER_RESERVATION(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
         reservationService.createReservation(sudalReservation);
         reservationService.createWaitingReservation(roroReservation);
 

@@ -36,6 +36,7 @@ class ReservationServiceTest extends ServiceTest {
     private Theme wootecoTheme;
     private Member mia;
     private Member tommy;
+    private LocalDate tomorrow;
 
     @BeforeEach
     void setUp() {
@@ -43,6 +44,7 @@ class ReservationServiceTest extends ServiceTest {
         this.wootecoTheme = themeService.create(WOOTECO_THEME());
         this.mia = memberService.create(USER_MIA());
         this.tommy = memberService.create(USER_TOMMY());
+        this.tomorrow = LocalDate.now().plusDays(1);
     }
 
     @Test
@@ -148,8 +150,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     @DisplayName("이미 예약이 된 테마를 예약 대기를 신청하면 예외가 발생한다.")
     void invalidWaitingReservation1() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        final Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme);
+        Reservation reservation = USER_RESERVATION(mia, tomorrow, miaReservationTime, wootecoTheme);
         reservationService.createReservation(reservation);
 
         assertThatThrownBy(() -> reservationService.createWaitingReservation(reservation))
@@ -160,8 +161,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     @DisplayName("이미 예약 대기 신청이 된 테마를 다시 예약 대기를 신청하면 예외가 발생한다.")
     void invalidWaitingReservation2() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        final Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        Reservation reservation = USER_RESERVATION(mia, tomorrow, miaReservationTime, wootecoTheme);
         reservationService.createWaitingReservation(reservation);
 
         assertThatThrownBy(() -> reservationService.createWaitingReservation(reservation))
@@ -172,8 +172,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     @DisplayName("예약 대기를 요청한 사용자가 예약 대기를 삭제할 수 있다.")
     void deleteWaitingReservation() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        Reservation reservation = USER_RESERVATION(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.BOOKING);
         Reservation createdReservation = reservationService.createWaitingReservation(reservation);
 
         reservationService.deleteWaitingReservation(createdReservation.getId(), mia);
@@ -185,8 +184,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     @DisplayName("관리자가 특정 사용자의 예약 대기를 삭제할 수 있다.")
     void deleteWaitingReservationByAdmin() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        Reservation reservation = USER_RESERVATION(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.BOOKING);
         Reservation createdReservation = reservationService.createWaitingReservation(reservation);
 
         reservationService.deleteWaitingReservation(createdReservation.getId(), USER_ADMIN());
@@ -198,8 +196,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     @DisplayName("예약 대기 삭제 시 예약 요청한 사용자가 아니라면 예외가 발생한다.")
     void invalidDeleteWaitingReservation() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        Reservation reservation = new Reservation(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.WAITING);
+        Reservation reservation = USER_RESERVATION(mia, tomorrow, miaReservationTime, wootecoTheme, ReservationStatus.BOOKING);
         Reservation createdReservation = reservationService.createWaitingReservation(reservation);
 
         assertThatThrownBy(() -> reservationService.deleteWaitingReservation(createdReservation.getId(), tommy))

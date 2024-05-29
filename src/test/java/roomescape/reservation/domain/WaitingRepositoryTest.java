@@ -13,8 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.MIA_RESERVATION_TIME;
-import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.TestFixture.*;
 
 class WaitingRepositoryTest extends RepositoryTest {
     @Autowired
@@ -47,8 +46,8 @@ class WaitingRepositoryTest extends RepositoryTest {
     @Test
     @DisplayName("사용자를 통해 대기 순위를 찾을 수 있다.")
     void findByMember() {
-        waitingRepository.save(new Waiting(sudal, tomorrow, reservationTime, theme));
-        waitingRepository.save(new Waiting(roro, tomorrow, reservationTime, theme));
+        waitingRepository.save(WAITING_RESERVATION(sudal, tomorrow, reservationTime, theme));
+        waitingRepository.save(WAITING_RESERVATION(roro, tomorrow, reservationTime, theme));
 
         WaitingWithRank sudalWaitingWithRank = waitingRepository.findByMember(sudal);
         WaitingWithRank roroWaitingWithRank = waitingRepository.findByMember(roro);
@@ -60,8 +59,8 @@ class WaitingRepositoryTest extends RepositoryTest {
     @Test
     @DisplayName("예약 대기를 삭제할 수 있다.")
     void deleteByMemberAndDateAndTimeAndTheme() {
-        waitingRepository.save(new Waiting(sudal, tomorrow, reservationTime, theme));
-        waitingRepository.save(new Waiting(roro, tomorrow, reservationTime, theme));
+        waitingRepository.save(WAITING_RESERVATION(sudal, tomorrow, reservationTime, theme));
+        waitingRepository.save(WAITING_RESERVATION(roro, tomorrow, reservationTime, theme));
 
         waitingRepository.deleteByMemberAndDateAndTimeAndTheme(sudal, tomorrow, reservationTime, theme);
         List<Waiting> waitings = waitingRepository.findAll();
@@ -72,8 +71,8 @@ class WaitingRepositoryTest extends RepositoryTest {
     @Test
     @DisplayName("가장 빠른 예약 대기 순서를 찾을 수 있다.")
     void findFistByDateAndTimeAndThemeOrderByIdAsc() {
-        waitingRepository.save(new Waiting(sudal, tomorrow, reservationTime, theme));
-        waitingRepository.save(new Waiting(roro, tomorrow, reservationTime, theme));
+        waitingRepository.save(WAITING_RESERVATION(sudal, tomorrow, reservationTime, theme));
+        waitingRepository.save(WAITING_RESERVATION(roro, tomorrow, reservationTime, theme));
 
         Waiting waiting = waitingRepository.findFistByDateAndTimeAndThemeOrderByIdAsc(tomorrow, reservationTime, theme).get();
 
