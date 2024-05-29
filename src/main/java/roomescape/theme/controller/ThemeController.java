@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.theme.dto.ThemeRankResponse;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.facade.ThemeFacadeService;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeService themeService;
+    private final ThemeFacadeService themeService;
 
-    public ThemeController(ThemeService themeService) {
+    public ThemeController(ThemeFacadeService themeService) {
         this.themeService = themeService;
     }
 
@@ -49,7 +49,7 @@ public class ThemeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") long themeId) {
+    public ResponseEntity<Void> deleteTheme(@PathVariable("id") Long themeId) {
         themeService.removeTheme(themeId);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

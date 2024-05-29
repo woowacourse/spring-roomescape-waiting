@@ -22,16 +22,16 @@ public class JwtTokenProvider implements TokenProvider {
     private static final Date TODAY = new Date();
 
     private final SecretKey secretKey;
-    private final long expirationTime;
+    private final Long expirationTime;
 
     public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey,
-                            @Value("${jwt.expiration}") long expirationTime) {
+                            @Value("${jwt.expiration}") Long expirationTime) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.expirationTime = expirationTime;
     }
 
     @Override
-    public Token getAccessToken(long principle) {
+    public Token getAccessToken(Long principle) {
         String accessToken = Jwts.builder()
                 .claims(makeClaims(principle))
                 .issuedAt(TODAY)
@@ -47,7 +47,7 @@ public class JwtTokenProvider implements TokenProvider {
         return parseClaims(token).getSubject();
     }
 
-    private Claims makeClaims(long principal) {
+    private Claims makeClaims(Long principal) {
         return Jwts.claims()
                 .subject(String.valueOf(principal))
                 .build();

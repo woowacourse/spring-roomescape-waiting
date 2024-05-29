@@ -13,7 +13,7 @@ public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @Embedded
     private Name name;
     @Column(nullable = false)
@@ -24,7 +24,7 @@ public class Theme {
     public Theme() {
     }
 
-    private Theme(long id, Name name, String description, String thumbnail) {
+    private Theme(Long id, Name name, String description, String thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -32,18 +32,14 @@ public class Theme {
     }
 
     private Theme(String name, String description, String thumbnail) {
-        this(0, new Name(name), description, thumbnail);
+        this(null, new Name(name), description, thumbnail);
     }
 
     public static Theme of(String name, String description, String thumbnail) {
         return new Theme(name, description, thumbnail);
     }
 
-    public static Theme from(long id) {
-        return new Theme(id, null, null, null);
-    }
-
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

@@ -1,118 +1,180 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.admin.domain.FilterInfo;
-import roomescape.admin.dto.AdminReservationRequest;
-import roomescape.admin.dto.ReservationFilterRequest;
-import roomescape.member.domain.Member;
-import roomescape.member.exception.model.MemberNotFoundException;
-import roomescape.member.repository.MemberRepository;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.reservation.domain.Date;
+import roomescape.reservation.domain.FilterInfo;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.reservation.dto.ReservationWaitingResponse;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.dto.ReservationAddRequest;
+import roomescape.reservation.dto.ReservationFilterRequest;
+import roomescape.reservation.exception.ReservationExceptionCode;
+import roomescape.reservation.exception.model.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.model.ThemeNotFoundException;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.exception.ThemeExceptionCode;
 import roomescape.time.domain.Time;
-import roomescape.time.exception.model.TimeNotFoundException;
-import roomescape.time.repository.TimeRepository;
+import roomescape.time.exception.TimeExceptionCode;
+import roomescape.waiting.domain.Waiting;
 
 @Service
 public class ReservationService {
 
+    private static final int MAX_WAITING_COUNT = 5;
+    public static final int NUMBER_OF_ONE_WEEK = 7;
+    public static final int TOP_THEMES_LIMIT = 10;
+
     private final ReservationRepository reservationRepository;
-    private final TimeRepository timeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-                              ThemeRepository themeRepository, MemberRepository memberRepository) {
+    public ReservationService(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.timeRepository = timeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
-        Time time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(TimeNotFoundException::new);
-        Theme theme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(ThemeNotFoundException::new);
-        Member member = memberRepository.findMemberById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
+    public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
+        validateExistReservation(reservationAddRequest);
+        Reservation reservation = Reservation.of(reservationAddRequest.date(), reservationAddRequest.time(),
+                reservationAddRequest.theme(), reservationAddRequest.member(), ReservationStatus.RESERVED);
 
-        Reservation saveReservation = Reservation.of(reservationRequest.date(), time, theme, member);
-
-        return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
+        return reservationRepository.save(reservation);
     }
 
-    public void addAdminReservation(AdminReservationRequest adminReservationRequest) {
-        Time time = timeRepository.findById(adminReservationRequest.timeId())
-                .orElseThrow(TimeNotFoundException::new);
-        Theme theme = themeRepository.findById(adminReservationRequest.themeId())
-                .orElseThrow(ThemeNotFoundException::new);
-        Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
-                .orElseThrow(MemberNotFoundException::new);
+    public Reservation addWaitingReservation(ReservationAddRequest reservationAddRequest, Long memberId) {
+        validateDuplicateReservation(reservationAddRequest, memberId);
+        validateIsOverMaxWaitingCount(reservationAddRequest);
 
-        Reservation saveReservation = Reservation.of(adminReservationRequest.date(), time, theme, member);
+        Reservation reservation = Reservation.of(reservationAddRequest.date(), reservationAddRequest.time(),
+                reservationAddRequest.theme(), reservationAddRequest.member(), ReservationStatus.WAITING);
 
-        ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
+        return reservationRepository.save(reservation);
     }
 
-
-    public List<ReservationResponse> findReservations() {
-        List<Reservation> reservations = reservationRepository.findAllByOrderByDateAscTimeAsc();
-
-        return reservations.stream()
-                .map(ReservationResponse::fromReservation)
-                .toList();
+    public List<Reservation> findReservationsOrderByDateAndTime() {
+        return reservationRepository.findAllByOrderByDateAscTimeAsc();
     }
 
-    public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
-        List<Time> allTimes = timeRepository.findAllByOrderByStartAt();
+    public List<Time> findBookedTimes(Long themeId, LocalDate date) {
         Date findDate = Date.dateFrom(date);
         List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate(themeId, findDate);
-        List<Time> bookedTimes = extractReservationTimes(reservations);
 
-        return allTimes.stream()
-                .map(time -> ReservationTimeAvailabilityResponse.fromTime(time, isTimeBooked(time, bookedTimes)))
-                .toList();
-    }
-
-    public List<ReservationResponse> findFilteredReservations(ReservationFilterRequest reservationFilterRequest) {
-        FilterInfo filterInfo = reservationFilterRequest.toFilterInfo();
-
-        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(filterInfo.getMemberId(),
-                        filterInfo.getThemeId(), filterInfo.getFromDate(), filterInfo.getToDate()).stream()
-                .map(ReservationResponse::fromReservation)
-                .toList();
-    }
-
-    public List<ReservationWaitingResponse> findMemberReservations(long id) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
-
-        return reservations.stream()
-                .map(ReservationWaitingResponse::from)
-                .toList();
-    }
-
-    public void removeReservations(long reservationId) {
-        reservationRepository.deleteById(reservationId);
-    }
-
-    private List<Time> extractReservationTimes(List<Reservation> reservations) {
         return reservations.stream()
                 .map(Reservation::getReservationTime)
                 .toList();
     }
 
-    private boolean isTimeBooked(Time time, List<Time> bookedTimes) {
-        return bookedTimes.contains(time);
+    public List<Reservation> findFilteredReservations(ReservationFilterRequest reservationFilterRequest) {
+        FilterInfo filterInfo = reservationFilterRequest.toFilterInfo();
+
+        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(filterInfo.getMemberId(),
+                filterInfo.getThemeId(), filterInfo.getFromDate(), filterInfo.getToDate());
+    }
+
+    public List<Reservation> findStatusReservations(Long memberId, ReservationStatus reservationStatus) {
+        return reservationRepository.findAllByMemberIdAndReservationStatus(memberId, reservationStatus);
+    }
+
+    public List<Reservation> findWaitings() {
+        return reservationRepository.findByReservationStatus(ReservationStatus.WAITING);
+    }
+
+    public List<Waiting> findWaitingWithRank(Long memberId) {
+        List<Reservation> waitingReservations = reservationRepository.findAllByMemberIdAndReservationStatus(memberId,
+                ReservationStatus.WAITING);
+
+        List<Waiting> waitings = new ArrayList<>();
+
+        for (Reservation reservation : waitingReservations) {
+            int rank = reservationRepository.countByThemeAndDateAndTimeAndIdLessThan(reservation.getTheme(),
+                    Date.dateFrom(reservation.getDate()), reservation.getReservationTime(), reservation.getId());
+
+            waitings.add(new Waiting(reservation, rank));
+        }
+        return waitings;
+    }
+
+    public List<Theme> findRankedThemes(LocalDate today) {
+        LocalDate beforeOneWeek = today.minusDays(NUMBER_OF_ONE_WEEK);
+
+        return reservationRepository.findAllByDateOrderByThemeIdCountLimit(beforeOneWeek, today,
+                TOP_THEMES_LIMIT);
+    }
+
+    @Transactional
+    public void removeReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(ReservationNotFoundException::new);
+
+        if (reservation.isAfterCancelDate(LocalDate.now())) {
+            throw new RoomEscapeException(ReservationExceptionCode.CAN_NOT_CANCEL_AFTER_MIN_CANCEL_DATE);
+        }
+
+        reservation.setReservationStatus(ReservationStatus.CANCEL);
+        waitingToReservation(reservation);
+    }
+
+    public void removeWaitingReservations(Long waitingId) {
+        reservationRepository.deleteById(waitingId);
+    }
+
+    public void validateBeforeRemoveTheme(Long themeId) {
+        List<Reservation> reservation = reservationRepository.findByThemeId(themeId);
+
+        if (!reservation.isEmpty()) {
+            throw new RoomEscapeException(ThemeExceptionCode.USING_THEME_RESERVATION_EXIST);
+        }
+    }
+
+    public void validateReservationExistence(Long timeId) {
+        List<Reservation> reservation = reservationRepository.findByTimeId(timeId);
+
+        if (!reservation.isEmpty()) {
+            throw new RoomEscapeException(TimeExceptionCode.EXIST_RESERVATION_AT_CHOOSE_TIME);
+        }
+    }
+
+    public void waitingToReservation(Reservation reservation) {
+        Optional<Reservation> topWaiting = reservationRepository.findFirstByDateAndThemeAndTimeAndReservationStatus(
+                Date.dateFrom(reservation.getDate()), reservation.getTheme(), reservation.getReservationTime(),
+                ReservationStatus.WAITING);
+
+        if (topWaiting.isPresent()) {
+            Reservation nextReservation = topWaiting.get();
+            nextReservation.setReservationStatus(ReservationStatus.RESERVED);
+        }
+    }
+
+    private void validateExistReservation(ReservationAddRequest reservationAddRequest) {
+        Optional<Reservation> reservation = reservationRepository.findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(
+                Date.saveFrom(reservationAddRequest.date()), reservationAddRequest.member().getId(),
+                reservationAddRequest.theme().getId(), reservationAddRequest.time().getId(),
+                ReservationStatus.RESERVED);
+
+        if (reservation.isPresent()) {
+            throw new RoomEscapeException(ReservationExceptionCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void validateIsOverMaxWaitingCount(ReservationAddRequest reservationRequest) {
+        int countWaiting = reservationRepository.countByThemeIdAndDateAndTimeIdAndReservationStatus(
+                reservationRequest.theme().getId(), Date.dateFrom(reservationRequest.date()),
+                reservationRequest.time().getId(), ReservationStatus.WAITING);
+
+        if (countWaiting >= MAX_WAITING_COUNT) {
+            throw new RoomEscapeException(ReservationExceptionCode.WAITING_IS_MAX);
+        }
+    }
+
+    private void validateDuplicateReservation(ReservationAddRequest reservationRequest, Long memberId) {
+        Optional<Reservation> duplicateReservation = reservationRepository.findByDateAndMemberIdAndThemeIdAndTimeId(
+                Date.saveFrom(reservationRequest.date()), memberId, reservationRequest.theme().getId(),
+                reservationRequest.time().getId());
+
+        if (duplicateReservation.isPresent()) {
+            throw new RoomEscapeException(ReservationExceptionCode.DUPLICATE_RESERVATION);
+        }
     }
 }

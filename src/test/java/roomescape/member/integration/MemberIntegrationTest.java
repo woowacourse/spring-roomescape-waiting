@@ -24,7 +24,7 @@ class MemberIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원의 예약 내역들을 가져올 수 있다.")
     void memberReservationList() {
-        Token token = tokenProvider.getAccessToken(1);
+        Token token = tokenProvider.getAccessToken(1L);
         ResponseCookie cookie = CookieProvider.setCookieFrom(token);
 
         RestAssured.given().log().all()

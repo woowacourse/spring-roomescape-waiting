@@ -27,10 +27,10 @@ public class ThemeIntegrationTest extends IntegrationTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(6));
 
         RestAssured.given().log().all()
-                .when().delete("/themes/3")
+                .when().delete("/themes/6")
                 .then().log().all()
                 .statusCode(204);
 
@@ -38,6 +38,6 @@ public class ThemeIntegrationTest extends IntegrationTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(5));
     }
 }

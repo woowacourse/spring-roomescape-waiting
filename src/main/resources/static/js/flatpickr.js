@@ -83,11 +83,11 @@
         }, i = {
             weekdays: {
                 shorthand: ["일", "월", "화", "수", "목", "금", "토"],
-                longhand: ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"]
+                Longhand: ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"]
             },
             months: {
                 shorthand: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
-                longhand: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
+                Longhand: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
             },
             daysInMonth: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
             firstDayOfWeek: 0,
@@ -170,10 +170,10 @@
 
     var p = function () {
     }, h = function (e, n, t) {
-        return t.months[n ? "shorthand" : "longhand"][e]
+        return t.months[n ? "shorthand" : "Longhand"][e]
     }, v = {
         D: p, F: function (e, n, t) {
-            e.setMonth(t.months.longhand.indexOf(n))
+            e.setMonth(t.months.Longhand.indexOf(n))
         }, G: function (e, n) {
             e.setHours((e.getHours() >= 12 ? 12 : 0) + parseFloat(n))
         }, H: function (e, n) {
@@ -272,7 +272,7 @@
         }, j: function (e) {
             return e.getDate()
         }, l: function (e, n) {
-            return n.weekdays.longhand[e.getDay()]
+            return n.weekdays.Longhand[e.getDay()]
         }, m: function (e) {
             return o(e.getMonth() + 1)
         }, n: function (e) {
@@ -740,7 +740,7 @@
         }
 
         function se() {
-            "object" != typeof w.config.locale && void 0 === I.l10ns[w.config.locale] && w.config.errorHandler(new Error("flatpickr: invalid locale " + w.config.locale)), w.l10n = e(e({}, I.l10ns.default), "object" == typeof w.config.locale ? w.config.locale : "default" !== w.config.locale ? I.l10ns[w.config.locale] : void 0), D.D = "(" + w.l10n.weekdays.shorthand.join("|") + ")", D.l = "(" + w.l10n.weekdays.longhand.join("|") + ")", D.M = "(" + w.l10n.months.shorthand.join("|") + ")", D.F = "(" + w.l10n.months.longhand.join("|") + ")", D.K = "(" + w.l10n.amPM[0] + "|" + w.l10n.amPM[1] + "|" + w.l10n.amPM[0].toLowerCase() + "|" + w.l10n.amPM[1].toLowerCase() + ")", void 0 === e(e({}, v), JSON.parse(JSON.stringify(p.dataset || {}))).time_24hr && void 0 === I.defaultConfig.time_24hr && (w.config.time_24hr = w.l10n.time_24hr), w.formatDate = b(w), w.parseDate = C({
+            "object" != typeof w.config.locale && void 0 === I.l10ns[w.config.locale] && w.config.errorHandler(new Error("flatpickr: invalid locale " + w.config.locale)), w.l10n = e(e({}, I.l10ns.default), "object" == typeof w.config.locale ? w.config.locale : "default" !== w.config.locale ? I.l10ns[w.config.locale] : void 0), D.D = "(" + w.l10n.weekdays.shorthand.join("|") + ")", D.l = "(" + w.l10n.weekdays.Longhand.join("|") + ")", D.M = "(" + w.l10n.months.shorthand.join("|") + ")", D.F = "(" + w.l10n.months.Longhand.join("|") + ")", D.K = "(" + w.l10n.amPM[0] + "|" + w.l10n.amPM[1] + "|" + w.l10n.amPM[0].toLowerCase() + "|" + w.l10n.amPM[1].toLowerCase() + ")", void 0 === e(e({}, v), JSON.parse(JSON.stringify(p.dataset || {}))).time_24hr && void 0 === I.defaultConfig.time_24hr && (w.config.time_24hr = w.l10n.time_24hr), w.formatDate = b(w), w.parseDate = C({
                 config: w.config,
                 l10n: w.l10n
             })

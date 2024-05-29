@@ -2,7 +2,8 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,40 +23,46 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Embedded
     private Date date;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "time_id")
     private Time time;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus reservationStatus;
 
     protected Reservation() {
     }
 
-    private Reservation(long id, Date date, Time time, Theme theme, Member member) {
+    private Reservation(Long id, Date date, Time time, Theme theme, Member member,
+                        ReservationStatus reservationStatus) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
+        this.reservationStatus = reservationStatus;
     }
 
-    public static Reservation of(LocalDate date, Time time, Theme theme, Member member) {
+    public static Reservation of(LocalDate date, Time time, Theme theme, Member member,
+                                 ReservationStatus reservationStatus) {
         validateAtSaveDateAndTime(date, time);
-        return new Reservation(0, Date.saveFrom(date), time, theme, member);
+        return new Reservation(null, Date.saveFrom(date), time, theme, member, reservationStatus);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -73,6 +80,18 @@ public class Reservation {
 
     public Member getMember() {
         return member;
+    }
+
+    public String getReservationStatus() {
+        return reservationStatus.getStatus();
+    }
+
+    public void setReservationStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
+    }
+
+    public boolean isAfterCancelDate(LocalDate now) {
+        return date.isAfterCancelDate(now);
     }
 
     private static void validateAtSaveDateAndTime(LocalDate date, Time time) {

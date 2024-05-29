@@ -11,7 +11,7 @@ public interface MemberRepository extends Repository<Member, Long> {
 
     Optional<Member> findMemberByEmailAndPassword(Email email, Password password);
 
-    Optional<Member> findMemberById(long id);
+    Optional<Member> findMemberById(Long id);
 
     List<Member> findAll();
 }

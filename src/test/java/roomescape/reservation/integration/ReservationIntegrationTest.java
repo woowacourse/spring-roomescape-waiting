@@ -4,23 +4,35 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 import roomescape.auth.domain.Token;
 import roomescape.auth.provider.CookieProvider;
 import roomescape.model.IntegrationTest;
+import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.ReservationRequest;
 
 class ReservationIntegrationTest extends IntegrationTest {
 
     @Test
-    @DisplayName("정상적인 요청에 대하여 예약을 정상적으로 등록, 조회, 삭제한다.")
-    void adminReservationPageWork() {
-        Token token = tokenProvider.getAccessToken(1);
+    @DisplayName("예약을 정상적으로 조회한다.")
+    void reservationList() {
+        RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(16));
+    }
+
+    @Test
+    @DisplayName("예약을 정상적으로 저장한다.")
+    void reservationSave() {
+        Token token = tokenProvider.getAccessToken(1L);
         ResponseCookie cookie = CookieProvider.setCookieFrom(token);
 
-        ReservationRequest reservationRequest = new ReservationRequest(TODAY.plusDays(1), 1L, 1L);
+        ReservationRequest reservationRequest = new ReservationRequest(TODAY.plusDays(1), 2L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -29,29 +41,55 @@ class ReservationIntegrationTest extends IntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("이미 예약한 방탈출을 대기하는 경우 에러가 발생한다.")
+    void duplicateReservationWaiting() {
+        Token token = tokenProvider.getAccessToken(1L);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2024, 4, 30), 1L, 1L);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(200)
-                .body("size()", is(4));
+                .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 정상적으로 저장한다.")
+    void reservationWaitingSave() {
+        Token token = tokenProvider.getAccessToken(7L);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        ReservationRequest reservationRequest = new ReservationRequest(TODAY.plusDays(1), 1L, 1L);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/3")
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("예약을 정상적으로 삭제한다.")
+    void reservationDelete() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/7")
                 .then().log().all()
                 .statusCode(204);
-
-        RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(3));
     }
 
     @Test
     @DisplayName("예약을 요청시 존재하지 않은 예약 시간의 id일 경우 예외가 발생한다.")
     void notExistTime() {
-        Token token = tokenProvider.getAccessToken(1);
+        Token token = tokenProvider.getAccessToken(1L);
         ResponseCookie cookie = CookieProvider.setCookieFrom(token);
 
         ReservationRequest reservationRequest = new ReservationRequest(TODAY, 0L, 1L);
@@ -71,6 +109,73 @@ class ReservationIntegrationTest extends IntegrationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/reservations/1?date=" + TODAY)
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("이미 대기 최대 인원인 경우 예외를 발생한다.")
+    void throwException_WhenWaitingCountIsMax() {
+        Token token = tokenProvider.getAccessToken(7L);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2025, 5, 20), 1L, 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("관리자가 아닌 경우 관리자 예매를 시도하지 못한다.")
+    void canNotAccessAdmin_WhenMember() {
+        Token token = tokenProvider.getAccessToken(2L);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(LocalDate.now().plusDays(1), 1L,
+                1L, 2L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(adminReservationRequest)
+                .cookie(cookie.toString())
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .statusCode(403);
+    }
+
+    @Test
+    @DisplayName("관리자인 경우 정상적으로 예약할 수 있다.")
+    void canAccessAdmin_WhenAdmin() {
+        Token token = tokenProvider.getAccessToken(1L);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(LocalDate.now().plusDays(1), 1L,
+                1L, 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(adminReservationRequest)
+                .cookie(cookie.toString())
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("대기 목록을 불러올 수 있다.")
+    void waitingList() {
+        Token token = tokenProvider.getAccessToken(1L);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .when().get("/admin/waitings")
                 .then().log().all()
                 .statusCode(200);
     }

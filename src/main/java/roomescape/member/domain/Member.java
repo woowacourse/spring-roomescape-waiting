@@ -20,7 +20,7 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Embedded
     private Name name;
@@ -38,7 +38,7 @@ public class Member {
     protected Member() {
     }
 
-    private Member(long id, String name, Email email, Password password, MemberRole role) {
+    private Member(Long id, String name, Email email, Password password, MemberRole role) {
         this.id = id;
         this.name = new Name(name);
         this.email = email;
@@ -47,14 +47,14 @@ public class Member {
     }
 
     private Member(String name, Email email, Password password, MemberRole role) {
-        this(0, name, email, password, role);
+        this(null, name, email, password, role);
     }
 
     public static Member of(String email, String password) {
         return new Member(DEFAULT_NAME, Email.from(email), Password.from(password), MemberRole.MEMBER);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

@@ -1,25 +1,22 @@
 const THEME_API_ENDPOINT = '/themes';
-const RESERVATION_API_ENDPOINT = '/reservations';
+const RESERVATION_API_ENDPOINT = '/reservations'
+
+const oneWeekFromToday = new Date();
+oneWeekFromToday.setDate(oneWeekFromToday.getDate() + 7);
 
 document.addEventListener('DOMContentLoaded', () => {
   requestRead(THEME_API_ENDPOINT)
       .then(renderTheme)
       .catch(error => console.error('Error fetching times:', error));
-
   flatpickr("#datepicker", {
+    minDate: 'today',
+    maxDate: oneWeekFromToday,
     inline: true,
     onChange: function (selectedDates, dateStr, instance) {
       if (dateStr === '') return;
       checkDate();
-    },
-    disable: [
-      function (date) {
-        // 과거 날짜 선택 비활성화
-        return date < new Date().setHours(0, 0, 0, 0);
-      }
-    ]
+    }
   });
-
   document.getElementById('theme-slots').addEventListener('click', event => {
     if (event.target.classList.contains('theme-slot')) {
       document.querySelectorAll('.theme-slot').forEach(slot => slot.classList.remove('active'));
@@ -27,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
       checkDateAndTheme();
     }
   });
-
   document.getElementById('time-slots').addEventListener('click', event => {
     if (event.target.classList.contains('time-slot') && !event.target.classList.contains('disabled')) {
       document.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('active'));
@@ -37,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
+  document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
 function renderTheme(themes) {
@@ -57,9 +54,6 @@ function createSlot(type, text, id, booked) {
   div.setAttribute('data-' + type + '-id', id);
   if (type === 'time') {
     div.setAttribute('data-time-booked', booked);
-    if (booked) {
-      div.classList.add('disabled');
-    }
   }
   return div;
 }
@@ -73,7 +67,6 @@ function checkDate() {
     }
     const timeSlots = document.getElementById('time-slots');
     timeSlots.innerHTML = '';
-
     requestRead(THEME_API_ENDPOINT)
         .then(renderTheme)
         .catch(error => console.error('Error fetching times:', error));
@@ -90,7 +83,6 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-
   fetch(`${RESERVATION_API_ENDPOINT}/${themeId}?date=${date}`, { // 예약 가능 시간 조회 API endpoint
     method: 'GET',
     headers: {
@@ -111,7 +103,6 @@ function renderAvailableTimes(times) {
   if (timeSection.classList.contains("disabled")) {
     timeSection.classList.remove("disabled");
   }
-
   const timeSlots = document.getElementById('time-slots');
   timeSlots.innerHTML = '';
   if (times.length === 0) {
@@ -119,11 +110,9 @@ function renderAvailableTimes(times) {
     return;
   }
   times.forEach(time => {
-
     const startAt = time.startAt;
     const timeId = time.timeId;
     const alreadyBooked = time.alreadyBooked;
-
     const div = createSlot('time', startAt, timeId, alreadyBooked); // createSlot('time', 시작 시간, time id, 예약 여부)
     timeSlots.appendChild(div);
   });
@@ -134,18 +123,22 @@ function checkDateAndThemeAndTime() {
   const selectedThemeElement = document.querySelector('.theme-slot.active');
   const selectedTimeElement = document.querySelector('.time-slot.active');
   const reserveButton = document.getElementById("reserve-button");
+  const waitButton = document.getElementById("wait-button");
 
   if (selectedDate && selectedThemeElement && selectedTimeElement) {
     if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
       // 선택된 시간이 이미 예약된 경우
       reserveButton.classList.add("disabled");
+      waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
     } else {
       // 선택된 시간이 예약 가능한 경우
       reserveButton.classList.remove("disabled");
+      waitButton.classList.add("disabled"); // 예약 대기 버튼 비활성화
     }
   } else {
     // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
     reserveButton.classList.add("disabled");
+    waitButton.classList.add("disabled");
   }
 }
 
@@ -153,15 +146,17 @@ function onReservationButtonClick() {
   const selectedDate = document.getElementById("datepicker").value;
   const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
   const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
-
   if (selectedDate && selectedThemeId && selectedTimeId) {
-
+    /*
+    TODO:
+          [5단계] 예약 생성 기능 변경 - 사용자
+          request 명세에 맞게 설정
+    */
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
       timeId: selectedTimeId
     };
-
     fetch('/reservations', {
       method: 'POST',
       headers: {
@@ -170,34 +165,70 @@ function onReservationButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (response.status !== 201) {
-            response.text().then(text => {
-              alert('ERROR! ' + text);
-              throw new Error('Reservation failed');
-            });
-          }
+          if (!response.ok) response.text().then(text => {
+            alert('ERROR! ' + text);
+            throw new Error('Read failed');
+          });
           return response.json();
         })
         .then(data => {
-          alert("예약되었습니다!");
+          alert("예약에 성공했습니다!");
           location.reload();
         })
         .catch(error => {
-          alert("예약 생성 중 오류가 발생하였습니다. 다시 시도해주시기 바랍니다.");
           console.error(error);
         });
   } else {
-    alert("Please select a date, theme, and time before making a reservation.");
+    alert("예약을 만들기 전 시간과 날짜를 선택해주세요.");
+  }
+}
+
+function onWaitButtonClick() {
+  const selectedDate = document.getElementById("datepicker").value;
+  const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
+  const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+
+  if (selectedDate && selectedThemeId && selectedTimeId) {
+    const reservationData = {
+      date: selectedDate,
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
+    };
+
+    fetch(`${RESERVATION_API_ENDPOINT}/waiting`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reservationData)
+    })
+        .then(response => {
+          if (!response.ok) response.text().then(text => {
+            alert('ERROR! ' + text);
+            throw new Error('Read failed');
+          });
+          return response.json();
+
+        })
+        .then(data => {
+          alert('예약 대기에 성공했습니다!');
+          window.location.href = "/";
+        })
+        .catch(error => {
+          console.error(error);
+        });
+  } else {
+    alert("예약 대기를 신청하기 전 날짜와 시간을 정해주세요.");
   }
 }
 
 function requestRead(endpoint) {
   return fetch(endpoint)
       .then(response => {
-        if (response.status === 200) return response.json();
-        response.text().then(text => {
+        if (response.status !== 200) response.text().then(text => {
           alert('ERROR! ' + text);
           throw new Error('Read failed');
         });
+        return response.json();
       });
 }

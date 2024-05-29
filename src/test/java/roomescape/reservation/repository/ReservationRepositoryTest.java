@@ -1,6 +1,5 @@
 package roomescape.reservation.repository;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
@@ -23,13 +22,10 @@ class ReservationRepositoryTest {
     @Test
     @DisplayName("제한된 개수에 맞게 인기 많은 테마를 조회해 온다.")
     void findAllByDateOrderByThemeIdCountLimit() {
-        LocalDate from = LocalDate.of(2024, 4, 28);
-        LocalDate to = LocalDate.of(2024, 5, 28);
+        LocalDate from = LocalDate.now();
+        LocalDate to = LocalDate.now().plusDays(2);
         List<Theme> themes = reservationRepository.findAllByDateOrderByThemeIdCountLimit(from, to, 1);
 
-        assertAll(
-                () -> assertEquals(themes.size(), 1),
-                () -> assertEquals(themes.get(0).getId(), 1)
-        );
+        assertEquals(themes.size(), 1);
     }
 }

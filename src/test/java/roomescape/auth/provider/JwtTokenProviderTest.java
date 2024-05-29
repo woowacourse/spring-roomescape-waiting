@@ -25,7 +25,7 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("Token을 정상적으로 만든다.")
     void getAccessToken() {
-        Token token = jwtTokenProvider.getAccessToken(1);
+        Token token = jwtTokenProvider.getAccessToken(1L);
         assertNotNull(token.getToken());
     }
 

@@ -11,7 +11,7 @@ public interface ThemeRepository extends Repository<Theme, Long> {
 
     List<Theme> findAll();
 
-    Optional<Theme> findById(long id);
+    Optional<Theme> findById(Long id);
 
-    void deleteById(long themeId);
+    void deleteById(Long themeId);
 }

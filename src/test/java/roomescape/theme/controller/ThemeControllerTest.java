@@ -24,7 +24,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRankResponse;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.facade.ThemeFacadeService;
 
 @WebMvcTest(ThemeController.class)
 public class ThemeControllerTest extends ControllerTest {
@@ -37,7 +37,7 @@ public class ThemeControllerTest extends ControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ThemeService themeService;
+    private ThemeFacadeService themeService;
 
     @Test
     @DisplayName("테마 정보를 정상적으로 저장하는지 확인한다.")

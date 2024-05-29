@@ -2,11 +2,14 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.reservation.domain.Date;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
+import roomescape.time.domain.Time;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {
 
@@ -14,14 +17,27 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findAllByOrderByDateAscTimeAsc();
 
-    List<Reservation> findAllByThemeIdAndDate(long themeId, Date date);
+    List<Reservation> findAllByThemeIdAndDate(Long themeId, Date date);
 
-    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId, Date fromDate,
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, Date fromDate,
                                                                 Date toDate);
 
-    List<Reservation> findByTimeId(long timeId);
+    Optional<Reservation> findById(Long id);
 
-    List<Reservation> findByThemeId(long themeId);
+    Optional<Reservation> findFirstByDateAndThemeAndTimeAndReservationStatus(Date date, Theme theme, Time time,
+                                                                             ReservationStatus status);
+
+    List<Reservation> findByTimeId(Long timeId);
+
+    Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeId(Date date, Long memberId, Long themeId, Long timeId);
+
+    Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeIdAndReservationStatus(Date date, Long memberId,
+                                                                                       Long themeId, Long timeId,
+                                                                                       ReservationStatus reservationStatus);
+
+    List<Reservation> findByThemeId(Long themeId);
+
+    List<Reservation> findByReservationStatus(ReservationStatus reservationStatus);
 
     @Query("SELECT r.theme " +
             "FROM Reservation r " +
@@ -32,7 +48,12 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
     )
     List<Theme> findAllByDateOrderByThemeIdCountLimit(LocalDate startDate, LocalDate endDate, int limitCount);
 
-    void deleteById(long reservationId);
+    int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, Long waitingId);
 
-    List<Reservation> findAllByMemberId(long id);
+    int countByThemeIdAndDateAndTimeIdAndReservationStatus(Long themeId, Date date, Long timeId,
+                                                           ReservationStatus status);
+
+    void deleteById(Long reservationId);
+
+    List<Reservation> findAllByMemberIdAndReservationStatus(Long id, ReservationStatus reservationStatus);
 }
