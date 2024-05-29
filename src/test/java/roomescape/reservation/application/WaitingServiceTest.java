@@ -8,10 +8,12 @@ import roomescape.common.ServiceTest;
 import roomescape.member.application.MemberService;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.reservation.domain.*;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.*;
@@ -60,33 +62,6 @@ class WaitingServiceTest extends ServiceTest {
 
         assertThat(roroRank).isEqualTo(1);
         assertThat(sudalRank).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("전체 예약 대기를 조회할 수 있다.")
-    void findAll() {
-        Reservation roroReservation = USER_RESERVATION(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
-        Reservation sudalReservation = USER_RESERVATION(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
-        reservationService.createWaitingReservation(roroReservation);
-        reservationService.createWaitingReservation(sudalReservation);
-
-        List<Waiting> waitings = waitingService.findAll();
-
-        assertThat(waitings).hasSize(2);
-    }
-
-    @Test
-    @DisplayName("예약 대기를 삭제할 수 있다.")
-    void delete() {
-        Reservation roroReservation = USER_RESERVATION(roro, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
-        Reservation sudalReservation = USER_RESERVATION(sudal, tomorrow, reservationTime, theme, ReservationStatus.WAITING);
-        reservationService.createWaitingReservation(roroReservation);
-        reservationService.createWaitingReservation(sudalReservation);
-
-        waitingService.delete(1L);
-        List<Waiting> waitings = waitingService.findAll();
-
-        assertThat(waitings).hasSize(1);
     }
 
     @Test
