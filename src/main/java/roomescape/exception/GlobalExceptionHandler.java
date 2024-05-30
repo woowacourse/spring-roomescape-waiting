@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(NotFoundException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.warn("[ERROR] ", exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
@@ -30,50 +30,50 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = DuplicatedException.class)
     public ResponseEntity<String> handleDuplicatedException(DuplicatedException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.warn("[ERROR] ", exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = DateTimeParseException.class)
     public ResponseEntity<String> handleDateTimeParseException(DateTimeParseException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.warn("[ERROR] ", exception);
         return new ResponseEntity<>("[ERROR] 유효하지 않은 요청입니다.", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.error("[ERROR] ", exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = AuthorizationException.class)
     public ResponseEntity<String> handleAuthorizationException(AuthorizationException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.warn("[ERROR] ", exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.warn("[ERROR] ", exception);
         String message = exception.getAllErrors().get(0).getDefaultMessage();
         return new ResponseEntity<>("[REQUEST_ERROR] " + message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.warn("[ERROR] ", exception);
         return new ResponseEntity<>("[REQUEST_ERROR] " + exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = HandlerMethodValidationException.class)
     public ResponseEntity<String> handleHandlerMethodValidationException(HandlerMethodValidationException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.warn("[ERROR] ", exception);
         return new ResponseEntity<>("[REQUEST_ERROR] " + exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = IllegalStateException.class)
     public ResponseEntity<String> handleIllegalStateException(IllegalStateException exception) {
-        logger.info("[ERROR] ", exception);
+        logger.error("[ERROR] ", exception);
         return new ResponseEntity<>("[ERROR] " + exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
