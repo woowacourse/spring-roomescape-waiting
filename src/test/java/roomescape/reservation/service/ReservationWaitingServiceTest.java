@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +49,6 @@ class ReservationWaitingServiceTest {
     private ReservationDetailRepository detailRepository;
     @Mock
     private MemberRepository memberRepository;
-    @Mock
-    private TimeRepository timeRepository;
 
     @Test
     @DisplayName("성공 : 예약 대기 정보를 얻을 수 있다.")
@@ -70,9 +69,11 @@ class ReservationWaitingServiceTest {
     @DisplayName("성공 : 아이디로 예약 대기 정보를 얻을 수 있다.")
     void findReservationWaitingByMemberId() {
         // Given
-        MyReservationResponse expected = MyReservationResponse.from(reservationWaiting);
+        MyReservationResponse expected = MyReservationResponse.from(reservationWaiting, 1);
         when(waitingRepository.findAllByMember_IdOrderByDetailDateAsc(any(Long.class)))
                 .thenReturn(List.of(reservationWaiting));
+        when(waitingRepository.countByCreateAtBeforeAndAndDetail_id(any(LocalDateTime.class), any(Long.class)))
+                .thenReturn(0);
 
         // When
         List<MyReservationResponse> reservationResponses

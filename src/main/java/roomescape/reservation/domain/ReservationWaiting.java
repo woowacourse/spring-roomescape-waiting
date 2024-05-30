@@ -25,7 +25,7 @@ import roomescape.time.domain.Time;
         @UniqueConstraint(columnNames = {"member_id", "detail_id"})
 })
 public class ReservationWaiting {
-    private static final String status = "대기";
+    private static final String status = "예약대기";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -106,6 +106,10 @@ public class ReservationWaiting {
 
     public Long getThemeId() {
         return detail.getThemeId();
+    }
+
+    public LocalDateTime getCreateAt() {
+        return createAt;
     }
 
     public String getStatus() {

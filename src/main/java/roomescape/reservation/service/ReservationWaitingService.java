@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,8 +50,11 @@ public class ReservationWaitingService {
     public List<MyReservationResponse> findReservationWaitingByMemberId(Long id) {
         List<ReservationWaiting> reservationsByMember
                 = waitingRepository.findAllByMember_IdOrderByDetailDateAsc(id);
+
         return reservationsByMember.stream()
-                .map(MyReservationResponse::from)
+                .sorted(Comparator.comparing(ReservationWaiting::getCreateAt))
+                .map(r -> MyReservationResponse.from(
+                        r, waitingRepository.countByCreateAtBeforeAndAndDetail_id(r.getCreateAt(), r.getDetailId()) + 1))
                 .toList();
     }
 

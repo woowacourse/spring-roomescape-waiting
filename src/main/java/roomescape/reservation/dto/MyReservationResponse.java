@@ -25,13 +25,13 @@ public record MyReservationResponse(
         );
     }
 
-    public static MyReservationResponse from(ReservationWaiting reservation) {
+    public static MyReservationResponse from(ReservationWaiting reservation, long waitingOrder) {
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus()
+                waitingOrder + "번째 " + reservation.getStatus()
         );
     }
 }
