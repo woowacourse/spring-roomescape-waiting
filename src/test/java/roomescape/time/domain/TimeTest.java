@@ -16,7 +16,7 @@ class TimeTest {
     void validation_ShouldThrowException_WhenStartAtIsNull() {
         assertThatThrownBy(() -> new Time(null))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("시간 값이 정의되지 않은 요청입니다.");
+                .hasMessage("예약 시간이 입력되지 않았습니다.");
     }
 
     @Test
