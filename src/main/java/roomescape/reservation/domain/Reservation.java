@@ -17,7 +17,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
-@Table(name = "reservation", uniqueConstraints = @UniqueConstraint(columnNames = {"date", "timeId", "themeId"}))
+@Table(name = "reservation", uniqueConstraints = @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"}))
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,12 +1,14 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.MyReservationWaitingResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -15,6 +17,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.TimeRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -22,16 +26,18 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
-
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               MemberRepository memberRepository,
                               TimeRepository timeRepository,
-                              ThemeRepository themeRepository) {
+                              ThemeRepository themeRepository,
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findReservations() {
@@ -48,10 +54,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findReservations(Long memberId) {
+    public List<MyReservationWaitingResponse> findMyReservations(Long memberId) {
         return reservationRepository.findByMember_id(memberId)
                 .stream()
-                .map(MyReservationResponse::from)
+                .map(MyReservationWaitingResponse::from)
                 .toList();
     }
 
@@ -108,7 +114,18 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
+        waitingRepository.findByReservation_id(id)
+                .stream()
+                .min(Comparator.comparing(Waiting::getCreatedAt))
+                .ifPresentOrElse(this::promoteWaiting, () -> reservationRepository.deleteById(id));
+    }
+
+    private void promoteWaiting(Waiting waiting) {
+        Reservation promotedReservation = waiting.promoteToReservation();
+
+        reservationRepository.save(promotedReservation);
+        waitingRepository.deleteById(waiting.getId());
     }
 }
