@@ -18,7 +18,7 @@ public record ReservationRequest(Long memberId, LocalDate date, Long timeId, Lon
                 memberReservationRequest.timeId(), memberReservationRequest.themeId());
     }
 
-    public Reservation toEntity(Member member, TimeSlot time, Theme theme) {
+    public Reservation createNewBooking(Member member, TimeSlot time, Theme theme) {
         return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
     }
 

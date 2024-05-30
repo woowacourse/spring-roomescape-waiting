@@ -84,7 +84,7 @@ public class ReservationService {
 
         validate(reservationRequest.date(), timeSlot, theme, member);
 
-        Reservation reservation = reservationRequest.toEntity(member, timeSlot, theme);
+        Reservation reservation = reservationRequest.createNewBooking(member, timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -96,7 +96,7 @@ public class ReservationService {
 
         validate(reservationRequest.date(), timeSlot, theme, member);
 
-        Reservation reservation = reservationRequest.toEntity(member, timeSlot, theme);
+        Reservation reservation = reservationRequest.createNewBooking(member, timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }

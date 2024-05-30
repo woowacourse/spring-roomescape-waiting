@@ -15,7 +15,7 @@ public record WaitingRequest(Long memberId, LocalDate date, Long timeId, Long th
                 memberWaitingRequest.timeId(), memberWaitingRequest.themeId());
     }
 
-    public Waiting toEntity(Member member, TimeSlot timeSlot, Theme theme) {
+    public Waiting createNewWaiting(Member member, TimeSlot timeSlot, Theme theme) {
         return new Waiting(null, member, date, timeSlot, theme, ReservationStatus.WAITING);
     }
 

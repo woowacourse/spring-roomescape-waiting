@@ -55,7 +55,7 @@ public class WaitingService {
 
         validate(waitingRequest.date(), timeSlot, theme, member);
 
-        Waiting waiting = waitingRequest.toEntity(member, timeSlot, theme);
+        Waiting waiting = waitingRequest.createNewWaiting(member, timeSlot, theme);
         Waiting createdWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(createdWaiting);
     }
