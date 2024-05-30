@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
@@ -25,6 +26,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getAllThemes() {
         return themeRepository.findAll()
                 .stream()
@@ -32,6 +34,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse addTheme(ThemeRequest request) {
         Theme theme = request.toTheme();
         Theme savedTheme = themeRepository.save(theme);
@@ -39,6 +42,7 @@ public class ThemeService {
         return ThemeResponse.from(savedTheme);
     }
 
+    @Transactional
     public void deleteThemeById(Long id) {
         Theme theme = themeRepository.getThemeById(id);
         validateReservationNotExist(id);
@@ -53,6 +57,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getMostReservedThemes() {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(ANALYSIS_PERIOD);

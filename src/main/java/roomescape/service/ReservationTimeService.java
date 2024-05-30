@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
@@ -25,6 +26,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getAllReservationTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -32,6 +34,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResponse addReservationTime(ReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
@@ -39,6 +42,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
+    @Transactional
     public void deleteReservationTimeById(Long id) {
         ReservationTime reservationTime = reservationTimeRepository.getReservationTimeById(id);
         boolean exist = reservationRepository.existsByReservationTimeId(id);
@@ -49,6 +53,7 @@ public class ReservationTimeService {
         reservationTimeRepository.delete(reservationTime);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getReservationTimeBookedStatus(LocalDate date, Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<ReservationTime> reservedTimes = reservationRepository.findAllByDateAndThemeId(date, themeId).stream()

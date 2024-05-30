@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.dto.request.LogInRequest;
@@ -18,6 +19,7 @@ public class AuthService {
         this.jwtProvider = jwtProvider;
     }
 
+    @Transactional(readOnly = true)
     public String logIn(LogInRequest logInRequest) {
         String email = logInRequest.email();
         String password = logInRequest.password();

@@ -23,7 +23,7 @@ public class ReservationDeletionService {
     @Transactional
     public void deleteById(Long id, Member member) {
         validateMemberMadeReservation(id, member);
-        this.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 
     private void validateMemberMadeReservation(Long id, Member member) {

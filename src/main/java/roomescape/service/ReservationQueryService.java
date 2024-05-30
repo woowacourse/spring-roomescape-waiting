@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
@@ -21,6 +22,7 @@ public class ReservationQueryService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservedReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -29,6 +31,7 @@ public class ReservationQueryService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllWaitingReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -37,6 +40,7 @@ public class ReservationQueryService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMyReservations(Member member) {
         return reservationRepository.findByMemberId(member.getId()).stream()
                 .map(this::getMyReservationsWithWaitRank)
@@ -54,6 +58,7 @@ public class ReservationQueryService {
         return MyReservationResponse.of(reservation, waitingRank);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getFilteredReservations(
             Long themeId,
             Long memberId,
