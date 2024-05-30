@@ -1,4 +1,4 @@
-package roomescape.service.exception;
+package roomescape.domain.exception;
 
 import org.springframework.http.HttpStatus;
 import roomescape.controller.exception.BaseCustomException;

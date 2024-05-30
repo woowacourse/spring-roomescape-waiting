@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import roomescape.service.exception.ResourceNotFoundCustomException;
+import roomescape.domain.exception.ResourceNotFoundCustomException;
 
 import java.time.LocalDate;
 import java.util.List;

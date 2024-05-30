@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.dto.request.LogInRequest;
-import roomescape.service.exception.ResourceNotFoundCustomException;
+import roomescape.domain.exception.ResourceNotFoundCustomException;
 import roomescape.util.JwtProvider;
 
 @Service

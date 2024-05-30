@@ -1,7 +1,7 @@
 package roomescape.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.service.exception.ResourceNotFoundCustomException;
+import roomescape.domain.exception.ResourceNotFoundCustomException;
 
 import java.util.Optional;
 
