@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     requestRead(RESERVATION_API_ENDPOINT)
         .then(render)
-        .catch(error => console.error('Error fetching reservations:', error));
+        .catch(error => {
+            console.error('Error fetching reservations:', error);
+            alert('예약 정보를 불러오는 데 실패했습니다.');
+        });
 
     fetchTimes();
 });

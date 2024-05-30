@@ -1,0 +1,15 @@
+insert into reservation (id, detail_id, member_id, status, created_at)
+values (1, 1, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (2, 1, 2, 'WAITING', dateadd('day', 1, current_date)),
+       (3, 1, 3, 'WAITING', dateadd('day', 1, current_date)),
+       (4, 1, 4, 'WAITING', dateadd('day', 1, current_date)),
+       (8, 2, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (9, 3, 1, 'WAITING', dateadd('day', 1, current_date)),
+       (10, 4, 1, 'WAITING', dateadd('day', 1, current_date)),
+       (11, 5, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (12, 6, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (13, 7, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (14, 8, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (15, 9, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (16, 10, 1, 'RESERVED', dateadd('day', 1, current_date)),
+       (17, 11, 1, 'WAITING', dateadd('day', 1, current_date));

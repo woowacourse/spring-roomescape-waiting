@@ -89,7 +89,7 @@ function fetchAvailableTimes(date, themeId) {
     [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
           요청 포맷에 맞게 설정
     */
-    const queryString = new URLSearchParams({'date': date, 'theme-id': themeId});
+    const queryString = new URLSearchParams({'date': date, 'themeId': themeId});
     fetch('/times/available?' + queryString, { // 예약 가능 시간 조회 API endpoint
         method: 'GET',
         headers: {
@@ -203,14 +203,14 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
         /*
         TODO: [3단계] 예약 대기 생성 요청 API 호출
          */
-        fetch('', {
+        fetch('/reservations', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

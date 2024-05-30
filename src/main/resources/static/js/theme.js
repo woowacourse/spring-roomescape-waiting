@@ -1,5 +1,6 @@
 let isEditing = false;
-const API_ENDPOINT = '/themes';
+const API_ENDPOINT = '/admin/themes';
+const GET_API_ENDPOINT = '/themes';
 const cellFields = ['id', 'name', 'description', 'thumbnail'];
 const createCellFields = ['', createInput(), createInput(), createInput()];
 
@@ -117,7 +118,7 @@ function requestCreate(data) {
 }
 
 function requestRead() {
-    return fetch(API_ENDPOINT)
+    return fetch(GET_API_ENDPOINT)
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');

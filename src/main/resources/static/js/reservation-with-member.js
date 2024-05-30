@@ -1,5 +1,5 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
+const RESERVATION_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
@@ -192,19 +192,16 @@ function deleteRow(event) {
 function applyFilter(event) {
     event.preventDefault();
 
-    const selectTheme = document.getElementById('theme');
-    const selectName = document.getElementById('member');
-
-    const theme = selectTheme.options[selectTheme.selectedIndex].text;
-    const name = selectName.options[selectName.selectedIndex].text;
-    const from = document.getElementById('date-from').value;
-    const to = document.getElementById('date-to').value;
+    const themeId = document.getElementById('theme').value;
+    const memberId = document.getElementById('member').value;
+    const dateFrom = document.getElementById('date-from').value;
+    const dateTo = document.getElementById('date-to').value;
 
     /*
     [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
           요청 포맷에 맞게 설정
     */
-    fetch('/reservations/search?' + new URLSearchParams({from: from, to: to, name: name, theme: theme}), { // 예약 검색 API 호출
+    fetch('/admin/reservations/search?' + new URLSearchParams({from: dateFrom, to: dateTo, memberId: memberId, themeId: themeId}), { // 예약 검색 API 호출
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -223,7 +220,7 @@ function requestCreate(reservation) {
         body: JSON.stringify(reservation)
     };
 
-    return fetch('/admin/reservations', requestOptions)
+    return fetch(RESERVATION_API_ENDPOINT, requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');
