@@ -4,6 +4,7 @@ GET localhost:8080/reservations
 ### 예약 추가 요청
 POST localhost:8080/reservations
 Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwicm9sZSI6Im5vcm1hbCIsIm5hbWUiOiJuYW1lIiwiZXhwIjoxNzE3MDQ1NzY3fQ.k1lpg4_GG6W15DpfAFSudaO3rsMXUZASavl7Ma-cNKHHIUFNP0yDcvFSPf6K5PQxBRD6RDXIFIS03TJYnGT1mw
 
 {
   "date": "2024-10-11",

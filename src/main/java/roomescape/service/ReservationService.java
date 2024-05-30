@@ -21,6 +21,7 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ReservationWaitRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.member.AuthenticationFailureException;
+import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
@@ -73,9 +74,11 @@ public class ReservationService {
 
     private Reservation verifyReservation(ReservationRequest request, ReservationTime time, Theme theme) {
         Reservation reservation = request.toReservation(time, theme);
-        boolean isExist = reservationRepository.existsByDateAndTimeAndTheme(request.date(), time, theme);
         reservation.validateDateTimeReservation(new CurrentDueTimePolicy());
-        reservation.validateDuplicateDateTime(isExist);
+        reservationRepository.findByDateAndTimeAndTheme(request.date(), time, theme)
+                .ifPresent(v -> {
+                    throw new DuplicatedReservationException();
+                });
         return reservation;
     }
 

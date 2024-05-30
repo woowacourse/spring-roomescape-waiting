@@ -19,7 +19,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.domain.policy.ReservationDueTimePolicy;
-import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 
 @Entity
@@ -49,12 +48,6 @@ public class Reservation {
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme) {
         this(null, date, time, theme);
-    }
-
-    public void validateDuplicateDateTime(boolean isExist) {
-        if (isExist) {
-            throw new DuplicatedReservationException();
-        }
     }
 
     public void validateDateTimeReservation(ReservationDueTimePolicy timePolicy) {

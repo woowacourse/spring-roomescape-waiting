@@ -9,39 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import roomescape.domain.policy.FixeDueTimePolicy;
 import roomescape.domain.policy.ReservationDueTimePolicy;
-import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 
 class ReservationTest {
-    @Test
-    @DisplayName("중복된 예약이 있는지 검증한다 - 예외 발생")
-    void validateDuplicateReservation_ShouldThrowException_WhenHasDuplicateReservations() {
-        // given
-        ReservationTime time = new ReservationTime(LocalTime.of(1, 1));
-        Theme theme = new Theme("a", "a", "a");
-        LocalDate date = LocalDate.of(2023, 1, 1);
-        Reservation sut = new Reservation(date, time, theme);
-
-        // when & them
-        Assertions.assertThatThrownBy(() -> sut.validateDuplicateDateTime(true))
-                .isInstanceOf(DuplicatedReservationException.class);
-    }
-
-    @Test
-    @DisplayName("중복된 예약이 있는 검증한다 - 통과")
-    void validateDuplicateReservation_ShouldVerifyDuplicateReservations() {
-        // given
-        LocalDate date = LocalDate.of(2023, 1, 1);
-        ReservationTime time = new ReservationTime(LocalTime.of(1, 1));
-        Theme theme = new Theme("a", "a", "a");
-
-        Reservation sut = new Reservation(date, time, theme);
-
-        // when & them
-        Assertions.assertThatCode(() -> sut.validateDuplicateDateTime(false))
-                .doesNotThrowAnyException();
-    }
-
+    
     @Test
     @DisplayName("예약 가능일 정책을 벗어난 예약은 예외를 발생시킨다 - 예외 발생")
     void validateDateTimeReservation_ShouldThrowException_WhenViolateReservationTimePolicy() {

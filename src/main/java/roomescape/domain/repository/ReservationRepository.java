@@ -21,7 +21,7 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     void delete(Reservation reservation);
 
