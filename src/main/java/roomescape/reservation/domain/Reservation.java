@@ -42,10 +42,17 @@ public class Reservation {
     }
 
     public Reservation(Long id, Member member, ReservationContent reservationContent, LocalDateTime createdAt) {
+        validate(member, reservationContent, createdAt);
         this.id = id;
         this.member = member;
         this.reservationContent = reservationContent;
         this.createdAt = createdAt;
+    }
+
+    private void validate(Member member, ReservationContent reservationContent, LocalDateTime createdAt) {
+        Objects.requireNonNull(member, "Member은 null이 될 수 없습니다.");
+        Objects.requireNonNull(reservationContent, "RservationContent는 null이 될 수 없습니다.");
+        Objects.requireNonNull(createdAt, "createdAt은 null이 될 수 없습니다.");
     }
 
     @PrePersist
