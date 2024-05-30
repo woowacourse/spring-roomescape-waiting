@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import roomescape.exception.BadRequestException;
-import roomescape.member.domain.MemberRole;
 
 @Entity
 public class Theme {

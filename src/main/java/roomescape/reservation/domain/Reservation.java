@@ -16,7 +16,6 @@ import jakarta.persistence.UniqueConstraint;
 
 import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRole;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 

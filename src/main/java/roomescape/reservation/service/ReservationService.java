@@ -70,7 +70,7 @@ public class ReservationService {
     }
 
     public void checkExistsReservation(Long detailId) {
-        if(existsByDetailId(detailId)) {
+        if (existsByDetailId(detailId)) {
             throw new BadRequestException("예약이 존재하지 않으므로 예약 대기할 수 없습니다.");
         }
     }
