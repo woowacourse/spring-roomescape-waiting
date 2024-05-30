@@ -4,12 +4,13 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
-import roomescape.domain.ReservationStatus;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static roomescape.domain.Reservation.Status;
 
 @Service
 public class ReservationQueryService {
@@ -23,7 +24,7 @@ public class ReservationQueryService {
     public List<ReservationResponse> getAllReservedReservations() {
         return reservationRepository.findAll()
                 .stream()
-                .filter(reservation -> reservation.getReservationStatus().isReserved())
+                .filter(Reservation::isReserved)
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -31,7 +32,7 @@ public class ReservationQueryService {
     public List<ReservationResponse> getAllWaitingReservations() {
         return reservationRepository.findAll()
                 .stream()
-                .filter(reservation -> reservation.getReservationStatus().isWaiting())
+                .filter(Reservation::isWaiting)
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -44,9 +45,9 @@ public class ReservationQueryService {
 
     private MyReservationResponse getMyReservationsWithWaitRank(Reservation reservation) {
         long waitingRank = 0L;
-        if (reservation.getReservationStatus().isWaiting()) {
+        if (reservation.isWaiting()) {
             long waitingCountsInFrontOfMe = reservationRepository
-                    .countPreviousReservationsWithSameDateThemeTimeAndStatus(reservation.getId(), ReservationStatus.WAITING);
+                    .countPreviousReservationsWithSameDateThemeTimeAndStatus(reservation.getId(), Status.WAITING);
             waitingRank = waitingCountsInFrontOfMe + 1;
         }
 
@@ -58,7 +59,7 @@ public class ReservationQueryService {
             Long memberId,
             LocalDate dateFrom,
             LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.filter(themeId, memberId, dateFrom, dateTo, ReservationStatus.RESERVED);
+        List<Reservation> reservations = reservationRepository.filter(themeId, memberId, dateFrom, dateTo, Status.RESERVED);
 
         return reservations.stream()
                 .map(ReservationResponse::from)

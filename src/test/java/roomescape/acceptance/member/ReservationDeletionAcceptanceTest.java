@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.MyReservationResponse;
 
@@ -24,6 +23,7 @@ import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER3_THEME2_24
 import static roomescape.acceptance.Fixture.customer1Token;
 import static roomescape.acceptance.Fixture.customer2Token;
 import static roomescape.acceptance.Fixture.customer3Token;
+import static roomescape.domain.Reservation.Status;
 
 @DisplayName("고객이 예약 대기를 삭제한다.")
 class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
@@ -37,7 +37,7 @@ class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
                 DynamicTest.dynamicTest("고객3은 두번째로 대기한다.", () -> {
                     MyReservationResponse myReservationResponse = sendRequestToGetWaitingStatus(reservation, customer3Token);
 
-                    assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(ReservationStatus.WAITING);
+                    assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(Status.WAITING);
                     assertThat(myReservationResponse.waiting().waitingRank()).isEqualTo(2L);
                 }),
 
@@ -48,7 +48,7 @@ class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
                 DynamicTest.dynamicTest("고객3은 첫번째로 대기한다.", () -> {
                     MyReservationResponse myReservationResponse = sendRequestToGetWaitingStatus(reservation, customer3Token);
 
-                    assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(ReservationStatus.WAITING);
+                    assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(Status.WAITING);
                     assertThat(myReservationResponse.waiting().waitingRank()).isEqualTo(1L);
                 })
         );

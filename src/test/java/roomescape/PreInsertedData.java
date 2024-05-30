@@ -9,8 +9,8 @@ import roomescape.domain.Theme;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static roomescape.domain.ReservationStatus.RESERVED;
-import static roomescape.domain.ReservationStatus.WAITING;
+import static roomescape.domain.Reservation.Status.RESERVED;
+import static roomescape.domain.Reservation.Status.WAITING;
 
 public class PreInsertedData {
 

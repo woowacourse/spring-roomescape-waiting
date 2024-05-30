@@ -15,6 +15,8 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 
+import static roomescape.domain.Reservation.Status.RESERVED;
+
 @Getter
 @EqualsAndHashCode(of = "id")
 @Entity
@@ -30,7 +32,7 @@ public class Reservation {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ReservationStatus reservationStatus;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
@@ -45,20 +47,34 @@ public class Reservation {
     }
 
     @Builder
-    public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme, ReservationStatus reservationStatus) {
+    public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme, Status reservationStatus) {
         this(null, member, date, reservationTime, theme, reservationStatus);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme, ReservationStatus reservationStatus) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme, Status status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
-        this.reservationStatus = reservationStatus;
+        this.status = status;
     }
 
-    public void setStatus(ReservationStatus reservationStatus) {
-        this.reservationStatus = reservationStatus;
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public boolean isReserved() {
+        return this.status == RESERVED;
+    }
+
+    public boolean isWaiting() {
+        return this.status == Status.WAITING;
+    }
+
+    public enum Status {
+        RESERVED,
+        WAITING,
+        ;
     }
 }

@@ -27,6 +27,7 @@ import static roomescape.PreInsertedData.THEME_1;
 import static roomescape.PreInsertedData.TIME_10_O0;
 import static roomescape.acceptance.Fixture.adminToken;
 import static roomescape.acceptance.Fixture.customer1Token;
+import static roomescape.domain.Reservation.Status;
 
 class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
 
@@ -48,7 +49,7 @@ class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
 
             assertAll(
                     () -> assertThat(response.member().id()).isEqualTo(CUSTOMER_1.getId()),
-                    () -> assertThat(response.reservationStatus().isReserved()).isTrue()
+                    () -> assertThat(response.status()).isEqualTo(Status.RESERVED)
             );
         }
 
@@ -77,7 +78,7 @@ class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
                                         .extract().as(ReservationResponse.class);
                                 assertAll(
                                         () -> assertThat(response.member().id()).isEqualTo(CUSTOMER_1.getId()),
-                                        () -> assertThat(response.reservationStatus().isWaiting()).isTrue()
+                                        () -> assertThat(response.status()).isEqualTo(Status.WAITING)
                                 );
                             }
                     )

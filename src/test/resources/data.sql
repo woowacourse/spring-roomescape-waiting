@@ -14,7 +14,7 @@ VALUES ('어드민', 'admin@email.com', 'admin', 'ADMIN'),
        ('고객2', 'customer2@email.com', 'customer2', 'CUSTOMER'),
        ('고객3', 'customer3@email.com', 'customer3', 'CUSTOMER');
 
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id, reservation_status)
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id, status)
 VALUES (2, '2024-05-01', 2, 2, 'RESERVED'),
        (2, '2024-05-02', 2, 3, 'RESERVED'),
        (2, '2024-05-01', 3, 2, 'RESERVED'),

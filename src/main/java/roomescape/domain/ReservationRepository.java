@@ -9,6 +9,8 @@ import roomescape.domain.exception.ResourceNotFoundCustomException;
 import java.time.LocalDate;
 import java.util.List;
 
+import static roomescape.domain.Reservation.Status;
+
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -45,14 +47,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (:memberId IS NULL OR r.member.id = :memberId)
                 AND (:from IS NULL OR r.date >= :from)
                 AND (:to IS NULL OR r.date <= :to)
-                AND (r.reservationStatus = :reservationStatus)
+                AND (r.status = :status)
             """)
     List<Reservation> filter(
             @Param("themeId") Long themeId,
             @Param("memberId") Long memberId,
             @Param("from") LocalDate from,
             @Param("to") LocalDate to,
-            @Param("reservationStatus") ReservationStatus reservationStatus);
+            @Param("status") Status status);
 
     @Query("""
             SELECT COUNT(r)
@@ -63,9 +65,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND r.reservationTime.id = s.reservationTime.id
             WHERE r.id < s.id
                 AND s.id = :reservationId
-                AND r.reservationStatus = :reservationStatus
+                AND r.status = :status
     """)
-    Long countPreviousReservationsWithSameDateThemeTimeAndStatus(@Param("reservationId") Long reservationId, @Param("reservationStatus") ReservationStatus reservationStatus);
+    Long countPreviousReservationsWithSameDateThemeTimeAndStatus(@Param("reservationId") Long reservationId, @Param("status") Status status);
 
     @Query("""
             SELECT r
@@ -75,10 +77,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND r.theme.id = s.theme.id
                 AND r.reservationTime.id = s.reservationTime.id
             WHERE s.id = :reservationId
-                AND r.reservationStatus = :reservationStatus
+                AND r.status = :status
             ORDER BY r.id ASC
     """)
-    List<Reservation> findReservationsWithSameDateThemeTimeAndStatusOrderedById(@Param("reservationId") Long reservationId, @Param("reservationStatus") ReservationStatus reservationStatus);
+    List<Reservation> findReservationsWithSameDateThemeTimeAndStatusOrderedById(@Param("reservationId") Long reservationId, @Param("status") Status status);
 
 
     default Reservation getReservationById(Long id) {

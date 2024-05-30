@@ -18,6 +18,6 @@ public record MyReservationResponse(
                 ThemeResponse.from(reservation.getTheme()),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getReservationTime()),
-                new WaitingResponse(reservation.getReservationStatus(), waitingRank));
+                new WaitingResponse(reservation.getStatus(), waitingRank));
     }
 }

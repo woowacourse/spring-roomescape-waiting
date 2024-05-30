@@ -13,7 +13,6 @@ import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.MyReservationResponse;
 
@@ -26,6 +25,8 @@ import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240503_120
 import static roomescape.acceptance.Fixture.adminToken;
 import static roomescape.acceptance.Fixture.customer2Token;
 import static roomescape.acceptance.Fixture.customer3Token;
+import static roomescape.domain.Reservation.Status.RESERVED;
+import static roomescape.domain.Reservation.Status.WAITING;
 
 class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
 
@@ -49,14 +50,14 @@ class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
                     DynamicTest.dynamicTest("고객2는 첫번째로 대기한다.", () -> {
                         MyReservationResponse myReservationResponse = sendRequestToGetWaitingStatus(reservation, customer2Token);
 
-                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(ReservationStatus.WAITING);
+                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(WAITING);
                         assertThat(myReservationResponse.waiting().waitingRank()).isEqualTo(1L);
                     }),
 
                     DynamicTest.dynamicTest("고객3은 두번째로 대기한다.", () -> {
                         MyReservationResponse myReservationResponse = sendRequestToGetWaitingStatus(reservation, customer3Token);
 
-                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(ReservationStatus.WAITING);
+                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(WAITING);
                         assertThat(myReservationResponse.waiting().waitingRank()).isEqualTo(2L);
                     }),
 
@@ -67,13 +68,13 @@ class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
                     DynamicTest.dynamicTest("고객2의 예약이 예약된 상태로 바뀐다.", () -> {
                         MyReservationResponse myReservationResponse = sendRequestToGetWaitingStatus(reservation, customer2Token);
 
-                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(ReservationStatus.RESERVED);
+                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(RESERVED);
                     }),
 
                     DynamicTest.dynamicTest("고객3의 예약 대기가 첫번째로 바뀐다.", () -> {
                         MyReservationResponse myReservationResponse = sendRequestToGetWaitingStatus(reservation, customer3Token);
 
-                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(ReservationStatus.WAITING);
+                        assertThat(myReservationResponse.waiting().reservationStatus()).isEqualTo(WAITING);
                         assertThat(myReservationResponse.waiting().waitingRank()).isEqualTo(1L);
                     })
             );

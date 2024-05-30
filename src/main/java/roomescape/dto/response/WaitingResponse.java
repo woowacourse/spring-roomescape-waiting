@@ -1,8 +1,8 @@
 package roomescape.dto.response;
 
-import roomescape.domain.ReservationStatus;
+import static roomescape.domain.Reservation.Status;
 
 public record WaitingResponse(
-        ReservationStatus reservationStatus,
+        Status reservationStatus,
         Long waitingRank) {
 }

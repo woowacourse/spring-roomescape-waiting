@@ -22,8 +22,7 @@ import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER2_THEME2_24
 import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100;
 import static roomescape.PreInsertedData.THEME_2;
 import static roomescape.PreInsertedData.THEME_3;
-import static roomescape.domain.ReservationStatus.RESERVED;
-import static roomescape.domain.ReservationStatus.WAITING;
+import static roomescape.domain.Reservation.Status;
 
 class ReservationRepositoryTest extends BaseRepositoryTest {
 
@@ -48,7 +47,7 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     @MethodSource("filterProvider")
     void filter(Long themeId, Long memberId, LocalDate from, LocalDate to, List<Reservation> expected) {
 
-        List<Reservation> filtered = reservationRepository.filter(themeId, memberId, from, to, RESERVED);
+        List<Reservation> filtered = reservationRepository.filter(themeId, memberId, from, to, Status.RESERVED);
 
         assertThat(filtered).containsAll(expected);
     }
@@ -94,7 +93,7 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     void findReservationsWithSameDateThemeTimeAndStatus() {
         Long id = RESERVATION_CUSTOMER1_THEME2_240501_1100.getId();
 
-        List<Reservation> reservations = reservationRepository.findReservationsWithSameDateThemeTimeAndStatusOrderedById(id, WAITING);
+        List<Reservation> reservations = reservationRepository.findReservationsWithSameDateThemeTimeAndStatusOrderedById(id, Status.WAITING);
 
         assertThat(reservations).containsExactly(
                 RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100,
@@ -107,7 +106,7 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     void countPreviousReservationsWithSameDateThemeTimeAndStatus() {
         Long id = RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100.getId();
 
-        Long waitingCountInFrontOfMe = reservationRepository.countPreviousReservationsWithSameDateThemeTimeAndStatus(id, WAITING);
+        Long waitingCountInFrontOfMe = reservationRepository.countPreviousReservationsWithSameDateThemeTimeAndStatus(id, Status.WAITING);
 
         assertThat(waitingCountInFrontOfMe).isEqualTo(1L);
     }

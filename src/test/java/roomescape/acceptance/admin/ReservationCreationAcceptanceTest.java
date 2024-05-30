@@ -24,6 +24,7 @@ import static roomescape.PreInsertedData.CUSTOMER_2;
 import static roomescape.PreInsertedData.THEME_1;
 import static roomescape.PreInsertedData.TIME_10_O0;
 import static roomescape.acceptance.Fixture.adminToken;
+import static roomescape.domain.Reservation.Status.WAITING;
 
 @DisplayName("관리자가 예약을 추가한다.")
 class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
@@ -72,7 +73,7 @@ class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
                                     .extract().as(ReservationResponse.class);
                             assertAll(
                                     () -> assertThat(response.member().id()).isEqualTo(CUSTOMER_2.getId()),
-                                    () -> assertThat(response.reservationStatus().isWaiting()).isTrue()
+                                    () -> assertThat(response.status()).isEqualTo(WAITING)
                             );
                         }
                 )
