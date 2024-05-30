@@ -2,6 +2,8 @@ package roomescape.service.dto.request;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.stream.Stream;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -12,8 +14,8 @@ public record WaitingRequest(LocalDate date, Long timeId, Long themeId) {
         validate(date, timeId, themeId);
     }
 
-    private void validate(LocalDate date, Long timeId, Long themeId) {
-        if (date == null || timeId == null || themeId == null) {
+    private void validate(Object... values) {
+        if (Stream.of(values).anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException();
         }
     }

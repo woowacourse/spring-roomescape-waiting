@@ -1,5 +1,6 @@
 package roomescape.service.dto.request;
 
+import java.util.stream.Stream;
 import roomescape.domain.Theme;
 
 public record ThemeRequest(String name, String description, String thumbnail) {
@@ -7,8 +8,8 @@ public record ThemeRequest(String name, String description, String thumbnail) {
         validate(name, description, thumbnail);
     }
 
-    private void validate(String name, String description, String thumbnail) {
-        if (name.isBlank() || description.isBlank() || thumbnail.isBlank()) {
+    private void validate(String... values) {
+        if (Stream.of(values).anyMatch(String::isBlank)) {
             throw new IllegalArgumentException();
         }
     }

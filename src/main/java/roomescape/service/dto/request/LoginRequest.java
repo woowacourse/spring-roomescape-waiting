@@ -1,12 +1,15 @@
 package roomescape.service.dto.request;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+
 public record LoginRequest(String email, String password) {
     public LoginRequest {
         validate(email, password);
     }
 
-    private void validate(String email, String password) {
-        if (email.isBlank() || password.isBlank()) {
+    private void validate(String... values) {
+        if (Stream.of(values).anyMatch(String::isBlank)) {
             throw new IllegalArgumentException();
         }
     }
