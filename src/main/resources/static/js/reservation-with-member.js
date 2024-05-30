@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead(RESERVATION_API_ENDPOINT)
+    requestRead("/admin/reservations?status=RESERVATION")
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
@@ -233,6 +233,7 @@ function requestDelete(id) {
     return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
         .then(response => {
             if (response.status !== 200) throw new Error('Delete failed');
+            location.reload();
         });
 }
 

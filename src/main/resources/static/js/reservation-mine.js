@@ -41,12 +41,10 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-
-    const endpoint = '';
-    return fetch(endpoint, {
+    return fetch(`/reservations/${id}`, {
         method: 'DELETE'
     }).then(response => {
-        if (response.status === 204) return;
+        if (response.status === 200) return;
         throw new Error('Delete failed');
     });
 }

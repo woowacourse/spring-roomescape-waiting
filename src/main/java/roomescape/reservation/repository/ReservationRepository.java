@@ -1,12 +1,13 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.data.jpa.repository.Modifying;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 
 public interface ReservationRepository extends CrudRepository<Reservation, Long> {
 
@@ -20,6 +21,11 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
+    int countByDateAndTimeIdAndThemeIdAndCreatedAtBefore(LocalDate date,
+                                                         long timeId,
+                                                         long themeId,
+                                                         LocalDateTime createdAt);
+
     List<Reservation> findByDateAndThemeId(LocalDate date, long themeId);
 
     @Query("""
@@ -29,13 +35,13 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
             LEFT JOIN FETCH r.time
             WHERE (:themeId IS NULL OR r.theme.id = :themeId)
             AND (:memberId IS NULL OR r.member.id = :memberId)
+            AND (:status IS NULL OR r.status = :status)
             AND (:dateFrom IS NULL OR r.date >= :dateFrom)
             AND (:dateTo IS NULL OR r.date <= :dateTo)
             """)
-    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId,
-                                                             LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByThemeIdAndMemberIdAndStatusAndDateBetween(Long themeId, Long memberId,
+                                                                      Optional<Status> status,
+                                                                      LocalDate dateFrom, LocalDate dateTo);
 
-    @Modifying
-    @Query("delete from Reservation where id = :id")
-    int deleteById(@Param("id") long id);
+    Optional<Reservation> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(LocalDate date, long timeId, long themeId);
 }

@@ -15,7 +15,6 @@ import roomescape.global.annotation.AuthenticationPrincipal;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.MemberReservationResponse;
-import roomescape.reservation.controller.dto.response.ReservationDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -53,8 +52,8 @@ public class MemberReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ReservationDeleteResponse> delete(@PathVariable("id") final long id) {
-        ReservationDeleteResponse reservationDeleteResponse = reservationService.delete(id);
-        return ResponseEntity.ok().body(reservationDeleteResponse);
+    public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
+        reservationService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }
