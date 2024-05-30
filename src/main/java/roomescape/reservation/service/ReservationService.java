@@ -141,7 +141,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public void removeMyReservation(long reservationId, MemberProfileInfo memberProfileInfo) throws IllegalAuthorizationException {
+    public void cancelMyReservation(long reservationId, MemberProfileInfo memberProfileInfo) throws IllegalAuthorizationException {
         List<Reservation> myReservations = reservationRepository.findAllByMember_Id(memberProfileInfo.id());
         myReservations.stream()
                 .filter(reservation -> reservation.getId().equals(reservationId))

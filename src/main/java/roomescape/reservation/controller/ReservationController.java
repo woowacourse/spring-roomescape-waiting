@@ -60,7 +60,7 @@ public class ReservationController {
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable long reservationId,
             MemberProfileInfo memberProfileInfo) {
-        reservationService.removeMyReservation(reservationId, memberProfileInfo);
+        reservationService.cancelMyReservation(reservationId, memberProfileInfo);
         return ResponseEntity.noContent()
                 .build();
     }
