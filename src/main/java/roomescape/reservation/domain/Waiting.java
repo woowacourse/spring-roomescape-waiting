@@ -5,7 +5,10 @@ import roomescape.exceptions.MissingRequiredFieldException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Entity
@@ -57,7 +60,10 @@ public class Waiting {
     }
 
     public boolean isBeforeNow() {
-        return reservationTime.isBeforeNow(date);
+        Instant instantToCompare = LocalDateTime.of(date, reservationTime.getStartAt())
+                .atZone(ZoneId.of("Asia/Seoul"))
+                .toInstant();
+        return instantToCompare.isBefore(Instant.now());
     }
 
     public Long getId() {

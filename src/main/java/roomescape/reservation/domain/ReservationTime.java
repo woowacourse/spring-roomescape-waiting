@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import roomescape.exceptions.MissingRequiredFieldException;
 
-import java.time.*;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
@@ -36,13 +36,6 @@ public class ReservationTime {
         if (startAt == null) {
             throw new MissingRequiredFieldException("시작 시간은 필수 값입니다.");
         }
-    }
-
-    public boolean isBeforeNow(LocalDate date) {
-        Instant instantToCompare = LocalDateTime.of(date, startAt)
-                .atZone(ZoneId.of("Asia/Seoul"))
-                .toInstant();
-        return instantToCompare.isBefore(Instant.now());
     }
 
     public boolean isBelongTo(List<Long> timeIds) {
