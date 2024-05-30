@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import roomescape.controller.request.ReservationTimeRequest;
@@ -20,8 +22,8 @@ import roomescape.repository.ReservationTimeRepository;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-
     private final ReservationRepository reservationRepository;
+    private final Logger logger = LoggerFactory.getLogger(ReservationTimeService.class);
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
                                   ReservationRepository reservationRepository) {
@@ -36,7 +38,10 @@ public class ReservationTimeService {
 
     public ReservationTime findReservationTime(long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
+                .orElseThrow(() -> {
+                    logger.error("아이디에 해당하는 예약 시간이 존재하지 않습니다. : 예약 시간 아이디={}", id);
+                    return new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id));
+                });
     }
 
     public ReservationTime addReservationTime(ReservationTimeRequest request) {
@@ -64,6 +69,7 @@ public class ReservationTimeService {
     private void validateExistTime(LocalTime startAt) {
         long countReservationTimeByStartAt = reservationTimeRepository.countByStartAt(startAt);
         if (countReservationTimeByStartAt > 0) {
+            logger.error("이미 존재하는 시간을 조회했습니다 : 조회한 시간={}", startAt);
             throw new DuplicatedException("이미 존재하는 시간입니다.");
         }
     }
@@ -73,6 +79,7 @@ public class ReservationTimeService {
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
         long countedReservationByTime = reservationRepository.countByTime(time);
         if (countedReservationByTime > 0) {
+            logger.error("삭제하려는 사간으로 예약한 예약내역이 존재하여 시간을 삭제할 수 없습니다 : 예약 시간 아이디={}", id);
             throw new BadRequestException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
@@ -80,6 +87,7 @@ public class ReservationTimeService {
     private void validateNotExistReservationTime(long id) {
         long countedReservationTime = reservationTimeRepository.countById(id);
         if (countedReservationTime <= 0) {
+            logger.error("아이디에 해당하는 예약 시간이 존재하지 않습니다 : 예약 시간 아이디={}", id);
             throw new NotFoundException("id(%s)에 해당하는 예약 시간이 존재하지 않습니다.".formatted(id));
         }
     }

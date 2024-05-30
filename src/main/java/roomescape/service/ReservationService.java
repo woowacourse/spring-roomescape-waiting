@@ -12,6 +12,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,8 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final DeletedReservationRepository deletedReservationRepository;
+
+    private final Logger logger = LoggerFactory.getLogger(ReservationService.class);
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
@@ -116,6 +120,7 @@ public class ReservationService {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         if (reservationDateTime.isBefore(now)) {
+            logger.error("현재 시간 이전으로 예약할 수 없습니다 : 현재 시간={} 예약 시간={}", now, reservationDateTime);
             throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(now));
         }
     }
@@ -125,7 +130,8 @@ public class ReservationService {
         Theme theme = findThemeById(themeId);
         long countReservation = reservationRepository.countByDateAndTimeAndTheme(date, reservationTime, theme);
         if (countReservation > 0) {
-            throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");
+            logger.error("이미 예약이 존재합니다 : 예약 시간={}", LocalDateTime.of(date, reservationTime.getStartAt()));
+            throw new DuplicatedException("이미 예약이 존재합니다.");
         }
     }
 
@@ -136,13 +142,18 @@ public class ReservationService {
         long countReservation = reservationRepository
                 .countByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member);
         if (countReservation > 0) {
+            logger.error("이미 예약을 했거나 예약 대기를 걸어놓았습니다 : 사용자 아이디={} 예약 시간={} 예약 테마 아이디 ={}",
+                    member.getId(), LocalDateTime.of(date, reservationTime.getStartAt()), theme.getId());
             throw new DuplicatedException("이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
         }
     }
 
     private Reservation findReservationById(long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약은 존재하지 않습니다.".formatted(id)));
+                .orElseThrow(() -> {
+                    logger.error("예약 시간이 존재하지 않습니다 : 예약 아이디={}", id);
+                    return new NotFoundException("아이디가 %s인 예약은 존재하지 않습니다.".formatted(id));
+                });
     }
 
     private List<Reservation> findWaitingReservation(Reservation reservation) {
@@ -160,12 +171,14 @@ public class ReservationService {
 
     private ReservationTime findReservationTimeById(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
+                .orElseThrow(() -> {
+                    logger.error("예약 시간이 존재하지 않습니다 : 예약 시간 아이디={}", timeId);
+                    return new NoSuchElementException("예약 시간이 존재하지 않습니다.");
+                });
     }
 
     private ReservationTime findReservationTime(LocalDate date, long timeId) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
+        ReservationTime reservationTime = findReservationTimeById(timeId);
         validateReservationDateTimeBeforeNow(date, reservationTime.getStartAt());
         return reservationTime;
     }
@@ -173,17 +186,24 @@ public class ReservationService {
     private void validateExistReservation(long id) {
         long count = reservationRepository.countById(id);
         if (count <= 0) {
+            logger.error("아이디에 해당하는 예약이 존재하지 않습니다 : reservationId={}", id);
             throw new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id));
         }
     }
 
     private Theme findThemeById(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId)));
+                .orElseThrow(() -> {
+                    logger.error("아이디에 해당하는 테마가 존재하지 않습니다 : themeId={}", themeId);
+                    return new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId));
+                });
     }
 
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(memberId)));
+                .orElseThrow(() -> {
+                    logger.error("아이디에 해당하는 사용자가 존재하지 않습니다 : memberId={}", memberId);
+                    return new NotFoundException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(memberId));
+                });
     }
 }

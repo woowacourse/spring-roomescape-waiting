@@ -359,7 +359,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest(now().plusDays(2), 1L, 1L);
         assertThatThrownBy(() -> reservationService.addReservation(request, member))
                 .isInstanceOf(DuplicatedException.class)
-                .hasMessage("[ERROR] 이미 해당 시간에 예약이 존재합니다.");
+                .hasMessage("[ERROR] 이미 예약이 존재합니다.");
     }
 
     @DisplayName("사용자가 예약한 예약을 반환한다.")
