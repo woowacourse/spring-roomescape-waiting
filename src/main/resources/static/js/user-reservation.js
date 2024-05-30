@@ -41,13 +41,13 @@ function renderTheme(themes) {
     });
 }
 
-function createSlot(type, text, id, booked) {
+function createSlot(type, text, id, isBooked) {
     const div = document.createElement('div');
     div.className = type + '-slot cursor-pointer bg-light border rounded p-3 mb-2';
     div.textContent = text;
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
-        div.setAttribute('data-time-booked', booked);
+        div.setAttribute('data-time-booked', isBooked);
     }
     return div;
 }
@@ -105,7 +105,7 @@ function renderAvailableTimes(times) {
         return;
     }
     times.forEach(time => {
-        const div = createSlot('time', time.startAt, time.timeId, time.alreadyBooked); // createSlot('time', 시작 시간, time id, 예약 여부)
+        const div = createSlot('time', time.startAt, time.timeId, time.isBooked); // createSlot('time', 시작 시간, time id, 예약 여부)
         timeSlots.appendChild(div);
     });
 }
@@ -125,12 +125,12 @@ function checkDateAndThemeAndTime() {
         } else {
             // 선택된 시간이 예약 가능한 경우
             reserveButton.classList.remove("disabled");
-            waitButton.classList.remove("disabled");
+            waitButton.classList.add("disabled");
         }
     } else {
         // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
         reserveButton.classList.add("disabled");
-        waitButton.classList.remove("disabled");
+        waitButton.classList.add("disabled");
     }
 }
 
