@@ -20,7 +20,6 @@ import static roomescape.service.fixture.TestReservationTimeFactory.createReserv
 import static roomescape.service.fixture.TestThemeFactory.createTheme;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import org.assertj.core.api.SoftAssertions;
@@ -141,7 +140,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addWaitingReservation(request, member))
                 .isInstanceOf(DuplicatedException.class)
-                .hasMessage("[ERROR] 이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
+                .hasMessage("[ERROR] 이미 예약(이)가 존재합니다.");
     }
 
     @DisplayName("이미 예약을 걸어 놓은 사용자가 또 다시 예약을 하면 예외가 발생한다.")
@@ -157,7 +156,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addWaitingReservation(request, member))
                 .isInstanceOf(DuplicatedException.class)
-                .hasMessage("[ERROR] 이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
+                .hasMessage("[ERROR] 이미 예약(이)가 존재합니다.");
     }
 
 
@@ -216,7 +215,7 @@ class ReservationServiceTest {
     void should_throw_exception_when_not_exist_reservation_time() {
         assertThatThrownBy(() -> reservationService.deleteReservation(1000000))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("[ERROR] 해당 id:[1000000] 값으로 예약된 내역이 존재하지 않습니다.");
+                .hasMessage("[ERROR] 아이디가 1000000인 예약가 존재하지 않습니다.");
     }
 
     @DisplayName("승인된 예약을 취소하면 해당 예약이 삭제 예약에 저장되고, 제일 먼저 예약된 대기가 승인으로 바뀐다 ")
@@ -342,7 +341,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest(now().plusDays(2), 1L, 1L);
         assertThatThrownBy(() -> reservationService.addReservation(request, member))
                 .isInstanceOf(DuplicatedException.class)
-                .hasMessage("[ERROR] 이미 예약이 존재합니다.");
+                .hasMessage("[ERROR] 이미 예약(이)가 존재합니다.");
     }
 
     @DisplayName("사용자가 예약한 예약을 반환한다.")

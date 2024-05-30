@@ -40,7 +40,7 @@ public class ReservationTimeService {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("아이디에 해당하는 예약 시간이 존재하지 않습니다. : 예약 시간 아이디={}", id);
-                    return new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id));
+                    return new NotFoundException("예약 시간", id);
                 });
     }
 
@@ -70,13 +70,12 @@ public class ReservationTimeService {
         long countReservationTimeByStartAt = reservationTimeRepository.countByStartAt(startAt);
         if (countReservationTimeByStartAt > 0) {
             logger.error("이미 존재하는 시간을 조회했습니다 : 조회한 시간={}", startAt);
-            throw new DuplicatedException("이미 존재하는 시간입니다.");
+            throw new DuplicatedException("시간");
         }
     }
 
     private void validateReservedTime(long id) {
-        ReservationTime time = reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
+        ReservationTime time = findReservationTime(id);
         long countedReservationByTime = reservationRepository.countByTime(time);
         if (countedReservationByTime > 0) {
             logger.error("삭제하려는 사간으로 예약한 예약내역이 존재하여 시간을 삭제할 수 없습니다 : 예약 시간 아이디={}", id);
@@ -88,7 +87,7 @@ public class ReservationTimeService {
         long countedReservationTime = reservationTimeRepository.countById(id);
         if (countedReservationTime <= 0) {
             logger.error("아이디에 해당하는 예약 시간이 존재하지 않습니다 : 예약 시간 아이디={}", id);
-            throw new NotFoundException("id(%s)에 해당하는 예약 시간이 존재하지 않습니다.".formatted(id));
+            throw new NotFoundException("예약 시간", id);
         }
     }
 

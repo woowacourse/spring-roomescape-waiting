@@ -10,7 +10,6 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +120,7 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         if (reservationDateTime.isBefore(now)) {
             logger.error("현재 시간 이전으로 예약할 수 없습니다 : 현재 시간={} 예약 시간={}", now, reservationDateTime);
-            throw new BadRequestException("현재(%s) 이전 시간으로 예약할 수 없습니다.".formatted(now));
+            throw new BadRequestException(now);
         }
     }
 
@@ -131,7 +130,7 @@ public class ReservationService {
         long countReservation = reservationRepository.countByDateAndTimeAndTheme(date, reservationTime, theme);
         if (countReservation > 0) {
             logger.error("이미 예약이 존재합니다 : 예약 시간={}", LocalDateTime.of(date, reservationTime.getStartAt()));
-            throw new DuplicatedException("이미 예약이 존재합니다.");
+            throw new DuplicatedException("예약");
         }
     }
 
@@ -144,7 +143,7 @@ public class ReservationService {
         if (countReservation > 0) {
             logger.error("이미 예약을 했거나 예약 대기를 걸어놓았습니다 : 사용자 아이디={} 예약 시간={} 예약 테마 아이디 ={}",
                     member.getId(), LocalDateTime.of(date, reservationTime.getStartAt()), theme.getId());
-            throw new DuplicatedException("이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
+            throw new DuplicatedException("예약");
         }
     }
 
@@ -152,7 +151,7 @@ public class ReservationService {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("예약 시간이 존재하지 않습니다 : 예약 아이디={}", id);
-                    return new NotFoundException("아이디가 %s인 예약은 존재하지 않습니다.".formatted(id));
+                    return new NotFoundException("예약", id);
                 });
     }
 
@@ -173,7 +172,7 @@ public class ReservationService {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> {
                     logger.error("예약 시간이 존재하지 않습니다 : 예약 시간 아이디={}", timeId);
-                    return new NoSuchElementException("예약 시간이 존재하지 않습니다.");
+                    return new NotFoundException("예약 시간", timeId);
                 });
     }
 
@@ -187,7 +186,7 @@ public class ReservationService {
         long count = reservationRepository.countById(id);
         if (count <= 0) {
             logger.error("아이디에 해당하는 예약이 존재하지 않습니다 : reservationId={}", id);
-            throw new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id));
+            throw new NotFoundException("예약", id);
         }
     }
 
@@ -195,7 +194,7 @@ public class ReservationService {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> {
                     logger.error("아이디에 해당하는 테마가 존재하지 않습니다 : themeId={}", themeId);
-                    return new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId));
+                    return new NotFoundException("테마", themeId);
                 });
     }
 
@@ -203,7 +202,7 @@ public class ReservationService {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> {
                     logger.error("아이디에 해당하는 사용자가 존재하지 않습니다 : memberId={}", memberId);
-                    return new NotFoundException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(memberId));
+                    return new NotFoundException("사용자", memberId);
                 });
     }
 }

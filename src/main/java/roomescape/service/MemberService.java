@@ -30,7 +30,7 @@ public class MemberService {
         return memberRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("아이디에 해당하는 사용자가 존재하지 않습니다 : 사용자 아이디={}", id);
-                    return new NotFoundException("id가 %s인 사용자가 존재하지 않습니다.");
+                    return new NotFoundException("사용자", id);
                 });
     }
 
