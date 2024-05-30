@@ -1,8 +1,8 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
-const TIME_API_ENDPOINT = '/times';
-const THEME_API_ENDPOINT = '/themes';
-const MEMBER_API_ENDPOINT = '/members';
+const RESERVATION_API_ENDPOINT = '/admin/reservations';
+const TIME_API_ENDPOINT = '/admin/times';
+const THEME_API_ENDPOINT = '/admin/themes';
+const MEMBER_API_ENDPOINT = '/admin/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -180,7 +180,10 @@ function deleteRow(event) {
     const reservationId = row.cells[0].textContent;
 
     requestDelete(reservationId)
-        .then(() => row.remove())
+        .then(() => {
+            row.remove();
+            location.reload();
+        })
         .catch(error => console.error('Error:', error));
 }
 
@@ -198,7 +201,7 @@ function applyFilter(event) {
         'date-from': dateFrom,
         'date-to': dateTo
     });
-    fetch('/reservations?' + queryString, { // 예약 검색 API 호출
+    fetch('/admin/reservations?' + queryString, { // 예약 검색 API 호출
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.helper.RoleAllowed;
 import roomescape.domain.MemberRole;
 import roomescape.service.ThemeService;
-import roomescape.service.dto.ThemeRequest;
-import roomescape.service.dto.ThemeResponse;
+import roomescape.service.dto.request.ThemeRequest;
+import roomescape.service.dto.response.ThemeResponse;
 
 @RestController
 public class ThemeController {
@@ -36,14 +36,14 @@ public class ThemeController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @PostMapping("/themes")
+    @PostMapping("/admin/themes")
     public ResponseEntity<ThemeResponse> saveTheme(@RequestBody ThemeRequest request) {
         ThemeResponse response = themeService.saveTheme(request);
-        return ResponseEntity.created(URI.create("/themes/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/admin/themes/" + response.id())).body(response);
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @DeleteMapping("/themes/{themeId}")
+    @DeleteMapping("/admin/themes/{themeId}")
     public ResponseEntity<Void> deleteTheme(@PathVariable Long themeId) {
         themeService.deleteTheme(themeId);
         return ResponseEntity.noContent().build();

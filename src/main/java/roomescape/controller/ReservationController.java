@@ -18,9 +18,9 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
-import roomescape.service.dto.ReservationMineResponse;
-import roomescape.service.dto.ReservationRequest;
-import roomescape.service.dto.ReservationResponse;
+import roomescape.service.dto.request.ReservationRequest;
+import roomescape.service.dto.response.ReservationMineResponse;
+import roomescape.service.dto.response.ReservationResponse;
 
 @RestController
 public class ReservationController {
@@ -33,7 +33,7 @@ public class ReservationController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @GetMapping("/reservations")
+    @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> findAllReservation(
             @RequestParam(required = false, name = "member-id") Long memberId,
             @RequestParam(required = false, name = "theme-id") Long themeId,
@@ -41,6 +41,15 @@ public class ReservationController {
             @RequestParam(required = false, name = "date-to") LocalDate dateTo) {
         List<ReservationResponse> response = reservationService.findAllReservation(memberId, themeId, dateFrom, dateTo);
         return ResponseEntity.ok().body(response);
+    }
+
+    @RoleAllowed(value = MemberRole.ADMIN)
+    @PostMapping("/admin/reservations")
+    public ResponseEntity<ReservationResponse> saveAdminReservation(@RequestBody AdminReservationRequest request) {
+        ReservationRequest input = new ReservationRequest(request);
+        Member member = memberService.findById(request.getMemberId());
+        ReservationResponse response = reservationService.saveReservation(input, member);
+        return ResponseEntity.created(URI.create("/admin/reservations/" + response.id())).body(response);
     }
 
     @RoleAllowed
@@ -55,20 +64,11 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> saveReservation(@RequestBody ReservationRequest request,
                                                                @LoginMember Member member) {
         ReservationResponse response = reservationService.saveReservation(request, member);
-        return ResponseEntity.created(URI.create("/reservations/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> saveAdminReservation(@RequestBody AdminReservationRequest request) {
-        ReservationRequest input = new ReservationRequest(request);
-        Member member = memberService.findById(request.getMemberId());
-        ReservationResponse response = reservationService.saveReservation(input, member);
-        return ResponseEntity.created(URI.create("/reservations/" + response.getId())).body(response);
-    }
-
-    @RoleAllowed(value = MemberRole.ADMIN)
-    @DeleteMapping("/reservations/{reservationId}")
+    @DeleteMapping("/admin/reservations/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId) {
         reservationService.deleteReservation(reservationId);
         return ResponseEntity.noContent().build();

@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.helper.RoleAllowed;
 import roomescape.domain.MemberRole;
 import roomescape.service.ReservationTimeService;
-import roomescape.service.dto.AvailableReservationTimeResponse;
-import roomescape.service.dto.ReservationTimeRequest;
-import roomescape.service.dto.ReservationTimeResponse;
+import roomescape.service.dto.request.ReservationTimeRequest;
+import roomescape.service.dto.response.AvailableReservationTimeResponse;
+import roomescape.service.dto.response.ReservationTimeResponse;
 
 @RestController
 public class ReservationTimeController {
@@ -27,7 +27,7 @@ public class ReservationTimeController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @GetMapping("/times")
+    @GetMapping("/admin/times")
     public ResponseEntity<List<ReservationTimeResponse>> findAllReservationTime() {
         List<ReservationTimeResponse> response = reservationTimeService.findAllReservationTime();
         return ResponseEntity.ok().body(response);
@@ -42,14 +42,14 @@ public class ReservationTimeController {
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @PostMapping("/times")
+    @PostMapping("/admin/times")
     public ResponseEntity<ReservationTimeResponse> saveReservationTime(@RequestBody ReservationTimeRequest request) {
         ReservationTimeResponse response = reservationTimeService.saveReservationTime(request);
-        return ResponseEntity.created(URI.create("/times/" + response.getId())).body(response);
+        return ResponseEntity.created(URI.create("/admin/times/" + response.id())).body(response);
     }
 
     @RoleAllowed(value = MemberRole.ADMIN)
-    @DeleteMapping("/times/{timeId}")
+    @DeleteMapping("/admin/times/{timeId}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable Long timeId) {
         reservationTimeService.deleteReservationTime(timeId);
         return ResponseEntity.noContent().build();

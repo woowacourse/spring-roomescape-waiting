@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import roomescape.service.dto.LoginRequest;
+import roomescape.helper.fixture.DateFixture;
+import roomescape.service.dto.request.LoginRequest;
 
 class ReservationIntegrationTest extends IntegrationTest {
     @Nested
@@ -22,17 +24,17 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations")
+                    .when().get("/admin/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("size()", is(2));
         }
 
         @Test
         void 예약_목록을_예약자별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations?member-id=1")
+                    .when().get("/admin/reservations?member-id=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
@@ -42,20 +44,21 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_테마별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations?theme-id=1")
+                    .when().get("/admin/reservations?theme-id=1")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("size()", is(2));
         }
 
         @Test
         void 예약_목록을_기간별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations?date-from=2024-08-05&date-to=2024-08-10")
+                    .when().get("/admin/reservations?date-from=" + DateFixture.today() + "&date-to="
+                            + DateFixture.dayAfterTomorrow())
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("size()", is(2));
         }
     }
 
@@ -86,7 +89,7 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 로그인한_사용자_이름으로_예약을_추가할_수_있다() {
-            params.put("date", "2023-08-06");
+            params.put("date", String.valueOf(LocalDate.now().plusYears(1)));
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -95,8 +98,8 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().post("/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/reservations/2")
-                    .body("id", is(2));
+                    .header("Location", "/reservations/3")
+                    .body("id", is(3));
         }
 
         @Test
@@ -127,7 +130,7 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 시간대와_테마가_똑같은_중복된_예약은_추가할_수_없다() {
-            params.put("date", "2024-08-05");
+            params.put("date", String.valueOf(DateFixture.tomorrow()));
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -162,7 +165,7 @@ class ReservationIntegrationTest extends IntegrationTest {
             params.put("themeId", "1");
             params.put("timeId", "1");
             params.put("memberId", "1");
-            params.put("date", "2023-08-06");
+            params.put("date", String.valueOf(LocalDate.now().plusYears(1L)));
         }
 
         @Test
@@ -174,8 +177,8 @@ class ReservationIntegrationTest extends IntegrationTest {
                     .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/reservations/2")
-                    .body("id", is(2));
+                    .header("Location", "/admin/reservations/3")
+                    .body("id", is(3));
         }
 
         @Test
@@ -205,21 +208,38 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약을_삭제할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/reservations/1")
+                    .when().delete("/admin/reservations/1")
                     .then().log().all()
                     .statusCode(204);
 
-            Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-            assertThat(countAfterDelete).isZero();
+            Integer countReservationAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation",
+                    Integer.class);
+            assertThat(countReservationAfterDelete).isEqualTo(1);
         }
 
         @Test
         void 존재하지_않는_예약은_삭제할_수_없다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().delete("/reservations/10")
+                    .when().delete("/admin/reservations/10")
                     .then().log().all()
                     .statusCode(404);
+        }
+
+        @Test
+        void 예약을_삭제했을_때_대기가_있으면_첫번째가_자동으로_예약된다() {
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .when().delete("/admin/reservations/2")
+                    .then().log().all()
+                    .statusCode(204);
+
+            Integer countReservationAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation",
+                    Integer.class);
+            Integer countWaitingAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting",
+                    Integer.class);
+            assertThat(countReservationAfterDelete).isEqualTo(2);
+            assertThat(countWaitingAfterDelete).isEqualTo(0);
         }
     }
 }

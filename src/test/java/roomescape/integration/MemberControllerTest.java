@@ -15,10 +15,10 @@ class MemberControllerTest extends IntegrationTest {
         void 사용자_목록을_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/members")
+                    .when().get("/admin/members")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("size()", is(2));
         }
     }
 }

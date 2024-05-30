@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import roomescape.service.dto.LoginCheckResponse;
-import roomescape.service.dto.LoginRequest;
+import roomescape.service.dto.request.LoginRequest;
+import roomescape.service.dto.response.LoginCheckResponse;
 
 class LoginIntegrationTest extends IntegrationTest {
     @Nested
@@ -51,7 +51,7 @@ class LoginIntegrationTest extends IntegrationTest {
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value()).extract().as(LoginCheckResponse.class);
 
-            assertThat(response.getName()).isEqualTo("어드민");
+            assertThat(response.name()).isEqualTo("어드민");
         }
 
         @Test
@@ -91,7 +91,7 @@ class LoginIntegrationTest extends IntegrationTest {
         @Test
         void 일반유저_권한으로_회원가입을_할_수_있다() {
             Map<String, String> params = new HashMap<>();
-            params.put("email", "user@email.com");
+            params.put("email", "user1@email.com");
             params.put("password", "password");
             params.put("name", "사용자");
 
@@ -101,8 +101,8 @@ class LoginIntegrationTest extends IntegrationTest {
                     .when().post("/signup")
                     .then().log().all()
                     .statusCode(201)
-                    .header("Location", "/members/2")
-                    .body("id", is(2))
+                    .header("Location", "/members/3")
+                    .body("id", is(3))
                     .body("role", is("USER"));
         }
     }

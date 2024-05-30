@@ -1,8 +1,13 @@
 package roomescape.domain;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import roomescape.exception.reservation.InvalidDateTimeReservationException;
 
 @Entity
 public class Reservation {
@@ -16,23 +21,28 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne
     private Theme theme;
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
+    public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme) {
+        validate(date.atTime(time.getStartAt()));
         this.id = id;
         this.date = date;
         this.member = member;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
 
-    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
-        this(null, date, member, time, theme, status);
+    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme) {
+        this(null, date, member, time, theme);
+    }
+
+
+    private void validate(LocalDateTime localDateTime) {
+        if (localDateTime.isBefore(LocalDateTime.now())) {
+            throw new InvalidDateTimeReservationException();
+        }
     }
 
     public Long getId() {
@@ -53,9 +63,5 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 }
