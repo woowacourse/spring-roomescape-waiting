@@ -32,11 +32,14 @@ public class Waitings {
                 .count() + 1;
     }
 
-    public Reservation getFirstWaiting() {
-        return waitings.get(0);
-    }
-
     public boolean haveWaiting() {
         return !waitings.isEmpty();
+    }
+
+    public void reserveFirst() {
+        if (haveWaiting()) {
+            Reservation reservation = waitings.get(0);
+            reservation.changeSuccess();
+        }
     }
 }

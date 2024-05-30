@@ -13,8 +13,8 @@ class PopularThemesTest {
     @Test
     @DisplayName("테마 리스트가 들어가면 인기 테마 10개를 조회한다.")
     void makePopularThemes() {
-        Theme theme1 = new Theme("a", "a", "a");
-        Theme theme2 = new Theme("b", "b", "b");
+        Theme theme1 = new Theme(1L, "a", "a", "a");
+        Theme theme2 = new Theme(2L, "b", "b", "b");
         List<Theme> themes = new ArrayList<>();
         themes.add(theme1);
         themes.add(theme1);
@@ -23,10 +23,8 @@ class PopularThemesTest {
         List<Theme> popularThemes = popularTheme.getPopularThemes();
 
         assertAll(
-                () -> assertThat(popularThemes.size()).isEqualTo(2),
+                () -> assertThat(popularThemes).hasSize(2),
                 () -> assertThat(popularThemes.get(0).getName()).isEqualTo("a")
         );
-
     }
-
 }

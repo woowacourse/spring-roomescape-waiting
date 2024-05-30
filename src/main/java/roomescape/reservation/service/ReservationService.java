@@ -112,14 +112,7 @@ public class ReservationService {
 
         Waitings waitings = new Waitings(reservationRepository.findAllByDateAndReservationTimeIdAndThemeIdAndStatus(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), Status.WAITING));
-        isAvailableChangeToReservation(waitings);
-    }
-
-    private void isAvailableChangeToReservation(Waitings waitings) {
-        if (waitings.haveWaiting()) {
-            Reservation firstWaiting = waitings.getFirstWaiting();
-            firstWaiting.changeSuccess();
-        }
+        waitings.reserveFirst();
     }
 
     public List<WaitingResponse> findWaiting() {
