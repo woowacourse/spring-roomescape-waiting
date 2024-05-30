@@ -112,8 +112,8 @@ class ReservationServiceTest {
         Mockito.doNothing()
                 .when(reservationRepository)
                 .deleteById(reservation.getId());
-        Mockito.when(reservationRepository.findAllByMember_Id(reservation.getMemberId()))
-                .thenReturn(List.of(reservation));
+        Mockito.when(reservationRepository.findById(reservation.getMemberId()))
+                .thenReturn(Optional.of(reservation));
 
         assertThatCode(() -> reservationService.cancelMyReservation(reservation.getId(),
                 new MemberProfileInfo(member.getId(), member.getName(), member.getEmail()))).doesNotThrowAnyException();
@@ -123,8 +123,8 @@ class ReservationServiceTest {
     @DisplayName("자신의 요청하지 않은 예약을 취소 요청할 경우, 예외를 던진다.")
     void cancelMyReservation_ShouldThrowException_WhenRequestNotFromReservationOwner() {
 
-        Mockito.when(reservationRepository.findAllByMember_Id(any(Long.class)))
-                .thenReturn(List.of());
+        Mockito.when(reservationRepository.findById(any(Long.class)))
+                .thenReturn(Optional.of(reservation));
         MemberProfileInfo memberProfileInfo = new MemberProfileInfo(0L, member.getName(), member.getEmail());
 
         Long reservationId = reservation.getId();
