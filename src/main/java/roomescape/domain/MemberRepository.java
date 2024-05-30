@@ -11,6 +11,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     default Member getMemberById(Long id) {
         return this.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 사용자가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 사용자를 찾을 수 없습니다."));
     }
 }

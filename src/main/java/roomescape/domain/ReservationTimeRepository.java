@@ -9,6 +9,6 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
 
     default ReservationTime getReservationTimeById(Long id) {
         return this.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약 시간이 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
     }
 }
