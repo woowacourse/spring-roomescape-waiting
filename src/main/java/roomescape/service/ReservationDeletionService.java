@@ -7,8 +7,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.service.exception.ForbiddenOperationCustomException;
 
-import static roomescape.domain.Reservation.Status;
-
 @Service
 public class ReservationDeletionService {
 
@@ -19,26 +17,27 @@ public class ReservationDeletionService {
     }
 
     @Transactional
-    public void deleteById(Long id, Member member) {
-        validateMemberMadeReservation(id, member);
-        reservationRepository.deleteById(id);
-    }
-
-    private void validateMemberMadeReservation(Long id, Member member) {
-        if (!reservationRepository.existsByIdAndMemberId(id, member.getId())) {
-            throw new ForbiddenOperationCustomException("예약 삭제 권한이 없습니다.");
-        }
-    }
-
-    @Transactional
-    public void deleteById(Long id) {
+    public void deleteByMember(Long id, Member member) {
         Reservation reservation = reservationRepository.getReservationById(id);
-        updateFirstWaitingReservationIfAny(id);
+        if (reservation.isNotReservedBy(member)) {
+            throw new ForbiddenOperationCustomException("자신의 예약이 아닌 것은 삭제할 수 없습니다.");
+        }
+
         reservationRepository.delete(reservation);
     }
 
-    private void updateFirstWaitingReservationIfAny(Long id) {
+    @Transactional
+    public void deleteByAdmin(Long id, Member member) {
+        if(member.isNotAdmin()) {
+            throw new ForbiddenOperationCustomException("관리자만 실행할 수 있습니다.");
+        }
+        makeFirstWaitingReserved(id);
+
+        reservationRepository.deleteById(id);
+    }
+
+    private void makeFirstWaitingReserved(Long id) {
         reservationRepository.getFirstReservationWaiting(id)
-                .ifPresent(reservation -> reservation.setStatus(Status.RESERVED));
+                .ifPresent(reservation -> reservation.setStatus(Reservation.Status.RESERVED));
     }
 }

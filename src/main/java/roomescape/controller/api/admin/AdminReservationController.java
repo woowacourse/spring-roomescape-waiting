@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.Member;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.ReservationDto;
 import roomescape.dto.response.MultipleResponse;
@@ -80,8 +81,8 @@ public class AdminReservationController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationDeletionService.deleteById(id);
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id, Member member) {
+        reservationDeletionService.deleteByAdmin(id, member);
 
         return ResponseEntity.noContent()
                 .build();

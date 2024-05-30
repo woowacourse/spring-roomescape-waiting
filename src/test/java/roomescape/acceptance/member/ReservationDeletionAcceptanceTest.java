@@ -79,7 +79,7 @@ class ReservationDeletionAcceptanceTest extends BaseAcceptanceTest {
 
         assertAll(
                 () -> assertThat(response.title()).isEqualTo("작업을 수행할 권한이 없습니다."),
-                () -> assertThat(response.detail()).isEqualTo("예약 삭제 권한이 없습니다.")
+                () -> assertThat(response.detail()).isEqualTo("자신의 예약이 아닌 것은 삭제할 수 없습니다.")
         );
     }
 

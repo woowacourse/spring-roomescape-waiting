@@ -60,8 +60,14 @@ public class Reservation {
         this.status = status;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public boolean isNotReservedBy(Member member) {
+        return !this.member.equals(member);
+    }
+
+    public enum Status {
+        RESERVED,
+        WAITING,
+        ;
     }
 
     public boolean isReserved() {
@@ -72,9 +78,7 @@ public class Reservation {
         return this.status == Status.WAITING;
     }
 
-    public enum Status {
-        RESERVED,
-        WAITING,
-        ;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
