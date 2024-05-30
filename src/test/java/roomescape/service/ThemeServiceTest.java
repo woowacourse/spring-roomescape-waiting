@@ -1,19 +1,12 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.exception.time.DuplicatedTimeException;
-import roomescape.service.dto.request.ReservationTimeRequest;
 import roomescape.service.dto.request.ThemeRequest;
-import roomescape.service.dto.response.AvailableReservationTimeResponse;
-import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.service.dto.response.ThemeResponse;
 
 class ThemeServiceTest extends ServiceTest {

@@ -9,6 +9,7 @@ public record AvailableReservationTimeResponse(Long id, LocalTime startAt, boole
     public AvailableReservationTimeResponse(ReservationTime time, boolean alreadyBooked) {
         this(time.getId(), time.getStartAt(), alreadyBooked);
     }
+
     @JsonFormat(shape = Shape.STRING, pattern = "HH:mm")
     public LocalTime getStartAt() {
         return startAt;

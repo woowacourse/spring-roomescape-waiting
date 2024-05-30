@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,10 +11,7 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.helper.fixture.DateFixture;
-import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.WaitingRequest;
-import roomescape.service.dto.response.ReservationMineResponse;
-import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.WaitingResponse;
 
 class WaitingServiceTest extends ServiceTest {

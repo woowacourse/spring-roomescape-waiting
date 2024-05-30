@@ -1,8 +1,6 @@
 package roomescape.service;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +19,6 @@ import roomescape.domain.Waiting;
 import roomescape.domain.WaitingRepository;
 import roomescape.domain.WaitingWithRank;
 import roomescape.exception.reservation.DuplicatedReservationException;
-import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
@@ -111,7 +108,8 @@ public class ReservationService {
 
         opWaiting.ifPresent(waiting -> {
             waitingRepository.delete(waiting);
-            reservationRepository.save(new Reservation(waiting.getDate(), waiting.getMember(), waiting.getTime(), waiting.getTheme()));
+            reservationRepository.save(
+                    new Reservation(waiting.getDate(), waiting.getMember(), waiting.getTime(), waiting.getTheme()));
         });
     }
 

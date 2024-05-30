@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +54,8 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_기간별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/admin/reservations?date-from=" + DateFixture.today() + "&date-to=" + DateFixture.dayAfterTomorrow())
+                    .when().get("/admin/reservations?date-from=" + DateFixture.today() + "&date-to="
+                            + DateFixture.dayAfterTomorrow())
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(2));

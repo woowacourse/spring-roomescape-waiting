@@ -1,6 +1,5 @@
 package roomescape.service.dto.request;
 
-import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;

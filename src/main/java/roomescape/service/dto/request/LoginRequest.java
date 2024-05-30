@@ -1,6 +1,5 @@
 package roomescape.service.dto.request;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public record LoginRequest(String email, String password) {

@@ -55,7 +55,8 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
                     .statusCode(200)
                     .body("size()", is(1));
 
-            List<Map<String, Object>> response = RestAssured.get("/times/available?date=" + DateFixture.tomorrow() + "&theme-id=1")
+            List<Map<String, Object>> response = RestAssured.get(
+                            "/times/available?date=" + DateFixture.tomorrow() + "&theme-id=1")
                     .as(new TypeRef<>() {
                     });
             Assertions.assertThat(response.get(0)).containsEntry("alreadyBooked", true);
