@@ -60,14 +60,6 @@ class ThemeServiceTest {
     }
 
     @Test
-    @DisplayName("인기순으로 지정된 갯수만큼의 테마를 반환한다.")
-    void findTrendingThemes() {
-        List<ThemeResponse> themes = themeService.findTrendingThemes(1L);
-
-        assertThat(themes).containsExactly(new ThemeResponse(THEME_3));
-    }
-
-    @Test
     @DisplayName("id값으로 테마를 조회한다.")
     void getTheme() {
         ThemeResponse themeResponse = themeService.getTheme(THEME_2.getId());

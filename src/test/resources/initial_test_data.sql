@@ -41,3 +41,11 @@ INSERT INTO reservation(member_id, date, reservation_time_id, theme_id) VALUES
                                (1L, DATEADD('DAY', -5, CURRENT_DATE), 3, 3),
                                (2L, DATEADD('DAY', -2, CURRENT_DATE), 2, 2),
                                (2L, DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
+
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) VALUES
+                               (2L, DATEADD('DAY', +2, CURRENT_DATE), 1, 1),
+                               (3L, DATEADD('DAY', +2, CURRENT_DATE), 1, 1),
+                               (2L, DATEADD('DAY', +3, CURRENT_DATE), 1, 1),
+                               (3L, DATEADD('DAY', +4, CURRENT_DATE), 1, 2),
+                               (1L, DATEADD('DAY', +4, CURRENT_DATE), 1, 2),
+                               (1L, DATEADD('DAY', +5, CURRENT_DATE), 1, 2);

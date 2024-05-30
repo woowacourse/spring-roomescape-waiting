@@ -3,6 +3,7 @@ package roomescape.reservation.dto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.dto.MemberNameResponse;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.dto.ThemeResponse;
 
 import java.time.format.DateTimeFormatter;
@@ -21,7 +22,8 @@ class ReservationResponseTest {
                 RESERVATION_1.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 new ReservationTimeResponse(RESERVATION_1.getReservationTime()),
                 new ThemeResponse(RESERVATION_1.getTheme()),
-                new MemberNameResponse(RESERVATION_1.getMember())
+                new MemberNameResponse(RESERVATION_1.getMember()),
+                ReservationStatus.RESERVED.getPrintName()
         );
 
         ReservationResponse reservationResponse = new ReservationResponse(RESERVATION_1);

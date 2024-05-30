@@ -67,8 +67,22 @@ class ReservationControllerTest {
     @Test
     @DisplayName("Reservation을 삭제한다.")
     void deleteReservation() {
+        Map<String, String> memberParam = new HashMap<>();
+        memberParam.put("password", "password");
+        memberParam.put("email", "kargo123@email.com");
+
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(memberParam)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract().cookie("token");
+
         //when
         RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);

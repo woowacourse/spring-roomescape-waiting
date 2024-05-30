@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.ValidationException;
-import roomescape.member.dto.MemberRequest;
+import roomescape.member.domain.Member;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 
@@ -25,12 +25,12 @@ import static roomescape.InitialMemberFixture.MEMBER_1;
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
 class ReservationServiceTest {
 
-    private final MemberRequest memberRequest = new MemberRequest(
+    private final Member member = new Member(
             MEMBER_1.getId(),
             MEMBER_1.getName().name(),
             MEMBER_1.getEmail().email(),
             MEMBER_1.getRole().name(),
-            COMMON_PASSWORD.password()
+            COMMON_PASSWORD.encodedPassword()
     );
 
     @Autowired
@@ -47,7 +47,7 @@ class ReservationServiceTest {
                 THEME_2.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, member))
                 .isInstanceOf(ValidationException.class);
     }
 
@@ -60,7 +60,7 @@ class ReservationServiceTest {
                 RESERVATION_2.getTheme().getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, member))
                 .isInstanceOf(ValidationException.class);
     }
 
@@ -74,7 +74,7 @@ class ReservationServiceTest {
         );
 
         ReservationResponse reservationResponse = reservationService.addReservation(
-                reservationRequest, memberRequest);
+                reservationRequest, member);
 
         assertThat(reservationResponse.id()).isNotNull();
     }
@@ -88,14 +88,14 @@ class ReservationServiceTest {
                 THEME_1.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, member))
                 .isInstanceOf(ValidationException.class);
     }
 
     @Test
     @DisplayName("id에 맞는 예약을 삭제한다.")
     void deleteReservation() {
-        reservationService.deleteReservation(RESERVATION_1.getId());
+        reservationService.deleteReservation(RESERVATION_1.getId(), MEMBER_1);
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         assertThat(count).isEqualTo(INITIAL_RESERVATION_COUNT - 1);

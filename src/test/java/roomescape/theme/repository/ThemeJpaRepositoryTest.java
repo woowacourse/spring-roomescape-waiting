@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
@@ -80,7 +79,7 @@ class ThemeJpaRepositoryTest {
         List<Theme> trendings = themeJpaRepository.findTrendingThemesBetweenDates(
                 LocalDate.now().minusDays(7),
                 LocalDate.now().minusDays(1),
-                PageRequest.of(0, 1)
+                1
         );
 
         assertThat(trendings).containsExactly(THEME_3);

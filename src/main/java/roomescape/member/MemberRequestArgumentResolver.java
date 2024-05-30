@@ -36,6 +36,6 @@ public class MemberRequestArgumentResolver implements HandlerMethodArgumentResol
         Cookie[] cookies = servletRequest.getCookies();
         String token = TokenExtractor.extractTokenFromCookie(cookies);
 
-        return memberService.getLoginMemberRequestByToken(token);
+        return memberService.getLoginMemberByToken(token);
     }
 }

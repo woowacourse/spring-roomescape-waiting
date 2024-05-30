@@ -1,8 +1,8 @@
 package roomescape.theme.service;
 
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.theme.domain.Name;
@@ -17,12 +17,15 @@ import java.util.List;
 @Service
 public class ThemeService {
 
+    private static final long ROW_LIMIT = 10;
+
     private final ThemeJpaRepository themeJpaRepository;
 
     public ThemeService(ThemeJpaRepository themeJpaRepository) {
         this.themeJpaRepository = themeJpaRepository;
     }
 
+    @Transactional
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
         validateDuplicatedName(themeRequest);
         try {
@@ -39,6 +42,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ThemeResponse getTheme(Long id) {
         Theme theme = themeJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 id입니다. theme_id = " + id));
@@ -46,18 +50,25 @@ public class ThemeService {
         return new ThemeResponse(theme);
     }
 
-    public List<ThemeResponse> findTrendingThemes(Long limit) {
+    @Transactional(readOnly = true)
+    public List<ThemeResponse> findTrendingThemes() {
         LocalDate now = LocalDate.now();
         LocalDate trendingStatsStart = now.minusDays(7);
         LocalDate trendingStatsEnd = now.minusDays(1);
 
-        List<Theme> mostReservedThemesBetweenDates = themeJpaRepository.findTrendingThemesBetweenDates(trendingStatsStart, trendingStatsEnd, PageRequest.of(0, Math.toIntExact(limit)));
+        List<Theme> mostReservedThemesBetweenDates = themeJpaRepository.findTrendingThemesBetweenDates(
+                trendingStatsStart,
+                trendingStatsEnd,
+                ROW_LIMIT
+        );
+
         return mostReservedThemesBetweenDates
                 .stream()
                 .map(ThemeResponse::new)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findThemes() {
         return themeJpaRepository.findAll()
                 .stream()
@@ -65,10 +76,12 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteTheme(Long id) {
         themeJpaRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public Theme getById(Long themeId) {
         return themeJpaRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("id에 맞는 테마가 없습니다. themeId = " + themeId));

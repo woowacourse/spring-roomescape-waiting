@@ -1,15 +1,15 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.exceptions.MissingRequiredFieldException;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class ReservationTime {
@@ -36,13 +36,6 @@ public class ReservationTime {
         if (startAt == null) {
             throw new MissingRequiredFieldException("시작 시간은 필수 값입니다.");
         }
-    }
-
-    public boolean isBeforeNow(LocalDate date) {
-        LocalDateTime dateTimeToReserve = LocalDateTime.of(date, startAt);
-        LocalDateTime now = LocalDateTime.now();
-
-        return dateTimeToReserve.isBefore(now);
     }
 
     public boolean isBelongTo(List<Long> timeIds) {

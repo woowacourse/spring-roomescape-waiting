@@ -1,14 +1,15 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.DuplicationException;
+import roomescape.exceptions.NotFoundException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationOfMemberResponse;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
@@ -19,6 +20,7 @@ import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -27,22 +29,26 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberService memberService;
+    private final WaitingService waitingService;
 
     public ReservationService(
             ReservationJpaRepository ReservationJpaRepository,
             ReservationTimeService reservationTimeService,
             ThemeService themeService,
-            MemberService memberService
+            MemberService memberService,
+            WaitingService waitingService
     ) {
         this.reservationJpaRepository = ReservationJpaRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
+        this.waitingService = waitingService;
     }
 
+    @Transactional
     public ReservationResponse addReservation(
             ReservationRequest reservationRequest,
-            MemberRequest memberRequest
+            Member member
     ) {
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(reservationRequest.timeId());
         ThemeResponse themeResponse = themeService.getTheme(reservationRequest.themeId());
@@ -51,7 +57,7 @@ public class ReservationService {
                 reservationRequest.date(),
                 timeResponse.toReservationTime(),
                 themeResponse.toTheme(),
-                memberRequest.toLoginMember()
+                member
         );
         validateIsBeforeNow(reservation);
         validateIsDuplicated(reservation);
@@ -59,6 +65,7 @@ public class ReservationService {
         return new ReservationResponse(reservationJpaRepository.save(reservation));
     }
 
+    @Transactional
     public ReservationResponse addReservation(AdminReservationRequest adminReservationRequest) {
         Member member = memberService.getLoginMemberById(adminReservationRequest.memberId());
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(adminReservationRequest.timeId());
@@ -83,11 +90,16 @@ public class ReservationService {
     }
 
     private void validateIsDuplicated(Reservation reservation) {
-        if (reservationJpaRepository.existsByDateAndReservationTimeAndTheme(reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())) {
+        if (reservationJpaRepository.existsByDateAndReservationTimeAndTheme(
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme())
+        ) {
             throw new DuplicationException("이미 예약이 존재합니다.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservations() {
         return reservationJpaRepository.findAll()
                 .stream()
@@ -95,6 +107,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservations(
             Long themeId,
             Long memberId,
@@ -110,14 +123,48 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationOfMemberResponse> findReservationsByMember(Member member) {
-        return reservationJpaRepository.findByMember(member)
-                .stream()
-                .map(ReservationOfMemberResponse::new)
-                .toList();
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> findReservationsByMember(Member member) {
+        List<ReservationResponse> reservations =
+                reservationJpaRepository.findByMember(member)
+                        .stream()
+                        .map(ReservationResponse::new)
+                        .collect(Collectors.toList());
+
+                waitingService.findWaitingsByMember(member)
+                        .stream()
+                        .map(ReservationResponse::fromWaitingWithRank)
+                        .forEach(reservations::add);
+
+        return reservations;
     }
 
-    public void deleteReservation(Long id) {
-        reservationJpaRepository.deleteById(id);
+    @Transactional
+    public void deleteReservation(Long id, Member member) {
+        Reservation reservation = reservationJpaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id와 일치하는 예약을 찾을 수 없습니다."));
+
+        if (reservation.getMember().equals(member)) {
+            waitingService.findWaitingByDateAndReservationTimeAndTheme(
+                        reservation.getDate(),
+                        reservation.getReservationTime(),
+                        reservation.getTheme()
+                    )
+                    .ifPresentOrElse(
+                            waiting -> updateReservationByWaiting(waiting, reservation, member),
+                            () -> reservationJpaRepository.deleteById(id)
+                    );
+        }
+    }
+
+    private void updateReservationByWaiting(Waiting waiting, Reservation reservation, Member member) {
+        Reservation changedReservation = new Reservation(reservation.getId(),
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme(),
+                waiting.getMember()
+                );
+        reservationJpaRepository.save(changedReservation);
+        waitingService.deleteById(waiting.getId(), member);
     }
 }

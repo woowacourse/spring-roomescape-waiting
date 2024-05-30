@@ -34,7 +34,7 @@ class AdminPageControllerTest {
     @DisplayName("관리자 권한이 없는 토큰으로 /admin 페이지에 접근하면 예외가 발생한다.")
     void throwExceptionIfNotAdmin(String url) {
         Map<String, String> memberParam = new HashMap<>();
-        memberParam.put("password", COMMON_PASSWORD.password());
+        memberParam.put("password", COMMON_PASSWORD.encodedPassword());
         memberParam.put("email", MEMBER_1.getEmail().email());
 
         String token = RestAssured.given().log().all()
@@ -57,7 +57,7 @@ class AdminPageControllerTest {
     @DisplayName("관리자 권한이 있는 토큰으로 /admin 페이지에 접근하면 접근이 가능하다.")
     void AdminCanAccessAdminPage(String url) {
         Map<String, String> memberParam = new HashMap<>();
-        memberParam.put("password", COMMON_PASSWORD.password());
+        memberParam.put("password", COMMON_PASSWORD.encodedPassword());
         memberParam.put("email", MEMBER_4.getEmail().email());
 
         String token = RestAssured.given().log().all()

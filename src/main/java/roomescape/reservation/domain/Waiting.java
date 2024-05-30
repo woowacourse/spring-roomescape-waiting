@@ -1,6 +1,5 @@
 package roomescape.reservation.domain;
 
-
 import jakarta.persistence.*;
 import roomescape.exceptions.MissingRequiredFieldException;
 import roomescape.member.domain.Member;
@@ -11,10 +10,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,10 +28,10 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+    public Waiting(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         validateNotNull(date, reservationTime, theme, member);
         this.id = id;
         this.date = date;
@@ -42,11 +40,7 @@ public class Reservation {
         this.member = member;
     }
 
-    public Reservation(Long id, Reservation reservation) {
-        this(id, reservation.date, reservation.reservationTime, reservation.theme, reservation.member);
-    }
-
-    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+    public Waiting(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         this(null, date, reservationTime, theme, member);
     }
 
@@ -72,10 +66,6 @@ public class Reservation {
         return instantToCompare.isBefore(Instant.now());
     }
 
-    public boolean isBetweenInclusive(LocalDate dateFrom, LocalDate dateTo) {
-        return !date.isBefore(dateFrom) && !date.isAfter(dateTo);
-    }
-
     public Long getId() {
         return id;
     }
@@ -98,22 +88,5 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
