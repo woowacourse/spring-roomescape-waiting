@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import io.restassured.RestAssured;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -134,8 +136,10 @@ class ThemeAcceptanceTest extends AcceptanceFixture {
     }
 
     private void addReservationBy(Theme theme, ReservationTime time, Member member, int count) {
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
         for (int i = 1; i <= count; i++) {
-            reservationRepository.save(new Reservation(LocalDate.now().minusDays(count % 7), time, theme));
+            reservationRepository.save(
+                    new Reservation(LocalDate.now().minusDays(count % 7), time, theme, status, member));
         }
     }
 

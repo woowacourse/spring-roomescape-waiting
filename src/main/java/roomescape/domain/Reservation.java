@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,16 +17,21 @@ import jakarta.persistence.Table;
 import org.hibernate.proxy.HibernateProxy;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.policy.ReservationDueTimePolicy;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 
 @Entity
 @Getter
+@AllArgsConstructor
 @Table(name = "reservation")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
+    private static final long PRIORITY_INCREMENTAL_STEP = 1L;
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,16 +44,15 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "theme_id", referencedColumnName = "id", nullable = false)
     private Theme theme;
+    @ManyToOne
+    @JoinColumn(name = "member_id", referencedColumnName = "id", nullable = false)
+    private Member member;
+    @Embedded
+    private ReservationStatus status;
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme) {
-        this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-    }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme) {
-        this(null, date, time, theme);
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, ReservationStatus status, Member member) {
+        this(null, date, time, theme, member, status);
     }
 
     public void validateDateTimeReservation(ReservationDueTimePolicy timePolicy) {
@@ -55,6 +60,22 @@ public class Reservation {
         if (reservationDateTime.isBefore(timePolicy.getDueTime())) {
             throw new InvalidDateTimeReservationException();
         }
+    }
+
+    public void reserve() {
+        status.reserve();
+    }
+
+    public long getNextPriority() {
+        return status.getPriority() + PRIORITY_INCREMENTAL_STEP;
+    }
+
+    public long getPriority() {
+        return status.getPriority();
+    }
+
+    public boolean isReserved() {
+        return status.isSameAs(Status.RESERVED);
     }
 
     @Override
@@ -85,3 +106,4 @@ public class Reservation {
                 .hashCode() : getClass().hashCode();
     }
 }
+

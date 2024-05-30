@@ -14,6 +14,8 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -106,9 +108,11 @@ class TimeAcceptanceTest extends AcceptanceFixture {
         ReservationTime time3 = timeRepository.save(new ReservationTime(LocalTime.of(3, 0)));
         Member member = memberRepository.save(new Member("aa", "aa@aa.aa", "aa"));
         Theme theme = themeRepository.save(new Theme("n", "d", "t"));
+        ReservationStatus status = new ReservationStatus(Status.WAITING, 0);
+        ReservationStatus status2 = new ReservationStatus(Status.RESERVED, 1);
 
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 11), time1, theme));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 12), time2, theme));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 11), time1, theme, status, member));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 12), time2, theme, status2, member));
 
         // when
         RestAssured

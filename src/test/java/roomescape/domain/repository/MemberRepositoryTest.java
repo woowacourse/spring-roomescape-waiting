@@ -54,12 +54,11 @@ class MemberRepositoryTest {
     @DisplayName("영속화 된 회원 정보를 email과 password로 불러온다")
     void findByEmailAndPassword_ShouldGetPersistenceByEmailAndPassword() {
         // given
-        Member member = new Member("name", "aa@aa.aa", "aa");
+        Member member = new Member("name", "bbx@aa.aa", "aa");
         memberRepository.save(member);
 
         // when & then
-        Assertions.assertThat(
-                        memberRepository.findByEmailAndPassword(member.getEmail(), member.getPassword()))
+        Assertions.assertThat(memberRepository.findByEmailAndPassword(member.getEmail(), member.getPassword()))
                 .isPresent()
                 .hasValue(member);
     }

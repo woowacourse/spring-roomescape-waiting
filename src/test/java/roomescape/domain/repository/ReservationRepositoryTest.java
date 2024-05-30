@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -37,7 +39,8 @@ class ReservationRepositoryTest {
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         Theme theme = new Theme("name", "desc", "thumb");
         Member member = new Member("name", "aa@aa.aa", "aa");
-        Reservation reservation = new Reservation(date, time, theme);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
+        Reservation reservation = new Reservation(date, time, theme, status, member);
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
@@ -59,9 +62,10 @@ class ReservationRepositoryTest {
         Member member = new Member("memberName", "email", "password");
         ReservationTime savedTime = reservationTimeRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
         Member savedMember = memberRepository.save(member);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme));
+                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, status, member));
 
         //when &then
         Assertions.assertThat(reservationRepository.findById(savedReservation.getId()))
@@ -96,10 +100,11 @@ class ReservationRepositoryTest {
         Theme theme = new Theme("name", "description", "thumbnail");
         ReservationTime savedTime = reservationTimeRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
         Member member = new Member("a", "b", "c");
         memberRepository.save(member);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme));
+                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, status, member));
 
         // when
         reservationRepository.delete(savedReservation);
@@ -120,11 +125,15 @@ class ReservationRepositoryTest {
 
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         ReservationTime savedTime = reservationTimeRepository.save(time);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
+        ReservationStatus status2 = new ReservationStatus(Status.WAITING, 1);
 
         Member member1 = new Member("name1", "email", "password");
         Member savedMember1 = memberRepository.save(member1);
-        Reservation reservation1 = new Reservation(LocalDate.of(2023, 1, 1), savedTime, savedTheme1);
-        Reservation reservation2 = new Reservation(LocalDate.of(2023, 1, 2), savedTime, savedTheme2);
+        Reservation reservation1 = new Reservation(LocalDate.of(2023, 1, 1), savedTime, savedTheme1, status,
+                savedMember1);
+        Reservation reservation2 = new Reservation(LocalDate.of(2023, 1, 2), savedTime, savedTheme2, status2,
+                savedMember1);
 
         Reservation savedReservation1 = reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -142,7 +151,9 @@ class ReservationRepositoryTest {
         Theme theme = new Theme("name", "desc", "thumb");
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         Member member = new Member("name", "aa@aa.aa", "aa");
-        Reservation reservation = new Reservation(LocalDate.of(2023, 1, dayOfMonth), time, theme);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
+
+        Reservation reservation = new Reservation(LocalDate.of(2023, 1, dayOfMonth), time, theme, status, member);
 
         themeRepository.save(theme);
         reservationTimeRepository.save(time);

@@ -14,35 +14,36 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import roomescape.service.ReservationWaitService;
+import roomescape.service.ReservationService;
 import roomescape.service.dto.request.member.Credential;
+import roomescape.service.dto.request.reservation.ReservationRequest;
 import roomescape.service.dto.request.wait.WaitRequest;
-import roomescape.service.dto.response.wait.WaitResponse;
+import roomescape.service.dto.response.wait.ReservationWithStatusResponse;
 
 @RestController
 @RequiredArgsConstructor
 public class WaitController {
-    private final ReservationWaitService waitService;
+    private final ReservationService reservationService;
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<WaitResponse>> findAllByMemberId(Credential credential) {
-        List<WaitResponse> reservations = waitService.findAllByMemberId(credential.memberId());
+    public ResponseEntity<List<ReservationWithStatusResponse>> findAllByMemberId(Credential credential) {
+        List<ReservationWithStatusResponse> responses = reservationService.findAllByMemberId(credential.memberId());
 
-        return ResponseEntity.ok(reservations);
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/reservation-wait")
     public ResponseEntity<Void> saveReservationWait(@Valid @RequestBody WaitRequest request, Credential credential) {
-        waitService.saveReservationWait(request, credential.memberId());
+        ReservationRequest reservationRequest = new ReservationRequest(request.date(), credential.memberId(),
+                request.timeId(), request.themeId());
+        reservationService.saveReservation(reservationRequest);
 
         return ResponseEntity.created(URI.create("/")).build();
     }
 
     @DeleteMapping("/reservation-wait/{reservationId}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId,
-                                                  Credential credential) {
-        waitService.deleteReservationWait(reservationId, credential.memberId());
-
+    public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId) {
+        reservationService.deleteReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

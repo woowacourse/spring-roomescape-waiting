@@ -14,21 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ReservationService;
-import roomescape.service.ReservationWaitService;
 import roomescape.service.dto.request.reservation.ReservationRequest;
 import roomescape.service.dto.response.reservation.ReservationResponse;
-import roomescape.service.dto.response.wait.AdminWaitResponse;
+import roomescape.service.dto.response.wait.AdminReservationResponse;
 
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
     private final ReservationService reservationService;
-    private final ReservationWaitService waitService;
 
     @GetMapping("/reservation-wait")
-    public ResponseEntity<List<AdminWaitResponse>> getAdminReservationWait() {
-        List<AdminWaitResponse> waits = waitService.findAllWaits();
+    public ResponseEntity<List<AdminReservationResponse>> getAdminReservationWait() {
+        List<AdminReservationResponse> waits = reservationService.findAllWaits();
         return ResponseEntity.ok(waits);
     }
 

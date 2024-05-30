@@ -38,6 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<String> handleException(Exception exception) {
+        exception.printStackTrace();
         log.error(ERROR_PREFIX, exception.getMessage());
         return new ResponseEntity<>("서버 에러입니다.", INTERNAL_SERVER_ERROR);
     }

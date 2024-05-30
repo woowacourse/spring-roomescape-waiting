@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -67,15 +69,17 @@ class ThemeRepositoryTest {
         Theme theme3 = new Theme("name3", "description", "thumbnail");
         Theme theme4 = new Theme("name4", "description", "thumbnail");
 
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
+
         ReservationTime savedTime = reservationTimeRepository.save(time1);
         Theme savedTheme1 = themeRepository.save(theme1);
         Theme savedTheme2 = themeRepository.save(theme2);
         Theme savedTheme3 = themeRepository.save(theme3);
         Theme savedTheme4 = themeRepository.save(theme4);
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme1));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 2), savedTime, savedTheme2));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 3), savedTime, savedTheme3));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 4), savedTime, savedTheme4));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme1, status, member));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 2), savedTime, savedTheme2, status, member));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 3), savedTime, savedTheme3, status, member));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 4), savedTime, savedTheme4, status, member));
         PageRequest pageRequest = PageRequest.of(0, 10);
 
         // when

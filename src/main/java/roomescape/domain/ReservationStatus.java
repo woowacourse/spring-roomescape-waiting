@@ -24,7 +24,6 @@ public class ReservationStatus {
         RESERVED, WAITING
     }
 
-    
     public static final long RESERVE_NUMBER = 0L;
     private static final LongFunction<Status> STATUS_GENERATOR = insertPriority -> insertPriority > 0 ? WAITING
             : RESERVED;
@@ -45,6 +44,16 @@ public class ReservationStatus {
         if (priority < RESERVE_NUMBER) {
             throw new InvalidPriorityException();
         }
+    }
+
+    public static ReservationStatus from(long priority) {
+        if (priority < 0) {
+            throw new IllegalArgumentException("허용되지 않은 우선순위입니다");
+        }
+        if (priority == RESERVE_NUMBER) {
+            return new ReservationStatus(RESERVED, 0L);
+        }
+        return new ReservationStatus(WAITING, priority);
     }
 
     public void reserve() {
