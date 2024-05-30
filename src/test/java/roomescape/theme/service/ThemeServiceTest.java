@@ -46,8 +46,8 @@ class ThemeServiceTest {
     @DisplayName("성공 : 테마 랭킹만 조회할 수 있다.")
     void findRankedThemes() {
         Theme theme = new Theme(1L, "그켬미", "켬미 방탈출", "thumbnail");
-        when(themeRepository.findThemesByReservationDateOrderByReservationCountDesc(
-                any(LocalDate.class), any(LocalDate.class)))
+        when(themeRepository.findAllByRank(
+                any(LocalDate.class), any(LocalDate.class), any(Integer.class)))
                 .thenReturn(List.of(theme));
 
         List<ThemeRankResponse> actual = themeService.findRankedThemes();

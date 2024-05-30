@@ -82,8 +82,8 @@ class ThemeRepositoryTest {
         entityManager.persist(new Reservation(member, detail));
 
         //When
-        List<Theme> themes = themeRepository.findThemesByReservationDateOrderByReservationCountDesc(
-                reservationStartDate, reservationStartDate.plusWeeks(1));
+        List<Theme> themes = themeRepository.findAllByRank(
+                reservationStartDate, reservationStartDate.plusWeeks(1), 10);
 
         // Then
         assertThat(themes).containsExactlyInAnyOrder(theme);
