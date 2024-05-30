@@ -18,6 +18,7 @@ import roomescape.dto.response.ThemeResponse;
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class ClientRankTest {
 
+    private static final long MOST_POPULAR_THEME_ID = 3L;
     @LocalServerPort
     private int port;
 
@@ -36,6 +37,6 @@ class ClientRankTest {
 
         ThemeResponse actual_first = themeResponses.get(0);
 
-        assertThat(actual_first.id()).isEqualTo(3L);
+        assertThat(actual_first.id()).isEqualTo(MOST_POPULAR_THEME_ID);
     }
 }

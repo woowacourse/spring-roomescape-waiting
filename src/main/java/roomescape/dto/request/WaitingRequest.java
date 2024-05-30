@@ -1,25 +1,22 @@
 package roomescape.dto.request;
 
+import roomescape.domain.*;
+
 import java.time.LocalDate;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
 
-public record ReservationRequest(Long memberId, LocalDate date, Long timeId, Long themeId) {
+public record WaitingRequest(Long memberId, LocalDate date, Long timeId, Long themeId) {
 
-    public ReservationRequest {
+    public WaitingRequest{
         isValid(memberId, date, timeId, themeId);
     }
 
-    public static ReservationRequest from(Long memberId, MemberReservationRequest memberReservationRequest) {
-        return new ReservationRequest(memberId, memberReservationRequest.date(),
-                memberReservationRequest.timeId(), memberReservationRequest.themeId());
+    public static WaitingRequest from(Long memberId, MemberWaitingRequest memberWaitingRequest) {
+        return new WaitingRequest(memberId, memberWaitingRequest.date(),
+                memberWaitingRequest.timeId(), memberWaitingRequest.themeId());
     }
 
-    public Reservation createNewBooking(Member member, TimeSlot time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
+    public Waiting createNewWaiting(Member member, TimeSlot timeSlot, Theme theme) {
+        return new Waiting(null, member, date, timeSlot, theme, ReservationStatus.WAITING);
     }
 
     private void isValid(Long memberId, LocalDate date, Long timeId, Long themeId) {

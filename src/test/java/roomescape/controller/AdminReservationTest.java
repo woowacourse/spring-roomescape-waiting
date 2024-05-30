@@ -14,20 +14,25 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.dto.request.TokenRequest;
+import roomescape.domain.Role;
+import roomescape.infrastructure.TokenGenerator;
+
+import static roomescape.fixture.TestFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class AdminReservationTest {
 
+    @Autowired
+    TokenGenerator tokenGenerator;
+
     private static final String EMAIL = "testDB@email.com";
-    private static final String PASSWORD = "1234";
 
     @LocalServerPort
     private int port;
@@ -36,25 +41,18 @@ class AdminReservationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        accessToken = tokenGenerator.createToken(EMAIL, Role.ADMIN.name());
     }
 
     @DisplayName("reservation 페이지 조회 요청이 올바르게 연결된다.")
     @Test
     void given_when_GetReservations_then_statusCodeIsOkay() {
         RestAssured.given().log().all()
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(7)); // 아직 생성 요청이 없으니 Controller에서 임의로 넣어준 Reservation 갯수 만큼 검증하거나 0개임을 확인하세요.
+                .body("size()", is(RESERVATION_COUNT));
     }
 
     @DisplayName("reservation 페이지에 새로운 예약 정보를 추가, 조회, 삭제할 수 있다.")
@@ -68,24 +66,46 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(8));
+                .body("size()", is(RESERVATION_COUNT + 1));
 
         RestAssured.given().log().all()
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("선예약이 취소될 경우 가장 첫 번째 예약 대기가 예약 단계로 넘어간다.")
+    @Test
+    void given_when_cancelReservation_then_firstWaitingBecomesNewReservation() {
+        RestAssured.given().log().all()
+                .cookies(TOKEN, accessToken)
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .cookies(TOKEN, accessToken)
+                .when().get("/reservations")
+                .then().log().all()
+                .body("size()", is(RESERVATION_COUNT));
+
+        RestAssured.given().log().all()
+                .cookies(TOKEN, accessToken)
+                .when().get("admin/waitings")
+                .then().log().all()
+                .body("size()", is(WAITING_COUNT - 1));
     }
 
     @DisplayName("등록되지 않은 시간으로 예약하는 경우 400 오류를 반환한다.")
@@ -99,7 +119,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
@@ -119,7 +139,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
@@ -140,7 +160,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
@@ -159,7 +179,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
@@ -178,7 +198,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
@@ -199,7 +219,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
@@ -218,7 +238,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
@@ -237,7 +257,7 @@ class AdminReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()

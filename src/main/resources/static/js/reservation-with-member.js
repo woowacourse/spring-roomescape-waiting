@@ -181,6 +181,7 @@ function deleteRow(event) {
 
   requestDelete(reservationId)
       .then(() => row.remove())
+      .then(() => location.reload())
       .catch(error => console.error('Error:', error));
 }
 

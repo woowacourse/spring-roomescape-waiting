@@ -1,17 +1,11 @@
 package roomescape.dto.request;
 
-import roomescape.domain.*;
-
 import java.time.LocalDate;
 
-public record MemberReservationRequest(LocalDate date, Long timeId, Long themeId) {
+public record MemberWaitingRequest(LocalDate date, Long timeId, Long themeId) {
 
-    public MemberReservationRequest {
+    public MemberWaitingRequest {
         isValid(date, timeId, themeId);
-    }
-
-    public Reservation createNewBooking(Member member, TimeSlot time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
     }
 
     private void isValid(LocalDate date, Long timeId, Long themeId) {

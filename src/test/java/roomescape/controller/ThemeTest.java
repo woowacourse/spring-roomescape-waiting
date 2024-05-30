@@ -22,6 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class ThemeTest {
 
+    private static final int THEME_COUNT = 3;
     @LocalServerPort
     private int port;
 
@@ -37,7 +38,7 @@ class ThemeTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(THEME_COUNT));
     }
 
     @DisplayName("theme 등록 및 삭제 요청이 올바르게 동작한다.")
@@ -59,7 +60,7 @@ class ThemeTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(THEME_COUNT + 1));
 
         RestAssured.given().log().all()
                 .when().delete("/themes/4")

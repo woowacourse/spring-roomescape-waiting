@@ -5,42 +5,33 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.*;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.*;
+import static roomescape.fixture.DateFixture.*;
+import static roomescape.fixture.TimeSlotFixture.*;
+import static roomescape.fixture.ThemeFixture.*;
 
 @DataJpaTest
 class ReservationRepositoryTest {
 
-    private final Member adminMember =
-            new Member((long) 1, "어드민", "testDB@email.com", "1234", Role.ADMIN);
-    private final Member userMember =
-            new Member((long) 2, "사용자", "test2DB@email.com", "1234", Role.USER);
-    private final Theme themeOne =
-            new Theme((long) 1, "레벨1 탈출", "우테코 레벨2를 탈출하는 내용입니다",
-                    "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
-    private final Theme themeTwo =
-            new Theme((long) 2, "레벨2 탈출", "우테코 레벨3를 탈출하는 내용입니다",
-                    "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
-    private final LocalDate fromDate = LocalDate.of(2024, 5, 18);
-    private final LocalDate toDate = LocalDate.of(2024, 5, 20);
-    private final TimeSlot timeOne = new TimeSlot((long) 1, LocalTime.of(10, 0));
-    private final TimeSlot timeTwo = new TimeSlot((long) 2, LocalTime.of(11, 0));
-
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @DisplayName("member를 기준으로 해당 member의 모든 예약 목록을 조회한다.")
+    @DisplayName("member를 기준으로 해당 member의 모든 예약 목록을 날짜 순으로 조회한다.")
     @Test
-    void findAllByMember() {
+    void findAllByMemberOrderByDateAsc() {
         //given, when
-        List<Reservation> reservations = reservationRepository.findAllByMember(adminMember);
+        List<Reservation> reservations = reservationRepository.findAllByMemberOrderByDateAsc(ADMIN_MEMBER);
 
         //then
-        assertThat(reservations).hasSize(3);
+        assertAll(
+                () -> assertThat(reservations).hasSize(3),
+                () -> assertThat(reservations.get(0).getDate()).isEqualTo("2024-05-01"),
+                () -> assertThat(reservations.get(2).getDate()).isEqualTo("2024-05-24")
+        );
     }
 
     @DisplayName("date, theme를 기준으로 해당하는 모든 예약 목록을 조회한다.")
@@ -48,7 +39,7 @@ class ReservationRepositoryTest {
     void findAllByDateAndTheme() {
         //given, when
         List<Reservation> reservations = reservationRepository
-                .findAllByDateAndTheme(fromDate, themeOne);
+                .findAllByDateAndTheme(FROM_DATE, THEME_ONE);
 
         //then
         assertThat(reservations).hasSize(1);
@@ -59,7 +50,7 @@ class ReservationRepositoryTest {
     void findAllByMemberAndThemeAndDateBetween() {
         //given, when
         List<Reservation> reservations = reservationRepository
-                .findAllByMemberAndThemeAndDateBetween(adminMember, themeOne, fromDate, toDate);
+                .findAllByMemberAndThemeAndDateBetween(ADMIN_MEMBER, THEME_ONE, FROM_DATE, TO_DATE);
 
         //then
         assertThat(reservations).hasSize(1);
@@ -68,8 +59,8 @@ class ReservationRepositoryTest {
     @DisplayName("해당 theme에 예약이 존재하면 true를 반환한다.")
     @Test
     void existsByTheme_isTrue() {
-        //given, when
-        boolean isReservationExistsAtThemeOne = reservationRepository.existsByTheme(themeOne);
+        //when
+        boolean isReservationExistsAtThemeOne = reservationRepository.existsByTheme(THEME_ONE);
 
         //then
         assertThat(isReservationExistsAtThemeOne).isTrue();
@@ -78,8 +69,8 @@ class ReservationRepositoryTest {
     @DisplayName("해당 theme에 예약이 존재하지 않으면 false를 반환한다.")
     @Test
     void existsByTheme_isFalse() {
-        //given, when
-        boolean isReservationExistsAtThemeTwo = reservationRepository.existsByTheme(themeTwo);
+        //when
+        boolean isReservationExistsAtThemeTwo = reservationRepository.existsByTheme(THEME_TWO);
 
         //then
         assertThat(isReservationExistsAtThemeTwo).isFalse();
@@ -88,8 +79,8 @@ class ReservationRepositoryTest {
     @DisplayName("해당 time에 예약이 존재하면 true를 반환한다.")
     @Test
     void existsByTime_isTrue() {
-        //given, when
-        boolean isReservationExistsAtTimeOne = reservationRepository.existsByTime(timeOne);
+        //when
+        boolean isReservationExistsAtTimeOne = reservationRepository.existsByTime(TIME_ONE);
 
         //then
         assertThat(isReservationExistsAtTimeOne).isTrue();
@@ -98,30 +89,52 @@ class ReservationRepositoryTest {
     @DisplayName("해당 time에 예약이 존재하지 않으면 false를 반환한다.")
     @Test
     void existsByTime_isFalse() {
-        //given, when
-        boolean isReservationExistsAtTimeTwo = reservationRepository.existsByTime(timeTwo);
+        //when
+        boolean isReservationExistsAtTimeTwo = reservationRepository.existsByTime(TIME_TWO);
 
         //then
        assertThat(isReservationExistsAtTimeTwo).isFalse();
     }
 
-    @DisplayName("해당 date와 theme와 time에 해당하는 예약이 존재하면 true를 반환한다.")
+    @DisplayName("해당 date와 member와 time에 해당하는 예약이 존재하면 true를 반환한다.")
     @Test
-    void existsByDateAndTimeAndTheme_isTrue() {
-        //given, when
+    void existsByDateAndTimeAndMember_isTrue() {
+        //when
         boolean isReservationExists_true = reservationRepository
-                .existsByDateAndTimeAndTheme(fromDate, timeOne, themeOne);
+                .existsByDateAndTimeAndMember(FROM_DATE, TIME_ONE, ADMIN_MEMBER);
 
         //then
         assertThat(isReservationExists_true).isTrue();
     }
 
-    @DisplayName("해당 date와 theme와 time에 해당하는 예약이 존재하지 않으면 false를 반환한다.")
+    @DisplayName("해당 date와 member와 time에 해당하는 예약이 존재하지 않으면 false를 반환한다.")
     @Test
-    void existsByDateAndTimeAndTheme_isFalse() {
-        //given, when
+    void existsByDateAndTimeAndMember_isFalse() {
+        //when
        boolean isReservationExists_false = reservationRepository
-                .existsByDateAndTimeAndTheme(fromDate, timeTwo, themeTwo);
+                .existsByDateAndTimeAndMember(FROM_DATE, TIME_TWO, USER_MEMBER);
+
+        //then
+        assertThat(isReservationExists_false).isFalse();
+    }
+
+    @DisplayName("해당 date와 theme와 time과 member에 해당하는 예약이 존재하면 true를 반환한다.")
+    @Test
+    void existsByDateAndTimeAndThemeAndMember_isTrue() {
+        //when
+        boolean isReservationExists_true = reservationRepository
+                .existsByDateAndTimeAndThemeAndMember(FROM_DATE, TIME_ONE, THEME_ONE, ADMIN_MEMBER);
+
+        //then
+        assertThat(isReservationExists_true).isTrue();
+    }
+
+    @DisplayName("해당 date와 theme와 time과 member에 해당하는 예약이 존재하지 않으면 false를 반환한다.")
+    @Test
+    void existsByDateAndTimeAndThemeAndMember_isFalse() {
+        //when
+        boolean isReservationExists_false = reservationRepository
+                .existsByDateAndTimeAndThemeAndMember(FROM_DATE, TIME_TWO, THEME_TWO, USER_MEMBER);
 
         //then
         assertThat(isReservationExists_false).isFalse();

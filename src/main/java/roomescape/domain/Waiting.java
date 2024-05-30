@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,20 +29,16 @@ public class Reservation {
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {
+    public Waiting(Long id, Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.status = status;
-    }
-
-    public static Reservation createNewBooking(Member member, LocalDate date, TimeSlot time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
     }
 
     public Long getId() {
@@ -69,3 +65,4 @@ public class Reservation {
         return status;
     }
 }
+

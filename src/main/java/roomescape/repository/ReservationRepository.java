@@ -10,13 +10,17 @@ import roomescape.domain.TimeSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findAllByMember(Member member);
+    List<Reservation> findAllByMemberOrderByDateAsc(Member member);
 
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
 
     List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, TimeSlot timeSlot, Theme theme);
+
+    boolean existsByDateAndTimeAndMember(LocalDate date, TimeSlot timeSlot, Member member);
+
+    boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, TimeSlot timeSlot, Theme theme, Member member);
 
     boolean existsByTheme(Theme theme);
 

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.MemberReservationRequest;
-import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
@@ -31,18 +30,16 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservationByClient(
-            @Valid @RequestBody MemberReservationRequest memberRequest,
-            LoginMember member) {
-        ReservationRequest reservationRequest = new ReservationRequest(member.id(), memberRequest.date(),
-                memberRequest.timeId(), memberRequest.themeId());
-        ReservationResponse reservationResponse = reservationService.create(reservationRequest);
+            @Valid @RequestBody MemberReservationRequest memberRequest, LoginMember member) {
+        ReservationResponse reservationResponse = reservationService.createByClient(member.id(), memberRequest);
+
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> readReservations() {
-        List<ReservationResponse> reservations = reservationService.findEntireReservationList();
+    public ResponseEntity<List<ReservationResponse>> findReservations() {
+        List<ReservationResponse> reservations = reservationService.findAllReservations();
         return ResponseEntity.ok(reservations);
     }
 
@@ -57,8 +54,8 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationMineResponse>> findMyReservations(LoginMember loginMember) {
-        List<ReservationMineResponse> myReservations = reservationService.findMyReservations(loginMember);
-        return ResponseEntity.ok(myReservations);
+        List<ReservationMineResponse> myReservationsAndWaitings = reservationService.findMyReservationsAndWaitings(loginMember);
+        return ResponseEntity.ok(myReservationsAndWaitings);
     }
 
     @DeleteMapping("/{id}")

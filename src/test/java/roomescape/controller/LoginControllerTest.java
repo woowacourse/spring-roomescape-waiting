@@ -16,6 +16,8 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.dto.request.TokenRequest;
 import roomescape.dto.response.MemberResponse;
 
+import static roomescape.fixture.TestFixture.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
@@ -54,17 +56,17 @@ class LoginControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+                .then().log().cookies().extract().cookie(TOKEN);
 
         MemberResponse client = RestAssured
                 .given().log().all()
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(200).extract().as(MemberResponse.class);
 
-        assertThat(client.name()).isEqualTo("admin");
+        assertThat(client.name()).isEqualTo("어드민");
     }
 
     @DisplayName("로그아웃을 수행한다.")
@@ -86,6 +88,6 @@ class LoginControllerTest {
                 .body(request)
                 .when().post("/login")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(401);
     }
 }

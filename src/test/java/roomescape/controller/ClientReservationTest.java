@@ -9,37 +9,38 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.dto.request.TokenRequest;
+import roomescape.domain.Role;
 import roomescape.dto.response.TimeSlotResponse;
+import roomescape.infrastructure.TokenGenerator;
+
+import static roomescape.fixture.TestFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class ClientReservationTest {
 
-    private static final String EMAIL = "testDB@email.com";
-    private static final String PASSWORD = "1234";
+
+    @Autowired
+    TokenGenerator tokenGenerator;
+
+    private static final String EMAIL = "test2DB@email.com";
+    private static final int RESERVATION_COUNT = 3;
+    private static final int WAITING_COUNT = 4;
 
     @LocalServerPort
     private int port;
     private String accessToken;
 
-
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        accessToken = tokenGenerator.createToken(EMAIL, Role.USER.name());
     }
 
     private int getTotalTimeSlotsCount() {
@@ -79,10 +80,20 @@ class ClientReservationTest {
     @Test
     void given_when_find_my_reservations_then_statusCodeIsOk() {
         RestAssured.given().log().all()
-                .cookies("token", accessToken)
+                .cookies(TOKEN, accessToken)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("로그인 된 유저의 예약 내역을 조회하면 예약 내역과 예약 대기 내역을 모두 응답한다.")
+    @Test
+    void given_when_find_my_reservations_then_responseWithReservationAndWaiting() {
+        RestAssured.given().log().all()
+                .cookies(TOKEN, accessToken)
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(RESERVATION_COUNT + WAITING_COUNT));
     }
 }

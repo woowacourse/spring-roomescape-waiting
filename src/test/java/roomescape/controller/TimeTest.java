@@ -23,6 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class TimeTest {
 
+    private static final int TIMESLOT_COUNT = 4;
     @LocalServerPort
     private int port;
 
@@ -48,7 +49,7 @@ class TimeTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(5));
+                .body("size()", is(TIMESLOT_COUNT + 1));
 
         RestAssured.given().log().all()
                 .when().delete("/times/4")
