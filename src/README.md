@@ -109,7 +109,7 @@
 | GET         | `/admin/reservations`        | 예약 목록 조회       |
 | POST        | `/admin/reservations`        | 관리자 예약 추가      |
 | DELETE      | `/admin/reservations/{id}`   | 예약 삭제          |
-| GET         | `/admin/reservations/filter` | 예약 목록 필터링      |
+| GET         | `/admin/reservations/search` | 예약 목록 필터링      |
 | POST        | `/admin/times`               | 예약 시간 추가       |
 | DELETE      | `/admin/times/{id}`          | 예약 시간 삭제       |
 | POST        | `/admin/themes`              | 테마 추가          |

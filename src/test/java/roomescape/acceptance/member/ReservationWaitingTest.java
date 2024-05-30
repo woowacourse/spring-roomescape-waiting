@@ -32,7 +32,7 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
     @DisplayName("예약 대기를 추가, 조회, 취소한다.")
     @Test
     void test() {
-        ReservationRequest request = new ReservationRequest(null, LocalDate.parse("2024-05-01"), 2L, 2L);
+        ReservationRequest request = new ReservationRequest(null, LocalDate.parse("2024-05-02"), 3L, 3L);
 
         // 추가
         ReservationWaitingResponse createdWaiting = RestAssured.given().log().all()

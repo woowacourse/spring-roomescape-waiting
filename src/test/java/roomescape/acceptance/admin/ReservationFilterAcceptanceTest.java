@@ -96,7 +96,7 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
 
         return RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .when().get("/admin/reservations/filter" + path)
+                .when().get("/admin/reservations/search" + path)
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(memberListFormat);

@@ -65,7 +65,7 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    public List<ReservationResponse> getFilteredReservations(
+    public List<ReservationResponse> searchReservations(
             Long themeId,
             Long memberId,
             LocalDate from,
