@@ -1,9 +1,7 @@
 package roomescape.fixture;
 
-import org.springframework.stereotype.Component;
 import roomescape.domain.Theme;
 
-@Component
 public class ThemeFixture {
 
     public static Theme THEME_ONE = new Theme(1L, "레벨1 탈출", "우테코 레벨2를 탈출하는 내용입니다",
