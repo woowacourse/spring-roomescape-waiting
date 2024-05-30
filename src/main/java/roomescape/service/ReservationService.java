@@ -25,7 +25,7 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.repository.DeletedReservationRepository;
+import roomescape.repository.ReservationLeaveRepository;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -39,7 +39,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final DeletedReservationRepository deletedReservationRepository;
+    private final ReservationLeaveRepository reservationLeaveRepository;
 
     private final Logger logger = LoggerFactory.getLogger(ReservationService.class);
 
@@ -47,12 +47,12 @@ public class ReservationService {
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
                               MemberRepository memberRepository,
-                              DeletedReservationRepository deletedReservationRepository) {
+                              ReservationLeaveRepository reservationLeaveRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.deletedReservationRepository = deletedReservationRepository;
+        this.reservationLeaveRepository = reservationLeaveRepository;
     }
 
     public List<Reservation> findAllReservations() {
@@ -111,7 +111,7 @@ public class ReservationService {
     }
 
     private void cancelReservation(Reservation reservation) {
-        deletedReservationRepository.save(reservation.toDeletedReservation());
+        reservationLeaveRepository.save(reservation.toDeletedReservation());
         reservationRepository.deleteById(reservation.getId());
     }
 

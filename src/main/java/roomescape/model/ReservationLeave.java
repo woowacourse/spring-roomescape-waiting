@@ -15,7 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jdk.jfr.Timestamp;
 
 @Entity
-public class CancelReservation {
+public class ReservationLeave {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,15 +32,15 @@ public class CancelReservation {
     @ManyToOne
     private Member member;
 
-    protected CancelReservation() {
+    protected ReservationLeave() {
     }
 
-    public CancelReservation(Long id,
-                             LocalDate date,
-                             LocalDateTime createdAt,
-                             ReservationTime time,
-                             Theme theme,
-                             Member member) {
+    public ReservationLeave(Long id,
+                            LocalDate date,
+                            LocalDateTime createdAt,
+                            ReservationTime time,
+                            Theme theme,
+                            Member member) {
         this.id = id;
         this.date = date;
         this.createdAt = createdAt;
@@ -49,7 +49,7 @@ public class CancelReservation {
         this.member = member;
     }
 
-    public CancelReservation(Reservation reservation) {
+    public ReservationLeave(Reservation reservation) {
         this.date = reservation.getDate();
         this.createdAt = reservation.getCreatedAt();
         this.time = reservation.getTime();
@@ -102,7 +102,7 @@ public class CancelReservation {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        CancelReservation that = (CancelReservation) object;
+        ReservationLeave that = (ReservationLeave) object;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getDate(), that.getDate())
                 && Objects.equals(getCreatedAt(), that.getCreatedAt()) && Objects.equals(getTime(),
                 that.getTime()) && Objects.equals(getTheme(), that.getTheme()) && Objects.equals(
