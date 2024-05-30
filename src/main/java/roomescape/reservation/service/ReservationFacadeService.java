@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dto.MyReservationResponse;
@@ -77,6 +78,7 @@ public class ReservationFacadeService {
 
     }
 
+    @Transactional
     public void deleteReservation(long id) {
         ReservationRequest reservation = reservationService.findReservation(id);
         reservationService.deleteReservation(id);
