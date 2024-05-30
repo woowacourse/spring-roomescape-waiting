@@ -15,4 +15,6 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
     Optional<ReservationWaiting> findFirstByDetail_IdOrderByCreateAtDesc(Long detailId);
 
     List<ReservationWaiting> findAllByOrderById();
+
+    Optional<ReservationWaiting> findByDetail_IdAndMember_Id(Long aLong, Long aLong1);
 }

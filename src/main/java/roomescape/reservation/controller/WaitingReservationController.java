@@ -42,7 +42,7 @@ public class WaitingReservationController {
         Long detailId = reservationDetailService.findReservationDetailId(request);
         ReservationRequest reservationRequest = new ReservationRequest(request.memberId(), detailId);
 
-        reservationService.findReservationByDetailId(reservationRequest);
+        waitingService.findReservationWaitingByDetailId(reservationRequest);
         ReservationResponse reservationCreateResponse = waitingService.addReservationWaiting(reservationRequest);
 
         URI uri = URI.create("/waiting-reservations/" + reservationCreateResponse.id());

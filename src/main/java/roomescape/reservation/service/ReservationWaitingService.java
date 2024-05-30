@@ -31,11 +31,12 @@ public class ReservationWaitingService {
         this.detailRepository = detailRepository;
     }
 
-    public ReservationRequest findReservationWaiting(Long id) {
-        ReservationWaiting waiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
+    public List<ReservationResponse> findReservationWaitings() {
+        List<ReservationWaiting> reservations = waitingRepository.findAllByOrderById();
 
-        return ReservationRequest.from(waiting);
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public Optional<ReservationRequest> findFirstByDetailId(Long detailId) {
@@ -51,6 +52,17 @@ public class ReservationWaitingService {
         return reservationsByMember.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    public void findReservationWaitingByDetailId(ReservationRequest request) {
+        waitingRepository.findByDetail_IdAndMember_Id(request.detailId(), request.memberId())
+                .ifPresent(reservation -> {
+                    throw new ConflictException(
+                            "해당 테마(%s)의 해당 시간(%s)에 이미 예약 되어있습니다."
+                                    .formatted(
+                                            reservation.getTheme().getName(),
+                                            reservation.getTime().getStartAt()));
+                });
     }
 
     public ReservationResponse addReservationWaiting(ReservationRequest reservationRequest) {
@@ -78,13 +90,5 @@ public class ReservationWaitingService {
 
     public void removeReservations(Long id) {
         waitingRepository.deleteById(id);
-    }
-
-    public List<ReservationResponse> findReservationWaitings() {
-        List<ReservationWaiting> reservations = waitingRepository.findAllByOrderById();
-
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 }
