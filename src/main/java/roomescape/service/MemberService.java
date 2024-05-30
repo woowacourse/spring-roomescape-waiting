@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.dto.response.MemberPreviewResponse;
-import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.util.List;
 
@@ -23,8 +22,7 @@ public class MemberService {
                 .toList();
     }
 
-    public Member findValidatedMemberById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 사용자가 없습니다."));
+    public Member getMemberById(Long id) {
+        return memberRepository.getMemberById(id);
     }
 }

@@ -7,7 +7,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationStatus;
 import roomescape.service.exception.ForbiddenOperationCustomException;
-import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.util.List;
 
@@ -34,14 +33,9 @@ public class ReservationDeletionService {
 
     @Transactional
     public void deleteById(Long id) {
-        findValidatedReservation(id);
+        Reservation reservation = reservationRepository.getReservationById(id);
         updateFirstWaitingReservationIfAny(id);
-        reservationRepository.deleteById(id);
-    }
-
-    private Reservation findValidatedReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약을 찾을 수 없습니다."));
+        reservationRepository.delete(reservation);
     }
 
     private void updateFirstWaitingReservationIfAny(Long id) {

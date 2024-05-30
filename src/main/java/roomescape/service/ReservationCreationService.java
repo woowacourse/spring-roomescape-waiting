@@ -13,7 +13,6 @@ import roomescape.domain.ThemeRepository;
 import roomescape.dto.request.ReservationDto;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.exception.OperationNotAllowedCustomException;
-import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,11 +38,11 @@ public class ReservationCreationService {
     }
 
     public ReservationResponse addReservation(ReservationDto request) {
-        Member member = findValidatedMember(request.memberId());
+        Member member = memberRepository.getMemberById(request.memberId());
         validateNotDuplicated(request, member);
-        ReservationTime reservationTime = findValidatedReservationTime(request.timeId());
+        ReservationTime reservationTime = reservationTimeRepository.getReservationTimeById(request.timeId());
         validateNotPast(request.date(), reservationTime.getStartAt());
-        Theme theme = findValidatedTheme(request.themeId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
         ReservationStatus reservationStatus = determineReservationStatus(request.date(), request.timeId(), request.themeId());
 
         Reservation reservation = Reservation.builder()
@@ -65,26 +64,11 @@ public class ReservationCreationService {
         }
     }
 
-    private ReservationTime findValidatedReservationTime(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
-    }
-
     private void validateNotPast(LocalDate date, LocalTime time) {
         LocalDateTime reservationDateTime = date.atTime(time);
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedCustomException("지나간 시간에 대한 예약은 할 수 없습니다.");
         }
-    }
-
-    private Theme findValidatedTheme(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 테마를 찾을 수 없습니다."));
-    }
-
-    private Member findValidatedMember(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 회원을 찾을 수 없습니다."));
     }
 
     private ReservationStatus determineReservationStatus(LocalDate date, Long timeId, Long themeId) {

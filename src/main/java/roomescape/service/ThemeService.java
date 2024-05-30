@@ -7,7 +7,6 @@ import roomescape.domain.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.service.exception.OperationNotAllowedCustomException;
-import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,15 +40,10 @@ public class ThemeService {
     }
 
     public void deleteThemeById(Long id) {
-        findValidatedTheme(id);
+        Theme theme = themeRepository.getThemeById(id);
         validateReservationNotExist(id);
 
-        themeRepository.deleteById(id);
-    }
-
-    private Theme findValidatedTheme(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 테마를 찾을 수 없습니다."));
+        themeRepository.delete(theme);
     }
 
     private void validateReservationNotExist(Long id) {

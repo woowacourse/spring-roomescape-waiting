@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import roomescape.service.exception.ResourceNotFoundCustomException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -78,4 +79,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ORDER BY r.id ASC
     """)
     List<Reservation> findReservationsWithSameDateThemeTimeAndStatusOrderedById(@Param("reservationId") Long reservationId, @Param("reservationStatus") ReservationStatus reservationStatus);
+
+
+    default Reservation getReservationById(Long id) {
+        return this.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundCustomException("아이디에 해당하는 예약을 찾을 수 없습니다."));
+    }
 }
