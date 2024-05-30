@@ -19,4 +19,5 @@ public class Reservations {
     public List<Reservation> getReservations() {
         return List.copyOf(reservationsOnQueue);
     }
+
 }

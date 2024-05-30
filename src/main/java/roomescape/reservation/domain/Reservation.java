@@ -31,13 +31,13 @@ public class Reservation {
     public Reservation() {
     }
 
+    public Reservation(Member member, LocalDate date, Time time, Theme theme) {
+        this(member, new ReservationContent(date, time, theme));
+    }
+
     public Reservation(Member member, ReservationContent reservationContent) {
         this.member = member;
         this.reservationContent = reservationContent;
-    }
-
-    public Reservation(Member member, LocalDate date, Time time, Theme theme) {
-        this(member, new ReservationContent(date, time, theme));
     }
 
     public Reservation(Long id, Member member, ReservationContent reservationContent, LocalDateTime createdAt) {

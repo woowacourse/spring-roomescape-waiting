@@ -40,10 +40,6 @@ public class Member {
         this.role = MemberRole.valueOf(role);
     }
 
-    public Member(Long id, String name, String email, String password) {
-        this(id, name, email, password, "USER");
-    }
-
     private void validateName(String name) {
         if (name.isBlank()) {
             throw new BadRequestException("공백으로 이루어진 이름으로 예약할 수 없습니다.");
@@ -52,6 +48,10 @@ public class Member {
                 .matches()) {
             throw new BadRequestException("특수문자가 포함된 이름으로 예약을 시도하였습니다.");
         }
+    }
+
+    public Member(Long id, String name, String email, String password) {
+        this(id, name, email, password, "USER");
     }
 
     public String getEmail() {

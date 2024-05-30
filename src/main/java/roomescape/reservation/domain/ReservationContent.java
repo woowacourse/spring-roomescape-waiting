@@ -66,8 +66,6 @@ public class ReservationContent {
         return theme;
     }
 
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -94,4 +92,5 @@ public class ReservationContent {
                 ", theme=" + theme +
                 '}';
     }
+
 }
