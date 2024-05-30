@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,12 +94,11 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     void findReservationsWithSameDateThemeTimeAndStatus() {
         Long id = RESERVATION_CUSTOMER1_THEME2_240501_1100.getId();
 
-        List<Reservation> reservations = reservationRepository.findReservationsWithSameDateThemeTimeAndStatusOrderedById(id, Status.WAITING);
+        Optional<Reservation> waiting = reservationRepository.getFirstReservationWaiting(id);
 
-        assertThat(reservations).containsExactly(
-                RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100,
-                RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100
-        );
+        assertThat(waiting)
+                .isPresent()
+                .contains(RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100);
     }
 
     @DisplayName("같은 날짜, 테마, 시간인 예약 중 주어진 예약 상태와 동일하면서, 먼저 예약된 수를 구한다.")

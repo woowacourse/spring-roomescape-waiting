@@ -8,6 +8,7 @@ import roomescape.domain.exception.ResourceNotFoundCustomException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static roomescape.domain.Reservation.Status;
 
@@ -17,6 +18,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, Long id);
 
     List<Reservation> findByMemberId(Long id);
+
+    Optional<Reservation> findTop1ByDateAndThemeAndReservationTimeAndStatusOrderById(
+            LocalDate date, Theme theme, ReservationTime reservationTime, Status status);
 
     boolean existsByReservationTimeId(Long id);
 
@@ -69,19 +73,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     """)
     Long countPreviousReservationsWithSameDateThemeTimeAndStatus(@Param("reservationId") Long reservationId, @Param("status") Status status);
 
-    @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN Reservation s
-                ON r.date = s.date
-                AND r.theme.id = s.theme.id
-                AND r.reservationTime.id = s.reservationTime.id
-            WHERE s.id = :reservationId
-                AND r.status = :status
-            ORDER BY r.id ASC
-    """)
-    List<Reservation> findReservationsWithSameDateThemeTimeAndStatusOrderedById(@Param("reservationId") Long reservationId, @Param("status") Status status);
+    default Optional<Reservation> getFirstReservationWaiting(Long reservationId) {
+        Reservation reservation = this.getReservationById(reservationId);
 
+        return this.findTop1ByDateAndThemeAndReservationTimeAndStatusOrderById(
+                reservation.getDate(), reservation.getTheme(), reservation.getReservationTime(), Status.WAITING);
+    }
 
     default Reservation getReservationById(Long id) {
         return this.findById(id)

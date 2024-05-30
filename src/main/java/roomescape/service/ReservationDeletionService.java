@@ -7,8 +7,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.service.exception.ForbiddenOperationCustomException;
 
-import java.util.List;
-
 import static roomescape.domain.Reservation.Status;
 
 @Service
@@ -40,10 +38,7 @@ public class ReservationDeletionService {
     }
 
     private void updateFirstWaitingReservationIfAny(Long id) {
-        List<Reservation> waitings = reservationRepository.findReservationsWithSameDateThemeTimeAndStatusOrderedById(id, Status.WAITING);
-        if(!waitings.isEmpty()) {
-            Reservation firstWaiting = waitings.get(0);
-            firstWaiting.setStatus(Status.RESERVED);
-        }
+        reservationRepository.getFirstReservationWaiting(id)
+                .ifPresent(reservation -> reservation.setStatus(Status.RESERVED));
     }
 }
