@@ -11,7 +11,7 @@ import roomescape.dto.response.ThemeResponse;
 import roomescape.repository.ThemeRepository;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class RankService {
 
     private final ThemeRepository themeRepository;
@@ -20,6 +20,7 @@ public class RankService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
         LocalDate currentDate = LocalDate.now();
 
