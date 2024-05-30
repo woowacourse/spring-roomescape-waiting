@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,8 +65,8 @@ public class ReservationService {
         List<ReservationMineResponse> myReservations = findMyReservations(loginMember);
         List<ReservationMineResponse> myWaitings = waitingService.findMyWaitings(loginMember);
 
-        myReservations.addAll(myWaitings);
-        return myReservations;
+        return Stream.concat(myReservations.stream(), myWaitings.stream())
+                .toList();
     }
 
     @Transactional(readOnly = true)
