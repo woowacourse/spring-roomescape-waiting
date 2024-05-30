@@ -13,6 +13,8 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 public class AuthService {
@@ -34,6 +36,7 @@ public class AuthService {
     }
 
     public TokenDto login(final LoginRequest request) {
+        List<Member> all = memberRepository.findAll();
         Member member = memberService.findMemberByEmailAndPassword(request);
 
         return jwtHandler.createToken(member.getId());
