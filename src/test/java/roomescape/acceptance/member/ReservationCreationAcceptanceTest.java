@@ -3,7 +3,11 @@ package roomescape.acceptance.member;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
@@ -17,9 +21,12 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.PreInsertedData.CUSTOMER_1;
+import static roomescape.PreInsertedData.CUSTOMER_2;
+import static roomescape.PreInsertedData.THEME_1;
+import static roomescape.PreInsertedData.TIME_10_O0;
 import static roomescape.acceptance.Fixture.adminToken;
 import static roomescape.acceptance.Fixture.customer1Token;
-import static roomescape.PreInsertedData.*;
 
 class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {
 

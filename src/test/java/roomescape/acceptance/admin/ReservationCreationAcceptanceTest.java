@@ -19,8 +19,11 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.PreInsertedData.CUSTOMER_1;
+import static roomescape.PreInsertedData.CUSTOMER_2;
+import static roomescape.PreInsertedData.THEME_1;
+import static roomescape.PreInsertedData.TIME_10_O0;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.PreInsertedData.*;
 
 @DisplayName("관리자가 예약을 추가한다.")
 class ReservationCreationAcceptanceTest extends BaseAcceptanceTest {

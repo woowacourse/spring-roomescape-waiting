@@ -1,11 +1,16 @@
 package roomescape;
 
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static roomescape.domain.ReservationStatus.*;
+import static roomescape.domain.ReservationStatus.RESERVED;
+import static roomescape.domain.ReservationStatus.WAITING;
 
 public class PreInsertedData {
 

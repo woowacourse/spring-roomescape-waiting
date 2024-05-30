@@ -1,7 +1,15 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.MemberRepository;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.Theme;
+import roomescape.domain.ThemeRepository;
 import roomescape.dto.request.ReservationDto;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.exception.OperationNotAllowedCustomException;

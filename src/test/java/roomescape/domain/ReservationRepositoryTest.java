@@ -12,8 +12,18 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.PreInsertedData.*;
-import static roomescape.domain.ReservationStatus.*;
+import static roomescape.PreInsertedData.CUSTOMER_1;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME3_240502_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240502_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240503_1200;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100;
+import static roomescape.PreInsertedData.THEME_2;
+import static roomescape.PreInsertedData.THEME_3;
+import static roomescape.domain.ReservationStatus.RESERVED;
+import static roomescape.domain.ReservationStatus.WAITING;
 
 class ReservationRepositoryTest extends BaseRepositoryTest {
 

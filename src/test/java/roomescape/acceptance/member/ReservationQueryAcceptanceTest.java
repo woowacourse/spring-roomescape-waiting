@@ -7,12 +7,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.MultipleResponse;
+import roomescape.dto.response.MyReservationResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME3_240502_1100;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER1_THEME3_240502_1200;
 import static roomescape.acceptance.Fixture.customer1Token;
-import static roomescape.PreInsertedData.*;
 
 class ReservationQueryAcceptanceTest extends BaseAcceptanceTest {
 

@@ -12,7 +12,10 @@ import roomescape.dto.response.MultipleResponse;
 
 import java.time.LocalDate;
 
-import static roomescape.PreInsertedData.*;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1100;
+import static roomescape.PreInsertedData.TIME_10_O0;
+import static roomescape.PreInsertedData.TIME_11_00;
+import static roomescape.PreInsertedData.TIME_12_00;
 
 class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 

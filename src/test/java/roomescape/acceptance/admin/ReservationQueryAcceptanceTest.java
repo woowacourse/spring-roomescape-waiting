@@ -13,8 +13,15 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME3_240502_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240502_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240503_1200;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER1_THEME3_240502_1200;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.PreInsertedData.*;
 
 class ReservationQueryAcceptanceTest extends BaseAcceptanceTest {
 
