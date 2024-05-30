@@ -3,6 +3,7 @@ package roomescape.controller.api.admin;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.request.ReservationDto;
 import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationCreationService;
@@ -32,9 +33,10 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addAdminReservation(@RequestBody AdminReservationRequest request) {
-        ReservationResponse reservationResponse = reservationCreationService.addReservationByAdmin(request);
+        ReservationDto reservationDto = ReservationDto.mapToApplicationDto(request);
+        ReservationResponse reservationResponse = reservationCreationService.addReservation(reservationDto);
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())) //todo: 헤더에 들어간다는 것을 더 가독성있게 명시하기
                 .body(reservationResponse);
     }
 

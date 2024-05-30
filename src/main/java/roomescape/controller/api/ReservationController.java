@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.request.ReservationDto;
 import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -41,10 +42,10 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody MemberReservationRequest request, Member member) {
-        ReservationResponse response = reservationCreationService.addReservationByCustomer(request, member);
-        URI location = URI.create("/reservations/" + response.id());
+        ReservationDto reservationDto = ReservationDto.mapToApplicationDto(request, member.getId());
+        ReservationResponse response = reservationCreationService.addReservation(reservationDto);
 
-        return ResponseEntity.created(location)
+        return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);
     }
 

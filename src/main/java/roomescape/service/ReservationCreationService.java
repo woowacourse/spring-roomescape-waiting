@@ -2,9 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.*;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.request.MemberReservationRequest;
-import roomescape.dto.request.ReservationCreationRequest;
+import roomescape.dto.request.ReservationDto;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.exception.OperationNotAllowedCustomException;
 import roomescape.service.exception.ResourceNotFoundCustomException;
@@ -32,26 +30,17 @@ public class ReservationCreationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse addReservationByAdmin(AdminReservationRequest request) {
+    public ReservationResponse addReservation(ReservationDto request) {
         Member member = findValidatedMember(request.memberId());
-
-        return addReservationForMember(request, member);
-    }
-
-    public ReservationResponse addReservationByCustomer(MemberReservationRequest request, Member member) {
-        return addReservationForMember(request, member);
-    }
-
-    private ReservationResponse addReservationForMember(ReservationCreationRequest request, Member member) {
         validateNotDuplicated(request, member);
-        ReservationTime reservationTime = findValidatedReservationTime(request.getTimeId());
-        validateNotPast(request.getDate(), reservationTime.getStartAt());
-        Theme theme = findValidatedTheme(request.getThemeId());
-        ReservationStatus reservationStatus = determineReservationStatus(request.getDate(), request.getTimeId(), request.getThemeId());
+        ReservationTime reservationTime = findValidatedReservationTime(request.timeId());
+        validateNotPast(request.date(), reservationTime.getStartAt());
+        Theme theme = findValidatedTheme(request.themeId());
+        ReservationStatus reservationStatus = determineReservationStatus(request.date(), request.timeId(), request.themeId());
 
         Reservation reservation = Reservation.builder()
                 .member(member)
-                .date(request.getDate())
+                .date(request.date())
                 .reservationTime(reservationTime)
                 .theme(theme)
                 .reservationStatus(reservationStatus)
@@ -61,9 +50,9 @@ public class ReservationCreationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateNotDuplicated(ReservationCreationRequest request, Member member) {
+    private void validateNotDuplicated(ReservationDto request, Member member) {
         if(reservationRepository.existsByMemberIdAndDateAndReservationTimeIdAndThemeId(
-                member.getId(), request.getDate(), request.getTimeId(), request.getThemeId())){
+                member.getId(), request.date(), request.timeId(), request.themeId())){
             throw new OperationNotAllowedCustomException("중복된 예약은 할 수 없습니다.");
         }
     }
