@@ -13,6 +13,7 @@ public class Waitings {
     private List<Reservation> getWaitings(List<Reservation> waitingReservations) {
         if (!waitingReservations.isEmpty()) {
             return waitingReservations.stream()
+                    .filter(reservation -> reservation.getStatus() == Status.WAITING)
                     .sorted(Comparator.comparing(Reservation::getCreatedAt))
                     .toList();
         }
