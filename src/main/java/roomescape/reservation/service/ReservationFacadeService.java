@@ -66,8 +66,15 @@ public class ReservationFacadeService {
         Long detailId = reservationDetailService.findReservationDetailId(request);
         ReservationRequest reservationRequest = new ReservationRequest(request.memberId(), detailId);
 
-        waitingService.findReservationWaitingByDetailId(reservationRequest);
+        validateWaitingReservation(reservationRequest);
+
         return waitingService.addReservationWaiting(reservationRequest);
+    }
+
+    private void validateWaitingReservation(ReservationRequest request) {
+        reservationService.checkExistsReservation(request.detailId());
+        waitingService.checkExistsReservationWaiting(request);
+
     }
 
     public void deleteReservation(long id) {

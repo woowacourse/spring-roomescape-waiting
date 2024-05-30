@@ -69,15 +69,14 @@ public class ReservationService {
                 .toList();
     }
 
-    public void findReservationByDetailId(ReservationRequest request) {
-        reservationRepository.findByDetail_IdAndMember_Id(request.detailId(), request.memberId())
-                .ifPresent(reservation -> {
-                    throw new ConflictException(
-                            "해당 테마(%s)의 해당 시간(%s)에 이미 예약 되어있습니다."
-                                    .formatted(
-                                            reservation.getTheme().getName(),
-                                            reservation.getTime().getStartAt()));
-                });
+    public void checkExistsReservation(Long detailId) {
+        if(existsByDetailId(detailId)) {
+            throw new BadRequestException("예약이 존재하지 않으므로 예약 대기할 수 없습니다.");
+        }
+    }
+
+    private boolean existsByDetailId(Long detailId) {
+        return reservationRepository.existsByDetail_Id(detailId);
     }
 
     public List<ReservationTimeAvailabilityResponse> findTimeAvailability(Long themeId, LocalDate date) {

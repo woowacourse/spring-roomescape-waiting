@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import roomescape.exception.ConflictException;
+import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -102,30 +102,28 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("성공 : 사용자, 예약 정보인 예약이 없다.")
+    @DisplayName("성공 : 예약 정보인 예약이 없다.")
     void findReservationByDetailId() {
         // Given
-        ReservationRequest request = new ReservationRequest(member.getId(), detail.getId());
-        when(reservationRepository.findByDetail_IdAndMember_Id(any(Long.class), any(Long.class)))
-                .thenReturn(Optional.empty());
+        when(reservationRepository.existsByDetail_Id(any(Long.class)))
+                .thenReturn(false);
 
         // Then
-        assertThatCode(() -> reservationService.findReservationByDetailId(request))
+        assertThatCode(() -> reservationService.checkExistsReservation((detail.getId())))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("실패 : 해당 사용자는 예약되어있으므로 예외가 발생한다.")
+    @DisplayName("실패 : 해당 예약이 있다.")
     void findReservationByDetailId_Exception() {
         // Given
-        ReservationRequest request = new ReservationRequest(member.getId(), detail.getId());
-        when(reservationRepository.findByDetail_IdAndMember_Id(any(Long.class), any(Long.class)))
-                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.existsByDetail_Id(any(Long.class)))
+                .thenReturn(true);
 
         // Then
-        assertThatThrownBy(() -> reservationService.findReservationByDetailId(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("해당 테마(%s)의 해당 시간(%s)에 이미 예약 되어있습니다.".formatted(theme.getName(), time.getStartAt()));
+        assertThatThrownBy(() -> reservationService.checkExistsReservation(detail.getId()))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("예약이 존재하지 않으므로 예약 대기할 수 없습니다.");
     }
 
     @Test

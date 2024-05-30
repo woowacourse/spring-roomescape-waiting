@@ -58,34 +58,23 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    public void findReservationWaitingByDetailId(ReservationRequest request) {
-        waitingRepository.findByDetail_IdAndMember_Id(request.detailId(), request.memberId())
-                .ifPresent(reservation -> {
-                    throw new ConflictException(
-                            "해당 테마(%s)의 해당 시간(%s)에 이미 예약 되어있습니다."
-                                    .formatted(
-                                            reservation.getTheme().getName(),
-                                            reservation.getTime().getStartAt()));
-                });
-    }
-
     public ReservationResponse addReservationWaiting(ReservationRequest reservationRequest) {
         Member member = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new BadRequestException("해당 멤버 정보가 존재하지 않습니다."));
         ReservationDetail detail = detailRepository.findById(reservationRequest.detailId())
                 .orElseThrow(() -> new BadRequestException("해당 예약 정보가 존재하지 않습니다."));
-        validateReservationDetail(member, detail);
+        checkExistsReservationWaiting(new ReservationRequest(member.getId(), detail.getId()));
 
         ReservationWaiting reservation = reservationRequest.createReservationWaiting(member, detail);
         ReservationWaiting savedReservation = waitingRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateReservationDetail(Member member, ReservationDetail detail) {
-        waitingRepository.findByMember_IdAndDetail_Id(member.getId(), detail.getId())
+    public void checkExistsReservationWaiting(ReservationRequest request) {
+        waitingRepository.findByMember_IdAndDetail_Id(request.memberId(), request.detailId())
                 .ifPresent(reservation -> {
                     throw new ConflictException(
-                            "해당 테마(%s)의 해당 시간(%s)에는 이미 예약 대기가 존재합니다."
+                            "해당 테마(%s)의 해당 시간(%s)에 이미 예약 대기가 존재합니다."
                                     .formatted(
                                             reservation.getTheme().getName(),
                                             reservation.getTime().getStartAt()));

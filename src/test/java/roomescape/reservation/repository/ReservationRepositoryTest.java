@@ -123,21 +123,6 @@ class ReservationRepositoryTest {
 
     @Test
     @DisplayName("성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
-    void findByDetail_IdAndMember_Id() {
-        // Given
-        entityManager.persist(reservation);
-
-        // When
-        Reservation actual = reservationRepository
-                .findByDetail_IdAndMember_Id(reservationDetail.getId(), member.getId())
-                .get();
-
-        // Then
-        assertThat(actual).isEqualTo(reservation);
-    }
-
-    @Test
-    @DisplayName("성공 : 해당 멤버가 예약한 예약을 모두 날짜순으로 얻을 수 있다.")
     void findByDetail_Id() {
         // Given
         entityManager.persist(reservation);

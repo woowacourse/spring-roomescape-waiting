@@ -31,7 +31,6 @@ import roomescape.reservation.repository.ReservationDetailRepository;
 import roomescape.reservation.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
-import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingServiceTest {
@@ -88,11 +87,11 @@ class ReservationWaitingServiceTest {
     void findReservationWaitingByDetailId() {
         // Given
         ReservationRequest request = new ReservationRequest(member.getId(), detail.getId());
-        when(waitingRepository.findByDetail_IdAndMember_Id(any(Long.class), any(Long.class)))
+        when(waitingRepository.findByMember_IdAndDetail_Id(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.empty());
 
         // Then
-        assertThatCode(() -> waitingService.findReservationWaitingByDetailId(request))
+        assertThatCode(() -> waitingService.checkExistsReservationWaiting(request))
                 .doesNotThrowAnyException();
     }
 
@@ -101,13 +100,14 @@ class ReservationWaitingServiceTest {
     void findReservationWaitingByDetailId_Exception() {
         // Given
         ReservationRequest request = new ReservationRequest(member.getId(), detail.getId());
-        when(waitingRepository.findByDetail_IdAndMember_Id(any(Long.class), any(Long.class)))
+        when(waitingRepository.findByMember_IdAndDetail_Id(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(reservationWaiting));
 
         // Then
-        assertThatThrownBy(() -> waitingService.findReservationWaitingByDetailId(request))
+        assertThatThrownBy(() -> waitingService.checkExistsReservationWaiting(request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("해당 테마(%s)의 해당 시간(%s)에 이미 예약 되어있습니다.".formatted(theme.getName(), time.getStartAt()));
+                .hasMessage("해당 테마(%s)의 해당 시간(%s)에 이미 예약 대기가 존재합니다."
+                        .formatted(theme.getName(), time.getStartAt()));
     }
 
 
