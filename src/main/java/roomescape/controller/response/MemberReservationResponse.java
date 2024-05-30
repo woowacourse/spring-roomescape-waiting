@@ -1,31 +1,48 @@
 package roomescape.controller.response;
 
+import static java.util.Comparator.comparing;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import roomescape.model.Reservation;
+import roomescape.service.dto.MemberReservation;
 
 public class MemberReservationResponse {
 
-    private Long reservationId;
+    private Long id;
     private String theme;
     private LocalDate date;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime time;
     private String status;
 
-    public MemberReservationResponse(Reservation reservation) {
-        this.reservationId = reservation.getId();
-        this.theme = reservation.getTheme().getName();
-        this.date = reservation.getDate();
-        this.time = reservation.getTime().getStartAt();
-        this.status = "예약";
+    public static List<MemberReservationResponse> of(List<MemberReservation> memberReservations) {
+        return memberReservations.stream()
+                .map(MemberReservationResponse::new)
+                .sorted(comparing(MemberReservationResponse::getDate))
+                .toList();
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public MemberReservationResponse(MemberReservation reservation) {
+        this.id = reservation.id();
+        this.theme = reservation.theme();
+        this.date = reservation.date();
+        this.time = reservation.time();
+        this.status = mapStatus(reservation.order());
+    }
+
+    public String mapStatus(Long order) {
+        if (order == 0L) {
+            return "예약";
+        }
+        return "%s번째 예약대기".formatted(order);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getTheme() {

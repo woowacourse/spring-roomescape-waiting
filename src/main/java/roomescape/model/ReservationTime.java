@@ -19,13 +19,13 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
-    public ReservationTime(LocalTime startAt) {
-        this(null, startAt);
-    }
-
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
+    }
+
+    public ReservationTime(LocalTime startAt) {
+        this(null, startAt);
     }
 
     public long getId() {

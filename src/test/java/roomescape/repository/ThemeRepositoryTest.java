@@ -3,10 +3,11 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import static roomescape.model.Role.MEMBER;
+import static roomescape.service.fixture.TestReservationFactory.createAcceptReservationAtNow;
+import static roomescape.service.fixture.TestReservationTimeFactory.createReservationTime;
+import static roomescape.service.fixture.TestThemeFactory.createTheme;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
@@ -19,9 +20,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 
 import roomescape.model.Member;
-import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.service.fixture.TestMemberFactory;
 
 @DataJpaTest
 @Sql("/init-data.sql")
@@ -36,40 +37,40 @@ class ThemeRepositoryTest {
     @DisplayName("테마를 조회한다.")
     @Test
     void should_find_all_themes() {
-        entityManager.persist(new Theme("무빈", "공포", "공포.jpg"));
-        entityManager.persist(new Theme("배키", "미스터리", "미스터리.jpg"));
+        Theme theme1 = saveTheme(createTheme(1L));
+        Theme theme2 = saveTheme(createTheme(2L));
 
         List<Theme> themes = themeRepository.findAll();
 
-        assertThat(themes).extracting(Theme::getName).containsOnly("무빈", "배키");
+        assertThat(themes).extracting(Theme::getName).containsOnly(theme1.getName(), theme2.getName());
     }
 
     @DisplayName("테마를 조회한다.")
     @Test
     void should_save_theme() {
-        themeRepository.save(new Theme("무빈", "공포", "공포.jpg"));
+        Theme theme = saveTheme(createTheme(1L));
 
         List<Theme> themes = themeRepository.findAll();
 
-        assertThat(themes).extracting(Theme::getName).containsOnly("무빈");
+        assertThat(themes).extracting(Theme::getName).containsOnly(theme.getName());
     }
 
     @DisplayName("아이디로 테마를 조회한다.")
     @Test
     void should_find_theme_when_give_theme_id() {
-        entityManager.persist(new Theme("무빈", "공포", "공포.jpg"));
-        entityManager.persist(new Theme("배키", "미스터리", "미스터리.jpg"));
+        Theme theme1 = saveTheme(createTheme(1L));
+        saveTheme(createTheme(2L));
 
         Theme theme = themeRepository.findById(1L).get();
 
-        assertThat(theme).extracting(Theme::getName).isEqualTo("무빈");
+        assertThat(theme).extracting(Theme::getName).isEqualTo(theme1.getName());
     }
 
     @DisplayName("테마를 삭제한다.")
     @Test
     void should_delete_theme() {
-        entityManager.persist(new Theme("무빈", "공포", "공포.jpg"));
-        entityManager.persist(new Theme("배키", "미스터리", "미스터리.jpg"));
+        saveTheme(createTheme(1L));
+        saveTheme(createTheme(2L));
 
         themeRepository.deleteById(1L);
 
@@ -79,27 +80,25 @@ class ThemeRepositoryTest {
     @DisplayName("특정 기간의 테마를 인기순으로 정렬하여 조회한다.")
     @Test
     void should_find_ranking_theme_by_date() {
-        entityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
-        ReservationTime reservationTime = entityManager.find(ReservationTime.class, 1L);
-        entityManager.persist(new Member("무빈", MEMBER, "email@email", "1234"));
-        Member member = entityManager.find(Member.class, 1L);
+        ReservationTime reservationTime = entityManager.merge(createReservationTime(1L, "10:00"));
+        Member member = entityManager.merge(TestMemberFactory.createMember(1L));
 
         for (int i = 1; i <= 15; i++) {
-            entityManager.persist(new Theme("name" + i, "description" + i, "thumbnail" + i));
+            entityManager.merge(createTheme((long) i));
         }
 
         for (int i = 1; i <= 10; i++) {
             Theme theme = entityManager.find(Theme.class, i);
-            entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme, member));
+            entityManager.merge(createAcceptReservationAtNow((long) i, reservationTime, theme, member));
         }
         Theme theme10 = entityManager.find(Theme.class, 10);
         Theme theme9 = entityManager.find(Theme.class, 9);
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
-        entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
-//
+        entityManager.merge(createAcceptReservationAtNow(11L, reservationTime, theme10, member));
+        entityManager.merge(createAcceptReservationAtNow(12L, reservationTime, theme10, member));
+        entityManager.merge(createAcceptReservationAtNow(13L, reservationTime, theme10, member));
+        entityManager.merge(createAcceptReservationAtNow(14L, reservationTime, theme9, member));
+        entityManager.merge(createAcceptReservationAtNow(15L, reservationTime, theme9, member));
+
         LocalDate before = LocalDate.now().minusDays(8);
         LocalDate after = LocalDate.now().plusDays(1);
         List<Theme> themes = themeRepository.findByDateBetweenOrderByTheme(before, after);
@@ -119,5 +118,10 @@ class ThemeRepositoryTest {
                     new Theme(8L, "name8", "description8", "thumbnail8")
             );
         });
+    }
+
+    public Theme saveTheme(Theme theme) {
+        entityManager.merge(theme);
+        return theme;
     }
 }

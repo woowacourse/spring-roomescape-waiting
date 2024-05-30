@@ -35,14 +35,6 @@ public class Member {
         this.password = password;
     }
 
-    public Member(String name, Role role, String email, String password) {
-        this(null, name, role, email, password);
-    }
-
-    public Member(Long id, String name, Role role) {
-        this(id, name, role, null, null);
-    }
-
     private void validateNullOrBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
             throw new BadRequestException(value, fieldName);

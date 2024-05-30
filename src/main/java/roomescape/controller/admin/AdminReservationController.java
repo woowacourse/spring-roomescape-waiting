@@ -42,4 +42,10 @@ public class AdminReservationController {
         Reservation reservation = reservationService.addReservation(request);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
     }
+
+    @GetMapping("/admin/reservations/waiting")
+    public ResponseEntity<List<Reservation>> getWaitingReservations() {
+        List<Reservation> waitingReservations = reservationService.findWaitingReservations();
+        return ResponseEntity.ok(waitingReservations);
+    }
 }

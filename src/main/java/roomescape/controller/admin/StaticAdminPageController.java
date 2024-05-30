@@ -24,4 +24,9 @@ public class StaticAdminPageController {
     public String getThemePage() {
         return "admin/theme";
     }
+
+    @GetMapping("/admin/reservation/waiting")
+    public String getWaitingReservationPage() {
+        return "admin/waiting";
+    }
 }

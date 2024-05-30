@@ -31,4 +31,6 @@ INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at)
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE, 1, 1, 1, 'ACCEPT', CURRENT_TIMESTAMP);
 INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE, 1, 1, 1, 'WAITING', CURRENT_TIMESTAMP + 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE, 1, 1, 1, 'WAITING', CURRENT_TIMESTAMP + 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE, 1, 1, 2, 'WAITING', CURRENT_TIMESTAMP + 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE, 1, 1, 3, 'WAITING', CURRENT_TIMESTAMP + 3);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE, 1, 1, 2, 'WAITING', CURRENT_TIMESTAMP + 4);

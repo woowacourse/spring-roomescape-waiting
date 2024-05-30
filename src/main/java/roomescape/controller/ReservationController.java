@@ -18,6 +18,7 @@ import roomescape.controller.response.ReservationResponse;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.MemberReservation;
 
 @RestController
 public class ReservationController {
@@ -38,12 +39,11 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@AuthenticationPrincipal Member member) {
-        List<Reservation> memberReservations = reservationService.findMemberReservations(member);
-        List<MemberReservationResponse> responses =
-                memberReservations.stream()
-                        .map(MemberReservationResponse::new)
-                        .toList();
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
+            @AuthenticationPrincipal Member member) {
+        List<MemberReservation> memberReservations = reservationService.findMemberReservations(member);
+
+        List<MemberReservationResponse> responses = MemberReservationResponse.of(memberReservations);
         return ResponseEntity.ok(responses);
     }
 
@@ -53,6 +53,14 @@ public class ReservationController {
         Reservation reservation = reservationService.addReservation(request, member);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
     }
+
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<Reservation> createWaitingReservation(@RequestBody ReservationRequest request,
+                                                                @AuthenticationPrincipal Member member) {
+        Reservation reservation = reservationService.addWaitingReservation(request, member);
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
+    }
+
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long id) {

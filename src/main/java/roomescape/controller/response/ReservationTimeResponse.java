@@ -13,16 +13,16 @@ public class ReservationTimeResponse {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime startAt;
 
+    public static ReservationTimeResponse of(ReservationTime domain) {
+        return new ReservationTimeResponse(domain.getId(), domain.getStartAt());
+    }
+
     public ReservationTimeResponse() {
     }
 
     public ReservationTimeResponse(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
-    }
-
-    public static ReservationTimeResponse of(ReservationTime domain) {
-        return new ReservationTimeResponse(domain.getId(), domain.getStartAt());
     }
 
     public Long getId() {

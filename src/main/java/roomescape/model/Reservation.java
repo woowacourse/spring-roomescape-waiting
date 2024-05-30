@@ -1,13 +1,21 @@
 package roomescape.model;
 
+import static roomescape.model.ReservationStatus.ACCEPT;
+import static roomescape.model.ReservationStatus.WAITING;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+
+import jdk.jfr.Timestamp;
 
 @Entity
 public class Reservation {
@@ -16,6 +24,10 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+    @Timestamp
+    private LocalDateTime createdAt;
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
@@ -26,16 +38,46 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id,
+                       LocalDate date,
+                       ReservationStatus status,
+                       LocalDateTime createdAt,
+                       ReservationTime time,
+                       Theme theme,
+                       Member member) {
         this.id = id;
         this.date = date;
+        this.status = status;
+        this.createdAt = createdAt;
         this.time = time;
         this.theme = theme;
         this.member = member;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public static Reservation createWaiting(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        return new Reservation(null, date, WAITING, LocalDateTime.now(), time, theme, member);
+    }
+
+    public static Reservation createAcceptReservation(LocalDate date, ReservationTime time, Theme theme,
+                                                      Member member) {
+        return new Reservation(null, date, ACCEPT, LocalDateTime.now(), time, theme, member);
+    }
+
+    public static Reservation createAcceptReservation(Long id, LocalDate date, ReservationTime time, Theme theme,
+                                                      Member member) {
+        return new Reservation(id, date, ACCEPT, LocalDateTime.now(), time, theme, member);
+    }
+
+    public void confirmReservation() {
+        this.status = ACCEPT;
+    }
+
+    public ReservationLeave toDeletedReservation() {
+        return new ReservationLeave(this);
+    }
+
+    public boolean isAcceptReservation() {
+        return status == ACCEPT;
     }
 
     public long getId() {
@@ -58,6 +100,14 @@ public class Reservation {
         return member;
     }
 
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -68,13 +118,14 @@ public class Reservation {
         }
         Reservation that = (Reservation) object;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getDate(), that.getDate())
-                && Objects.equals(getTime(), that.getTime()) && Objects.equals(getTheme(),
-                that.getTheme()) && Objects.equals(getMember(), that.getMember());
+                && getStatus() == that.getStatus() && Objects.equals(getTime(), that.getTime())
+                && Objects.equals(getTheme(), that.getTheme()) && Objects.equals(getMember(),
+                that.getMember());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getDate(), getTime(), getTheme(), getMember());
+        return Objects.hash(getId(), getDate(), getStatus(), getTime(), getTheme(), getMember());
     }
 
     @Override
@@ -82,6 +133,7 @@ public class Reservation {
         return "Reservation{" +
                 "id=" + id +
                 ", date=" + date +
+                ", status=" + status +
                 ", time=" + time +
                 ", theme=" + theme +
                 ", member=" + member +
