@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
+import roomescape.exception.OperationNotAllowedException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -36,6 +38,7 @@ public class ReservationWaitingService {
         Member member = getMemberById(request.memberId());
         Reservation reservation = getReservationByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
                 request.themeId());
+        validateDifferentMember(member, reservation.getMember());
         validateWaitingNotExists(member, reservation);
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(member, reservation));
         List<ReservationWaiting> reservations = reservationWaitingRepository.findAllByReservation(reservation);
@@ -61,6 +64,12 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "%s, timeId=%d, themeId=%d에 해당하는 예약이 존재하지 않습니다.".formatted(date, timeId, themeId)
                 ));
+    }
+
+    private void validateDifferentMember(Member member1, Member member2) {
+        if (Objects.equals(member1, member2)) {
+            throw new OperationNotAllowedException("내 예약에 대기할 수 없습니다.");
+        }
     }
 
     private void validateWaitingNotExists(Member member, Reservation reservation) {
