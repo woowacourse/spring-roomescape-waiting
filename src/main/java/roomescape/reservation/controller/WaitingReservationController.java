@@ -12,38 +12,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationDetailService;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.ReservationWaitingService;
+import roomescape.reservation.service.ReservationFacadeService;
 
 @RestController
 @RequestMapping("/waiting-reservations")
 public class WaitingReservationController {
-    private final ReservationDetailService reservationDetailService;
-    private final ReservationWaitingService waitingService;
-    private final ReservationService reservationService;
+    private final ReservationFacadeService reservationFacadeService;
 
-    public WaitingReservationController(ReservationDetailService reservationDetailService, ReservationWaitingService waitingService, ReservationService reservationService) {
-        this.reservationDetailService = reservationDetailService;
-        this.waitingService = waitingService;
-        this.reservationService = reservationService;
+    public WaitingReservationController(ReservationFacadeService reservationFacadeService) {
+        this.reservationFacadeService = reservationFacadeService;
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findReservations() {
-        List<ReservationResponse> response = waitingService.findReservationWaitings();
+    public ResponseEntity<List<ReservationResponse>> findReservationWaitings() {
+        List<ReservationResponse> response = reservationFacadeService.findReservationWaitings();
+
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createWaitingReservation(ReservationCreateRequest request) {
-        Long detailId = reservationDetailService.findReservationDetailId(request);
-        ReservationRequest reservationRequest = new ReservationRequest(request.memberId(), detailId);
-
-        waitingService.findReservationWaitingByDetailId(reservationRequest);
-        ReservationResponse reservationCreateResponse = waitingService.addReservationWaiting(reservationRequest);
+        ReservationResponse reservationCreateResponse = reservationFacadeService.createWaitingReservation(request);
 
         URI uri = URI.create("/waiting-reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
@@ -52,7 +42,8 @@ public class WaitingReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservationWaiting(@PathVariable long id) {
-        waitingService.removeReservations(id);
+        reservationFacadeService.deleteReservationWaiting(id);
+
         return ResponseEntity.noContent()
                 .build();
     }

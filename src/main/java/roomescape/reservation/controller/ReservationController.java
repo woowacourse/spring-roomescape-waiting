@@ -2,9 +2,7 @@ package roomescape.reservation.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,43 +16,29 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.reservation.service.ReservationDetailService;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.ReservationWaitingService;
+import roomescape.reservation.service.ReservationFacadeService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
-    private final ReservationDetailService reservationDetailService;
-    private final ReservationService reservationService;
-    private final ReservationWaitingService waitingService;
+    private final ReservationFacadeService reservationFacadeService;
 
-    public ReservationController(ReservationDetailService reservationDetailService,
-                                 ReservationService reservationService,
-                                 ReservationWaitingService waitingService) {
-        this.reservationDetailService = reservationDetailService;
-        this.reservationService = reservationService;
-        this.waitingService = waitingService;
+    public ReservationController(ReservationFacadeService reservationFacadeService) {
+        this.reservationFacadeService = reservationFacadeService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
-        List<ReservationResponse> reservationResponse = reservationService.findReservations();
+        List<ReservationResponse> reservationResponse = reservationFacadeService.findReservations();
 
         return ResponseEntity.ok(reservationResponse);
     }
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findReservationsByMember(MemberProfileInfo memberProfileInfo) {
-        List<MyReservationResponse> reservationResponse = reservationService.findReservationByMemberId(memberProfileInfo.id());
-        List<MyReservationResponse> waitingResponse = waitingService.findReservationWaitingByMemberId(memberProfileInfo.id());
-
-        List<MyReservationResponse> response = new ArrayList<>();
-        response.addAll(reservationResponse);
-        response.addAll(waitingResponse);
+        List<MyReservationResponse> response = reservationFacadeService.findReservationsByMember(memberProfileInfo);
 
         return ResponseEntity.ok(response);
     }
@@ -64,15 +48,14 @@ public class ReservationController {
             @PathVariable long themeId,
             @RequestParam LocalDate date) {
         List<ReservationTimeAvailabilityResponse> timeAvailabilityReadResponse
-                = reservationService.findTimeAvailability(themeId, date);
+                = reservationFacadeService.findReservationTimes(themeId, date);
+
         return ResponseEntity.ok(timeAvailabilityReadResponse);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(ReservationCreateRequest request) {
-        Long detailId = reservationDetailService.findReservationDetailId(request);
-        ReservationRequest reservationRequest = new ReservationRequest(request.memberId(), detailId);
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(reservationRequest);
+        ReservationResponse reservationCreateResponse = reservationFacadeService.createReservation(request);
 
         URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
@@ -81,11 +64,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable long id) {
-        ReservationRequest reservation = reservationService.findReservation(id);
-        reservationService.deleteReservation(id);
-
-        Optional<ReservationRequest> newReservation = waitingService.findFirstByDetailId(reservation.detailId());
-        newReservation.ifPresent(reservationService::addReservation);
+        reservationFacadeService.deleteReservation(id);
 
         return ResponseEntity.noContent()
                 .build();

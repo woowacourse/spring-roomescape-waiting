@@ -16,23 +16,15 @@ import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationDetailService;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.ReservationWaitingService;
+import roomescape.reservation.service.ReservationFacadeService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
-    private final ReservationService reservationService;
-    private final ReservationDetailService reservationDetailService;
-    private final ReservationWaitingService waitingService;
+    private final ReservationFacadeService reservationFacadeService;
 
-    public AdminReservationController(ReservationService reservationService,
-                                      ReservationDetailService reservationDetailService,
-                                      ReservationWaitingService waitingService) {
-        this.reservationService = reservationService;
-        this.reservationDetailService = reservationDetailService;
-        this.waitingService = waitingService;
+    public AdminReservationController(ReservationFacadeService reservationFacadeService) {
+        this.reservationFacadeService = reservationFacadeService;
     }
 
     @GetMapping("/search")
@@ -44,16 +36,14 @@ public class AdminReservationController {
     ) {
         ReservationConditionSearchRequest request
                 = new ReservationConditionSearchRequest(memberId, themeId, dateFrom, dateTo);
-        List<ReservationResponse> reservationResponse = reservationService.findReservationsByConditions(request);
+        List<ReservationResponse> reservationResponse = reservationFacadeService.findReservationsInCondition(request);
 
         return ResponseEntity.ok(reservationResponse);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationCreateRequest request) {
-        Long detailId = reservationDetailService.findReservationDetailId(request);
-        ReservationRequest reservationRequest = new ReservationRequest(request.memberId(), detailId);
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(reservationRequest);
+        ReservationResponse reservationCreateResponse = reservationFacadeService.createReservation(request);
 
         URI uri = URI.create("/admin/reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
