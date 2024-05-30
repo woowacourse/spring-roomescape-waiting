@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
+import static roomescape.exception.ExceptionType.FORBIDDEN_DELETE;
 import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
@@ -9,6 +9,7 @@ import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -19,6 +20,7 @@ import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -27,6 +29,8 @@ import roomescape.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
+    private static final int NOT_WAITING_INDEX = 1;
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -42,27 +46,17 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse save(LoginMemberRequest loginMemberRequest,
-                                    ReservationRequest reservationRequest) {
-
+    public ReservationResponse saveByUser(LoginMemberRequest loginMemberRequest,
+                                          ReservationRequest reservationRequest) {
         ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
         Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
         Member requestedMember = memberRepository.findById(loginMemberRequest.id())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        Reservation beforeSaveReservation = reservationRequest.toReservation(requestedMember, requestedTime,
-                requestedTheme);
 
-        List<Reservation> reservations = reservationRepository.findAll();
-        if (hasSameReservation(reservations, beforeSaveReservation)) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION);
-        }
-        if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
-        }
-
-        return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
+        return save(requestedMember, reservationRequest.toReservation(
+                requestedMember, requestedTime, requestedTheme));
     }
 
     public ReservationResponse saveByAdmin(AdminReservationRequest reservationRequest) {
@@ -73,28 +67,42 @@ public class ReservationService {
         Member requestedMember = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
 
-        Reservation beforeSaveReservation = new Reservation(reservationRequest.date(), requestedTime, requestedTheme,
-                requestedMember);
+        return save(requestedMember, new Reservation(
+                reservationRequest.date(), requestedTime, requestedTheme, requestedMember));
+    }
 
-        List<Reservation> reservations = reservationRepository.findAll();
-        if (hasSameReservation(reservations, beforeSaveReservation)) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION);
-        }
+    private ReservationResponse save(Member requestedMember, Reservation beforeSaveReservation) {
         if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
             throw new RoomescapeException(PAST_TIME_RESERVATION);
         }
-
-        return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
+        if (isMultipleReservationForMember(requestedMember, beforeSaveReservation)) {
+            throw new RoomescapeException(ExceptionType.MULTIPLE_RESERVATION_FOR_MEMBER);
+        }
+        Reservation savedReservation = reservationRepository.save(beforeSaveReservation);
+        return ReservationResponse.from(savedReservation);
     }
 
-    private boolean hasSameReservation(List<Reservation> reservations, Reservation beforeSaveReservation) {
-        return reservations.stream()
-                .anyMatch(reservation -> reservation.isSameReservation(beforeSaveReservation));
+    private boolean isMultipleReservationForMember(Member requestedMember, Reservation beforeSaveReservation) {
+        return reservationRepository.findByMemberAndThemeAndDateAndTime(
+                requestedMember,
+                beforeSaveReservation.getTheme(),
+                beforeSaveReservation.getDate(),
+                beforeSaveReservation.getReservationTime()
+        ).isPresent();
     }
 
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationDetailResponse> findAllByMemberId(long userId) {
+        List<Reservation> reservationsByMember = reservationRepository.findAllByMemberId(userId);
+        return reservationsByMember.stream()
+                .map(reservation -> ReservationDetailResponse.from(
+                        reservation,
+                        reservationRepository.calculateIndexOf(reservation)))
                 .toList();
     }
 
@@ -119,13 +127,39 @@ public class ReservationService {
         return reservationRepository.findByDateBetween(dateFrom, dateTo);
     }
 
-    public void delete(long reservationId) {
-        reservationRepository.deleteById(reservationId);
+    public void deleteByUser(LoginMemberRequest loginMemberRequest, long reservationId) {
+        Optional<Reservation> findResult = reservationRepository.findById(reservationId);
+        if (findResult.isEmpty()) {
+            return;
+        }
+
+        Reservation requestedReservation = findResult.get();
+        if (requestedReservation.getMember().getId() != loginMemberRequest.id()) {
+            throw new RoomescapeException(FORBIDDEN_DELETE);
+        }
+        reservationRepository.delete(requestedReservation);
     }
 
-    public List<ReservationDetailResponse> findAllByMemberId(long userId) {
-        return reservationRepository.findAllByMemberId(userId).stream()
-                .map(ReservationDetailResponse::from)
+    public void deleteWaitingByAdmin(long id) {
+        Optional<Reservation> findResult = reservationRepository.findById(id);
+        if (findResult.isEmpty()) {
+            return;
+        }
+
+        Reservation requestedReservation = findResult.get();
+        if (isNotWaiting(requestedReservation)) {
+            throw new RoomescapeException(FORBIDDEN_DELETE);
+        }
+        reservationRepository.deleteById(id);
+    }
+
+    private boolean isNotWaiting(Reservation requestedReservation) {
+        return reservationRepository.calculateIndexOf(requestedReservation) == NOT_WAITING_INDEX;
+    }
+
+    public List<ReservationResponse> findAllRemainedWaiting() {
+        return reservationRepository.findAllRemainedWaiting(LocalDateTime.now()).stream()
+                .map(ReservationResponse::from)
                 .toList();
     }
 }

@@ -83,7 +83,9 @@ public class AdminIntegrationTest {
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when()
+                .cookie("token", adminToken)
+                .delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
@@ -115,7 +117,9 @@ public class AdminIntegrationTest {
         Assertions.assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when()
+                .cookie("token", adminToken)
+                .delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 

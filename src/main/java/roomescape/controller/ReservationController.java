@@ -29,7 +29,8 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> saveReservation(@Authenticated LoginMemberRequest loginMemberRequest,
                                                                @RequestBody ReservationRequest reservationRequest) {
-        ReservationResponse savedReservationResponse = reservationService.save(loginMemberRequest, reservationRequest);
+        ReservationResponse savedReservationResponse = reservationService.saveByUser(loginMemberRequest,
+                reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + savedReservationResponse.id()))
                 .body(savedReservationResponse);
     }
@@ -45,6 +46,12 @@ public class ReservationController {
     @GetMapping("/reservations")
     public List<ReservationResponse> findAllReservations() {
         return reservationService.findAll();
+    }
+
+    @GetMapping("/reservations/waiting")
+    @AdminOnly
+    public List<ReservationResponse> findAllRemainedWaiting() {
+        return reservationService.findAllRemainedWaiting();
     }
 
     @GetMapping("/reservations/mine")
@@ -64,8 +71,16 @@ public class ReservationController {
     }
 
     @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
-        reservationService.delete(id);
+    public ResponseEntity<Void> delete(@Authenticated LoginMemberRequest loginMemberRequest,
+                                       @PathVariable long id) {
+        reservationService.deleteByUser(loginMemberRequest, id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/admin/reservations/{id}")
+    @AdminOnly
+    public ResponseEntity<Void> deleteByAdmin(@PathVariable long id) {
+        reservationService.deleteWaitingByAdmin(id);
         return ResponseEntity.noContent().build();
     }
 }

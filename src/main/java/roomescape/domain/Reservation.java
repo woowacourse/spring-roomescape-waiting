@@ -7,8 +7,7 @@ import static roomescape.exception.ExceptionType.EMPTY_TIME;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,9 +16,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import roomescape.exception.RoomescapeException;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Reservation implements Comparable<Reservation> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,8 +34,9 @@ public class Reservation implements Comparable<Reservation> {
     private Theme theme;
     @ManyToOne
     private Member member;
-    @Enumerated(value = EnumType.STRING)
-    private ReservationStatus status;
+    @Column(nullable = false)
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     protected Reservation() {
 
@@ -52,6 +55,11 @@ public class Reservation implements Comparable<Reservation> {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(id, date, time, theme, member, LocalDateTime.now());
+    }
+
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member,
+                       LocalDateTime createdAt) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
@@ -61,7 +69,6 @@ public class Reservation implements Comparable<Reservation> {
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = ReservationStatus.BOOKED;
     }
 
     private void validateTheme(Theme theme) {
@@ -92,12 +99,24 @@ public class Reservation implements Comparable<Reservation> {
         return this.getLocalDateTime().isBefore(base);
     }
 
+    public boolean isAfter(LocalDateTime base) {
+        return this.getLocalDateTime().isAfter(base);
+    }
+
     public boolean isBetween(Duration duration) {
         return duration.contains(date);
     }
 
     public boolean isReservationTimeOf(long id) {
         return this.time.isIdOf(id);
+    }
+
+    public boolean isMemberIdOf(long memberId) {
+        return member.getId() == memberId;
+    }
+
+    public boolean isThemeIdOf(long themeId) {
+        return theme.getId() == themeId;
     }
 
     public boolean isSameReservation(Reservation beforeSave) {
@@ -144,8 +163,8 @@ public class Reservation implements Comparable<Reservation> {
         return member;
     }
 
-    public ReservationStatus getStatus() {
-        return status;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

@@ -18,24 +18,34 @@ INSERT INTO member (NAME, ROLE, EMAIL, PASSWORD)
 VALUES ('admin', 'ADMIN', 'admin@email.com', 'password');
 INSERT INTO member (NAME, ROLE, EMAIL, PASSWORD)
 VALUES ('아서', 'USER', 'Hyunta@wooteco.com', 'KingArthur');
+INSERT INTO member (NAME, ROLE, EMAIL, PASSWORD)
+VALUES ('제이미', 'USER', 'jamie9504@wooteco.com', 'jamie9504');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 2, 1, 2, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 3, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 4, 2, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 1, 3, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 2, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 1, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE + 1, 1, 2, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE + 2, 1, 2, 1, 'BOOKED');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 3, 1, 1, 1, '2024-04-02');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 3, 2, 1, 2, '2024-04-02T11:20');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 3, 1, 1, 3, '2024-04-02T12:30');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 3, 3, 1, 1, '2024-04-02');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 3, 4, 2, 1, '2024-04-02');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 3, 1, 3, 1, '2024-04-02');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 2, 1, 1, 1, '2024-04-02');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE - 1, 1, 1, 1, '2024-04-02');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE, 1, 1, 1, '2024-04-02');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE + 1, 1, 2, 1, '2024-04-02T10:30');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE + 1, 1, 2, 2, '2024-04-02T10:40');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE + 2, 1, 2, 1, '2024-04-02T10:30');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE + 2, 1, 2, 2, '2024-04-02T11:30');
+INSERT INTO reservation (date, time_id, theme_id, member_id, created_at)
+VALUES (CURRENT_DATE + 2, 1, 2, 3, '2024-04-02T12:30');

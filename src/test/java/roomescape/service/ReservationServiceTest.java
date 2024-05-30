@@ -4,13 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,58 +17,31 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.Fixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.dto.LoginMemberRequest;
+import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-class ReservationServiceTest {
+class ReservationServiceTest extends FixtureUsingTest {
 
-    private final LoginMemberRequest loginMemberRequest = Fixture.defaultLoginuser;
-    private final Member member = Fixture.defaultMember;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private ReservationRepository reservationRepository;
     @Autowired
     private ReservationService reservationService;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    private ReservationTime defaultTime = new ReservationTime(LocalTime.now());
-    private Theme defaultTheme = new Theme("name", "description", "thumbnail");
-
-    @BeforeEach
-    void initService() {
-        defaultTime = reservationTimeRepository.save(defaultTime);
-        defaultTheme = themeRepository.save(defaultTheme);
-        memberRepository.save(member);
-    }
 
     @DisplayName("지나지 않은 시간에 대한 예약을 생성할 수 있다.")
     @Test
     void createFutureReservationTest() {
         //when
-        ReservationResponse saved = reservationService.save(
-                loginMemberRequest,
+        ReservationResponse saved = reservationService.saveByUser(
+                LoginMemberRequest.from(USER1),
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
-                        defaultTime.getId(),
-                        defaultTheme.getId()
+                        reservationTime_10_0.getId(),
+                        theme1.getId()
                 ));
 
         //then
@@ -84,12 +55,12 @@ class ReservationServiceTest {
     @DisplayName("지난 시간에 대해 예약을 시도할 경우 예외가 발생한다.")
     @Test
     void createPastReservationFailTest() {
-        assertThatThrownBy(() -> reservationService.save(
-                loginMemberRequest,
+        assertThatThrownBy(() -> reservationService.saveByUser(
+                LoginMemberRequest.from(USER1),
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
-                        defaultTime.getId(),
-                        defaultTheme.getId()
+                        reservationTime_10_0.getId(),
+                        theme1.getId()
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(PAST_TIME_RESERVATION.getMessage());
@@ -98,12 +69,12 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 시간에 대해 예약을 생성하면 예외가 발생한다.")
     @Test
     void createReservationWithTimeNotExistsTest() {
-        assertThatThrownBy(() -> reservationService.save(
-                loginMemberRequest,
+        assertThatThrownBy(() -> reservationService.saveByUser(
+                LoginMemberRequest.from(USER1),
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
-                        2L,
-                        defaultTheme.getId()
+                        reservationTimeIdNotExists,
+                        theme1.getId()
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(NOT_FOUND_RESERVATION_TIME.getMessage());
@@ -112,12 +83,12 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 테마에 대해 예약을 생성하면 예외가 발생한다.")
     @Test
     void createReservationWithThemeNotExistsTest() {
-        assertThatThrownBy(() -> reservationService.save(
-                loginMemberRequest,
+        assertThatThrownBy(() -> reservationService.saveByUser(
+                LoginMemberRequest.from(USER1),
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
-                        defaultTime.getId(),
-                        2L
+                        reservationTime_10_0.getId(),
+                        themeIdNotSaved
                 )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(NOT_FOUND_THEME.getMessage());
@@ -127,14 +98,14 @@ class ReservationServiceTest {
     @Test
     void findAllTest() {
         //given
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
-                member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
-                member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme,
-                member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme,
-                member));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), reservationTime_10_0, theme1,
+                USER1));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), reservationTime_10_0, theme1,
+                USER1));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), reservationTime_10_0, theme1,
+                USER1));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), reservationTime_10_0, theme1,
+                USER1));
 
         //when
         List<ReservationResponse> reservationResponses = reservationService.findAll();
@@ -149,38 +120,103 @@ class ReservationServiceTest {
 
         LocalDate defaultDate = LocalDate.now().plusDays(1);
         Reservation defaultReservation;
+        Member usedMember = USER1;
+        Member notUsedMember = USER2;
 
         @BeforeEach
         void addDefaultReservation() {
-            defaultReservation = new Reservation(defaultDate, defaultTime, defaultTheme, member);
+            defaultReservation = new Reservation(defaultDate, reservationTime_10_0, theme1, USER1);
             defaultReservation = reservationRepository.save(defaultReservation);
         }
 
-        @DisplayName("이미 예약된 시간, 테마의 예약을 또 생성할 수 없다.")
-        @Test
-        void duplicatedReservationFailTest() {
-            assertThatThrownBy(() -> reservationService.save(
-                    loginMemberRequest,
-                    new ReservationRequest(defaultDate, defaultTime.getId(), defaultTheme.getId())))
-                    .isInstanceOf(RoomescapeException.class)
-                    .hasMessage(DUPLICATE_RESERVATION.getMessage());
-        }
-
-        @DisplayName("예약을 삭제할 수 있다.")
+        @DisplayName("본인의 예약을 삭제할 수 있다.")
         @Test
         void deleteReservationTest() {
             //when
-            reservationService.delete(1L);
+            reservationService.deleteByUser(LoginMemberRequest.from(usedMember), 1L);
 
             //then
             assertThat(reservationRepository.findAll()).isEmpty();
         }
 
+        @DisplayName("다른 사람의 예약을 삭제할 수 없다.")
+        @Test
+        void deleteOthersReservationFailTest() {
+            assertThatThrownBy(() ->
+                    reservationService.deleteByUser(LoginMemberRequest.from(notUsedMember), 1L))
+                    .isInstanceOf(RoomescapeException.class)
+                    .hasMessage(ExceptionType.FORBIDDEN_DELETE.getMessage());
+
+            assertThat(reservationRepository.findAll()).isNotEmpty();
+        }
+
+        @DisplayName("관리자는 다른 사람의 예약을 삭제할 수 없다.")
+        @Test
+        void deleteOthersReservationByAdminFailTest() {
+            assertThatThrownBy(() ->
+                    reservationService.deleteByUser(LoginMemberRequest.from(ADMIN), 1L))
+                    .isInstanceOf(RoomescapeException.class)
+                    .hasMessage(ExceptionType.FORBIDDEN_DELETE.getMessage());
+
+            assertThat(reservationRepository.findAll()).isNotEmpty();
+        }
+
+        @DisplayName("관리자는 다른 사람의 예약 대기를 삭제할 수 있다.")
+        @Test
+        void deleteWaitingByAdminTest() {
+            //given
+            ReservationResponse waitingResponse = reservationService.saveByUser(LoginMemberRequest.from(USER2),
+                    new ReservationRequest(
+                            defaultReservation.getDate(),
+                            defaultReservation.getReservationTime().getId(),
+                            defaultReservation.getTheme().getId()
+                    ));
+
+            //when
+            reservationService.deleteWaitingByAdmin(waitingResponse.id());
+
+            //then
+            assertThat(reservationService.findAll().size()).isEqualTo(1);
+        }
+
         @DisplayName("존재하지 않는 예약에 대한 삭제 요청은 정상 요청으로 간주한다.")
         @Test
         void deleteNotExistReservationNotThrowsException() {
-            assertThatCode(() -> reservationService.delete(2L))
+            assertThatCode(
+                    () -> reservationService.deleteByUser(LoginMemberRequest.from(defaultReservation.getMember()), 2L))
                     .doesNotThrowAnyException();
         }
+    }
+
+    @DisplayName("본인의 예약 / 예약 대기 목록을 확인할 수 있다.")
+    @Test
+    void findMembersReservationTest() {
+        //given
+        reservationService.saveByUser(LoginMemberRequest.from(USER2),
+                new ReservationRequest(LocalDate.now().plusDays(1), reservationTime_10_0.getId(), theme1.getId()));
+        ReservationResponse waitingReservation = reservationService.saveByUser(LoginMemberRequest.from(USER1),
+                new ReservationRequest(LocalDate.now().plusDays(1), reservationTime_10_0.getId(), theme1.getId()));
+        ReservationResponse bookedReservation = reservationService.saveByUser(LoginMemberRequest.from(USER1),
+                new ReservationRequest(LocalDate.now().plusDays(1), reservationTime_11_0.getId(), theme2.getId()));
+
+        //when
+        List<ReservationDetailResponse> usersReservations = reservationService.findAllByMemberId(USER1.getId());
+
+        //then
+        assertThat(usersReservations).containsExactlyInAnyOrder(
+                new ReservationDetailResponse(
+                        waitingReservation.id(),
+                        waitingReservation.theme().name(),
+                        waitingReservation.date(),
+                        waitingReservation.time().startAt(),
+                        "1번째 예약대기"
+                ), new ReservationDetailResponse(
+                        bookedReservation.id(),
+                        bookedReservation.theme().name(),
+                        bookedReservation.date(),
+                        bookedReservation.time().startAt(),
+                        "예약"
+                )
+        );
     }
 }

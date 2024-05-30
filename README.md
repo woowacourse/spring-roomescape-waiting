@@ -6,7 +6,7 @@
     - [x] ISO 8601 표준에 따른 hh:mm 포맷에 해당하지 않는 요청 시 에러
     - [x] 예약이 있는 예약 시간을 삭제 요청 시 에러
 - [x] 예약에 대한 제약 조건 추가
-    - [x] 동일한 날짜와 시간, 테마에 예약 생성 요청 시 에러
+    - [x] 동일한 날짜와 시간, 테마에 예약 생성 요청 시 첫 번째 예약만 성공, 나머지 예약은 예약 대기
     - [x] 존재하지 않는 시간에 예약 생성 요청 시 에러
     - [x] ISO 8601 표준에 따른 YYYY-MM-dd 포맷에 해당하지 않는 날짜가 포함된 예약 생성 요청 시 에러
     - [x] 지나간 날짜와 시간의 예약 요청 시 에러
@@ -23,13 +23,15 @@
 - [x] 인기 테마 기능 추가
 
 - [x] 사용자 기능 추가
-    - [ ] ~~회원가입~~
     - [x] 로그인 기능 추가
     - [x] 로그아웃 기능 추가
     - [x] 인증 정보 확인 기능 추가
 - [x] 테마 검색 기능 추가
 - [x] 자신의 예약 목록 조회 기능 추가
+  - [x] 예약 목록에 예약 대기 목록도 포함하도록 변경
 
+- [x] 관리자가 예약 대기 목록을 조회할 수 있는 페이지 추가
+- [x] 관리자 권한으로 예약 대기 삭제 기능 추가
 
 # API 명세
 
@@ -104,8 +106,7 @@
 > POST /reservations HTTP/1.1  
 > content-type: application/json  
 > cookie:
->
-token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI  
+> token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI  
 > host: localhost:8080
 
 ```JSON
@@ -117,6 +118,8 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 ```
 
 ### Response
+
+#### 예약 추가 성공
 
 > HTTP/1.1 201
 >
@@ -140,6 +143,11 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
   }
 }
 ```
+
+#### 예약자에 대한 동일한 예약이 존재하는 경우
+
+> HTTP/1.1 400
+> message : 동일한 테마를 두 번 이상 예매할 수 없습니다.
 
 ## 예약 추가 API - 관리자
 
@@ -163,6 +171,8 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### response
 
+#### 예약 추가 성공
+
 > HTTP/1.1 201
 >
 > Content-Type: application/json
@@ -186,7 +196,12 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 }
 ```
 
-## 예약 취소 API
+#### 예약자에 대한 동일한 예약이 존재하는 경우
+
+> HTTP/1.1 400
+> message : 동일한 테마를 두 번 이상 예매할 수 없습니다.
+
+## 예약 취소 API - 사용자
 
 ### Request
 
@@ -194,7 +209,39 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### Response
 
+#### 예약 취소 삭제 성공
+
 > HTTP/1.1 204
+
+#### 로그인이 필요할 경우
+
+> HTTP/1.1 401
+
+#### 다른 사람의 예약일 경우
+
+> HTTP/1.1 403
+> message : 삭제 권한이 없습니다.
+
+## 예약대기 취소 API - 관리자
+
+### Request
+
+> DELETE /admin/reservations/11 HTTP/1.1
+
+### Response
+
+#### 예약 대기 삭제 성공
+
+> HTTP/1.1 204
+
+#### 로그인이 필요할 경우
+
+> HTTP/1.1 401
+
+#### 예약 대기가 아닐 경우
+
+> HTTP/1.1 400
+> message : 예약은 삭제할 수 없습니다. 
 
 ## 시간 추가 API
 
@@ -386,11 +433,11 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBR
 }
 ```
 
-API 응답 예시
+## 본인 예약 조회
 
 ### request
 
-> GET /reservations-mine HTTP/1.1
+> GET /reservations/mine HTTP/1.1
 > cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 > host: localhost:8080
 
@@ -413,7 +460,7 @@ API 응답 예시
     "theme": "테마2",
     "date": "2024-03-01",
     "time": "12:00",
-    "status": "예약"
+    "status": "1번째 예약대기"
   },
   {
     "reservationId": 3,

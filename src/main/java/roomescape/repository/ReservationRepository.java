@@ -1,16 +1,22 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     List<Reservation> findByThemeAndDate(Theme theme, LocalDate date);
+
+    Optional<Reservation> findByMemberAndThemeAndDateAndTime(Member member, Theme theme, LocalDate date, ReservationTime reservationTime);
 
     List<Reservation> findAllByMemberId(long userId);
 
@@ -37,4 +43,32 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeId(long themeId);
+
+    default long calculateIndexOf(Reservation reservation) {
+        return countByDateAndThemeAndTimeAndCreatedAtLessThanEqual(
+                reservation.getDate(),
+                reservation.getTheme(),
+                reservation.getReservationTime(),
+                reservation.getCreatedAt()
+        );
+    }
+
+    long countByDateAndThemeAndTimeAndCreatedAtLessThanEqual(
+            LocalDate date, Theme theme, ReservationTime reservationTime, LocalDateTime createdAt
+    );
+
+    default List<Reservation> findAllRemainedWaiting(LocalDateTime base) {
+        List<Reservation> remainedAllReservation = findAllByDateGreaterThanEqual(base.toLocalDate());
+
+        return remainedAllReservation.stream()
+                .filter(reservation -> reservation.isAfter(base))
+                .filter(this::isWaiting)
+                .toList();
+    }
+
+    private boolean isWaiting(Reservation reservation) {
+        return calculateIndexOf(reservation) > 1;
+    }
+
+    List<Reservation> findAllByDateGreaterThanEqual(LocalDate date);
 }

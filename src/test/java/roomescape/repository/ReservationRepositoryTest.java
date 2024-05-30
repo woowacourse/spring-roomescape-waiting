@@ -10,13 +10,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import roomescape.Fixture;
+import roomescape.config.AuditingConfig;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @DataJpaTest
+@Import(AuditingConfig.class)
 class ReservationRepositoryTest {
 
     @Autowired
@@ -93,4 +96,12 @@ class ReservationRepositoryTest {
         assertThat(popularThemes).containsExactly(theme1, theme3, theme2);
     }
 
+    @DisplayName("자동으로 생성된 날짜를 저장해 준다.")
+    @Test
+    void auditingTest() {
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(LocalDate.now().plusDays(1), time1, theme1, defaultMember));
+
+        assertThat(savedReservation.getCreatedAt()).isNotNull();
+    }
 }
