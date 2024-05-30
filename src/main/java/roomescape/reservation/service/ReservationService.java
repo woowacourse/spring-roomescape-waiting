@@ -89,7 +89,7 @@ public class ReservationService {
     }
 
     private List<Time> getBookedTimesOfThemeAtDate(long themeId, LocalDate date) {
-        List<Reservation> reservations = reservationRepository.findAllByDetailTheme_IdAndDetailDate(themeId, date);
+        List<Reservation> reservations = reservationRepository.findAllByDetail_Theme_IdAndDetail_Date(themeId, date);
         return reservations.stream()
                 .map(Reservation::getTime)
                 .toList();

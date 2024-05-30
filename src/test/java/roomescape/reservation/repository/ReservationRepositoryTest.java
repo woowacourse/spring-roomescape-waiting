@@ -88,7 +88,7 @@ class ReservationRepositoryTest {
 
         // When
         List<Reservation> reservations
-                = reservationRepository.findAllByDetailTheme_IdAndDetailDate(theme.getId(), LocalDate.MIN);
+                = reservationRepository.findAllByDetail_Theme_IdAndDetail_Date(theme.getId(), LocalDate.MIN);
 
         // Then
         assertThat(reservations).hasSize(0);

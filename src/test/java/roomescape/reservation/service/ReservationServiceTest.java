@@ -133,7 +133,7 @@ class ReservationServiceTest {
         ReservationTimeAvailabilityResponse expected = ReservationTimeAvailabilityResponse.from(time, true);
         when(timeRepository.findAllByOrderByStartAtAsc())
                 .thenReturn(List.of(time));
-        when(reservationRepository.findAllByDetailTheme_IdAndDetailDate(any(Long.class), any(LocalDate.class)))
+        when(reservationRepository.findAllByDetail_Theme_IdAndDetail_Date(any(Long.class), any(LocalDate.class)))
                 .thenReturn(List.of(reservation));
 
         // Then

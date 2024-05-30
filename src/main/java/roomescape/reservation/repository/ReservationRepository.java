@@ -11,7 +11,7 @@ import roomescape.reservation.domain.Reservation;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     List<Reservation> findAllByOrderByDetailDateAsc();
 
-    List<Reservation> findAllByDetailTheme_IdAndDetailDate(Long themeId, LocalDate date);
+    List<Reservation> findAllByDetail_Theme_IdAndDetail_Date(Long themeId, LocalDate date);
 
     List<Reservation> findAllByMember_Id(Long memberId);
 
