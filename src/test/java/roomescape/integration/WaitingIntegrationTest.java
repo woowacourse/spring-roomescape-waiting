@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,7 @@ class WaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 로그인한_사용자_이름으로_예약_대기를_추가할_수_있다() {
-            params.put("date", "2023-08-05");
+            params.put("date", String.valueOf(LocalDate.now().plusYears(1L)));
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())

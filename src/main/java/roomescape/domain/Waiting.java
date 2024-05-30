@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import roomescape.exception.reservation.InvalidDateTimeReservationException;
 
 @Entity
 public class Waiting {
@@ -30,6 +32,7 @@ public class Waiting {
 
     public Waiting(Long id, LocalDate date, Member member, ReservationTime time, Theme theme,
                    ReservationStatus status) {
+        validate(date.atTime(time.getStartAt()));
         this.id = id;
         this.date = date;
         this.member = member;
@@ -40,6 +43,12 @@ public class Waiting {
 
     public Waiting(LocalDate date, Member member, ReservationTime time, Theme theme) {
         this(null, date, member, time, theme, ReservationStatus.WAITING);
+    }
+
+    private void validate(LocalDateTime localDateTime) {
+        if (localDateTime.isBefore(LocalDateTime.now())) {
+            throw new InvalidDateTimeReservationException();
+        }
     }
 
     public void denyWaiting() {

@@ -35,16 +35,14 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final Clock clock;
     private final WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              Clock clock, WaitingRepository waitingRepository) {
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.clock = clock;
         this.waitingRepository = waitingRepository;
     }
 
@@ -81,7 +79,6 @@ public class ReservationService {
         ReservationTime time = findReservationTimeById(request.timeId());
         Theme theme = findThemeById(request.themeId());
 
-        validateDateTimeReservation(request, time);
         validateDuplicateReservation(request);
 
         Reservation reservation = request.toReservation(member, time, theme);
@@ -96,12 +93,6 @@ public class ReservationService {
         }
     }
 
-    private void validateDateTimeReservation(ReservationRequest request, ReservationTime time) {
-        LocalDateTime localDateTime = request.date().atTime(time.getStartAt());
-        if (localDateTime.isBefore(LocalDateTime.now(clock))) {
-            throw new InvalidDateTimeReservationException();
-        }
-    }
 
     @Transactional
     public void deleteReservation(long id) {

@@ -29,15 +29,13 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final Clock clock;
     private final ReservationRepository reservationRepository;
 
     public WaitingService(WaitingRepository waitingRepository, ReservationTimeRepository reservationTimeRepository,
-                          ThemeRepository themeRepository, Clock clock, ReservationRepository reservationRepository) {
+                          ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.clock = clock;
         this.reservationRepository = reservationRepository;
     }
 
@@ -52,7 +50,6 @@ public class WaitingService {
     public WaitingResponse save(WaitingRequest waitingRequest, Member member) {
         ReservationTime reservationTime = findReservationTimeById(waitingRequest.timeId());
         Theme theme = findThemeById(waitingRequest.themeId());
-        validateDateTimeWaiting(waitingRequest, reservationTime);
 
         Waiting waiting = waitingRequest.toWaiting(member, reservationTime, theme);
         validateDuplicateWaiting(waitingRequest, member);
@@ -82,13 +79,6 @@ public class WaitingService {
         if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
                 request.date(), request.timeId(), request.themeId(), member.getId())) {
             throw new DuplicatedReservationException();
-        }
-    }
-
-    private void validateDateTimeWaiting(WaitingRequest request, ReservationTime time) {
-        LocalDateTime localDateTime = request.date().atTime(time.getStartAt());
-        if (localDateTime.isBefore(LocalDateTime.now(clock))) {
-            throw new InvalidDateTimeReservationException();
         }
     }
 

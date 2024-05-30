@@ -8,6 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import roomescape.exception.reservation.InvalidDateTimeReservationException;
+import roomescape.service.dto.request.ReservationRequest;
 
 @Entity
 public class Reservation {
@@ -26,6 +29,7 @@ public class Reservation {
     }
 
     public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme) {
+        validate(date.atTime(time.getStartAt()));
         this.id = id;
         this.date = date;
         this.member = member;
@@ -35,6 +39,13 @@ public class Reservation {
 
     public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme) {
         this(null, date, member, time, theme);
+    }
+
+
+    private void validate(LocalDateTime localDateTime) {
+        if (localDateTime.isBefore(LocalDateTime.now())) {
+            throw new InvalidDateTimeReservationException();
+        }
     }
 
     public Long getId() {
