@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.dto.request.LogInRequest;
-import roomescape.domain.exception.ResourceNotFoundCustomException;
+import roomescape.service.exception.AuthFailureCustomException;
 import roomescape.util.JwtProvider;
 
 @Service
@@ -28,6 +28,6 @@ public class AuthService {
 
     private Member findMemberByEmailAndPassword(String email, String password) {
         return memberRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new ResourceNotFoundCustomException("일치하는 이메일과 비밀번호가 없습니다."));
+                .orElseThrow(() -> new AuthFailureCustomException("일치하는 이메일과 비밀번호가 없습니다."));
     }
 }
