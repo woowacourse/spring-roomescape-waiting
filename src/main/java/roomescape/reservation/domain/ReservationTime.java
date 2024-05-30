@@ -18,8 +18,8 @@ public class ReservationTime {
     }
 
     public ReservationTime(LocalTime startAt) {
+        this(null, startAt);
         validateIsNull(startAt);
-        this.startAt = startAt;
     }
 
     public ReservationTime(Long id, LocalTime startAt) {

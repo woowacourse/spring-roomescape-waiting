@@ -15,7 +15,7 @@ public class Member {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
     @Enumerated(value = EnumType.STRING)
-    private Role role = Role.MEMBER;
+    private Role role = Role.USER;
     private String name;
     private String email;
     private String password;
@@ -24,9 +24,7 @@ public class Member {
     }
 
     public Member(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
+        this(null, Role.USER, name, email, password);
     }
 
     public Member(Long id, Role role, String name, String email, String password) {
@@ -55,5 +53,9 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean sameMemberId(Long memberId) {
+        return this.id.equals(memberId);
     }
 }

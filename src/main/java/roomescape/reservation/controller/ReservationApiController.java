@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.member.dto.LoginMemberInToken;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationSearchRequest;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.request.ReservationSearchRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -51,10 +52,16 @@ public class ReservationApiController {
     ) {
         Long id = reservationService.save(reservationCreateRequest, loginMemberInToken);
         ReservationResponse reservationResponse = reservationService.findById(id);
-        
+
         return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponse);
     }
 
+    @GetMapping("/reservations/waiting")
+    public ResponseEntity<List<WaitingResponse>> findWaiting() {
+        List<WaitingResponse> waitingResponses = reservationService.findWaiting();
+
+        return ResponseEntity.ok(waitingResponses);
+    }
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {

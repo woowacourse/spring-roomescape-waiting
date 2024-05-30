@@ -1,4 +1,7 @@
 spring:
+  sql:
+    init:
+      data-locations:
   h2:
     console:
       enabled: true

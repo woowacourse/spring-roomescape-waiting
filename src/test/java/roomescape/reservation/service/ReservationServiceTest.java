@@ -1,9 +1,11 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,9 +17,13 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.ReservationCreateRequest;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
@@ -37,6 +43,9 @@ class ReservationServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
     private ReservationService reservationService;
 
     @AfterEach
@@ -50,7 +59,7 @@ class ReservationServiceTest {
         Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
         Long themeId = themeRepository.save(theme).getId();
 
-        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.MEMBER, "카키", "kaki@email.com");
+        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.USER, "카키", "kaki@email.com");
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(
                 LocalDate.now(), 1L, 1L);
 
@@ -59,35 +68,42 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약이 있다면 예외가 발생한다.")
-    void duplicateReservationExceptionTest() {
-        Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
-        Long themeId = themeRepository.save(theme).getId();
-
-        LocalTime localTime = LocalTime.parse("10:00");
-        ReservationTime reservationTime = new ReservationTime(localTime);
-        Long timeId = reservationTimeRepository.save(reservationTime).getId();
-
-        Member member = new Member(1L, Role.MEMBER, "호기", "hogi@email.com", "1234");
-        memberRepository.save(member);
-
-        LocalDate localDate = LocalDate.now();
-        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(localDate,
-                themeId, timeId);
-        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, member.getRole(), member.getName(),
-                member.getEmail());
-        reservationService.save(reservationCreateRequest, loginMemberInToken);
-
-        ReservationCreateRequest duplicateRequest = new ReservationCreateRequest(localDate, themeId, timeId);
-        assertThatThrownBy(() -> reservationService.save(duplicateRequest, loginMemberInToken))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
     @DisplayName("예약 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")
     void findByIdExceptionTest() {
         assertThatThrownBy(() -> reservationService.findById(1L))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("맴버에 해당하는 모든 예약을 반환한다.")
+    void findAllByMemberIdTest() {
+        Theme theme = themeRepository.save(new Theme("a", "a", "a"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(new Member("hogi", "a", "a"));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.WAITING));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.SUCCESS));
+
+        List<MyReservationResponse> memberReservations = reservationService.findAllByMemberId(member.getId());
+        assertThat(memberReservations.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("앞의 예약이 사라지면 1번 웨이팅이 예약 확정 된다.")
+    void deleteTest() {
+        Theme theme = themeRepository.save(new Theme("a", "a", "a"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(new Member("hogi", "a", "a"));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.WAITING));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.SUCCESS));
+
+        reservationService.delete(reservation2.getId());
+        Reservation findReservation = reservationRepository.findById(reservation1.getId()).get();
+        
+        assertThat(findReservation.getStatus()).isEqualTo(Status.SUCCESS);
     }
 }
 

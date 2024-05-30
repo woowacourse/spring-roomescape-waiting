@@ -13,6 +13,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 
 @DataJpaTest
@@ -61,7 +62,7 @@ class ReservationTimeRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("호기", "hogi@naver.com", "asd"));
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime));
+        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
         boolean present = reservationTimeRepository.findByReservationsId(
                 reservationTime.getId()).isPresent();
         assertThat(present).isTrue();

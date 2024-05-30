@@ -17,9 +17,10 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.PopularThemeResponse;
-import roomescape.reservation.dto.ThemeCreateRequest;
+import roomescape.reservation.dto.request.ThemeCreateRequest;
+import roomescape.reservation.dto.response.PopularThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -69,13 +70,13 @@ class ThemeServiceTest {
         Theme theme2 = themeRepository.save(new Theme("b", "b", "b"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Reservation reservation1 = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme2, time
+                new Reservation(member, LocalDate.now(), theme2, time, Status.SUCCESS
                 ));
         Reservation reservation2 = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme1, time
+                new Reservation(member, LocalDate.now(), theme1, time, Status.SUCCESS
                 ));
         Reservation reservation3 = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme2, time
+                new Reservation(member, LocalDate.now(), theme2, time, Status.SUCCESS
                 ));
 
         List<PopularThemeResponse> popularThemes = themeService.findPopularThemeBetweenWeekLimitTen();

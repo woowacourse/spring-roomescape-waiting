@@ -4,12 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Objects;
 
 @Entity
 public class Theme {
@@ -25,9 +20,7 @@ public class Theme {
     }
 
     public Theme(String themeName, String description, String thumbnail) {
-        this.themeName = themeName;
-        this.description = description;
-        this.thumbnail = thumbnail;
+        this(null, themeName, description, thumbnail);
     }
 
     public Theme(Long id, String themeName, String description, String thumbnail) {
@@ -35,25 +28,6 @@ public class Theme {
         this.themeName = themeName;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    public List<Theme> getPopularTheme(List<Theme> themes) {
-        Map<Theme, Integer> countTheme = new HashMap<>();
-        for (Theme theme : themes) {
-            countTheme.put(theme, countTheme.getOrDefault(theme, 0) + 1);
-        }
-        return sortThemes(countTheme).stream()
-                .limit(10)
-                .toList();
-    }
-
-    private List<Theme> sortThemes(Map<Theme, Integer> countTheme) {
-        List<Entry<Theme, Integer>> list = new ArrayList<>(countTheme.entrySet());
-        list.sort(Entry.comparingByValue(Comparator.reverseOrder()));
-
-        return list.stream()
-                .map(Entry::getKey)
-                .toList();
     }
 
     public Long getId() {
@@ -72,4 +46,24 @@ public class Theme {
         return thumbnail;
     }
 
+    public boolean sameThemeId(Long id) {
+        return this.id.equals(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Theme theme = (Theme) o;
+        return Objects.equals(id, theme.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

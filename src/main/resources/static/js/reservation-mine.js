@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [2단계] 내 예약 목록 조회 기능
-          endpoint 설정
-     */
     fetch('/reservations/me') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
@@ -19,19 +15,22 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        /*
-        TODO: [2단계] 내 예약 목록 조회 기능
-              response 명세에 맞춰 값 설정
-         */
+        const id = item.id;
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
         const status = item.status;
+        const order = item.order;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+
+        if (status === '예약') {
+            row.insertCell(3).textContent = status;
+        } else {
+            row.insertCell(3).textContent = `${item.order}번째 예약대기`;
+        }
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
@@ -55,7 +54,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = `/reservations/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
