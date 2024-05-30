@@ -18,4 +18,6 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
     List<Reservation> findByMember(Member member);
+
+    boolean existsByMemberAndDateAndReservationTimeAndTheme(Member member, LocalDate date, ReservationTime reservationTime, Theme theme);
 }

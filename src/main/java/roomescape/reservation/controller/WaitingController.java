@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.member.MemberArgumentResolver;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.service.WaitingService;
@@ -24,10 +23,10 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<ReservationResponse> addWaiting(
             @RequestBody WaitingRequest waitingRequest,
-            @MemberArgumentResolver MemberRequest memberRequest
+            @MemberArgumentResolver Member member
     ) {
         ReservationResponse waitingResponse =
-                waitingService.addWaiting(waitingRequest, memberRequest);
+                waitingService.addWaiting(waitingRequest, member);
 
         return ResponseEntity.created(URI.create("/waiting/" + waitingResponse.id()))
                 .body(waitingResponse);

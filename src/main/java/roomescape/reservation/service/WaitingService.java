@@ -2,19 +2,17 @@ package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.WaitingResponse;
-import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.dto.WaitingRequest;
+import roomescape.reservation.repository.ReservationJpaRepository;
 import roomescape.reservation.repository.WaitingJpaRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
@@ -27,38 +25,46 @@ import java.util.Optional;
 @Service
 public class WaitingService {
 
+    private final ReservationJpaRepository reservationJpaRepository;
     private final WaitingJpaRepository waitingJpaRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final MemberService memberService;
 
-    public WaitingService(WaitingJpaRepository waitingJpaRepository,
+    public WaitingService(ReservationJpaRepository reservationJpaRepository, WaitingJpaRepository waitingJpaRepository,
                           ReservationTimeService reservationTimeService,
-                          ThemeService themeService,
-                          MemberService memberService
+                          ThemeService themeService
     ) {
+        this.reservationJpaRepository = reservationJpaRepository;
         this.waitingJpaRepository = waitingJpaRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.memberService = memberService;
     }
 
     @Transactional
-    public ReservationResponse addWaiting(WaitingRequest waitingRequest, MemberRequest memberRequest) {
+    public ReservationResponse addWaiting(WaitingRequest waitingRequest, Member member) {
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(waitingRequest.time());
         ThemeResponse themeResponse = themeService.getTheme(waitingRequest.theme());
-        Member member = memberService.getLoginMemberById(memberRequest.id());
 
         Waiting waiting = new Waiting(waitingRequest.date(),
                 timeResponse.toReservationTime(),
                 themeResponse.toTheme(),
                 member);
 
-        validateIsBeforeNow(waiting);
-        validateIsDuplicated(waiting);
-
+        validateAvailableWaiting(member, waiting);
         Waiting savedWaiting = waitingJpaRepository.save(waiting);
         return new ReservationResponse(savedWaiting);
+    }
+
+    private void validateAvailableWaiting(Member member, Waiting waiting) {
+        validateIsReserved(member, waiting.getTheme(), waiting.getDate(), waiting.getReservationTime());
+        validateIsBeforeNow(waiting);
+        validateIsDuplicated(waiting);
+    }
+
+    private void validateIsReserved(Member member, Theme theme, LocalDate date, ReservationTime reservationTime) {
+        if (reservationJpaRepository.existsByMemberAndDateAndReservationTimeAndTheme(member, date, reservationTime, theme)) {
+            throw new ValidationException("이미 예약한 회원입니다.");
+        }
     }
 
     private void validateIsBeforeNow(Waiting waiting) {
@@ -74,7 +80,7 @@ public class WaitingService {
                 waiting.getTheme(),
                 waiting.getMember())
         ) {
-            throw new DuplicationException("이미 예약 대기중 입니다.");
+            throw new ValidationException("이미 예약 대기중 입니다.");
         }
     }
 
@@ -106,6 +112,6 @@ public class WaitingService {
             ReservationTime reservationTime,
             Theme theme
     ) {
-        return waitingJpaRepository.findTopByDateAndReservationTimeAndTheme(date, reservationTime, theme);
+        return waitingJpaRepository.findTopByDateAndReservationTimeAndThemeOrderByIdAsc(date, reservationTime, theme);
     }
 }
