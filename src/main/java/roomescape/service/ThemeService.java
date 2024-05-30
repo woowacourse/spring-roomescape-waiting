@@ -18,12 +18,10 @@ import roomescape.service.dto.response.ThemeResponse;
 public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
-    private final Clock clock;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository, Clock clock) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
-        this.clock = clock;
     }
 
     public List<ThemeResponse> findAllTheme() {
@@ -34,8 +32,8 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAllPopularTheme() {
-        LocalDate startDate = LocalDate.now(clock).minusDays(7L);
-        LocalDate endDate = LocalDate.now(clock);
+        LocalDate startDate = LocalDate.now().minusDays(7L);
+        LocalDate endDate = LocalDate.now();
         List<Theme> themes = reservationRepository.findThemeByMostPopularReservation(startDate, endDate);
         return themes.stream()
                 .map(ThemeResponse::new)

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import roomescape.helper.fixture.DateFixture;
 import roomescape.service.dto.request.LoginRequest;
 
 class ReservationIntegrationTest extends IntegrationTest {
@@ -54,7 +55,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_기간별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
-                    .when().get("/admin/reservations?date-from=2024-08-05&date-to=2024-08-10")
+                    .when().get("/admin/reservations?date-from=" + DateFixture.today() + "&date-to=" + DateFixture.dayAfterTomorrow())
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(2));
@@ -129,7 +130,7 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 시간대와_테마가_똑같은_중복된_예약은_추가할_수_없다() {
-            params.put("date", "2024-08-05");
+            params.put("date", String.valueOf(DateFixture.tomorrow()));
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())

@@ -13,6 +13,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.helper.fixture.DateFixture;
 
 class ReservationTimeIntegrationTest extends IntegrationTest {
     @Nested
@@ -49,12 +50,12 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
         @Test
         void 예약이_불가한_시간을_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .when().get("/times/available?date=2024-08-05&theme-id=1")
+                    .when().get("/times/available?date=" + DateFixture.tomorrow() + "&theme-id=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
 
-            List<Map<String, Object>> response = RestAssured.get("/times/available?date=2024-08-05&theme-id=1")
+            List<Map<String, Object>> response = RestAssured.get("/times/available?date=" + DateFixture.tomorrow() + "&theme-id=1")
                     .as(new TypeRef<>() {
                     });
             Assertions.assertThat(response.get(0)).containsEntry("alreadyBooked", true);

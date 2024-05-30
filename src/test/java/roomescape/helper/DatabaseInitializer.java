@@ -12,6 +12,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.helper.fixture.DateFixture;
 
 @Component
 @Transactional
@@ -57,14 +58,14 @@ public class DatabaseInitializer {
     }
 
     private void createReservation(Member admin, Member user, ReservationTime time, Theme theme) {
-        Reservation reservation1 = new Reservation(LocalDate.of(2024, 8, 5), user, time, theme);
-        Reservation reservation2 = new Reservation(LocalDate.of(2024, 8, 6), admin, time, theme);
+        Reservation reservation1 = new Reservation(DateFixture.tomorrow(), user, time, theme);
+        Reservation reservation2 = new Reservation(DateFixture.dayAfterTomorrow(), admin, time, theme);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
     }
 
     private void createWaiting(Member admin, Member user, ReservationTime time, Theme theme) {
-        Waiting waiting = new Waiting(LocalDate.of(2024, 8, 6), user, time, theme);
+        Waiting waiting = new Waiting(LocalDate.now().plusDays(2), user, time, theme);
         entityManager.persist(waiting);
     }
 }

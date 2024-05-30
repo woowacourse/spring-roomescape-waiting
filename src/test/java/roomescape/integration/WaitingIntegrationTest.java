@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.helper.fixture.DateFixture;
 
 class WaitingIntegrationTest extends IntegrationTest {
 
@@ -92,7 +93,7 @@ class WaitingIntegrationTest extends IntegrationTest {
 
         @Test
         void 이미_예약을_한_시간대와_테마에는_예약_대기를_추가할_수_없다() {
-            params.put("date", "2024-08-06");
+            params.put("date", String.valueOf(DateFixture.dayAfterTomorrow()));
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())

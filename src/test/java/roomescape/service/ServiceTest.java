@@ -1,4 +1,4 @@
-package roomescape.integration;
+package roomescape.service;
 
 import static org.mockito.BDDMockito.given;
 
@@ -20,7 +20,7 @@ import roomescape.helper.DatabaseInitializer;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public abstract class IntegrationTest {
+public abstract class ServiceTest {
     @LocalServerPort
     int port;
 
