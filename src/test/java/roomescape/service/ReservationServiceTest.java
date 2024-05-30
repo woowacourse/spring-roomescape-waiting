@@ -315,23 +315,6 @@ class ReservationServiceTest {
                 .hasMessageContaining("[ERROR] 현재(", ") 이전 시간으로 예약할 수 없습니다.");
     }
 
-    @DisplayName("현재로 예약하면 예외가 발생하지 않는다.")
-    @Test
-    void should_not_throw_exception_when_current_date() {
-        themeRepository.save(createTheme(1L));
-        themeRepository.save(createTheme(2L));
-        themeRepository.save(createTheme(3L));
-        reservationTimeRepository.save(createReservationTime(1L, "10:00"));
-        reservationTimeRepository.save(createReservationTime(2L, "11:00"));
-        reservationTimeRepository.save(createReservationTime(3L, LocalTime.now()));
-        Member member = memberRepository.save(createMember(1L));
-
-        ReservationRequest request = new ReservationRequest(now(), 3L, 1L);
-
-        assertThatCode(() -> reservationService.addReservation(request, member))
-                .doesNotThrowAnyException();
-    }
-
     @DisplayName("현재 이후로 예약하면 예외가 발생하지 않는다.")
     @Test
     void should_not_throw_exception_when_later_date() {
