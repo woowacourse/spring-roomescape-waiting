@@ -40,8 +40,7 @@ public class ReservationWaiting {
     @Column(nullable = false, name = "create_at")
     private LocalDateTime createAt;
 
-
-    public ReservationWaiting() {
+    protected ReservationWaiting() {
     }
 
     public ReservationWaiting(Member member, ReservationDetail detail) {

@@ -23,7 +23,7 @@ public class Time {
     @Column(nullable = false, unique = true, name = "start_at")
     private LocalTime startAt;
 
-    public Time() {
+    protected Time() {
     }
 
     public Time(LocalTime startAt) {

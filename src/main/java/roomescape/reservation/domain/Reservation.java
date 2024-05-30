@@ -38,7 +38,7 @@ public class Reservation {
     @JoinColumn(name = "detail_id")
     private ReservationDetail detail;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Member member, ReservationDetail detail) {

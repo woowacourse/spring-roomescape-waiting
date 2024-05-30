@@ -36,7 +36,7 @@ public class ReservationDetail {
     @Column(nullable = false, name = "date")
     private LocalDate date;
 
-    public ReservationDetail() {
+    protected ReservationDetail() {
     }
 
     public ReservationDetail(Theme theme, Time time, LocalDate date) {
