@@ -8,7 +8,7 @@ import roomescape.support.dto.TokenCookieDto;
 
 import static org.hamcrest.Matchers.is;
 
-class MemberControllerTest extends IntegrationTest {
+class MemberIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("/members 으로 GET 요청을 보내면 회원 정보와 200 OK 를 받는다.")

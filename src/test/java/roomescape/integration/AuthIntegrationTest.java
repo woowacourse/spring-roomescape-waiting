@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 
-public class AuthControllerTest extends IntegrationTest {
+public class AuthIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("로그인에 성공하면 JWT accessToken, refreshToken 을 Response 받는다.")

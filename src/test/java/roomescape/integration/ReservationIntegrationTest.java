@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.is;
 
-public class ReservationControllerTest extends IntegrationTest {
+public class ReservationIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("회원권한이 있으면 예약을 등록할 수 있다.")

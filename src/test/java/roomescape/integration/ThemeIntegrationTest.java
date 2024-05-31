@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 
-class ThemeControllerTest extends IntegrationTest {
+class ThemeIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("모든 테마 정보를 조회한다.")

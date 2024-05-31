@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.is;
 
-public class ReservationTimeControllerTest extends IntegrationTest {
+public class ReservationTimeIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("처음으로 등록하는 시간의 id는 1이다.")
