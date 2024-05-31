@@ -7,14 +7,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.global.auth.annotation.Admin;
 import roomescape.global.auth.annotation.Auth;
 import roomescape.global.auth.annotation.MemberId;
 import roomescape.global.dto.response.ApiResponse;
@@ -23,7 +21,6 @@ import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MemberReservationsResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
-import roomescape.reservation.dto.response.ReservationsResponse;
 import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
@@ -34,13 +31,6 @@ public class ReservationController {
 
     public ReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
-    }
-
-    @Admin
-    @GetMapping("/admin/reservations")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<ReservationsResponse> getReservationsByStatus(@RequestParam final ReservationStatus status) {
-        return ApiResponse.success(reservationService.findReservationsByStatus(status));
     }
 
     @Auth
@@ -56,19 +46,6 @@ public class ReservationController {
             @NotNull(message = "날짜는 null일 수 없습니다.") @RequestParam final LocalDate date) {
         return ApiResponse.success(reservationService.findReservationsByDateAndThemeId(date, themeId));
 
-    }
-
-    @Admin
-    @GetMapping("/admin/reservations/search")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<ReservationsResponse> getReservationBySearching(
-            @RequestParam(required = false) final Long themeId,
-            @RequestParam(required = false) final Long memberId,
-            @RequestParam(required = false) final LocalDate dateFrom,
-            @RequestParam(required = false) final LocalDate dateTo
-    ) {
-        return ApiResponse.success(
-                reservationService.searchWith(themeId, memberId, dateFrom, dateTo));
     }
 
     // TODO: @Auth, @Admin 애노테이션 대신 @RequiredRole(value = ), @RequiredRole(values = {}) 애노테이션으로 변경
@@ -124,23 +101,5 @@ public class ReservationController {
         reservationService.removeMemberReservationById(memberReservationId, memberId, ReservationStatus.WAITING);
 
         return ApiResponse.success();
-    }
-
-    @Admin
-    @PatchMapping("/admin/reservations/waitings/{memberReservationId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<Void> approveWaitingReservation(
-            @NotNull(message = "memberReservationId는 null 일 수 없습니다.") @PathVariable("memberReservationId") final Long memberReservationId
-    ) {
-        reservationService.approveWaitingReservation(memberReservationId);
-
-        return ApiResponse.success();
-    }
-
-    @Admin
-    @GetMapping("/admin/reservations/waitings")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<ReservationsResponse> getFirstOrderWaitingReservations() {
-        return ApiResponse.success(reservationService.findFirstOrderWaitingReservations());
     }
 }

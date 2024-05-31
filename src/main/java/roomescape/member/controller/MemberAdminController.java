@@ -10,10 +10,10 @@ import roomescape.member.dto.MembersResponse;
 import roomescape.member.service.MemberService;
 
 @RestController
-public class MemberController {
+public class MemberAdminController {
     private final MemberService memberService;
 
-    public MemberController(final MemberService memberService) {
+    public MemberAdminController(final MemberService memberService) {
         this.memberService = memberService;
     }
 
