@@ -17,7 +17,6 @@ import roomescape.support.dto.TokenCookieDto;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -394,7 +393,7 @@ public class ReservationIntegrationTest extends IntegrationTest {
         Member waitingMember = memberFixture.createMember();
 
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
-        ReservationTime time = reservationTimeFixture.createTime(LocalTime.of(17, 30));
+        ReservationTime time = reservationTimeFixture.createTime();
         Theme theme = themeFixture.createTheme();
         ReservationDetail reservationDetail = reservationDetailFixture.createReservationDetail(tomorrow, time, theme);
 
