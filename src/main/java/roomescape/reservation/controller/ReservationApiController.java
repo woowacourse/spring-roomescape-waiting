@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
-import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.request.ReservationMemberCreateRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.request.ReservationSearchRequest;
 import roomescape.reservation.service.ReservationService;
@@ -32,12 +33,20 @@ public class ReservationApiController {
         this.waitingService = waitingService;
     }
 
-    @PostMapping(path = {"/reservations", "/admin/reservations"})
-    public ResponseEntity<ReservationResponse> createMemberReservation(
-            @Valid @RequestBody final ReservationCreateRequest request,
+    @PostMapping("/reservations")
+    public ResponseEntity<ReservationResponse> createReservation(
+            @Valid @RequestBody final ReservationMemberCreateRequest request,
             @Login final LoginMemberInToken loginMember
     ) {
         Reservation reservation = reservationService.save(request, loginMember);
+        ReservationResponse reservationResponse = new ReservationResponse(reservation);
+
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
+    }
+
+    @PostMapping("/admin/reservations")
+    public ResponseEntity<ReservationResponse> createReservationByAdmin(@Valid @RequestBody final ReservationAdminCreateRequest request) {
+        Reservation reservation = reservationService.saveByAdmin(request);
         ReservationResponse reservationResponse = new ReservationResponse(reservation);
 
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);

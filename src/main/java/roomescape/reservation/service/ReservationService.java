@@ -11,7 +11,8 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.ReservationAdminCreateRequest;
+import roomescape.reservation.dto.request.ReservationMemberCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -44,10 +45,22 @@ public class ReservationService {
     }
 
     public Reservation save(
-            final ReservationCreateRequest request,
+            final ReservationMemberCreateRequest request,
             final LoginMemberInToken loginMember
     ) {
-        Reservation reservation = getValidatedReservation(request, loginMember);
+        Reservation reservation = getValidatedReservation(
+                request.date(), request.timeId(), request.themeId(), loginMember.id());
+
+        validateDuplicateReservation(reservation);
+        validateDateTime(reservation.getDate(), reservation.getTime().getStartAt());
+
+        return reservationRepository.save(reservation);
+    }
+
+    public Reservation saveByAdmin(final ReservationAdminCreateRequest request) {
+        Reservation reservation = getValidatedReservation(
+                request.date(), request.timeId(), request.themeId(), request.memberId());
+
         validateDuplicateReservation(reservation);
         validateDateTime(reservation.getDate(), reservation.getTime().getStartAt());
 
@@ -68,19 +81,21 @@ public class ReservationService {
     }
 
     private Reservation getValidatedReservation(
-            final ReservationCreateRequest request,
-            final LoginMemberInToken loginMember
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long memberId
     ) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
+        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
-        Theme theme = themeRepository.findById(request.themeId())
+        Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        Member member = memberRepository.findById(loginMember.id())
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        return request.toReservation(member, theme, reservationTime);
+        return new Reservation(member, date, theme, reservationTime);
     }
 
     private void validateDuplicateReservation(final Reservation reservation) {
