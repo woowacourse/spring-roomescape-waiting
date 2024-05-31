@@ -1,4 +1,4 @@
-package roomescape.reservation.vo;
+package roomescape.reservation.dto;
 
 import roomescape.reservation.domain.Waiting;
 

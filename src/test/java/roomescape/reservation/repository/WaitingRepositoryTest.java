@@ -17,7 +17,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.vo.WaitingWithRank;
+import roomescape.reservation.dto.WaitingWithRank;
 
 @DataJpaTest
 class WaitingRepositoryTest {

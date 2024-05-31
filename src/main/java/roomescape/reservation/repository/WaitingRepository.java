@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.vo.WaitingWithRank;
+import roomescape.reservation.dto.WaitingWithRank;
 
 @Repository
 public interface WaitingRepository extends CrudRepository<Waiting, Long> {
@@ -26,7 +26,7 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
     Optional<Waiting> findFirstByThemeIdAndDateAndReservationTimeStartAt(Long themeId, LocalDate date, LocalTime startAt);
 
     @Query("""
-            SELECT new roomescape.reservation.vo.WaitingWithRank(
+            SELECT new roomescape.reservation.dto.WaitingWithRank(
                 w,
                 (SELECT cast (COUNT(w2) as long)
                 FROM Waiting w2
