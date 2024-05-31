@@ -35,7 +35,7 @@ public class ThemeService {
         LocalDate endDate = today.minusDays(1);
         Pageable pageable = Pageable.ofSize(10);
 
-        List<ThemeResponse> response = themeRepository.findTopNThemeBetweenStartDateAndEndDate(startDate, endDate, pageable)
+        List<ThemeResponse> response = themeRepository.findTopNBetweenStartDateAndEndDate(startDate, endDate, pageable)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();

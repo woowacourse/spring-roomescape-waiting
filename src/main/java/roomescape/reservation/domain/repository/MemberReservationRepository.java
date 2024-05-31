@@ -11,8 +11,6 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.ReservationDetail;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -54,16 +52,16 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             WHERE mr.member = :member AND r.date > CURRENT_DATE OR (r.date = CURRENT_DATE AND rt.startAt >= CURRENT_TIME)
             ORDER BY mr.id ASC
             """)
-    List<MemberReservation> findAfterAndEqualDateReservationByMemberOrderByIdAsc(final Member member);
+    List<MemberReservation> findNotOverdueByMemberOrderByIdAsc(final Member member);
 
     @Query("""
             SELECT mr
-            FROM MemberReservation mr JOIN mr.reservationDetail r JOIN r.reservationTime rt JOIN r.theme t
-            WHERE mr.member = :member AND rt = :time AND t = :theme AND r.date = :date
+            FROM MemberReservation mr JOIN mr.reservationDetail r
+            WHERE mr.member = :member AND r = :detail
             """)
-    Optional<MemberReservation> findByMemberAndReservationTimeAndDateAndTheme(Member member, ReservationTime time, LocalDate date, Theme theme);
+    Optional<MemberReservation> findByMemberAndDetail(Member member, ReservationDetail detail);
 
-    Long countByReservationDetail(ReservationDetail reservationDetail);
+    Long countByDetail(ReservationDetail reservationDetail);
 
     @Query("""
             SELECT mr
@@ -79,7 +77,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             GROUP BY mr.id
             HAVING mr.id = MIN(mr.id)
             """)
-    List<MemberReservation> findFirstOrderMemberReservationsByStatus(ReservationStatus status);
+    List<MemberReservation> findFirstOrderByStatus(ReservationStatus status);
 
     @Query("""
             SELECT mr
@@ -87,5 +85,5 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             WHERE r = :reservationDetail AND mr.status = WAITING
             ORDER BY mr.id ASC
             """)
-    List<MemberReservation> findFirstOrderWaitingMemberReservationByReservationDetail(ReservationDetail reservationDetail, Pageable pageable);
+    List<MemberReservation> findFirstOrderWaitingByDetail(ReservationDetail reservationDetail, Pageable pageable);
 }

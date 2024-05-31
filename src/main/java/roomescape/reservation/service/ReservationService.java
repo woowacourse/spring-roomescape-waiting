@@ -64,7 +64,7 @@ public class ReservationService {
 
     public ReservationsResponse findFirstOrderWaitingReservations() {
         List<MemberReservation> firstOrderWaitingReservations = memberReservationRepository
-                .findFirstOrderMemberReservationsByStatus(ReservationStatus.WAITING);
+                .findFirstOrderByStatus(ReservationStatus.WAITING);
 
         List<ReservationResponse> response = firstOrderWaitingReservations.stream()
                 .map(ReservationResponse::from)
@@ -130,7 +130,7 @@ public class ReservationService {
     private void validateMemberReservationIsFirstOrder(final MemberReservation memberReservationToApprove) {
         Pageable limit = Pageable.ofSize(1);
         List<MemberReservation> firstMemberReservationOnReservationDetail = memberReservationRepository
-                .findFirstOrderWaitingMemberReservationByReservationDetail(memberReservationToApprove.getReservationDetail(), limit);
+                .findFirstOrderWaitingByDetail(memberReservationToApprove.getReservationDetail(), limit);
 
         if (!firstMemberReservationOnReservationDetail.isEmpty()) {
             MemberReservation firstMemberReservation = firstMemberReservationOnReservationDetail.get(0);
@@ -175,7 +175,7 @@ public class ReservationService {
 
     private void validateReservation(final ReservationDetail requestReservationDetail, final Member requestMember, final ReservationStatus status) {
         LocalDateTime now = LocalDateTime.now();
-        long alreadyBookedReservationSize = memberReservationRepository.countByReservationDetail(requestReservationDetail);
+        long alreadyBookedReservationSize = memberReservationRepository.countByDetail(requestReservationDetail);
 
         validateDateAndTime(requestReservationDetail, now);
         if (status.isReserved()) {
@@ -202,14 +202,14 @@ public class ReservationService {
         }
     }
 
-    private void validateMemberNotWaitingDuplicated(final ReservationDetail requestReservation, final Member requestMember) {
-        Optional<MemberReservation> memberReservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(
-                requestMember, requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme());
+    private void validateMemberNotWaitingDuplicated(final ReservationDetail requestReservationDetail, final Member requestMember) {
+        Optional<MemberReservation> memberReservation = memberReservationRepository.findByMemberAndDetail(
+                requestMember, requestReservationDetail);
 
         if (memberReservation.isPresent() && memberReservation.get().isWaitingStatus()) {
             throw new DataDuplicateException(ErrorType.RESERVATION_DUPLICATED,
                     String.format("이미 해당 날짜/시간/테마에 예약대기 중 입니다. [values: %s/%s/%s]",
-                            requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
+                            requestReservationDetail.getReservationTime(), requestReservationDetail.getDate(), requestReservationDetail.getTheme()));
         }
     }
 
@@ -223,7 +223,7 @@ public class ReservationService {
 
     public MemberReservationsResponse findUnexpiredReservationByMemberId(final Long memberId) {
         Member member = memberRepository.getById(memberId);
-        List<MemberReservation> memberReservations = memberReservationRepository.findAfterAndEqualDateReservationByMemberOrderByIdAsc(member);
+        List<MemberReservation> memberReservations = memberReservationRepository.findNotOverdueByMemberOrderByIdAsc(member);
 
         List<MemberReservationResponse> responses = new ArrayList<>();
         for (int order = 0; order < memberReservations.size(); order++) {
