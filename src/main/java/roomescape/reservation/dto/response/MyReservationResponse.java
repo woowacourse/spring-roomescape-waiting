@@ -4,20 +4,21 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.vo.WaitingWithRank;
 
 public class MyReservationResponse {
+
+    private static final long RESERVATION_STATUS = 0;
 
     private final Long id;
     private final String theme;
     private final LocalDate date;
     @JsonFormat(pattern = "HH:mm")
     private final LocalTime time;
-    private final String status;
+    private final Long status;
 
     public MyReservationResponse(final Long id, final LocalDate date, final LocalTime time, final String theme,
-            final String status) {
+            final Long status) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -31,7 +32,7 @@ public class MyReservationResponse {
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getTheme().getName(),
-                ReservationStatus.RESERVATION.getStatus()
+                RESERVATION_STATUS
         );
     }
 
@@ -41,7 +42,7 @@ public class MyReservationResponse {
                 waitingWithRank.waiting().getDate(),
                 waitingWithRank.waiting().getReservationTime().getStartAt(),
                 waitingWithRank.waiting().getTheme().getName(),
-                ReservationStatus.WAITING.formatRankWithSuffix(waitingWithRank.rank())
+                waitingWithRank.rank()
         );
     }
 
@@ -61,7 +62,7 @@ public class MyReservationResponse {
         return time;
     }
 
-    public String getStatus() {
+    public Long getStatus() {
         return status;
     }
 }
