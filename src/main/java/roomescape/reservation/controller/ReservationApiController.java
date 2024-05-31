@@ -2,7 +2,6 @@ package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,18 +18,18 @@ import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.request.ReservationMemberCreateRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.request.ReservationSearchRequest;
+import roomescape.reservation.service.ReservationAndWaitingQueryService;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.WaitingService;
 
 @RestController
 public class ReservationApiController {
 
     private final ReservationService reservationService;
-    private final WaitingService waitingService;
+    private final ReservationAndWaitingQueryService reservationAndWaitingQueryService;
 
-    public ReservationApiController(ReservationService reservationService, WaitingService waitingService) {
+    public ReservationApiController(ReservationService reservationService, ReservationAndWaitingQueryService reservationAndWaitingQueryService) {
         this.reservationService = reservationService;
-        this.waitingService = waitingService;
+        this.reservationAndWaitingQueryService = reservationAndWaitingQueryService;
     }
 
     @PostMapping("/reservations")
@@ -68,13 +67,9 @@ public class ReservationApiController {
 
     @GetMapping("/reservations/me")
     public ResponseEntity<List<MyReservationResponse>> myReservations(@Login LoginMemberInToken loginMember) {
-        List<MyReservationResponse> myReservationResponses = new ArrayList<>();
         final Long memberId = loginMember.id();
 
-        myReservationResponses.addAll(reservationService.findAllByMemberId(memberId));
-        myReservationResponses.addAll(waitingService.findWaitingWithRanksByMemberId(memberId));
-
-        return ResponseEntity.ok(myReservationResponses);
+        return ResponseEntity.ok(reservationAndWaitingQueryService.findAllByMemberId(memberId));
     }
 
     @DeleteMapping("/reservations/{id}")

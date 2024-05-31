@@ -115,12 +115,6 @@ public class WaitingService {
         return waitingResponses;
     }
 
-    public List<MyReservationResponse> findWaitingWithRanksByMemberId(final Long memberId) {
-        return waitingRepository.findWaitingWithRanksByMemberId(memberId).stream()
-                .map(MyReservationResponse::new)
-                .toList();
-    }
-
     public void delete(final Long id, final LoginMemberInToken loginMember) {
         final Waiting target = waitingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 대기 입니다."));

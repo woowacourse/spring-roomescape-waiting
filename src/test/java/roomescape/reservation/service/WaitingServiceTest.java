@@ -199,29 +199,6 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("멤버id를 통해 그의 예약 대기와 순번을 반환한다.")
-    void findWaitingWithRanksByMemberIdTest() {
-        final LocalTime time = LocalTime.now();
-        final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(time));
-        final Theme theme = themeRepository.save(new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg"));
-        final Member member1 = memberRepository.save(new Member("마크", "mark@woowa.com", "asd"));
-        final Member member2 = memberRepository.save(new Member("안돌", "andol@woowa.com", "asd"));
-        final LocalDate date = LocalDate.now();
-        reservationRepository.save(new Reservation(member1, date, theme, reservationTime));
-        waitingRepository.save(new Waiting(member1, date, theme, reservationTime));
-        waitingRepository.save(new Waiting(member1, date.plusDays(1), theme, reservationTime));
-
-        final Waiting waiting1 = waitingRepository.save(new Waiting(member2, date, theme, reservationTime));
-        final Waiting waiting2 = waitingRepository.save(new Waiting(member2, date.plusDays(1), theme, reservationTime));
-
-        final List<MyReservationResponse> actual = waitingService.findWaitingWithRanksByMemberId(member2.getId());
-
-        assertThat(actual).hasSize(2);
-        assertThat(waiting1.getId()).isEqualTo(actual.get(0).getId());
-        assertThat(waiting2.getId()).isEqualTo(actual.get(1).getId());
-    }
-
-    @Test
     @DisplayName("사용자 본인의 예약 대기를 삭제한다.")
     void deleteTest() {
         final LocalTime time = LocalTime.now();
