@@ -1,4 +1,4 @@
-package roomescape.theme.controller;
+package roomescape.theme.controller.admin;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

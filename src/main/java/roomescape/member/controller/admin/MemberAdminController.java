@@ -1,4 +1,4 @@
-package roomescape.member.controller;
+package roomescape.member.controller.admin;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

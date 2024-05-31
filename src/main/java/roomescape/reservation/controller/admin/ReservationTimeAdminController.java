@@ -1,4 +1,4 @@
-package roomescape.reservation.controller;
+package roomescape.reservation.controller.admin;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
