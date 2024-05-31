@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -138,8 +139,8 @@ public class ReservationService {
         final Reservation target = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 입니다."));
 
-        final Long memberIdOfTarget = target.getMember().getId();
-        if (!loginMember.role().isAdmin() && !memberIdOfTarget.equals(loginMember.id())) {
+        final Role role = loginMember.role();
+        if (!role.isAdmin() && !target.isSameMemberId(loginMember.id())) {
             throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
         }
 

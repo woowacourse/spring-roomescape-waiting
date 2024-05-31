@@ -37,6 +37,10 @@ public class Reservation {
         this.reservationTime = reservationTime;
     }
 
+    public boolean isSameMemberId(long id) {
+        return this.member.isSameId(id);
+    }
+
     public Long getId() {
         return id;
     }
