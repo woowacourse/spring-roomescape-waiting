@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
-import roomescape.service.exception.OperationNotAllowedCustomException;
 import roomescape.service.exception.UnauthorizedOperationException;
 
 @Service
@@ -21,7 +20,7 @@ public class ReservationDeletionService {
     public void deleteByMember(Long id, Member member) {
         Reservation reservation = reservationRepository.getReservationById(id);
         if (reservation.isNotReservedBy(member)) {
-            throw new OperationNotAllowedCustomException("자신의 예약이 아닌 것은 삭제할 수 없습니다.");
+            throw new UnauthorizedOperationException("자신의 예약이 아닌 것은 삭제할 수 없습니다.");
         }
 
         reservationRepository.delete(reservation);
