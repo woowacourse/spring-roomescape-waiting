@@ -61,7 +61,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             """)
     Optional<MemberReservation> findByMemberAndDetail(Member member, ReservationDetail detail);
 
-    Long countByDetail(ReservationDetail reservationDetail);
+    Long countByReservationDetail(ReservationDetail reservationDetail);
 
     @Query("""
             SELECT mr

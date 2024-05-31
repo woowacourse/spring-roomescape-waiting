@@ -175,7 +175,7 @@ public class ReservationService {
 
     private void validateReservation(final ReservationDetail requestReservationDetail, final Member requestMember, final ReservationStatus status) {
         LocalDateTime now = LocalDateTime.now();
-        long alreadyBookedReservationSize = memberReservationRepository.countByDetail(requestReservationDetail);
+        long alreadyBookedReservationSize = memberReservationRepository.countByReservationDetail(requestReservationDetail);
 
         validateDateAndTime(requestReservationDetail, now);
         if (status.isReserved()) {
