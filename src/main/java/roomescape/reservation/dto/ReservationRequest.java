@@ -1,35 +1,40 @@
 package roomescape.reservation.dto;
 
-import java.time.LocalDate;
-
 import jakarta.validation.constraints.NotNull;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationBuilder;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.Time;
+import roomescape.reservation.domain.ReservationDetail;
+import roomescape.reservation.domain.ReservationWaiting;
+import roomescape.reservation.domain.ReservationWaitingBuilder;
 
 public record ReservationRequest(
         @NotNull(message = "예약자 정보가 없습니다.")
         Long memberId,
         @NotNull(message = "테마 정보가 입력되지 않았습니다.")
-        Long themeId,
-        @NotNull(message = "시간 정보가 입력되지 않았습니다.")
-        Long timeId,
-        @NotNull(message = "날짜가 선택되지 않습니다.")
-        LocalDate date
+        Long detailId
 ) {
-    public Reservation toReservation(Member member, Theme theme, Time time) {
+
+    public static ReservationRequest from(ReservationWaiting waiting) {
+        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
+    }
+
+    public static ReservationRequest from(Reservation waiting) {
+        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
+    }
+
+    public Reservation createReservation(Member member, ReservationDetail detail) {
         return new ReservationBuilder()
-                .date(date)
                 .member(member)
-                .time(time)
-                .theme(theme)
+                .reservationDetail(detail)
                 .build();
     }
 
-    public boolean isBeforeDate(LocalDate newDate) {
-        return date.isBefore(newDate);
+    public ReservationWaiting createReservationWaiting(Member member, ReservationDetail detail) {
+        return new ReservationWaitingBuilder()
+                .member(member)
+                .reservationDetail(detail)
+                .build();
     }
 }

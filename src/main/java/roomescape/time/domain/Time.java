@@ -15,13 +15,15 @@ import roomescape.exception.BadRequestException;
 public class Time {
     private static final LocalTime OPEN_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "start_at")
     private LocalTime startAt;
 
-    public Time() {
+    protected Time() {
     }
 
     public Time(LocalTime startAt) {
@@ -36,8 +38,10 @@ public class Time {
     }
 
     public void validation(LocalTime startAt) {
-        if (startAt == null) {
-            throw new BadRequestException("시간 값이 정의되지 않은 요청입니다.");
+        try {
+            Objects.requireNonNull(startAt, "예약 시간이 입력되지 않았습니다.");
+        } catch (NullPointerException e) {
+            throw new BadRequestException(e.getMessage());
         }
         if (OPEN_TIME.isAfter(startAt) || CLOSE_TIME.isBefore(startAt)) {
             throw new BadRequestException("운영 시간 외의 예약 시간 요청입니다.");

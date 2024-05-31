@@ -24,22 +24,21 @@ class TimeRepositoryTest {
     private TimeRepository timeRepository;
 
     @Test
-    @DisplayName("시간 데이터들이 잘 저장되는지 확인.")
-    void saveTime() {
+    @DisplayName("성공 : 시간 정보가 DB에 저장할 수 있다.")
+    void save() {
         Time time = new Time(LocalTime.of(12, 0));
         Time actualSavedTime = timeRepository.save(time);
 
-        Iterable<Time> expected = timeRepository.findAll();
-        assertThat(actualSavedTime).isEqualTo(expected.iterator()
-                .next());
+        List<Time> expected = timeRepository.findAll();
+        assertThat(actualSavedTime).isEqualTo(expected.get(0));
     }
 
     @Test
-    @DisplayName("시간 데이터들을 잘 가져오는지 확인.")
-    void getTimes() {
-        entityManager.merge(new Time(LocalTime.of(13, 0)));
-        entityManager.merge(new Time(LocalTime.of(14, 0)));
-        entityManager.merge(new Time(LocalTime.of(15, 0)));
+    @DisplayName("성공 : 시간 정보들을 조회할 수 있다.")
+    void findAllByOrderByStartAtAsc() {
+        entityManager.persist(new Time(LocalTime.of(13, 0)));
+        entityManager.persist(new Time(LocalTime.of(14, 0)));
+        entityManager.persist(new Time(LocalTime.of(15, 0)));
 
         List<Time> times = timeRepository.findAllByOrderByStartAtAsc();
 
@@ -47,14 +46,32 @@ class TimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("시간 데이터들의 연관관계가 없다면 잘 지우는지 확인")
+    @DisplayName("성공 : 해당 시간이 존재할 경우 true를 반환한다.")
+    void countByStartAt_true() {
+        entityManager.persist(new Time(LocalTime.of(13, 0)));
+
+        boolean actual = timeRepository.existsByStartAt(LocalTime.of(13, 0));
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @DisplayName("성공 : 해당 시간이 존재할 경우 false를 반환한다.")
+    void countByStartAt_false() {
+        entityManager.persist(new Time(LocalTime.of(13, 0)));
+
+        boolean actual = timeRepository.existsByStartAt(LocalTime.of(12, 0));
+
+        assertThat(actual).isFalse();
+    }
+
+    @Test
+    @DisplayName("성공 : 시간 정보를 삭제할 수 있다.")
     void deleteTime() {
-        entityManager.merge(new Time(LocalTime.of(10, 0)));
+        entityManager.persist(new Time(LocalTime.of(10, 0)));
 
         timeRepository.deleteById(1L);
 
-        assertThat(timeRepository.findAllByOrderByStartAtAsc()
-                .size())
-                .isEqualTo(1);
+        assertThat(timeRepository.findById(1L)).isEmpty();
     }
 }

@@ -1,78 +1,76 @@
 package roomescape.member.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.servlet.http.Cookie;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.jdbc.Sql;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
-import roomescape.member.dto.MemberLoginResponse;
-import roomescape.member.security.service.MemberAuthService;
-import roomescape.member.service.MemberService;
+import roomescape.member.repository.MemberRepository;
 
-@WebMvcTest(MemberLoginController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(scripts = "/truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class MemberLoginControllerTest {
+
+    @LocalServerPort
+    private int port;
+
     @Autowired
-    private MockMvc mockMvc;
+    private MemberRepository memberRepository;
 
-    @MockBean
-    private MemberService memberService;
+    private final MemberLoginRequest request = new MemberLoginRequest("kyummi@naver.com", "1111");
+    private Member member;
 
-    @MockBean
-    private MemberAuthService memberAuthService;
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
 
-    @Test
-    @DisplayName("로그인 프로세스가 정상적으로 수행되는지 확인한다")
-    void loginProcess() throws Exception {
-        MemberLoginRequest memberRequest = new MemberLoginRequest("user@example.com", "password");
-        Member memberInfo = new Member("User", "user@example.com", "password");
-        String token = "mocked-token";
-
-        when(memberService.findMember(any())).thenReturn(memberInfo);
-        when(memberAuthService.publishToken(any())).thenReturn(token);
-
-        mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(memberRequest))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(cookie().httpOnly("token", true))
-                .andExpect(cookie().exists("token"));
+        member = new Member("켬미", "kyummi@naver.com", "1111");
+        memberRepository.save(member);
     }
 
     @Test
-    @DisplayName("쿠키를 통해 사용자 인증 상태를 검사하는 요청을 정상적으로 처리한다")
-    void checkLoginStatus() throws Exception {
-        String memberName = "User";
-        Cookie[] cookies = {new Cookie("token", "mocked-token")};
+    @DisplayName("성공 : 로그인을 할 수 있다.")
+    void login() {
+        String accessToken = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/login")
+                .then()
+                .statusCode(200)
+                .log().all().extract()
+                .cookie("token");
 
-        when(memberAuthService.extractNameFromPayload(cookies)).thenReturn(memberName);
+        assertThat(accessToken).isNotNull();
+    }
 
-        mockMvc.perform(get("/login/check")
-                        .cookie(cookies))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(result -> assertEquals(memberName,
-                        new ObjectMapper().readValue(result.getResponse()
-                                        .getContentAsString(), MemberLoginResponse.class)
-                                .name()));
+    @Test
+    @DisplayName("성공 : 로그인 정보를 확인 수 있다.")
+    void loginCheck() {
+        String accessToken = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/login")
+                .then()
+                .statusCode(200)
+                .log().all().extract()
+                .cookie("token");
+
+        String actual = RestAssured.given()
+                .cookie("token", accessToken)
+                .when().get("/login/check")
+                .then()
+                .statusCode(200).extract()
+                .jsonPath().getJsonObject("name");
+
+        assertThat(actual).isEqualTo(member.getName());
     }
 }

@@ -5,22 +5,18 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import roomescape.theme.domain.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
-    @Query(value = """
-            SELECT th.*
-            FROM theme th
-            INNER JOIN (
-                SELECT theme_id
-                FROM reservation
-                WHERE date BETWEEN :startDate AND :endDate
-                GROUP BY theme_id
-                ORDER BY COUNT(theme_id) DESC
-            ) r ON th.id = r.theme_id
-            """, nativeQuery = true)
-    List<Theme> findThemesByReservationDateOrderByReservationCountDesc(@Param("startDate") LocalDate startDate,
-                                                                       @Param("endDate") LocalDate endDate);
+
+    @Query("""
+            SELECT t
+            FROM Theme t INNER JOIN Reservation r ON (t.id = r.detail.theme.id)
+            WHERE r.detail.date BETWEEN :startDate AND :endDate
+            GROUP BY t.id
+            ORDER BY COUNT(t.id) DESC
+            LIMIT :rankLimit
+            """)
+    List<Theme> findAllByRank(LocalDate startDate, LocalDate endDate, int rankLimit);
 }

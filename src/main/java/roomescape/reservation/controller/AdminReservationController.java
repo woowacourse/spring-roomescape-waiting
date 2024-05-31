@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.reservation.dto.ReservationConditionSearchRequest;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationFacadeService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
-    private final ReservationService reservationService;
+    private final ReservationFacadeService reservationFacadeService;
 
-    public AdminReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(ReservationFacadeService reservationFacadeService) {
+        this.reservationFacadeService = reservationFacadeService;
     }
 
     @GetMapping("/search")
@@ -35,14 +35,16 @@ public class AdminReservationController {
     ) {
         ReservationConditionSearchRequest request
                 = new ReservationConditionSearchRequest(memberId, themeId, dateFrom, dateTo);
-        List<ReservationResponse> response = reservationService.findReservationsByConditions(request);
-        return ResponseEntity.ok(response);
+        List<ReservationResponse> reservationResponse = reservationFacadeService.findReservationsInCondition(request);
+
+        return ResponseEntity.ok(reservationResponse);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest request) {
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(request);
-        URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationCreateRequest request) {
+        ReservationResponse reservationCreateResponse = reservationFacadeService.createReservation(request);
+
+        URI uri = URI.create("/admin/reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
                 .body(reservationCreateResponse);
     }

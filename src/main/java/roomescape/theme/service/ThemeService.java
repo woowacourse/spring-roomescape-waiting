@@ -16,6 +16,7 @@ public class ThemeService {
     public static final int NUMBER_OF_ONE_DAY = 1;
     public static final int NUMBER_OF_ONE_WEEK = 7;
     public static final int TOP_THEMES_LIMIT = 10;
+    public static final int RANK_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
 
@@ -26,7 +27,7 @@ public class ThemeService {
     public List<ThemeResponse> findThemes() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
-                .map(ThemeResponse::fromTheme)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
@@ -35,20 +36,20 @@ public class ThemeService {
         LocalDate beforeOneWeek = yesterday.minusDays(NUMBER_OF_ONE_WEEK);
 
         List<Theme> rankedThemes = themeRepository
-                .findThemesByReservationDateOrderByReservationCountDesc(beforeOneWeek, yesterday);
+                .findAllByRank(beforeOneWeek, yesterday, RANK_LIMIT);
         return rankedThemes.stream()
                 .limit(TOP_THEMES_LIMIT)
-                .map(ThemeRankResponse::fromTheme)
+                .map(ThemeRankResponse::from)
                 .toList();
     }
 
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
-        Theme theme = themeRequest.toTheme();
+        Theme theme = themeRequest.createTheme();
         Theme savedTheme = themeRepository.save(theme);
-        return ThemeResponse.fromTheme(savedTheme);
+        return ThemeResponse.from(savedTheme);
     }
 
-    public void removeTheme(long id) {
+    public void removeTheme(Long id) {
         themeRepository.deleteById(id);
     }
 }

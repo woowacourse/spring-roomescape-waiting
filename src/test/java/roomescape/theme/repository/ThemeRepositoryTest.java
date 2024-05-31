@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetail;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
@@ -29,22 +30,22 @@ class ThemeRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Test
-    @DisplayName("테마 정보가 DB에 정상적으로 저장되는지 확인한다.")
-    void saveTheme() {
+    @DisplayName("성공 : 테마 정보를 DB에 저장할 수 있다.")
+    void save() {
         Theme theme = new Theme("포레스트", "공포 테마", "thumbnail");
         Theme actual = themeRepository.save(theme);
 
         List<Theme> expected = themeRepository.findAll();
-        assertThat(actual).isEqualTo(expected.iterator()
-                .next());
+        assertThat(actual).isEqualTo(expected.get(0));
     }
 
     @Test
-    @DisplayName("테마 정보들을 정상적으로 가져오는지 확인한다.")
-    void getThemes() {
-        entityManager.merge(new Theme("테마1", "설명1", "image.png"));
-        entityManager.merge(new Theme("테마2", "설명2", "image.png"));
-        entityManager.merge(new Theme("테마3", "설명3", "image.png"));
+    @DisplayName("성공 : 테마 정보들을 조회할 수 있다.")
+    void findAll() {
+        entityManager.persist(new Theme("테마1", "설명1", "image.png"));
+        entityManager.persist(new Theme("테마2", "설명2", "image.png"));
+        entityManager.persist(new Theme("테마3", "설명3", "image.png"));
+        entityManager.flush();
 
         List<Theme> themes = themeRepository.findAll();
         assertAll(() -> {
@@ -55,37 +56,36 @@ class ThemeRepositoryTest {
     }
 
     @Test
-    @DisplayName("테마 정보들이 정상적으로 제거되었는지 확인한다.")
-    void deleteThemes() {
-        entityManager.merge(new Theme("테마1", "설명1", "image.png"));
-        entityManager.merge(new Theme("테마2", "설명2", "image.png"));
-        entityManager.merge(new Theme("테마3", "설명3", "image.png"));
+    @DisplayName("성공 : 테마 정보를 삭제할 수 있다.")
+    void deleteById() {
+        entityManager.persist(new Theme("테마1", "설명1", "image.png"));
 
-        themeRepository.deleteById(3L);
+        themeRepository.deleteById(1L);
 
-        assertThat(themeRepository.findAll()).hasSize(2);
+        assertThat(themeRepository.findById(1L)).isEmpty();
     }
 
     @Test
-    @DisplayName("지난 7일 기준 예약이 많은 테마 순으로 조회한다.")
+    @DisplayName("성공 : 지난 7일 기준 예약이 많은 테마 순으로 조회할 수 있다.")
     void getTopReservationThemes() {
         // Given
-        LocalDate reservationStartDate = LocalDate.now()
-                .minusDays(6);
+        LocalDate reservationStartDate = LocalDate.now().minusDays(6);
         Time time = new Time(LocalTime.of(12, 0));
         Theme theme = new Theme("테마1", "설명1", "image.png");
         Member member = new Member("켬미", "kyum@naver.com", "1111");
+        ReservationDetail detail = new ReservationDetail(theme, time, reservationStartDate);
 
-        //When
         entityManager.persist(theme);
         entityManager.persist(time);
         entityManager.persist(member);
-        entityManager.persist(new Reservation(member, theme, time, reservationStartDate));
+        entityManager.persist(detail);
+        entityManager.persist(new Reservation(member, detail));
+
+        //When
+        List<Theme> themes = themeRepository.findAllByRank(
+                reservationStartDate, reservationStartDate.plusWeeks(1), 10);
 
         // Then
-        List<Theme> themes = themeRepository.findThemesByReservationDateOrderByReservationCountDesc(
-                reservationStartDate, reservationStartDate.plusWeeks(1));
-        assertThat(themes)
-                .containsExactlyInAnyOrder(theme);
+        assertThat(themes).containsExactlyInAnyOrder(theme);
     }
 }

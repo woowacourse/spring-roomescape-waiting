@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.AuthorizationLoginFailException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
 import roomescape.member.dto.MemberCreateRequest;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberProfileInfo;
@@ -21,13 +22,13 @@ public class MemberService {
     }
 
     public List<MemberProfileInfo> findAllMembers() {
-        return memberRepository.findAll()
+        return memberRepository.findAllByRole(MemberRole.USER)
                 .stream()
                 .map(MemberProfileInfo::from)
                 .toList();
     }
 
-    public Member findMember(MemberLoginRequest memberLoginRequest) {
+    public Member findMemberByEmail(MemberLoginRequest memberLoginRequest) {
         return memberRepository.findByEmail(memberLoginRequest.email())
                 .orElseThrow(AuthorizationLoginFailException::new);
     }

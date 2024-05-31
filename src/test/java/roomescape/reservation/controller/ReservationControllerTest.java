@@ -1,133 +1,225 @@
 package roomescape.reservation.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 import java.util.List;
-
-import jakarta.servlet.http.Cookie;
+import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.jdbc.Sql;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberProfileInfo;
-import roomescape.member.security.crypto.JwtTokenProvider;
-import roomescape.member.security.service.MemberAuthService;
-import roomescape.member.service.MemberService;
+import roomescape.member.dto.MemberLoginRequest;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationBuilder;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.domain.ReservationDetail;
+import roomescape.reservation.domain.ReservationWaiting;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.repository.ReservationDetailRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.Time;
+import roomescape.time.repository.TimeRepository;
 
-@WebMvcTest(ReservationController.class)
-@TestPropertySource(properties = {"security.jwt.token.secret-key=test_secret_key",
-        "security.jwt.token.expire-length=3600000"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(scripts = "/truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationControllerTest {
-    private final Member member = new Member("tester", "test@email.com", "pass");
-    private final Reservation reservation = new ReservationBuilder()
-            .member(member)
-            .date(LocalDate.MAX)
-            .time(new Time(1L, LocalTime.of(12, 0)))
-            .theme(new Theme(1L, "도비", "도비 방탈출", "이미지~"))
-            .build();
+    @LocalServerPort
+    private int port;
 
-    @Value("${security.jwt.token.secret-key}")
-    private String secretKey;
-    @Value("${security.jwt.token.expire-length}")
-    private long validityInMilliseconds;
     @Autowired
-    private MockMvc mockMvc;
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationWaitingRepository waitingRepository;
+    @Autowired
+    private ReservationDetailRepository detailRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private TimeRepository timeRepository;
 
-    @MockBean
-    private ReservationService reservationService;
-    @MockBean
-    private MemberAuthService memberAuthService;
-    @MockBean
-    private MemberService memberService;
-
-    private JwtTokenProvider jwtTokenProvider;
+    private String cookie;
+    private Member member = new Member("범블비", "aa@email.com", "1111");
+    private Theme theme = new Theme("Harry Potter", "해리포터와 도비", "thumbnail.jpg");
+    private Time time = new Time(LocalTime.of(12, 0));
+    private ReservationDetail reservationDetail = new ReservationDetail(theme, time, LocalDate.MAX);
+    private Reservation reservation = new Reservation(member, reservationDetail);
+    private ReservationWaiting waiting = new ReservationWaiting(member, reservationDetail);
 
     @BeforeEach
-    void setUp() {
-        jwtTokenProvider = new JwtTokenProvider(secretKey, validityInMilliseconds);
+    void login() {
+        member = memberRepository.save(member);
+        theme = themeRepository.save(theme);
+        time = timeRepository.save(time);
+        reservationDetail = detailRepository.save(reservationDetail);
+
+        RestAssured.port = port;
+
+        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(member.getEmail(), member.getPassword());
+
+        cookie = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(memberLoginRequest)
+                .when().post("/login")
+                .then()
+                .statusCode(200)
+                .log().all().extract()
+                .cookie("token");
     }
 
     @Test
-    @DisplayName("예약 정보를 정상적으로 저장하는지 확인한다.")
-    void createReservation() throws Exception {
-        Mockito.when(reservationService.addReservation(any(ReservationRequest.class)))
-                .thenReturn(ReservationResponse.fromReservation(reservation));
-        Mockito.when(memberAuthService.isLoginMember(any()))
-                .thenReturn(true);
-        Mockito.when(memberAuthService.extractPayload(any()))
-                .thenReturn(new MemberProfileInfo(1L, "valid", "testUser@email.com"));
+    @DisplayName("성공 : 예약 정보를 얻을 수 있다.")
+    void findReservations() {
+        reservation = reservationRepository.save(reservation);
+        waiting = waitingRepository.save(waiting);
 
-        Member member = new Member(1L, "valid", "testUser@email.com", "pass");
-        String token = jwtTokenProvider.createToken(member, new Date());
-        String content = new ObjectMapper().registerModule(new JavaTimeModule())
-                .writeValueAsString(new ReservationRequest(1L, 1L, 1L, reservation.getDate()));
+        int actualSize = RestAssured.given()
+                .cookie("token", cookie)
+                .when()
+                .get("/reservations")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getInt("size()");
 
-        mockMvc.perform(post("/reservations")
-                        .cookie(new Cookie("token", token))
-                        .content(content)
-                        .contentType("application/Json")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isCreated());
+        assertThat(actualSize).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("예약 정보를 정상적으로 불러오는지 확인한다.")
-    void findAllReservations() throws Exception {
-        Mockito.when(reservationService.findReservations())
-                .thenReturn(List.of(ReservationResponse.fromReservation(reservation)));
+    @DisplayName("성공 : 회원의 예약 및 예약 대기만 조회할 수 있다.")
+    void findReservationsByMember() {
+        reservation = reservationRepository.save(reservation);
+        waiting = waitingRepository.save(waiting);
 
-        mockMvc.perform(get("/reservations"))
-                .andDo(print())
-                .andExpect(status().isOk());
+        Member otherMember = new Member("켬미", "aa@naver.com", "1234");
+        memberRepository.save(otherMember);
+        waitingRepository.save(new ReservationWaiting(otherMember, reservationDetail)); // 해당 예약은 내 예약이 아니므로 조회되지 않음
+        reservationRepository.save(reservation); // 해당 예약은 내 예약으로 조회
+
+        int actualSize = RestAssured.given()
+                .cookie("token", cookie)
+                .when()
+                .get("/reservations/mine")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getInt("size()");
+
+        assertThat(actualSize).isEqualTo(2);
     }
 
     @Test
-    @DisplayName("예약 가능한 시간을 정상적으로 불러오는지 확인한다.")
-    void findAvailableTimeList() throws Exception {
-        Mockito.when(reservationService.findTimeAvailability(1, LocalDate.now()))
-                .thenReturn(
-                        List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getTime(), true)));
+    @DisplayName("성공 : 해당 예약 정보에 예약 가능한 시간을 조회한다.")
+    void findReservationTimes() {
+        reservation = reservationRepository.save(reservation);
 
-        mockMvc.perform(get("/reservations/times/1?date=" + LocalDate.now()))
-                .andDo(print())
-                .andExpect(status().isOk());
+        Time otherTime = new Time(LocalTime.of(20, 0));
+        timeRepository.save(otherTime); // 예약되지 않은 시간으로 1개는 booked가 false
+        reservationRepository.save(reservation); // 예약된 시간 1개는 booked가 true
+
+        List<ReservationTimeAvailabilityResponse> actual = RestAssured.given()
+                .cookie("token", cookie)
+                .when()
+                .get("/reservations/times/" + reservation.getTimeId() + "?date=" + reservation.getDate())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getList(".", ReservationTimeAvailabilityResponse.class);
+
+        assertThat(actual).containsExactly(
+                ReservationTimeAvailabilityResponse.from(time, true),
+                ReservationTimeAvailabilityResponse.from(otherTime, false));
     }
 
     @Test
-    @DisplayName("예약 정보를 정상적으로 지우는지 확인한다.")
-    void deleteReservation() throws Exception {
-        mockMvc.perform(delete("/reservations/1"))
-                .andDo(print())
-                .andExpect(status().isNoContent());
+    @DisplayName("성공 : 예약을 만들 수 있다.")
+    void createReservation() {
+        Map<String, String> params = Map.of(
+                "themeId", reservation.getThemeId().toString(),
+                "timeId", reservation.getTimeId().toString(),
+                "date", reservation.getDate().toString()
+        );
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie("token", cookie)
+                .body(params)
+                .when()
+                .post("/reservations")
+                .then()
+                .statusCode(201)
+                .header("Location", "/reservations/1");
+
+        List<Reservation> actual = reservationRepository.findAll();
+        assertThat(actual).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("성공 : 예약 대기를 만들 수 있다.")
+    void createWaitingReservation() {
+        ReservationCreateRequest params = new ReservationCreateRequest(
+                reservation.getMemberId(),
+                reservation.getThemeId(),
+                reservation.getTimeId(),
+                reservation.getDate()
+        );
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie("token", cookie)
+                .body(params)
+                .when()
+                .post("/waiting-reservations")
+                .then()
+                .statusCode(201)
+                .header("Location", "/waiting-reservations/1");
+
+        List<ReservationWaiting> actual = waitingRepository.findAll();
+        assertThat(actual).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("성공 : 예약을 제거할 수 있다.")
+    void deleteReservation() {
+        reservationRepository.save(reservation);
+
+        RestAssured.given()
+                .when()
+                .delete("/reservations/1")
+                .then()
+                .statusCode(204);
+
+        Optional<Reservation> expected = reservationRepository.findById(1L);
+        assertThat(expected).isEmpty();
+    }
+
+    @Test
+    @DisplayName("성공 : 예약 대기를 제거할 수 있다.")
+    void deleteReservationWaiting() {
+        waitingRepository.save(waiting);
+
+        RestAssured.given()
+                .when()
+                .delete("/waiting-reservations/1")
+                .then()
+                .statusCode(204);
+
+        Optional<ReservationWaiting> expected = waitingRepository.findById(1L);
+        assertThat(expected).isEmpty();
     }
 }

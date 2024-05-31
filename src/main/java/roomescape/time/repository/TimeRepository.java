@@ -3,12 +3,12 @@ package roomescape.time.repository;
 import java.time.LocalTime;
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import roomescape.time.domain.Time;
 
-public interface TimeRepository extends CrudRepository<Time, Long> {
+public interface TimeRepository extends JpaRepository<Time, Long> {
     List<Time> findAllByOrderByStartAtAsc();
 
-    int countByStartAt(LocalTime startAt);
+    boolean existsByStartAt(LocalTime startAt);
 }

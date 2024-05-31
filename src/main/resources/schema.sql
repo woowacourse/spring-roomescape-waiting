@@ -1,9 +1,16 @@
-INSERT INTO member(name, email, password, role) VALUES ('켬미', 'aaa@naver.com', '1111', 'USER');
-INSERT INTO member(name, email, password, role) VALUES ('관리자', 'admin@naver.com', '1111', 'ADMIN');
+INSERT INTO member(name, email, password, role)
+VALUES ('켬미', 'aaa@naver.com', '1111', 'USER');
+INSERT INTO member(name, email, password, role)
+VALUES ('도비', '111@naver.com', '1111', 'USER');
+INSERT INTO member(name, email, password, role)
+VALUES ('관리자', 'admin@naver.com', '1111', 'ADMIN');
 
-INSERT INTO time(start_at) VALUES ('09:00');
-INSERT INTO time(start_at) VALUES ('10:00');
-INSERT INTO time(start_at) VALUES ('23:00');
+INSERT INTO time(start_at)
+VALUES ('09:00');
+INSERT INTO time(start_at)
+VALUES ('10:00');
+INSERT INTO time(start_at)
+VALUES ('23:00');
 
 INSERT INTO theme(name, description, thumbnail)
 VALUES ('제로 공포', '마지막까지 저희와 함께 해 주시겠습니까?',
@@ -18,11 +25,47 @@ INSERT INTO theme(name, description, thumbnail)
 VALUES ('우테코 살아남기', '우테코는 어떤 곳인가 과연.. 그곳에 찾아간...',
         'https://techblog.woowahan.com/wp-content/uploads/img/2019-02-08/techcourse_poster.jpeg');
 
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 5, 1, 1, 4);
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 4, 1, 2, 4);
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 5, 1, 2, 4);
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 3, 1, 1, 2);
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 3, 1, 2, 2);
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 2, 1, 1, 3);
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 2, 1, 2, 3);
-INSERT INTO reservation(date, member_id, time_id, theme_id) VALUES (CURRENT_DATE - 1, 1, 1, 1);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (4, 1, CURRENT_DATE - 5);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (4, 2, CURRENT_DATE - 4);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (4, 2, CURRENT_DATE - 5);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (2, 1, CURRENT_DATE - 3);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (2, 2, CURRENT_DATE - 3);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (3, 1, CURRENT_DATE - 2);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (3, 2, CURRENT_DATE - 2);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (1, 1, CURRENT_DATE - 1);
+INSERT INTO reservation_detail(theme_id, time_id, date)
+VALUES (1, 1, CURRENT_DATE);
+
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,1);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,2);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (2,3);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (2,4);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,5);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (2,6);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (2,7);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (1,8);
+INSERT INTO reservation(member_id, detail_id)
+VALUES (2,9);
+
+INSERT INTO reservation_waiting(member_id, detail_id, create_at)
+VALUES (1,6, '2024-05-27 14:45:00');
+INSERT INTO reservation_waiting(member_id, detail_id, create_at)
+VALUES (1,7, '2024-05-27 14:49:00');
+INSERT INTO reservation_waiting(member_id, detail_id, create_at)
+VALUES (2,8, '2024-05-27 14:42:00');

@@ -15,29 +15,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationFacadeService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
-    private final ReservationService reservationService;
+    private final ReservationFacadeService reservationFacadeService;
 
-    public ReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public ReservationController(ReservationFacadeService reservationFacadeService) {
+        this.reservationFacadeService = reservationFacadeService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
-        List<ReservationResponse> response = reservationService.findReservations();
-        return ResponseEntity.ok(response);
+        List<ReservationResponse> reservationResponse = reservationFacadeService.findReservations();
+
+        return ResponseEntity.ok(reservationResponse);
     }
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findReservationsByMember(MemberProfileInfo memberProfileInfo) {
-        List<MyReservationResponse> response = reservationService.findReservationByMemberId(memberProfileInfo.id());
+        List<MyReservationResponse> response = reservationFacadeService.findReservationsByMember(memberProfileInfo);
+
         return ResponseEntity.ok(response);
     }
 
@@ -46,13 +48,15 @@ public class ReservationController {
             @PathVariable long themeId,
             @RequestParam LocalDate date) {
         List<ReservationTimeAvailabilityResponse> timeAvailabilityReadResponse
-                = reservationService.findTimeAvailability(themeId, date);
+                = reservationFacadeService.findReservationTimes(themeId, date);
+
         return ResponseEntity.ok(timeAvailabilityReadResponse);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(ReservationRequest request) {
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(request);
+    public ResponseEntity<ReservationResponse> createReservation(ReservationCreateRequest request) {
+        ReservationResponse reservationCreateResponse = reservationFacadeService.createReservation(request);
+
         URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
                 .body(reservationCreateResponse);
@@ -60,7 +64,8 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable long id) {
-        reservationService.removeReservations(id);
+        reservationFacadeService.deleteReservation(id);
+
         return ResponseEntity.noContent()
                 .build();
     }
