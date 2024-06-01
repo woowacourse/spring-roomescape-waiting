@@ -25,11 +25,11 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            throw new TokenValidationFailureException("토큰이 존재하지 않습니다.");
+            throw new TokenValidationFailureCustomException("토큰이 존재하지 않습니다.");
         }
 
         String token = CookieUtil.extractToken(cookies)
-                .orElseThrow(() -> new TokenValidationFailureException("토큰이 존재하지 않습니다."));
+                .orElseThrow(() -> new TokenValidationFailureCustomException("토큰이 존재하지 않습니다."));
         validateAdmin(token);
 
         return true;
@@ -38,9 +38,9 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
     private void validateAdmin(String token) {
         String subject = jwtProvider.getSubject(token);
         long memberId = Long.parseLong(subject);
-        Member member = memberService.findValidatedSiteUserById(memberId);
-        if (!member.isAdmin()) {
-            throw new ForbiddenAccessException();
+        Member member = memberService.getMemberById(memberId);
+        if (member.isNotAdmin()) {
+            throw new ForbiddenAccessCustomException();
         }
     }
 }

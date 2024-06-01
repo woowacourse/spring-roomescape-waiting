@@ -5,7 +5,7 @@ public class InputValidator {
     public static void validateNotNull(Object... inputs) {
         for (Object input : inputs) {
             if (input == null) {
-                throw new InputNotAllowedException("null은 입력할 수 없습니다.");
+                throw new InputNotAllowedCustomException("null은 입력할 수 없습니다.");
             }
         }
     }
@@ -13,7 +13,7 @@ public class InputValidator {
     public static void validateNotBlank(String... inputs) {
         for (String input : inputs) {
             if (input.isBlank()) {
-                throw new InputNotAllowedException("빈 문자열은 입력할 수 없습니다.");
+                throw new InputNotAllowedCustomException("빈 문자열은 입력할 수 없습니다.");
             }
         }
     }

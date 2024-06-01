@@ -1,14 +1,22 @@
 package roomescape.controller.api;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberReservationRequest;
-import roomescape.dto.response.MemberReservationResponse;
+import roomescape.dto.request.ReservationDto;
 import roomescape.dto.response.MultipleResponse;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.service.MemberService;
-import roomescape.service.ReservationService;
+import roomescape.service.ReservationCreationService;
+import roomescape.service.ReservationDeletionService;
+import roomescape.service.ReservationQueryService;
 
 import java.net.URI;
 import java.util.List;
@@ -17,31 +25,41 @@ import java.util.List;
 @RestController
 public class ReservationController {
 
-    private final ReservationService reservationService;
-    private final MemberService memberService;
+    private final ReservationCreationService reservationCreationService;
+    private final ReservationQueryService reservationQueryService;
+    private final ReservationDeletionService reservationDeletionService;
 
     public ReservationController(
-            ReservationService reservationService,
-            MemberService memberService
-    ) {
-        this.reservationService = reservationService;
-        this.memberService = memberService;
+            ReservationCreationService reservationCreationService,
+            ReservationQueryService reservationQueryService,
+            ReservationDeletionService reservationDeletionService) {
+        this.reservationCreationService = reservationCreationService;
+        this.reservationQueryService = reservationQueryService;
+        this.reservationDeletionService = reservationDeletionService;
     }
 
     @GetMapping
-    public ResponseEntity<MultipleResponse<MemberReservationResponse>> getMyReservations(Member member) {
-        List<MemberReservationResponse> reservations = memberService.getMyReservations(member);
-        MultipleResponse<MemberReservationResponse> response = new MultipleResponse<>(reservations);
+    public ResponseEntity<MultipleResponse<MyReservationResponse>> getMyReservations(Member member) {
+        List<MyReservationResponse> reservations = reservationQueryService.getMyReservations(member);
+        MultipleResponse<MyReservationResponse> response = new MultipleResponse<>(reservations);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody MemberReservationRequest request, Member member) {
-        ReservationResponse response = reservationService.addMemberReservation(request, member);
-        URI location = URI.create("/reservations/" + response.id());
+        ReservationDto reservationDto = ReservationDto.mapToApplicationDto(request, member.getId());
+        ReservationResponse response = reservationCreationService.addReservation(reservationDto);
 
-        return ResponseEntity.created(location)
+        return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id, Member member){
+        reservationDeletionService.deleteByMember(id, member);
+
+        return ResponseEntity.noContent()
+                .build();
     }
 }

@@ -10,8 +10,12 @@ import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME3_240502_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240502_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240503_1200;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.*;
 
 @DisplayName("관리자가 예약을 필터링해서 조회한다.")
 class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {

@@ -19,8 +19,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.PreInsertedData.ADMIN;
 import static roomescape.acceptance.Fixture.secretKey;
-import static roomescape.acceptance.PreInsertedData.ADMIN;
 
 class AuthAcceptanceTest extends BaseAcceptanceTest {
 

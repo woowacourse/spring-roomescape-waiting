@@ -11,21 +11,21 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Member;
 import roomescape.dto.request.LogInRequest;
 import roomescape.dto.response.MemberPreviewResponse;
-import roomescape.service.MemberService;
+import roomescape.service.AuthService;
 import roomescape.util.CookieUtil;
 
 @RestController
 public class AuthController {
 
-    private final MemberService memberService;
+    private final AuthService authService;
 
-    public AuthController(MemberService memberService) {
-        this.memberService = memberService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LogInRequest logInRequest) {
-        String token = "token=" + memberService.logIn(logInRequest);
+        String token = "token=" + authService.logIn(logInRequest);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, token)

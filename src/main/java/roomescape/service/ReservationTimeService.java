@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
@@ -8,8 +9,7 @@ import roomescape.domain.ReservationTimeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.service.exception.OperationNotAllowedCustomException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +26,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getAllReservationTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -33,6 +34,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResponse addReservationTime(ReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
@@ -40,16 +42,18 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
+    @Transactional
     public void deleteReservationTimeById(Long id) {
-        findValidatedReservationTime(id);
+        ReservationTime reservationTime = reservationTimeRepository.getReservationTimeById(id);
         boolean exist = reservationRepository.existsByReservationTimeId(id);
         if (exist) {
-            throw new OperationNotAllowedException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
+            throw new OperationNotAllowedCustomException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
         }
 
-        reservationTimeRepository.deleteById(id);
+        reservationTimeRepository.delete(reservationTime);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getReservationTimeBookedStatus(LocalDate date, Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<ReservationTime> reservedTimes = reservationRepository.findAllByDateAndThemeId(date, themeId).stream()
@@ -62,10 +66,5 @@ public class ReservationTimeService {
                         reservedTimes.contains(reservationTime)
                 ))
                 .toList();
-    }
-
-    private ReservationTime findValidatedReservationTime(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
     }
 }

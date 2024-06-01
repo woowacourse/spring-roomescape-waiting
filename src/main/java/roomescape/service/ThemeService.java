@@ -1,13 +1,13 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.service.exception.OperationNotAllowedCustomException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +26,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getAllThemes() {
         return themeRepository.findAll()
                 .stream()
@@ -33,6 +34,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse addTheme(ThemeRequest request) {
         Theme theme = request.toTheme();
         Theme savedTheme = themeRepository.save(theme);
@@ -40,25 +42,22 @@ public class ThemeService {
         return ThemeResponse.from(savedTheme);
     }
 
+    @Transactional
     public void deleteThemeById(Long id) {
-        findValidatedTheme(id);
+        Theme theme = themeRepository.getThemeById(id);
         validateReservationNotExist(id);
 
-        themeRepository.deleteById(id);
-    }
-
-    private Theme findValidatedTheme(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 테마를 찾을 수 없습니다."));
+        themeRepository.delete(theme);
     }
 
     private void validateReservationNotExist(Long id) {
         boolean exist = reservationRepository.existsByThemeId(id);
         if (exist) {
-            throw new OperationNotAllowedException("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.");
+            throw new OperationNotAllowedCustomException("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getMostReservedThemes() {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(ANALYSIS_PERIOD);

@@ -1,9 +1,16 @@
-package roomescape.acceptance;
+package roomescape;
 
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import static roomescape.domain.Reservation.Status.RESERVED;
+import static roomescape.domain.Reservation.Status.WAITING;
 
 public class PreInsertedData {
 
@@ -67,12 +74,21 @@ public class PreInsertedData {
             Role.CUSTOMER
     );
 
+    public static final Member CUSTOMER_3 = new Member(
+            4L,
+            "고객3",
+            "customer3@email.com",
+            "customer3",
+            Role.CUSTOMER
+    );
+
     public static final Reservation RESERVATION_CUSTOMER1_THEME2_240501_1100 = new Reservation(
             1L,
             CUSTOMER_1,
             LocalDate.parse("2024-05-01"),
             TIME_11_00,
-            THEME_2
+            THEME_2,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER1_THEME3_240502_1100 = new Reservation(
@@ -80,7 +96,8 @@ public class PreInsertedData {
             CUSTOMER_1,
             LocalDate.parse("2024-05-02"),
             TIME_11_00,
-            THEME_3
+            THEME_3,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER1_THEME2_240501_1200 = new Reservation(
@@ -88,7 +105,8 @@ public class PreInsertedData {
             CUSTOMER_1,
             LocalDate.parse("2024-05-01"),
             TIME_12_00,
-            THEME_2
+            THEME_2,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER2_THEME3_240502_1200 = new Reservation(
@@ -96,7 +114,8 @@ public class PreInsertedData {
             CUSTOMER_2,
             LocalDate.parse("2024-05-02"),
             TIME_12_00,
-            THEME_3
+            THEME_3,
+            RESERVED
     );
 
     public static final Reservation RESERVATION_CUSTOMER2_THEME3_240503_1200 = new Reservation(
@@ -104,6 +123,34 @@ public class PreInsertedData {
             CUSTOMER_2,
             LocalDate.parse("2024-05-03"),
             TIME_12_00,
-            THEME_3
+            THEME_3,
+            RESERVED
+    );
+
+    public static final Reservation RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100 = new Reservation(
+            6L,
+            CUSTOMER_2,
+            LocalDate.parse("2024-05-01"),
+            TIME_11_00,
+            THEME_2,
+            WAITING
+    );
+
+    public static final Reservation RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100 = new Reservation(
+            7L,
+            CUSTOMER_3,
+            LocalDate.parse("2024-05-01"),
+            TIME_11_00,
+            THEME_2,
+            WAITING
+    );
+
+    public static final Reservation RESERVATION_WAITING_CUSTOMER1_THEME3_240502_1200 = new Reservation(
+            8L,
+            CUSTOMER_1,
+            LocalDate.parse("2024-05-02"),
+            TIME_12_00,
+            THEME_3,
+            WAITING
     );
 }

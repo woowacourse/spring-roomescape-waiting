@@ -1,12 +1,16 @@
 package roomescape.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.util.Objects;
-
 @Getter
+@EqualsAndHashCode(of = "id")
 @Entity
 public class Theme {
 
@@ -37,18 +41,5 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

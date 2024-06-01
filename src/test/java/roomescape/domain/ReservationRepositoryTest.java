@@ -9,10 +9,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.acceptance.PreInsertedData.*;
+import static roomescape.PreInsertedData.CUSTOMER_1;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME2_240501_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER1_THEME3_240502_1100;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240502_1200;
+import static roomescape.PreInsertedData.RESERVATION_CUSTOMER2_THEME3_240503_1200;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100;
+import static roomescape.PreInsertedData.RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100;
+import static roomescape.PreInsertedData.THEME_2;
+import static roomescape.PreInsertedData.THEME_3;
+import static roomescape.domain.Reservation.Status;
 
 class ReservationRepositoryTest extends BaseRepositoryTest {
 
@@ -27,8 +38,8 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
         List<Long> results = reservationRepository.findMostReservedThemesId(from, to);
 
         assertThat(results).containsExactly(
-                THEME_3.getId(),
-                THEME_2.getId()
+                THEME_2.getId(),
+                THEME_3.getId()
         );
     }
 
@@ -37,7 +48,7 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
     @MethodSource("filterProvider")
     void filter(Long themeId, Long memberId, LocalDate from, LocalDate to, List<Reservation> expected) {
 
-        List<Reservation> filtered = reservationRepository.filter(themeId, memberId, from, to);
+        List<Reservation> filtered = reservationRepository.filter(themeId, memberId, from, to, Status.RESERVED);
 
         assertThat(filtered).containsAll(expected);
     }
@@ -76,5 +87,27 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
                                 RESERVATION_CUSTOMER2_THEME3_240502_1200
                         ))
         );
+    }
+
+    @DisplayName("같은 날짜, 테마, 시간인 예약 중 주어진 예약 상태와 예약 목록을 구한다.")
+    @Test
+    void findReservationsWithSameDateThemeTimeAndStatus() {
+        Long id = RESERVATION_CUSTOMER1_THEME2_240501_1100.getId();
+
+        Optional<Reservation> waiting = reservationRepository.getFirstReservationWaiting(id);
+
+        assertThat(waiting)
+                .isPresent()
+                .contains(RESERVATION_WAITING_CUSTOMER2_THEME2_240501_1100);
+    }
+
+    @DisplayName("같은 날짜, 테마, 시간인 예약 중 주어진 예약 상태와 동일하면서, 먼저 예약된 수를 구한다.")
+    @Test
+    void countPreviousReservationsWithSameDateThemeTimeAndStatus() {
+        Long id = RESERVATION_WAITING_CUSTOMER3_THEME2_240501_1100.getId();
+
+        Long waitingCountInFrontOfMe = reservationRepository.countPreviousReservationsWithSameDateThemeTimeAndStatus(id, Status.WAITING);
+
+        assertThat(waitingCountInFrontOfMe).isEqualTo(1L);
     }
 }

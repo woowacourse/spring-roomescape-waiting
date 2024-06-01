@@ -26,14 +26,20 @@ VALUES ('산초', 'sancho@sancho.com', 'sancho', 'ADMIN'),
        ('썬', 'sun@sancho.com', 'sun', 'CUSTOMER'),
        ('범블비', 'bumblebee@zeus.com', 'bumblebee', 'CUSTOMER');
 
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id)
-VALUES (2, '2024-05-17', 1, 1),
-       (3, '2024-05-17', 3, 2),
-       (3, '2024-05-17', 4, 3),
-       (4, '2024-05-17', 4, 4),
-       (4, '2024-05-17', 3, 1),
-       (4, '2024-05-17', 2, 2),
-       (5, '2024-05-17', 3, 3),
-       (5, '2024-05-18', 1, 1),
-       (5, '2024-05-18', 2, 2),
-       (5, '2024-05-18', 3, 1);
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id, status)
+VALUES (2, '2024-05-26', 1, 1, 'RESERVED'),
+       (3, '2024-05-26', 3, 2, 'RESERVED'),
+       (3, '2024-05-26', 4, 3, 'RESERVED'),
+       (4, '2024-05-26', 4, 4, 'RESERVED'),
+       (4, '2024-05-26', 3, 1, 'RESERVED'),
+       (4, '2024-05-26', 2, 2, 'RESERVED'),
+       (5, '2024-05-26', 3, 3, 'RESERVED'),
+       (5, '2024-05-27', 1, 1, 'RESERVED'),
+       (5, '2024-05-27', 2, 2, 'RESERVED'),
+       (5, '2024-05-27', 3, 1, 'RESERVED'),
+       (3, '2024-05-26', 1, 1, 'WAITING'),
+       (4, '2024-05-26', 1, 1, 'WAITING'),
+       (5, '2024-05-26', 1, 1, 'WAITING'),
+       (2, '2024-05-27', 1, 1, 'WAITING'),
+       (3, '2024-05-27', 1, 1, 'WAITING'),
+       (4, '2024-05-27', 1, 1, 'WAITING');
