@@ -47,6 +47,10 @@ public class ReservationWaiting {
         return reservation.getTheme();
     }
 
+    public String getMemberName() {
+        return member.getName();
+    }
+
     public LocalDate getDate() {
         return reservation.getDate();
     }

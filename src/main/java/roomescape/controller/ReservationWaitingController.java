@@ -1,9 +1,11 @@
 package roomescape.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +37,12 @@ public class ReservationWaitingController {
         ReservationWaitingResponse response = reservationWaitingService.save(requestWithMemberId);
         URI location = URI.create("/reservations/waitings/" + response.id());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReservationWaitingResponse>> findAll() {
+        List<ReservationWaitingResponse> waitings = reservationWaitingService.findAll();
+        return ResponseEntity.ok(waitings);
     }
 
     @DeleteMapping("/{id}")

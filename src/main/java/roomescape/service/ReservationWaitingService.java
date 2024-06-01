@@ -42,9 +42,7 @@ public class ReservationWaitingService {
         validateDifferentMember(member, reservation.getMember());
         validateWaitingNotExists(member, reservation);
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(member, reservation));
-        List<ReservationWaiting> reservations = reservationWaitingRepository.findAllByReservation(reservation);
-        int rank = reservations.indexOf(waiting) + 1;
-        return ReservationWaitingResponse.of(waiting, rank);
+        return ReservationWaitingResponse.from(waiting);
     }
 
     public List<MyReservationResponse> findWaitingsByMemberId(long memberId) {
@@ -52,6 +50,13 @@ public class ReservationWaitingService {
         List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByMember(member);
         return waitings.stream()
                 .map(MyReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationWaitingResponse> findAll() {
+        return reservationWaitingRepository.findAll()
+                .stream()
+                .map(ReservationWaitingResponse::from)
                 .toList();
     }
 
