@@ -1,5 +1,8 @@
 package roomescape.reservation.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -7,9 +10,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.WaitingResponse;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -35,6 +35,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Boolean existsByThemeId(Long themeId);
 
+    @SuppressWarnings("JpaQlInspection")
     @Query("SELECT new roomescape.reservation.dto.WaitingResponse(r , " +
             "(SELECT count(r1.id) FROM Reservation r1 " +
             "WHERE r.createdAt <= r1.createdAt " +
@@ -44,6 +45,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "FROM Reservation r ")
     List<WaitingResponse> getWaitingResponses();
 
+    @SuppressWarnings("JpaQlInspection")
     @Query("SELECT new roomescape.reservation.dto.MemberReservationResponse(r , " +
             "(SELECT count(r1.id) FROM Reservation r1 " +
             "WHERE r.createdAt <= r1.createdAt " +
@@ -58,6 +60,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "WHERE r.date = :#{#reservation.date} " +
             "AND r.time = :#{#reservation.time} " +
             "AND r.theme = :#{#reservation.theme} " +
-            "AND r.createdAt <= :#{#reservation.createdAt} ")
+            "AND r.createdAt <= :#{#reservation.createdAt} " +
+            "AND r.status = :#{#reservation.status} ")
     Long findSequence(@Param("reservation") Reservation reservation);
 }

@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,6 @@ import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -181,5 +181,23 @@ public class ReservationServiceRepositoryTest {
         //when, then
         assertThatThrownBy(() -> reservationService.deleteWaitingReservation(waitingId, member2))
                 .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @DisplayName("예약 대기는 올바른 순서를 반환한다.")
+    @Test
+    void sequenceOfWaiting() {
+        //given
+        MemberReservationCreateRequest request = new MemberReservationCreateRequest(
+                LocalDate.now().plusMonths(6),
+                1L,
+                1L);
+
+        LoginMember member = new LoginMember(1L, "test@gmail.com");
+
+        reservationService.createReservation(request, member);
+        WaitingResponse waitingResponse = reservationService.createWaitingReservation(request, member);
+
+        //when, then
+        assertThat(waitingResponse.getSequence()).isEqualTo(1L);
     }
 }

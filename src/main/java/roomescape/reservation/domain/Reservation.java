@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import roomescape.member.domain.Member;
@@ -58,6 +59,11 @@ public class Reservation {
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
         this(null, member, date, time, theme, status);
+    }
+
+    @PrePersist
+    private void persistCreateAtWithNanoZero() {
+        createdAt = createdAt.withNano(0);
     }
 
     public boolean isSameMember(Reservation other) {
