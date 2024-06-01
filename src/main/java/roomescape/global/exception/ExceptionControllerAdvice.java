@@ -15,6 +15,7 @@ import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.CustomException;
 import roomescape.global.exception.model.DataDuplicateException;
 import roomescape.global.exception.model.ForbiddenException;
+import roomescape.global.exception.model.InternalServerException;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.global.exception.model.ValidateException;
@@ -23,7 +24,7 @@ import roomescape.global.exception.model.ValidateException;
 public class ExceptionControllerAdvice {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @ExceptionHandler(value = {NotFoundException.class, ValidateException.class})
+    @ExceptionHandler(value = {ValidateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNotFoundException(final CustomException e) {
         logger.error(e.getMessage(), e);
@@ -58,6 +59,13 @@ public class ExceptionControllerAdvice {
         return ErrorResponse.of(e.getErrorType(), e.getMessage());
     }
 
+    @ExceptionHandler(value = NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        logger.error(e.getMessage(), e);
+        return ErrorResponse.of(e.getErrorType(), e.getMessage());
+    }
+
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public ErrorResponse handleHttpRequestMethodNotSupportedException(final HttpRequestMethodNotSupportedException e) {
@@ -74,7 +82,7 @@ public class ExceptionControllerAdvice {
         return ErrorResponse.of(e.getErrorType(), e.getMessage());
     }
 
-    @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(value = {Exception.class, InternalServerException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(final Exception e) {
         logger.error(e.getMessage(), e);

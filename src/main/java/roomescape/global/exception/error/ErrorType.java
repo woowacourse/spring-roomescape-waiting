@@ -21,7 +21,8 @@ public enum ErrorType {
 
     // 404 Not Found
     MEMBER_NOT_FOUND("회원(Member) 정보가 존재하지 않습니다."),
-    RESERVATION_NOT_FOUND("예약(Reservation) 정보가 존재하지 않습니다."),
+    MEMBER_RESERVATION_NOT_FOUND("회원 예약(MemberReservation) 정보가 존재하지 않습니다."),
+    RESERVATION_DETAIL_NOT_FOUND("예약 정보(ReservationDetail)가 존재하지 않습니다."),
     RESERVATION_TIME_NOT_FOUND("예약 시간(ReservationTime) 정보가 존재하지 않습니다."),
     THEME_NOT_FOUND("테마(Theme) 정보가 존재하지 않습니다."),
 
@@ -31,11 +32,14 @@ public enum ErrorType {
     // 409 Conflict
     TIME_IS_USED_CONFLICT("삭제할 수 없는 시간대입니다."),
     TIME_DUPLICATED("이미 해당 시간이 존재합니다."),
+    EMAIL_DUPLICATED("이미 가입된 이메일입니다."),
     RESERVATION_DUPLICATED("해당 시간에 이미 예약이 존재합니다."),
+    RESERVATION_WAITING_DUPLICATED("해당 시간에 이미 예약대기 중입니다."),
     RESERVATION_PERIOD_IN_PAST("이미 지난 시간대는 예약할 수 없습니다."),
 
     // 500 Internal Server Error,
-    INTERNAL_SERVER_ERROR("서버 내부에서 에러가 발생하였습니다.");
+    INTERNAL_SERVER_ERROR("서버 내부에서 에러가 발생하였습니다."),
+    ;
 
     private final String description;
 

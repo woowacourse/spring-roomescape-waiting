@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 @Embeddable
 public record Email(String email) {
-    private static final Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
     public Email(final String email) {
         this.email = email;
@@ -26,7 +26,7 @@ public record Email(String email) {
     }
 
     private void validatePattern() {
-        if (!emailPattern.matcher(email).matches()) {
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
             throw new ValidateException(ErrorType.INVALID_REQUEST_DATA,
                     String.format("입력하신 이메일(Email)의 형식이 잘못되었습니다."));
         }

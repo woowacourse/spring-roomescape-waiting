@@ -2,7 +2,7 @@
 
 ## ERD
 
-<img width="896" alt="image" src="https://github.com/PgmJun/spring-roomescape-waiting/assets/84304802/e050da11-0193-4512-bd18-530755f3e767">
+<img width="1019" alt="image" src="https://github.com/PgmJun/spring-roomescape-waiting/assets/84304802/bf2a4714-9efb-4e28-bde0-6c0c7827a6b0">
 
 ## API 명세
 
@@ -19,22 +19,25 @@
 |          | GET    | `/signup`                                               | 회원가입 페이지 요청           |                                        | `@Controller`     |
 |          | POST   | `/login`                                                | 로그인 요청                |                                        | `@RestController` |
 |          | POST   | `/signup`                                               | 회원가입 요청               |                                        | `@RestController` |
-|          | POST   | `/logout`                                               | 로그아웃 요청               |                                        | `@RestController` |
-|          | GET    | `/login/check`                                          | 인증 정보 조회              |                                        | `@RestController` |
+| `MEMBER` | POST   | `/logout`                                               | 로그아웃 요청               |                                        | `@RestController` |
+| `MEMBER` | GET    | `/login/check`                                          | 인증 정보 조회              |                                        | `@RestController` |
 | `MEMBER` | GET    | `/token-reissue`                                        | JWT 토큰 재발급            |                                        | `@RestController` |
 | `ADMIN`  | GET    | `/reservations`                                         | 예약 정보 조회              |                                        | `@RestController` |
-| `MEMBER` | GET    | `/reservations/member`                                  | 내 예약 정보 조회            |                                        | `@RestController` |
+| `MEMBER` | GET    | `/reservations/my`                                      | 내 예약 정보 조회            |                                        | `@RestController` |
 | `ADMIN`  | GET    | `/reservations/search?themeId&memberId&dateFrom&dateTo` | 예약 정보 조건 검색           |                                        | `@RestController` |
-|          | GET    | `/reservations/themes/{themeId}/reservationTimes?date`  | 특정 날짜의 특정 테마 예약 정보 조회 |                                        | `@RestController` |
-| `MEMBER` | POST   | `/reservations`                                         | 예약 추가                 |                                        | `@RestController` |
-|          | DELETE | `/reservations/{id}`                                    | 예약 취소                 |                                        | `@RestController` |
-|          | GET    | `/reservationTimes`                                     | 예약 시간 조회              |                                        | `@RestController` |
-|          | DELETE | `/reservationTimes/{id}`                                | 예약 시간 추가              |                                        | `@RestController` |
-|          | POST   | `/reservationTimes`                                     | 예약 시간 삭제              |                                        | `@RestController` |
-|          | GET    | `/themes`                                               | 테마 정보 조회              |                                        | `@RestController` |
+|          | GET    | `/reservations/themes/{themeId}/times?date`             | 특정 날짜의 특정 테마 예약 정보 조회 |                                        | `@RestController` |
+| `MEMBER` | POST   | `/reservations`                                         | 예약 정보 추가              |                                        | `@RestController` |
+| `ADMIN`  | DELETE | `/reservations/{id}`                                    | 예약 취소                 |                                        | `@RestController` |
+| `MEMBER` | DELETE | `/reservations/waitings/{reservationId}`                | 예약 대기 삭제              |                                        | `@RestController` |
+| `ADMIN`  | POST   | `/reservations/waitings/{reservationId}`                | 예약 대기 승인              |                                        | `@RestController` |
+| `ADMIN`  | GET    | `/reservations/waitings`                                | 첫 순서 예약 대기 정보 전체 조회   |                                        | `@RestController` |
+|          | GET    | `/reservationTimes`                                     | 예약 시간 전체 조회           |                                        | `@RestController` |
+| `ADMIN`  | DELETE | `/reservationTimes/{id}`                                | 예약 시간 추가              |                                        | `@RestController` |
+| `ADMIN`  | POST   | `/reservationTimes`                                     | 예약 시간 삭제              |                                        | `@RestController` |
+|          | GET    | `/themes`                                               | 테마 정보 전체 조회           |                                        | `@RestController` |
 |          | GET    | `/themes/top?today`                                     | 특정 기간의 인기 테마 조회       |                                        | `@RestController` |
-|          | POST   | `/themes`                                               | 테마 추가                 |                                        | `@RestController` |
-|          | DELETE | `/themes/{id}`                                          | 테마 삭제                 |                                        | `@RestController` |
+| `ADMIN`  | POST   | `/themes`                                               | 테마 추가                 |                                        | `@RestController` |
+| `ADMIN`  | DELETE | `/themes/{id}`                                          | 테마 삭제                 |                                        | `@RestController` |
 
 ---
 
@@ -199,7 +202,7 @@ Content-Type: application/json
 - Request
 
 ```
-GET /reservations/member HTTP/1.1
+GET /reservations/my HTTP/1.1
 Cookie: accessToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM;
 ```
 
@@ -298,7 +301,7 @@ GET /reservations/themes/1/reservationTimes?date=2024-12-31 HTTP/1.1
 
 ---
 
-### 예약 추가 API
+### 예약 정보 추가 API
 
 - Request
 
@@ -309,7 +312,8 @@ content-type: application/json
 {
     "date": "2023-08-05",
     "name": "브라운",
-    "timeId": 1
+    "timeId": 1,
+    "status": "RESERVED" (or "WAITING")
 }
 ```
 

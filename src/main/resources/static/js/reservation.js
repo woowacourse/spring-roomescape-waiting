@@ -141,7 +141,9 @@ function deleteRow(event) {
     const reservationId = row.cells[0].textContent;
 
     requestDelete(reservationId)
-        .then(() => row.remove())
+        .then(() => {
+            window.location.reload();
+        });
         .catch(error => console.error('Error:', error));
 }
 

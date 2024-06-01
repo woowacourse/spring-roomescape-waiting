@@ -42,10 +42,11 @@ public class AuthController {
         return ApiResponse.success();
     }
 
+    @Auth
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(final HttpServletResponse response) {
-        TokenDto logoutTokenDto = authService.logout();
-        addTokensToCookie(logoutTokenDto, response);
+    public ApiResponse<Void> logout(final HttpServletRequest request, final HttpServletResponse response) {
+        TokenDto requestToken = getTokenFromCookie(request);
+        addExpireToken(requestToken, response);
 
         return ApiResponse.success();
     }
@@ -94,5 +95,10 @@ public class AuthController {
         cookie.setMaxAge(maxAge);
 
         response.addCookie(cookie);
+    }
+
+    private void addExpireToken(final TokenDto tokens, final HttpServletResponse response) {
+        addTokenToCookie(JwtHandler.ACCESS_TOKEN_HEADER_KEY, tokens.accessToken(), response, 0);
+        addTokenToCookie(JwtHandler.REFRESH_TOKEN_HEADER_KEY, tokens.refreshToken(), response, 0);
     }
 }

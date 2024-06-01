@@ -22,6 +22,9 @@ document.getElementById('logout-btn').addEventListener('click', function (event)
       });
 });
 
+const registerBtn = document.getElementById('register-btn');
+if (registerBtn !== null) registerBtn.addEventListener('click', register);
+
 function updateUIBasedOnLogin() {
   fetch('/login/check') // 로그인 상태 확인 API 호출
       .then(response => {
@@ -74,7 +77,7 @@ function login() {
     })
   })
       .then(response => {
-        if (200 !== response.status) {
+        if (200 === !response.status) {
           alert('Login failed'); // 로그인 실패 시 경고창 표시
           throw new Error('Login failed');
         }
@@ -94,6 +97,10 @@ function signup() {
 }
 
 function register(event) {
+  console.log("register called");
+  // 폼 제출에 의한 페이지 리로드 방지
+  event.preventDefault();
+
   // 폼 데이터 수집
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -113,6 +120,7 @@ function register(event) {
   };
 
   // AJAX 요청 생성 및 전송
+
   fetch('/signup', {
     method: 'POST',
     headers: {
@@ -136,9 +144,6 @@ function register(event) {
         // 에러 처리
         console.error('Error during signup:', error);
       });
-
-  // 폼 제출에 의한 페이지 리로드 방지
-  event.preventDefault();
 }
 
 function base64DecodeUnicode(str) {

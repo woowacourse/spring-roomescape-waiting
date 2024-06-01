@@ -40,10 +40,6 @@ public class Member {
         this(null, name, email, password, role);
     }
 
-    public Member(final Long id, final Member member) {
-        this(id, member.name, member.email, member.password, member.role);
-    }
-
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
         this(id, new MemberName(name), new Email(email), new Password(password), role);
     }
@@ -61,12 +57,12 @@ public class Member {
     private void validateRole() {
         if (role == null) {
             throw new ValidateException(ErrorType.REQUEST_DATA_BLANK,
-                    String.format("회원(Member) 역할(Role)에 유효하지 않은 값(null OR 공백)이 입력되었습니다."));
+                    "회원(Member) 역할(Role)에 유효하지 않은 값(null OR 공백)이 입력되었습니다.");
         }
     }
 
-    public boolean isRole(final Role role) {
-        return this.role == role;
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 
     public boolean hasRole() {

@@ -28,11 +28,7 @@ public class Theme {
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);
     }
-
-    public Theme(final Long id, final Theme theme) {
-        this(id, theme.name, theme.description, theme.thumbnail);
-    }
-
+    
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         this(id, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
     }

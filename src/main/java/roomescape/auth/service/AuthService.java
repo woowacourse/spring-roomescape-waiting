@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.SignUpRequest;
@@ -9,18 +10,25 @@ import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 
+import java.util.List;
+
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final JwtHandler jwtHandler;
 
-    public AuthService(final MemberService memberService, final JwtHandler jwtHandler) {
+    public AuthService(MemberService memberService, MemberRepository memberRepository, final JwtHandler jwtHandler) {
         this.memberService = memberService;
+        this.memberRepository = memberRepository;
         this.jwtHandler = jwtHandler;
     }
 
+    @Transactional
     public TokenDto signUp(final SignUpRequest signupRequest) {
         Member member = memberService.addMember(signupRequest);
 
@@ -28,13 +36,14 @@ public class AuthService {
     }
 
     public TokenDto login(final LoginRequest request) {
+        List<Member> all = memberRepository.findAll();
         Member member = memberService.findMemberByEmailAndPassword(request);
 
         return jwtHandler.createToken(member.getId());
     }
 
     public LoginCheckResponse checkLogin(final Long memberId) {
-        Member member = memberService.findMemberById(memberId);
+        Member member = memberRepository.getById(memberId);
 
         return new LoginCheckResponse(member.getName());
     }
@@ -48,9 +57,5 @@ public class AuthService {
 
         Long memberId = jwtHandler.getMemberIdFromTokenWithNotValidate(accessToken);
         return jwtHandler.createToken(memberId);
-    }
-
-    public TokenDto logout() {
-        return jwtHandler.createLogoutToken();
     }
 }

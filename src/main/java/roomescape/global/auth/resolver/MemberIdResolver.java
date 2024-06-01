@@ -30,8 +30,6 @@ public class MemberIdResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer, final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest httpServletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
         Long memberId = (Long) httpServletRequest.getAttribute(JwtKey.MEMBER_ID.getValue());
-        System.out.println("=====");
-        System.out.println(memberId);
 
         return memberId;
     }
