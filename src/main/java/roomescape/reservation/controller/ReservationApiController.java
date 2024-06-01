@@ -12,19 +12,43 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.member.dto.LoginMemberInToken;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationSearchRequest;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.request.ReservationMemberCreateRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.request.ReservationSearchRequest;
+import roomescape.reservation.service.ReservationAndWaitingQueryService;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
 public class ReservationApiController {
 
     private final ReservationService reservationService;
+    private final ReservationAndWaitingQueryService reservationAndWaitingQueryService;
 
-    public ReservationApiController(ReservationService reservationService) {
+    public ReservationApiController(ReservationService reservationService, ReservationAndWaitingQueryService reservationAndWaitingQueryService) {
         this.reservationService = reservationService;
+        this.reservationAndWaitingQueryService = reservationAndWaitingQueryService;
+    }
+
+    @PostMapping("/reservations")
+    public ResponseEntity<ReservationResponse> createReservation(
+            @Valid @RequestBody final ReservationMemberCreateRequest request,
+            @Login final LoginMemberInToken loginMember
+    ) {
+        Reservation reservation = reservationService.save(request, loginMember);
+        ReservationResponse reservationResponse = new ReservationResponse(reservation);
+
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
+    }
+
+    @PostMapping("/admin/reservations")
+    public ResponseEntity<ReservationResponse> createReservationByAdmin(@Valid @RequestBody final ReservationAdminCreateRequest request) {
+        Reservation reservation = reservationService.saveByAdmin(request);
+        ReservationResponse reservationResponse = new ReservationResponse(reservation);
+
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
     }
 
     @GetMapping("/reservations")
@@ -35,38 +59,23 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations/search")
-    public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
-            @Valid ReservationSearchRequest reservationSearchRequest
-    ) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllBySearch(reservationSearchRequest);
+    public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(@Valid ReservationSearchRequest request) {
+        List<ReservationResponse> reservationResponses = reservationService.findAllBySearch(request);
 
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @PostMapping(path = {"/reservations", "/admin/reservations"})
-    public ResponseEntity<ReservationResponse> createMemberReservation(
-            @Valid @RequestBody ReservationCreateRequest reservationCreateRequest,
-            @Login LoginMemberInToken loginMemberInToken
-    ) {
-        Long id = reservationService.save(reservationCreateRequest, loginMemberInToken);
-        ReservationResponse reservationResponse = reservationService.findById(id);
+    @GetMapping("/reservations/me")
+    public ResponseEntity<List<MyReservationResponse>> myReservations(@Login LoginMemberInToken loginMember) {
+        final Long memberId = loginMember.id();
 
-        return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponse);
+        return ResponseEntity.ok(reservationAndWaitingQueryService.findAllByMemberId(memberId));
     }
-
 
     @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
-        reservationService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id, @Login LoginMemberInToken loginMember) {
+        reservationService.delete(id, loginMember);
 
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/reservations/me")
-    public ResponseEntity<List<MyReservationResponse>> myReservations(@Login LoginMemberInToken loginMemberInToken) {
-        List<MyReservationResponse> myReservationResponses = reservationService.findAllByMemberId(
-                loginMemberInToken.id());
-
-        return ResponseEntity.ok(myReservationResponses);
     }
 }

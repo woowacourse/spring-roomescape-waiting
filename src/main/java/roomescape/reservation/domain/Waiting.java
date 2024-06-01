@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import roomescape.member.domain.Member;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,14 +22,11 @@ public class Reservation {
     @ManyToOne
     private ReservationTime reservationTime;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
-        this(null, member, date, theme, reservationTime);
-    }
-
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
+    public Waiting(final Long id, final Member member, final LocalDate date, final Theme theme,
+            final ReservationTime reservationTime) {
         this.id = id;
         this.member = member;
         this.date = date;
@@ -37,8 +34,13 @@ public class Reservation {
         this.reservationTime = reservationTime;
     }
 
-    public boolean isSameMemberId(long id) {
-        return this.member.isSameId(id);
+    public Waiting(final Member member, final LocalDate date, final Theme theme,
+            final ReservationTime reservationTime) {
+        this(null, member, date, theme, reservationTime);
+    }
+
+    public Reservation toReservation() {
+        return new Reservation(null, member, date, theme, reservationTime);
     }
 
     public Long getId() {
@@ -49,15 +51,15 @@ public class Reservation {
         return member;
     }
 
-    public Theme getTheme() {
-        return theme;
-    }
-
     public LocalDate getDate() {
         return date;
     }
 
-    public ReservationTime getTime() {
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public ReservationTime getReservationTime() {
         return reservationTime;
     }
 }

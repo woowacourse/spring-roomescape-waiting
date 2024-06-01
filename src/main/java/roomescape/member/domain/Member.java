@@ -42,6 +42,10 @@ public class Member {
         this.password = password;
     }
 
+    public boolean isSameId(long id) {
+        return this.id == id;
+    }
+
     public Long getId() {
         return id;
     }

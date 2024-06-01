@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.config.ControllerConfig;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 
 @WebMvcTest(ReservationApiController.class)
 @Import(ControllerConfig.class)
@@ -23,6 +24,8 @@ class ReservationApiControllerTest {
 
     @MockBean
     private ReservationService reservationService;
+    @MockBean
+    private WaitingService waitingService;
 
     @Autowired
     private MockMvc mockMvc;
