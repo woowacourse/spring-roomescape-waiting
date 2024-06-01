@@ -50,7 +50,7 @@ public class TimeService {
     }
 
     private void validateReservationExistence(long timeId) {
-        int reservationCount = reservationRepository.countReservationsByTime_Id(timeId);
+        int reservationCount = reservationRepository.countReservationsByReservationContent_Time_Id(timeId);
         if (reservationCount > 0) {
             throw new ConflictException("삭제를 요청한 시간에 예약이 존재합니다.");
         }

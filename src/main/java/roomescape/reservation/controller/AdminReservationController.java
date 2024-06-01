@@ -4,7 +4,9 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,11 @@ public class AdminReservationController {
                 .body(reservationCreateResponse);
     }
 
+    @GetMapping
+    public List<ReservationResponse> reservationList() {
+        return reservationService.findReservations();
+    }
+
     @GetMapping("/search")
     public List<ReservationResponse> reservationListInCondition(
             @RequestParam("themeId") long themeId,
@@ -44,6 +51,12 @@ public class AdminReservationController {
         ReservationConditionSearchRequest request = new ReservationConditionSearchRequest(memberId, themeId, dateFrom,
                 dateTo);
         return reservationService.findReservationsByConditions(request);
+    }
+
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable long reservationId) {
+        reservationService.cancelReservation(reservationId);
+        return ResponseEntity.noContent().build();
     }
 
 }
