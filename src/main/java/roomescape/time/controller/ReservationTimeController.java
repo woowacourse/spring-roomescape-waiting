@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/times")
 public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
@@ -19,12 +18,12 @@ public class ReservationTimeController {
         this.reservationTimeService = reservationTimeService;
     }
 
-    @GetMapping
+    @GetMapping("/times")
     public List<TimeBookedResponse> readTimes() {
         return reservationTimeService.readReservationTimes();
     }
 
-    @GetMapping(params = {"date", "themeId"})
+    @GetMapping(path = "/times", params = {"date", "themeId"})
     public List<TimeBookedResponse> readTimes(
             @RequestParam(value = "date") LocalDate date,
             @RequestParam(value = "themeId") Long themeId
@@ -32,18 +31,18 @@ public class ReservationTimeController {
         return reservationTimeService.readReservationTimes(date, themeId);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/times/{id}")
     public TimeBookedResponse readTime(@PathVariable Long id) {
         return reservationTimeService.readReservationTime(id);
 
     }
 
-    @PostMapping
+    @PostMapping("/times")
     public TimeBookedResponse createTime(@Valid @RequestBody ReservationTimeCreateRequest request) {
         return reservationTimeService.createTime(request);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/times/{id}")
     public void deleteTime(@PathVariable Long id) {
         reservationTimeService.deleteTime(id);
     }
