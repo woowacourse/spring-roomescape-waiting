@@ -78,7 +78,6 @@ public class ReservationService {
     public void cancelReservation(long reservationId) {
         Reservation reservation = getReservationById(reservationId);
         approveReservationWaiting(reservation);
-        reservationRepository.delete(reservation);
     }
 
     private void approveReservationWaiting(Reservation reservation) {
