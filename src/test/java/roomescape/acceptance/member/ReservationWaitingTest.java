@@ -19,7 +19,7 @@ import io.restassured.http.ContentType;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.Fixture;
 import roomescape.domain.Reservation;
-import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.util.JwtProvider;
@@ -46,7 +46,7 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
                 .extract().as(ReservationWaitingResponse.class);
 
         // 조회
-        TypeRef<List<MemberReservationResponse>> reservationResponse = new TypeRef<>() {};
+        TypeRef<List<MyReservationResponse>> reservationResponse = new TypeRef<>() {};
         RestAssured.given().log().all()
                 .cookie("token", Fixture.customerToken)
                 .contentType(ContentType.JSON)

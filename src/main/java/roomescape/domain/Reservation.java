@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
@@ -43,6 +44,10 @@ public class Reservation {
         this.theme = theme;
     }
 
+    public void updateMember(Member member) {
+        this.member = member;
+    }
+
     public Long getId() {
         return id;
     }
@@ -61,6 +66,14 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public LocalTime getStartAt() {
+        return reservationTime.getStartAt();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     @Override

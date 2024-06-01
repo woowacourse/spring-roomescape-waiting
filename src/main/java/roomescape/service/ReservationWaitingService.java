@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
+import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.exception.OperationNotAllowedException;
@@ -46,6 +47,14 @@ public class ReservationWaitingService {
         return ReservationWaitingResponse.of(waiting, rank);
     }
 
+    public List<MyReservationResponse> findWaitingsByMemberId(long memberId) {
+        Member member = getMemberById(memberId);
+        List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByMember(member);
+        return waitings.stream()
+                .map(MyReservationResponse::from)
+                .toList();
+    }
+
     public boolean existsByMemberAndReservation(Member member, Reservation reservation) {
         return reservationWaitingRepository.existsByMemberAndReservation(member, reservation);
     }
@@ -74,7 +83,7 @@ public class ReservationWaitingService {
 
     private void validateWaitingNotExists(Member member, Reservation reservation) {
         if (existsByMemberAndReservation(member, reservation)) {
-            throw new ResourceNotFoundException("중복된 예약 대기를 신청할 수 없습니다.");
+            throw new OperationNotAllowedException("중복된 예약 대기를 신청할 수 없습니다.");
         }
     }
 }

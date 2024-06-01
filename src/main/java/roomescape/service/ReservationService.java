@@ -4,19 +4,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.dto.ReservationWaitingResponse;
 import roomescape.exception.OperationNotAllowedException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.MemberRepository;
@@ -78,26 +75,29 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteById(Long id) {
-        reservationRepository.delete(getReservationById(id));
+    public void cancelReservation(long id) {
+        Reservation reservation = getReservationById(id);
+        approveReservationWaiting(reservation);
+        reservationRepository.delete(reservation);
     }
 
-    public List<MemberReservationResponse> findReservationsByMemberId(long memberId) {
+    private void approveReservationWaiting(Reservation reservation) {
+        reservationWaitingRepository.findTopByReservationOrderById(reservation)
+                .ifPresentOrElse(
+                        waiting -> {
+                            reservation.updateMember(waiting.getMember());
+                            reservationWaitingRepository.delete(waiting);
+                        },
+                        () -> deleteReservation(reservation)
+                );
+    }
+
+    public List<MyReservationResponse> findReservationsByMemberId(long memberId) {
         Member member = getMemberById(memberId);
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
         return reservations.stream()
-                .map(reservation -> MemberReservationResponse.of(reservation, getReservationWaiting(member, reservation)))
+                .map(MyReservationResponse::from)
                 .toList();
-    }
-
-    private ReservationWaitingResponse getReservationWaiting(Member member, Reservation reservation) {
-        Optional<ReservationWaiting> waiting = reservationWaitingRepository.findByMemberAndReservation(member, reservation);
-        if (waiting.isEmpty()) {
-            return null;
-        }
-        List<ReservationWaiting> reservations = reservationWaitingRepository.findAllByReservation(reservation);
-        int rank = reservations.indexOf(waiting.get()) + 1;
-        return ReservationWaitingResponse.of(waiting.get(), rank);
     }
 
     public boolean checkReservationExists(LocalDate date, Long timeId, Long themeId) {
@@ -140,5 +140,9 @@ public class ReservationService {
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedException("지나간 시간에 대한 예약은 할 수 없습니다.");
         }
+    }
+
+    private void deleteReservation(Reservation reservation) {
+        reservationRepository.delete(reservation);
     }
 }

@@ -1,5 +1,8 @@
 package roomescape.domain;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -38,5 +41,21 @@ public class ReservationWaiting {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public Theme getTheme() {
+        return reservation.getTheme();
+    }
+
+    public LocalDate getDate() {
+        return reservation.getDate();
+    }
+
+    public LocalTime getStartAt() {
+        return reservation.getStartAt();
+    }
+
+    public String getThemeName() {
+        return reservation.getThemeName();
     }
 }

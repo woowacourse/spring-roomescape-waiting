@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -13,24 +14,32 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.config.Authorization;
-import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.ReservationWaitingService;
 
 @RequestMapping("/reservations")
 @RestController
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+            ReservationWaitingService reservationWaitingService
+    ) {
         this.reservationService = reservationService;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@Authorization long memberId) {
-        List<MemberReservationResponse> response = reservationService.findReservationsByMemberId(memberId);
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@Authorization long memberId) {
+        List<MyReservationResponse> reservations = reservationService.findReservationsByMemberId(memberId);
+        List<MyReservationResponse> waitings = reservationWaitingService.findWaitingsByMemberId(memberId);
+        List<MyReservationResponse> response = new ArrayList<>(reservations);
+        response.addAll(waitings);
         return ResponseEntity.ok(response);
     }
 

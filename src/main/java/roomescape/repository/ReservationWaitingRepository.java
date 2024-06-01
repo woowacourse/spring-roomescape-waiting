@@ -13,9 +13,11 @@ import roomescape.domain.ReservationWaiting;
 @Repository
 public interface ReservationWaitingRepository extends JpaRepository<ReservationWaiting, Long> {
 
-    Optional<ReservationWaiting> findByMemberAndReservation(Member member, Reservation reservation);
-
     List<ReservationWaiting> findAllByReservation(Reservation reservation);
+
+    List<ReservationWaiting> findAllByMember(Member member);
+
+    Optional<ReservationWaiting> findTopByReservationOrderById(Reservation reservation);
 
     boolean existsByMemberAndReservation(Member member, Reservation reservation);
 }

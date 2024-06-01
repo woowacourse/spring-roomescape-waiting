@@ -17,25 +17,24 @@ import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.MyReservationResponse;
 
 public class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
 
     @DisplayName("고객이 자신의 예약 목록을 조회한다.")
     @Test
     void getMyReservation_success() {
-        TypeRef<List<MemberReservationResponse>> reservationListFormat = new TypeRef<>() {
-        };
+        TypeRef<List<MyReservationResponse>> reservationListFormat = new TypeRef<>() {};
 
-        List<MemberReservationResponse> response = sendGetRequest()
+        List<MyReservationResponse> response = sendGetRequest()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .as(reservationListFormat);
 
         assertThat(response).containsExactly(
-                MemberReservationResponse.from(PRE_INSERTED_RESERVATION_1),
-                MemberReservationResponse.from(PRE_INSERTED_RESERVATION_2),
-                MemberReservationResponse.from(PRE_INSERTED_RESERVATION_3)
+                MyReservationResponse.from(PRE_INSERTED_RESERVATION_1),
+                MyReservationResponse.from(PRE_INSERTED_RESERVATION_2),
+                MyReservationResponse.from(PRE_INSERTED_RESERVATION_3)
         );
     }
 
