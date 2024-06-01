@@ -21,14 +21,14 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> getAllThemes() {
-        List<ThemeResponse> responses = themeService.getAllThemes();
+    public ResponseEntity<List<ThemeResponse>> findThemes() {
+        List<ThemeResponse> responses = themeService.findThemes();
         return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/rankings")
-    public ResponseEntity<List<ThemeResponse>> getMostReservedThemes() {
-        List<ThemeResponse> responses = themeService.getMostReservedThemes();
+    public ResponseEntity<List<ThemeResponse>> findMostReservedThemes() {
+        List<ThemeResponse> responses = themeService.findMostReservedThemes();
         return ResponseEntity.ok().body(responses);
     }
 }

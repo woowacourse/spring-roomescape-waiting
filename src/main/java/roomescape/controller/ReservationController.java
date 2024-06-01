@@ -33,7 +33,7 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@Authorization long memberId) {
+    public ResponseEntity<List<MyReservationResponse>> findMyReservationsAndWaitings(@Authorization long memberId) {
         List<MyReservationResponse> reservations = reservationService.findReservationsByMemberId(memberId);
         List<MyReservationResponse> waitings = reservationWaitingService.findWaitingsByMemberId(memberId);
         List<MyReservationResponse> response = new ArrayList<>(reservations);
@@ -42,13 +42,13 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(
+    public ResponseEntity<ReservationResponse> reserve(
             @Authorization long memberId,
             @RequestBody ReservationRequest request
     ) {
         ReservationRequest requestWithMemberId = new ReservationRequest(memberId, request.date(), request.timeId(),
                 request.themeId());
-        ReservationResponse response = reservationService.save(requestWithMemberId);
+        ReservationResponse response = reservationService.reserve(requestWithMemberId);
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location).body(response);
     }

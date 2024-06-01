@@ -25,17 +25,17 @@ public class TimeController {
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getTimes() {
-        List<ReservationTimeResponse> responses = reservationTimeService.getAllReservationTimes();
+        List<ReservationTimeResponse> responses = reservationTimeService.findReservationTimes();
         return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> getReservationTimeBookedStatus(
+    public ResponseEntity<List<AvailableReservationTimeResponse>> findReservationTimeWithBookedStatus(
             @RequestParam LocalDate date,
             @RequestParam Long themeId
     ) {
         List<AvailableReservationTimeResponse> responses = reservationTimeService
-                .getReservationTimeBookedStatus(date, themeId);
+                .findReservationTimesWithBookedStatus(date, themeId);
         return ResponseEntity.ok().body(responses);
     }
 }

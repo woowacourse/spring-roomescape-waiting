@@ -28,14 +28,14 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ThemeResponse> getAllThemes() {
+    public List<ThemeResponse> findThemes() {
         return themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
-    public ThemeResponse addTheme(ThemeRequest request) {
+    public ThemeResponse createTheme(ThemeRequest request) {
         Theme theme = request.toTheme();
         Theme savedTheme = themeRepository.save(theme);
 
@@ -47,10 +47,10 @@ public class ThemeService {
         if (exist) {
             throw new OperationNotAllowedException("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.");
         }
-        themeRepository.delete(findValidatedTheme(id));
+        themeRepository.delete(getTheme(id));
     }
 
-    public List<ThemeResponse> getMostReservedThemes() {
+    public List<ThemeResponse> findMostReservedThemes() {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(DAYS_IN_WEEK);
 
@@ -63,7 +63,7 @@ public class ThemeService {
                 .toList();
     }
 
-    private Theme findValidatedTheme(Long id) {
+    private Theme getTheme(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 테마를 찾을 수 없습니다."));
     }

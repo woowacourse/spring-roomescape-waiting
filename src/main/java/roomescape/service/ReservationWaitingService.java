@@ -35,7 +35,7 @@ public class ReservationWaitingService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationWaitingResponse save(ReservationRequest request) {
+    public ReservationWaitingResponse createWaiting(ReservationRequest request) {
         Member member = getMemberById(request.memberId());
         Reservation reservation = getReservationByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
                 request.themeId());
@@ -53,7 +53,7 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    public List<ReservationWaitingResponse> findAll() {
+    public List<ReservationWaitingResponse> findWaitings() {
         return reservationWaitingRepository.findAll()
                 .stream()
                 .map(ReservationWaitingResponse::from)
@@ -64,7 +64,7 @@ public class ReservationWaitingService {
         return reservationWaitingRepository.existsByMemberAndReservation(member, reservation);
     }
 
-    public void deleteReservationWaiting(Long id) {
+    public void deleteById(Long id) {
         reservationWaitingRepository.deleteById(id);
     }
 

@@ -48,21 +48,21 @@ public class AdminController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<MemberResponse>> getMembers() {
+    public ResponseEntity<List<MemberResponse>> findMembers() {
         List<MemberResponse> members = memberService.findAllMembers();
         return ResponseEntity.ok(members);
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest request) {
-        ReservationResponse reservation = reservationService.save(request);
+        ReservationResponse reservation = reservationService.reserve(request);
         URI uri = URI.create("/reservations/" + reservation.id());
         return ResponseEntity.created(uri).body(reservation);
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<ReservationResponse> reservations = reservationService.getAllReservations();
+    public ResponseEntity<List<ReservationResponse>> findReservations() {
+        List<ReservationResponse> reservations = reservationService.findAllReservations();
         return ResponseEntity.ok().body(reservations);
     }
 
@@ -86,7 +86,7 @@ public class AdminController {
 
     @PostMapping("/themes")
     public ResponseEntity<ThemeResponse> createTheme(@RequestBody ThemeRequest request) {
-        ThemeResponse theme = themeService.addTheme(request);
+        ThemeResponse theme = themeService.createTheme(request);
         URI location = URI.create("/themes/" + theme.id());
         return ResponseEntity.created(location).body(theme);
     }
@@ -98,8 +98,8 @@ public class AdminController {
     }
 
     @PostMapping("/times")
-    public ResponseEntity<ReservationTimeResponse> addTime(@RequestBody ReservationTimeRequest request) {
-        ReservationTimeResponse time = reservationTimeService.addReservationTime(request);
+    public ResponseEntity<ReservationTimeResponse> createTime(@RequestBody ReservationTimeRequest request) {
+        ReservationTimeResponse time = reservationTimeService.createReservationTime(request);
         URI location = URI.create("/times/" + time.id());
         return ResponseEntity.created(location).body(time);
     }

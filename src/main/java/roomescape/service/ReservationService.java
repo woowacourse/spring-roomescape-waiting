@@ -45,14 +45,14 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<ReservationResponse> getAllReservations() {
+    public List<ReservationResponse> findAllReservations() {
         return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public ReservationResponse save(ReservationRequest request) {
+    public ReservationResponse reserve(ReservationRequest request) {
         Member member = getMemberById(request.memberId());
         ReservationTime reservationTime = getReservationTimeById(request.timeId());
         Theme theme = getThemeById(request.themeId());
@@ -75,8 +75,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public void cancelReservation(long id) {
-        Reservation reservation = getReservationById(id);
+    public void cancelReservation(long reservationId) {
+        Reservation reservation = getReservationById(reservationId);
         approveReservationWaiting(reservation);
         reservationRepository.delete(reservation);
     }
@@ -98,10 +98,6 @@ public class ReservationService {
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
-    }
-
-    public boolean checkReservationExists(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId);
     }
 
     private ReservationTime getReservationTimeById(Long id) {

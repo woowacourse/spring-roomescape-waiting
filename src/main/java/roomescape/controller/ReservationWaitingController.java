@@ -28,26 +28,26 @@ public class ReservationWaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationWaitingResponse> create(
+    public ResponseEntity<ReservationWaitingResponse> createWaiting(
             @Authorization long memberId,
             @RequestBody ReservationRequest request
     ) {
         ReservationRequest requestWithMemberId = new ReservationRequest(memberId, request.date(), request.timeId(),
                 request.themeId());
-        ReservationWaitingResponse response = reservationWaitingService.save(requestWithMemberId);
+        ReservationWaitingResponse response = reservationWaitingService.createWaiting(requestWithMemberId);
         URI location = URI.create("/reservations/waitings/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationWaitingResponse>> findAll() {
-        List<ReservationWaitingResponse> waitings = reservationWaitingService.findAll();
+    public ResponseEntity<List<ReservationWaitingResponse>> findWaitings() {
+        List<ReservationWaitingResponse> waitings = reservationWaitingService.findWaitings();
         return ResponseEntity.ok(waitings);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationWaitingService.deleteReservationWaiting(id);
+        reservationWaitingService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
