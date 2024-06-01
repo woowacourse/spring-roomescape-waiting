@@ -25,13 +25,13 @@ public record MyReservationResponse(
         );
     }
 
-    public static MyReservationResponse from(ReservationWaiting waiting) {
+    public static MyReservationResponse of(ReservationWaiting waiting, int rank) {
         return new MyReservationResponse(
                 waiting.getId(),
                 waiting.getDate(),
                 waiting.getStartAt(),
                 waiting.getThemeName(),
-                "예약 대기"
+                "%d번째 예약 대기".formatted(rank)
         );
     }
 }

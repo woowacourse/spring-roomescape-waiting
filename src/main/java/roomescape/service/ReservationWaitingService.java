@@ -49,7 +49,7 @@ public class ReservationWaitingService {
         Member member = getMemberById(memberId);
         List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByMember(member);
         return waitings.stream()
-                .map(MyReservationResponse::from)
+                .map(waiting -> MyReservationResponse.of(waiting, waiting.getRank(waitings)))
                 .toList();
     }
 

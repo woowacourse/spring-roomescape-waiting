@@ -2,6 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,6 +31,18 @@ public class ReservationWaiting {
     public ReservationWaiting(Member member, Reservation reservation) {
         this.member = member;
         this.reservation = reservation;
+    }
+
+    public int getRank(List<ReservationWaiting> waitings) {
+        Objects.requireNonNull(waitings, "waitings must not be null");
+        List<Long> waitingIds = waitings.stream()
+                .map(ReservationWaiting::getId)
+                .sorted()
+                .toList();
+        if (!waitingIds.contains(getId())) {
+            throw new IllegalArgumentException("waitings does not contain this reservation");
+        }
+        return waitingIds.indexOf(getId()) + 1;
     }
 
     public Long getId() {
