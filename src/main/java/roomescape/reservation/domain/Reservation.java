@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
@@ -39,20 +40,35 @@ public class Reservation {
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
     public Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
+    public Reservation(Long id,
+                       Member member,
+                       LocalDate date,
+                       ReservationTime time,
+                       Theme theme,
+                       Status status,
+                       LocalDateTime createdAt) {
         this.id = id;
         this.member = member;
         this.date = new ReservationDate(date);
         this.time = time;
         this.theme = theme;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, member, date, time, theme, Status.RESERVED);
+    public Reservation(Member member,
+                       LocalDate date,
+                       ReservationTime time,
+                       Theme theme,
+                       Status status,
+                       LocalDateTime createdAt) {
+        this(null, member, date, time, theme, status, createdAt);
     }
 
     public Reservation(Long id, Reservation reservation) {
@@ -62,12 +78,17 @@ public class Reservation {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
-                Status.RESERVED
+                reservation.getStatus(),
+                reservation.getCreatedAt()
         );
     }
 
-    public boolean isDateBefore(LocalDate target) {
-        return date.isBefore(target);
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
+    public boolean isReserved() {
+        return this.status == Status.RESERVED;
     }
 
     public Long getId() {
@@ -98,6 +119,10 @@ public class Reservation {
         return status;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -109,11 +134,12 @@ public class Reservation {
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id) && Objects.equals(member, that.member)
                 && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme) && Objects.equals(status, that.status);
+                && Objects.equals(theme, that.theme) && status == that.status
+                && Objects.equals(createdAt, that.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme, status);
+        return Objects.hash(id, member, date, time, theme, status, createdAt);
     }
 }

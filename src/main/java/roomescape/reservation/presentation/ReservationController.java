@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Authenticated;
 import roomescape.auth.dto.Accessor;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
@@ -33,6 +34,11 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.findAllReservation());
     }
 
+    @GetMapping("/reservations/{id}")
+    public ResponseEntity<MemberReservationStatusResponse> getReservationById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(reservationService.findById(id));
+    }
+
     @GetMapping(path = "/reservations", params = {"memberId", "themeId", "dateFrom", "dateTo"})
     public ResponseEntity<List<ReservationResponse>> findAllByMemberAndThemeAndPeriod(
             @RequestParam(name = "memberId") Long memberId,
@@ -47,15 +53,16 @@ public class ReservationController {
     @GetMapping("/reservations/my")
     public ResponseEntity<List<MemberReservationStatusResponse>> findMemberReservationStatus(
             @Authenticated Accessor accessor) {
-        return ResponseEntity.ok(reservationService.findAllByMemberWithStatus(accessor.id()));
+        return ResponseEntity.ok(reservationService.findAllByMemberId(accessor.id()));
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> saveMemberReservation(
             @Authenticated Accessor accessor,
-            @Valid @RequestBody MemberReservationAddRequest memberReservationAddRequest) {
+            @Valid @RequestBody MemberReservationAddRequest memberReservationAddRequest,
+            @RequestParam(name = "status") Status status) {
         ReservationResponse saveResponse = reservationService.saveMemberReservation(accessor.id(),
-                memberReservationAddRequest);
+                memberReservationAddRequest, status);
         URI createdUri = URI.create("/reservations/" + saveResponse.id());
         return ResponseEntity.created(createdUri).body(saveResponse);
     }

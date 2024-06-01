@@ -1,8 +1,12 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.DuplicateSaveException;
 import roomescape.global.exception.IllegalReservationDateException;
 import roomescape.global.exception.NoSuchRecordException;
@@ -10,6 +14,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
@@ -42,6 +47,18 @@ public class ReservationService {
                 .toList();
     }
 
+    public MemberReservationStatusResponse findById(Long id) {
+        Reservation foundReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchRecordException("해당하는 예약이 존재하지 않습니다 ID: " + id));
+        return new MemberReservationStatusResponse(foundReservation);
+    }
+
+    public List<ReservationResponse> findAllWaitingReservation(Status status) {
+        return reservationRepository.findAllReservationByStatus(status).stream()
+                .map(ReservationResponse::new)
+                .toList();
+    }
+
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(Long memberId, Long themeId, LocalDate dateFrom,
                                                                       LocalDate dateTo) {
         return reservationRepository.findByMemberIdAndThemeIdAndDateValueBetween(memberId, themeId,
@@ -50,35 +67,73 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId)
+    public List<MemberReservationStatusResponse> findAllByMemberId(Long memberId) {
+        List<MemberReservationStatusResponse> memberReservationStatusResponses = new ArrayList<>();
+
+        findAllMembersReservedReservation(memberReservationStatusResponses, memberId);
+        findAllMembersWaitingReservation(memberReservationStatusResponses, memberId);
+
+        return memberReservationStatusResponses;
+    }
+
+    private void findAllMembersReservedReservation(List<MemberReservationStatusResponse> responses, Long memberId) {
+        reservationRepository.findAllReservedByMemberId(memberId)
                 .stream()
                 .map(MemberReservationStatusResponse::new)
-                .toList();
+                .forEach(responses::add);
     }
 
-    public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
-
-        return saveMemberReservation(member, request);
+    private void findAllMembersWaitingReservation(List<MemberReservationStatusResponse> responses, Long memberId) {
+        reservationRepository.findAllReservationWaitingByMemberId(memberId)
+                .stream()
+                .map(MemberReservationStatusResponse::new)
+                .forEach(responses::add);
     }
 
-    public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
+    public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request, Status status) {
+        if (status.isReserved()) {
+            validateDuplicatedReservation(request);
+        }
+        validateDuplicatedWaitingReservation(memberId, request);
+        return createMemberReservation(memberId, request, status);
+    }
+
+    private void validateDuplicatedReservation(MemberReservationAddRequest request) {
         if (reservationRepository.existsByDateValueAndTimeIdAndThemeId(request.date(), request.timeId(),
                 request.themeId())) {
-            throw new DuplicateSaveException("중복되는 예약이 존재합니다");
+            throw new DuplicateSaveException("중복되는 예약이 존재합니다.");
         }
+    }
 
+    private void validateDuplicatedWaitingReservation(Long memberId, MemberReservationAddRequest request) {
+        if (reservationRepository.existsByDateValueAndTimeIdAndThemeIdAndMemberId(request.date(), request.timeId(),
+                request.themeId(), memberId)) {
+            throw new DuplicateSaveException("이미 회원님이 대기하고 있는 예약이 존재합니다.");
+        }
+    }
+
+    private ReservationResponse createMemberReservation(Long memberId,
+                                                        MemberReservationAddRequest request,
+                                                        Status status) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
         ReservationTime reservationTime = getReservationTime(request.timeId());
+        validateReservingPastTime(request.date(), reservationTime.getStartAt());
         Theme theme = getTheme(request.themeId());
 
-        Reservation reservation = request.toReservation(member, reservationTime, theme);
-        if (reservation.isDateBefore(LocalDate.now())) {
-            throw new IllegalReservationDateException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
-        }
+        Reservation reservation
+                = new Reservation(member, request.date(), reservationTime, theme, status, LocalDateTime.now());
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
+    }
+
+    private void validateReservingPastTime(LocalDate date, LocalTime time) {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+        if (date.isBefore(nowDate) || (date.isEqual(nowDate) && time.isBefore(nowTime))) {
+            throw new IllegalReservationDateException(
+                    nowDate + " " + nowTime + ": 예약 날짜와 시간은 현재 보다 이전일 수 없습니다");
+        }
     }
 
     private ReservationTime getReservationTime(long timeId) {
@@ -91,7 +146,22 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchRecordException("해당하는 테마가 존재하지 않습니다 ID: " + themeId));
     }
 
+    @Transactional
     public void removeReservation(long id) {
+        Reservation reservationForDelete = reservationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchRecordException("해당하는 예약이 존재하지 않습니다 ID: " + id));
+        if (reservationForDelete.isReserved()) {
+            updateWaitingReservationStatus(reservationForDelete);
+        }
         reservationRepository.deleteById(id);
+    }
+
+    private void updateWaitingReservationStatus(Reservation reservationForDelete) {
+        reservationRepository.findFirstByDateValueAndTimeIdAndThemeIdAndStatus(
+                reservationForDelete.getDate(),
+                reservationForDelete.getTime().getId(),
+                reservationForDelete.getTheme().getId(),
+                Status.WAITING
+        ).ifPresent(value -> value.updateStatus(Status.RESERVED));
     }
 }
