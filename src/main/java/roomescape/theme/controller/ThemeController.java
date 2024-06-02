@@ -11,7 +11,6 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/themes")
 public class ThemeController {
     private final ThemeService themeService;
 
@@ -19,32 +18,32 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
-    @PostMapping
+    @PostMapping("/themes")
     public ResponseEntity<ThemeResponse> createTheme(@Valid @RequestBody ThemeCreateRequest themeCreateRequest) {
         ThemeResponse theme = themeService.createTheme(themeCreateRequest);
         return ResponseEntity.created(URI.create("/themes/" + theme.id()))
                 .body(theme);
     }
 
-    @GetMapping
+    @GetMapping("/themes")
     public ResponseEntity<List<ThemeResponse>> readThemes() {
         List<ThemeResponse> themes = themeService.readThemes();
         return ResponseEntity.ok(themes);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/themes/{id}")
     public ResponseEntity<ThemeResponse> readTheme(@PathVariable Long id) {
         ThemeResponse themeResponse = themeService.readTheme(id);
         return ResponseEntity.ok(themeResponse);
     }
 
-    @GetMapping("/popular")
+    @GetMapping("/themes/popular")
     public ResponseEntity<List<ThemeResponse>> readPopularThemes() {
         List<ThemeResponse> themeResponses = themeService.readPopularThemes();
         return ResponseEntity.ok(themeResponses);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/themes/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable Long id) {
         themeService.deleteTheme(id);
         return ResponseEntity.noContent().build();

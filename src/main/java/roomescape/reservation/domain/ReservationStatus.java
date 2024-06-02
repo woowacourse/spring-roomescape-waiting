@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 public enum ReservationStatus {
 
     CONFIRMATION("예약"),
+    WAITING("대기")
     ;
 
     private final String statusName;

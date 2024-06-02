@@ -6,7 +6,13 @@ import roomescape.theme.dto.ThemeResponse;
 import roomescape.time.dto.ReservationTimeResponse;
 import java.time.LocalDate;
 
-public record ReservationResponse(Long id, MemberResponse member, LocalDate date, ReservationTimeResponse time, ThemeResponse theme) {
+public record ReservationResponse(
+        Long id,
+        MemberResponse member,
+        LocalDate date,
+        ReservationTimeResponse time,
+        ThemeResponse theme,
+        String status) {
 
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
@@ -14,7 +20,8 @@ public record ReservationResponse(Long id, MemberResponse member, LocalDate date
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme())
+                ThemeResponse.from(reservation.getTheme()),
+                reservation.getStatus().getStatusName()
         );
     }
 }
