@@ -15,6 +15,8 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class ReservationWaiting {
 
+    private static final int DIFFERENCE_BETWEEN_RANK_AND_INDEX = 1;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,7 +44,7 @@ public class ReservationWaiting {
         if (!waitingIds.contains(getId())) {
             throw new IllegalArgumentException("waitings does not contain this reservation");
         }
-        return waitingIds.indexOf(getId()) + 1;
+        return waitingIds.indexOf(getId()) + DIFFERENCE_BETWEEN_RANK_AND_INDEX;
     }
 
     public Long getId() {
