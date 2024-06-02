@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.customerToken;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_1;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
@@ -93,7 +94,7 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
 
     private ValidatableResponse sendPostRequest(ReservationRequest requestBody) {
         return RestAssured.given().log().ifValidationFails()
-                .cookie("token", customerToken)
+                .cookie(TOKEN_NAME, customerToken)
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when().post("/reservations")

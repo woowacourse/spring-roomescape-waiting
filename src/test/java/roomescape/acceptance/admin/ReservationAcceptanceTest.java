@@ -9,6 +9,7 @@ import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_CUSTOMER_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_1;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +41,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         };
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -59,7 +60,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
             );
 
             RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/reservations")
@@ -120,7 +121,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
 
         private ValidatableResponse sendPostRequest(ReservationRequest requestBody) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/reservations")
@@ -158,7 +159,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
 
         private ValidatableResponse sendDeleteRequest(Long id) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .when().delete("/admin/reservations/" + id)
                     .then().log().all();
         }

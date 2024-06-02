@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_ADMIN;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.stream.Stream;
 
@@ -60,12 +61,12 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().cookie("token");
+                .extract().cookie(TOKEN_NAME);
     }
 
     private MemberResponse sendCheckNameRequest(String token) {
         return RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(TOKEN_NAME, token)
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -82,10 +83,10 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
         String token = sendLoginRequest(adminRequest);
 
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(TOKEN_NAME, token)
                 .when().post("/logout")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .cookie("token", Matchers.emptyString());
+                .cookie(TOKEN_NAME, Matchers.emptyString());
     }
 }

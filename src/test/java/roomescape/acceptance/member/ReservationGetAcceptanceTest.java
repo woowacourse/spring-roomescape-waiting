@@ -6,6 +6,7 @@ import static roomescape.acceptance.Fixture.customerToken;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_2;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_3;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
 
     private ValidatableResponse sendGetRequest() {
         return RestAssured.given().log().ifValidationFails()
-                .cookie("token", customerToken)
+                .cookie(TOKEN_NAME, customerToken)
                 .when().get("/reservations/my")
                 .then().log().all();
     }

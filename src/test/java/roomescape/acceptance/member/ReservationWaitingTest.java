@@ -2,6 +2,8 @@ package roomescape.acceptance.member;
 
 import static org.hamcrest.Matchers.containsString;
 
+import static roomescape.util.CookieUtil.TOKEN_NAME;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
 
         // 추가
         ReservationWaitingResponse createdWaiting = RestAssured.given().log().all()
-                .cookie("token", Fixture.customerToken)
+                .cookie(TOKEN_NAME, Fixture.customerToken)
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations/waitings")
@@ -44,7 +46,7 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
         // 조회
         TypeRef<List<MyReservationResponse>> reservationResponse = new TypeRef<>() {};
         RestAssured.given().log().all()
-                .cookie("token", Fixture.customerToken)
+                .cookie(TOKEN_NAME, Fixture.customerToken)
                 .contentType(ContentType.JSON)
                 .when().get("/reservations/my")
                 .then().log().all()
@@ -53,7 +55,7 @@ public class ReservationWaitingTest extends BaseAcceptanceTest {
 
         // 취소
         RestAssured.given().log().all()
-                .cookie("token", Fixture.customerToken)
+                .cookie(TOKEN_NAME, Fixture.customerToken)
                 .when().delete("/reservations/waitings/" + createdWaiting.id())
                 .then().log().all()
                 .statusCode(HttpStatus.SC_NO_CONTENT);

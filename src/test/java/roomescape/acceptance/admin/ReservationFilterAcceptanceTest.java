@@ -7,6 +7,7 @@ import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_2;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_3;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_4;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.List;
 
@@ -95,7 +96,7 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
         };
 
         return RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/admin/reservations/search" + path)
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.adminToken;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_2;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
         };
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -51,7 +52,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
         RestAssured.given().log().ifValidationFails()
                 .contentType(ContentType.JSON)
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .body(themeRequest)
                 .when().post("/admin/themes")
                 .then().log().all()
@@ -105,7 +106,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
         private ValidatableResponse sendDeleteRequest(long id) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .when().delete("/admin/themes/" + id)
                     .then().log().all();
         }

@@ -9,7 +9,7 @@ import roomescape.exception.TokenValidationFailureException;
 
 public class CookieUtil {
 
-    private static final String TOKEN_NAME = "token";
+    public static final String TOKEN_NAME = "token";
 
     protected CookieUtil() {}
 

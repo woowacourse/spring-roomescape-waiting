@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.adminToken;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
 import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_2;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -35,7 +36,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
         };
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -49,7 +50,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 
         RestAssured.given().log().ifValidationFails()
                 .contentType(ContentType.JSON)
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .body(reservationTimeRequest)
                 .when().post("/admin/times")
                 .then().log().all()
@@ -103,7 +104,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 
         private ValidatableResponse sendDeleteRequest(long existReservationTimeId) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .when().delete("/admin/times/" + existReservationTimeId)
                     .then().log().all();
         }

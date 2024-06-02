@@ -1,6 +1,7 @@
 package roomescape.acceptance.admin;
 
 import static roomescape.acceptance.Fixture.adminToken;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ class MemberAcceptanceTest extends BaseAcceptanceTest {
         };
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
