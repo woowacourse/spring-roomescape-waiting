@@ -3,19 +3,23 @@ package roomescape.domain.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
+@Transactional
 @SpringBootTest
 class ReservationRepositoryTest {
     @Autowired
@@ -27,14 +31,6 @@ class ReservationRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAll();
-        themeRepository.deleteAll();
-        memberRepository.deleteAll();
-        reservationTimeRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("예약에 대한 영속성을 저장한다")
     void save_ShouldStorePersistence() {
@@ -43,7 +39,8 @@ class ReservationRepositoryTest {
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         Theme theme = new Theme("name", "desc", "thumb");
         Member member = new Member("name", "aa@aa.aa", "aa");
-        Reservation reservation = new Reservation(date, time, theme, member);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
+        Reservation reservation = new Reservation(date, time, theme, status, member);
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
@@ -65,9 +62,10 @@ class ReservationRepositoryTest {
         Member member = new Member("memberName", "email", "password");
         ReservationTime savedTime = reservationTimeRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
         Member savedMember = memberRepository.save(member);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, savedMember));
+                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, status, member));
 
         //when &then
         Assertions.assertThat(reservationRepository.findById(savedReservation.getId()))
@@ -84,11 +82,12 @@ class ReservationRepositoryTest {
         createReservation(2);
         createReservation(3);
 
+        Theme theme = themeRepository.findById(themeId).orElseThrow();
         // when
-        List<Long> timeIds = reservationRepository.findTimeIdByDateAndThemeId(LocalDate.of(2023, 1, 2), themeId);
+        List<Reservation> reservations = reservationRepository.findByDateAndTheme(LocalDate.of(2023, 1, 2), theme);
 
         // then
-        Assertions.assertThat(timeIds)
+        Assertions.assertThat(reservations)
                 .hasSize(1);
 
     }
@@ -101,10 +100,11 @@ class ReservationRepositoryTest {
         Theme theme = new Theme("name", "description", "thumbnail");
         ReservationTime savedTime = reservationTimeRepository.save(time);
         Theme savedTheme = themeRepository.save(theme);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
         Member member = new Member("a", "b", "c");
         memberRepository.save(member);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, member));
+                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, status, member));
 
         // when
         reservationRepository.delete(savedReservation);
@@ -125,31 +125,35 @@ class ReservationRepositoryTest {
 
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         ReservationTime savedTime = reservationTimeRepository.save(time);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
+        ReservationStatus status2 = new ReservationStatus(Status.WAITING, 1);
 
         Member member1 = new Member("name1", "email", "password");
         Member savedMember1 = memberRepository.save(member1);
-        Reservation reservation1 = new Reservation(LocalDate.of(2023, 1, 1), savedTime, savedTheme1,
+        Reservation reservation1 = new Reservation(LocalDate.of(2023, 1, 1), savedTime, savedTheme1, status,
                 savedMember1);
-        Reservation reservation2 = new Reservation(LocalDate.of(2023, 1, 2), savedTime, savedTheme2,
+        Reservation reservation2 = new Reservation(LocalDate.of(2023, 1, 2), savedTime, savedTheme2, status2,
                 savedMember1);
 
         Reservation savedReservation1 = reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
 
         // when
-        List<Reservation> findReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
+        Optional<Reservation> findReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
                 LocalDate.of(2023, 1, 1), savedTime.getId(), savedTheme1.getId());
 
         // then
         Assertions.assertThat(findReservations)
-                .containsExactlyInAnyOrder(savedReservation1);
+                .hasValue(savedReservation1);
     }
 
     private Long createReservation(int dayOfMonth) {
         Theme theme = new Theme("name", "desc", "thumb");
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         Member member = new Member("name", "aa@aa.aa", "aa");
-        Reservation reservation = new Reservation(LocalDate.of(2023, 1, dayOfMonth), time, theme, member);
+        ReservationStatus status = new ReservationStatus(Status.RESERVED, 0);
+
+        Reservation reservation = new Reservation(LocalDate.of(2023, 1, dayOfMonth), time, theme, status, member);
 
         themeRepository.save(theme);
         reservationTimeRepository.save(time);

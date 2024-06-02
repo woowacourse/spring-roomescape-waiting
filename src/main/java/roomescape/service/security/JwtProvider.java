@@ -58,5 +58,4 @@ public class JwtProvider {
             throw new AuthenticationFailureException();
         }
     }
-
 }

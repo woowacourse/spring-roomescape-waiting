@@ -1,23 +1,19 @@
 package roomescape.domain.repository;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 
+@Transactional
 @SpringBootTest
 class MemberRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
-
-    @AfterEach
-    void tearDown() {
-        memberRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("회원 정보를 영속화한다")
@@ -58,12 +54,11 @@ class MemberRepositoryTest {
     @DisplayName("영속화 된 회원 정보를 email과 password로 불러온다")
     void findByEmailAndPassword_ShouldGetPersistenceByEmailAndPassword() {
         // given
-        Member member = new Member("name", "aa@aa.aa", "aa");
+        Member member = new Member("name", "bbx@aa.aa", "aa");
         memberRepository.save(member);
 
         // when & then
-        Assertions.assertThat(
-                        memberRepository.findByEmailAndPassword(member.getEmail(), member.getPassword()))
+        Assertions.assertThat(memberRepository.findByEmailAndPassword(member.getEmail(), member.getPassword()))
                 .isPresent()
                 .hasValue(member);
     }

@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import static roomescape.domain.ReservationStatus.RESERVE_NUMBER;
+import static roomescape.domain.ReservationStatus.Status.RESERVED;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.policy.CurrentDueTimePolicy;
@@ -16,16 +20,19 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.member.AuthenticationFailureException;
+import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
-import roomescape.web.dto.request.reservation.ReservationRequest;
-import roomescape.web.dto.request.reservation.ReservationSearchCond;
-import roomescape.web.dto.response.reservation.ReservationResponse;
+import roomescape.service.dto.request.reservation.ReservationRequest;
+import roomescape.service.dto.request.reservation.ReservationSearchCond;
+import roomescape.service.dto.response.reservation.ReservationResponse;
+import roomescape.service.dto.response.wait.AdminReservationResponse;
+import roomescape.service.dto.response.wait.ReservationWithStatusResponse;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -34,59 +41,103 @@ public class ReservationService {
 
     public List<ReservationResponse> findAllReservation() {
         List<Reservation> reservations = reservationRepository.findAll();
+
         return reservations.stream()
-                .map(ReservationResponse::from)
+                .map(ReservationResponse::new)
                 .toList();
     }
 
     public List<ReservationResponse> findAllReservationByConditions(ReservationSearchCond cond) {
-        return reservationRepository.findByPeriodAndMemberAndTheme(cond.start(), cond.end(), cond.memberName(),
-                        cond.themeName())
+        return reservationRepository.findByPeriodAndThemeAndMember(
+                        cond.start(),
+                        cond.end(),
+                        cond.memberName(),
+                        cond.themeName(),
+                        RESERVED)
                 .stream()
-                .map(ReservationResponse::from)
+                .map(ReservationResponse::new)
                 .toList();
     }
 
     @Transactional
     public ReservationResponse saveReservation(ReservationRequest request) {
-        ReservationTime time = findReservationTimeById(request.timeId());
-        Theme theme = findThemeById(request.themeId());
+        Reservation reservation = createReservation(request);
+        Reservation verifiedReservation = verifyReservation(reservation);
+        reservationRepository.save(verifiedReservation);
+
+        return new ReservationResponse(verifiedReservation);
+    }
+
+    private Reservation createReservation(ReservationRequest request) {
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(NotFoundTimeException::new);
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(NotFoundThemeException::new);
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(AuthenticationFailureException::new);
+        Long nextPriority = reservationRepository.findHighestPriority(request.date(), theme, time)
+                .map(Reservation::getNextPriority)
+                .orElse(RESERVE_NUMBER);
 
-        Reservation verifiedReservation = verifyReservation(request, time, theme, member);
-        Reservation savedReservation = reservationRepository.save(verifiedReservation);
-        return ReservationResponse.from(savedReservation);
+        ReservationStatus status = ReservationStatus.from(nextPriority);
+        return new Reservation(request.date(), time, theme, status, member);
     }
 
-    private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(NotFoundThemeException::new);
-    }
-
-    private ReservationTime findReservationTimeById(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(NotFoundTimeException::new);
-    }
-
-    private Reservation verifyReservation(ReservationRequest request, ReservationTime time, Theme theme,
-                                          Member member) {
-        Reservation reservation = request.toReservation(time, theme, member);
-        List<Reservation> findReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId());
+    private Reservation verifyReservation(Reservation reservation) {
         reservation.validateDateTimeReservation(new CurrentDueTimePolicy());
-        reservation.validateDuplicateDateTime(findReservations);
+        reservationRepository.findByDateAndTimeAndThemeAndMember(
+                        reservation.getDate(),
+                        reservation.getTime(),
+                        reservation.getTheme(),
+                        reservation.getMember())
+                .ifPresent(v -> {
+                    throw new DuplicatedReservationException();
+                });
         return reservation;
     }
 
-    @Transactional
-    public void deleteReservation(Long id) {
-        Reservation reservation = findReservationById(id);
-        reservationRepository.delete(reservation);
+    public List<AdminReservationResponse> findAllWaits() {
+        return reservationRepository.findAll()
+                .stream()
+                .map(AdminReservationResponse::new)
+                .toList();
     }
 
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
+
+    @Transactional
+    public void deleteReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(NotFoundReservationException::new);
+
+        reservationRepository.delete(reservation);
+        proceedAutoScheduling(reservation);
+    }
+
+    private void proceedAutoScheduling(Reservation reservation) {
+        if (reservation.isReserved()) {
+            reservationRepository.findTopByDateAndThemeAndTimeOrderByStatusPriorityAsc(
+                            reservation.getDate(),
+                            reservation.getTheme(),
+                            reservation.getTime())
+                    .ifPresentOrElse(
+                            Reservation::reserve,
+                            () -> reservationRepository.delete(reservation));
+        }
+    }
+
+    public List<ReservationWithStatusResponse> findAllByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId)
+                .stream()
+                .map(reservation -> ReservationWithStatusResponse.from(reservation, findRank(reservation)))
+                .toList();
+    }
+
+    private long findRank(Reservation reservation) {
+        return reservationRepository.countByDateAndThemeAndTimeAndStatusPriorityIsLessThan(
+                reservation.getDate(),
+                reservation.getTheme(),
+                reservation.getTime(),
+                reservation.getPriority());
+
     }
 }

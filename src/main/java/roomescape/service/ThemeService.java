@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,12 +15,12 @@ import roomescape.domain.policy.WeeklyRankingPolicy;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.theme.ReservationReferencedThemeException;
-import roomescape.web.dto.request.theme.ThemeRequest;
-import roomescape.web.dto.response.theme.ThemeResponse;
+import roomescape.service.dto.request.theme.ThemeRequest;
+import roomescape.service.dto.response.theme.ThemeResponse;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ThemeService {
     private final ThemeRepository themeRepository;
 
@@ -43,24 +44,23 @@ public class ThemeService {
         LocalDate endDate = rankingPolicy.getEndDateAsString();
         int limit = rankingPolicy.exposureSize();
 
-        List<Theme> themes = themeRepository.findThemeByPeriodWithLimit(startDate, endDate, limit);
+        PageRequest pageRequest = PageRequest.of(0, limit);
+        List<Theme> themes = themeRepository.findByPeriodWithLimit(startDate, endDate, pageRequest);
+
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     @Transactional
-    public void deleteTheme(Long id) {
-        Theme theme = findThemeById(id);
+    public void deleteTheme(Long themeId) {
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(NotFoundThemeException::new);
+
         try {
             themeRepository.delete(theme);
         } catch (DataIntegrityViolationException e) {
             throw new ReservationReferencedThemeException();
         }
-    }
-
-    private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(NotFoundThemeException::new);
     }
 }

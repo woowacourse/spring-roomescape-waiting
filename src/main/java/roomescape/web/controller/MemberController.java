@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.MemberService;
-import roomescape.web.dto.request.member.SignupRequest;
-import roomescape.web.dto.response.member.MemberResponse;
+import roomescape.service.dto.request.member.SignupRequest;
+import roomescape.service.dto.response.member.MemberResponse;
 
 @RestController
 @RequestMapping("/members")
@@ -38,8 +38,8 @@ public class MemberController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> withdrawal(@PathVariable("id") String id) {
-        memberService.withdrawal(Long.valueOf(id));
+    public ResponseEntity<Void> deleteMember(@PathVariable("id") String id) {
+        memberService.deleteMember(Long.valueOf(id));
         return ResponseEntity.noContent()
                 .build();
     }

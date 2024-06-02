@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ReservationTimeService;
-import roomescape.web.dto.request.time.ReservationTimeRequest;
-import roomescape.web.dto.response.time.AvailableReservationTimeResponse;
-import roomescape.web.dto.response.time.ReservationTimeResponse;
+import roomescape.service.dto.request.time.ReservationTimeRequest;
+import roomescape.service.dto.response.time.AvailableReservationTimeResponse;
+import roomescape.service.dto.response.time.ReservationTimeResponse;
 
 @RestController
 @RequestMapping("/times")
@@ -49,9 +49,9 @@ public class ReservationTimeController {
         return ResponseEntity.created(URI.create("/times/" + response.id())).body(response);
     }
 
-    @DeleteMapping("/{time_id}")
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable(value = "time_id") Long id) {
-        reservationTimeService.deleteReservationTime(id);
+    @DeleteMapping("/{timeId}")
+    public ResponseEntity<Void> deleteReservationTime(@PathVariable("timeId") Long timeId) {
+        reservationTimeService.deleteReservationTime(timeId);
         return ResponseEntity.noContent().build();
     }
 }

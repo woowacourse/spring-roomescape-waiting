@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.member.DuplicatedEmailException;
-import roomescape.web.dto.request.member.SignupRequest;
-import roomescape.web.dto.response.member.MemberResponse;
+import roomescape.service.dto.request.member.SignupRequest;
+import roomescape.service.dto.response.member.MemberResponse;
 
 @Transactional
 @SpringBootTest
@@ -70,13 +70,13 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("회원정보를 삭제할 수 있다")
-    void withdrawal_ShouldRemovePersistence() {
+    void deleteMember_ShouldRemovePersistence() {
         // given
         Member member = new Member("name", "email", "password");
         Member savedMember = memberRepository.save(member);
 
         // when
-        memberService.withdrawal(savedMember.getId());
+        memberService.deleteMember(savedMember.getId());
 
         // then
         Assertions.assertThat(memberRepository.findAll()).isEmpty();

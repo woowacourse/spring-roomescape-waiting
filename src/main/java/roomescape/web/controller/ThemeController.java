@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ThemeService;
-import roomescape.web.dto.request.theme.ThemeRequest;
-import roomescape.web.dto.response.theme.ThemeResponse;
+import roomescape.service.dto.request.theme.ThemeRequest;
+import roomescape.service.dto.response.theme.ThemeResponse;
 
 @RestController
 @RequestMapping("/themes")
@@ -43,9 +43,9 @@ public class ThemeController {
         return ResponseEntity.created(URI.create("/themes/" + response.id())).body(response);
     }
 
-    @DeleteMapping("/{theme_id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable(value = "theme_id") Long id) {
-        themeService.deleteTheme(id);
+    @DeleteMapping("/{themeId}")
+    public ResponseEntity<Void> deleteTheme(@PathVariable("themeId") Long themeId) {
+        themeService.deleteTheme(themeId);
         return ResponseEntity.noContent().build();
     }
 }

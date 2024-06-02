@@ -3,23 +3,19 @@ package roomescape.domain.repository;
 import java.time.LocalTime;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.ReservationTime;
 
+@Transactional
 @SpringBootTest
 class ReservationTimeRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
-    @AfterEach
-    void tearDown() {
-        reservationTimeRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("예약 시간을 저장한다")

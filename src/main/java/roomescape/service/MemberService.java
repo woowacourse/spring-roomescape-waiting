@@ -8,15 +8,17 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import roomescape.domain.Member;
 import roomescape.domain.repository.MemberRepository;
+import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.member.DuplicatedEmailException;
-import roomescape.web.dto.request.member.SignupRequest;
-import roomescape.web.dto.response.member.MemberResponse;
+import roomescape.service.dto.request.member.SignupRequest;
+import roomescape.service.dto.response.member.MemberResponse;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<MemberResponse> findAllMember() {
         return memberRepository.findAll()
@@ -39,10 +41,10 @@ public class MemberService {
     }
 
     @Transactional
-    public void withdrawal(Long memberId) {
+    public void deleteMember(Long memberId) {
         Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(IllegalArgumentException::new);
-
+        reservationRepository.deleteByMember(findMember);
         memberRepository.delete(findMember);
     }
 }

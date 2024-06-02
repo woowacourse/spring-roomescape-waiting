@@ -1,6 +1,5 @@
 package roomescape.exception;
 
-
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;

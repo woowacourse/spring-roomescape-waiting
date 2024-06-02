@@ -2,46 +2,24 @@ package roomescape.acceptance;
 
 import static org.hamcrest.Matchers.is;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class TimeAcceptanceTest {
-    @LocalServerPort
-    private int port;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @AfterEach
-    void tearDown() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART");
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART");
-    }
+class TimeAcceptanceTest extends AcceptanceFixture {
 
     @Test
     @DisplayName("예약 시간 생성 API")
@@ -121,22 +99,20 @@ class TimeAcceptanceTest {
                 .body("size()", is(1));
     }
 
-    // GET localhost:8080/times/available?date=2024-10-11&theme-id=1
     @Test
     @DisplayName("예약 가능 시간 조회 API")
     void inquire_available_time_API() {
         // given
-        jdbcTemplate.update("INSERT INTO member (name, email, password, role) VALUES (?,?,?,?)", "aa", "aa@aa.aa", "aa",
-                "NORMAL");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "01:00");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "02:00");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "03:00");
-        jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES (?, ?, ?)", "n", "d", "t");
+        ReservationTime time1 = timeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
+        ReservationTime time2 = timeRepository.save(new ReservationTime(LocalTime.of(2, 0)));
+        ReservationTime time3 = timeRepository.save(new ReservationTime(LocalTime.of(3, 0)));
+        Member member = memberRepository.save(new Member("aa", "aa@aa.aa", "aa"));
+        Theme theme = themeRepository.save(new Theme("n", "d", "t"));
+        ReservationStatus status = new ReservationStatus(Status.WAITING, 0);
+        ReservationStatus status2 = new ReservationStatus(Status.RESERVED, 1);
 
-        jdbcTemplate.update("INSERT INTO reservation(date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                "2023-12-11", "1", "1", "1");
-        jdbcTemplate.update("INSERT INTO reservation(date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                "2023-12-11", "2", "1", "1");
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 11), time1, theme, status, member));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 12), time2, theme, status2, member));
 
         // when
         RestAssured
@@ -144,7 +120,7 @@ class TimeAcceptanceTest {
                 .when().get("/times/available?date=2023-12-11&theme-id=1")
                 .then().statusCode(HttpStatus.SC_OK)
                 .body("[0].alreadyBooked", is(true))
-                .body("[1].alreadyBooked", is(true))
+                .body("[1].alreadyBooked", is(false))
                 .body("[2].alreadyBooked", is(false))
                 .log().all();
     }

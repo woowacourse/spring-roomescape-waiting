@@ -9,21 +9,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
+import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.time.DuplicatedTimeException;
 import roomescape.exception.time.NotFoundTimeException;
 import roomescape.exception.time.ReservationReferencedTimeException;
-import roomescape.web.dto.request.time.ReservationTimeRequest;
-import roomescape.web.dto.response.time.AvailableReservationTimeResponse;
-import roomescape.web.dto.response.time.ReservationTimeResponse;
+import roomescape.service.dto.request.time.ReservationTimeRequest;
+import roomescape.service.dto.response.time.AvailableReservationTimeResponse;
+import roomescape.service.dto.response.time.ReservationTimeResponse;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
 
     @Transactional
     public ReservationTimeResponse saveReservationTime(ReservationTimeRequest request) {
@@ -43,7 +46,14 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> findAllAvailableReservationTime(LocalDate date, Long themeId) {
-        List<Long> unavailableTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(NotFoundTimeException::new);
+
+        List<Long> unavailableTimeIds = reservationRepository.findByDateAndTheme(date, theme)
+                .stream()
+                .map(reservation -> reservation.getTime().getId())
+                .toList();
+
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(time -> toAvailableReservationTimeResponse(time, unavailableTimeIds))

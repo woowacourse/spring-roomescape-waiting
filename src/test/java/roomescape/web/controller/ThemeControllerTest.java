@@ -22,9 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import roomescape.service.AuthService;
 import roomescape.service.ThemeService;
+import roomescape.service.dto.request.theme.ThemeRequest;
+import roomescape.service.dto.response.theme.ThemeResponse;
 import roomescape.service.security.JwtProvider;
-import roomescape.web.dto.request.theme.ThemeRequest;
-import roomescape.web.dto.response.theme.ThemeResponse;
 
 @WebMvcTest(controllers = ThemeController.class)
 class ThemeControllerTest {

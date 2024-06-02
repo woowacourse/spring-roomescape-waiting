@@ -10,8 +10,8 @@ import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.member.AuthenticationFailureException;
+import roomescape.service.dto.request.member.LoginRequest;
 import roomescape.service.security.JwtProvider;
-import roomescape.web.dto.request.member.LoginRequest;
 
 @Service
 @Transactional(readOnly = true)

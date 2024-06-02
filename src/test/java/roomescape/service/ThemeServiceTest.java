@@ -13,13 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatus.Status;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
-import roomescape.web.dto.response.theme.ThemeResponse;
+import roomescape.service.dto.response.theme.ThemeResponse;
 
 @Transactional
 @SpringBootTest
@@ -44,15 +46,21 @@ class ThemeServiceTest {
         Theme savedTheme3 = themeRepository.save(new Theme("name3", "description", "thumbnail"));
 
         ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
+        ReservationStatus status1 = new ReservationStatus(Status.RESERVED, 0);
+        ReservationStatus status2 = new ReservationStatus(Status.WAITING, 1);
+        ReservationStatus status3 = new ReservationStatus(Status.WAITING, 2);
 
-        creatReservation(1, savedReservationTime, savedTheme1);
-        creatReservation(2, savedReservationTime, savedTheme1);
-        creatReservation(3, savedReservationTime, savedTheme1);
+        Member member = new Member("aa", "aa@aa.aa", "aa");
+        memberRepository.save(member);
 
-        creatReservation(1, savedReservationTime, savedTheme2);
-        creatReservation(2, savedReservationTime, savedTheme2);
+        creatReservation(1, savedReservationTime, savedTheme1, status1, member);
+        creatReservation(2, savedReservationTime, savedTheme1, status1, member);
+        creatReservation(3, savedReservationTime, savedTheme1, status1, member);
 
-        creatReservation(1, savedReservationTime, savedTheme3);
+        creatReservation(1, savedReservationTime, savedTheme2, status2, member);
+        creatReservation(2, savedReservationTime, savedTheme2, status2, member);
+
+        creatReservation(1, savedReservationTime, savedTheme3, status3, member);
 
         // when
         List<ThemeResponse> popularTheme = themeService.findAllPopularTheme();
@@ -82,17 +90,32 @@ class ThemeServiceTest {
 
         ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
 
-        creatReservation(1, savedReservationTime, savedTheme1);
-        creatReservation(1, savedReservationTime, savedTheme2);
-        creatReservation(1, savedReservationTime, savedTheme3);
-        creatReservation(1, savedReservationTime, savedTheme4);
-        creatReservation(1, savedReservationTime, savedTheme5);
-        creatReservation(1, savedReservationTime, savedTheme6);
-        creatReservation(1, savedReservationTime, savedTheme7);
-        creatReservation(1, savedReservationTime, savedTheme8);
-        creatReservation(1, savedReservationTime, savedTheme9);
-        creatReservation(1, savedReservationTime, savedTheme10);
-        creatReservation(1, savedReservationTime, savedTheme11);
+        Member member = new Member("aa", "aa@aa.aa", "aa");
+        memberRepository.save(member);
+
+        ReservationStatus status1 = new ReservationStatus(Status.RESERVED, 0);
+        ReservationStatus status2 = new ReservationStatus(Status.WAITING, 1);
+        ReservationStatus status3 = new ReservationStatus(Status.WAITING, 2);
+        ReservationStatus status4 = new ReservationStatus(Status.WAITING, 3);
+        ReservationStatus status5 = new ReservationStatus(Status.WAITING, 4);
+        ReservationStatus status6 = new ReservationStatus(Status.WAITING, 5);
+        ReservationStatus status7 = new ReservationStatus(Status.WAITING, 6);
+        ReservationStatus status8 = new ReservationStatus(Status.WAITING, 7);
+        ReservationStatus status9 = new ReservationStatus(Status.WAITING, 8);
+        ReservationStatus status10 = new ReservationStatus(Status.WAITING, 9);
+        ReservationStatus status11 = new ReservationStatus(Status.WAITING, 10);
+
+        creatReservation(1, savedReservationTime, savedTheme1, status1, member);
+        creatReservation(1, savedReservationTime, savedTheme2, status2, member);
+        creatReservation(1, savedReservationTime, savedTheme3, status3, member);
+        creatReservation(1, savedReservationTime, savedTheme4, status4, member);
+        creatReservation(1, savedReservationTime, savedTheme5, status5, member);
+        creatReservation(1, savedReservationTime, savedTheme6, status6, member);
+        creatReservation(1, savedReservationTime, savedTheme7, status7, member);
+        creatReservation(1, savedReservationTime, savedTheme8, status8, member);
+        creatReservation(1, savedReservationTime, savedTheme9, status9, member);
+        creatReservation(1, savedReservationTime, savedTheme10, status10, member);
+        creatReservation(1, savedReservationTime, savedTheme11, status11, member);
 
         // when
         List<ThemeResponse> popularTheme = themeService.findAllPopularTheme();
@@ -102,9 +125,12 @@ class ThemeServiceTest {
                 .hasSize(10);
     }
 
-    private void creatReservation(int day, ReservationTime reservationTime, Theme theme) {
-        Member savedMember = memberRepository.save(new Member("a", "b", "C"));
+    private void creatReservation(int day,
+                                  ReservationTime reservationTime,
+                                  Theme theme,
+                                  ReservationStatus status,
+                                  Member member) {
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(day), reservationTime, theme, savedMember));
+                new Reservation(LocalDate.now().minusDays(day), reservationTime, theme, status, member));
     }
 }

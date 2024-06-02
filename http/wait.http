@@ -1,0 +1,9 @@
+### 예약 대기 생성
+POST http://localhost:8080/reservation-wait
+Content-Type: application/json
+
+{
+  "date": "2024-10-11",
+  "themeId": 1,
+  "timeId": 1
+}
