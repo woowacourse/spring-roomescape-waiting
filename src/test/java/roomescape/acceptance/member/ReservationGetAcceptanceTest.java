@@ -2,10 +2,10 @@ package roomescape.acceptance.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_2;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_3;
 import static roomescape.acceptance.Fixture.customerToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_2;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_3;
 import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.List;

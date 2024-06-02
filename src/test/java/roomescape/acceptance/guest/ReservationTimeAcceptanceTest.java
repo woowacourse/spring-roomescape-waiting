@@ -1,9 +1,9 @@
 package roomescape.acceptance.guest;
 
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_2;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_3;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_2;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_3;
 
 import java.time.LocalDate;
 import java.util.List;
