@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.CANNOT_DELETE_TIME_REFERENCED_BY_RESERVATION;
+import static roomescape.exception.RoomescapeExceptionCode.TIME_NOT_FOUND;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -10,8 +13,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.dto.AvailableReservationTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
-import roomescape.exception.OperationNotAllowedException;
-import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
@@ -46,7 +48,7 @@ public class ReservationTimeService {
     public void deleteReservationTimeById(Long id) {
         boolean exist = reservationRepository.existsByReservationTimeId(id);
         if (exist) {
-            throw new OperationNotAllowedException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
+            throw new RoomescapeException(CANNOT_DELETE_TIME_REFERENCED_BY_RESERVATION);
         }
         reservationTimeRepository.delete(getReservationTime(id));
     }
@@ -67,6 +69,6 @@ public class ReservationTimeService {
 
     private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(TIME_NOT_FOUND));
     }
 }

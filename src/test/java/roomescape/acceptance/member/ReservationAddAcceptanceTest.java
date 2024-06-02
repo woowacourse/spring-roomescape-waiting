@@ -2,11 +2,12 @@ package roomescape.acceptance.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_1;
 import static roomescape.acceptance.Fixture.PRE_INSERTED_THEME_1;
 import static roomescape.acceptance.Fixture.customerToken;
+import static roomescape.exception.RoomescapeExceptionCode.INVALID_DATETIME;
+import static roomescape.exception.RoomescapeExceptionCode.RESERVATION_ALREADY_EXISTS;
 import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.time.LocalDate;
@@ -24,7 +25,7 @@ import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.exception.CustomExceptionResponse;
+import roomescape.exception.ExceptionResponse;
 
 @DisplayName("고객이 예약을 추가한다.")
 class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
@@ -49,14 +50,11 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
                 LocalDate.now().minusDays(1)
         );
 
-        CustomExceptionResponse response = sendPostRequest(reservationForPast)
+        ExceptionResponse response = sendPostRequest(reservationForPast)
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .extract().as(CustomExceptionResponse.class);
+                .extract().as(ExceptionResponse.class);
 
-        assertAll(
-                () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
-                () -> assertThat(response.detail()).contains("지나간 시간에 대한 예약은 할 수 없습니다.")
-        );
+        assertThat(response.message()).contains(INVALID_DATETIME.message());
     }
 
     @DisplayName("예외 발생 - 이미 있는 예약을 추가한다.")
@@ -70,14 +68,10 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
                 DynamicTest.dynamicTest("예약을 추가한다", () -> sendPostRequest(requestBody)),
 
                 DynamicTest.dynamicTest("동일한 예약을 추가한다", () -> {
-                            CustomExceptionResponse response = sendPostRequest(requestBody)
+                            ExceptionResponse response = sendPostRequest(requestBody)
                                     .statusCode(HttpStatus.BAD_REQUEST.value())
-                                    .extract().as(CustomExceptionResponse.class);
-                            assertAll(
-                                    () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
-                                    () -> assertThat(response.detail()).contains("예약이 이미 존재합니다.")
-                            );
-
+                                    .extract().as(ExceptionResponse.class);
+                            assertThat(response.message()).contains(RESERVATION_ALREADY_EXISTS.message());
                         }
                 )
         );

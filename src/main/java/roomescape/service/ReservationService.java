@@ -1,5 +1,12 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.INVALID_DATETIME;
+import static roomescape.exception.RoomescapeExceptionCode.MEMBER_NOT_FOUND;
+import static roomescape.exception.RoomescapeExceptionCode.RESERVATION_ALREADY_EXISTS;
+import static roomescape.exception.RoomescapeExceptionCode.RESERVATION_NOT_FOUND;
+import static roomescape.exception.RoomescapeExceptionCode.THEME_NOT_FOUND;
+import static roomescape.exception.RoomescapeExceptionCode.TIME_NOT_FOUND;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -14,8 +21,7 @@ import roomescape.domain.Theme;
 import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.exception.OperationNotAllowedException;
-import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -101,22 +107,22 @@ public class ReservationService {
 
     private ReservationTime getReservationTimeById(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(TIME_NOT_FOUND));
     }
 
     private Theme getThemeById(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 테마를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(THEME_NOT_FOUND));
     }
 
     private Member getMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(MEMBER_NOT_FOUND));
     }
 
     private Reservation getReservationById(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
     }
 
     private void validateRequest(ReservationRequest request, ReservationTime reservationTime) {
@@ -126,14 +132,14 @@ public class ReservationService {
 
     private void validateNotDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new OperationNotAllowedException("예약이 이미 존재합니다.");
+            throw new RoomescapeException(RESERVATION_ALREADY_EXISTS);
         }
     }
 
     private void validateNotPast(LocalDate date, LocalTime time) {
         LocalDateTime reservationDateTime = date.atTime(time);
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            throw new OperationNotAllowedException("지나간 시간에 대한 예약은 할 수 없습니다.");
+            throw new RoomescapeException(INVALID_DATETIME);
         }
     }
 

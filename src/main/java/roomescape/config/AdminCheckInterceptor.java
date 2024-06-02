@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import roomescape.domain.Member;
-import roomescape.exception.BaseException;
+import roomescape.exception.RoomescapeException;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 import roomescape.util.JwtProvider;
@@ -41,7 +41,7 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
                 return false;
             }
             return true;
-        } catch (BaseException e) {
+        } catch (RoomescapeException e) {
             response.sendRedirect("/");
             return false;
         }

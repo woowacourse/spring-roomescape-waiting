@@ -1,11 +1,13 @@
 package roomescape.util;
 
+import static roomescape.exception.RoomescapeExceptionCode.INVALID_TOKEN;
+
 import java.util.Arrays;
 import java.util.Objects;
 
 import jakarta.servlet.http.Cookie;
 
-import roomescape.exception.TokenValidationFailureException;
+import roomescape.exception.RoomescapeException;
 
 public class CookieUtil {
 
@@ -22,13 +24,13 @@ public class CookieUtil {
 
     public static String extractToken(Cookie[] cookies) {
         if (cookies == null) {
-            throw new TokenValidationFailureException();
+            throw new RoomescapeException(INVALID_TOKEN);
         }
         return Arrays.stream(cookies)
                 .filter(cookie -> Objects.equals(TOKEN_NAME, cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst()
-                .orElseThrow(TokenValidationFailureException::new);
+                .orElseThrow(() -> new RoomescapeException(INVALID_TOKEN));
     }
 
     public static Cookie expired() {

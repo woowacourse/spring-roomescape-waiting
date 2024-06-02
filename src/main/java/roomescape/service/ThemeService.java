@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.CANNOT_DELETE_THEME_REFERENCED_BY_RESERVATION;
+import static roomescape.exception.RoomescapeExceptionCode.THEME_NOT_FOUND;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -9,8 +12,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.dto.ThemeRequest;
 import roomescape.dto.ThemeResponse;
-import roomescape.exception.OperationNotAllowedException;
-import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
@@ -45,7 +47,7 @@ public class ThemeService {
     public void deleteThemeById(Long id) {
         boolean exist = reservationRepository.existsByThemeId(id);
         if (exist) {
-            throw new OperationNotAllowedException("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.");
+            throw new RoomescapeException(CANNOT_DELETE_THEME_REFERENCED_BY_RESERVATION);
         }
         themeRepository.delete(getTheme(id));
     }
@@ -65,6 +67,6 @@ public class ThemeService {
 
     private Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 테마를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(THEME_NOT_FOUND));
     }
 }

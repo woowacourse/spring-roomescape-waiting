@@ -7,7 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import roomescape.exception.BaseException;
+import roomescape.exception.RoomescapeException;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 import roomescape.util.JwtProvider;
@@ -34,7 +34,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             long memberId = jwtProvider.getMemberIdFrom(token);
             memberService.getMemberById(memberId);
             return true;
-        } catch (BaseException e) {
+        } catch (RoomescapeException e) {
             response.sendRedirect("/login");
             return false;
         }

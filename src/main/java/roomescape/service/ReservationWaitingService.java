@@ -1,5 +1,10 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.CANNOT_WAIT_FOR_MY_RESERVATION;
+import static roomescape.exception.RoomescapeExceptionCode.MEMBER_NOT_FOUND;
+import static roomescape.exception.RoomescapeExceptionCode.RESERVATION_NOT_FOUND;
+import static roomescape.exception.RoomescapeExceptionCode.WAITING_DUPLICATED;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -12,8 +17,7 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
-import roomescape.exception.OperationNotAllowedException;
-import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
@@ -70,25 +74,23 @@ public class ReservationWaitingService {
 
     private Member getMemberById(long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+                .orElseThrow(() -> new RoomescapeException(MEMBER_NOT_FOUND));
     }
 
     private Reservation getReservationByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "%s, timeId=%d, themeId=%d에 해당하는 예약이 존재하지 않습니다.".formatted(date, timeId, themeId)
-                ));
+                .orElseThrow(() -> new RoomescapeException(RESERVATION_NOT_FOUND));
     }
 
     private void validateDifferentMember(Member member1, Member member2) {
         if (Objects.equals(member1, member2)) {
-            throw new OperationNotAllowedException("내 예약에 대기할 수 없습니다.");
+            throw new RoomescapeException(CANNOT_WAIT_FOR_MY_RESERVATION);
         }
     }
 
     private void validateWaitingNotExists(Member member, Reservation reservation) {
         if (existsByMemberAndReservation(member, reservation)) {
-            throw new OperationNotAllowedException("중복된 예약 대기를 신청할 수 없습니다.");
+            throw new RoomescapeException(WAITING_DUPLICATED);
         }
     }
 }

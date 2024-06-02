@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.MEMBER_NOT_FOUND;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -7,7 +9,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.dto.LoginRequest;
 import roomescape.dto.MemberResponse;
-import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.util.JwtProvider;
 
@@ -31,12 +33,12 @@ public class MemberService {
 
     private Member getMemberByEmailAndPassword(String email, String password) {
         return memberRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new ResourceNotFoundException("일치하는 이메일과 비밀번호가 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(MEMBER_NOT_FOUND));
     }
 
     public Member getMemberById(long memberId) {
         return memberRepository.findById(memberId).orElseThrow(
-                () -> new ResourceNotFoundException("아이디에 해당하는 사용자가 없습니다."));
+                () -> new RoomescapeException(MEMBER_NOT_FOUND));
     }
 
     public List<MemberResponse> findAllMembers() {
