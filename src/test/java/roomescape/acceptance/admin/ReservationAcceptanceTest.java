@@ -2,13 +2,16 @@ package roomescape.acceptance.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
+import static roomescape.acceptance.Fixture.PRE_INSERTED_CUSTOMER_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_THEME_1;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_CUSTOMER_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_1;
+import static roomescape.exception.RoomescapeExceptionCode.INVALID_DATETIME;
+import static roomescape.exception.RoomescapeExceptionCode.RESERVATION_ALREADY_EXISTS;
+import static roomescape.exception.RoomescapeExceptionCode.RESERVATION_NOT_FOUND;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,9 +30,9 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
-import roomescape.controller.exception.CustomExceptionResponse;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.ReservationRequest;
+import roomescape.dto.ReservationResponse;
+import roomescape.exception.ExceptionResponse;
 
 class ReservationAcceptanceTest extends BaseAcceptanceTest {
 
@@ -40,7 +43,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         };
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -54,12 +57,12 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         @DisplayName("정상 작동")
         @Test
         void addReservation_success() {
-            AdminReservationRequest requestBody = getRequestBody(
+            ReservationRequest requestBody = getRequestBody(
                     LocalDate.parse("2099-12-30")
             );
 
             RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/reservations")
@@ -72,24 +75,21 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         @DisplayName("예외 발생 - 과거 시간에 대한 예약 추가한다.")
         @Test
         void addReservation_forPastTime_fail() {
-            AdminReservationRequest reservationForPast = getRequestBody(
+            ReservationRequest reservationForPast = getRequestBody(
                     LocalDate.now().minusDays(1)
             );
 
-            CustomExceptionResponse response = sendPostRequest(reservationForPast)
+            ExceptionResponse response = sendPostRequest(reservationForPast)
                     .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .extract().as(CustomExceptionResponse.class);
+                    .extract().as(ExceptionResponse.class);
 
-            assertAll(
-                    () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
-                    () -> assertThat(response.detail()).contains("지나간 시간에 대한 예약은 할 수 없습니다.")
-            );
+            assertThat(response.message()).contains(INVALID_DATETIME.message());
         }
 
         @DisplayName("예외 발생 - 이미 있는 예약을 추가한다.")
         @TestFactory
         Stream<DynamicTest> addReservation_alreadyExist_fail() {
-            AdminReservationRequest requestBody = getRequestBody(
+            ReservationRequest requestBody = getRequestBody(
                     LocalDate.parse("2099-12-31")
             );
 
@@ -97,20 +97,17 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
                     DynamicTest.dynamicTest("예약을 추가한다", () -> sendPostRequest(requestBody)),
 
                     DynamicTest.dynamicTest("동일한 예약을 추가한다", () -> {
-                                CustomExceptionResponse response = sendPostRequest(requestBody)
+                                ExceptionResponse response = sendPostRequest(requestBody)
                                         .statusCode(HttpStatus.BAD_REQUEST.value())
-                                        .extract().as(CustomExceptionResponse.class);
-                                assertAll(
-                                        () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
-                                        () -> assertThat(response.detail()).contains("예약이 이미 존재합니다.")
-                                );
+                                        .extract().as(ExceptionResponse.class);
+                                assertThat(response.message()).contains(RESERVATION_ALREADY_EXISTS.message());
                             }
                     )
             );
         }
 
-        private AdminReservationRequest getRequestBody(LocalDate date) {
-            return new AdminReservationRequest(
+        private ReservationRequest getRequestBody(LocalDate date) {
+            return new ReservationRequest(
                     PRE_INSERTED_CUSTOMER_1.getId(),
                     date,
                     PRE_INSERTED_RESERVATION_TIME_1.getId(),
@@ -118,9 +115,9 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
             );
         }
 
-        private ValidatableResponse sendPostRequest(AdminReservationRequest requestBody) {
+        private ValidatableResponse sendPostRequest(ReservationRequest requestBody) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/reservations")
@@ -146,19 +143,16 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         void deleteReservation_forNonExist_fail() {
             long notExistReservationId = 0L;
 
-            CustomExceptionResponse response = sendDeleteRequest(notExistReservationId)
+            ExceptionResponse response = sendDeleteRequest(notExistReservationId)
                     .statusCode(HttpStatus.NOT_FOUND.value())
-                    .extract().as(CustomExceptionResponse.class);
+                    .extract().as(ExceptionResponse.class);
 
-            assertAll(
-                    () -> assertThat(response.title()).contains("리소스를 찾을 수 없습니다."),
-                    () -> assertThat(response.detail()).contains("아이디에 해당하는 예약을 찾을 수 없습니다.")
-            );
+            assertThat(response.message()).contains(RESERVATION_NOT_FOUND.message());
         }
 
         private ValidatableResponse sendDeleteRequest(Long id) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .when().delete("/admin/reservations/" + id)
                     .then().log().all();
         }

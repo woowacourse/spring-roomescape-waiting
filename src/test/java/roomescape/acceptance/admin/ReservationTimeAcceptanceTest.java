@@ -2,11 +2,13 @@ package roomescape.acceptance.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_2;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_2;
+import static roomescape.exception.RoomescapeExceptionCode.CANNOT_DELETE_TIME_REFERENCED_BY_RESERVATION;
+import static roomescape.exception.RoomescapeExceptionCode.RESERVATION_NOT_FOUND;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -22,9 +24,9 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
-import roomescape.controller.exception.CustomExceptionResponse;
-import roomescape.dto.request.ReservationTimeRequest;
-import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.ReservationTimeRequest;
+import roomescape.dto.ReservationTimeResponse;
+import roomescape.exception.ExceptionResponse;
 
 class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 
@@ -35,7 +37,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
         };
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -49,7 +51,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 
         RestAssured.given().log().ifValidationFails()
                 .contentType(ContentType.JSON)
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .body(reservationTimeRequest)
                 .when().post("/admin/times")
                 .then().log().all()
@@ -76,14 +78,11 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
         void deleteReservationTime_forNonExist_fail() {
             long notExistTimeId = 0L;
 
-            CustomExceptionResponse response = sendDeleteRequest(notExistTimeId)
+            ExceptionResponse response = sendDeleteRequest(notExistTimeId)
                     .statusCode(HttpStatus.NOT_FOUND.value())
-                    .extract().as(CustomExceptionResponse.class);
+                    .extract().as(ExceptionResponse.class);
 
-            assertAll(
-                    () -> assertThat(response.title()).contains("리소스를 찾을 수 없습니다."),
-                    () -> assertThat(response.detail()).contains("아이디에 해당하는 예약 시간을 찾을 수 없습니다.")
-            );
+            assertThat(response.message()).contains(RESERVATION_NOT_FOUND.message());
         }
 
         @DisplayName("예외 발생 - 예약이 있는 예약 시간을 삭제한다.")
@@ -91,19 +90,16 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
         void deleteReservationTime_whenReservationExist_fail() {
             long timeIdWhereReservationExist = PRE_INSERTED_RESERVATION_TIME_2.getId();
 
-            CustomExceptionResponse response = sendDeleteRequest(timeIdWhereReservationExist)
+            ExceptionResponse response = sendDeleteRequest(timeIdWhereReservationExist)
                     .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .extract().as(CustomExceptionResponse.class);
+                    .extract().as(ExceptionResponse.class);
 
-            assertAll(
-                    () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
-                    () -> assertThat(response.detail()).contains("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.")
-            );
+            assertThat(response.message()).contains(CANNOT_DELETE_TIME_REFERENCED_BY_RESERVATION.message());
         }
 
         private ValidatableResponse sendDeleteRequest(long existReservationTimeId) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .when().delete("/admin/times/" + existReservationTimeId)
                     .then().log().all();
         }

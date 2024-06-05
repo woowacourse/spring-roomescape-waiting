@@ -1,19 +1,21 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.CANNOT_DELETE_TIME_REFERENCED_BY_RESERVATION;
+import static roomescape.exception.RoomescapeExceptionCode.TIME_NOT_FOUND;
+
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
-import roomescape.dto.request.ReservationTimeRequest;
-import roomescape.dto.response.AvailableReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.dto.AvailableReservationTimeResponse;
+import roomescape.dto.ReservationTimeRequest;
+import roomescape.dto.ReservationTimeResponse;
+import roomescape.exception.RoomescapeException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
@@ -21,20 +23,22 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+    public ReservationTimeService(
+            ReservationTimeRepository reservationTimeRepository,
+            ReservationRepository reservationRepository
+    ) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ReservationTimeResponse> getAllReservationTimes() {
+    public List<ReservationTimeResponse> findReservationTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
-    public ReservationTimeResponse addReservationTime(ReservationTimeRequest request) {
+    public ReservationTimeResponse createReservationTime(ReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
@@ -44,12 +48,12 @@ public class ReservationTimeService {
     public void deleteReservationTimeById(Long id) {
         boolean exist = reservationRepository.existsByReservationTimeId(id);
         if (exist) {
-            throw new OperationNotAllowedException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
+            throw new RoomescapeException(CANNOT_DELETE_TIME_REFERENCED_BY_RESERVATION);
         }
-        reservationTimeRepository.delete(findValidatedReservationTime(id));
+        reservationTimeRepository.delete(getReservationTime(id));
     }
 
-    public List<AvailableReservationTimeResponse> getReservationTimeBookedStatus(LocalDate date, Long themeId) {
+    public List<AvailableReservationTimeResponse> findReservationTimesWithBookedStatus(LocalDate date, Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<ReservationTime> reservedTimes = reservationRepository.findAllByDateAndThemeId(date, themeId).stream()
                 .map(Reservation::getReservationTime)
@@ -63,8 +67,8 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    private ReservationTime findValidatedReservationTime(Long id) {
+    private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(TIME_NOT_FOUND));
     }
 }

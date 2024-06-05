@@ -1,9 +1,11 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,15 +18,15 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime reservationTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
     protected Reservation() {
@@ -40,6 +42,10 @@ public class Reservation {
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
+    }
+
+    public void updateMember(Member member) {
+        this.member = member;
     }
 
     public Long getId() {
@@ -60,6 +66,14 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public LocalTime getStartAt() {
+        return reservationTime.getStartAt();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     @Override

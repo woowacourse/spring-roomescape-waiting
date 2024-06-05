@@ -2,11 +2,13 @@ package roomescape.acceptance.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
+import static roomescape.acceptance.Fixture.PRE_INSERTED_THEME_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_THEME_2;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_2;
+import static roomescape.exception.RoomescapeExceptionCode.CANNOT_DELETE_THEME_REFERENCED_BY_RESERVATION;
+import static roomescape.exception.RoomescapeExceptionCode.THEME_NOT_FOUND;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.List;
 
@@ -21,9 +23,9 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
-import roomescape.controller.exception.CustomExceptionResponse;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.dto.ThemeRequest;
+import roomescape.dto.ThemeResponse;
+import roomescape.exception.ExceptionResponse;
 
 class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
@@ -34,7 +36,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
         };
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -51,7 +53,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
         RestAssured.given().log().ifValidationFails()
                 .contentType(ContentType.JSON)
-                .cookie("token", adminToken)
+                .cookie(TOKEN_NAME, adminToken)
                 .body(themeRequest)
                 .when().post("/admin/themes")
                 .then().log().all()
@@ -78,14 +80,11 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
         void deleteTheme_forNonExist_fail() {
             long notExistTimeId = 0L;
 
-            CustomExceptionResponse response = sendDeleteRequest(notExistTimeId)
+            ExceptionResponse response = sendDeleteRequest(notExistTimeId)
                     .statusCode(HttpStatus.NOT_FOUND.value())
-                    .extract().as(CustomExceptionResponse.class);
+                    .extract().as(ExceptionResponse.class);
 
-            assertAll(
-                    () -> assertThat(response.title()).contains("리소스를 찾을 수 없습니다."),
-                    () -> assertThat(response.detail()).contains("아이디에 해당하는 테마를 찾을 수 없습니다.")
-            );
+            assertThat(response.message()).contains(THEME_NOT_FOUND.message());
         }
 
         @DisplayName("예외 발생 - 예약이 있는 테마를 삭제한다.")
@@ -93,19 +92,16 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
         void deleteTheme_whenReservationExist_fail() {
             long themeIdWhereReservationExist = PRE_INSERTED_THEME_2.getId();
 
-            CustomExceptionResponse response = sendDeleteRequest(themeIdWhereReservationExist)
+            ExceptionResponse response = sendDeleteRequest(themeIdWhereReservationExist)
                     .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .extract().as(CustomExceptionResponse.class);
+                    .extract().as(ExceptionResponse.class);
 
-            assertAll(
-                    () -> assertThat(response.title()).contains("허용되지 않는 작업입니다."),
-                    () -> assertThat(response.detail()).contains("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.")
-            );
+            assertThat(response.message()).contains(CANNOT_DELETE_THEME_REFERENCED_BY_RESERVATION.message());
         }
 
         private ValidatableResponse sendDeleteRequest(long id) {
             return RestAssured.given().log().all()
-                    .cookie("token", adminToken)
+                    .cookie(TOKEN_NAME, adminToken)
                     .when().delete("/admin/themes/" + id)
                     .then().log().all();
         }

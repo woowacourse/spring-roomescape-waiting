@@ -17,6 +17,9 @@
 - `/reservation`으로 접속할 수 있다.
 - 날짜, 테마, 시간을 선택해서 예약할 수 있다.
   - 날짜와 테마를 선택하면 예약 가능한 시간을 확인할 수 있다.
+  - 예약이 있는 경우 예약 대기를 할 수 있다.
+  - 예약이 취소된 경우 예약 대기 목록의 가장 앞에 있는 대기를 예약으로 변경한다.
+  - 동일한 예약에 대하여 같은 사람이 2개 이상의 대기를 만들 수 없다.
 
 ### 로그인 페이지
 
@@ -25,8 +28,10 @@
 
 ### 예약 목록 조회 페이지
 
-- `/reservation-mine`으로 접속할 수 있다.
+- `/reservation/my`로 접속할 수 있다.
 - 예약 목록을 확인할 수 있다.
+- 대기 목록도 함께 확인할 수 있다.
+- 대기를 취소할 수 있다.
 
 <br>
 
@@ -88,12 +93,12 @@
 
 #### 그 외
 
-| HTTP Method | URI                 | Description  |
-|-------------|---------------------|--------------|
-| GET         | `/`                 | 사용자 메인 페이지   |
-| GET         | `/reservation`      | 예약 페이지       |
-| GET         | `/login`            | 로그인 페이지      |
-| GET         | `/reservation-mine` | 예약 목록 조회 페이지 |
+| HTTP Method | URI               | Description  |
+|-------------|-------------------|--------------|
+| GET         | `/`               | 사용자 메인 페이지   |
+| GET         | `/reservation`    | 예약 페이지       |
+| GET         | `/login`          | 로그인 페이지      |
+| GET         | `/reservation/my` | 예약 목록 조회 페이지 |
 
 ### API
 
@@ -104,7 +109,7 @@
 | GET         | `/admin/reservations`        | 예약 목록 조회       |
 | POST        | `/admin/reservations`        | 관리자 예약 추가      |
 | DELETE      | `/admin/reservations/{id}`   | 예약 삭제          |
-| GET         | `/admin/reservations/filter` | 예약 목록 필터링      |
+| GET         | `/admin/reservations/search` | 예약 목록 필터링      |
 | POST        | `/admin/times`               | 예약 시간 추가       |
 | DELETE      | `/admin/times/{id}`          | 예약 시간 삭제       |
 | POST        | `/admin/themes`              | 테마 추가          |

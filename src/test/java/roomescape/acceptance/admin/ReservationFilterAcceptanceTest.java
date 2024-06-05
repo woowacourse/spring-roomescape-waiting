@@ -2,11 +2,12 @@ package roomescape.acceptance.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_2;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_3;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_4;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_2;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_3;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_4;
+import static roomescape.util.CookieUtil.TOKEN_NAME;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.ReservationResponse;
 
 @DisplayName("관리자가 예약을 필터링해서 조회한다.")
 class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
@@ -95,8 +96,8 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
         };
 
         return RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .when().get("/admin/reservations/filter" + path)
+                .cookie(TOKEN_NAME, adminToken)
+                .when().get("/admin/reservations/search" + path)
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(memberListFormat);

@@ -1,18 +1,20 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.CANNOT_DELETE_THEME_REFERENCED_BY_RESERVATION;
+import static roomescape.exception.RoomescapeExceptionCode.THEME_NOT_FOUND;
+
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ThemeResponse;
-import roomescape.service.exception.OperationNotAllowedException;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.dto.ThemeRequest;
+import roomescape.dto.ThemeResponse;
+import roomescape.exception.RoomescapeException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
@@ -28,14 +30,14 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ThemeResponse> getAllThemes() {
+    public List<ThemeResponse> findThemes() {
         return themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
-    public ThemeResponse addTheme(ThemeRequest request) {
+    public ThemeResponse createTheme(ThemeRequest request) {
         Theme theme = request.toTheme();
         Theme savedTheme = themeRepository.save(theme);
 
@@ -45,12 +47,12 @@ public class ThemeService {
     public void deleteThemeById(Long id) {
         boolean exist = reservationRepository.existsByThemeId(id);
         if (exist) {
-            throw new OperationNotAllowedException("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.");
+            throw new RoomescapeException(CANNOT_DELETE_THEME_REFERENCED_BY_RESERVATION);
         }
-        themeRepository.delete(findValidatedTheme(id));
+        themeRepository.delete(getTheme(id));
     }
 
-    public List<ThemeResponse> getMostReservedThemes() {
+    public List<ThemeResponse> findMostReservedThemes() {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(DAYS_IN_WEEK);
 
@@ -63,8 +65,8 @@ public class ThemeService {
                 .toList();
     }
 
-    private Theme findValidatedTheme(Long id) {
+    private Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 테마를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(THEME_NOT_FOUND));
     }
 }

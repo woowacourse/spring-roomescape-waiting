@@ -1,8 +1,9 @@
 package roomescape.acceptance;
 
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.web.server.LocalServerPort;
+
+import io.restassured.RestAssured;
 
 public abstract class NestedAcceptanceTest {
 
@@ -10,7 +11,7 @@ public abstract class NestedAcceptanceTest {
     private int port;
 
     @BeforeEach
-    private void setUp() {
+    public void setUp() {
         RestAssured.port = port;
     }
 }

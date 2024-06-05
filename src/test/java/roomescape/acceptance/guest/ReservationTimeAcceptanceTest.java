@@ -1,9 +1,9 @@
 package roomescape.acceptance.guest;
 
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_2;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_3;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_1;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_2;
+import static roomescape.acceptance.Fixture.PRE_INSERTED_RESERVATION_TIME_3;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.response.AvailableReservationTimeResponse;
+import roomescape.dto.AvailableReservationTimeResponse;
 
 class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 

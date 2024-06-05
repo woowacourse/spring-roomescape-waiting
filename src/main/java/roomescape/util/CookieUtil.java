@@ -1,37 +1,43 @@
 package roomescape.util;
 
+import static roomescape.exception.RoomescapeExceptionCode.INVALID_TOKEN;
+
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import jakarta.servlet.http.Cookie;
 
-import roomescape.controller.exception.BaseException;
+import roomescape.exception.RoomescapeException;
 
 public class CookieUtil {
 
-    private static final String TOKEN_NAME = "token";
+    public static final String TOKEN_NAME = "token";
 
     protected CookieUtil() {}
 
-    public static Optional<String> extractToken(Cookie[] cookies) {
+    public static Cookie create(String value) {
+        Cookie cookie = new Cookie(TOKEN_NAME, value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
+    }
+
+    public static String extractToken(Cookie[] cookies) {
+        if (cookies == null) {
+            throw new RoomescapeException(INVALID_TOKEN);
+        }
         return Arrays.stream(cookies)
                 .filter(cookie -> Objects.equals(TOKEN_NAME, cookie.getName()))
                 .map(Cookie::getValue)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(() -> new RoomescapeException(INVALID_TOKEN));
     }
 
     public static Cookie expired() {
         Cookie cookie = new Cookie(TOKEN_NAME, null);
         cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
         return cookie;
-    }
-
-    public static <X extends BaseException> Cookie[] requireNonnull(Cookie[] cookies, Supplier<X> exception) {
-        if (cookies != null) {
-            return cookies;
-        }
-        throw exception.get();
     }
 }

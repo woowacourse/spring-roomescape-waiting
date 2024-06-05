@@ -1,15 +1,16 @@
 package roomescape.service;
 
+import static roomescape.exception.RoomescapeExceptionCode.MEMBER_NOT_FOUND;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
-import roomescape.dto.request.LogInRequest;
-import roomescape.dto.response.MemberPreviewResponse;
-import roomescape.dto.response.MemberReservationResponse;
-import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.dto.LoginRequest;
+import roomescape.dto.MemberResponse;
+import roomescape.exception.RoomescapeException;
+import roomescape.repository.MemberRepository;
 import roomescape.util.JwtProvider;
 
 @Service
@@ -23,35 +24,26 @@ public class MemberService {
         this.jwtProvider = jwtProvider;
     }
 
-    public String logIn(LogInRequest logInRequest) {
-        String email = logInRequest.email();
-        String password = logInRequest.password();
-
-        Member member = findMemberByEmailAndPassword(email, password);
-
-        return jwtProvider.createToken(member);
+    public String login(LoginRequest loginRequest) {
+        String email = loginRequest.email();
+        String password = loginRequest.password();
+        Member member = getMemberByEmailAndPassword(email, password);
+        return jwtProvider.createToken(member.getId());
     }
 
-    private Member findMemberByEmailAndPassword(String email, String password) {
+    private Member getMemberByEmailAndPassword(String email, String password) {
         return memberRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new ResourceNotFoundException("일치하는 이메일과 비밀번호가 없습니다."));
+                .orElseThrow(() -> new RoomescapeException(MEMBER_NOT_FOUND));
     }
 
-    public Member findValidatedSiteUserById(Long memberId) {
+    public Member getMemberById(long memberId) {
         return memberRepository.findById(memberId).orElseThrow(
-                () -> new ResourceNotFoundException("아이디에 해당하는 사용자가 없습니다."));
+                () -> new RoomescapeException(MEMBER_NOT_FOUND));
     }
 
-    public List<MemberPreviewResponse> getAllMemberPreview() {
+    public List<MemberResponse> findAllMembers() {
         return memberRepository.findAll().stream()
-                .map(MemberPreviewResponse::from)
-                .toList();
-    }
-
-    public List<MemberReservationResponse> getReservationsOf(Member member) {
-        return member.getReservations()
-                .stream()
-                .map(MemberReservationResponse::from)
+                .map(MemberResponse::from)
                 .toList();
     }
 }
