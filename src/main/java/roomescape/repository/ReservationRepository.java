@@ -15,7 +15,7 @@ import roomescape.domain.Status;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
-    Optional<List<Reservation>> findByThemeIdAndStatusIn(Long themeId, List<Status> statuses); //TODO 상태값 관리 고민
+    Optional<List<Reservation>> findByThemeIdAndStatusIn(Long themeId, List<Status> statuses);
 
     Optional<Reservation> findByDateAndTimeAndThemeAndMemberAndStatusIn(
             LocalDate date,
