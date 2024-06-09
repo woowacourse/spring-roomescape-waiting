@@ -36,7 +36,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         WHERE r1.member.id = :memberId
         order by r1.date
         """)
-    List<ReservationWithRank> findMyReservationsAndStatusIn(Long memberId, List<Status> statuses);
+    List<ReservationWithRank> findMyReservationsWithRank(Long memberId, List<Status> statuses);
 
     Optional<Reservation> findByIdAndStatus(Long id, Status status);
 

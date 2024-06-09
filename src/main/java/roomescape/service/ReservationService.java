@@ -54,7 +54,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
-        return reservationRepository.findMyReservationsAndStatusIn(
+        return reservationRepository.findMyReservationsWithRank(
                         authInfo.id(),
                         List.of(Status.CREATED, Status.WAITING))
                 .stream()
