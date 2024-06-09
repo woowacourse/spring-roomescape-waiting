@@ -12,4 +12,12 @@ public enum Status {
     Status(String value) {
         this.value = value;
     }
+
+    public Status delete() {
+        return switch (this) {
+            case CREATED -> DELETED;
+            case WAITING -> WAITING_CANCEL;
+            default -> this;
+        };
+    }
 }

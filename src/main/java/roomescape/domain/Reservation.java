@@ -120,8 +120,8 @@ public class Reservation {
         return status;
     }
 
-    public void updateStatus(Status status) {
-        this.status = status;
+    public void delete() {
+        status = status.delete();
     }
 
     @Override

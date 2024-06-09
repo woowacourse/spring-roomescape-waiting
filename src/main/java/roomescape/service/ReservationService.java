@@ -107,7 +107,7 @@ public class ReservationService {
 
         reservation.validateAuthorization(member);
 
-        reservation.updateStatus(Status.WAITING_CANCEL);
+        reservation.delete();
     }
 
     @Transactional
@@ -118,10 +118,10 @@ public class ReservationService {
                 .findTopByStatusInOrderByCreatedAt(List.of(Status.WAITING))
                 .orElse(null);
 
-        reservation.updateStatus(Status.DELETED);
+        reservation.delete();
 
         if (reservationWaiting != null) {
-            reservationWaiting.updateStatus(Status.CREATED);
+            reservationWaiting.delete();
         }
     }
 
