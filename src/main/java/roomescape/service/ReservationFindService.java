@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.RankCalculator;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationWithRank;
-import roomescape.repository.ReservationRepository;
 import roomescape.system.exception.RoomescapeException;
 
 @Service

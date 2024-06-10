@@ -2,7 +2,6 @@ package roomescape.domain.reservation;
 
 import java.util.List;
 import org.springframework.stereotype.Component;
-import roomescape.repository.ReservationRepository;
 
 @Component
 public class RankCalculator {
