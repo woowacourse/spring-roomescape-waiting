@@ -91,7 +91,7 @@ public class Reservation {
         return status.isWaiting();
     }
 
-    public void validateNotMyWaiting(Long memberId) {
+    public void validateNotMyWaitingForDelete(Long memberId) {
         if (isNotMyWaiting(memberId)) {
             throw new RoomescapeException("다른 유저의 예약 대기는 삭제할 수 없습니다.");
         }

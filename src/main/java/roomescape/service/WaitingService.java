@@ -69,7 +69,7 @@ public class WaitingService {
         reservation.validateWaitingStatusForDelete();
 
         if (member.isNotAdmin()) {
-            reservation.validateNotMyWaiting(member.getId());
+            reservation.validateNotMyWaitingForDelete(member.getId());
         }
 
         reservationRepository.deleteById(id);
