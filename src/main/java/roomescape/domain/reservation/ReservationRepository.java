@@ -32,5 +32,5 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByStatus(ReservationStatus Status);
 
-    Reservation deleteById(long id);
+    void deleteById(long id);
 }

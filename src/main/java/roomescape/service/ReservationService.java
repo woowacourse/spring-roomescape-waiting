@@ -11,9 +11,9 @@ import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.system.exception.RoomescapeException;
 
 @Service

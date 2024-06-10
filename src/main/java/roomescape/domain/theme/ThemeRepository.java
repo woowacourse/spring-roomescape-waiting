@@ -14,7 +14,7 @@ public interface ThemeRepository {
 
     boolean existsByName(Name name);
 
-    Theme deleteById(long id);
-
     List<Theme> findPopular(LocalDate start, LocalDate end, int popularThemeCount);
+
+    void deleteById(long id);
 }

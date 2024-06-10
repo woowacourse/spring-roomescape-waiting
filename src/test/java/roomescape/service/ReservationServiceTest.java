@@ -17,8 +17,8 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.ReservationWithRank;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.system.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
