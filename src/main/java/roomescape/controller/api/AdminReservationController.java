@@ -19,6 +19,7 @@ import roomescape.controller.dto.FindReservationResponse;
 import roomescape.controller.dto.FindWaitingReservationResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.service.ReservationFindService;
 import roomescape.service.ReservationService;
 import roomescape.system.argumentresolver.AuthenticationPrincipal;
 
@@ -27,9 +28,11 @@ import roomescape.system.argumentresolver.AuthenticationPrincipal;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationFindService reservationFindService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService, ReservationFindService reservationFindService) {
         this.reservationService = reservationService;
+        this.reservationFindService = reservationFindService;
     }
 
     @PostMapping
@@ -53,7 +56,7 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<List<FindReservationResponse>> findAll() {
-        List<Reservation> reservations = reservationService.findAll();
+        List<Reservation> reservations = reservationFindService.findAll();
         List<FindReservationResponse> createReservationResponse = reservations.stream()
             .map(FindReservationResponse::from)
             .toList();
@@ -68,7 +71,7 @@ public class AdminReservationController {
         @RequestParam LocalDate dateFrom,
         @RequestParam LocalDate dateTo) {
 
-        List<Reservation> reservations = reservationService.findAllBy(themeId, memberId, dateFrom, dateTo);
+        List<Reservation> reservations = reservationFindService.findAllBy(themeId, memberId, dateFrom, dateTo);
         List<FindReservationResponse> response = reservations.stream()
             .map(FindReservationResponse::from)
             .toList();
@@ -78,9 +81,9 @@ public class AdminReservationController {
 
     @GetMapping("/waiting")
     public ResponseEntity<List<FindWaitingReservationResponse>> findAllWaitingReservations() {
-        List<Reservation> reservations = reservationService.findAllWaitingReservations();
+        List<Reservation> reservations = reservationFindService.findAllWaitingReservations();
         List<FindWaitingReservationResponse> responses = reservations.stream()
-            .map(reservation -> FindWaitingReservationResponse.from(reservation))
+            .map(FindWaitingReservationResponse::from)
             .toList();
         return ResponseEntity.ok(responses);
     }

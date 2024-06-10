@@ -3,16 +3,13 @@ package roomescape.service;
 import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Date;
-import roomescape.domain.reservation.RankCalculator;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -24,27 +21,22 @@ import roomescape.system.exception.RoomescapeException;
 public class ReservationService {
 
     public static final int EXCLUDE_CURRENT_RESERVATION = 1;
-    public static final int DEFAULT_RANK = 0;
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final RankCalculator rankCalculator;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         ReservationTimeRepository reservationTimeRepository,
         ThemeRepository themeRepository,
-        MemberRepository memberRepository,
-        RankCalculator rankCalculator
+        MemberRepository memberRepository
     ) {
-
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.rankCalculator = rankCalculator;
     }
 
     public Reservation save(Long memberId, String date, Long timeId, Long themeId) {
@@ -98,38 +90,6 @@ public class ReservationService {
             );
     }
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll().stream().filter(reservation -> reservation.isNotWaiting()).toList();
-    }
-
-    public List<Reservation> findAllBy(
-        Long themeId,
-        Long memberId,
-        LocalDate dateFrom,
-        LocalDate dateTo
-    ) {
-        if (dateFrom.isAfter(dateTo)) {
-            throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
-        }
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId,
-            new Date(dateFrom.toString()), new Date(dateTo.toString()));
-    }
-
-    public List<ReservationWithRank> findMyReservations(Long memberId) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-
-        return reservations.stream()
-            .map(reservation -> new ReservationWithRank(
-                reservation.getId(),
-                reservation.getMember(),
-                reservation.getDate().getValue().toString(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                reservation.getStatus(),
-                reservation.isWaiting() ? rankCalculator.calculate(reservation) : DEFAULT_RANK
-            ))
-            .toList();
-    }
 
     public Reservation saveWaiting(Long memberId, String date, Long timeId, Long themeId) {
         Member member = findMember(memberId);
@@ -155,9 +115,5 @@ public class ReservationService {
         }
 
         reservationRepository.deleteById(id);
-    }
-
-    public List<Reservation> findAllWaitingReservations() {
-        return reservationRepository.findAllByStatus(WAITING);
     }
 }
