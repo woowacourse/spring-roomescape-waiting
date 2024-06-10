@@ -77,7 +77,7 @@ public class Reservation {
         }
     }
 
-    public void validateNotWaiting() {
+    public void validateWaitingStatusForDelete() {
         if (isNotWaiting()) {
             throw new RoomescapeException("대기가 아닌 예약은 삭제할 수 없습니다.");
         }
