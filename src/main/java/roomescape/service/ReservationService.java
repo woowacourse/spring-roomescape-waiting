@@ -81,7 +81,7 @@ public class ReservationService {
             .findFirst()
             .ifPresentOrElse(
                 waiting -> {
-                    waiting.setStatus(RESERVED);
+                    waiting.initiateStatus(RESERVED);
                     reservationRepository.save(waiting);
                     reservationRepository.deleteById(id);
                 },

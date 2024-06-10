@@ -101,6 +101,10 @@ public class Reservation {
         return !(member.getId() == memberId);
     }
 
+    public void initiateStatus(ReservationStatus status) {
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }
@@ -127,10 +131,6 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(ReservationStatus status) {
-        this.status = status;
     }
 
     @Override
