@@ -1,7 +1,5 @@
 package roomescape.service;
 
-import static roomescape.domain.reservation.ReservationStatus.WAITING;
-
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -58,9 +56,5 @@ public class ReservationFindService {
                 reservation.isWaiting() ? rankCalculator.calculate(reservation) : DEFAULT_RANK
             ))
             .toList();
-    }
-
-    public List<Reservation> findAllWaitingReservations() {
-        return reservationRepository.findAllByStatus(WAITING);
     }
 }

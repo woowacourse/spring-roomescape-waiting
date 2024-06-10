@@ -21,6 +21,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.service.ReservationFindService;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.system.argumentresolver.AuthenticationPrincipal;
 
 @RestController
@@ -29,10 +30,16 @@ public class AdminReservationController {
 
     private final ReservationService reservationService;
     private final ReservationFindService reservationFindService;
+    private final WaitingService waitingService;
 
-    public AdminReservationController(ReservationService reservationService, ReservationFindService reservationFindService) {
+    public AdminReservationController(
+        ReservationService reservationService,
+        ReservationFindService reservationFindService,
+        WaitingService waitingService
+    ) {
         this.reservationService = reservationService;
         this.reservationFindService = reservationFindService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -81,7 +88,7 @@ public class AdminReservationController {
 
     @GetMapping("/waiting")
     public ResponseEntity<List<FindWaitingReservationResponse>> findAllWaitingReservations() {
-        List<Reservation> reservations = reservationFindService.findAllWaitingReservations();
+        List<Reservation> reservations = waitingService.findAllWaitingReservations();
         List<FindWaitingReservationResponse> responses = reservations.stream()
             .map(FindWaitingReservationResponse::from)
             .toList();
@@ -90,7 +97,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> deleteWaitingReservation(@AuthenticationPrincipal Member member, @PathVariable Long id) {
-        reservationService.deleteWaiting(member, id);
+        waitingService.deleteWaiting(member, id);
         return ResponseEntity.noContent().build();
     }
 }

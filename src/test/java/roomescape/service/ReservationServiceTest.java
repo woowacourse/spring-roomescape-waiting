@@ -15,11 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationWithRank;
-import roomescape.fixture.MemberFixture;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.system.exception.RoomescapeException;
 
@@ -32,8 +30,13 @@ class ReservationServiceTest {
     private final Long timeId = 1L;
     private final Long themeId = 1L;
     private final Long memberId = 1L;
+
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationFindService reservationFindService;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
@@ -112,70 +115,7 @@ class ReservationServiceTest {
     @DisplayName("성공: 주어진 멤버가 예약한 예약 목록 조회")
     @Test
     void findMyReservations() {
-        List<ReservationWithRank> reservations = reservationService.findMyReservations(1L);
+        List<ReservationWithRank> reservations = reservationFindService.findMyReservations(1L);
         assertThat(reservations).hasSize(3);
-    }
-
-    @DisplayName("성공: 예약 대기 생성")
-    @Test
-    void saveWaiting() {
-        // when
-        Reservation saved = reservationService.saveWaiting(memberId, rawDate, timeId, themeId);
-        //then
-        assertThat(saved.getId()).isEqualTo(7L);
-    }
-
-    @DisplayName("실패: 동일한 멤버가 2개 이상의 예약 대기를 생성 시도시 예외 발생.")
-    @Test
-    void saveWaiting_MemberDuplication() {
-        // given 
-        Reservation saved = reservationService.saveWaiting(memberId, rawDate, timeId, themeId);
-        // when & then
-        assertThatThrownBy(
-            () -> reservationService.saveWaiting(memberId, rawDate, timeId, themeId)
-        ).isInstanceOf(RoomescapeException.class)
-            .hasMessage("동일한 멤버가 다수의 예약을 생성할 수 없습니다.");
-    }
-
-    @DisplayName("성공: 내 예약 대기를 삭제 한다.")
-    @Test
-    void deleteWaiting() {
-        // given
-        Member user = MemberFixture.createUserWithIdTwo();
-        // when
-        reservationService.deleteWaiting(user, 6L);
-        //then
-        assertThat(reservationService.findAll()).hasSize(5);
-    }
-
-    @DisplayName("실패: 대기가 아닌 예약을 삭제 시도시 예외 발생.")
-    @Test
-    void deleteWaiting_NotWaiting() {
-        // given
-        Member user = MemberFixture.createUserWithIdTwo();
-        // when & then
-        assertThatThrownBy(() -> reservationService.deleteWaiting(user, 1L))
-            .isInstanceOf(RoomescapeException.class)
-            .hasMessage("대기가 아닌 예약은 삭제할 수 없습니다.");
-    }
-
-    @DisplayName("실패: 내 예약이 아닌 대기를 삭제 시도시 예외 발생.")
-    @Test
-    void deleteWaiting_NotMine() {
-        // given
-        Member user = MemberFixture.createUserWithIdThree();
-        // when & then
-        assertThatThrownBy(() -> reservationService.deleteWaiting(user, 6L))
-            .isInstanceOf(RoomescapeException.class)
-            .hasMessage("다른 유저의 예약 대기는 삭제할 수 없습니다.");
-    }
-
-    @DisplayName("성공: 예약 대기 목록 조회")
-    @Test
-    void findAllWaitingReservations() {
-        // when
-        List<Reservation> reservations = reservationService.findAllWaitingReservations();
-        //then
-        assertThat(reservations).hasSize(1);
     }
 }
