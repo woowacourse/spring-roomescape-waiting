@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +13,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
-import roomescape.domain.Status;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
@@ -47,23 +47,21 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findByStatusIn(List.of(Status.CREATED))
+        return reservationRepository.findAllReservations()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
-        return reservationRepository.findMyReservationsWithRank(
-                        authInfo.id(),
-                        List.of(Status.CREATED, Status.WAITING))
+        return reservationRepository.findMyReservationWithRank(authInfo.id())
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
     }
 
     public List<ReservationWaitingResponse> findReservationsWaiting() {
-        return reservationRepository.findByStatusIn(List.of(Status.WAITING))
+        return reservationRepository.findAllWaitings()
                 .stream()
                 .map(ReservationWaitingResponse::from)
                 .toList();
@@ -71,12 +69,12 @@ public class ReservationService {
 
     public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
-        Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
+        Specification<Reservation> specification = Specification.where(ReservationSpecification.hasThemeId(themeId))
                 .and(ReservationSpecification.hasMemberId(memberId))
                 .and(ReservationSpecification.fromDate(dateFrom))
                 .and(ReservationSpecification.toDate(dateTo));
 
-        return reservationRepository.findAll(spec).stream()
+        return reservationRepository.findBy(specification).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -102,7 +100,7 @@ public class ReservationService {
     public void deleteWaiting(Long id, AuthInfo authInfo) {
         Member member = memberRepository.findById(authInfo.id())
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
-        Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.WAITING)
+        Reservation reservation = reservationRepository.findWaitingReservationById(id)
                 .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
 
         reservation.validateAuthorization(member);
@@ -112,17 +110,12 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = reservationRepository.findByIdAndStatus(id, Status.CREATED)
+        Reservation reservation = reservationRepository.findReservationById(id)
                 .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
-        Reservation reservationWaiting = reservationRepository
-                .findTopByStatusInOrderByCreatedAt(List.of(Status.WAITING))
-                .orElse(null);
+        Optional<Reservation> reservationWaiting = reservationRepository.findLatestWaitingReservation();
 
         reservation.delete();
-
-        if (reservationWaiting != null) {
-            reservationWaiting.delete();
-        }
+        reservationWaiting.ifPresent(Reservation::delete);
     }
 
     private void validateDateCondition(LocalDate dateFrom, LocalDate dateTo) {
@@ -139,12 +132,11 @@ public class ReservationService {
     }
 
     private void validateDuplication(Reservation reservation) {
-        reservationRepository.findByDateAndTimeAndThemeAndMemberAndStatusIn(
+        reservationRepository.findMemberReservation(
                         reservation.getDate(),
                         reservation.getTime(),
                         reservation.getTheme(),
-                        reservation.getMember(),
-                        List.of(Status.CREATED))
+                        reservation.getMember())
                 .ifPresent(reservation::validateDuplication);
     }
 }
