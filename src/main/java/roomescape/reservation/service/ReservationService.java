@@ -94,10 +94,14 @@ public class ReservationService {
             reservationRepository.deleteById(reservationId);
             return;
         }
+        convertWaitingToReservation(reservationId);
+    }
+
+    private void convertWaitingToReservation(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId).get();
-        Member firstCandidate = waitingRepository.findFirstMemberByReservationIdOrderByIdAsc(reservationId);
-        reservation.updateMemberToWaiter(firstCandidate);
-        waitingRepository.deleteByMemberAndReservation(firstCandidate, reservation);
+        Member firstWaiter = waitingRepository.findFirstMemberByReservationIdOrderByIdAsc(reservationId);
+        reservation.updateMemberToWaiter(firstWaiter);
+        waitingRepository.deleteByMemberAndReservation(firstWaiter, reservation);
     }
 
     public List<MyReservationResponse> getMyReservations(final Long memberId) {
