@@ -101,17 +101,28 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(final Long memberId) {
-        List<WaitingWithRank> waitingsWithRank = waitingRepository.findWaitingsWithRank(memberId);
-        List<MyReservationResponse> myWaitings = waitingsWithRank.stream()
-                .map(MyReservationResponse::from)
-                .toList();
+        List<MyReservationResponse> myReservedResponse = getMyReservedResponses(memberId);
+        List<MyReservationResponse> myWaitingResponse = getMyWaitingResponses(memberId);
 
-        List<MyReservationResponse> myReservedReservations = reservationRepository.findAllByMemberId(memberId).stream()
+        List<MyReservationResponse> myReservationResponse = new ArrayList<>(myReservedResponse);
+        myReservationResponse.addAll(myWaitingResponse);
+        return myReservationResponse;
+    }
+
+    private List<MyReservationResponse> getMyReservedResponses(Long memberId) {
+        return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(MyReservationResponse::from)
                 .toList();
-        List<MyReservationResponse> myReservations = new ArrayList<>(myReservedReservations);
-        myReservations.addAll(myWaitings);
-        return myReservations;
+    }
+
+    private List<MyReservationResponse> getMyWaitingResponses(Long memberId) {
+        List<Waiting> myWaiting = waitingRepository.findByMemberId(memberId);
+        List<WaitingWithRank> myWaitingWithRisk = myWaiting.stream()
+                .map((waiting) -> new WaitingWithRank(waiting, waitingRepository.countByReservation(waiting)))
+                .toList();
+        return myWaitingWithRisk.stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 
 }

@@ -13,17 +13,14 @@ import roomescape.reservation.dto.WaitingWithRank;
 
 @Repository
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
+
     @Query("""
-            SELECT new roomescape.reservation.dto.WaitingWithRank(
-                w,
-                (SELECT COUNT(w2)
-                 FROM Waiting w2
-                 WHERE w2.reservation.id = w.reservation.id
-                   AND w2.id < w.id) + 1)
-            FROM Waiting w
-            WHERE w.member.id = :memberId
+                SELECT COUNT(w)
+                         FROM Waiting w
+                         WHERE w.reservation.id = :#{#waiting.reservation.id}
+                           AND w.id < :#{#waiting.id} + 1
             """)
-    List<WaitingWithRank> findWaitingsWithRank(Long memberId);
+    long countByReservation(Waiting waiting);
 
     boolean existsByMemberIdAndReservationId(Long memberId, Long reservationId);
 
@@ -33,4 +30,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     Member findFirstMemberByReservationIdOrderByIdAsc(Long reservationId);
 
     void deleteByMemberAndReservation(Member firstCandidate, Reservation reservation);
+
+    List<Waiting> findByMemberId(Long memberId);
 }
