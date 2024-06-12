@@ -46,7 +46,7 @@ public class Reservation {
         validatePastReservation(LocalDate.parse(rawDate), time);
     }
 
-    private Reservation(Long id, Member Member, String rawDate, ReservationTime time, Theme theme,
+    public Reservation(Long id, Member Member, String rawDate, ReservationTime time, Theme theme,
         ReservationStatus status) {
         this.id = id;
         this.member = Member;
@@ -77,6 +77,34 @@ public class Reservation {
         }
     }
 
+    public void validateWaitingStatusForDelete() {
+        if (isNotWaiting()) {
+            throw new RoomescapeException("대기가 아닌 예약은 삭제할 수 없습니다.");
+        }
+    }
+
+    public boolean isNotWaiting() {
+        return !status.isWaiting();
+    }
+
+    public boolean isWaiting() {
+        return status.isWaiting();
+    }
+
+    public void validateNotMyWaitingForDelete(Long memberId) {
+        if (isNotMyWaiting(memberId)) {
+            throw new RoomescapeException("다른 유저의 예약 대기는 삭제할 수 없습니다.");
+        }
+    }
+
+    private boolean isNotMyWaiting(Long memberId) {
+        return !(member.getId() == memberId);
+    }
+
+    public void initiateStatus(ReservationStatus status) {
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }
@@ -85,8 +113,8 @@ public class Reservation {
         return member.getName();
     }
 
-    public LocalDate getDate() {
-        return date.getValue();
+    public Date getDate() {
+        return date;
     }
 
     public ReservationTime getTime() {

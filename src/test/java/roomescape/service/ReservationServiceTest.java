@@ -17,7 +17,8 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.system.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -29,8 +30,13 @@ class ReservationServiceTest {
     private final Long timeId = 1L;
     private final Long themeId = 1L;
     private final Long memberId = 1L;
+
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationFindService reservationFindService;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
@@ -38,7 +44,7 @@ class ReservationServiceTest {
     @Test
     void save() {
         Reservation saved = reservationService.save(memberId, rawDate, timeId, themeId);
-        assertThat(saved.getId()).isEqualTo(5L);
+        assertThat(saved.getId()).isEqualTo(7L);
     }
 
     @DisplayName("실패: 존재하지 않는 멤버 ID 입력 시 예외가 발생한다.")
@@ -109,7 +115,7 @@ class ReservationServiceTest {
     @DisplayName("성공: 주어진 멤버가 예약한 예약 목록 조회")
     @Test
     void findMyReservations() {
-        List<Reservation> reservations = reservationService.findMyReservations(1L);
-        assertThat(reservations).hasSize(2);
+        List<ReservationWithRank> reservations = reservationFindService.findMyReservations(1L);
+        assertThat(reservations).hasSize(3);
     }
 }

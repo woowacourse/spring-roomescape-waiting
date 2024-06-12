@@ -15,7 +15,7 @@ public record FindReservationResponse(Long id,
         return new FindReservationResponse(
             reservation.getId(),
             reservation.getMember().getName(),
-            reservation.getDate(),
+            reservation.getDate().getValue(),
             reservation.getTime().getStartAt(),
             reservation.getTheme().getName()
         );

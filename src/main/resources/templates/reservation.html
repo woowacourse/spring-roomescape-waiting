@@ -2,28 +2,28 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>방탈출 예약 페이지</title>
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet"
-        href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/flatpickr.css">
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="stylesheet" href="/css/reservation.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        rel="stylesheet">
+  <link href="/css/flatpickr.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        rel="stylesheet">
+  <link href="/css/reservation.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="/">
-    <img src="https://avatars.githubusercontent.com/u/141792611?s=200&v=4" alt="LOGO"
+    <img alt="LOGO" src="https://avatars.githubusercontent.com/u/141792611?s=200&v=4"
          style="height: 40px;">
   </a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse"
-          data-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent" aria-expanded="false"
-          aria-label="Toggle navigation">
+  <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+          class="navbar-toggler"
+          data-target="#navbarSupportedContent" data-toggle="collapse"
+          type="button">
     <span class="navbar-toggler-icon"></span>
   </button>
 
@@ -39,13 +39,13 @@
         <a class="nav-link" href="/login">Login</a>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-           data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">
-          <img class="profile-image" src="/image/default-profile.png" alt="Profile">
+        <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+           href="#"
+           id="navbarDropdown" role="button">
+          <img alt="Profile" class="profile-image" src="/image/default-profile.png">
           <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
         </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <div aria-labelledby="navbarDropdown" class="dropdown-menu">
           <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
@@ -56,7 +56,7 @@
 </nav>
 
 <!-- Content -->
-<div id="content-container" class="col-md-10 offset-md-1 p-5">
+<div class="col-md-10 offset-md-1 p-5" id="content-container">
   <h2 class="content-container-title">예약 페이지</h2>
   <div class="d-flex" id="reservation-container">
     <!-- Date Section -->
@@ -86,7 +86,8 @@
 
   <!-- Reservation Button -->
   <div class="button-group float-right">
-    <button id="reserve-button" class="btn btn-primary mt-3 disabled">예약하기</button>
+    <button class="btn btn-primary mt-3 disabled" id="reserve-button">예약하기</button>
+    <button class="btn btn-secondary mt-3 disabled" id="wait-button">예약대기</button>
   </div>
 </div>
 

@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
+import roomescape.fixture.LoginRequestFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(value = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -20,8 +21,8 @@ class AdminPageControllerTest {
 
     @BeforeEach
     void login() {
-        LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
-        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+        LoginRequest admin = LoginRequestFixture.createAdminRequest();
+        LoginRequest user = LoginRequestFixture.createUserRequest();
 
         adminToken = RestAssured.given()
             .contentType(ContentType.JSON)
@@ -112,6 +113,26 @@ class AdminPageControllerTest {
         RestAssured.given().log().all()
             .cookie("token", userToken)
             .when().get("/admin/theme")
+            .then().log().all()
+            .statusCode(401);
+    }
+
+    @DisplayName("성공: /admin/waiting 페이지 응답 -> 200")
+    @Test
+    void getWaitingPage_Admin_Ok() {
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .when().get("/admin/waiting")
+            .then().log().all()
+            .statusCode(200);
+    }
+
+    @DisplayName("실패: /admin/theme 페이지 응답 -> 401")
+    @Test
+    void getWaitingPage_User_Unauthorized() {
+        RestAssured.given().log().all()
+            .cookie("token", userToken)
+            .when().get("/admin/waiting")
             .then().log().all()
             .statusCode(401);
     }

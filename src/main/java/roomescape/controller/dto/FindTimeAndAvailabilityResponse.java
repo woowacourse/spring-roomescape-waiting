@@ -5,4 +5,6 @@ import java.time.LocalTime;
 
 public record FindTimeAndAvailabilityResponse(Long id,
                                               @JsonFormat(pattern = "HH:mm") LocalTime startAt,
-                                              boolean alreadyBooked) { }
+                                              boolean alreadyBooked) {
+
+}
