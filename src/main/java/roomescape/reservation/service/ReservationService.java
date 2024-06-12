@@ -93,10 +93,9 @@ public class ReservationService {
             reservationRepository.deleteById(reservationId);
             return;
         }
-        //기존 예약의 멤버를 대기 1번 멤버로 바꿔줘야함.
         Reservation reservation = reservationRepository.findById(reservationId).get();
         Member firstCandidate = waitingRepository.findFirstMemberByReservationIdOrderByIdAsc(reservationId);
-        reservation.setMember(firstCandidate);
+        reservation.updateMemberToWaiter(firstCandidate);
         waitingRepository.deleteByMemberAndReservation(firstCandidate, reservation);
     }
 

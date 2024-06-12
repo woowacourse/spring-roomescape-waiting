@@ -113,7 +113,7 @@ public class Reservation {
         return member;
     }
 
-    public void setMember(Member member) {
+    public void updateMemberToWaiter(Member member) {
         this.member = member;
     }
 }
