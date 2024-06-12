@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import roomescape.auth.principal.AuthenticatedMember;
 import roomescape.reservation.dto.*;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
@@ -17,6 +18,7 @@ import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
 import roomescape.reservation.service.WaitingService;
+import roomescape.resolver.Authenticated;
 
 import java.net.URI;
 import java.util.List;
@@ -103,8 +105,9 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/admin/waitings/{waiting-id}")
-    public ResponseEntity<Void> deleteWaitings(@PathVariable("waiting-id") final Long waitingId) {
-        waitingService.deleteWaiting(waitingId);
+    public ResponseEntity<Void> deleteWaitings(@PathVariable("waiting-id") final Long waitingId,
+                                               @Authenticated AuthenticatedMember authenticatedMember) {
+        waitingService.deleteWaiting(waitingId, authenticatedMember);
         return ResponseEntity.noContent().build();
     }
 }

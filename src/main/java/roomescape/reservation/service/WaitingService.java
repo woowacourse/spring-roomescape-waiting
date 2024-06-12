@@ -1,10 +1,15 @@
 package roomescape.reservation.service;
 
+import static roomescape.member.model.MemberRole.USER;
+
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import roomescape.auth.principal.AuthenticatedMember;
 import roomescape.member.model.Member;
+import roomescape.member.model.MemberRole;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.SaveWaitingRequest;
 import roomescape.reservation.model.Reservation;
@@ -44,11 +49,20 @@ public class WaitingService {
         }
     }
 
-    public void deleteWaiting(Long waitingId) {
+    public void deleteWaiting(Long waitingId, AuthenticatedMember member) {
+        Long waitingMemberId = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약 대기는 존재하지 않습니다."))
+                .getMember()
+                .getId();
+
+        if (member.role() == USER && !waitingMemberId.equals(member.id())) {
+            throw new IllegalArgumentException("자신의 예약 대기만 제거 할 수 있습니다");
+        }
         waitingRepository.deleteById(waitingId);
     }
 
     public List<Waiting> getWaitings() {
         return waitingRepository.findAll();
     }
+
 }
