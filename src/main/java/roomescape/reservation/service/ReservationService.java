@@ -8,6 +8,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.SaveReservationRequest;
 import roomescape.reservation.dto.SearchReservationsRequest;
+import roomescape.reservation.dto.WaitingWithRank;
 import roomescape.reservation.model.*;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;

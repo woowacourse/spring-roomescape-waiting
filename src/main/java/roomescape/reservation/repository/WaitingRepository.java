@@ -9,18 +9,20 @@ import org.springframework.stereotype.Repository;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.Waiting;
-import roomescape.reservation.model.WaitingWithRank;
+import roomescape.reservation.dto.WaitingWithRank;
 
 @Repository
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
-    @Query("SELECT new roomescape.reservation.model.WaitingWithRank(" +
-            "    w, " +
-            "    (SELECT COUNT(w2) " +
-            "     FROM Waiting w2 " +
-            "     WHERE w2.reservation.id = w.reservation.id " +
-            "       AND w2.id < w.id) + 1) " +
-            "FROM Waiting w " +
-            "WHERE w.member.id = :memberId")
+    @Query("""
+            SELECT new roomescape.reservation.dto.WaitingWithRank(
+                w,
+                (SELECT COUNT(w2)
+                 FROM Waiting w2
+                 WHERE w2.reservation.id = w.reservation.id
+                   AND w2.id < w.id) + 1)
+            FROM Waiting w
+            WHERE w.member.id = :memberId
+            """)
     List<WaitingWithRank> findWaitingsWithRank(Long memberId);
 
     boolean existsByMemberIdAndReservationId(Long memberId, Long reservationId);
