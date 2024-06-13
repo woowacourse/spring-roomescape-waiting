@@ -1,5 +1,7 @@
 package roomescape.theme.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.system.exception.error.ErrorType;
 import roomescape.system.exception.model.NotFoundException;
@@ -8,9 +10,6 @@ import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.dto.ThemesResponse;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class ThemeService {
@@ -27,7 +26,7 @@ public class ThemeService {
     }
 
     public ThemesResponse findAllThemes() {
-        List<ThemeResponse> response = themeRepository.findAll()
+        final List<ThemeResponse> response = themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -36,11 +35,12 @@ public class ThemeService {
     }
 
     public ThemesResponse getTop10Themes(final LocalDate today) {
-        LocalDate startDate = today.minusDays(7);
-        LocalDate endDate = today.minusDays(1);
-        int limit = 10;
+        final LocalDate startDate = today.minusDays(7);
+        final LocalDate endDate = today.minusDays(1);
+        final int limit = 10;
 
-        List<ThemeResponse> response = themeRepository.findTopNThemeBetweenStartDateAndEndDate(startDate, endDate, limit)
+        final List<ThemeResponse> response = themeRepository.findTopNThemeBetweenStartDateAndEndDate(startDate, endDate,
+                        limit)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -49,7 +49,7 @@ public class ThemeService {
     }
 
     public ThemeResponse addTheme(final ThemeRequest request) {
-        Theme theme = themeRepository.save(new Theme(request.name(), request.description(), request.thumbnail()));
+        final Theme theme = themeRepository.save(new Theme(request.name(), request.description(), request.thumbnail()));
 
         return ThemeResponse.from(theme);
     }

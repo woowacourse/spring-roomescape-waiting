@@ -1,14 +1,13 @@
 package roomescape.member.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.system.exception.error.ErrorType;
-import roomescape.system.exception.model.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.MembersResponse;
-
-import java.util.List;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.NotFoundException;
 
 @Service
 public class MemberService {
@@ -19,7 +18,7 @@ public class MemberService {
     }
 
     public MembersResponse findAllMembers() {
-        List<MemberResponse> response = memberRepository.findAll().stream()
+        final List<MemberResponse> response = memberRepository.findAll().stream()
                 .map(MemberResponse::fromEntity)
                 .toList();
 

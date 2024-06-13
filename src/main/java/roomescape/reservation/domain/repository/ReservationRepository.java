@@ -10,7 +10,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.dto.response.WaitingWithRank;
 import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
@@ -28,7 +28,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     List<Reservation> findByMember(Member member);
 
-    @Query("SELECT new roomescape.reservation.domain.WaitingWithRank(" +
+    @Query("SELECT new roomescape.reservation.dto.response.WaitingWithRank(" +
            "    w, " +
            "    (SELECT COUNT(w2) " +
            "     FROM Reservation w2 " +
@@ -39,5 +39,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
            "FROM Reservation w " +
            "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
-
 }

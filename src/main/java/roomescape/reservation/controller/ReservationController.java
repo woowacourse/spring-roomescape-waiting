@@ -4,26 +4,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import org.apache.tomcat.websocket.server.WsHandshakeRequest;
-import org.hibernate.tool.schema.TargetType;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.DataBinder;
-import org.springframework.validation.DataBinder.ValueResolver;
-import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.NativeWebRequest;
-import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationSearchRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -82,7 +72,7 @@ public class ReservationController {
             @NotNull(message = "reservationId는 null일 수 없습니다.") @PathVariable("id") final Long reservationId,
             @NotNull(message = "status는 null일 수 없습니다.") @RequestParam("status") final String status
     ) {
-        reservationService.updateState(memberId, reservationId, status);
+        reservationService.removeReservationByStatus(memberId, reservationId, status);
 
         return ApiResponse.success();
     }
@@ -106,7 +96,7 @@ public class ReservationController {
             @MemberId final Long memberId,
             @NotNull(message = "reservationId는 null 또는 공백일 수 없습니다.") @PathVariable("id") final Long reservationId
     ) {
-        reservationService.removeReservationById(reservationId, memberId);
+        reservationService.removeReservationByIdAndPullIfMemberIsAdmin(reservationId, memberId);
 
         return ApiResponse.success();
     }

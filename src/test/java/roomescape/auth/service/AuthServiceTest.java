@@ -3,6 +3,7 @@ package roomescape.auth.service;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +42,11 @@ class AuthServiceTest {
         final TokenDto response = authService.login(new LoginRequest(member.getEmail(), member.getPassword()));
 
         // then
-        assertAll(
-                () -> Assertions.assertThat(response.accessToken()).isNotNull(),
-                () -> Assertions.assertThat(response.refreshToken()).isNotNull()
+        SoftAssertions.assertSoftly(
+                assertSoftly ->{
+                         assertSoftly.assertThat(response.accessToken()).isNotNull();
+                        assertSoftly.assertThat(response.refreshToken()).isNotNull();
+                }
         );
     }
 

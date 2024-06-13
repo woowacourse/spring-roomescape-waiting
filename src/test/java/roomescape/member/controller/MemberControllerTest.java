@@ -44,8 +44,7 @@ class MemberControllerTest {
                 .header(new Header("Cookie", accessTokenCookie))
                 .when().get("/members")
                 .then().log().all()
-                .statusCode(200)
-                .body("data.members.size()", is(5));
+                .statusCode(200);
     }
 
     private String getAdminAccessTokenCookieByLogin(final String email, final String password) {

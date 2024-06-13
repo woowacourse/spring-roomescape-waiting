@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,6 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSpecification;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
-import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationSearchRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -95,16 +95,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void removeReservationById(final Long targetReservationId, final Long myMemberId) {
+    public void removeReservationByIdAndPullIfMemberIsAdmin(final Long targetReservationId, final Long myMemberId) {
         final Member requestMember = memberService.findMemberById(myMemberId);
         final Reservation requestReservation = findReservationById(targetReservationId);
 
-        if (!requestMember.isAdmin() && !requestReservation.getMemberId().equals(myMemberId)) {
-            throw new ForbiddenException(
-                    ErrorType.PERMISSION_DOES_NOT_EXIST,
-                    "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다."
-            );
-        }
+        validateMemberIsAdmin(myMemberId, requestMember, requestReservation);
 
         reservationRepository.delete(requestReservation);
         final Optional<Reservation> waitingOptional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
@@ -114,6 +109,10 @@ public class ReservationService {
                 ReservationStatus.WAITING
         );
 
+        pull(requestReservation, waitingOptional);
+    }
+
+    private void pull(final Reservation requestReservation, final Optional<Reservation> waitingOptional) {
         if (requestReservation.isReserved() && waitingOptional.isPresent()) {
             final Reservation waitingReservation = waitingOptional.get();
             reservationRepository.delete(waitingReservation);
@@ -125,7 +124,16 @@ public class ReservationService {
                     ReservationStatus.RESERVED
             ));
         }
+    }
 
+    private void validateMemberIsAdmin(final Long myMemberId, final Member requestMember,
+                                       final Reservation requestReservation) {
+        if (!requestMember.isAdmin() && !requestReservation.getMemberId().equals(myMemberId)) {
+            throw new ForbiddenException(
+                    ErrorType.PERMISSION_DOES_NOT_EXIST,
+                    "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다."
+            );
+        }
     }
 
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
@@ -212,18 +220,17 @@ public class ReservationService {
     }
 
     public WaitingWithRanksResponse findWaitingWithRankById(final Long myId) {
-        final List<WaitingWithRankResponse> waitingWithRanks = reservationRepository.findWaitingsWithRankByMemberId(myId)
+        return reservationRepository.findWaitingsWithRankByMemberId(myId)
                 .stream()
                 .map(WaitingWithRankResponse::from)
-                .toList();
-        return new WaitingWithRanksResponse(waitingWithRanks);
+                .collect(Collectors.collectingAndThen(Collectors.toList(), WaitingWithRanksResponse::new));
     }
 
-    public void updateState(final Long myId, final Long targetReservationId, final String status) {
+    public void removeReservationByStatus(final Long myId, final Long targetReservationId, final String status) {
         String STATUS_DECLINE = "decline";
         if (!status.equals(STATUS_DECLINE)) {
             return;
         }
-        removeReservationById(targetReservationId, myId);
+        removeReservationByIdAndPullIfMemberIsAdmin(targetReservationId, myId);
     }
 }

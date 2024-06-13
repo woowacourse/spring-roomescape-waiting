@@ -1,4 +1,6 @@
-package roomescape.reservation.domain;
+package roomescape.reservation.dto.response;
+
+import roomescape.reservation.domain.Reservation;
 
 public class WaitingWithRank {
     private final Reservation waiting;
