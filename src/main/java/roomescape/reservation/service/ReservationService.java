@@ -1,20 +1,22 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.member.model.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.SaveReservationRequest;
 import roomescape.reservation.dto.SearchReservationsRequest;
-import roomescape.reservation.model.Reservation;
-import roomescape.reservation.model.ReservationDate;
-import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.model.Theme;
+import roomescape.reservation.dto.WaitingWithRank;
+import roomescape.reservation.model.*;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -25,17 +27,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<Reservation> getReservations() {
@@ -83,11 +88,45 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(final Long reservationId) {
-        reservationRepository.deleteById(reservationId);
+        if (!waitingRepository.existsByReservationId(reservationId)) {
+            reservationRepository.deleteById(reservationId);
+            return;
+        }
+        convertWaitingToReservation(reservationId);
     }
 
-    public List<Reservation> getMyReservations(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId);
+    private void convertWaitingToReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId).get();
+        Member firstWaiter = waitingRepository.findFirstMemberByReservationIdOrderByIdAsc(reservationId);
+        reservation.updateMemberToWaiter(firstWaiter);
+        waitingRepository.deleteByMemberAndReservation(firstWaiter, reservation);
     }
+
+    public List<MyReservationResponse> getMyReservations(final Long memberId) {
+        List<MyReservationResponse> myReservedResponse = getMyReservedResponses(memberId);
+        List<MyReservationResponse> myWaitingResponse = getMyWaitingResponses(memberId);
+
+        List<MyReservationResponse> myReservationResponse = new ArrayList<>(myReservedResponse);
+        myReservationResponse.addAll(myWaitingResponse);
+        return myReservationResponse;
+    }
+
+    private List<MyReservationResponse> getMyReservedResponses(Long memberId) {
+        return reservationRepository.findAllByMemberId(memberId).stream()
+                .map(MyReservationResponse::from)
+                .toList();
+    }
+
+    private List<MyReservationResponse> getMyWaitingResponses(Long memberId) {
+        List<Waiting> myWaiting = waitingRepository.findByMemberId(memberId);
+        List<WaitingWithRank> myWaitingWithRisk = myWaiting.stream()
+                .map((waiting) -> new WaitingWithRank(waiting, waitingRepository.countByReservation(waiting)))
+                .toList();
+        return myWaitingWithRisk.stream()
+                .map(MyReservationResponse::from)
+                .toList();
+    }
+
 }

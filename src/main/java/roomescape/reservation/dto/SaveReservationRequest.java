@@ -2,7 +2,6 @@ package roomescape.reservation.dto;
 
 import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.model.ReservationStatus;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 
@@ -22,7 +21,6 @@ public record SaveReservationRequest(@NotNull(message = "예약 날짜는 공백
             final Member member
     ) {
         return Reservation.of(
-                ReservationStatus.RESERVATION,
                 date,
                 reservationTime,
                 theme,

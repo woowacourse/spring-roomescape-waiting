@@ -29,7 +29,7 @@ class InMemoryMemberRepositoryTest {
         final List<Member> members = memberRepository.findAll();
 
         // Then
-        assertThat(members).hasSize(5);
+        assertThat(members).hasSize(7);
     }
 
     @DisplayName("주어진 id에 일치한 member를 찾아 반환한다.")

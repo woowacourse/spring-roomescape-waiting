@@ -13,7 +13,6 @@ public record ReservationResponse(
         ThemeResponse theme
 ) {
     public static ReservationResponse from(final Reservation reservation) {
-        reservation.getDate();
         return new ReservationResponse(
                 reservation.getId(),
                 new MemberResponse(

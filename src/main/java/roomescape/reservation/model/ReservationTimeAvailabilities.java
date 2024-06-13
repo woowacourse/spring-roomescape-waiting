@@ -1,13 +1,13 @@
 package roomescape.reservation.model;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public record ReservationTimeAvailabilities(Map<ReservationTime, Boolean> values) {
 
     public static ReservationTimeAvailabilities of(final List<ReservationTime> reservationTimes, final List<Reservation> reservations) {
-        final Map<ReservationTime, Boolean> reservationTimeAvailabilities = new HashMap<>();
+        final Map<ReservationTime, Boolean> reservationTimeAvailabilities = new LinkedHashMap<>();
         reservationTimes.forEach(reservationTime -> reservationTimeAvailabilities.put(
                 reservationTime, isTimeAvailable(reservations, reservationTime)));
 

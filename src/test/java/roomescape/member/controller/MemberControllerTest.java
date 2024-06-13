@@ -36,7 +36,7 @@ class MemberControllerTest {
                 .when().get("/members")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(5));
+                .body("size()", is(7));
     }
 
     private String createUserAccessToken() {
