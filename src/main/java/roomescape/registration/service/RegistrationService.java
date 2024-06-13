@@ -1,6 +1,7 @@
 package roomescape.registration.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.model.ReservationExceptionCode;
 import roomescape.exception.model.ReservationTimeExceptionCode;
@@ -19,6 +20,7 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
+@Transactional
 @Service
 public class RegistrationService {
 
