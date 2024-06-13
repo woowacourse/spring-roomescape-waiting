@@ -24,6 +24,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 import roomescape.exception.BadRequestException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -77,7 +78,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(member.getId(),
-                LocalDate.parse(VALID_STRING_DATE), reservationTime.getId(), roomTheme.getId());
+                LocalDate.parse(VALID_STRING_DATE), reservationTime.getId(), roomTheme.getId(), Status.CREATED);
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
         AuthInfo authInfo = new AuthInfo(member.getId(), member.getEmail(), member.getRole());
 
@@ -88,11 +89,11 @@ class ReservationServiceTest {
         MyReservationResponse myReservationResponse = myReservations.get(0);
 
         assertAll(
-                () -> assertThat(myReservationResponse.reservationId()).isEqualTo(reservationResponse.id()),
+                () -> assertThat(myReservationResponse.id()).isEqualTo(reservationResponse.id()),
                 () -> assertThat(myReservationResponse.theme()).isEqualTo(ROOM_THEME1.getName()),
                 () -> assertThat(myReservationResponse.date()).isEqualTo(VALID_STRING_DATE),
                 () -> assertThat(myReservationResponse.time()).isEqualTo(VALID_STRING_TIME),
-                () -> assertThat(myReservationResponse.status()).isEqualTo("예약")
+                () -> assertThat(myReservationResponse.status()).isEqualTo(Status.CREATED)
         );
     }
 
@@ -147,9 +148,11 @@ class ReservationServiceTest {
     @Test
     void deleteById() {
         // given
-        createReservationRequest(MEMBER_BROWN, RESERVATION_TIME_10AM, ROOM_THEME1, VALID_STRING_DATE);
+        ReservationCreateRequest request = createReservationRequest(MEMBER_BROWN, RESERVATION_TIME_10AM,
+                ROOM_THEME1, VALID_STRING_DATE);
+        ReservationResponse response = reservationService.save(request);
         // when
-        reservationService.deleteById(1L);
+        reservationService.deleteReservation(response.id());
         // then
         assertThat(reservationService.findAll()).isEmpty();
     }
@@ -160,6 +163,6 @@ class ReservationServiceTest {
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         RoomTheme savedRoomTheme = roomThemeRepository.save(roomTheme);
         return new ReservationCreateRequest(savedMember.getId(), LocalDate.parse(date),
-                savedReservationTime.getId(), savedRoomTheme.getId());
+                savedReservationTime.getId(), savedRoomTheme.getId(), Status.CREATED);
     }
 }

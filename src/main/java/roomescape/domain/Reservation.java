@@ -1,13 +1,17 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.exception.AuthorizationException;
 import roomescape.exception.BadRequestException;
 
 @Entity
@@ -23,15 +27,18 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     private RoomTheme theme;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+    private LocalDateTime createdAt;
 
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, RoomTheme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(Member member, LocalDate date, ReservationTime time, RoomTheme theme, Status status) {
+        this(null, member, date, time, theme, status);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, RoomTheme theme) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, RoomTheme theme, Status status) {
         validateMember(member);
         validateDate(date);
         validateReservationTime(time);
@@ -41,6 +48,8 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
+        this.createdAt = LocalDateTime.now();
     }
 
     private void validateRoomTheme(RoomTheme theme) {
@@ -67,13 +76,24 @@ public class Reservation {
         }
     }
 
-    public Reservation setId(Long id) {
-        return new Reservation(id, member, date, time, theme);
-    }
-
     public boolean hasDateTime(LocalDate date, ReservationTime reservationTime) {
         return this.date.equals(date)
                 && this.time.getStartAt().equals(reservationTime.getStartAt());
+    }
+
+    public void validateDuplication(Reservation reservation) {
+        if (date.equals(reservation.date)
+                && time.equals(reservation.time)
+                && theme.equals(reservation.theme)
+                && member.equals(reservation.member)) {
+            throw new BadRequestException("중복된 예약이 존재합니다.");
+        }
+    }
+
+    public void validateAuthorization(Member member) {
+        if (!this.member.equals(member) && !member.getRole().equals(Role.ADMIN)) {
+            throw new AuthorizationException("접근권한이 없습니다.");
+        }
     }
 
     public Long getId() {
@@ -94,6 +114,14 @@ public class Reservation {
 
     public RoomTheme getTheme() {
         return theme;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void delete() {
+        status = status.delete();
     }
 
     @Override

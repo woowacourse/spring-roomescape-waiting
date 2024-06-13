@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.TIME;
 
@@ -55,18 +54,6 @@ class ReservationTimeRepositoryTest {
 
         // then
         assertThat(reservationTime.getStartAt()).isEqualTo(TIME);
-    }
-
-    @DisplayName("중복된 예약 시간이 존재하는 지 여부를 반환한다.")
-    @Test
-    void existsByStartAt() {
-        // given
-        ReservationTime reservationTime = RESERVATION_TIME_10AM;
-        reservationTimeRepository.save(reservationTime);
-        // when
-        boolean result = reservationTimeRepository.existsByStartAt(reservationTime.getStartAt());
-        // then
-        assertThat(result).isTrue();
     }
 
     @DisplayName("해당 id의 예약 시간을 삭제한다.")

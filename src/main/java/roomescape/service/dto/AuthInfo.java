@@ -6,7 +6,7 @@ import roomescape.domain.Role;
 
 public record AuthInfo(Long id, String name, Role role) {
 
-    public boolean isNotAdmin() {
-        return role != ADMIN;
+    public boolean isRole(Role role) {
+        return this.role == role;
     }
 }

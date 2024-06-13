@@ -9,7 +9,6 @@ import static roomescape.TestFixture.VALID_STRING_DATE;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +24,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -94,6 +94,24 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(reservationRequest)
                 .when().post("/admin/reservations")
+                .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
+    }
+
+    @DisplayName("예약 대기 성공 테스트")
+    @Test
+    void createReservationWaiting() {
+        // given
+        String accessToken = getTokenByLoginRequest(MEMBER_BROWN);
+        Map<String, Object> reservationRequest = createReservationRequest(
+                MEMBER_BROWN, VALID_STRING_DATE,
+                RESERVATION_TIME_10AM, ROOM_THEME1);
+
+        // then
+        RestAssured.given().log().all()
+                .header("cookie", accessToken)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
                 .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
     }
 
@@ -195,7 +213,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .body(new ReservationCreateRequest(1L, DATE_AFTER_1DAY, 1L, 1L))
+                .body(new ReservationCreateRequest(1L, DATE_AFTER_1DAY, 1L, 1L, Status.CREATED))
                 .when().post("/reservations")
                 .then().log().all().assertThat().statusCode(HttpStatus.NOT_FOUND.value());
     }
@@ -208,24 +226,16 @@ class ReservationControllerTest {
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
+                new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme, Status.CREATED));
+
+        String accessToken = getTokenByLoginRequest(member);
 
         // when & then
         Long id = savedReservation.getId();
         RestAssured.given().log().all()
-                .when().delete("/reservations/" + id)
-                .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
-    }
-
-    @DisplayName("예약 취소 실패 테스트")
-    @Test
-    void deleteReservationFail() {
-        // given
-        long invalidId = 0;
-
-        // when & then
-        RestAssured.given().log().all()
-                .when().delete("/reservations/" + invalidId)
+                .header("cookie", accessToken)
+                .contentType(ContentType.JSON)
+                .when().delete("/admin/reservations/" + id)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 

@@ -25,4 +25,9 @@ public class AdminViewController {
     public String findAdminThemePage() {
         return "admin/theme";
     }
+
+    @GetMapping("/admin/reservation/waiting")
+    public String findReservationWaiting() {
+        return "admin/waiting";
+    }
 }

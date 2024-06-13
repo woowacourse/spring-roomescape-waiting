@@ -6,7 +6,6 @@ import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.ROOM_THEME1;
 
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ReservationRepositoryTest {
@@ -40,29 +40,6 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.findAll()).isEmpty();
     }
 
-
-    @DisplayName("날짜와 시간이 같은 예약이 존재하는지 여부를 반환한다.")
-    @Test
-    void duplicatedReservationTest() {
-        // given
-        LocalDate date = DATE_AFTER_1DAY;
-
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
-        Reservation reservation = new Reservation(member, date, savedReservationTime, savedRoomTheme);
-        reservationRepository.save(reservation);
-
-        // when
-        boolean result = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                date,
-                savedReservationTime.getId(),
-                savedRoomTheme.getId());
-
-        // then
-        assertThat(result).isTrue();
-    }
-
     @DisplayName("예약을 저장한다.")
     @Test
     void save() {
@@ -71,7 +48,7 @@ class ReservationRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
         // when
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme, Status.CREATED));
         // then
         assertThat(reservationRepository.findAll()).hasSize(1);
     }
@@ -84,7 +61,7 @@ class ReservationRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+                new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme, Status.CREATED));
         // when
         reservationRepository.deleteById(savedReservation.getId());
         // then
