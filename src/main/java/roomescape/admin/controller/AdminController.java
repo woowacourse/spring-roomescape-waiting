@@ -18,11 +18,11 @@ import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
 import roomescape.auth.annotation.Auth;
 import roomescape.member.domain.MemberRole;
-import roomescape.registration.domain.reservation.dto.ReservationResponse;
-import roomescape.registration.domain.reservation.service.ReservationService;
-import roomescape.registration.domain.waiting.dto.WaitingResponse;
-import roomescape.registration.domain.waiting.service.WaitingService;
-import roomescape.registration.service.RegistrationService;
+import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.service.ReservationService;
+import roomescape.waiting.dto.WaitingResponse;
+import roomescape.waiting.service.WaitingService;
+import roomescape.reservation.service.RegistrationService;
 
 @RestController
 @Auth(roles = MemberRole.ADMIN)

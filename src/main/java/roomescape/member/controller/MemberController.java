@@ -7,11 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
-import roomescape.registration.dto.RegistrationInfoDto;
-import roomescape.registration.domain.reservation.service.ReservationService;
-import roomescape.registration.domain.waiting.service.WaitingService;
+import roomescape.reservation.dto.RegistrationInfoDto;
+import roomescape.reservation.service.ReservationService;
+import roomescape.waiting.service.WaitingService;
 
-// todo : 멤버별 예약은 멤버에 있는게 맞을까 예약에 있는게 맞을까
 @RestController
 public class MemberController {
 
@@ -31,7 +30,6 @@ public class MemberController {
         return memberService.findMembersId();
     }
 
-    // todo: 정렬 어떻게 할지 생각
     @GetMapping("/member/registrations")
     public List<RegistrationInfoDto> memberReservationList(@LoginMemberId long memberId) {
         List<RegistrationInfoDto> reservationsOfMember = reservationService.findMemberReservations(memberId)

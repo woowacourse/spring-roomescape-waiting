@@ -2,20 +2,16 @@ package roomescape.reservation.domain;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.registration.domain.reservation.domain.Reservation;
-import roomescape.vo.Name;
-import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.exception.model.ReservationExceptionCode;
-import roomescape.theme.domain.Theme;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
+import roomescape.vo.Name;
 
 class ReservationTest {
 
