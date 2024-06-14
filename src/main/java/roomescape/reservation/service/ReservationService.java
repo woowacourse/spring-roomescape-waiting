@@ -4,13 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.DataDuplicateException;
-import roomescape.global.exception.model.ForbiddenException;
-import roomescape.global.exception.model.NotFoundException;
-import roomescape.global.exception.model.ValidateException;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
@@ -19,14 +17,18 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSpecification;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
-import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
-import roomescape.reservation.dto.response.MemberReservationResponse;
-import roomescape.reservation.dto.response.MemberReservationsResponse;
+import roomescape.reservation.dto.request.ReservationSearchRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfoResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
 import roomescape.reservation.dto.response.ReservationsResponse;
+import roomescape.reservation.dto.response.WaitingWithRankResponse;
+import roomescape.reservation.dto.response.WaitingWithRanksResponse;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.ForbiddenException;
+import roomescape.system.exception.model.NotFoundException;
+import roomescape.system.exception.model.ValidateException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
@@ -92,36 +94,65 @@ public class ReservationService {
                         String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
     }
 
-    public void removeReservationById(final Long reservationId, final Long requestMemberId) {
-        final Member member = memberService.findMemberById(requestMemberId);
-        final Reservation reservation = findReservationById(reservationId);
-        final Long reservationMemberId = reservation.getMember().getId();
+    @Transactional
+    public void removeReservationByIdAndPullIfMemberIsAdmin(final Long targetReservationId, final Long myMemberId) {
+        final Member requestMember = memberService.findMemberById(myMemberId);
+        final Reservation requestReservation = findReservationById(targetReservationId);
 
-        if (member.isAdmin() || reservationMemberId.equals(requestMemberId)) {
-            reservationRepository.delete(reservation);
-            return;
-        }
-        throw new ForbiddenException(
-                ErrorType.PERMISSION_DOES_NOT_EXIST,
-                "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다."
+        validateMemberIsAdmin(myMemberId, requestMember, requestReservation);
+
+        reservationRepository.delete(requestReservation);
+        final Optional<Reservation> waitingOptional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
+                requestReservation.getReservationTime(),
+                requestReservation.getDate(),
+                requestReservation.getTheme(),
+                ReservationStatus.WAITING
         );
+
+        pull(requestReservation, waitingOptional);
+    }
+
+    private void pull(final Reservation requestReservation, final Optional<Reservation> waitingOptional) {
+        if (requestReservation.isReserved() && waitingOptional.isPresent()) {
+            final Reservation waitingReservation = waitingOptional.get();
+            reservationRepository.delete(waitingReservation);
+            reservationRepository.save(new Reservation(
+                    waitingReservation.getDate(),
+                    waitingReservation.getReservationTime(),
+                    waitingReservation.getTheme(),
+                    waitingReservation.getMember(),
+                    ReservationStatus.RESERVED
+            ));
+        }
+    }
+
+    private void validateMemberIsAdmin(final Long myMemberId, final Member requestMember,
+                                       final Reservation requestReservation) {
+        if (!requestMember.isAdmin() && !requestReservation.getMemberId().equals(myMemberId)) {
+            throw new ForbiddenException(
+                    ErrorType.PERMISSION_DOES_NOT_EXIST,
+                    "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다."
+            );
+        }
     }
 
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDate requestDate = request.date();
 
-        final ReservationTime requestReservationTime = reservationTimeService.findTimeById(request.timeId());
-        final Theme theme = themeService.findThemeById(request.themeId());
+        final ReservationTime requestTime = reservationTimeService.findTimeById(request.timeId());
+        final Theme requestTheme = themeService.findThemeById(request.themeId());
         final Member member = memberService.findMemberById(memberId);
 
-        validateDateAndTime(requestDate, requestReservationTime, now);
-        validateReservationDuplicate(request, theme);
+        validateDateAndTime(requestDate, requestTime, now);
 
-        // TODO: 예약대기 추가 시, ReservationStatus 값 설정 로직 추가
-        final Reservation savedReservation = reservationRepository.save(
-                request.toEntity(requestReservationTime, theme, member, ReservationStatus.RESERVED));
-        return ReservationResponse.from(savedReservation);
+        final Optional<Reservation> optional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
+                requestTime, requestDate, requestTheme, ReservationStatus.RESERVED
+        );
+        final ReservationStatus state = optional.isEmpty() ? ReservationStatus.RESERVED : ReservationStatus.WAITING;
+        final Reservation saved = reservationRepository.save(
+                new Reservation(requestDate, requestTime, requestTheme, member, state));
+        return ReservationResponse.from(saved);
     }
 
     private void validateDateAndTime(
@@ -152,22 +183,7 @@ public class ReservationService {
         return requestDate.isEqual(today) && requestReservationTime.getStartAt().isBefore(nowTime);
     }
 
-    private void validateReservationDuplicate(
-            final ReservationRequest reservationRequest,
-            final Theme theme
-    ) {
-        final ReservationTime time = reservationTimeService.findTimeById(reservationRequest.timeId());
-
-        final List<Reservation> duplicateTimeReservations = reservationRepository.findByReservationTimeAndDateAndTheme(
-                time, reservationRequest.date(), theme);
-
-        if (!duplicateTimeReservations.isEmpty()) {
-            throw new DataDuplicateException(ErrorType.RESERVATION_DUPLICATED,
-                    String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s]", reservationRequest));
-        }
-    }
-
-    public ReservationsResponse findFilteredReservations(final FilteredReservationRequest request) {
+    public ReservationsResponse findFilteredReservations(final ReservationSearchRequest request) {
         final Specification<Reservation> specification = getReservationSpecification(request);
 
         final List<ReservationResponse> response = reservationRepository.findAll(specification)
@@ -179,7 +195,7 @@ public class ReservationService {
     }
 
     private Specification<Reservation> getReservationSpecification(
-            final FilteredReservationRequest request
+            final ReservationSearchRequest request
     ) {
         Specification<Reservation> specification = (root, query, criteriaBuilder) -> null;
         if (request.themeId() != null) {
@@ -197,15 +213,24 @@ public class ReservationService {
         if (request.dateTo() != null) {
             specification = specification.and(ReservationSpecification.withDateTo(request.dateTo()));
         }
+        if (request.waiting() != null) {
+            specification = specification.and(ReservationSpecification.withWaiting(request.waiting()));
+        }
         return specification;
     }
 
-    public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
-        final Member member = memberService.findMemberById(memberId);
-        final List<Reservation> reservations = reservationRepository.findByMember(member);
-        final List<MemberReservationResponse> responses = reservations.stream()
-                .map(MemberReservationResponse::from)
-                .toList();
-        return new MemberReservationsResponse(responses);
+    public WaitingWithRanksResponse findWaitingWithRankById(final Long myId) {
+        return reservationRepository.findWaitingsWithRankByMemberId(myId)
+                .stream()
+                .map(WaitingWithRankResponse::from)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), WaitingWithRanksResponse::new));
+    }
+
+    public void removeReservationByStatus(final Long myId, final Long targetReservationId, final String status) {
+        String STATUS_DECLINE = "decline";
+        if (!status.equals(STATUS_DECLINE)) {
+            return;
+        }
+        removeReservationByIdAndPullIfMemberIsAdmin(targetReservationId, myId);
     }
 }

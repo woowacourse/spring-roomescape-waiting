@@ -6,8 +6,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.ValidateException;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.ValidateException;
 
 @Entity
 public class Member {

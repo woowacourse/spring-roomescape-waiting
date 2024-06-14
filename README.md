@@ -2,32 +2,33 @@
 
 ## API 명세
 
-| Role     | Method | Endpoint                                                | Description           | File Path                              | Controller Type   |
-|----------|--------|---------------------------------------------------------|-----------------------|----------------------------------------|-------------------|
-|          | GET    | `/`                                                     | 인기 테마 페이지 요청          | `templates/index.html`                 | `@Controller`     |
-|          | GET    | `/reservation`                                          | 사용자 예약 페이지 요청         | `templates/reservation.html`           | `@Controller`     |
-|          | GET    | `/reservation-mine`                                     | 내 예약 조회 페이지 요청        | `templates/reservation-mine.html`      | `@Controller`     |
-| `ADMIN`  | GET    | `/admin`                                                | 어드민 페이지 요청            | `templates/admin/index.html`           | `@Controller`     |
-| `ADMIN`  | GET    | `/admin/reservation`                                    | 예약 관리 페이지 요청          | `templates/admin/reservation-new.html` | `@Controller`     |
-| `ADMIN`  | GET    | `/admin/reservationTime`                                | 예약 시간 관리 페이지 요청       | `templates/admin/reservationTime.html` | `@Controller`     |
-| `ADMIN`  | GET    | `/admin/theme`                                          | 테마 관리 페이지 요청          | `templates/admin/theme.html`           | `@Controller`     |
-|          | GET    | `/login`                                                | 로그인 페이지 요청            | `templates/login.html`                 | `@Controller`     |
-|          | POST   | `/login`                                                | 로그인 요청                |                                        | `@RestController` |
-|          | GET    | `/login/check`                                          | 인증 정보 조회              |                                        | `@RestController` |
-| `MEMBER` | GET    | `/token-reissue`                                        | JWT 토큰 재발급            |                                        | `@RestController` |
-| `ADMIN`  | GET    | `/reservations`                                         | 예약 정보 조회              |                                        | `@RestController` |
-| `MEMBER` | GET    | `/reservations-mine`                                    | 내 예약 정보 조회            |                                        | `@RestController` |
-| `ADMIN`  | GET    | `/reservations/search?themeId&memberId&dateFrom&dateTo` | 예약 정보 조건 검색           |                                        | `@RestController` |
-|          | GET    | `/reservations/themes/{themeId}/reservationTimes?date`  | 특정 날짜의 특정 테마 예약 정보 조회 |                                        | `@RestController` |
-| `MEMBER` | POST   | `/reservations`                                         | 예약 추가                 |                                        | `@RestController` |
-|          | DELETE | `/reservations/{id}`                                    | 예약 취소                 |                                        | `@RestController` |
-|          | GET    | `/reservationTimes`                                     | 예약 시간 조회              |                                        | `@RestController` |
-|          | DELETE | `/reservationTimes/{id}`                                | 예약 시간 추가              |                                        | `@RestController` |
-|          | POST   | `/reservationTimes`                                     | 예약 시간 삭제              |                                        | `@RestController` |
-|          | GET    | `/themes`                                               | 테마 정보 조회              |                                        | `@RestController` |
-|          | GET    | `/themes/top?today`                                     | 특정 기간의 인기 테마 조회       |                                        | `@RestController` |
-|          | POST   | `/themes`                                               | 테마 추가                 |                                        | `@RestController` |
-|          | DELETE | `/themes/{id}`                                          | 테마 삭제                 |                                        | `@RestController` |
+| Role     | Method | Endpoint                                                        | Description           | File Path                              | Controller Type   |
+|----------|--------|-----------------------------------------------------------------|-----------------------|----------------------------------------|-------------------|
+|          | GET    | `/`                                                             | 인기 테마 페이지 요청          | `templates/index.html`                 | `@Controller`     |
+|          | GET    | `/reservation`                                                  | 사용자 예약 페이지 요청         | `templates/reservation.html`           | `@Controller`     |
+|          | GET    | `/reservation-mine`                                             | 내 예약 조회 페이지 요청        | `templates/reservation-mine.html`      | `@Controller`     |
+| `ADMIN`  | GET    | `/admin`                                                        | 어드민 페이지 요청            | `templates/admin/index.html`           | `@Controller`     |
+| `ADMIN`  | GET    | `/admin/reservation`                                            | 예약 관리 페이지 요청          | `templates/admin/reservation-new.html` | `@Controller`     |
+| `ADMIN`  | GET    | `/admin/reservationTime`                                        | 예약 시간 관리 페이지 요청       | `templates/admin/reservationTime.html` | `@Controller`     |
+| `ADMIN`  | GET    | `/admin/waiting`                                                | 예약 대기 관리 페이지 요청       | `templates/admin/waiting.html`         | `@Controller`     |
+| `ADMIN`  | GET    | `/admin/theme`                                                  | 테마 관리 페이지 요청          | `templates/admin/theme.html`           | `@Controller`     |
+|          | GET    | `/login`                                                        | 로그인 페이지 요청            | `templates/login.html`                 | `@Controller`     |
+|          | POST   | `/login`                                                        | 로그인 요청                |                                        | `@RestController` |
+|          | GET    | `/login/check`                                                  | 인증 정보 조회              |                                        | `@RestController` |
+| `MEMBER` | GET    | `/token-reissue`                                                | JWT 토큰 재발급            |                                        | `@RestController` |
+| `ADMIN`  | GET    | `/reservations`                                                 | 예약 정보 조회              |                                        | `@RestController` |
+| `MEMBER` | GET    | `/reservations-mine`                                            | 내 예약 정보 조회            |                                        | `@RestController` |
+| `ADMIN`  | GET    | `/reservations/search?themeId&memberId&dateFrom&dateTo&waiting` | 예약 정보 조건 검색           |                                        | `@RestController` |
+|          | GET    | `/reservations/themes/{themeId}/reservationTimes?date`          | 특정 날짜의 특정 테마 예약 정보 조회 |                                        | `@RestController` |
+| `MEMBER` | POST   | `/reservations`                                                 | 예약 추가                 |                                        | `@RestController` |
+|          | DELETE | `/reservations/{id}`                                            | 예약 취소                 |                                        | `@RestController` |
+|          | GET    | `/reservationTimes`                                             | 예약 시간 조회              |                                        | `@RestController` |
+|          | DELETE | `/reservationTimes/{id}`                                        | 예약 시간 추가              |                                        | `@RestController` |
+|          | POST   | `/reservationTimes`                                             | 예약 시간 삭제              |                                        | `@RestController` |
+|          | GET    | `/themes`                                                       | 테마 정보 조회              |                                        | `@RestController` |
+|          | GET    | `/themes/top?today`                                             | 특정 기간의 인기 테마 조회       |                                        | `@RestController` |
+|          | POST   | `/themes`                                                       | 테마 추가                 |                                        | `@RestController` |
+|          | DELETE | `/themes/{id}`                                                  | 테마 삭제                 |                                        | `@RestController` |
 
 ---
 
@@ -107,7 +108,7 @@ Transfer-Encoding: chunked
 
 ---
 
-### 예약 정보 조회 API
+### 예약 / 예약 대기 정보 조회 API
 
 - Request
 
