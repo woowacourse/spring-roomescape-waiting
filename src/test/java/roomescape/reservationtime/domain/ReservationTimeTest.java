@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.global.exception.model.RoomEscapeException;
-import roomescape.reservationtime.exception.TimeExceptionCode;
+import roomescape.exception.RoomEscapeException;
+import roomescape.exception.model.ReservationTimeExceptionCode;
 
-public class ReservationTimeTest {
+class ReservationTimeTest {
 
     @Test
     @DisplayName("전달 받은 데이터로 Time 객체를 정상적으로 생성한다.")
@@ -28,7 +28,7 @@ public class ReservationTimeTest {
     void validation_ShouldThrowException_WhenStartAtIsNull() {
         Throwable nullStartAt = assertThrows(
                 RoomEscapeException.class, () -> new ReservationTime(null));
-        assertEquals(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION.getMessage(), nullStartAt.getMessage());
+        assertEquals(ReservationTimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION.getMessage(), nullStartAt.getMessage());
     }
 
     @Test
@@ -36,7 +36,7 @@ public class ReservationTimeTest {
     void validation_ShouldThrowException_WhenStartAtIsBeforeOpeningHour() {
         Throwable beforeOpenTime = assertThrows(
                 RoomEscapeException.class, () -> new ReservationTime(LocalTime.of(7, 59)));
-        assertEquals(TimeExceptionCode.TIME_IS_OUT_OF_OPERATING_TIME.getMessage(), beforeOpenTime.getMessage());
+        assertEquals(ReservationTimeExceptionCode.TIME_IS_OUT_OF_OPERATING_TIME.getMessage(), beforeOpenTime.getMessage());
     }
 
     @Test
@@ -44,6 +44,6 @@ public class ReservationTimeTest {
     void validation_ShouldThrowException_WhenStartAtIsAfterEndHour() {
         Throwable afterCloseTime = assertThrows(
                 RoomEscapeException.class, () -> new ReservationTime(LocalTime.of(23, 1)));
-        assertEquals(TimeExceptionCode.TIME_IS_OUT_OF_OPERATING_TIME.getMessage(), afterCloseTime.getMessage());
+        assertEquals(ReservationTimeExceptionCode.TIME_IS_OUT_OF_OPERATING_TIME.getMessage(), afterCloseTime.getMessage());
     }
 }

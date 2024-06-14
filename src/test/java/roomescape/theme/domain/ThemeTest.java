@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.global.domain.Name;
+import roomescape.vo.Name;
 
-public class ThemeTest {
+class ThemeTest {
 
     @Test
     @DisplayName("전달 받은 데이터로 Theme 객체를 정상적으로 생성한다.")

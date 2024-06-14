@@ -8,13 +8,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.reservation.exception.ReservationExceptionCode;
-import roomescape.theme.domain.Theme;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Entity
 public class Reservation {
@@ -29,7 +26,7 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
+    private ReservationTime reservationTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
@@ -40,37 +37,20 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validateAtSave(date);
-        validateAtSaveDateAndTime(date, time);
-
+    public Reservation(long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         this.id = id;
         this.date = date;
-        this.time = time;
+        this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(NULL_ID, date, time, theme, member);
+    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        this(NULL_ID, date, reservationTime, theme, member);
     }
 
-    private void validateAtSave(LocalDate date) {
-        if (date.isBefore(LocalDate.now())) {
-            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION);
-        }
-    }
-
-    private void validateAtSaveDateAndTime(LocalDate date, ReservationTime time) {
-        if (date.equals(LocalDate.now())) {
-            validateTime(time);
-        }
-    }
-
-    private void validateTime(ReservationTime time) {
-        if (time.isBeforeTime(LocalTime.now())) {
-            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_TIME_IS_PAST_EXCEPTION);
-        }
+    public void setMember(Member member) {
+        this.member = member;
     }
 
     public long getId() {
@@ -82,7 +62,7 @@ public class Reservation {
     }
 
     public ReservationTime getReservationTime() {
-        return time;
+        return reservationTime;
     }
 
     public Theme getTheme() {

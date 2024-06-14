@@ -22,11 +22,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.model.ControllerTest;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.dto.TimeRequest;
-import roomescape.reservationtime.dto.TimeResponse;
-import roomescape.reservationtime.service.TimeService;
+import roomescape.reservationtime.dto.ReservationTimeRequest;
+import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.reservationtime.service.ReservationTimeService;
 
-@WebMvcTest(TimeController.class)
+@WebMvcTest(ReservationTimeController.class)
 class ReservationTimeControllerTest extends ControllerTest {
     private final ReservationTime time = new ReservationTime(4L, LocalTime.of(10, 0, 0));
     private final String expectedTime = "10:00:00";
@@ -35,17 +35,17 @@ class ReservationTimeControllerTest extends ControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private TimeService timeService;
+    private ReservationTimeService reservationTimeService;
 
     @Test
     @DisplayName("시간을 잘 저장하는지 확인한다.")
     void reservationTimeSave() throws Exception {
-        when(timeService.addReservationTime(any()))
+        when(reservationTimeService.addReservationTime(any()))
                 .thenReturn(toResponse(time));
 
         String content = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                .writeValueAsString(new TimeRequest(time.getStartAt()));
+                .writeValueAsString(new ReservationTimeRequest(time.getStartAt()));
 
         mockMvc.perform(post("/times")
                         .content(content)
@@ -61,7 +61,7 @@ class ReservationTimeControllerTest extends ControllerTest {
     @Test
     @DisplayName("시간 정보를 잘 불러오는지 확인한다.")
     void reservationTimesList() throws Exception {
-        when(timeService.findReservationTimes())
+        when(reservationTimeService.findReservationTimes())
                 .thenReturn(List.of(toResponse(time)));
 
         mockMvc.perform(get("/times"))
@@ -79,7 +79,7 @@ class ReservationTimeControllerTest extends ControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    public TimeResponse toResponse(ReservationTime time) {
-        return new TimeResponse(time.getId(), time.getStartAt());
+    public ReservationTimeResponse toResponse(ReservationTime time) {
+        return new ReservationTimeResponse(time.getId(), time.getStartAt());
     }
 }

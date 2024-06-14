@@ -3,8 +3,8 @@ package roomescape.view.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import roomescape.global.annotation.Auth;
-import roomescape.member.role.MemberRole;
+import roomescape.auth.annotation.Auth;
+import roomescape.member.domain.MemberRole;
 
 @Controller
 @Auth(roles = MemberRole.ADMIN)
@@ -29,5 +29,10 @@ public class AdminViewController {
     @GetMapping("/theme")
     public String themePage() {
         return "admin/theme";
+    }
+
+    @GetMapping("/waiting")
+    public String waitingPage() {
+        return "admin/waiting";
     }
 }

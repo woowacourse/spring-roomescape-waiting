@@ -23,7 +23,7 @@ class ThemeRepositoryTest {
     @Test
     @DisplayName("제한된 개수에 맞게 인기 많은 테마를 조회해 온다.")
     void findAllByDateOrderByThemeIdCountLimit() {
-        int limitCount = 2;
+        int limitCount = 1;
         LocalDate from = LocalDate.of(2024, 4, 28);
         LocalDate to = LocalDate.of(2024, 5, 28);
         List<Theme> themes = themeRepository.findLimitedAllByDateOrderByThemeIdCount(from, to, limitCount);

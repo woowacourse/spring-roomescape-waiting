@@ -13,18 +13,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.member.role.MemberRole;
-import roomescape.global.domain.Name;
+import roomescape.member.domain.MemberRole;
+import roomescape.vo.Name;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeExceptionCode;
+import roomescape.exception.model.ThemeExceptionCode;
 import roomescape.reservationtime.domain.ReservationTime;
 
 @ExtendWith(MockitoExtension.class)
-public class ThemeServiceTest {
+class ThemeServiceTest {
 
     @InjectMocks
     private ThemeService themeService;
@@ -36,7 +36,7 @@ public class ThemeServiceTest {
     void validateReservationExistence_ShouldThrowException_WhenReservationExist() {
         List<Reservation> reservations = List.of(new Reservation(
                 LocalDate.now().plusDays(1),
-                new ReservationTime(1L, LocalTime.now()),
+                new ReservationTime(1L, LocalTime.of(13, 13, 13)),
                 new Theme(1L, new Name("테스트 테마"), "테마 설명", "썸네일"),
                 new Member(1L, new Name("레모네"), "lemone@gmail.com", "lemon12", MemberRole.MEMBER))
         );
