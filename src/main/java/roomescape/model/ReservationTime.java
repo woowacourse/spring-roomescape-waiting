@@ -15,6 +15,8 @@ import roomescape.service.dto.ReservationTimeDto;
 @Entity
 public class ReservationTime {
 
+    private static final int INITIAL_STATE_ID = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -32,11 +34,11 @@ public class ReservationTime {
         this(0, startAt);
     }
 
-    public ReservationTime() {
+    public ReservationTime(ReservationTimeDto reservationTimeDto) {
+        this(INITIAL_STATE_ID, reservationTimeDto.getStartAt());
     }
 
-    public static ReservationTime from(ReservationTimeDto reservationTimeDto) {
-        return new ReservationTime(reservationTimeDto.getStartAt());
+    public ReservationTime() {
     }
 
     public long getId() {

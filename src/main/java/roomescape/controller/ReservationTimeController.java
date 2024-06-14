@@ -2,7 +2,6 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,7 @@ public class ReservationTimeController {
     public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
         List<ReservationTime> times = reservationTimeService.findAllReservationTimes();
         List<ReservationTimeResponse> response = times.stream()
-                .map(ReservationTimeResponse::from)
+                .map(ReservationTimeResponse::new)
                 .toList();
         return ResponseEntity.ok(response);
     }
@@ -43,7 +42,7 @@ public class ReservationTimeController {
             @Valid @RequestBody ReservationTimeRequest request) {
         ReservationTimeDto timeDto = ReservationTimeDto.from(request);
         ReservationTime time = reservationTimeService.saveReservationTime(timeDto);
-        ReservationTimeResponse response = ReservationTimeResponse.from(time);
+        ReservationTimeResponse response = new ReservationTimeResponse(time);
         return ResponseEntity
                 .created(URI.create("/times/" + response.getId()))
                 .body(response);

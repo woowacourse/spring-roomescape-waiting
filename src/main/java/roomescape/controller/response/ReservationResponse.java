@@ -31,9 +31,9 @@ public class ReservationResponse {
         Theme theme = reservation.getTheme();
         Member member = reservation.getMember();
         return new ReservationResponse(reservation.getId(), reservation.getDate(),
-                ReservationTimeResponse.from(time),
-                ThemeResponse.from(theme),
-                MemberResponse.from(member));
+                new ReservationTimeResponse(time),
+                new ThemeResponse(theme),
+                new MemberResponse(member));
     }
 
     public long getId() {

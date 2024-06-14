@@ -17,6 +17,8 @@ import roomescape.service.dto.ThemeDto;
 @Entity
 public class Theme {
 
+    private static final int INITIAL_STATE_ID = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -46,11 +48,11 @@ public class Theme {
         this(id, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
 
-    public Theme() {
+    public Theme(ThemeDto themeDto) {
+        this(INITIAL_STATE_ID, themeDto.getName(), themeDto.getDescription(), themeDto.getThumbnail());
     }
 
-    public static Theme from(ThemeDto themeDto) {
-        return new Theme(0, themeDto.getName(), themeDto.getDescription(), themeDto.getThumbnail());
+    public Theme() {
     }
 
     public long getId() {

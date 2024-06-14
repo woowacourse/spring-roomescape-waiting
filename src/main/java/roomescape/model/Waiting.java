@@ -9,13 +9,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.Objects;
+import java.time.LocalDateTime;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 import roomescape.service.dto.ReservationDto;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     private static final int INITIAL_STATE_ID = 0;
 
@@ -24,6 +24,8 @@ public class Reservation {
     private long id;
     @NotNull
     private LocalDate date;
+    @NotNull
+    private LocalDateTime created_at;
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "time_id")
@@ -37,27 +39,26 @@ public class Reservation {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    private Waiting(long id, LocalDate date, LocalDateTime created_at, ReservationTime time, Theme theme,
+                    Member member) {
         this.id = id;
         this.date = date;
+        this.created_at = created_at;
         this.time = time;
         this.theme = theme;
         this.member = member;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(INITIAL_STATE_ID, date, time, theme, member);
-    }
-
-    public Reservation(ReservationDto reservationDto) {
+    public Waiting(ReservationDto reservationDto) {
         this(INITIAL_STATE_ID,
                 reservationDto.getDate(),
+                LocalDateTime.now(),
                 new ReservationTime(reservationDto.getTimeId(), null),
                 new Theme(reservationDto.getThemeId(), null, null, null),
                 new Member(reservationDto.getMemberId(), null, null, null, null));
     }
 
-    public Reservation() {
+    public Waiting() {
     }
 
     public long getId() {
@@ -66,6 +67,10 @@ public class Reservation {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public LocalDateTime getCreated_at() {
+        return created_at;
     }
 
     public ReservationTime getTime() {
@@ -78,22 +83,5 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation reservation = (Reservation) o;
-        return id == reservation.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

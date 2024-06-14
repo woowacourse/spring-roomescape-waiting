@@ -24,7 +24,7 @@ class MemberRepositoryTest {
     @DisplayName("특정 이메일과 비밀번호를 가진 사용자를 조회한다.")
     @Test
     void should_find_member_by_email_and_password() {
-        Member expected = new Member(1L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER);
+        Member expected = new Member(2L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER);
 
         Email email = new Email(expected.getEmail());
         Password password = new Password(expected.getPassword());

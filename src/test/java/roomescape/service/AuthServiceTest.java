@@ -31,7 +31,7 @@ class AuthServiceTest {
         MemberInfo memberInfo = TokenUtils.parseToken(accessToken);
         assertAll(
                 () -> assertThat(accessToken).isNotBlank(),
-                () -> assertThat(memberInfo.getId()).isEqualTo(1L));
+                () -> assertThat(memberInfo.getId()).isEqualTo(2L));
     }
 
     @DisplayName("토큰을 통해 사용자 정보를 조회한다.")
@@ -41,6 +41,6 @@ class AuthServiceTest {
 
         MemberInfo loginMember = TokenUtils.parseToken(token);
 
-        assertThat(loginMember.getId()).isEqualTo(1L);
+        assertThat(loginMember.getId()).isEqualTo(2L);
     }
 }
