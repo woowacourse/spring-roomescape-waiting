@@ -27,22 +27,22 @@
       <li class="nav-item">
         <a class="nav-link" href="/reservation">Reservation</a>
       </li>
-      <!--      TODO: [4단계] 사용자 로그인 - 로그인 기능 구현 후 활성화-->
-      <!--      <li class="nav-item">-->
-      <!--        <a class="nav-link" href="/login">Login</a>-->
-      <!--      </li>-->
-      <!--      <li class="nav-item dropdown">-->
-      <!--        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"-->
-      <!--           aria-haspopup="true" aria-expanded="false">-->
-      <!--          <img class="profile-image" src="/image/default-profile.png" alt="Profile">-->
-      <!--          <span id="profile-name">Profile</span> &lt;!&ndash; 프로필 이름을 넣을 span 추가 &ndash;&gt;-->
-      <!--        </a>-->
-      <!--        <div class="dropdown-menu" aria-labelledby="navbarDropdown">-->
-      <!--          <a class="dropdown-item" href="/reservation-mine">My Reservation</a>-->
-      <!--          <div class="dropdown-divider"></div>-->
-      <!--          <a class="dropdown-item" href="#" id="logout-btn">Logout</a>-->
-      <!--        </div>-->
-      <!--      </li>-->
+      <!--      [4단계] 사용자 로그인 - 로그인 기능 구현 후 활성화-->
+            <li class="nav-item">
+              <a class="nav-link" href="/login">Login</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                 aria-haspopup="true" aria-expanded="false">
+                <img class="profile-image" src="/image/default-profile.png" alt="Profile">
+                <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
+              </div>
+            </li>
     </ul>
   </div>
 </nav>
@@ -77,14 +77,9 @@
   </div>
 
   <!--
-  TODO: [5단계] 예약 생성 기능 변경 - 사용자
+  [5단계] 예약 생성 기능 변경 - 사용자
         적용 후 아래에 있는 User Name Input 삭제
   -->
-  <!-- User Name Input -->
-  <div class="input-group mb-3 mt-4">
-    <span class="input-group-text" id="name">예약자명</span>
-    <input id="user-name" type="text" class="form-control" aria-label="Username" aria-describedby="name">
-  </div>
 
   <!-- Reservation Button -->
   <div class="button-group float-right">
@@ -93,9 +88,8 @@
 </div>
 </div>
 
-<!--TODO: [4단계] 사용자 로그인 - 로그인 기능 구현 후 활성화-->
-<!--<script src="/js/user-scripts.js"></script>-->
-
+<!--[4단계] 사용자 로그인 - 로그인 기능 구현 후 활성화-->
+<script src="/js/user-scripts.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="/js/user-reservation.js"></script>
 </body>

@@ -1,0 +1,22 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  # DB connection setting
+  datasource:
+    url: jdbc:h2:mem:database
+    username: sa
+    password: password
+  # DB initialization
+  sql:
+    init:
+      mode: embedded
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+
+security:
+  jwt:
+    access-token:
+      secret-key: since-jjwt-api-0.11-secret-key-must-be-longer-than-32-bytes
+      validity-in-milliseconds: 900000 # 15 minutes
