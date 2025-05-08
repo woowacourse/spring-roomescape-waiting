@@ -8,7 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class AdminControllerTest {
+public class AdminPageControllerTest {
 
     @Test
     @DisplayName("/admin 요청시 메인 페이지 응답")
