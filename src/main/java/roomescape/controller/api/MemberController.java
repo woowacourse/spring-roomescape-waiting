@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.Member;
 import roomescape.dto.request.MemberCreateRequest;
 import roomescape.service.MemberService;
 
@@ -18,7 +19,8 @@ public class MemberController {
     }
 
     @PostMapping
-    public void signUp(@RequestBody MemberCreateRequest memberCreateRequest) {
-        memberService.createUser(memberCreateRequest);
+    public Member signUp(@RequestBody MemberCreateRequest memberCreateRequest) {
+        // TODO: 회원가입 응답 Dto 만들기
+        return memberService.createUser(memberCreateRequest);
     }
 }

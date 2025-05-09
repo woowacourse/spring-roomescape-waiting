@@ -42,11 +42,11 @@ public class AuthController {
         try {
             return ResponseEntity
                     .ok(AuthenticationCheckResponse.from(authService.checkAuthenticationStatus(cookies)));
-        } catch (IllegalArgumentException exception) {
+        } catch (NullPointerException exception) {
             return ResponseEntity
-                    .ok(AuthenticationCheckResponse.from(new Member(null, "익명", "a@a.com", "a")));
-//                    .status(HttpStatus.UNAUTHORIZED)
-//                    .body(null);
+//                    .ok(AuthenticationCheckResponse.from(new Member(null, "익명", "a@a.com", "a")));
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(null);
         }
     }
 }
