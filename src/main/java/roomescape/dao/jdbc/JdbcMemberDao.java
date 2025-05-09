@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Repository
 public class JdbcMemberDao implements MemberDao {
 
@@ -21,9 +24,37 @@ public class JdbcMemberDao implements MemberDao {
     }
 
     @Override
+    public Member add(Member member) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("email", member.getEmail());
+        parameters.put("password", member.getPassword());
+        parameters.put("name", member.getName());
+        Number key = jdbcInsert.executeAndReturnKey(parameters);
+        return member.toEntity(key.longValue());
+    }
+
+    @Override
+    public Member findByEmail(String email) {
+        String sql = "SELECT * FROM member WHERE email = ?";
+        return jdbcTemplate.queryForObject(sql, mapResultsToMember(), email);
+    }
+
+    @Override
     public Member findByEmailAndPassword(String email, String password) {
         String sql = "SELECT * FROM member WHERE email = ? AND password = ?";
         return jdbcTemplate.queryForObject(sql, mapResultsToMember(), email, password);
+    }
+
+    @Override
+    public boolean existByEmail(String email) {
+        String sql = "SELECT EXISTS(SELECT * FROM member WHERE email = ?)";
+        return jdbcTemplate.queryForObject(sql, Boolean.class, email);
+    }
+
+    @Override
+    public boolean existByName(String name) {
+        String sql = "SELECT EXISTS(SELECT * FROM member WHERE name = ?)";
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name);
     }
 
     private RowMapper<Member> mapResultsToMember() {

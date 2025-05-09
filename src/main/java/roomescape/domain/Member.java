@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.exception.AlreadyEntityException;
+
 public class Member {
 
     private final Long id;
@@ -14,7 +16,26 @@ public class Member {
         this.password = password;
     }
 
+    public Member toEntity(Long id) {
+        if (this.id == null) {
+            return new Member(id, name, email, password);
+        }
+        throw new AlreadyEntityException("해당 멤버는 이미 엔티티화 된 상태입니다.");
+    }
+
+    public Long getId() {
+        return id;
+    }
+
     public String getEmail() {
         return email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

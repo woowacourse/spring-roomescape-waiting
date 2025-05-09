@@ -8,11 +8,16 @@ public class MemberPageController {
 
     @GetMapping("/reservation")
     public String reservationPage() {
-        return "reservation";
+        return "/reservation";
     }
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login";
+        return "/login";
+    }
+
+    @GetMapping("/signup")
+    public String signUpPage() {
+        return "/signup";
     }
 }
