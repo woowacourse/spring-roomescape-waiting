@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -31,12 +32,12 @@ public class ReservationService {
         this.themeDao = themeDao;
     }
 
-    public Reservation createReservationAfterNow(ReservationRequest request) {
+    public Reservation createReservationAfterNow(ReservationRequest request, Member member) {
         LocalDate date = request.date();
         ReservationTime time = reservationTimeDao.findById(request.timeId());
         validateDateAndTime(date, time);
 
-        return createReservation(request);
+        return createReservation(request, member);
     }
 
     private void validateDateAndTime(LocalDate date, ReservationTime time) {
@@ -47,14 +48,14 @@ public class ReservationService {
         }
     }
 
-    public Reservation createReservation(ReservationRequest reservationRequest) {
+    public Reservation createReservation(ReservationRequest reservationRequest, Member member) {
         LocalDate date = reservationRequest.date();
         Long timeId = reservationRequest.timeId();
         Long themeId = reservationRequest.themeId();
         validateDuplicateReservation(date, timeId, themeId);
         ReservationTime time = reservationTimeDao.findById(timeId);
         Theme theme = themeDao.findById(themeId);
-        return reservationDao.add(new Reservation(null, reservationRequest.name(), date, time, theme));
+        return reservationDao.add(new Reservation(null, member.getName(), date, time, theme));
     }
 
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {

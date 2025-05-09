@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.annotation.Login;
+import roomescape.domain.Member;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -27,15 +30,15 @@ public class ReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponse createReservation(@RequestBody ReservationRequest request) {
-        return ReservationResponse.from(reservationService.createReservationAfterNow(request));
+    public ReservationResponse createReservation(@Login Member member, @RequestBody ReservationRequest reservationRequest) {
+        return ReservationResponse.from(reservationService.createReservationAfterNow(reservationRequest, member));
     }
 
-    @PostMapping("/admin")
-    @ResponseStatus(HttpStatus.CREATED)
-    private ReservationResponse createAdminReservation(@RequestBody ReservationRequest request) {
-        return ReservationResponse.from(reservationService.createReservation(request));
-    }
+//    @PostMapping("/admin")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    private ReservationResponse createAdminReservation(@RequestBody ReservationRequest reservationRequest) {
+//        return ReservationResponse.from(reservationService.createReservation(reservationRequest));
+//    }
 
     @GetMapping
     public List<ReservationResponse> readReservations() {

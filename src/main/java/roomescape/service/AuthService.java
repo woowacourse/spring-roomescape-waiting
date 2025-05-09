@@ -50,4 +50,21 @@ public class AuthService {
         // TODO: 토큰이 없는 상태
         return "";
     }
+
+    public Member checkAuthenticationStatus(String[] cookies) {
+        String accessToken = extractTokenFromCookie(cookies);
+        String email = jwtTokenProvider.getPayload(accessToken);
+        return memberDao.findByEmail(email);
+    }
+
+    private String extractTokenFromCookie(String[] cookies) {
+        for (String cookie : cookies) {
+            String[] cookieEntry = cookie.split("=");
+            if (cookieEntry[0].equals("token")) {
+                return cookieEntry[1];
+            }
+        }
+        // TODO: 토큰이 없는 상태
+        return "";
+    }
 }
