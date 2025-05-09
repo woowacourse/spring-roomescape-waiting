@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.servlet.http.Cookie;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.dao.MemberDao;
@@ -32,5 +33,21 @@ public class AuthService {
         } catch (DataIntegrityViolationException exception) {
             throw new InvalidCredentialsException();
         }
+    }
+
+    public Member checkAuthenticationStatus(Cookie[] cookies) {
+        String accessToken = extractTokenFromCookie(cookies);
+        String email = jwtTokenProvider.getPayload(accessToken);
+        return memberDao.findByEmail(email);
+    }
+
+    private String extractTokenFromCookie(Cookie[] cookies) {
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("token")) {
+                return cookie.getValue();
+            }
+        }
+        // TODO: 토큰이 없는 상태
+        return "";
     }
 }
