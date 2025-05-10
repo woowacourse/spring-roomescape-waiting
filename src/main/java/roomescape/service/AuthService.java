@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequest;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.InvalidCredentialsException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.infrastructure.JwtTokenProvider;
 
 @Service
@@ -47,24 +49,13 @@ public class AuthService {
                 return cookie.getValue();
             }
         }
-        // TODO: 토큰이 없는 상태
-        return "";
+        throw new UnauthorizedException("로그인 되지 않은 상태이다.");
     }
 
-    public Member checkAuthenticationStatus(String[] cookies) {
+    public boolean isAdminRequest(Cookie[] cookies) {
         String accessToken = extractTokenFromCookie(cookies);
         String email = jwtTokenProvider.getPayload(accessToken);
-        return memberDao.findByEmail(email);
-    }
-
-    private String extractTokenFromCookie(String[] cookies) {
-        for (String cookie : cookies) {
-            String[] cookieEntry = cookie.split("=");
-            if (cookieEntry[0].equals("token")) {
-                return cookieEntry[1];
-            }
-        }
-        // TODO: 토큰이 없는 상태
-        return "";
+        Member member =  memberDao.findByEmail(email);
+        return member.isAdmin();
     }
 }

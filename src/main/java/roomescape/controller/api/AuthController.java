@@ -27,7 +27,6 @@ public class AuthController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public void login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         String accessToken = authService.createToken(loginRequest);
         Cookie cookie = new Cookie("token", accessToken);

@@ -1,5 +1,6 @@
 package roomescape.argumentresolver;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -24,8 +25,7 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Member resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        // TODO: 토큰이 없을 경우 처리
-        String[] cookies = webRequest.getHeader("cookie").split("; ");
-        return authService.checkAuthenticationStatus(cookies);
+        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+        return authService.checkAuthenticationStatus(request.getCookies());
     }
 }

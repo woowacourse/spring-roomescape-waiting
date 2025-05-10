@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
+import roomescape.domain.Role;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ public class JdbcMemberDao implements MemberDao {
         parameters.put("email", member.getEmail());
         parameters.put("password", member.getPassword());
         parameters.put("name", member.getName());
+        parameters.put("role", member.getRole());
         Number key = jdbcInsert.executeAndReturnKey(parameters);
         return member.toEntity(key.longValue());
     }
@@ -75,7 +77,8 @@ public class JdbcMemberDao implements MemberDao {
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 resultSet.getString("email"),
-                resultSet.getString("password")
+                resultSet.getString("password"),
+                Role.valueOf(resultSet.getString("role"))
         );
     }
 }

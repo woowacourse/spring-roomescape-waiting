@@ -20,6 +20,7 @@ CREATE TABLE theme
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     thumbnail VARCHAR(255) NOT NULL,
+    role        VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
 );
 

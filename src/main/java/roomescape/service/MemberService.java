@@ -22,7 +22,7 @@ public class MemberService {
         String email = memberCreateRequest.email();
         String name = memberCreateRequest.name();
         validateDuplicateUser(email, name);
-        Member newMember = new Member(null, name, email, memberCreateRequest.password());
+        Member newMember = Member.generateNormalMember(name, email, memberCreateRequest.password());
         return memberDao.add(newMember);
     }
 
