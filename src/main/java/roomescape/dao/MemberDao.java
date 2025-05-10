@@ -2,7 +2,9 @@ package roomescape.dao;
 
 
 import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MemberDao {

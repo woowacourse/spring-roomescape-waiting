@@ -86,6 +86,17 @@ public class ReservationService {
         return reservationDao.findAll();
     }
 
+    public List<Reservation> findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
+        validateNoInput(memberId, themeId, startDate, endDate);
+        return reservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(memberId, themeId, startDate, endDate);
+    }
+
+    private void validateNoInput(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
+        if (memberId == null && themeId == null && startDate == null && endDate == null) {
+            throw new InvalidInputException("필터링할 조건을 하나 이상 입력하라.");
+        }
+    }
+
     public void deleteReservationById(Long id) {
         if (reservationDao.deleteById(id) == 0) {
             throw new InvalidInputException("존재하지 않는 예약 id이다.");

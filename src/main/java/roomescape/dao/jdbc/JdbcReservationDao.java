@@ -13,6 +13,7 @@ import roomescape.domain.Theme;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,65 @@ public class JdbcReservationDao implements ReservationDao {
                 WHERE r.date = ? AND r.theme_id = ?
                 """;
         return jdbcTemplate.query(sql, mapResultsToReservation(), date, themeId);
+    }
+
+    @Override
+    public List<Reservation> findByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                SELECT
+                    r.id as reservation_id,
+                    r.date,
+                    m.id as member_id,
+                    m.name as member_name,
+                    m.email as member_email,
+                    m.password as member_password,
+                    m.role as member_role,
+                    rt.id as time_id,
+                    rt.start_at as time_value,
+                    t.id as theme_id,
+                    t.name as theme_name,
+                    t.description,
+                    t.thumbnail
+                FROM reservation as r
+                    INNER JOIN member as m ON r.member_id = m.id
+                    INNER JOIN reservation_time as rt ON r.time_id = rt.id
+                    INNER JOIN theme as t ON r.theme_id = t.id
+                """;
+
+        List<String> whereCluases = new ArrayList<>();
+        List<Object> parameters = new ArrayList<>();
+        addMemberCondition(memberId, whereCluases, parameters);
+        addThemeCondition(themeId, whereCluases, parameters);
+        addDateCondition(startDate, endDate, whereCluases, parameters);
+        if (whereCluases.size() > 0) {
+            sql = sql + " WHERE " + String.join(" AND ", whereCluases);
+        }
+        return jdbcTemplate.query(sql, parameters.toArray(), mapResultsToReservation());
+    }
+
+    private void addMemberCondition(Long memberId, List<String> whereCluases, List<Object> parameters) {
+        if (memberId == null) {
+            return;
+        }
+        whereCluases.add("m.id = ?");
+        parameters.add(memberId);
+    }
+
+    private void addThemeCondition(Long themeId, List<String> whereCluases, List<Object> parameters) {
+        if (themeId == null) {
+            return;
+        }
+        whereCluases.add("t.id = ?");
+        parameters.add(themeId);
+    }
+
+    private void addDateCondition(LocalDate startDate, LocalDate endDate, List<String> whereCluases, List<Object> parameters) {
+        if (startDate == null || endDate == null) {
+            return;
+        }
+        whereCluases.add("r.date >= ? AND r.date <= ?");
+        parameters.add(startDate);
+        parameters.add(endDate);
     }
 
     @Override
