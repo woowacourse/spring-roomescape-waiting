@@ -33,10 +33,10 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    private List<ReservationResponse> readFilteredReservation(@RequestParam("memberId") @Nullable Long memberId,
-                                                              @RequestParam("themeId") @Nullable Long themeId,
-                                                              @RequestParam("startDate") @Nullable LocalDate startDate,
-                                                              @RequestParam("endDate") @Nullable LocalDate endDate) {
+    private List<ReservationResponse> readFilteredReservation(@RequestParam(value = "memberId", required = false) Long memberId,
+                                                              @RequestParam(value = "themeId", required = false) Long themeId,
+                                                              @RequestParam(value = "startDate", required = false) LocalDate startDate,
+                                                              @RequestParam(value = "endDate", required = false) LocalDate endDate) {
         return reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(memberId, themeId, startDate, endDate).stream()
                 .map(ReservationResponse::from)
                 .toList();
