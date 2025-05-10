@@ -78,9 +78,8 @@ class JdbcThemeDaoTest {
     @Test
     @DisplayName("일주일 동안의 인기 테마를 검색할 수 있다.")
     void findMostReservedThemesInPeriodWithLimit() {
-        LocalDate date = LocalDate.of(2025, 4, 30);
-        List<Theme> themes = jdbcThemeDao.findMostReservedThemesInPeriodWithLimit(date.minusDays(7),
-                date, 2);
+        LocalDate date = LocalDate.of(2025, 5, 6);
+        List<Theme> themes = jdbcThemeDao.findMostReservedThemesInPeriodWithLimit(date.minusDays(7), date, 2);
         assertAll(() -> {
             assertThat(themes.getFirst().getId()).isEqualTo(2);
             assertThat(themes.getLast().getId()).isEqualTo(1);

@@ -46,7 +46,12 @@ public class JdbcReservationDao implements ReservationDao {
 
     @Override
     public List<Reservation> findAll() {
-        String sql = """
+        String sql = generateFindAllQuery();
+        return jdbcTemplate.query(sql, mapResultsToReservation());
+    }
+
+    private String generateFindAllQuery() {
+        return """
                 SELECT
                     r.id as reservation_id,
                     r.date,
@@ -66,64 +71,24 @@ public class JdbcReservationDao implements ReservationDao {
                     INNER JOIN reservation_time as rt ON r.time_id = rt.id
                     INNER JOIN theme as t ON r.theme_id = t.id
                 """;
-        return jdbcTemplate.query(sql, mapResultsToReservation());
     }
 
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
-        String sql = """
-                SELECT
-                    r.id as reservation_id,
-                    r.date,
-                    m.id as member_id,
-                    m.name as member_name,
-                    m.email as member_email,
-                    m.password as member_password,
-                    m.role as member_role,
-                    rt.id as time_id,
-                    rt.start_at as time_value,
-                    t.id as theme_id,
-                    t.name as theme_name,
-                    t.description,
-                    t.thumbnail
-                FROM reservation as r
-                    INNER JOIN member as m ON r.member_id = m.id
-                    INNER JOIN reservation_time as rt ON r.time_id = rt.id
-                    INNER JOIN theme as t ON r.theme_id = t.id
-                WHERE r.date = ? AND r.theme_id = ?
-                """;
+        String sql = generateFindAllQuery()
+                + " WHERE r.date = ? AND r.theme_id = ?";
         return jdbcTemplate.query(sql, mapResultsToReservation(), date, themeId);
     }
 
     @Override
     public List<Reservation> findByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
-        String sql = """
-                SELECT
-                    r.id as reservation_id,
-                    r.date,
-                    m.id as member_id,
-                    m.name as member_name,
-                    m.email as member_email,
-                    m.password as member_password,
-                    m.role as member_role,
-                    rt.id as time_id,
-                    rt.start_at as time_value,
-                    t.id as theme_id,
-                    t.name as theme_name,
-                    t.description,
-                    t.thumbnail
-                FROM reservation as r
-                    INNER JOIN member as m ON r.member_id = m.id
-                    INNER JOIN reservation_time as rt ON r.time_id = rt.id
-                    INNER JOIN theme as t ON r.theme_id = t.id
-                """;
-
+        String sql = generateFindAllQuery();
         List<String> whereCluases = new ArrayList<>();
         List<Object> parameters = new ArrayList<>();
         addMemberCondition(memberId, whereCluases, parameters);
         addThemeCondition(themeId, whereCluases, parameters);
         addDateCondition(startDate, endDate, whereCluases, parameters);
-        if (whereCluases.size() > 0) {
+        if (!whereCluases.isEmpty()) {
             sql = sql + " WHERE " + String.join(" AND ", whereCluases);
         }
         return jdbcTemplate.query(sql, parameters.toArray(), mapResultsToReservation());

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import roomescape.global.exception.InvalidInputException;
 
-public record ReservationRequest(
+public record ReservationCreateRequest(
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
     Long timeId,
     Long themeId) {
 
-    public ReservationRequest {
+    public ReservationCreateRequest {
         validateNull(date, timeId, themeId);
     }
 

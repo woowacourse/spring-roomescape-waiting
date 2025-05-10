@@ -17,7 +17,7 @@ public class FakeReservationDao implements ReservationDao {
     public Reservation add(Reservation reservation) {
         Reservation saved = new Reservation(
                 index.getAndIncrement(),
-                reservation.getName(),
+                reservation.getMember(),
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme()
@@ -36,6 +36,11 @@ public class FakeReservationDao implements ReservationDao {
         return reservations.stream()
                 .filter(reservation -> reservation.getDate().isEqual(date) && reservation.getTheme().getId().equals(themeId))
                 .toList();
+    }
+
+    @Override
+    public List<Reservation> findByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
+        return List.of();
     }
 
     @Override

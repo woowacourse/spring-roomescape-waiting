@@ -59,7 +59,7 @@ public class ReservationTimeControllerTest {
             .body("size()", is(6));
 
         RestAssured.given().log().all()
-            .when().delete("/times/1")
+            .when().delete("/times/6")
             .then().log().all()
             .statusCode(204);
 

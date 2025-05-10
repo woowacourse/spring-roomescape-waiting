@@ -11,6 +11,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.member.model.Member;
+import roomescape.member.model.Role;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
@@ -73,9 +75,10 @@ public class ReservationTimeServiceTest {
     void findReservationTimeByDateAndThemeIdWithIsBooked() {
         // Given
         FakeReservationDao reservationDao = new FakeReservationDao();
+        Member member = new Member(1L, "일반1", "normal1@normal.com", "password", Role.NORMAL);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "테마설명", "테마썸네일");
-        reservationDao.add(new Reservation(null, "프리", LocalDate.of(2025, 4, 28), time, theme));
+        reservationDao.add(new Reservation(null, member, LocalDate.of(2025, 4, 28), time, theme));
         reservationTimeService = new ReservationTimeService(new FakeReservationTimeDao(), reservationDao);
         reservationTimeService.createReservationTime(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
         reservationTimeService.createReservationTime(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));

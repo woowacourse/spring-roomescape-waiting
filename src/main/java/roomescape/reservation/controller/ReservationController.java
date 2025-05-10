@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.annotation.Login;
 import roomescape.member.model.Member;
-import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -29,8 +29,8 @@ public class ReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponse createReservation(@Login Member member, @RequestBody ReservationRequest reservationRequest) {
-        return ReservationResponse.from(reservationService.createReservationAfterNow(reservationRequest, member));
+    public ReservationResponse createReservation(@Login Member member, @RequestBody ReservationCreateRequest reservationCreateRequest) {
+        return ReservationResponse.from(reservationService.createReservationAfterNow(reservationCreateRequest, member));
     }
 
     @GetMapping

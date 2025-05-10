@@ -4,6 +4,7 @@ CREATE TABLE member
     name        VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL,
     password    VARCHAR(255) NOT NULL,
+    role        VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -20,7 +21,6 @@ CREATE TABLE theme
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     thumbnail VARCHAR(255) NOT NULL,
-    role        VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
 );
 

@@ -4,10 +4,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.global.exception.InvalidInputException;
 
-public class TimeCreateRequestTest {
+public class ReservationTimeCreateRequestTest {
 
     @Test
     @DisplayName("시간은 빈 값이 들어올 수 없다.")

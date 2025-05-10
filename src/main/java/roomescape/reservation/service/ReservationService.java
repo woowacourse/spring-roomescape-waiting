@@ -10,7 +10,7 @@ import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
-import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.global.exception.InvalidInputException;
 import roomescape.reservation.exception.NotCorrectDateTimeException;
@@ -36,7 +36,7 @@ public class ReservationService {
         this.memberDao = memberDao;
     }
 
-    public Reservation createReservationAfterNow(ReservationRequest request, Member member) {
+    public Reservation createReservationAfterNow(ReservationCreateRequest request, Member member) {
         LocalDate date = request.date();
         ReservationTime time = reservationTimeDao.findById(request.timeId());
         validateDateAndTime(date, time);
@@ -61,11 +61,11 @@ public class ReservationService {
                 member);
     }
 
-    public Reservation createReservation(ReservationRequest reservationRequest, Member member) {
+    public Reservation createReservation(ReservationCreateRequest reservationCreateRequest, Member member) {
         return generateReservation(
-                reservationRequest.date(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId(),
+                reservationCreateRequest.date(),
+                reservationCreateRequest.timeId(),
+                reservationCreateRequest.themeId(),
                 member);
     }
 

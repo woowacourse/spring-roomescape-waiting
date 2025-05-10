@@ -23,7 +23,6 @@ public class MemberController {
 
     @PostMapping
     public MemberGetResponse signUp(@RequestBody MemberCreateRequest memberCreateRequest) {
-        // TODO: 회원가입 응답 Dto 만들기
         return MemberGetResponse.from(memberService.createUser(memberCreateRequest));
     }
 

@@ -1,8 +1,9 @@
 package roomescape.auth.service;
 
 import jakarta.servlet.http.Cookie;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import roomescape.auth.constant.AuthConstant;
 import roomescape.member.dao.MemberDao;
 import roomescape.member.model.Member;
 import roomescape.auth.dto.request.LoginRequest;
@@ -31,7 +32,7 @@ public class AuthService {
     private Member findMember(String email, String password) {
         try {
             return memberDao.findByEmailAndPassword(email, password);
-        } catch (DataIntegrityViolationException exception) {
+        } catch (DataAccessException exception) {
             throw new InvalidCredentialsException();
         }
     }
@@ -43,12 +44,15 @@ public class AuthService {
     }
 
     private String extractTokenFromCookie(Cookie[] cookies) {
+        if (cookies == null) {
+            throw new UnauthorizedException();
+        }
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("token")) {
+            if (cookie.getName().equals(AuthConstant.COOKIE_KEY_OF_ACCESS_TOKEN)) {
                 return cookie.getValue();
             }
         }
-        throw new UnauthorizedException("로그인 되지 않은 상태이다.");
+        throw new UnauthorizedException();
     }
 
     public boolean isAdminRequest(Cookie[] cookies) {
