@@ -34,12 +34,6 @@ public class ReservationController {
         return ReservationResponse.from(reservationService.createReservationAfterNow(reservationRequest, member));
     }
 
-//    @PostMapping("/admin")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    private ReservationResponse createAdminReservation(@RequestBody ReservationRequest reservationRequest) {
-//        return ReservationResponse.from(reservationService.createReservation(reservationRequest));
-//    }
-
     @GetMapping
     public List<ReservationResponse> readReservations() {
         return reservationService.findAllReservations().stream()

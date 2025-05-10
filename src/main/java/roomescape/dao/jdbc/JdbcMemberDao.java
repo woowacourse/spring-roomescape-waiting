@@ -8,6 +8,7 @@ import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -31,6 +32,18 @@ public class JdbcMemberDao implements MemberDao {
         parameters.put("name", member.getName());
         Number key = jdbcInsert.executeAndReturnKey(parameters);
         return member.toEntity(key.longValue());
+    }
+
+    @Override
+    public List<Member> findAll() {
+        String sql = "SELECT * FROM member";
+        return jdbcTemplate.query(sql, mapResultsToMember());
+    }
+
+    @Override
+    public Member findById(Long id) {
+        String sql = "SELECT * FROM member WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, mapResultsToMember(), id);
     }
 
     @Override

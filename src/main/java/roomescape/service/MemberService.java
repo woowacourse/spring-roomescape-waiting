@@ -4,7 +4,10 @@ import org.springframework.stereotype.Service;
 import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberCreateRequest;
+import roomescape.dto.response.MemberGetResponse;
 import roomescape.exception.DuplicateMemberException;
+
+import java.util.List;
 
 @Service
 public class MemberService {
@@ -30,5 +33,9 @@ public class MemberService {
         if (memberDao.existByName(name)) {
             throw new DuplicateMemberException("이미 존재하는 이름이다.");
         }
+    }
+
+    public List<Member> findAllMembers() {
+        return memberDao.findAll();
     }
 }

@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -8,6 +9,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.dto.request.AdminReservationCreateRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.InvalidInputException;
@@ -24,12 +26,14 @@ public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
+    private final MemberDao memberDao;
 
     public ReservationService(ReservationDao reservationDao,
-                              ReservationTimeDao reservationTimeDao, ThemeDao themeDao) {
+                              ReservationTimeDao reservationTimeDao, ThemeDao themeDao, MemberDao memberDao) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
+        this.memberDao = memberDao;
     }
 
     public Reservation createReservationAfterNow(ReservationRequest request, Member member) {
@@ -48,14 +52,28 @@ public class ReservationService {
         }
     }
 
+    public Reservation createReservation(AdminReservationCreateRequest adminReservationCreateRequest) {
+        Member member = memberDao.findById(adminReservationCreateRequest.memberId());
+        return generateReservation(
+                adminReservationCreateRequest.date(),
+                adminReservationCreateRequest.timeId(),
+                adminReservationCreateRequest.themeId(),
+                member);
+    }
+
     public Reservation createReservation(ReservationRequest reservationRequest, Member member) {
-        LocalDate date = reservationRequest.date();
-        Long timeId = reservationRequest.timeId();
-        Long themeId = reservationRequest.themeId();
+        return generateReservation(
+                reservationRequest.date(),
+                reservationRequest.timeId(),
+                reservationRequest.themeId(),
+                member);
+    }
+
+    private Reservation generateReservation(LocalDate date, Long timeId, Long themeId, Member member) {
         validateDuplicateReservation(date, timeId, themeId);
         ReservationTime time = reservationTimeDao.findById(timeId);
         Theme theme = themeDao.findById(themeId);
-        return reservationDao.add(new Reservation(null, member.getName(), date, time, theme));
+        return reservationDao.add(new Reservation(null, member, date, time, theme));
     }
 
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {

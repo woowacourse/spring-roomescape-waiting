@@ -3,9 +3,15 @@ package roomescape.dao;
 
 import roomescape.domain.Member;
 
+import java.util.List;
+
 public interface MemberDao {
 
     Member add(Member member);
+
+    List<Member> findAll();
+
+    Member findById(Long memberId);
 
     Member findByEmail(String email);
 

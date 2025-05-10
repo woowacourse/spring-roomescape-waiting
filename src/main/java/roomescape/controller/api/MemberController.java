@@ -1,12 +1,16 @@
 package roomescape.controller.api;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberCreateRequest;
+import roomescape.dto.response.MemberGetResponse;
 import roomescape.service.MemberService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/members")
@@ -19,8 +23,15 @@ public class MemberController {
     }
 
     @PostMapping
-    public Member signUp(@RequestBody MemberCreateRequest memberCreateRequest) {
+    public MemberGetResponse signUp(@RequestBody MemberCreateRequest memberCreateRequest) {
         // TODO: 회원가입 응답 Dto 만들기
-        return memberService.createUser(memberCreateRequest);
+        return MemberGetResponse.from(memberService.createUser(memberCreateRequest));
+    }
+
+    @GetMapping
+    public List<MemberGetResponse> readAllMembers() {
+        return memberService.findAllMembers().stream()
+                .map(MemberGetResponse::from)
+                .toList();
     }
 }
