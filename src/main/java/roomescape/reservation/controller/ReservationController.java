@@ -27,14 +27,15 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @Login
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponse createReservation(@Login Member member, @RequestBody ReservationCreateRequest reservationCreateRequest) {
+    public ReservationResponse createReservation(@RequestBody ReservationCreateRequest reservationCreateRequest, Member member) {
         return ReservationResponse.from(reservationService.createReservationAfterNow(reservationCreateRequest, member));
     }
 
     @GetMapping
-    public List<ReservationResponse> readReservations() {
+    public List<ReservationResponse> readAllReservations() {
         return reservationService.findAllReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
