@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
-import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.ReservationGetResponse;
 import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
@@ -27,17 +27,17 @@ public class AdminReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    private ReservationResponse createAdminReservation(@RequestBody AdminReservationCreateRequest requestBody) {
-        return ReservationResponse.from(reservationService.createReservation(requestBody));
+    private ReservationGetResponse createAdminReservation(@RequestBody AdminReservationCreateRequest requestBody) {
+        return ReservationGetResponse.from(reservationService.createReservation(requestBody));
     }
 
     @GetMapping
-    private List<ReservationResponse> readFilteredReservation(@RequestParam(value = "memberId", required = false) Long memberId,
-                                                              @RequestParam(value = "themeId", required = false) Long themeId,
-                                                              @RequestParam(value = "startDate", required = false) LocalDate startDate,
-                                                              @RequestParam(value = "endDate", required = false) LocalDate endDate) {
+    private List<ReservationGetResponse> readFilteredReservation(@RequestParam(value = "memberId", required = false) Long memberId,
+                                                                 @RequestParam(value = "themeId", required = false) Long themeId,
+                                                                 @RequestParam(value = "startDate", required = false) LocalDate startDate,
+                                                                 @RequestParam(value = "endDate", required = false) LocalDate endDate) {
         return reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(memberId, themeId, startDate, endDate).stream()
-                .map(ReservationResponse::from)
+                .map(ReservationGetResponse::from)
                 .toList();
     }
 }

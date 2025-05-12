@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.annotation.Login;
 import roomescape.member.model.Member;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.ReservationGetResponse;
 import roomescape.reservation.service.ReservationService;
 
 import java.util.List;
@@ -30,14 +30,14 @@ public class ReservationController {
     @Login
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponse createReservation(@RequestBody ReservationCreateRequest requestBody, Member member) {
-        return ReservationResponse.from(reservationService.createReservationAfterNow(requestBody, member));
+    public ReservationGetResponse createReservation(@RequestBody ReservationCreateRequest requestBody, Member member) {
+        return ReservationGetResponse.from(reservationService.createReservationAfterNow(requestBody, member));
     }
 
     @GetMapping
-    public List<ReservationResponse> readAllReservations() {
+    public List<ReservationGetResponse> readAllReservations() {
         return reservationService.findAllReservations().stream()
-                .map(ReservationResponse::from)
+                .map(ReservationGetResponse::from)
                 .toList();
     }
 
