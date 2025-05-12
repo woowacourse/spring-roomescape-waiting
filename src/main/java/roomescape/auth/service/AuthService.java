@@ -22,14 +22,14 @@ public class AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public String createToken(LoginRequest loginRequest) {
+    public String login(LoginRequest loginRequest) {
         String email = loginRequest.email();
         String password = loginRequest.password();
-        Member member = findMember(email, password);
+        Member member = findMemberByEmailAndPassword(email, password);
         return jwtTokenProvider.createToken(member.getEmail());
     }
 
-    private Member findMember(String email, String password) {
+    private Member findMemberByEmailAndPassword(String email, String password) {
         try {
             return memberDao.findByEmailAndPassword(email, password);
         } catch (DataAccessException exception) {
@@ -39,6 +39,10 @@ public class AuthService {
 
     public Member checkAuthenticationStatus(Cookie[] cookies) {
         String accessToken = extractTokenFromCookie(cookies);
+        return findMemberWithAccessToken(accessToken);
+    }
+
+    private Member findMemberWithAccessToken(String accessToken) {
         String email = jwtTokenProvider.getPayload(accessToken);
         return memberDao.findByEmail(email);
     }
@@ -56,9 +60,7 @@ public class AuthService {
     }
 
     public boolean isAdminRequest(Cookie[] cookies) {
-        String accessToken = extractTokenFromCookie(cookies);
-        String email = jwtTokenProvider.getPayload(accessToken);
-        Member member =  memberDao.findByEmail(email);
+        Member member = checkAuthenticationStatus(cookies);
         return member.isAdmin();
     }
 }
