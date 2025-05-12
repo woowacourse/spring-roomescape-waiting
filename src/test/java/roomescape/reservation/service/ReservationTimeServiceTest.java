@@ -11,6 +11,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.model.Member;
 import roomescape.member.model.Role;
 import roomescape.reservation.model.Reservation;
@@ -23,6 +26,9 @@ import roomescape.global.exception.InvalidInputException;
 import roomescape.reservation.service.fake.FakeReservationDao;
 import roomescape.reservation.service.fake.FakeReservationTimeDao;
 
+@SpringBootTest
+@Transactional
+@Import(ReservationTimeService.class)
 public class ReservationTimeServiceTest {
 
     private ReservationTimeService reservationTimeService;

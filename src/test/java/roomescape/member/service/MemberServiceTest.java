@@ -1,45 +1,53 @@
 package roomescape.member.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.member.dao.MemberDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.member.dto.request.MemberCreateRequest;
 import roomescape.member.exception.DuplicateMemberException;
 import roomescape.member.model.Member;
-import roomescape.member.service.fake.FakeMemberDao;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+@SpringBootTest
+@Transactional
+@Import(MemberService.class)
 class MemberServiceTest {
 
-    private MemberDao memberDao;
-
-    @BeforeEach
-    void initialize() {
-        memberDao = new FakeMemberDao();
-    }
+    @Autowired
+    private MemberService memberService;
 
     @Test
     void 멤버를_추가한다() {
         // Given
-        Member member = Member.generateNormalMember("프리", "phree@woowa.com", "password");
+        MemberCreateRequest memberCreateRequest = new MemberCreateRequest("phree@woowa.com", "password", "프리");
 
         // When
+        Member newMember = memberService.createUser(memberCreateRequest);
+
         // Then
-        assertThatCode(() -> memberDao.add(member))
-                .doesNotThrowAnyException();
+        assertAll(() -> {
+            assertThat(newMember).isNotNull();
+            assertThat(newMember.getEmail()).isEqualTo("phree@woowa.com");
+            assertThat(newMember.getPassword()).isEqualTo("password");
+            assertThat(newMember.getName()).isEqualTo("프리");
+        });
     }
 
     @Test
     void 중복된_이름을_가진_멤버는_추가할_수_없다() {
         // Given
-        Member member1 = Member.generateNormalMember("프리", "phree@woowa.com", "password");
-        Member member2 = Member.generateNormalMember("프리", "phree2@woowa.com", "password");
-        memberDao.add(member1);
+        MemberCreateRequest memberCreateRequest = new MemberCreateRequest("phree@woowa.com", "password", "프리");
+        MemberCreateRequest memberCreateRequest2 = new MemberCreateRequest("phree2@woowa.com", "password", "프리");
+        memberService.createUser(memberCreateRequest);
 
         // When
         // Then
-        assertThatThrownBy(() -> memberDao.add(member2))
+        assertThatThrownBy(() -> memberService.createUser(memberCreateRequest2))
                 .isInstanceOf(DuplicateMemberException.class)
                 .hasMessage("이미 존재하는 이름이다.");
     }
@@ -47,13 +55,13 @@ class MemberServiceTest {
     @Test
     void 중복된_이메일을_가진_멤버는_추가할_수_없다() {
         // Given
-        Member member1 = Member.generateNormalMember("프리", "phree@woowa.com", "password");
-        Member member2 = Member.generateNormalMember("프리2", "phree@woowa.com", "password");
-        memberDao.add(member1);
+        MemberCreateRequest memberCreateRequest = new MemberCreateRequest("phree@woowa.com", "password", "프리");
+        MemberCreateRequest memberCreateRequest2 = new MemberCreateRequest("phree@woowa.com", "password", "프리2");
+        memberService.createUser(memberCreateRequest);
 
         // When
         // Then
-        assertThatThrownBy(() -> memberDao.add(member2))
+        assertThatThrownBy(() -> memberService.createUser(memberCreateRequest2))
                 .isInstanceOf(DuplicateMemberException.class)
                 .hasMessage("이미 가입된 이메일이다.");
     }

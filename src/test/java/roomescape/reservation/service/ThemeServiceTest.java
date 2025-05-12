@@ -3,6 +3,9 @@ package roomescape.reservation.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.request.ThemeCreateRequest;
 import roomescape.reservation.exception.DuplicateThemeException;
 import roomescape.global.exception.InvalidInputException;
@@ -11,6 +14,9 @@ import roomescape.reservation.service.fake.FakeThemeDao;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest
+@Transactional
+@Import(ThemeService.class)
 class ThemeServiceTest {
 
     private ThemeService themeService;

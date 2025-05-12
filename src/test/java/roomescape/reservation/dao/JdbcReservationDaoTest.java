@@ -74,6 +74,22 @@ public class JdbcReservationDaoTest {
     }
 
     @Test
+    void 멤버와_테마_날짜로_필터링하여_검색할_수_있다() {
+        // Given
+        // When
+        // Then
+        assertAll(() -> {
+            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, null, null)).hasSize(10);
+            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, null, null)).hasSize(10);
+            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(null, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(12);
+            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, null, null)).hasSize(5);
+            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
+            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
+            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(3);
+        });
+    }
+
+    @Test
     void ID로_예약을_삭제할_수_있다() {
         Member member = new Member(1L, "일반1", "normal1@normal.com", "password", Role.NORMAL);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(12, 0));
@@ -97,21 +113,5 @@ public class JdbcReservationDaoTest {
         jdbcReservationDao.add(reservation);
 
         assertThat(jdbcReservationDao.existByDateTimeAndTheme(date, 1L, 1L)).isTrue();
-    }
-
-    @Test
-    void 멤버와_테마_날짜로_필터링하여_검색할_수_있다() {
-        // Given
-        // When
-        // Then
-        assertAll(() -> {
-            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, null, null)).hasSize(10);
-            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, null, null)).hasSize(10);
-            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(null, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(12);
-            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, null, null)).hasSize(5);
-            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
-            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
-            assertThat(jdbcReservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(3);
-        });
     }
 }

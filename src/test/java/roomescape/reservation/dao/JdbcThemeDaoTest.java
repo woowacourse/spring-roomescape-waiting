@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -26,10 +28,20 @@ class JdbcThemeDaoTest {
     private JdbcThemeDao jdbcThemeDao;
 
     @Test
+    void DataSource_접근_테스트() {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            assertThat(connection).isNotNull();
+            assertThat(connection.getMetaData().getTables(null, null, "THEME", null)
+                    .next()).isTrue();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     @DisplayName("전체 테마를 조회할 수 있다.")
     void findAllThemes() {
         List<Theme> times = jdbcThemeDao.findAll();
-
         assertThat(times).hasSize(3);
     }
 

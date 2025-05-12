@@ -8,6 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.member.model.Member;
 import roomescape.member.model.Role;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +22,17 @@ class JdbcMemberDaoTest {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private JdbcMemberDao jdbcMemberDao;
+
+    @Test
+    void DataSource_접근_테스트() {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            assertThat(connection).isNotNull();
+            assertThat(connection.getMetaData().getTables(null, null, "MEMBER", null)
+                    .next()).isTrue();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     void 멤버를_추가할_수_있다() {

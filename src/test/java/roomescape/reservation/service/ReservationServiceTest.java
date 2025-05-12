@@ -9,6 +9,9 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.dao.MemberDao;
 import roomescape.member.model.Member;
 import roomescape.member.service.fake.FakeMemberDao;
@@ -25,6 +28,9 @@ import roomescape.reservation.service.fake.FakeReservationDao;
 import roomescape.reservation.service.fake.FakeReservationTimeDao;
 import roomescape.reservation.service.fake.FakeThemeDao;
 
+@SpringBootTest
+@Transactional
+@Import(ReservationService.class)
 public class ReservationServiceTest {
 
     private ReservationService reservationService;
