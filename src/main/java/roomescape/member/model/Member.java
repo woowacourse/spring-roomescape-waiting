@@ -29,6 +29,10 @@ public class Member {
         throw new AlreadyEntityException("해당 멤버는 이미 엔티티화 된 상태입니다.");
     }
 
+    public boolean isAdmin() {
+        return role.isAdmin();
+    }
+
     public Long getId() {
         return id;
     }
@@ -47,9 +51,5 @@ public class Member {
 
     public Role getRole() {
         return role;
-    }
-
-    public boolean isAdmin() {
-        return role.isAdmin();
     }
 }

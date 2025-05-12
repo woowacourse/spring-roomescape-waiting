@@ -37,25 +37,32 @@ public class JdbcMemberDao implements MemberDao {
 
     @Override
     public List<Member> findAll() {
-        String sql = "SELECT * FROM member";
+        String sql = generateFindAllQuery();
         return jdbcTemplate.query(sql, mapResultsToMember());
+    }
+
+    private String generateFindAllQuery() {
+        return "SELECT * FROM member";
     }
 
     @Override
     public Member findById(Long id) {
-        String sql = "SELECT * FROM member WHERE id = ?";
+        String whereClause = "WHERE id = ?";
+        String sql = generateFindAllQuery() + whereClause;
         return jdbcTemplate.queryForObject(sql, mapResultsToMember(), id);
     }
 
     @Override
     public Member findByEmail(String email) {
-        String sql = "SELECT * FROM member WHERE email = ?";
+        String whereClause = "WHERE email = ?";
+        String sql = generateFindAllQuery() + whereClause;
         return jdbcTemplate.queryForObject(sql, mapResultsToMember(), email);
     }
 
     @Override
     public Member findByEmailAndPassword(String email, String password) {
-        String sql = "SELECT * FROM member WHERE email = ? AND password = ?";
+        String whereClause = "WHERE email = ? AND password = ?";
+        String sql = generateFindAllQuery() + whereClause;
         return jdbcTemplate.queryForObject(sql, mapResultsToMember(), email, password);
     }
 
