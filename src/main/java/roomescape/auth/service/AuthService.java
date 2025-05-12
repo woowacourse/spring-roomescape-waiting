@@ -9,7 +9,7 @@ import roomescape.member.model.Member;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.exception.InvalidCredentialsException;
 import roomescape.global.exception.UnauthorizedException;
-import roomescape.global.infrastructure.JwtTokenProvider;
+import roomescape.auth.infrastructure.JwtTokenProvider;
 
 @Service
 public class AuthService {

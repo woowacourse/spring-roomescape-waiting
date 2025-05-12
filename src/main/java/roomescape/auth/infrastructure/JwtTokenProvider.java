@@ -1,10 +1,13 @@
-package roomescape.global.infrastructure;
+package roomescape.auth.infrastructure;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.auth.exception.InvalidTokenException;
 
 import java.util.Date;
 
@@ -30,10 +33,16 @@ public class JwtTokenProvider {
     }
 
     public String getPayload(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        } catch (ExpiredJwtException expiredJwtException) {
+            throw new InvalidTokenException("만료된 토큰입니다.");
+        } catch (JwtException | IllegalArgumentException jwtException) {
+            throw new InvalidTokenException("유효하지 않은 토큰입니다.");
+        }
     }
 }

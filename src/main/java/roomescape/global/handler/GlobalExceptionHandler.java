@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.auth.exception.InvalidCredentialsException;
+import roomescape.auth.exception.InvalidTokenException;
 import roomescape.global.dto.response.ErrorResponse;
 import roomescape.global.exception.AlreadyEntityException;
 import roomescape.global.exception.ForbiddenException;
@@ -50,6 +51,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = InvalidCredentialsException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidCredentials(InvalidCredentialsException exception) {
+        return generateErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(value = InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidToken(InvalidTokenException exception) {
         return generateErrorResponse(exception.getMessage());
     }
 
