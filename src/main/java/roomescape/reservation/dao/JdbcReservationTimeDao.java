@@ -33,7 +33,7 @@ public class JdbcReservationTimeDao implements ReservationTimeDao {
         param.put("start_at", reservationTime.getStartAt());
 
         Number key = jdbcInsert.executeAndReturnKey(param);
-        return new ReservationTime(key.longValue(), reservationTime.getStartAt());
+        return reservationTime.toEntity(key.longValue());
     }
 
     @Override

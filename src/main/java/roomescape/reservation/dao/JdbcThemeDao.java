@@ -35,7 +35,7 @@ public class JdbcThemeDao implements ThemeDao {
         param.put("thumbnail", theme.getThumbnail());
 
         Number key = jdbcInsert.executeAndReturnKey(param);
-        return new Theme(key.longValue(), theme.getName(), theme.getDescription(), theme.getThumbnail());
+        return theme.toEntity(key.longValue());
     }
 
     @Override

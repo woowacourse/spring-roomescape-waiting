@@ -39,8 +39,7 @@ public class JdbcReservationDao implements ReservationDao {
         param.put("theme_id", reservation.getTheme().getId());
 
         Number key = jdbcInsert.executeAndReturnKey(param);
-        return new Reservation(key.longValue(), reservation.getMember(), reservation.getDate(),
-                reservation.getTime(), reservation.getTheme());
+        return reservation.toEntity(key.longValue());
     }
 
     @Override

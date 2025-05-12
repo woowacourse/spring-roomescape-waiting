@@ -1,5 +1,7 @@
 package roomescape.reservation.model;
 
+import roomescape.global.exception.AlreadyEntityException;
+
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -11,6 +13,13 @@ public class ReservationTime {
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
+    }
+
+    public ReservationTime toEntity(Long id) {
+        if (this.id == null) {
+            return new ReservationTime(id, startAt);
+        }
+        throw new AlreadyEntityException("해당 예약시간은 이미 엔티티화 된 상태입니다.");
     }
 
     public boolean isBefore(LocalTime time) {
