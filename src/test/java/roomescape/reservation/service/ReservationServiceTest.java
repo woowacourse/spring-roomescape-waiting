@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.dao.MemberDao;
 import roomescape.member.model.Member;
@@ -28,8 +29,8 @@ import roomescape.reservation.service.fake.FakeReservationDao;
 import roomescape.reservation.service.fake.FakeReservationTimeDao;
 import roomescape.reservation.service.fake.FakeThemeDao;
 
-@SpringBootTest
-@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Import(ReservationService.class)
 public class ReservationServiceTest {
 
