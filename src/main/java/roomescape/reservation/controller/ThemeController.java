@@ -36,7 +36,7 @@ public class ThemeController {
         return themeService.findAllThemes();
     }
 
-    @GetMapping("/most-reserved")
+    @GetMapping("/popular")
     public List<Theme> readMostReservedThemes() {
         return themeService.findMostReservedThemes();
     }
