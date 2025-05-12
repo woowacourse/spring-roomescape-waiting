@@ -80,6 +80,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = AlreadyEntityException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleAlreadyEntity(AlreadyEntityException exception) {
+        exception.printStackTrace();
         return generateErrorResponse("서버 오류 발생. 관리자에게 문의하시오.");
     }
 

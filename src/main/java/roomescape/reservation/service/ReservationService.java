@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.global.constant.GlobalConstant;
 import roomescape.member.dao.MemberDao;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dao.ReservationTimeDao;
@@ -45,7 +46,7 @@ public class ReservationService {
     }
 
     private void validateDateAndTime(LocalDate date, ReservationTime time) {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(GlobalConstant.TIME_ZONE));
         if (date.isBefore(now.toLocalDate()) ||
                 (date.isEqual(now.toLocalDate()) && time.isBefore(now.toLocalTime()))) {
             throw new NotCorrectDateTimeException("지나간 날짜와 시간에 대한 예약 생성은 불가능하다.");

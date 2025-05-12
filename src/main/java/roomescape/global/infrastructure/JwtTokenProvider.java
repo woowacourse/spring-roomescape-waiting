@@ -3,6 +3,7 @@ package roomescape.global.infrastructure;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -10,8 +11,11 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private String secretKey = "reservationSecretKey";
-    private long validityInMilliseconds = 3600000;
+    @Value("${auth.jwt.secret-key}")
+    private String secretKey;
+
+    @Value("${auth.jwt.validity-ms}")
+    private long validityInMilliseconds;
 
     public String createToken(String payload) {
         Claims claims = Jwts.claims().setSubject(payload);
