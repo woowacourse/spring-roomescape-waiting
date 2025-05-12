@@ -29,7 +29,7 @@ import roomescape.reservation.service.fake.FakeReservationDao;
 import roomescape.reservation.service.fake.FakeReservationTimeDao;
 import roomescape.reservation.service.fake.FakeThemeDao;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Import(ReservationService.class)
 public class ReservationServiceTest {
