@@ -1,31 +1,23 @@
 package roomescape.reservation.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.request.ThemeCreateRequest;
 import roomescape.reservation.exception.DuplicateThemeException;
 import roomescape.global.exception.InvalidInputException;
-import roomescape.reservation.service.fake.FakeThemeDao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Import(ThemeService.class)
 class ThemeServiceTest {
 
+    @Autowired
     private ThemeService themeService;
-
-    @BeforeEach
-    void setUp() {
-        themeService = new ThemeService(new FakeThemeDao());
-    }
 
     @Test
     @DisplayName("테마를 추가할 수 있다.")
@@ -62,7 +54,7 @@ class ThemeServiceTest {
         int originalThemeCount = themeService.findAllThemes().size();
 
         // When
-        themeService.deleteThemeById(1L);
+        themeService.deleteThemeById(4L);
 
         // Then
         assertThat(themeService.findAllThemes()).hasSize(originalThemeCount - 1);

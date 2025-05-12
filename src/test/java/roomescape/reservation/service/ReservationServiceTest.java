@@ -5,48 +5,23 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.model.Member;
-import roomescape.member.service.fake.FakeMemberDao;
-import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationTimeDao;
-import roomescape.reservation.dao.ThemeDao;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.model.Theme;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.NotCorrectDateTimeException;
-import roomescape.reservation.service.fake.FakeReservationDao;
-import roomescape.reservation.service.fake.FakeReservationTimeDao;
-import roomescape.reservation.service.fake.FakeThemeDao;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Import(ReservationService.class)
 public class ReservationServiceTest {
 
+    @Autowired
     private ReservationService reservationService;
-
-    @BeforeEach
-    void setUp() {
-        ReservationDao reservationDao = new FakeReservationDao();
-        ReservationTimeDao reservationTimeDao = new FakeReservationTimeDao();
-        ThemeDao themeDao = new FakeThemeDao();
-        MemberDao memberDao = new FakeMemberDao();
-        reservationService = new ReservationService(reservationDao, reservationTimeDao, themeDao, memberDao);
-
-        reservationTimeDao.add(new ReservationTime(1L, LocalTime.of(10, 0)));
-        themeDao.add(new Theme(1L, "레벨1", "탈출하기", "http://~"));
-    }
 
     @Test
     @DisplayName("예약 추가를 할 수 있다.")
@@ -56,7 +31,7 @@ public class ReservationServiceTest {
         Reservation actual = reservationService.createReservation(request, member);
 
         assertAll(() -> {
-            assertThat(actual.getId()).isEqualTo(1L);
+            assertThat(actual.getId()).isEqualTo(22L);
             assertThat(actual.getMember().getName()).isEqualTo("프리");
             assertThat(actual.getDate()).isEqualTo(LocalDate.of(2024, 4, 26));
             assertThat(actual.getTime().getId()).isEqualTo(1L);
@@ -94,33 +69,29 @@ public class ReservationServiceTest {
     @Test
     @DisplayName("모든 예약 정보를 가져올 수 있다.")
     void findAllReservations() {
-        Member member = Member.generateNormalMember("프리", "phree@woowa.com", "password");
-        ReservationCreateRequest request1 = new ReservationCreateRequest(LocalDate.of(2024, 4, 26), 1L, 1L);
-        ReservationCreateRequest request2 = new ReservationCreateRequest(LocalDate.of(2024, 4, 28), 1L, 1L);
-
-        reservationService.createReservation(request1, member);
-        reservationService.createReservation(request2, member);
-
-        assertThat(reservationService.findAllReservations()).hasSize(2);
+        assertThat(reservationService.findAllReservations()).hasSize(21);
     }
 
     @Test
     @DisplayName("예약을 id를 통해 제거할 수 있다.")
     void deleteReservationById() {
-        Member member = Member.generateNormalMember("프리", "phree@woowa.com", "password");
-        ReservationCreateRequest request = new ReservationCreateRequest(LocalDate.of(2024, 4, 26), 1L, 1L);
-        reservationService.createReservation(request, member);
-
         reservationService.deleteReservationById(1L);
-
-        assertThat(reservationService.findAllReservations()).hasSize(0);
+        assertThat(reservationService.findAllReservations()).hasSize(20);
     }
 
     @Test
     void 멤버와_테마_날짜로_필터링하여_검색할_수_있다() {
-        // TODO: Stub 공부 후 작성하기
         // Given
         // When
         // Then
+        assertAll(() -> {
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, null, null)).hasSize(10);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, null, null)).hasSize(10);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(12);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, null, null)).hasSize(5);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(3);
+        });
     }
 }

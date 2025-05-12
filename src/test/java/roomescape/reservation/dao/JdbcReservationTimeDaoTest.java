@@ -16,11 +16,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.exception.TimeNotExistException;
-import roomescape.reservation.dao.JdbcReservationTimeDao;
 
 @JdbcTest
 @Import(JdbcReservationTimeDao.class)
 public class JdbcReservationTimeDaoTest {
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
