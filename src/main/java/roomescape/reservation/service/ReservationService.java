@@ -29,8 +29,7 @@ public class ReservationService {
     private final ThemeDao themeDao;
     private final MemberDao memberDao;
 
-    public ReservationService(ReservationDao reservationDao,
-                              ReservationTimeDao reservationTimeDao, ThemeDao themeDao, MemberDao memberDao) {
+    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, MemberDao memberDao) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
@@ -41,7 +40,6 @@ public class ReservationService {
         LocalDate date = request.date();
         ReservationTime time = reservationTimeDao.findById(request.timeId());
         validateDateAndTime(date, time);
-
         return createReservation(request, member);
     }
 

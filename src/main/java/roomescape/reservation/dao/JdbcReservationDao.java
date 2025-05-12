@@ -39,7 +39,6 @@ public class JdbcReservationDao implements ReservationDao {
         param.put("theme_id", reservation.getTheme().getId());
 
         Number key = jdbcInsert.executeAndReturnKey(param);
-
         return new Reservation(key.longValue(), reservation.getMember(), reservation.getDate(),
                 reservation.getTime(), reservation.getTheme());
     }
@@ -75,8 +74,9 @@ public class JdbcReservationDao implements ReservationDao {
 
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
+        String whereClause = " WHERE r.date = ? AND r.theme_id = ?";
         String sql = generateFindAllQuery()
-                + " WHERE r.date = ? AND r.theme_id = ?";
+                + whereClause;
         return jdbcTemplate.query(sql, mapResultsToReservation(), date, themeId);
     }
 

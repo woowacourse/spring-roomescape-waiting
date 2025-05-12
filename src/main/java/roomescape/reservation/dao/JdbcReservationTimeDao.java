@@ -38,13 +38,18 @@ public class JdbcReservationTimeDao implements ReservationTimeDao {
 
     @Override
     public List<ReservationTime> findAll() {
-        String sql = "SELECT id, start_at FROM reservation_time";
+        String sql = generateFindAllQuery();
         return jdbcTemplate.query(sql, mapResultsToReservationTime());
+    }
+
+    private String generateFindAllQuery() {
+        return "SELECT id, start_at FROM reservation_time";
     }
 
     @Override
     public ReservationTime findById(Long id) {
-        String sql = "SELECT id, start_at FROM reservation_time WHERE id = ?";
+        String whereClause = " WHERE id = ?";
+        String sql = generateFindAllQuery() + whereClause;
         try {
             return jdbcTemplate.queryForObject(sql, mapResultsToReservationTime(), id);
         } catch (DataAccessException e) {

@@ -40,13 +40,18 @@ public class JdbcThemeDao implements ThemeDao {
 
     @Override
     public List<Theme> findAll() {
-        String sql = "SELECT id, name, description, thumbnail FROM theme";
+        String sql = generateFindAllQuery();
         return jdbcTemplate.query(sql, mapResultsToTheme());
+    }
+
+    private static String generateFindAllQuery() {
+        return "SELECT id, name, description, thumbnail FROM theme";
     }
 
     @Override
     public Theme findById(Long id) {
-        String sql = "SELECT id, name, description, thumbnail FROM theme WHERE id = ?";
+        String whereClause = " WHERE id = ?";
+        String sql = generateFindAllQuery() + whereClause;
         try {
             return jdbcTemplate.queryForObject(sql, mapResultsToTheme(), id);
         } catch (DataAccessException exception) {
