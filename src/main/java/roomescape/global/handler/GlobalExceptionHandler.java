@@ -11,6 +11,7 @@ import roomescape.global.exception.AlreadyEntityException;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.UnauthorizedException;
 import roomescape.member.exception.DuplicateMemberException;
+import roomescape.member.exception.MemberNotExistException;
 import roomescape.reservation.exception.AssociatedReservationExistsException;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.DuplicateThemeException;
@@ -36,7 +37,7 @@ public class GlobalExceptionHandler {
         return generateErrorResponse(exception.getMessage());
     }
 
-    @ExceptionHandler(value = {ThemeNotExistException.class, TimeNotExistException.class})
+    @ExceptionHandler(value = {ThemeNotExistException.class, TimeNotExistException.class, MemberNotExistException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleEntityNotExist(RuntimeException exception) {
         return generateErrorResponse(exception.getMessage());

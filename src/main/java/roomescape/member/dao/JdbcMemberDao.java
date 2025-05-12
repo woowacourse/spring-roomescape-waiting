@@ -1,9 +1,11 @@
 package roomescape.member.dao;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.member.exception.MemberNotExistException;
 import roomescape.member.model.Member;
 import roomescape.member.model.Role;
 
@@ -30,7 +32,7 @@ public class JdbcMemberDao implements MemberDao {
         parameters.put("email", member.getEmail());
         parameters.put("password", member.getPassword());
         parameters.put("name", member.getName());
-        parameters.put("role", member.getRole());
+        parameters.put("role", member.getRole().name());
         Number key = jdbcInsert.executeAndReturnKey(parameters);
         return member.toEntity(key.longValue());
     }
@@ -49,7 +51,11 @@ public class JdbcMemberDao implements MemberDao {
     public Member findById(Long id) {
         String whereClause = " WHERE id = ?";
         String sql = generateFindAllQuery() + whereClause;
-        return jdbcTemplate.queryForObject(sql, mapResultsToMember(), id);
+        try {
+            return jdbcTemplate.queryForObject(sql, mapResultsToMember(), id);
+        } catch (DataAccessException exception) {
+            throw new MemberNotExistException();
+        }
     }
 
     @Override
