@@ -22,8 +22,8 @@ public class MemberController {
     }
 
     @PostMapping
-    public MemberGetResponse signUp(@RequestBody MemberCreateRequest memberCreateRequest) {
-        return MemberGetResponse.from(memberService.createUser(memberCreateRequest));
+    public MemberGetResponse signUp(@RequestBody MemberCreateRequest requestBody) {
+        return MemberGetResponse.from(memberService.createUser(requestBody));
     }
 
     @GetMapping

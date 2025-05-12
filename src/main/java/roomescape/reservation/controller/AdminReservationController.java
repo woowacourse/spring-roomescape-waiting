@@ -27,8 +27,8 @@ public class AdminReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    private ReservationResponse createAdminReservation(@RequestBody AdminReservationCreateRequest adminReservationCreateRequest) {
-        return ReservationResponse.from(reservationService.createReservation(adminReservationCreateRequest));
+    private ReservationResponse createAdminReservation(@RequestBody AdminReservationCreateRequest requestBody) {
+        return ReservationResponse.from(reservationService.createReservation(requestBody));
     }
 
     @GetMapping

@@ -29,8 +29,8 @@ public class ReservationTimeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationTimeGetResponse createReservationTime(@RequestBody ReservationTimeCreateRequest reservationTimeCreateRequest) {
-        return ReservationTimeGetResponse.from(reservationTimeService.createReservationTime(reservationTimeCreateRequest));
+    public ReservationTimeGetResponse createReservationTime(@RequestBody ReservationTimeCreateRequest requestBody) {
+        return ReservationTimeGetResponse.from(reservationTimeService.createReservationTime(requestBody));
     }
 
     @GetMapping

@@ -30,8 +30,8 @@ public class ReservationController {
     @Login
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponse createReservation(@RequestBody ReservationCreateRequest reservationCreateRequest, Member member) {
-        return ReservationResponse.from(reservationService.createReservationAfterNow(reservationCreateRequest, member));
+    public ReservationResponse createReservation(@RequestBody ReservationCreateRequest requestBody, Member member) {
+        return ReservationResponse.from(reservationService.createReservationAfterNow(requestBody, member));
     }
 
     @GetMapping
