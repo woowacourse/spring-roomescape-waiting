@@ -12,6 +12,8 @@ import roomescape.auth.constant.AuthConstant;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.dto.response.AuthenticationCheckResponse;
 import roomescape.auth.service.AuthService;
+import roomescape.global.annotation.Login;
+import roomescape.member.model.Member;
 
 @RestController
 @RequestMapping("/login")
@@ -32,9 +34,9 @@ public class AuthController {
         response.addCookie(cookie);
     }
 
+    @Login
     @GetMapping("/check")
-    public AuthenticationCheckResponse authenticationCheck(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        return AuthenticationCheckResponse.from(authService.checkAuthenticationStatus(cookies));
+    public AuthenticationCheckResponse authenticationCheck(Member member, HttpServletRequest request) {
+        return AuthenticationCheckResponse.from(member);
     }
 }
