@@ -1,11 +1,7 @@
 package roomescape.unit.web;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -17,14 +13,15 @@ import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.global.AdminOnlyInterceptor;
 import roomescape.global.SessionMember;
-import roomescape.repository.MemberRepository;
+import roomescape.global.exception.AccessDeniedException;
+import roomescape.global.exception.AuthenticationException;
 
 class AdminOnlyInterceptorTest {
 
     private final AdminOnlyInterceptor interceptor = new AdminOnlyInterceptor();
 
     @Test
-    void 관리자가_아니면_403_반환하고_false() throws Exception {
+    void 관리자가_아니면_403_반환() throws Exception {
         // given
         SessionMember sessionMember = new SessionMember(1L, new MemberName("한스"), MemberRole.MEMBER);
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -40,12 +37,9 @@ class AdminOnlyInterceptorTest {
                 MemberRole.MEMBER
         );
 
-        // when
-        boolean result = interceptor.preHandle(request, response, new Object());
-
-        // then
-        assertThat(result).isFalse();
-        assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_FORBIDDEN);
+        assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object()))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("어드민이 아닙니다.");
     }
 
     @Test
@@ -79,7 +73,7 @@ class AdminOnlyInterceptorTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object()))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(AuthenticationException.class)
                 .hasMessageContaining("로그인이 필요합니다.");
     }
 }

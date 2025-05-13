@@ -2,7 +2,6 @@ package roomescape.global;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import org.apache.tomcat.websocket.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,11 +10,23 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.global.dto.ErrorResponse;
+import roomescape.global.exception.AccessDeniedException;
+import roomescape.global.exception.AuthenticationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(final AuthenticationException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.from(exception));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(final AuthenticationException exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.from(exception));
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchElementException(final NoSuchElementException exception) {
@@ -30,11 +41,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(final IllegalStateException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.from(exception));
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthentication(final AuthenticationException exception) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.from(exception));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

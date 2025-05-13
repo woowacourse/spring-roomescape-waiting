@@ -8,6 +8,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.global.exception.AuthenticationException;
 
 public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -26,11 +27,11 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
         HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
         HttpSession session = request.getSession(false);
         if (session == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
+            throw new AuthenticationException("로그인이 필요합니다.");
         }
         SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
         if (sessionMember == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
+            throw new AuthenticationException("로그인이 필요합니다.");
         }
         return sessionMember;
     }

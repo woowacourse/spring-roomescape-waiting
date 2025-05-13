@@ -13,6 +13,7 @@ import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.global.MemberArgumentResolver;
 import roomescape.global.SessionMember;
+import roomescape.global.exception.AuthenticationException;
 
 class MemberArgumentResolverTest {
 
@@ -42,11 +43,12 @@ class MemberArgumentResolverTest {
         NativeWebRequest webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
         assertThatThrownBy(() -> resolver.resolveArgument(null, null, webRequest, null))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(AuthenticationException.class)
                 .hasMessageContaining("로그인이 필요합니다.");
     }
 
     static class DummyController {
-        public void dummyMethod(Long memberId) {}
+        public void dummyMethod(Long memberId) {
+        }
     }
 }

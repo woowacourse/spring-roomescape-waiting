@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.MemberRole;
+import roomescape.global.exception.AccessDeniedException;
+import roomescape.global.exception.AuthenticationException;
 
 public class AdminOnlyInterceptor implements HandlerInterceptor {
 
@@ -16,15 +18,14 @@ public class AdminOnlyInterceptor implements HandlerInterceptor {
     ) throws Exception {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
+            throw new AuthenticationException("로그인이 필요합니다.");
         }
         SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
         if (sessionMember == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
+            throw new AuthenticationException("로그인이 필요합니다.");
         }
         if (sessionMember.role() != MemberRole.ADMIN) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "관리자 권한이 필요합니다.");
-            return false;
+            throw new AccessDeniedException("어드민이 아닙니다.");
         }
         return true;
     }
