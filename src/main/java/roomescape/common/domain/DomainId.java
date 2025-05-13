@@ -1,8 +1,5 @@
 package roomescape.common.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.validate.Validator;
@@ -11,24 +8,17 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @FieldNameConstants
-@MappedSuperclass
 public abstract class DomainId implements Serializable {
 
-    @Column(name = "id")
-    private Long value;
-    @Transient
+    private final Long value;
     @Getter
-    private boolean assigned;
+    private final boolean assigned;
 
     protected DomainId(final Long value, final boolean assigned) {
         validate(value, assigned);
 
         this.value = value;
         this.assigned = assigned;
-    }
-
-    protected DomainId() {
-
     }
 
     private void validate(final Long value,
@@ -45,7 +35,7 @@ public abstract class DomainId implements Serializable {
     }
 
     public void requireAssigned() {
-        if (assigned) {
+        if (isAssigned()) {
             return;
         }
         throw new IllegalStateException("식별자가 할당되지 않았습니다.");

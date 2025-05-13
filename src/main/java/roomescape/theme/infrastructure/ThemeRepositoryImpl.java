@@ -14,36 +14,35 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ThemeRepositoryImpl implements ThemeRepository {
 
-    private final JdbcTemplateThemeRepository jdbcTemplateThemeRepository;
     private final JpaThemeRepository jpaThemeRepository;
 
     @Override
     public boolean existsById(final ThemeId id) {
-        return jdbcTemplateThemeRepository.existsById(id);
+        return jpaThemeRepository.existsById(id.getValue());
     }
 
     @Override
     public boolean existsByName(final ThemeName name) {
-        return jdbcTemplateThemeRepository.existsByName(name);
+        return jpaThemeRepository.existsByName(name);
     }
 
     @Override
     public List<Theme> findAll() {
-        return jdbcTemplateThemeRepository.findAll();
+        return jpaThemeRepository.findAll();
     }
 
     @Override
     public Optional<Theme> findById(final ThemeId id) {
-        return jdbcTemplateThemeRepository.findById(id);
+        return jpaThemeRepository.findById(id.getValue());
     }
 
     @Override
     public Theme save(final Theme theme) {
-        return jdbcTemplateThemeRepository.save(theme);
+        return jpaThemeRepository.save(theme);
     }
 
     @Override
     public void deleteById(final ThemeId id) {
-        jdbcTemplateThemeRepository.deleteById(id);
+        jpaThemeRepository.deleteById(id.getValue());
     }
 }
