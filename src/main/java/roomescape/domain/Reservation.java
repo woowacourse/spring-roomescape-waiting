@@ -27,12 +27,16 @@ public class Reservation {
 
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    public static Reservation createNew(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(null, member, date, time, theme);
     }
 
     public Long getId() {

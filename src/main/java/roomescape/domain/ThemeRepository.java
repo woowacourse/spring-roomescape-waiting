@@ -1,18 +1,23 @@
 package roomescape.domain;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
-public interface ThemeRepository {
+@Repository
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    Long create(Theme theme);
-
-    List<Theme> findAll();
-
-    Optional<Theme> findById(Long id);
-
-    void deleteById(Long id);
-
+    @Query(value = """
+                    SELECT t.id, t.name, t.description, t.thumbnail
+                    FROM Theme t
+                    INNER JOIN Reservation r ON t.id = r.theme_id
+                    WHERE r.date BETWEEN :startDate AND :endDate
+                    GROUP BY t.id, t.name, t.description, t.thumbnail
+                    ORDER BY COUNT(r.id) DESC, t.name ASC
+                    LIMIT :limit
+                """, nativeQuery = true) //TODO: nativeQuery??
     List<Theme> findRankByDate(LocalDate startDate, LocalDate endDate, int limit);
 }

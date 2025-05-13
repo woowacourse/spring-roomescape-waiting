@@ -32,9 +32,9 @@ public class ThemeService {
                 .toList();
     }
 
-    public Long create(CreateThemeParam createThemeParam) {
-        Theme theme = new Theme(createThemeParam.name(), createThemeParam.description(), createThemeParam.thumbnail());
-        return themeRepository.create(theme);
+    public ThemeResult create(CreateThemeParam createThemeParam) {
+        Theme theme = themeRepository.save(new Theme(createThemeParam.name(), createThemeParam.description(), createThemeParam.thumbnail()));
+        return ThemeResult.from(theme);
     }
 
     public ThemeResult findById(Long id) {

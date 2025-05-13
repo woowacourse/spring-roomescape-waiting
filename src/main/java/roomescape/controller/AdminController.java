@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.request.CreateReservationAdminRequest;
+import roomescape.controller.response.ReservationResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
@@ -23,14 +24,14 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResult> createReservation(@RequestBody CreateReservationAdminRequest reservationRequest) {
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody CreateReservationAdminRequest reservationRequest) {
         CreateReservationParam createReservationParam = new CreateReservationParam(
                 reservationRequest.memberId(),
                 reservationRequest.reservationDate(),
                 reservationRequest.timeId(),
                 reservationRequest.themeId()
         );
-        Long reservationId = reservationService.create(createReservationParam, LocalDateTime.now());
-        return ResponseEntity.ok().body(reservationService.findById(reservationId));
+        ReservationResult reservationResult = reservationService.create(createReservationParam, LocalDateTime.now());
+        return ResponseEntity.ok().body(ReservationResponse.from(reservationResult));
     }
 }

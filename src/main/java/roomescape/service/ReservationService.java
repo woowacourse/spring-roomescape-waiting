@@ -3,7 +3,6 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.domain.*;
 import roomescape.exception.*;
-import roomescape.persistence.query.CreateReservationQuery;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
 
@@ -27,7 +26,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Long create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
+    public ReservationResult create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId()).orElseThrow(
                 () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
         Theme theme = themeRepository.findById(createReservationParam.themeId()).orElseThrow(
@@ -38,13 +37,9 @@ public class ReservationService {
         validateUniqueReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
 
-        return reservationRepository.create(
-                new CreateReservationQuery(
-                        member,
-                        createReservationParam.date(),
-                        reservationTime,
-                        theme
-                ));
+        Reservation reservation = Reservation.createNew(member, createReservationParam.date(), reservationTime, theme);
+        reservationRepository.save(reservation);
+        return ReservationResult.from(reservation);
     }
 
     public void deleteById(Long reservationId) {

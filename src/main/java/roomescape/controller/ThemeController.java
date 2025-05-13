@@ -31,8 +31,8 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@RequestBody CreateThemeRequest createThemeRequest) {
-        Long id = themeService.create(createThemeRequest.toServiceParam());
-        return ResponseEntity.status(HttpStatus.CREATED).body(ThemeResponse.from(themeService.findById(id)));
+        ThemeResult themeResult = themeService.create(createThemeRequest.toServiceParam());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ThemeResponse.from(themeResult));
     }
 
     @DeleteMapping("/{themeId}")

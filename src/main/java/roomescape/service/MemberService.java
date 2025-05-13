@@ -6,7 +6,6 @@ import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.exception.NotFoundMemberException;
 import roomescape.exception.UnAuthorizedException;
-import roomescape.persistence.query.CreateMemberQuery;
 import roomescape.service.param.LoginMemberParam;
 import roomescape.service.param.RegisterMemberParam;
 import roomescape.service.result.MemberResult;
@@ -35,15 +34,8 @@ public class MemberService {
     }
 
     public MemberResult create(final RegisterMemberParam registerMemberParam) {
-        Long id = memberRepository.create(new CreateMemberQuery(
-                registerMemberParam.name(),
-                MemberRole.USER,
-                registerMemberParam.email(),
-                registerMemberParam.password()
-        ));
+        Member member = memberRepository.save(Member.createNew(registerMemberParam.name(), MemberRole.USER, registerMemberParam.email(), registerMemberParam.password()));
 
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundMemberException(id + "에 해당하는 유저가 없습니다."));
         return MemberResult.from(member);
     }
 

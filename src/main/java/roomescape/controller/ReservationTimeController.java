@@ -26,8 +26,8 @@ public class ReservationTimeController {
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> create(
             @RequestBody CreateReservationTimeRequest createReservationTImeRequest) {
-        Long id = reservationService.create(createReservationTImeRequest.toServiceParam());
-        ReservationTimeResult reservationTimeResult = reservationService.findById(id);
+
+        ReservationTimeResult reservationTimeResult = reservationService.create(createReservationTImeRequest.toServiceParam());
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationTimeResponse.from(reservationTimeResult));
     }
 
