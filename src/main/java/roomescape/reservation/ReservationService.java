@@ -21,6 +21,7 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepository;
+import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
 
 @Service
@@ -42,30 +43,28 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
-        validateExistsReservationTime(request.timeId());
-        validateExistsTheme(request.themeId());
-        validateExistsMemberByEmail(loginMember.email());
         validateDuplicateDateTimeAndTheme(request.date(), request.timeId(), request.themeId());
         validatePastDateTime(request.date(), request.timeId());
 
-        final Member member = memberRepository.findByEmail(loginMember.email());
-        final Reservation reservation = new Reservation(request.date());
-        final Long id = reservationRepository.save(reservation, request.timeId(), request.themeId(), member.getId());
-        final Reservation savedReservation = reservationRepository.findById(id);
+        final ReservationTime reservationTime = getReservationTimeById(request.timeId());
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberByEmail(loginMember.email());
+
+        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme);
+        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
 
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
-        validateExistsReservationTime(request.timeId());
-        validateExistsTheme(request.themeId());
-        validateExistsMemberById(request.memberId());
         validateDuplicateDateTimeAndTheme(request.date(), request.timeId(), request.themeId());
         validatePastDateTime(request.date(), request.timeId());
 
-        final Reservation reservation = new Reservation(request.date());
-        final Long id = reservationRepository.save(reservation, request.timeId(), request.themeId(),
-                request.memberId());
-        final Reservation savedReservation = reservationRepository.findById(id);
+        final ReservationTime reservationTime = getReservationTimeById(request.timeId());
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberById(request.memberId());
+
+        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme);
+        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
 
@@ -74,8 +73,11 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> readAllByMemberAndThemeAndDateRange(final AdminFilterReservationRequest request) {
-        return reservationRepository.findAllByMemberIdAndThemeIdAndDateRange(
-                        request.memberId(), request.themeId(),
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberById(request.memberId());
+
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(
+                        member, theme,
                         request.from(), request.to()
                 ).stream()
                 .map(ReservationResponse::from)
@@ -86,7 +88,8 @@ public class ReservationService {
         if (!reservationRepository.existsById(id)) {
             throw new ReservationNotFoundException();
         }
-        reservationRepository.delete(id);
+
+        reservationRepository.deleteById(id);
     }
 
     private void validatePastDateTime(final LocalDate date, final Long reservationTimeId) {
@@ -101,7 +104,7 @@ public class ReservationService {
     }
 
     private void validatePastTime(final Long reservationTimeId) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(reservationTimeId);
+        final ReservationTime reservationTime = getReservationTimeById(reservationTimeId);
         if (reservationTime.isBefore(LocalTime.now())) {
             throw new ReservationPastTimeException();
         }
@@ -109,32 +112,32 @@ public class ReservationService {
 
     private void validateDuplicateDateTimeAndTheme(final LocalDate date, final Long reservationTimeId,
                                                    final Long themeId) {
-        if (reservationRepository.existsByReservationTimeIdAndDateAndThemeId(reservationTimeId, date, themeId)) {
+
+        final ReservationTime reservationTime = getReservationTimeById(reservationTimeId);
+        final Theme theme = getThemeById(themeId);
+
+        if (reservationRepository.existsByReservationTimeAndDateAndTheme(reservationTime, date, theme)) {
             throw new ReservationConflictException();
         }
     }
 
-    private void validateExistsReservationTime(final Long reservationTimeId) {
-        if (!reservationTimeRepository.existsById(reservationTimeId)) {
-            throw new ReservationNotExistsTimeException();
-        }
+    private Theme getThemeById(final Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new ReservationNotExistsThemeException());
     }
 
-    private void validateExistsTheme(final Long themeId) {
-        if (!themeRepository.existsById(themeId)) {
-            throw new ReservationNotExistsThemeException();
-        }
+    private ReservationTime getReservationTimeById(final Long reservationTimeId) {
+        return reservationTimeRepository.findById(reservationTimeId)
+                .orElseThrow(() -> new ReservationNotExistsTimeException());
     }
 
-    private void validateExistsMemberByEmail(final String email) {
-        if (!memberRepository.existsByEmail(email)) {
-            throw new ReservationNotExistsMemberException();
-        }
+    private Member getMemberById(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new ReservationNotExistsMemberException());
     }
 
-    private void validateExistsMemberById(final Long memberId) {
-        if (!memberRepository.existsById(memberId)) {
-            throw new ReservationNotExistsMemberException();
-        }
+    private Member getMemberByEmail(final String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ReservationNotExistsMemberException());
     }
 }

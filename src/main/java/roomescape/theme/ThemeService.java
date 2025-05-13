@@ -2,7 +2,7 @@ package roomescape.theme;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
@@ -11,6 +11,7 @@ import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
 @Service
+@AllArgsConstructor
 public class ThemeService {
 
     private static final int BETWEEN_DAY_START = 7;
@@ -18,15 +19,6 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
-
-    @Autowired
-    public ThemeService(
-            final ThemeRepository themeRepository,
-            final ReservationRepository reservationRepository
-    ) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-    }
 
     public ThemeResponse create(
             final ThemeRequest request
@@ -59,21 +51,13 @@ public class ThemeService {
     public void deleteById(
             final Long id
     ) {
-        validateExistsTheme(id);
-        validateUnusedTheme(id);
+        final Theme theme = themeRepository.findById(id)
+                .orElseThrow(() -> new ThemeNotFoundException());
 
-        themeRepository.deleteById(id);
-    }
-
-    private void validateExistsTheme(final Long id) {
-        if (!themeRepository.existsById(id)) {
-            throw new ThemeNotFoundException();
-        }
-    }
-
-    private void validateUnusedTheme(final Long id) {
-        if (reservationRepository.existsByTheme(id)) {
+        if(reservationRepository.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
+
+        themeRepository.delete(theme);
     }
 }

@@ -1,17 +1,27 @@
 package roomescape.reservationtime;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-
+@Entity
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReservationTime {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private final Long id;
     private final LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
-        this.id = id;
-        this.startAt = startAt;
+    public ReservationTime() {
+        this(null, null);
     }
 
     public ReservationTime(final LocalTime startAt) {
@@ -20,26 +30,5 @@ public class ReservationTime {
 
     public boolean isBefore(final LocalTime localTime) {
         return startAt.isBefore(localTime);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ReservationTime that)) {
-            return false;
-        }
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }
