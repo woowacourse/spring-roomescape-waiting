@@ -36,8 +36,8 @@ class MemberControllerIntTest {
         int beforeSize = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM member", Integer.class);
 
         Map<String, String> params = new HashMap<>();
-        params.put("name", "어드민");
-        params.put("email", "admin@email.com");
+        params.put("name", "user");
+        params.put("email", "user@email.com");
         params.put("password", "password");
 
         RestAssured.given().log().all()

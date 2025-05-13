@@ -1,14 +1,10 @@
 package roomescape.domain;
 
-import org.springframework.lang.Nullable;
-
 public class Member {
     private final Long id;
     private final String name;
     private final String email;
     private final String password;
-
-    @Nullable
     private final Role role;
 
     private Member(Long id, String name, String email, String password, Role role) {
@@ -28,11 +24,7 @@ public class Member {
     }
 
     public static Member withoutId(String name, String email, String password, Role role) {
-        return new Member(null, name, email, password, role);
-    }
-
-    public static Member withoutId(String name, String email, String password) {
-        return withoutId(name, email, password, Role.USER);
+        return of(null, name, email, password, role);
     }
 
     public static Member assignId(Long id, Member memberWithoutId) {

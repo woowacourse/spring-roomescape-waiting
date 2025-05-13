@@ -18,8 +18,8 @@ VALUES ('테마1', '테마 1입니다', '썸네일1'),
 INSERT INTO member (name, email, password, role)
 VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN'),
        ('브라운', 'brown@email.com', 'brown', 'USER'),
-       ('브리', 'brie@email.com', 'brie', null),
-       ('솔라', 'solar@email.com', 'solar', null);
+       ('브리', 'brie@email.com', 'brie', 'USER'),
+       ('솔라', 'solar@email.com', 'solar', 'USER');
 
 INSERT INTO reservation (member_id, theme_id, date, time_id)
 VALUES (2, 1, '2025-04-29', 1),

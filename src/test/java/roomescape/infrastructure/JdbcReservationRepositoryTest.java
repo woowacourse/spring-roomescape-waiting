@@ -47,7 +47,7 @@ class JdbcReservationRepositoryTest {
         jdbcTemplate.update(
                 "INSERT INTO theme (id, name, description, thumbnail) VALUES (1, '테마1', '테마 1입니다.', '썸네일입니다.')");
         jdbcTemplate.update(
-                "INSERT INTO member (id, name, email, password) VALUES (1, '어드민', 'admin@email.com', 'password')");
+                "INSERT INTO member (id, name, email, password, role) VALUES (1, '어드민', 'admin@email.com', 'password', 'ADMIN')");
 
         Reservation reservation = Reservation.withoutId(
                 MEMBER1_ADMIN,
@@ -80,11 +80,11 @@ class JdbcReservationRepositoryTest {
                 "INSERT INTO theme (id, name, description, thumbnail) VALUES (1, '테마1', '테마 1입니다.', '썸네일입니다.')");
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00:00')");
         jdbcTemplate.update("""
-                INSERT INTO member (name, email, password)
-                VALUES ('어드민', 'admin@email.com', 'password'),
-                       ('브라운', 'brown@email.com', 'brown'),
-                       ('브리', 'brie@email.com', 'brie'),
-                       ('솔라', 'solar@email.com', 'solar')
+                INSERT INTO member (name, email, password, role)
+                VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN'),
+                       ('브라운', 'brown@email.com', 'brown', 'USER'),
+                       ('브리', 'brie@email.com', 'brie', 'USER'),
+                       ('솔라', 'solar@email.com', 'solar', 'USER')
                 """);
 
         jdbcTemplate.update(
@@ -113,7 +113,7 @@ class JdbcReservationRepositoryTest {
                 "INSERT INTO theme (id, name, description, thumbnail) VALUES (1, '테마1', '테마 1입니다.', '썸네일입니다.')");
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00:00')");
         jdbcTemplate.update(
-                "INSERT INTO member (id, name, email, password) VALUES (1, '어드민', 'admin@email.com', 'password')");
+                "INSERT INTO member (id, name, email, password, role) VALUES (1, '어드민', 'admin@email.com', 'password', 'ADMIN')");
         jdbcTemplate.update(
                 "INSERT INTO reservation (id, member_id, date, time_id, theme_id) VALUES (1, 1, '2025-01-01', 1, 1)");
         assertThat(reservationRepository.findAll()).hasSize(1);

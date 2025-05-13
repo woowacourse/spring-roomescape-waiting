@@ -44,7 +44,8 @@ public class JdbcMemberRepository implements MemberRepository {
         Map<String, Object> params = Map.of(
                 "name", member.getName(),
                 "email", member.getEmail(),
-                "password", member.getPassword()
+                "password", member.getPassword(),
+                "role", member.getRole().name()
         );
 
         Number key = simpleJdbcInsert.executeAndReturnKey(params);

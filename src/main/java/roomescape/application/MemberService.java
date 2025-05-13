@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.application.dto.MemberCreateDto;
 import roomescape.application.dto.MemberDto;
 import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.NotFoundException;
 
@@ -19,7 +20,12 @@ public class MemberService {
     }
 
     public MemberDto registerMember(@Valid MemberCreateDto createDto) {
-        Member memberWithoutId = Member.withoutId(createDto.name(), createDto.email(), createDto.password());
+        Member memberWithoutId = Member.withoutId(
+                createDto.name(),
+                createDto.email(),
+                createDto.password(),
+                Role.USER
+        );
         Long id = memberRepository.save(memberWithoutId);
         Member member = Member.assignId(id, memberWithoutId);
         return MemberDto.from(member);
@@ -40,6 +46,5 @@ public class MemberService {
     public List<MemberDto> getAllMembers() {
         List<Member> members = memberRepository.findAll();
         return MemberDto.from(members);
-
     }
 }

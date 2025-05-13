@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS member
     name     VARCHAR(255)          NOT NULL,
     email    VARCHAR(255)          NOT NULL,
     password VARCHAR(255)          NOT NULL,
-    role     ENUM('ADMIN', 'USER') NULL,
+    role     ENUM('ADMIN', 'USER') NOT NULL,
     PRIMARY KEY (id)
 );
 
