@@ -1,15 +1,31 @@
 package roomescape.domain;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    private Member member;
+
+    private LocalDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
+
+    public Reservation() {
+
+    }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
@@ -51,14 +67,4 @@ public class Reservation {
         return Objects.hash(id, member, date, time, theme);
     }
 
-    @Override
-    public String toString() {
-        return "Reservation{" +
-                "id=" + id +
-                ", member=" + member +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
-                '}';
-    }
 }

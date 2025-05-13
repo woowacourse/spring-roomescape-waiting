@@ -1,9 +1,12 @@
 ### 요구사항
 - [x] gradle 의존성 추가
-- [ ] 엔티티 매핑
+- [x] 엔티티 매핑
   - [x] Theme나 Time 엔티티 설정을 하세요.
-  - [ ] 연관관계 매핑
-    - [ ] Reservation이 Member나 Theme, ReservationTime 객체에 의존하도록
+  - [x] 연관관계 매핑
+    - [x] Reservation이 Member나 Theme, ReservationTime 객체에 의존하도록
+
+
+
 
 ---
 
