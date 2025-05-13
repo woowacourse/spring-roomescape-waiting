@@ -2,18 +2,19 @@ package roomescape.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Theme;
 
-public interface ThemeRepository {
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    Optional<Theme> findById(long id);
-
-    long save(Theme theme);
-
-    boolean removeById(long id);
-
-    List<Theme> findAll();
-
+    @Query(""" 
+            SELECT t.id, t.name, t.description, t.thumbnail
+                               FROM Theme t
+                               JOIN t.reservations r
+                               WHERE r.date BETWEEN :startDate AND :endDate
+                               GROUP BY t.id, t.name, t.description, t.thumbnail
+                               ORDER BY COUNT(r.id) DESC
+            """)
     List<Theme> findRankingByPeriod(LocalDate startDate, LocalDate endDate, int limit);
 }

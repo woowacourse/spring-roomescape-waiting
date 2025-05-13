@@ -16,8 +16,8 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
 
     public ThemeService(
-        final ReservationRepository reservationRepository,
-        final ThemeRepository themeRepository
+            final ReservationRepository reservationRepository,
+            final ThemeRepository themeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
@@ -25,20 +25,19 @@ public class ThemeService {
 
     public Theme register(final String name, final String description, final String thumbnail) {
         var theme = new Theme(name, description, thumbnail);
-        var id = themeRepository.save(theme);
-        return theme.withId(id);
+        return themeRepository.save(theme);
     }
 
     public List<Theme> findAllThemes() {
         return themeRepository.findAll();
     }
 
-    public boolean removeById(final long id) {
+    public void removeById(final long id) {
         List<Reservation> reservations = reservationRepository.findByThemeId(id);
         if (!reservations.isEmpty()) {
             throw new IllegalStateException("삭제하려는 테마를 사용하는 예약이 있습니다.");
         }
-        return themeRepository.removeById(id);
+        themeRepository.deleteById(id);
     }
 
     public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {

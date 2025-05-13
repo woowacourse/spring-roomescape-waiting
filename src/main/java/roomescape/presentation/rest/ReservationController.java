@@ -32,8 +32,8 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> reserve(
-        @Authenticated final User user,
-        @RequestBody @Valid final CreateReservationRequest request
+            @Authenticated final User user,
+            @RequestBody @Valid final CreateReservationRequest request
     ) {
         var reservation = service.reserve(user, request.date(), request.timeId(), request.themeId());
         var response = ReservationResponse.from(reservation);
@@ -42,10 +42,10 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations(
-        @RequestParam(name = "themeId", required = false) Long themeId,
-        @RequestParam(name = "userId", required = false) Long userId,
-        @RequestParam(name = "dateFrom", required = false) LocalDate dateFrom,
-        @RequestParam(name = "dateTo", required = false) LocalDate dateTo
+            @RequestParam(name = "themeId", required = false) Long themeId,
+            @RequestParam(name = "userId", required = false) Long userId,
+            @RequestParam(name = "dateFrom", required = false) LocalDate dateFrom,
+            @RequestParam(name = "dateTo", required = false) LocalDate dateTo
     ) {
 
         var searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
@@ -56,10 +56,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
-        boolean isRemoved = service.removeById(id);
-        if (isRemoved) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        service.removeById(id);
+        return ResponseEntity.noContent().build();
     }
 }

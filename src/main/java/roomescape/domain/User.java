@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,7 +15,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
-@Entity
+@Entity(name = "USERS")
 public class User {
 
     private static final int NAME_MAX_LENGTH = 5;
@@ -24,6 +26,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+
+    @Enumerated(EnumType.STRING)
     private UserRole role;
     private String email;
     private String password;
@@ -42,6 +46,10 @@ public class User {
     protected User() {
     }
 
+    public static User createUser(final String name, final String email, final String password) {
+        return new User(null, name, UserRole.USER, email, password);
+    }
+
     public User withId(final long id) {
         if (this.id == null) {
             this.id = id;
@@ -56,10 +64,6 @@ public class User {
 
     public boolean isAdmin() {
         return role == UserRole.ADMIN;
-    }
-
-    public static User createUser(final String name, final String email, final String password) {
-        return new User(null, name, UserRole.USER, email, password);
     }
 
     private void validateNameLength(final String name) {

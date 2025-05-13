@@ -16,14 +16,14 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
-@Entity
+@Entity(name = "RESERVATION_TIME")
 public class TimeSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
-    @OneToMany(mappedBy = "time")
+    @OneToMany(mappedBy = "timeSlot")
     private Set<Reservation> reservations;
 
     public TimeSlot(final LocalTime startAt) {
@@ -36,14 +36,6 @@ public class TimeSlot {
     }
 
     protected TimeSlot() {
-    }
-
-    public TimeSlot withId(final long id) {
-        if (this.id == null) {
-            this.id = id;
-            return this;
-        }
-        throw new IllegalStateException("타임 슬롯 ID는 재할당할 수 없습니다. 현재 ID: " + this.id);
     }
 
     public boolean isTimeBefore(final LocalTime time) {

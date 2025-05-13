@@ -21,13 +21,12 @@ public class UserService {
         }
 
         var user = User.createUser(name, email, password);
-        var id = repository.save(user);
-        return user.withId(id);
+        return repository.save(user);
     }
 
     public User getById(final long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. id : " + id));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. id : " + id));
     }
 
     public List<User> findAllUsers() {

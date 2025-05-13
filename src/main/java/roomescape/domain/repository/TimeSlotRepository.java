@@ -1,16 +1,8 @@
 package roomescape.domain.repository;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.TimeSlot;
 
-public interface TimeSlotRepository {
+public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
 
-    Optional<TimeSlot> findById(long id);
-
-    long save(TimeSlot timeSlot);
-
-    boolean removeById(long id);
-
-    List<TimeSlot> findAll();
 }

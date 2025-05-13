@@ -17,8 +17,8 @@ public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
 
     public TimeSlotService(
-        final ReservationRepository reservationRepository,
-        final TimeSlotRepository timeSlotRepository
+            final ReservationRepository reservationRepository,
+            final TimeSlotRepository timeSlotRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
@@ -26,31 +26,31 @@ public class TimeSlotService {
 
     public TimeSlot register(final LocalTime startAt) {
         var timeSlot = new TimeSlot(startAt);
-        var id = timeSlotRepository.save(timeSlot);
-        return timeSlot.withId(id);
+        return timeSlotRepository.save(timeSlot);
     }
 
     public List<TimeSlot> findAllTimeSlots() {
         return timeSlotRepository.findAll();
     }
 
-    public boolean removeById(final long id) {
+    public void removeById(final long id) {
         List<Reservation> reservations = reservationRepository.findByTimeSlotId(id);
         if (!reservations.isEmpty()) {
             throw new IllegalStateException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
         }
-        return timeSlotRepository.removeById(id);
+        timeSlotRepository.deleteById(id);
     }
 
     public List<AvailableTimeSlot> findAvailableTimeSlots(final LocalDate date, final long themeId) {
         var filteredReservations = reservationRepository.findByDateAndThemeId(date, themeId);
         var filteredTimeSlots = filteredReservations.stream()
-            .map(Reservation::timeSlot)
-            .toList();
+                .map(Reservation::timeSlot)
+                .toList();
 
         var allTimeSlots = timeSlotRepository.findAll();
+
         return allTimeSlots.stream()
-            .map(ts -> new AvailableTimeSlot(ts, filteredTimeSlots.contains(ts)))
-            .toList();
+                .map(ts -> new AvailableTimeSlot(ts, filteredTimeSlots.contains(ts)))
+                .toList();
     }
 }

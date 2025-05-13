@@ -1,16 +1,10 @@
 package roomescape.domain.repository;
 
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.User;
 
-public interface UserRepository {
-
-    Optional<User> findById(long id);
-
-    long save(User user);
-
-    List<User> findAll();
+public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 }

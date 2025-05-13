@@ -43,9 +43,9 @@ public class ThemeController {
 
     @GetMapping(value = "/popular", params = {"startDate", "endDate", "count"})
     public ResponseEntity<List<ThemeResponse>> getAvailableTimes(
-        @RequestParam("startDate") final LocalDate startDate,
-        @RequestParam("endDate") final LocalDate endDate,
-        @RequestParam("count") final Integer count
+            @RequestParam("startDate") final LocalDate startDate,
+            @RequestParam("endDate") final LocalDate endDate,
+            @RequestParam("count") final Integer count
     ) {
         var themes = service.findPopularThemes(startDate, endDate, count);
         var response = ThemeResponse.from(themes);
@@ -54,10 +54,7 @@ public class ThemeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
-        boolean isRemoved = service.removeById(id);
-        if (isRemoved) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        service.removeById(id);
+        return ResponseEntity.noContent().build();
     }
 }
