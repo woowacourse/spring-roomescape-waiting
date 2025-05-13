@@ -7,6 +7,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.sql.init.DatabaseInitializationSettings;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.*;
+import roomescape.persistence.impl.JdbcReservationRepository;
 import roomescape.persistence.query.CreateReservationQuery;
 
 import javax.sql.DataSource;

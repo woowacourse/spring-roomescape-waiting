@@ -1,7 +1,7 @@
 package roomescape.fake;
 
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.persistence.MemberRepository;
 import roomescape.persistence.query.CreateMemberQuery;
 
 import java.util.*;

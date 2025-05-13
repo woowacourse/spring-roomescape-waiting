@@ -1,7 +1,7 @@
 package roomescape.fake;
 
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
+import roomescape.persistence.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

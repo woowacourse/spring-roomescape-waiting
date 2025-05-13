@@ -1,5 +1,6 @@
-package roomescape.domain;
+package roomescape.persistence;
 
+import roomescape.domain.Reservation;
 import roomescape.persistence.query.CreateReservationQuery;
 
 import java.time.LocalDate;

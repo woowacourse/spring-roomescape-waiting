@@ -1,4 +1,4 @@
-package roomescape.persistence;
+package roomescape.persistence.impl;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,8 +7,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
+import roomescape.persistence.MemberRepository;
 import roomescape.persistence.query.CreateMemberQuery;
 
 import java.sql.PreparedStatement;

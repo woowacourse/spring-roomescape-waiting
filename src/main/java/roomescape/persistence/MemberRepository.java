@@ -1,5 +1,6 @@
-package roomescape.domain;
+package roomescape.persistence;
 
+import roomescape.domain.Member;
 import roomescape.persistence.query.CreateMemberQuery;
 
 import java.util.List;

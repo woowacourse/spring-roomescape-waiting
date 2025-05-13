@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Theme;
 
 import javax.sql.DataSource;
+import roomescape.persistence.impl.JdbcThemeRepository;
 import java.util.List;
 import java.util.Optional;
 

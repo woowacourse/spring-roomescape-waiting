@@ -2,9 +2,9 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
+import roomescape.persistence.ReservationRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.persistence.ReservationTimeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundReservationTimeException;
 import roomescape.service.param.CreateReservationTimeParam;

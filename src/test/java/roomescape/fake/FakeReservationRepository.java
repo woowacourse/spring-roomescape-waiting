@@ -1,7 +1,7 @@
 package roomescape.fake;
 
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
+import roomescape.persistence.ReservationRepository;
 import roomescape.persistence.query.CreateReservationQuery;
 
 import java.time.LocalDate;

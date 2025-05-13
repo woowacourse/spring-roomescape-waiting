@@ -6,6 +6,8 @@ import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundThemeException;
 import roomescape.fake.FakeReservationRepository;
 import roomescape.fake.FakeThemeRepository;
+import roomescape.persistence.ReservationRepository;
+import roomescape.persistence.ThemeRepository;
 import roomescape.persistence.query.CreateReservationQuery;
 import roomescape.service.param.CreateThemeParam;
 import roomescape.service.result.ThemeResult;

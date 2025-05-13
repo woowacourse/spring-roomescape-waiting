@@ -7,8 +7,8 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.sql.init.DatabaseInitializationSettings;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
+import roomescape.persistence.impl.JdbcMemberRepository;
 import roomescape.persistence.query.CreateMemberQuery;
 
 import javax.sql.DataSource;
