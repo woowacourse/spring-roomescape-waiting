@@ -1,12 +1,14 @@
 package roomescape.member.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.global.error.exception.ConflictException;
 import roomescape.member.dto.request.MemberRequest.MemberCreateRequest;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
@@ -73,5 +75,20 @@ class MemberServiceTest {
         // then
         var members = memberService.getAllMembers();
         assertThat(members).isEmpty();
+    }
+
+    @Test
+    @DisplayName("중복된 이메일로 회원을 생성할 수 없다.")
+    void validateDuplicateEmail() {
+        // given
+        var request1 = new MemberCreateRequest("미소", "miso@email.com", "password");
+        memberService.createMember(request1);
+
+        var request2 = new MemberCreateRequest("브라운", "miso@email.com", "password");
+
+        // when & then
+        assertThatThrownBy(() -> memberService.createMember(request2))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("중복된 이메일입니다.");
     }
 }
