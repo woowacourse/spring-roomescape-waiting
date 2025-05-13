@@ -1,0 +1,15 @@
+spring:
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+
+  h2:
+    console:
+      enabled: true
+
+  datasource:
+    url: jdbc:h2:mem:DATABASE
+
+jwt:
+  key: /VCEkdrvbjkCLRp0G0LK12VsDYViO/kufd8UVphCq80MdiZzNlefqOcwqfpvW+jIRNBmhiNKbNUGXSwum0DSgUjkEl2To/350R/ffncBkVeO7tfNq/4rNXWGGHre9p8s14m0k2z/QS4=
+  expiration: 360000
