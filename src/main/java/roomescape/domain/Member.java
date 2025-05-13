@@ -1,22 +1,35 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 
+@Entity
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Member {
 
-    private final Long id;
-    private final String name;
-    private final Role role;
-    private final String email;
-    private final String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private Member(Long id, String name, Role role, String email, String password) {
-        this.id = id;
-        this.name = name;
-        this.role = role;
-        this.email = email;
-        this.password = password;
-    }
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    private String email;
+
+    private String password;
 
     public static Member create(String name, Role role, String email, String password) {
         return new Member(null, name, role, email, password);
@@ -28,26 +41,6 @@ public class Member {
 
     public boolean isIncorrectPassword(String password) {
         return !this.password.equals(password);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     @Override

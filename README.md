@@ -2,17 +2,17 @@
 
 ### 1단계 - JPA 전환
 - [x] gradle 의존성 추가 (jdbc -> data-jpa)
-- [ ] 엔티티 매핑
-  - [ ] `Theme`
-  - [ ] `ReservationTime`
-  - [ ] `Member`
-  - [ ] `Reservation`
-  - [ ] `Role`
-- [ ] 연관관계 매핑
-  - [ ] `Theme` - `Reservation` : 일대다, 주인은 예약
-  - [ ] `ReservationTime` - `Reservation` : 일대다, 주인은 예약
-  - [ ] `Member` - `Reservation` : 일대다, 주인은 예약
-  - [ ] `Member` - `Role` : 일대다, 주인은 멤버
+- [x] 엔티티 매핑
+  - [x] `Theme`
+  - [x] `ReservationTime`
+  - [x] `Member`
+  - [x] `Reservation`
+  - [x] `Role`
+- [x] 연관관계 매핑
+  - [x] `Theme` - `Reservation` : 일대다, 주인은 예약
+  - [x] `ReservationTime` - `Reservation` : 일대다, 주인은 예약
+  - [x] `Member` - `Reservation` : 일대다, 주인은 예약
+  - [x] `Member` - `Role` : 일대다, 주인은 멤버
 
 ### 2단계 - 내 예약 목록 조회 기능
 - [ ] 내 예약 목록 조회 기능

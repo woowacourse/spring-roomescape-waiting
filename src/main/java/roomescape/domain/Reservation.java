@@ -1,29 +1,36 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
+@Entity
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final ReservationDate reservationDate;
-    private final ReservationTime reservationTime;
-    private final Theme theme;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private Reservation(
-            Long id,
-            Member member,
-            LocalDate reservationDate,
-            ReservationTime reservationTime,
-            Theme theme
-    ) {
-        this.id = id;
-        this.member = member;
-        this.reservationDate = new ReservationDate(reservationDate);
-        this.reservationTime = reservationTime;
-        this.theme = theme;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
+
+    private LocalDate reservationDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ReservationTime reservationTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Theme theme;
 
     public static Reservation create(
             Member member,
@@ -42,33 +49,5 @@ public class Reservation {
             Theme theme
     ) {
         return new Reservation(id, member, reservationDate, reservationTime, theme);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public LocalDate getDate() {
-        return reservationDate.getDate();
-    }
-
-    public LocalTime getStartAt() {
-        return reservationTime.getStartAt();
-    }
-
-    public ReservationTime getReservationTime() {
-        return reservationTime;
-    }
-
-    public Long getTimeId() {
-        return reservationTime.getId();
-    }
-
-    public Theme getTheme() {
-        return theme;
     }
 }
