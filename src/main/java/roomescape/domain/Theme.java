@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -15,6 +18,9 @@ public class Theme {
     private String name;
     private String description;
     private String thumbnail;
+
+    @OneToMany(mappedBy = "theme")
+    private List<Reservation> reservation = new ArrayList<>();
 
     public Theme() {
     }
@@ -52,6 +58,10 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
+    }
+
+    public List<Reservation> getReservation() {
+        return reservation;
     }
 
     @Override

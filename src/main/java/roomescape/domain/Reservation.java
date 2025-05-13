@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -15,9 +16,11 @@ public class Reservation {
     private Long id;
     private LocalDate reservationDate;
 
-    // TODO: 연관관계 설정
+    @ManyToOne
     private ReservationTime reservationTime;
+    @ManyToOne
     private Member member;
+    @ManyToOne
     private Theme theme;
 
     // TODO: 호출 순서 변경
