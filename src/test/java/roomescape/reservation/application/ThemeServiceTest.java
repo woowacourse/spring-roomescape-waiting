@@ -1,6 +1,5 @@
 package roomescape.reservation.application;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
@@ -22,7 +21,6 @@ import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.service.ReservationTimeService;
 import roomescape.reservation.application.service.ThemeService;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.infrastructure.dao.ReservationDao;
@@ -131,7 +129,7 @@ public class ThemeServiceTest {
                 new Theme(theme.getId(), "레벨3 탈출",
                         "우테코 레벨3를 탈출하는 내용입니다.",
                         "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"),
-                new ReservationDate(LocalDate.now().minusDays(3)),
+                LocalDate.now().minusDays(3),
                 new ReservationTime(1L, LocalTime.of(15, 40))
         ));
 

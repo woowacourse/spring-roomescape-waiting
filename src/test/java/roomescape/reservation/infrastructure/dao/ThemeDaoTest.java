@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.dto.CreateReservationRequest;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.presentation.dto.ThemeRequest;
@@ -107,7 +106,7 @@ public class ThemeDaoTest {
         CreateReservationRequest createReservationRequest = new CreateReservationRequest(
                 new Member(2L, "admin@admin.com", "admin", "어드민", Role.ADMIN),
                 theme2,
-                new ReservationDate(LocalDate.now().minusDays(3)),
+                LocalDate.now().minusDays(3),
                 reservationTimeDao.insert(reservationTimeRequest.getStartAt())
         );
         reservationDao.insert(createReservationRequest);

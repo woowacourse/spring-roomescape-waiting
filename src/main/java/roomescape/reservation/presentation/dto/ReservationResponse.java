@@ -1,7 +1,6 @@
 package roomescape.reservation.presentation.dto;
 
 import java.time.LocalDate;
-import roomescape.member.domain.Member;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
 
@@ -19,7 +18,7 @@ public class ReservationResponse {
         this.id = reservation.getId();
         this.member = new MemberResponse(reservation.getMember());
         this.theme = new ThemeResponse(reservation.getTheme());
-        this.date = reservation.getDate().getReservationDate();
+        this.date = reservation.getDate();
         this.time = new ReservationTimeResponse(reservation.getReservationTime());
     }
 
@@ -42,5 +41,4 @@ public class ReservationResponse {
     public ThemeResponse getTheme() {
         return theme;
     }
-
 }

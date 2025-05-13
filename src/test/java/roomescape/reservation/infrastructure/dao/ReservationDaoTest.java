@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.dto.CreateReservationRequest;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.presentation.dto.ThemeRequest;
 
@@ -45,7 +44,7 @@ public class ReservationDaoTest {
         CreateReservationRequest createReservationRequest = new CreateReservationRequest(
                 new Member(2L, "admin@admin.com", "admin", "어드민", Role.ADMIN),
                 themeDao.insert(themeRequest),
-                new ReservationDate(LocalDate.of(2023, 8, 5)),
+                LocalDate.of(2023, 8, 5),
                 reservationTimeDao.insert(reservationTimeRequest.getStartAt())
         );
 
@@ -70,5 +69,4 @@ public class ReservationDaoTest {
         String sql = "select count(*) from reservation";
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
-
 }

@@ -13,7 +13,6 @@ import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
@@ -40,10 +39,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(final ReservationRequest reservationRequest, final Long memberId) {
-        ReservationDate reservationDate = new ReservationDate(reservationRequest.getDate());
         ReservationTime reservationTime = getReservationTime(reservationRequest.getTimeId());
         Theme theme = getTheme(reservationRequest.getThemeId());
-        validateReservationDateTime(reservationDate, reservationTime);
+        final LocalDate date = reservationRequest.getDate();
+        validateReservationDateTime(date, reservationTime);
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
@@ -51,7 +50,7 @@ public class ReservationService {
         CreateReservationRequest createReservationRequest = new CreateReservationRequest(
                 member,
                 theme,
-                reservationDate,
+                date,
                 reservationTime
         );
 
@@ -60,10 +59,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(final AdminReservationRequest adminReservationRequest) {
-        ReservationDate reservationDate = new ReservationDate(adminReservationRequest.getDate());
         ReservationTime reservationTime = getReservationTime(adminReservationRequest.getTimeId());
         Theme theme = getTheme(adminReservationRequest.getThemeId());
-        validateReservationDateTime(reservationDate, reservationTime);
+        final LocalDate date = adminReservationRequest.getDate();
+        validateReservationDateTime(date, reservationTime);
 
         Member member = memberRepository.findById(adminReservationRequest.getMemberId())
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
@@ -71,7 +70,7 @@ public class ReservationService {
         CreateReservationRequest createReservationRequest = new CreateReservationRequest(
                 member,
                 theme,
-                reservationDate,
+                date,
                 reservationTime
         );
 
@@ -107,8 +106,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("테마 정보를 찾을 수 없습니다."));
     }
 
-    private void validateReservationDateTime(ReservationDate reservationDate, ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate.getReservationDate(),
+    private void validateReservationDateTime(LocalDate reservationDate, ReservationTime reservationTime) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate,
                 reservationTime.getStartAt());
 
         validateIsPast(reservationDateTime);

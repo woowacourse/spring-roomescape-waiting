@@ -16,7 +16,6 @@ import roomescape.member.domain.Role;
 import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
@@ -38,9 +37,7 @@ public class ReservationDao implements ReservationRepository {
                         resultSet.getString("theme_description"),
                         resultSet.getString("theme_thumbnail")
                 ),
-                new ReservationDate(
-                        resultSet.getDate("reservation_date").toLocalDate()
-                ),
+                resultSet.getDate("reservation_date").toLocalDate(),
                 new ReservationTime(
                         resultSet.getLong("time_id"),
                         resultSet.getTime("time_value").toLocalTime()
@@ -62,7 +59,7 @@ public class ReservationDao implements ReservationRepository {
         Map<String, Object> params = new HashMap<>();
         params.put("member_id", request.member().getId());
         params.put("theme_id", request.theme().getId());
-        params.put("date", request.date().getReservationDate().toString());
+        params.put("date", request.date());
         params.put("time_id", request.time().getId());
 
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
