@@ -6,11 +6,9 @@ import java.util.Optional;
 
 public interface ThemeQueryRepository {
 
-    Boolean existsByName(String name);
+    boolean existsByName(String name);
 
     Optional<Theme> findById(Long id);
-
-    Theme getById(Long id);
 
     List<Theme> findAll();
 

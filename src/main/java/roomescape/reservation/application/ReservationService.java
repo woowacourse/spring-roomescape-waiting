@@ -39,7 +39,8 @@ public class ReservationService {
         final ReservationTime reservationTime = getReservationTime(request);
         validateNoDuplicateReservation(request);
 
-        final Theme theme = themeQueryRepository.getById(request.themeId());
+        final Theme theme = themeQueryRepository.findById(request.themeId())
+                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
         final Member member = memberQueryRepository.getById(memberAuthInfo.id());
         final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
 

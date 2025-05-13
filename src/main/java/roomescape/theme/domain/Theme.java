@@ -1,16 +1,32 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
+@Table(name = "themes")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = {"id"})
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, unique = true)
+    private String name;
+    @Column(nullable = false)
+    private String description;
+    @Column(nullable = false)
+    private String thumbnail;
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateName(name);
@@ -28,19 +44,19 @@ public class Theme {
 
     private void validateName(final String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be null or blank");
+            throw new IllegalArgumentException("이름은 null이거나 공백일 수 없습니다.");
         }
     }
 
     private void validateDescription(final String description) {
         if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("Description cannot be null or blank");
+            throw new IllegalArgumentException("테마 설명은 null이거나 공백일 수 없습니다.");
         }
     }
 
     private void validateThumbnail(final String thumbnail) {
         if (thumbnail == null || thumbnail.isBlank()) {
-            throw new IllegalArgumentException("Thumbnail cannot be null or blank");
+            throw new IllegalArgumentException("썸네일은 null이거나 공백일 수 없습니다.");
         }
     }
 }
