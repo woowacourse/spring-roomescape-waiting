@@ -2,7 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.SignupRequest;
 import roomescape.exception.InvalidMemberException;

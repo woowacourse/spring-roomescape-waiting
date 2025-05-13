@@ -8,7 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.exception.UnauthorizedException;
 
 @Component

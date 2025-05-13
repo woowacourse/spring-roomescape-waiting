@@ -3,7 +3,7 @@ package roomescape.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 
 @Repository
 public interface MemberRepository {

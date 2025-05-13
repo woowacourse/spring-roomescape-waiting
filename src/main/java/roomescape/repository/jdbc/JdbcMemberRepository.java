@@ -9,8 +9,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.entity.Member;
+import roomescape.entity.Role;
 import roomescape.repository.MemberRepository;
 
 @Repository

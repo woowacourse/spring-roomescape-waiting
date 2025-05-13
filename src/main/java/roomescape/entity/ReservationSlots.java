@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,8 +18,7 @@ public class ReservationSlots {
 
         for (ReservationTime time : times) {
             boolean contains = alreadyReservationTimes.contains(time);
-            ReservationSlot reservationSlot = new ReservationSlot(time.getId(), time.getTime(),
-                    contains);
+            ReservationSlot reservationSlot = new ReservationSlot(time.getId(), time.getTime(), contains);
             reservationSlots.add(reservationSlot);
         }
 

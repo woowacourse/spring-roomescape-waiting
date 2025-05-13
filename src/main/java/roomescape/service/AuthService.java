@@ -2,9 +2,9 @@ package roomescape.service;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
-import roomescape.domain.LoginMember;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.entity.LoginMember;
+import roomescape.entity.Member;
+import roomescape.entity.Role;
 import roomescape.jwt.JwtTokenProvider;
 
 @Service

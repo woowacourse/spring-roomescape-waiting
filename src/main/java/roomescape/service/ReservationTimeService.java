@@ -2,9 +2,9 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlots;
-import roomescape.domain.ReservationTime;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationSlots;
+import roomescape.entity.ReservationTime;
 import roomescape.dto.request.AvailableTimeRequest;
 import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.exception.InvalidReservationTimeException;
