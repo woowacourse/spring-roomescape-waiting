@@ -28,7 +28,13 @@ public class ReservationTimeService {
     }
 
     public Long create(CreateReservationTimeParam createReservationTimeParam) {
-        return reservationTimeRepository.create(new ReservationTime(createReservationTimeParam.startAt()));
+        ReservationTime reservationTime = new ReservationTime(
+                null,
+                createReservationTimeParam.startAt()
+        );
+
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        return savedReservationTime.getId();
     }
 
     public ReservationTimeResult findById(Long reservationTimeId) {
@@ -47,7 +53,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId, LocalDate reservationDate) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
-        Set<ReservationTime> bookedTimes = reservationRepository.findByThemeIdAndReservationDate(themeId, reservationDate).stream()
+        Set<ReservationTime> bookedTimes = reservationRepository.findByThemeIdAndDate(themeId, reservationDate).stream()
                 .map(Reservation::getTime)
                 .filter(reservationTimes::contains)
                 .collect(Collectors.toSet());

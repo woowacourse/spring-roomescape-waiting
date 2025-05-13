@@ -34,7 +34,9 @@ public class ThemeService {
 
     public Long create(CreateThemeParam createThemeParam) {
         Theme theme = new Theme(createThemeParam.name(), createThemeParam.description(), createThemeParam.thumbnail());
-        return themeRepository.create(theme);
+        Theme savedTheme = themeRepository.save(theme);
+
+        return savedTheme.getId();
     }
 
     public ThemeResult findById(Long id) {

@@ -1,30 +1,51 @@
 package roomescape.persistence;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
-import roomescape.persistence.query.CreateReservationQuery;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 
-public interface ReservationRepository {
+public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
 
-    List<Reservation> findAll();
-
-    Long create(CreateReservationQuery createReservationQuery);
-
-    void deleteById(Long reservationId);
-
-    Optional<Reservation> findById(Long reservationId);
-
-    boolean existsByTimeId(Long reservationTimeId);
-
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
+    boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
 
-    List<Reservation> findByThemeIdAndReservationDate(Long themeId, LocalDate reservationDate);
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByThemeIdAndDate(Long themeId, LocalDate date);
+
+    @Query(value = """
+            SELECT
+                r.id as reservation_id,
+                r.date,
+                t.id as time_id,
+                t.start_at as time_value,
+                tm.id as theme_id,
+                tm.name as theme_name,
+                tm.description as theme_description,
+                tm.thumbnail as theme_thumbnail,
+                m.id as member_id,
+                m.role as member_role,
+                m.name as member_name,
+                m.email as member_email,
+                m.password as member_password
+            FROM reservation as r
+                inner join reservation_time as t on r.time_id = t.id
+                inner join theme as tm on r.theme_id = tm.id
+                inner join member as m on r.member_id = m.id
+            WHERE (:memberId IS NULL OR m.id = :memberId)
+              AND (:themeId IS NULL OR tm.id = :themeId)
+              AND (:dateFrom IS NULL OR r.date >= :dateFrom)
+              AND (:dateTo IS NULL OR r.date <= :dateTo)
+            """, nativeQuery = true)
+    List<Reservation> findReservationsInConditions(
+            @Param("memberId") Long memberId,
+            @Param("themeId") Long themeId,
+            @Param("dateFrom") LocalDate dateFrom,
+            @Param("dateTo") LocalDate dateTo);
 }

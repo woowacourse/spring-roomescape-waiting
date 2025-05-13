@@ -26,7 +26,7 @@ public class AdminController {
     public ResponseEntity<ReservationResult> createReservation(@RequestBody CreateReservationAdminRequest reservationRequest) {
         CreateReservationParam createReservationParam = new CreateReservationParam(
                 reservationRequest.memberId(),
-                reservationRequest.reservationDate(),
+                reservationRequest.date(),
                 reservationRequest.timeId(),
                 reservationRequest.themeId()
         );

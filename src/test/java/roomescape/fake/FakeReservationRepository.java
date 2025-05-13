@@ -50,10 +50,10 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate reservationDate, final Long timeId, final Long themeId) {
+    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
         return reservations.stream()
                 .anyMatch(reservation ->
-                        reservation.getDate().equals(reservationDate) &&
+                        reservation.getDate().equals(date) &&
                         Objects.equals(reservation.getTime().id(), timeId) &&
                         Objects.equals(reservation.getTime().id(), themeId));
     }
@@ -65,10 +65,10 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeIdAndReservationDate(final Long themeId, final LocalDate reservationDate) {
+    public List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate date) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getTheme().getId(), themeId))
-                .filter(reservation -> reservation.getDate().equals(reservationDate))
+                .filter(reservation -> reservation.getDate().equals(date))
                 .toList();
     }
 

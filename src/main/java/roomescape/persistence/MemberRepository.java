@@ -1,18 +1,9 @@
 package roomescape.persistence;
 
-import roomescape.domain.Member;
-import roomescape.persistence.query.CreateMemberQuery;
-
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.ListCrudRepository;
+import roomescape.domain.Member;
 
-public interface MemberRepository {
-
+public interface MemberRepository extends ListCrudRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
-
-    Optional<Member> findById(Long id);
-
-    Long create(CreateMemberQuery createMemberQuery);
-
-    List<Member> findAll();
 }

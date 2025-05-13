@@ -42,13 +42,16 @@ public class ReservationService {
         validateUniqueReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
 
-        return reservationRepository.create(
-                new CreateReservationQuery(
-                        member,
-                        createReservationParam.date(),
-                        reservationTime,
-                        theme
-                ));
+        Reservation reservation = new Reservation(
+                null,
+                member,
+                createReservationParam.date(),
+                reservationTime,
+                theme
+        );
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return savedReservation.getId();
     }
 
     public void deleteById(Long reservationId) {

@@ -43,6 +43,8 @@ public class AuthController {
     public ResponseEntity<CheckLoginUserResponse> loginCheck(@CookieValue("token") Cookie cookie) {
         String token = cookieProvider.extractTokenFromCookie(cookie);
         Long id = jwtTokenProvider.extractIdFromToken(token);
+
+        // TODO: DB 접근하지 않고 Claim 정보를 사용하도록 리팩터링 고려
         return ResponseEntity.ok().body(CheckLoginUserResponse.from(memberService.findById(id)));
     }
 
