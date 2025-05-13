@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.dto.request.AdminCreateReservationRequest;
+import roomescape.dto.request.CreateReservationRequest;
 import roomescape.entity.LoginMember;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
-import roomescape.dto.request.AdminCreateReservationRequest;
-import roomescape.dto.request.CreateReservationRequest;
 import roomescape.exception.InvalidMemberException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.InvalidReservationTimeException;
@@ -58,7 +58,7 @@ public class ReservationService {
 
         validateDuplicateReservation(reservation);
         validateAddReservationDateTime(reservation);
-        return reservationRepository.add(reservation);
+        return reservationRepository.save(reservation);
     }
 
     private void validateDuplicateReservation(Reservation reservation) {

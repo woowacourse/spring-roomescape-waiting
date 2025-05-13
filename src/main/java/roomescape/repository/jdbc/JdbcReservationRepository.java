@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -20,7 +19,6 @@ import roomescape.entity.Role;
 import roomescape.entity.Theme;
 import roomescape.repository.ReservationRepository;
 
-@Repository
 public class JdbcReservationRepository implements ReservationRepository {
 
     private static final String DEFUALT_SELECT_SQL = """
@@ -80,7 +78,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Reservation add(Reservation reservation) {
+    public Reservation save(Reservation reservation) {
         String sql = "insert into reservation (member_id, `date`, time_id, theme_id) values(?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 

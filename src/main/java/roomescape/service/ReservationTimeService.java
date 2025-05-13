@@ -2,11 +2,11 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.dto.request.AvailableTimeRequest;
+import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationSlots;
 import roomescape.entity.ReservationTime;
-import roomescape.dto.request.AvailableTimeRequest;
-import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.exception.InvalidReservationTimeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -28,7 +28,7 @@ public class ReservationTimeService {
         if (reservationTimeRepository.existsByTime(reservationTime.getTime())) {
             throw new InvalidReservationTimeException("중복된 예약시간입니다");
         }
-        return reservationTimeRepository.add(reservationTime);
+        return reservationTimeRepository.save(reservationTime);
     }
 
     public List<ReservationTime> findAll() {

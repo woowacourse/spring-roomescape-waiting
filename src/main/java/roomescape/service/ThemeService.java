@@ -3,10 +3,10 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.dto.request.CreateThemeRequest;
 import roomescape.entity.Reservation;
 import roomescape.entity.Theme;
 import roomescape.entity.ThemeRanking;
-import roomescape.dto.request.CreateThemeRequest;
 import roomescape.exception.InvalidThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -27,7 +27,7 @@ public class ThemeService {
 
     public Theme addTheme(CreateThemeRequest request) {
         Theme theme = request.toTheme();
-        return themeRepository.add(theme);
+        return themeRepository.save(theme);
     }
 
     public List<Theme> findAll() {

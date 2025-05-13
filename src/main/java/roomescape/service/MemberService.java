@@ -2,9 +2,9 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.entity.Member;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.SignupRequest;
+import roomescape.entity.Member;
 import roomescape.exception.InvalidMemberException;
 import roomescape.repository.MemberRepository;
 
@@ -21,7 +21,7 @@ public class MemberService {
         if (memberRepository.existsByEmail(request.email())) {
             throw new InvalidMemberException("동일한 이메일로 추가할 수 없습니다.");
         }
-        return memberRepository.add(request.toMember());
+        return memberRepository.save(request.toMember()); //TODO: save로직으로 수정
     }
 
     public List<Member> findAll() {

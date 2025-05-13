@@ -10,11 +10,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.entity.ReservationTime;
 import roomescape.repository.ReservationTimeRepository;
 
-@Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
     private static final String DEFAULT_SELECT_SQL = "select id, start_at from reservation_time";
@@ -32,7 +30,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public ReservationTime add(ReservationTime reservationTime) {
+    public ReservationTime save(ReservationTime reservationTime) {
         String sql = "insert into reservation_time (start_at) values(?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
