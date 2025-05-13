@@ -21,12 +21,21 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
-    implementation 'io.jsonwebtoken:jjwt-gson:0.11.2'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     runtimeOnly 'com.h2database:h2'
+
+    // JWT 의존성
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    // 해시 기능 의존성
+    implementation 'org.springframework.security:spring-security-crypto:6.4.5'
+
+    // 롬복
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.rest-assured:rest-assured:5.3.1'
