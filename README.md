@@ -44,4 +44,4 @@
   - [x] ThemeRepository
   - [x] MemberRepository
   - [ ] ReservationRepository
-  - [ ] ReservationTimeRepository
+  - [x] ReservationTimeRepository
