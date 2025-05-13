@@ -4,6 +4,6 @@
 
 - JPA 도입
   - [x] JPA 의존성 추가 
-  - [ ] Entity 매핑
-  - [ ] 연관관계 매핑 
+  - [x] Entity 매핑
+  - [x] 연관관계 매핑 
   - [ ] JPA Repository 도입  
