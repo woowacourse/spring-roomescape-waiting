@@ -13,7 +13,7 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
-        return parameter.getParameterType().equals(Long.class);
+        return parameter.getParameterType().equals(SessionMember.class);
     }
 
     @Override
@@ -28,10 +28,10 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
         if (session == null) {
             throw new IllegalStateException("로그인이 필요합니다.");
         }
-        SessionMember member = (SessionMember) session.getAttribute("LOGIN_MEMBER");
-        if (member == null) {
+        SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
+        if (sessionMember == null) {
             throw new IllegalStateException("로그인이 필요합니다.");
         }
-        return member.id();
+        return sessionMember;
     }
 }

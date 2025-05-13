@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.global.SessionMember;
 import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationCreateRequest;
 import roomescape.service.response.ReservationResponse;
@@ -30,9 +31,9 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody @Valid final ReservationCreateRequest request,
-            final Long memberId
+            final SessionMember sessionMember
     ) {
-        ReservationResponse response = reservationService.createReservation(request, memberId);
+        ReservationResponse response = reservationService.createReservation(request, sessionMember.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);

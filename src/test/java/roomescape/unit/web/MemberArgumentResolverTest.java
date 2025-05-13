@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import roomescape.domain.member.MemberName;
+import roomescape.domain.member.MemberRole;
 import roomescape.global.MemberArgumentResolver;
 import roomescape.global.SessionMember;
 
@@ -20,7 +21,7 @@ class MemberArgumentResolverTest {
     @Test
     void 세션에서_멤버ID를_추출할_수_있다() throws Exception {
         // given
-        SessionMember sessionMember = new SessionMember(1L, new MemberName("한스"));
+        SessionMember sessionMember = new SessionMember(1L, new MemberName("한스"), MemberRole.MEMBER);
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
         servletRequest.setSession(new MockHttpSession());
         servletRequest.getSession().setAttribute("LOGIN_MEMBER", sessionMember);
@@ -33,7 +34,7 @@ class MemberArgumentResolverTest {
         Object resolved = resolver.resolveArgument(parameter, null, webRequest, null);
 
         // then
-        assertThat(resolved).isEqualTo(1L);
+        assertThat(resolved).isEqualTo(new SessionMember(1L, new MemberName("한스"), MemberRole.MEMBER));
     }
 
     @Test
