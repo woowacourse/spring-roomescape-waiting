@@ -1,15 +1,28 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.domain.enums.Role;
 import roomescape.exception.member.MemberFieldRequiredException;
 
+@Entity
 public class Member {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String email;
     private String password;
+    @Enumerated(value = EnumType.STRING)
     private Role role;
+
+    public Member() {
+    }
 
     public Member(Long id, String name, String email, String password, Role role) {
         validate(name, email, password, role);
