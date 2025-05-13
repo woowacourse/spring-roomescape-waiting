@@ -1,4 +1,13 @@
 package roomescape.member.controller.request;
 
-public record TokenLoginCreateRequest(String email, String password) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record TokenLoginCreateRequest(
+        @NotBlank
+        @Email
+        String email,
+        @NotBlank
+        String password
+) {
 }
