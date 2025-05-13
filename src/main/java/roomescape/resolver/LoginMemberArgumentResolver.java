@@ -6,7 +6,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.service.MemberService;
 import roomescape.util.CookieTokenExtractor;
 
@@ -22,7 +22,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().equals(LoginMember.class);
+        return parameter.getParameterType().equals(Member.class);
     }
 
     @Override

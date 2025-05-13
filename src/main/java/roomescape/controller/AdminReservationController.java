@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.UnauthorizedAccessException;
@@ -26,8 +27,8 @@ public class AdminReservationController {
     }
 
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody ReservationRequest request, LoginMember member) {
-        if (member.getRole().equalsIgnoreCase("USER")) {
+    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody ReservationRequest request, Member member) {
+        if (Role.isAdmin(member.getRole())) {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
         }
 
@@ -37,15 +38,15 @@ public class AdminReservationController {
 
     @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> searchReservation(
-            @RequestParam(value = "theme", required = false) Long theme,
-            @RequestParam(value = "member", required = false) Long member,
+            @RequestParam(value = "theme-id", required = false) Long themeId,
+            @RequestParam(value = "member-id", required = false) Long memberId,
             @RequestParam(value = "from", required = false) LocalDate from,
             @RequestParam(value = "to", required = false) LocalDate to,
-            LoginMember loginMember) {
-        if (loginMember.getRole().equalsIgnoreCase("USER")) {
+            Member member) {
+        if (Role.isUser(member.getRole())) {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
         }
 
-        return ResponseEntity.ok(reservationService.searchReservations(theme, member, from, to));
+        return ResponseEntity.ok(reservationService.searchReservations(themeId, memberId, from, to));
     }
 }

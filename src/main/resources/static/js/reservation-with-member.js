@@ -198,7 +198,7 @@ function applyFilter(event) {
   const dateFrom = document.getElementById('date-from').value;
   const dateTo = document.getElementById('date-to').value;
 
-  const query = `theme=${themeId}&member=${memberId}&from=${dateFrom}&to=${dateTo}`;
+  const query = `theme-id=${themeId}&member-id=${memberId}&from=${dateFrom}&to=${dateTo}`;
 
   fetch(`/admin/reservations?${query}`, { // 예약 검색 API 호출
     method: 'GET',

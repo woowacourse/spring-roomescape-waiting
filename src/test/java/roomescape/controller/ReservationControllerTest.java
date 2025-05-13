@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.dto.member.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 
@@ -28,7 +28,7 @@ class ReservationControllerTest {
 
     @BeforeEach
     void loginAsUser() {
-        LoginMember user = LoginMemberFixture.getUser();
+        Member user = LoginMemberFixture.getUser();
 
         userCookie = RestAssured
                 .given().log().all()
@@ -37,7 +37,7 @@ class ReservationControllerTest {
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
 
-        LoginMember admin = LoginMemberFixture.getAdmin();
+        Member admin = LoginMemberFixture.getAdmin();
 
         adminCookie = RestAssured
                 .given().log().all()

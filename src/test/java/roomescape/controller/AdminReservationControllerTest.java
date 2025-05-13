@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.dto.member.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 
@@ -27,7 +27,7 @@ class AdminReservationControllerTest {
 
     @BeforeEach
     void loginAsAdmin() {
-        LoginMember admin = LoginMemberFixture.getAdmin();
+        Member admin = LoginMemberFixture.getAdmin();
 
         cookie = RestAssured
                 .given().log().all()
@@ -59,7 +59,7 @@ class AdminReservationControllerTest {
         @DisplayName("일반 유저는 예약 검색 API에 접근할 수 없다")
         @Test
         void searchReservationsExceptionTest() {
-            LoginMember user = LoginMemberFixture.getUser();
+            Member user = LoginMemberFixture.getUser();
             String userCookie = RestAssured
                     .given().log().all()
                     .body(new LoginRequest(user.getPassword(), user.getEmail()))
@@ -112,7 +112,7 @@ class AdminReservationControllerTest {
         @DisplayName("일반 유저는 /admin/reservations API를 통해 Reservation을 생성할 수 없다")
         @Test
         void addReservationExceptionTest1() {
-            LoginMember user = LoginMemberFixture.getUser();
+            Member user = LoginMemberFixture.getUser();
             String userCookie = RestAssured
                     .given().log().all()
                     .body(new LoginRequest(user.getPassword(), user.getEmail()))

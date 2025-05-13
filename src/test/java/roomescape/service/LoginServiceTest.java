@@ -2,8 +2,8 @@ package roomescape.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dto.member.LoginMemberResponse;
 import roomescape.dto.member.LoginRequest;
+import roomescape.dto.member.MemberResponse;
 import roomescape.dto.member.TokenResponse;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
@@ -43,7 +43,7 @@ class LoginServiceTest {
         String token = "admin@gmail.com";
 
         // when
-        LoginMemberResponse response = loginService.findMemberByToken(token);
+        MemberResponse response = loginService.findMemberByToken(token);
 
         // then
         assertAll(

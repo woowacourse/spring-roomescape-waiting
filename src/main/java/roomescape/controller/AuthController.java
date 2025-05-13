@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.LoginMember;
-import roomescape.dto.member.LoginMemberResponse;
+import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.dto.member.LoginRequest;
+import roomescape.dto.member.MemberResponse;
 import roomescape.dto.member.RegistrationRequest;
 import roomescape.dto.member.TokenResponse;
 import roomescape.exception.UnauthorizedAccessException;
@@ -40,14 +41,14 @@ public class AuthController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<LoginMemberResponse>> getAllMembers(LoginMember member) {
-        if (member.getRole().equalsIgnoreCase("USER")) {
+    public ResponseEntity<List<MemberResponse>> getAllMembers(Member member) {
+        if (Role.isUser(member.getRole())) {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
         }
 
-        List<LoginMemberResponse> response = memberService.findAllMembers()
+        List<MemberResponse> response = memberService.findAllMembers()
                 .stream()
-                .map(value -> new LoginMemberResponse(value.getId(), value.getName()))
+                .map(value -> new MemberResponse(value.getId(), value.getName()))
                 .toList();
         return ResponseEntity.ok().body(response);
     }
@@ -65,8 +66,8 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<LoginMemberResponse> checkLogin(@CookieValue(name = "token", required = false) String token) {
-        LoginMemberResponse response = loginService.findMemberByToken(token);
+    public ResponseEntity<MemberResponse> checkLogin(@CookieValue(name = "token", required = false) String token) {
+        MemberResponse response = loginService.findMemberByToken(token);
         return ResponseEntity.ok().body(response);
     }
 

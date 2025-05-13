@@ -1,10 +1,10 @@
 package roomescape.dto.member;
 
-import roomescape.domain.ReservationName;
+import roomescape.domain.Member;
 
 public record NameResponse(Long id, String name) {
 
-    public static NameResponse from(ReservationName name) {
-        return new NameResponse(name.getId(), name.getName());
+    public static NameResponse from(Member member) {
+        return new NameResponse(member.getId(), member.getName());
     }
 }

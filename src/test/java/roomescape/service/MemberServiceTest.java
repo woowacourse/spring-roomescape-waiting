@@ -3,7 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.repository.FakeTokenProvider;
@@ -26,13 +26,13 @@ class MemberServiceTest {
         String token = "admin@gmail.com";
 
         // when
-        LoginMember loginMember = memberService.findMemberByToken(token);
+        Member member = memberService.findMemberByToken(token);
 
         // then
         assertAll(
-                () -> assertThat(loginMember.getId()).isEqualTo(1L),
-                () -> assertThat(loginMember.getName()).isEqualTo("어드민"),
-                () -> assertThat(loginMember.getEmail()).isEqualTo("admin@gmail.com")
+                () -> assertThat(member.getId()).isEqualTo(1L),
+                () -> assertThat(member.getName()).isEqualTo("어드민"),
+                () -> assertThat(member.getEmail()).isEqualTo("admin@gmail.com")
         );
     }
 
@@ -50,7 +50,7 @@ class MemberServiceTest {
     @Test
     void findAllTest() {
         // when
-        List<LoginMember> members = memberService.findAllMembers();
+        List<Member> members = memberService.findAllMembers();
 
         // then
         assertAll(

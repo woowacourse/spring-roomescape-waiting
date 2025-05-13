@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.dto.member.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 
@@ -21,7 +21,7 @@ class AdminPageControllerTest {
 
     @BeforeEach
     void loginAsAdmin() {
-        LoginMember admin = LoginMemberFixture.getAdmin();
+        Member admin = LoginMemberFixture.getAdmin();
 
         cookie = RestAssured
                 .given().log().all()
@@ -74,7 +74,7 @@ class AdminPageControllerTest {
     @DisplayName("일반 유저는 /admin으로 시작하는 페이지에 접근할 수 없다")
     @Test
     void pageAccessTest() {
-        LoginMember user = LoginMemberFixture.getUser();
+        Member user = LoginMemberFixture.getUser();
         String userCookie = RestAssured
                 .given().log().all()
                 .body(new LoginRequest(user.getPassword(), user.getEmail()))

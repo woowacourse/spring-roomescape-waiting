@@ -28,7 +28,7 @@ public class FakeReservationRepository implements ReservationRepository {
             throw new DuplicateKeyException("동일한 예약이 존재합니다.");
         }
         long id = reservationId.getAndIncrement();
-        Reservation newReservation = new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        Reservation newReservation = new Reservation(id, reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
         reservations.add(newReservation);
         return id;
     }
@@ -63,7 +63,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Reservation> findByThemeMemberDateRange(Long themeId, Long memberId, LocalDate from, LocalDate to) {
         return reservations.stream()
                 .filter(r -> themeId == null || r.getTheme().getId().equals(themeId))
-                .filter(r -> memberId == null || r.getName().getId().equals(memberId))
+                .filter(r -> memberId == null || r.getMember().getId().equals(memberId))
                 .filter(r -> from == null || !r.getDate().isBefore(from))
                 .filter(r -> to == null || !r.getDate().isAfter(to))
                 .collect(Collectors.toList());

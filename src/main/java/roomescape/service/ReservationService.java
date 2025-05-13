@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -24,7 +24,7 @@ public class ReservationService {
         this.reservationChecker = reservationChecker;
     }
 
-    public ReservationResponse createUserReservation(UserReservationRequest dto, LoginMember member) {
+    public ReservationResponse createUserReservation(UserReservationRequest dto, Member member) {
         Reservation reservation = reservationChecker.createReservationWithoutId(dto, member);
         return createReservation(reservation);
     }
@@ -37,7 +37,7 @@ public class ReservationService {
     private ReservationResponse createReservation(Reservation reservation) {
         try {
             long id = reservationRepository.save(reservation);
-            Reservation newReservation = new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+            Reservation newReservation = new Reservation(id, reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
             return ReservationResponse.from(newReservation, newReservation.getTime(), newReservation.getTheme());
         } catch (DuplicateKeyException e) {
             throw new DuplicateContentException("[ERROR] 해당 날짜와 테마로 이미 예약된 내역이 존재합니다.");

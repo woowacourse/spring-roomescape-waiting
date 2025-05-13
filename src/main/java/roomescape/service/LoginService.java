@@ -2,9 +2,9 @@ package roomescape.service;
 
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.domain.LoginMember;
-import roomescape.dto.member.LoginMemberResponse;
+import roomescape.domain.Member;
 import roomescape.dto.member.LoginRequest;
+import roomescape.dto.member.MemberResponse;
 import roomescape.dto.member.TokenResponse;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.repository.MemberRepository;
@@ -33,13 +33,13 @@ public class LoginService {
     }
 
     private boolean checkInvalidLogin(String email, String password) {
-        Optional<LoginMember> member = memberRepository.findByEmailAndPassword(email, password);
+        Optional<Member> member = memberRepository.findByEmailAndPassword(email, password);
         return member.map(value -> !email.equals(value.getEmail()) || !password.equals(value.getPassword()))
                 .orElse(true);
     }
 
-    public LoginMemberResponse findMemberByToken(String token) {
-        LoginMember loginMember = memberService.findMemberByToken(token);
-        return new LoginMemberResponse(loginMember.getId(), loginMember.getName());
+    public MemberResponse findMemberByToken(String token) {
+        Member member = memberService.findMemberByToken(token);
+        return new MemberResponse(member.getId(), member.getName());
     }
 }

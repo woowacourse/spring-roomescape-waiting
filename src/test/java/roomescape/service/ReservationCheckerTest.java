@@ -39,7 +39,7 @@ class ReservationCheckerTest {
         // then
         assertAll(
                 () -> assertThat(reservation.getDate()).isEqualTo(targetDate),
-                () -> assertThat(reservation.getName().getName()).isEqualTo("어드민"),
+                () -> assertThat(reservation.getMember().getName()).isEqualTo("어드민"),
                 () -> assertThat(reservation.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0)),
                 () -> assertThat(reservation.getTheme().getName()).isEqualTo("우테코")
         );

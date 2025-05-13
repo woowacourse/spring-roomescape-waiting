@@ -15,7 +15,7 @@ public record ReservationResponse(Long id, @JsonFormat(pattern = "yyyy-MM-dd") L
                                   ReservationTimeResponse time) {
 
     public static ReservationResponse from(Reservation reservation, ReservationTime reservationTime, Theme theme) {
-        NameResponse nameResponse = NameResponse.from(reservation.getName());
+        NameResponse nameResponse = NameResponse.from(reservation.getMember());
         ReservationTimeResponse timeResponse = ReservationTimeResponse.from(reservationTime);
         ThemeResponse themeResponse = ThemeResponse.from(theme);
 

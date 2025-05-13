@@ -2,7 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationName;
 import roomescape.domain.ReservationTime;
@@ -28,7 +28,7 @@ public class ReservationChecker {
         this.memberRepository = memberRepository;
     }
 
-    public Reservation createReservationWithoutId(UserReservationRequest dto, LoginMember member) {
+    public Reservation createReservationWithoutId(UserReservationRequest dto, Member member) {
         ReservationRequest request = new ReservationRequest(dto.date(), dto.timeId(), dto.themeId(), member.getId());
         return createReservationWithoutId(request);
     }
@@ -42,7 +42,7 @@ public class ReservationChecker {
         Theme theme = themeRepository.findById(dto.themeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + dto.themeId()));
 
-        LoginMember member = memberRepository.findById(dto.memberId())
+        Member member = memberRepository.findById(dto.memberId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 회원을 찾을 수 없습니다."));
 
         return dto.createWithoutId(reservationTime, theme, new ReservationName(member.getId(), member.getName()));

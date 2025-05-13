@@ -5,15 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.dao.DuplicateKeyException;
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.domain.RegistrationDetails;
+import roomescape.domain.Role;
 
 public class FakeMemberRepository implements MemberRepository {
 
-    private final List<LoginMember> members;
+    private final List<Member> members;
     private final AtomicLong memberId;
 
-    public FakeMemberRepository(final List<LoginMember> members) {
+    public FakeMemberRepository(final List<Member> members) {
         this.members = new ArrayList<>(members);
         this.memberId = new AtomicLong(members.size() + 1);
     }
@@ -28,34 +29,34 @@ public class FakeMemberRepository implements MemberRepository {
         }
 
         long id = memberId.getAndIncrement();
-        LoginMember newMember = new LoginMember(id, registrationDetails.name(), registrationDetails.email(),
-                registrationDetails.password(), "USER");
+        Member newMember = new Member(id, registrationDetails.name(), registrationDetails.email(),
+                registrationDetails.password(), Role.USER);
         members.add(newMember);
     }
 
     @Override
-    public Optional<LoginMember> findByEmail(String email) {
+    public Optional<Member> findByEmail(String email) {
         return members.stream()
                 .filter(member -> member.getEmail().equalsIgnoreCase(email))
                 .findFirst();
     }
 
     @Override
-    public Optional<LoginMember> findByEmailAndPassword(String email, String password) {
+    public Optional<Member> findByEmailAndPassword(String email, String password) {
         return members.stream()
                 .filter(member -> member.getEmail().equalsIgnoreCase(email) && member.getPassword().equals(password))
                 .findFirst();
     }
 
     @Override
-    public Optional<LoginMember> findById(long id) {
+    public Optional<Member> findById(long id) {
         return members.stream()
                 .filter(member -> member.getId() == id)
                 .findFirst();
     }
 
     @Override
-    public List<LoginMember> findAll() {
+    public List<Member> findAll() {
         return members;
     }
 }
