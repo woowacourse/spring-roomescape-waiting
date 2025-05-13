@@ -65,7 +65,7 @@ class ReservationTimeServiceTest {
         Theme theme = new Theme(0L, "공포", "공포테마입니다.", "ㅁㄴㅇㄹ");
         Reservation reservation = new Reservation(null, "praisebak", LocalDate.now().plusDays(1), reservationTime,
                 theme);
-        reservationRepository.add(reservation);
+        reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(id))
                 .isInstanceOf(IllegalArgumentException.class);

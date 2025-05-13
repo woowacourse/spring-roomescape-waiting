@@ -48,11 +48,11 @@ public class ReservationService {
         validateDuplicateReservation(reservation);
         LocalDateTime currentDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.now());
         validateAddReservationDateTime(reservation, currentDateTime);
-        return reservationRepository.add(reservation);
+        return reservationRepository.save(reservation);
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndTheme(reservation)) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(reservation)) {
             throw new InvalidReservationException("중복된 예약신청입니다");
         }
     }

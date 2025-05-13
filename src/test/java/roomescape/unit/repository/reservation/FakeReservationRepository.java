@@ -16,7 +16,7 @@ public class FakeReservationRepository implements ReservationRepository {
     private final List<Reservation> reservations = new ArrayList<>();
 
     @Override
-    public long add(Reservation reservation) {
+    public long save(Reservation reservation) {
         long id = index.getAndIncrement();
         reservations.add(
                 new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getReservationTime(),
@@ -45,7 +45,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndTheme(Reservation reservation) {
+    public boolean existsByDateAndTimeAndTheme(Reservation reservation) {
         return reservations.stream()
                 .anyMatch(currentReservation -> currentReservation.getDate().isEqual(reservation.getDate())
                         && currentReservation.getReservationTime().getId()

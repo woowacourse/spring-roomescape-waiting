@@ -7,7 +7,7 @@ import roomescape.domain.reservation.Reservation;
 
 public interface ReservationRepository {
 
-    long add(Reservation reservation);
+    long save(Reservation reservation);
 
     List<Reservation> findAll();
 
@@ -21,7 +21,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByDateInRange(LocalDate start, LocalDate end);
 
-    boolean existsByDateAndTimeIdAndTheme(Reservation reservation);
+    boolean existsByDateAndTimeAndTheme(Reservation reservation);
 
     boolean existsByThemeId(long id);
 }

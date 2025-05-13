@@ -93,17 +93,17 @@ class ReservationIntegrateTest {
         long themeId2 = requestFixture.requestAddTheme("테마 명2", "description", "thumbnail");
         long themeId3 = requestFixture.requestAddTheme("테마 명3", "description", "thumbnail");
 
-        reservationRepository.add(new Reservation(null, "이름", LocalDate.now().minusDays(1),
+        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(1),
                 new ReservationTime(timeId, afterTime), new Theme(themeId1, "테마 명1", "description", "thumbnail")));
-        reservationRepository.add(new Reservation(null, "이름", LocalDate.now().minusDays(2),
+        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(2),
                 new ReservationTime(timeId, afterTime), new Theme(themeId1, "테마 명1", "description", "thumbnail")));
-        reservationRepository.add(new Reservation(null, "이름", LocalDate.now().minusDays(3),
+        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(3),
                 new ReservationTime(timeId, afterTime), new Theme(themeId1, "테마 명1", "description", "thumbnail")));
-        reservationRepository.add(new Reservation(null, "이름", LocalDate.now().minusDays(4),
+        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(4),
                 new ReservationTime(timeId, afterTime), new Theme(themeId2, "테마 명2", "description", "thumbnail")));
-        reservationRepository.add(new Reservation(null, "이름", LocalDate.now().minusDays(5),
+        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(5),
                 new ReservationTime(timeId, afterTime), new Theme(themeId2, "테마 명2", "description", "thumbnail")));
-        reservationRepository.add(new Reservation(null, "이름", LocalDate.now().minusDays(6),
+        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(6),
                 new ReservationTime(timeId, afterTime), new Theme(themeId3, "테마 명3", "description", "thumbnail")));
 
         Response response = RestAssured.given()
