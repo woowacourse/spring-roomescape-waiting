@@ -72,13 +72,13 @@ public class ReservationService {
     }
 
     private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.id(), theme.getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
             throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
     }
 
     private void validateReservationDateTime(final CreateReservationParam createReservationParam, final LocalDateTime currentDateTime, final ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(createReservationParam.date(), reservationTime.startAt());
+        LocalDateTime reservationDateTime = LocalDateTime.of(createReservationParam.date(), reservationTime.getStartAt());
         if (reservationDateTime.isBefore(currentDateTime)) {
             throw new UnAvailableReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
         }

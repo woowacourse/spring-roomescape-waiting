@@ -67,7 +67,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setLong(1, createReservationQuery.member().getId());
             ps.setString(2, createReservationQuery.date().toString());
-            ps.setLong(3, createReservationQuery.time().id());
+            ps.setLong(3, createReservationQuery.time().getId());
             ps.setLong(4, createReservationQuery.theme().getId());
             return ps;
         }, keyHolder);
