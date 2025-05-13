@@ -1,12 +1,26 @@
 package roomescape.user.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.HashSet;
+import java.util.Set;
+import roomescape.reservation.domain.Reservation;
+
+@Entity
 public class User {
 
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private final Long id;
     private final Role role;
     private final String name;
     private final String email;
     private final String password;
+
+    @OneToMany(mappedBy = "user")
+    private final Set<Reservation> reservations;
 
     public User(Long id, Role role, String name, String email, String password) {
         this.id = id;
@@ -14,6 +28,7 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.reservations = new HashSet<>();
     }
 
     public User(String roleName, String name, String email, String password) {

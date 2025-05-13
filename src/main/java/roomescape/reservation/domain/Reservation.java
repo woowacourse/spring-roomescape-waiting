@@ -1,5 +1,11 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.reservation.exception.InvalidReservationTimeException;
@@ -7,12 +13,18 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.user.domain.User;
 
+@Entity
 public class Reservation {
 
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private final Long id;
     private final LocalDate date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private final ReservationTime reservationTime;
+    @ManyToOne(fetch = FetchType.LAZY)
     private final Theme theme;
+    @ManyToOne(fetch = FetchType.LAZY)
     private final User user;
 
     public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, User user) {
