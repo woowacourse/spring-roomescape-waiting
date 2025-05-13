@@ -1,14 +1,21 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.domain.BusinessRuleViolationException;
 
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
 
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);
@@ -22,6 +29,9 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    protected Theme() {
     }
 
     public void validateLength(String value, int maxLength, String fieldName) {
