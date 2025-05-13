@@ -1,14 +1,24 @@
 package roomescape.business.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final LocalDate date;
-    private final Member member;
-    private final PlayTime playTime;
-    private final Theme theme;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate date;
+    @ManyToOne
+    private Member member;
+    @ManyToOne
+    private PlayTime playTime;
+    @ManyToOne
+    private Theme theme;
 
     public Reservation(final Long id, final LocalDate date, final Member member, final PlayTime playTime,
                        final Theme theme
@@ -24,6 +34,10 @@ public class Reservation {
 
     public Reservation(final LocalDate date, final Member member, final PlayTime playTime, final Theme theme) {
         this(null, date, member, playTime, theme);
+    }
+
+    public Reservation() {
+
     }
 
     private void validateDate(final LocalDate date) {

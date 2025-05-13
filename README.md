@@ -84,6 +84,6 @@
     - [x] `as is: spring-boot-starter-jdbc` -> `to be: spring-boot-starter-data-jpa`
 - [x] 엔티티 매핑
     - [x] 의존이 없는 클래스를 먼저 엔티티로 설정한다
-- [ ] 연관관계 매핑
-    - [ ] 의존이 있는 클래스의 연관관계 매핑을 추가한다
+- [x] 연관관계 매핑
+    - [x] 의존이 있는 클래스의 연관관계 매핑을 추가한다
 
