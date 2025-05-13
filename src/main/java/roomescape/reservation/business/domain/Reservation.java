@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.member.business.domain.Member;
+import roomescape.member.business.domain.MemberName;
 import roomescape.theme.business.domain.Theme;
 
 @Entity
@@ -55,7 +56,7 @@ public class Reservation {
         return id;
     }
 
-    public String getName() {
+    public MemberName getName() {
         return member.getName();
     }
 

@@ -56,7 +56,11 @@ public class Member {
         return id;
     }
 
-    public String getName() {
+    public MemberName getName() {
+        return name;
+    }
+
+    public String getNameValue() {
         return name.getValue();
     }
 
@@ -64,8 +68,8 @@ public class Member {
         return email;
     }
 
-    public String getPassword() {
-        return password.getValue();
+    public Password getPassword() {
+        return password;
     }
 
     public Role getRole() {

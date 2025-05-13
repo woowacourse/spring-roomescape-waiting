@@ -37,7 +37,7 @@ public class LoginService {
         final Member member = memberDao.findById(request.id())
                 .orElseThrow(() -> new NotFoundException("회원 정보가 존재하지 않습니다."));
 
-        return new LoginCheckResponse(member.getName());
+        return LoginCheckResponse.from(member);
     }
 
     public LoginCheckResponse signup(final SignupRequest request) {

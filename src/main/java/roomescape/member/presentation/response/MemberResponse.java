@@ -8,6 +8,6 @@ public record MemberResponse(
 ) {
 
     public static MemberResponse of(final Member member) {
-        return new MemberResponse(member.getId(), member.getName());
+        return new MemberResponse(member.getId(), member.getNameValue());
     }
 }
