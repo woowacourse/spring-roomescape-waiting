@@ -44,7 +44,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     };
 
     @Override
-    public long add(Reservation reservation) {
+    public long save(Reservation reservation) {
         String sql = "insert into reservation (name,date,time_id, theme_id) values(?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -94,7 +94,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndTheme(Reservation reservation) {
+    public boolean existsByDateAndTimeAndTheme(Reservation reservation) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?)";
         return jdbcTemplate.queryForObject(sql, Boolean.class,
                 reservation.getDate(),
