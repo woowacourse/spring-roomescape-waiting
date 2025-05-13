@@ -3,9 +3,10 @@ package roomescape.time.repository;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.CrudRepository;
 import roomescape.time.domain.ReservationTime;
 
-public interface ReservationTimeRepository {
+public interface ReservationTimeRepository extends CrudRepository<ReservationTime, Long> {
 
     ReservationTime save(ReservationTime reservationTime);
 
@@ -15,5 +16,5 @@ public interface ReservationTimeRepository {
 
     void deleteById(long id);
 
-    boolean existsByTime(LocalTime reservationTime);
+    boolean existsByStartAt(LocalTime reservationTime);
 }

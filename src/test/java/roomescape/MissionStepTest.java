@@ -23,7 +23,7 @@ import roomescape.reservation.controller.ReservationController;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql("/schema.sql")
+@Sql("/test-schema.sql")
 public class MissionStepTest {
 
     @Autowired

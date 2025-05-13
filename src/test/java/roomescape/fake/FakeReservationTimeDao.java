@@ -19,10 +19,62 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
         return newReservationTime;
     }
 
+
+    @Override
+    public <S extends ReservationTime> Iterable<S> saveAll(final Iterable<S> entities) {
+        return null;
+    }
+
+    @Override
+    public Optional<ReservationTime> findById(final Long aLong) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean existsById(final Long aLong) {
+        return false;
+    }
+
     @Override
     public List<ReservationTime> findAll() {
         return times;
     }
+
+    @Override
+    public Iterable<ReservationTime> findAllById(final Iterable<Long> longs) {
+        return null;
+    }
+
+    @Override
+    public long count() {
+        return 0;
+    }
+
+    @Override
+    public void deleteById(final Long aLong) {
+
+    }
+
+    @Override
+    public void delete(final ReservationTime entity) {
+
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends Long> longs) {
+
+    }
+
+    @Override
+    public void deleteAll(final Iterable<? extends ReservationTime> entities) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
+    }
+
 
     @Override
     public Optional<ReservationTime> findById(final long id) {
@@ -38,7 +90,7 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     }
 
     @Override
-    public boolean existsByTime(final LocalTime reservationTime) {
+    public boolean existsByStartAt(final LocalTime reservationTime) {
         return times.stream()
                 .anyMatch(time -> time.getStartAt().equals(reservationTime));
     }
