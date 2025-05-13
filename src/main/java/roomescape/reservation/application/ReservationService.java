@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberQueryRepository;
 import roomescape.reservation.domain.Reservation;
@@ -49,7 +50,8 @@ public class ReservationService {
     }
 
     private ReservationTime getReservationTime(final CreateReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeQueryRepository.getById(request.timeId());
+        final ReservationTime reservationTime = reservationTimeQueryRepository.findById(request.timeId())
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime reservationDateTime = LocalDateTime.of(request.date(), reservationTime.getStartAt());
         if (reservationDateTime.isBefore(now)) {

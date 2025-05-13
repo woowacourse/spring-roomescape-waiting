@@ -29,7 +29,8 @@ public class ReservationTimeService {
         }
 
         final Long id = reservationTimeCommandRepository.save(new ReservationTime(startAt));
-        final ReservationTime found = reservationTimeQueryRepository.getById(id);
+        final ReservationTime found = reservationTimeQueryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다. id = " + id));
 
         return ReservationTimeResponse.from(found);
     }
