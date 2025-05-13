@@ -17,14 +17,12 @@ import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.theme.ThemeTestDataConfig;
-import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.user.MemberTestDataConfig;
 import roomescape.user.repository.JdbcUserRepository;
 
 @ExtendWith(SpringExtension.class)
 @JdbcTest
 @ContextConfiguration(classes = {
-        JdbcThemeRepository.class,
         JdbcUserRepository.class,
         ThemeTestDataConfig.class,
         MemberTestDataConfig.class

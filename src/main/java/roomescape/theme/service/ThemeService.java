@@ -26,7 +26,7 @@ public class ThemeService {
 
     public List<ThemeResponseDto> findThemesOrderByReservationCount(LocalDate from, LocalDate to,
                                                                     PopularThemeRequestDto popularThemeRequestDto) {
-        return repository.findThemesOrderByReservationCount(from, to, popularThemeRequestDto).stream()
+        return repository.findThemesOrderByReservationCount(from, to, popularThemeRequestDto.size()).stream()
                 .map(ThemeResponseDto::of)
                 .toList();
     }

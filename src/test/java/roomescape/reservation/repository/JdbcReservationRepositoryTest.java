@@ -15,13 +15,11 @@ import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.repository.ReservationTimeRepository;
 import roomescape.theme.ThemeTestDataConfig;
-import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.user.MemberTestDataConfig;
 import roomescape.user.repository.JdbcUserRepository;
 
 @JdbcTest
 @Import({JdbcReservationRepository.class,
-        JdbcThemeRepository.class,
         ThemeTestDataConfig.class,
         MemberTestDataConfig.class,
         KeyHolderManager.class,

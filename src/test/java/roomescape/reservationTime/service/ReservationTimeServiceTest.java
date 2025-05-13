@@ -26,7 +26,6 @@ import roomescape.reservationTime.exception.AlreadyReservedTimeException;
 import roomescape.reservationTime.exception.DuplicateReservationException;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
@@ -39,7 +38,6 @@ import roomescape.user.repository.UserRepository;
         ReservationTimeService.class,
         JdbcReservationRepository.class,
         ReservationService.class,
-        JdbcThemeRepository.class,
         ReservationTimeTestDataConfig.class,
         JdbcUserRepository.class,
         KeyHolderManager.class

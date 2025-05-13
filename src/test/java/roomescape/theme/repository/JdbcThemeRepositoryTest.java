@@ -3,13 +3,16 @@ package roomescape.theme.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.KeyHolderManager;
 import roomescape.reservation.fixture.ReservationFixture;
@@ -19,17 +22,18 @@ import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.reservationTime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.dto.PopularThemeRequestDto;
+import roomescape.theme.fixture.ThemeFixture;
 import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.User;
 import roomescape.user.repository.JdbcUserRepository;
 
-@JdbcTest
-@Import({JdbcThemeRepository.class, JdbcReservationRepository.class,
+@DataJpaTest
+@Import({JdbcReservationRepository.class,
         MemberTestDataConfig.class, KeyHolderManager.class, JdbcUserRepository.class})
 class JdbcThemeRepositoryTest {
 
     @Autowired
-    private JdbcThemeRepository repository;
+    private ThemeRepository repository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -185,6 +189,24 @@ class JdbcThemeRepositoryTest {
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme10, savedUser));
     }
 
+    @DisplayName("ID에 해당하는 테마를 조회할 수 있다")
+    @Test
+    void testMethodNameHere() {
+        // given
+        Theme theme = ThemeFixture.create("테마", "설명", "섬네일");
+        Theme expectTheme = repository.save(theme);
+
+        // when
+        Optional<Theme> actualTheme = repository.findById(expectTheme.getId());
+
+        // then
+        SoftAssertions.assertSoftly(s -> {
+                    s.assertThat(actualTheme).isPresent();
+                    s.assertThat(actualTheme.get()).isEqualTo(expectTheme);
+                }
+        );
+    }
+
     @Nested
     @DisplayName("인기 있는 테마를 갯수, 정렬 방식에 따라 처리할 수 있다.")
     class findThemesOrderByReservationTime {
@@ -199,7 +221,7 @@ class JdbcThemeRepositoryTest {
             LocalDate to = now.plusDays(8);
 
             // when
-            List<Theme> actual = repository.findThemesOrderByReservationCount(from, to, new PopularThemeRequestDto());
+            List<Theme> actual = repository.findThemesOrderByReservationCount(from, to, new PopularThemeRequestDto().size());
 
             // then
             SoftAssertions.assertSoftly(s -> {
