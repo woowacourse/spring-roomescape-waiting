@@ -1,7 +1,7 @@
 ## 방탈출 예약 대기
 
 ### 1단계 - JPA 전환
-- [ ] gradle 의존성 추가 (jdbc -> data-jpa)
+- [x] gradle 의존성 추가 (jdbc -> data-jpa)
 - [ ] 엔티티 매핑
   - [ ] `Theme`
   - [ ] `ReservationTime`
