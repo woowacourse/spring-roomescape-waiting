@@ -1,5 +1,9 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -9,17 +13,20 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
+@Entity
 public class User {
 
     private static final int NAME_MAX_LENGTH = 5;
     private static final int PASSWORD_MAX_LENGTH = 30;
     private static final String VALID_EMAIL_FORMAT = "\\w+@\\w+\\.\\w+";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final String name;
-    private final UserRole role;
-    private final String email;
-    private final String password;
+    private String name;
+    private UserRole role;
+    private String email;
+    private String password;
 
     public User(final Long id, final String name, final UserRole role, final String email, final String password) {
         validateNameLength(name);
@@ -30,6 +37,9 @@ public class User {
         this.role = role;
         this.email = email;
         this.password = password;
+    }
+
+    protected User() {
     }
 
     public User withId(final long id) {

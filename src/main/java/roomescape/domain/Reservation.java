@@ -1,5 +1,10 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.EqualsAndHashCode;
@@ -11,13 +16,19 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
+@Entity
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final User user;
-    private final LocalDate date;
-    private final TimeSlot timeSlot;
-    private final Theme theme;
+    @ManyToOne
+    private User user;
+    private LocalDate date;
+    @ManyToOne
+    private TimeSlot timeSlot;
+    @ManyToOne
+    private Theme theme;
 
     private Reservation(final Long id, final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         this.id = id;
@@ -25,6 +36,9 @@ public class Reservation {
         this.date = date;
         this.timeSlot = timeSlot;
         this.theme = theme;
+    }
+
+    protected Reservation() {
     }
 
     public Reservation withId(final long id) {

@@ -1,5 +1,11 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -9,15 +15,20 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
+@Entity
 public class Theme {
 
     private static final int NAME_MAX_LENGTH = 10;
     private static final int DESCRIPTION_MAX_LENGTH = 50;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    private String name;
+    private String description;
+    private String thumbnail;
+    @OneToMany(mappedBy = "theme")
+    private Set<Reservation> reservations;
 
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);
@@ -30,6 +41,9 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    protected Theme() {
     }
 
     public Theme withId(final long id) {
