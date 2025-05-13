@@ -20,11 +20,15 @@ public class AuthService {
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadRequestException("이메일 또는 비밀번호가 일치하지 않습니다."));
 
-        if (!member.getPassword().equals(request.password())) {
-            throw new BadRequestException("이메일 또는 비밀번호가 일치하지 않습니다.");
-        }
+        validatePasswordCorrect(request, member);
 
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
         return jwtUtil.createToken(loginMember);
+    }
+
+    private void validatePasswordCorrect(LoginRequest request, Member member) {
+        if (!member.matchesPassword(request.password())) {
+            throw new BadRequestException("이메일 또는 비밀번호가 일치하지 않습니다.");
+        }
     }
 }
