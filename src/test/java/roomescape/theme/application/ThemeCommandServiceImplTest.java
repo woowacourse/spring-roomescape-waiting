@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.theme.application.dto.CreateThemeServiceRequest;
@@ -110,7 +111,8 @@ class ThemeCommandServiceImplTest {
         // when
         // then
         assertThatThrownBy(() -> themeCommandService.delete(unassigned))
-                .isInstanceOf(IllegalStateException.class)
+                .hasCauseInstanceOf(IllegalStateException.class)
+                .isInstanceOf(InvalidDataAccessApiUsageException.class)
                 .hasMessage("식별자가 할당되지 않았습니다.");
     }
 }
