@@ -29,12 +29,9 @@ import roomescape.service.ReservationTimeService;
 public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
-    private final ReservationSlotService reservationSlotService;
 
-    public ReservationTimeController(ReservationTimeService reservationTimeService,
-                                     ReservationSlotService reservationSlotService) {
+    public ReservationTimeController(ReservationTimeService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
-        this.reservationSlotService = reservationSlotService;
     }
 
     @GetMapping
