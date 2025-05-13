@@ -1,6 +1,7 @@
 package roomescape.global.config;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -14,7 +15,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final HandlerInterceptor adminInterceptor;
 
     public WebMvcConfig(
-            final HandlerMethodArgumentResolver memberIdResolver,
+            @Qualifier("memberArgumentResolver") final HandlerMethodArgumentResolver memberIdResolver,
             final HandlerInterceptor adminInterceptor
     ) {
         this.memberIdResolver = memberIdResolver;

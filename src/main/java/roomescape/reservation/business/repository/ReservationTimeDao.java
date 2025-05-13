@@ -1,19 +1,12 @@
 package roomescape.reservation.business.repository;
 
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import roomescape.reservation.business.domain.ReservationTime;
 
-public interface ReservationTimeDao {
+@Repository
+public interface ReservationTimeDao extends JpaRepository<ReservationTime, Long> {
 
-    List<ReservationTime> findAll();
-
-    ReservationTime save(ReservationTime reservationTime);
-
-    int deleteById(Long id);
-
-    Optional<ReservationTime> findById(Long id);
-
-    boolean existByTime(LocalTime time);
+    boolean existsByStartAt(LocalTime startAt);
 }

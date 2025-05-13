@@ -9,7 +9,9 @@ import roomescape.login.presentation.request.LoginCheckRequest;
 import roomescape.login.presentation.request.LoginRequest;
 import roomescape.login.presentation.request.SignupRequest;
 import roomescape.login.presentation.response.LoginCheckResponse;
+import roomescape.member.business.domain.Email;
 import roomescape.member.business.domain.Member;
+import roomescape.member.business.domain.Password;
 import roomescape.member.business.repository.MemberDao;
 
 @Service
@@ -24,7 +26,8 @@ public class LoginService {
     }
 
     public Token login(final LoginRequest loginRequest) {
-        final Member member = memberDao.findByEmailAndPassword(loginRequest.email(), loginRequest.password())
+        final Member member = memberDao.findMemberByEmailAndPassword(new Email(loginRequest.email()),
+                        new Password(loginRequest.password()))
                 .orElseThrow(() -> new NotFoundException("회원 정보가 존재하지 않습니다."));
 
         return jwtHandler.createToken(member);

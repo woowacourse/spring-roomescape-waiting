@@ -1,18 +1,37 @@
 package roomescape.reservation.business.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.member.business.domain.Member;
 import roomescape.theme.business.domain.Theme;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final Member member;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
+
+    @ManyToOne
+    private Member member;
+
+    public Reservation() {
+
+    }
 
     public Reservation(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
                        final Member member) {

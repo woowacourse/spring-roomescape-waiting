@@ -3,7 +3,6 @@ package roomescape.reservation.business.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.impl.BadRequestException;
-import roomescape.global.exception.impl.NotFoundException;
 import roomescape.reservation.business.domain.ReservationTime;
 import roomescape.reservation.business.repository.ReservationDao;
 import roomescape.reservation.business.repository.ReservationTimeDao;
@@ -29,7 +28,7 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse add(final ReservationTimeRequest requestDto) {
-        if (reservationTimeDao.existByTime(requestDto.startAt())) {
+        if (reservationTimeDao.existsByStartAt(requestDto.startAt())) {
             throw new BadRequestException("동일한 시간이 이미 존재합니다.");
         }
         final ReservationTime reservationTime = new ReservationTime(requestDto.startAt());
@@ -38,12 +37,9 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final Long id) {
-        if (reservationDao.existByTimeId(id)) {
+        if (reservationDao.existsReservationByTime_Id(id)) {
             throw new BadRequestException("이 시간의 예약이 존재합니다.");
         }
-        final int affectedRows = reservationTimeDao.deleteById(id);
-        if (affectedRows == 0) {
-            throw new NotFoundException("삭제할 예약시간이 없습니다.");
-        }
+        reservationTimeDao.deleteById(id);
     }
 }

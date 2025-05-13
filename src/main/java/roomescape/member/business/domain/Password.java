@@ -1,8 +1,17 @@
 package roomescape.member.business.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class Password {
 
-    private final String value;
+    @Column(name = "password")
+    private String value;
+
+    public Password() {
+
+    }
 
     public Password(final String value) {
         this.value = value;

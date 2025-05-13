@@ -3,7 +3,6 @@ package roomescape.theme.business.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.impl.BadRequestException;
-import roomescape.global.exception.impl.NotFoundException;
 import roomescape.reservation.business.repository.ReservationDao;
 import roomescape.theme.business.domain.Theme;
 import roomescape.theme.business.repository.ThemeDao;
@@ -29,7 +28,7 @@ public class ThemeService {
     }
 
     public ThemeResponse add(final ThemeRequest requestDto) {
-        if (themeDao.existByName(requestDto.name())) {
+        if (themeDao.existsThemeByName(requestDto.name())) {
             throw new BadRequestException("동일한 이름의 테마가 이미 존재합니다.");
         }
         final Theme theme = new Theme(requestDto.name(), requestDto.description(), requestDto.thumbnail());
@@ -38,13 +37,10 @@ public class ThemeService {
     }
 
     public void deleteById(final Long id) {
-        if (reservationDao.existByThemeId(id)) {
+        if (reservationDao.existsReservationByTheme_Id(id)) {
             throw new BadRequestException("이 테마의 예약이 존재합니다.");
         }
-        final int affectedRows = themeDao.deleteById(id);
-        if (affectedRows == 0) {
-            throw new NotFoundException("삭제할 테마가 없습니다.");
-        }
+        themeDao.deleteById(id);
     }
 
     public List<ThemeResponse> sortByRank() {

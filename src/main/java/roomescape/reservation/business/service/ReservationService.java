@@ -55,16 +55,17 @@ public class ReservationService {
     }
 
     public void deleteById(final Long id) {
-        final int affectedRows = reservationDao.deleteById(id);
-        if (affectedRows == 0) {
-            throw new NotFoundException("삭제할 예약정보가 없습니다.");
+        if (!reservationDao.existsReservationById(id)) {
+            throw new NotFoundException("존재하지 않는 예약입니다.");
         }
+        reservationDao.deleteById(id);
     }
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId, final String date) {
         final List<ReservationTime> reservationTimes = reservationTimeDao.findAll();
         final Theme selectedTheme = getTheme(themeId);
-        final List<Reservation> bookedReservations = reservationDao.findByDateAndThemeId(LocalDate.parse(date),
+        final List<Reservation> bookedReservations = reservationDao.findReservationByDateAndTheme_Id(
+                LocalDate.parse(date),
                 themeId);
         return getAvailableReservationTimeResponses(reservationTimes, bookedReservations, selectedTheme);
     }
@@ -76,7 +77,7 @@ public class ReservationService {
             final LocalDate end
     ) {
         final List<Reservation> reservations = reservationDao
-                .findReservationByThemeIdAndMemberIdInDuration(themeId, memberId, start, end);
+                .findReservationByTheme_IdAndMember_IdAndDateBetween(themeId, memberId, start, end);
         return reservations.stream()
                 .map(ReservationResponse::of)
                 .toList();
@@ -88,7 +89,7 @@ public class ReservationService {
         final Theme theme = getTheme(themeId);
         final Member member = getMember(memberId);
 
-        final List<Reservation> sameTimeReservations = reservationDao.findByDateAndThemeId(date, themeId);
+        final List<Reservation> sameTimeReservations = reservationDao.findReservationByDateAndTheme_Id(date, themeId);
 
         validateIsBooked(sameTimeReservations, reservationTime, theme);
         validatePastDateTime(date, reservationTime.getStartAt());

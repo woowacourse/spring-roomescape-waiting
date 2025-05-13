@@ -1,12 +1,17 @@
 package roomescape.member.business.domain;
 
-import java.util.regex.Pattern;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
+@Embeddable
 public class Email {
 
-    private static final Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    @Column(name = "email")
+    private String value;
 
-    private final String value;
+    public Email() {
+
+    }
 
     public Email(final String value) {
         this.value = value;

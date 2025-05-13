@@ -1,20 +1,26 @@
 package roomescape.member.business.repository;
 
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import roomescape.member.business.domain.Email;
 import roomescape.member.business.domain.Member;
+import roomescape.member.business.domain.Password;
 
-public interface MemberDao {
+public interface MemberDao extends JpaRepository<Member, Long> {
 
-    List<Member> findAll();
+    Optional<Member> findMemberByEmailAndPassword(Email email, Password password);
 
-    Member save(Member member);
+    boolean existsByEmail(Email email);
 
-    int deleteById(Long id);
+//    List<Member> findAll();
+//
+//    Member save(Member member);
+//
+//    int deleteById(Long id);
+//
+//    Optional<Member> findById(Long id);
 
-    Optional<Member> findById(Long id);
+//    Optional<Member> findByEmailAndPassword(String email, String password);
 
-    Optional<Member> findByEmailAndPassword(String email, String password);
-
-    boolean existsByEmail(String email);
+//    boolean existsByEmail(String email);
 }
