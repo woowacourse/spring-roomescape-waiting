@@ -1,11 +1,19 @@
 package roomescape.business.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateName(name);
@@ -27,6 +35,9 @@ public class Theme {
         this.name = null;
         this.description = null;
         this.thumbnail = null;
+    }
+
+    public Theme() {
     }
 
     private void validateName(final String name) {

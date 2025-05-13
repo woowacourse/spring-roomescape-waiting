@@ -1,12 +1,20 @@
 package roomescape.business.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Member {
 
-    private final Long id;
-    private final String name;
-    private final String role;
-    private final String email;
-    private final String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String role;
+    private String email;
+    private String password;
 
     public Member(final Long id, final String name, final String role, final String email, final String password) {
         this.id = id;
@@ -16,12 +24,15 @@ public class Member {
         this.password = password;
     }
 
-    public Member(final Long id){
+    public Member(final Long id) {
         this.id = id;
         this.name = null;
         this.role = null;
         this.email = null;
         this.password = null;
+    }
+
+    public Member() {
     }
 
     public Long getId() {

@@ -1,11 +1,18 @@
 package roomescape.business.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 
+@Entity
 public class PlayTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
 
     public PlayTime(final Long id, final LocalTime startAt) {
         validateStartAt(startAt);
@@ -20,6 +27,9 @@ public class PlayTime {
     public PlayTime(final Long id) {
         this.id = id;
         this.startAt = null;
+    }
+
+    public PlayTime() {
     }
 
     private void validateStartAt(final LocalTime startAt) {
