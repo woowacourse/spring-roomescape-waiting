@@ -26,16 +26,17 @@ public class AuthRoleCheckInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        final RequiresRole requiresRole = handlerMethod.getMethodAnnotation(RequiresRole.class);
+
+        if (requiresRole == null) {
+            return true;
+        }
+
         final String accessToken = authTokenExtractor.extract(request);
         if (!authTokenProvider.validateToken(accessToken)) {
             throw new AuthenticationException("유효하지 않은 토큰입니다.");
         }
 
-        if (handlerMethod.hasMethodAnnotation(RequiresRole.class)) {
-            return true;
-        }
-
-        final RequiresRole requiresRole = handlerMethod.getMethodAnnotation(RequiresRole.class);
         final AuthRole role = authTokenProvider.getRole(accessToken);
         if (Arrays.stream(requiresRole.authRoles())
                 .noneMatch(authRole -> authRole == role)) {
