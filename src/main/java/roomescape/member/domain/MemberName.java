@@ -1,14 +1,21 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class MemberName {
 
     private static final int MAX_NAME_LENGTH = 10;
 
-    private final String name;
+    private String name;
 
     public MemberName(String name) {
         validate(name);
         this.name = name;
+    }
+
+    public MemberName() {
+
     }
 
     private void validate(String name) {

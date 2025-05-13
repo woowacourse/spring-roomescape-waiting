@@ -2,66 +2,52 @@ package roomescape.theme.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import javax.sql.DataSource;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Role;
-import roomescape.member.infrastructure.JdbcMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.infrastructure.JdbcReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.ReservationTimeRepository;
-import roomescape.reservationTime.infrastructure.JdbcReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
+import roomescape.theme.domain.ThemeJpaRepository;
 
-@JdbcTest
-class JdbcReservationThemeRepositoryTest {
+@DataJpaTest
+class ThemeCustomRepositoryImplTest {
 
     @Autowired
-    private DataSource dataSource;
-    private ThemeRepository repository;
-
-    @BeforeEach
-    void beforeEach() {
-        repository = new JdbcThemeRepository(dataSource);
-    }
+    private ThemeJpaRepository repository;
+    @Autowired
+    private EntityManager em;
 
     @Test
-    @DisplayName("저장 후 아이디 반환 테스트")
+    @DisplayName("저장 후 테마 객체 반환 테스트")
     void save_test() {
         Theme theme = Theme.createWithoutId("a", "a", "a");
 
-        Long save = repository.save(theme);
+        Theme savedTheme = repository.save(theme);
 
-        assertThat(save).isNotNull();
+        assertThat(savedTheme).isNotNull();
     }
 
-    @ParameterizedTest
+    @Test
     @DisplayName("삭제 성공 관련 테스트")
-    @CsvSource({"0,true", "1,false"})
-    void delete_test(Long plus, boolean expected) {
+    void delete_test() {
         // given
         Theme theme = Theme.createWithoutId("a", "a", "a");
-        Long save = repository.save(theme);
-        // when
-        boolean isDeleted = repository.deleteById(save + plus);
-        // then
-        assertThat(isDeleted).isEqualTo(expected);
+        Theme savedTheme = repository.save(theme);
+        // when & then
+        assertDoesNotThrow(() -> repository.deleteById(savedTheme.getId()));
     }
 
     @Test
@@ -99,14 +85,15 @@ class JdbcReservationThemeRepositoryTest {
     void find_by_id() {
         // given
         Theme theme = Theme.createWithoutId("a", "a", "a");
-        Long save = repository.save(theme);
+        Theme saveTheme = repository.save(theme);
         // when
-        Theme findTheme = repository.findById(save);
+        Optional<Theme> findTheme = repository.findById(saveTheme.getId());
         // then
         assertAll(
-                () -> assertThat(findTheme.getName()).isEqualTo(theme.getName()),
-                () -> assertThat(findTheme.getDescription()).isEqualTo(theme.getDescription()),
-                () -> assertThat(findTheme.getThumbnail()).isEqualTo(theme.getThumbnail())
+                () -> assertThat(findTheme).isPresent(),
+                () -> assertThat(findTheme.get().getName()).isEqualTo(theme.getName()),
+                () -> assertThat(findTheme.get().getDescription()).isEqualTo(theme.getDescription()),
+                () -> assertThat(findTheme.get().getThumbnail()).isEqualTo(theme.getThumbnail())
         );
     }
 
@@ -114,93 +101,85 @@ class JdbcReservationThemeRepositoryTest {
     @DisplayName("인기 많은 테마를 순서대로 반환한다.(시간 조건 미포함, 개수 조건 미포함)")
     void find_popular_theme_no_time_and_count_condition() {
         // given
-        ReservationRepository reservationRepository = new JdbcReservationRepository(dataSource);
-        ReservationTimeRepository reservationTimeRepository = new JdbcReservationTimeRepository(dataSource);
-        MemberRepository memberRepository = new JdbcMemberRepository(dataSource);
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(10, 11));
         Theme theme1 = Theme.createWithoutId("a", "a", "a");
         Theme theme2 = Theme.createWithoutId("b", "b", "b");
         Theme theme3 = Theme.createWithoutId("c", "c", "c");
-
-        Long timeId1 = reservationTimeRepository.save(reservationTime1);
-        Long timeId2 = reservationTimeRepository.save(reservationTime2);
+        em.persist(reservationTime1);
+        em.persist(reservationTime2);
 
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
-        Long memberId = memberRepository.save(member);
-        member = member.assignId(memberId);
-
-        Long themeId1 = repository.save(theme1);
-        Long themeId2 = repository.save(theme2);
+        em.persist(member);
+        em.persist(theme1);
+        em.persist(theme2);
+        em.persist(theme3);
         repository.save(theme3);
 
         Reservation reservation1 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 2),
-                reservationTime1.assignId(timeId1), theme1.assignId(themeId1));
+                reservationTime1, theme1);
         Reservation reservation2 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 3),
-                reservationTime2.assignId(timeId2), theme1.assignId(themeId1));
+                reservationTime2, theme2);
         Reservation reservation3 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 3),
-                reservationTime1.assignId(timeId1), theme2.assignId(themeId2));
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
-        reservationRepository.save(reservation3);
+                reservationTime1, theme2);
+        em.persist(reservation1);
+        em.persist(reservation2);
+        em.persist(reservation3);
 
         ReservationPeriod period = new ReservationPeriod(LocalDate.of(2000, 11, 5), 3, 1);
+        em.flush();
         // when
-        List<Theme> popularThemes = repository.findPopularThemes(period, 3);
+        List<Theme> popularThemes = repository.findPopularThemes(period.findStartDate(), period.findEndDate(), 3);
         List<String> names = popularThemes.stream()
                 .map(Theme::getName)
                 .toList();
         // then
         assertThat(popularThemes).hasSize(2);
-        assertThat(names).containsExactly("a", "b");
+        assertThat(names).containsExactly("b", "a");
     }
 
     @Test
     @DisplayName("인기 많은 테마를 순서대로 반환한다.(시간 조건 포함, 개수 조건 미포함)")
     void find_popular_theme_no_count_condition() {
         // given
-        ReservationRepository reservationRepository = new JdbcReservationRepository(dataSource);
-        ReservationTimeRepository reservationTimeRepository = new JdbcReservationTimeRepository(dataSource);
-        MemberRepository memberRepository = new JdbcMemberRepository(dataSource);
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(10, 11));
         Theme theme1 = Theme.createWithoutId("a", "a", "a");
         Theme theme2 = Theme.createWithoutId("b", "b", "b");
         Theme theme3 = Theme.createWithoutId("c", "c", "c");
 
-        Long timeId1 = reservationTimeRepository.save(reservationTime1);
-        Long timeId2 = reservationTimeRepository.save(reservationTime2);
-        Long themeId1 = repository.save(theme1);
-        Long themeId2 = repository.save(theme2);
-        repository.save(theme3);
+        em.persist(reservationTime1);
+        em.persist(reservationTime2);
+        em.persist(theme1);
+        em.persist(theme2);
+        em.persist(theme3);
 
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
-        Long memberId = memberRepository.save(member);
-        member = member.assignId(memberId);
+        em.persist(member);
 
         Reservation reservation1 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 2),
-                reservationTime1.assignId(timeId1), theme1.assignId(themeId1));
+                reservationTime1, theme1);
         Reservation reservation2 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 3),
-                reservationTime2.assignId(timeId2), theme1.assignId(themeId1));
+                reservationTime2, theme1);
         Reservation reservation3 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 3),
-                reservationTime1.assignId(timeId1), theme2.assignId(themeId2));
+                reservationTime1, theme2);
         Reservation reservation4 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 4),
-                reservationTime1.assignId(timeId1), theme2.assignId(themeId2));
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
-        reservationRepository.save(reservation3);
-        reservationRepository.save(reservation4);
-
+                reservationTime1, theme2);
+        em.persist(reservation1);
+        em.persist(reservation2);
+        em.persist(reservation3);
+        em.persist(reservation4);
+        em.flush();
         ReservationPeriod period = new ReservationPeriod(LocalDate.of(2000, 11, 5), 2, 1);
         // when
-        List<Theme> popularThemes = repository.findPopularThemes(period, 3);
+        List<Theme> popularThemes = repository.findPopularThemes(period.findStartDate(),period.findEndDate(), 3);
         List<String> names = popularThemes.stream()
                 .map(Theme::getName)
                 .toList();
@@ -213,45 +192,42 @@ class JdbcReservationThemeRepositoryTest {
     @DisplayName("인기 많은 테마를 순서대로 반환한다.(시간 조건 포함, 개수 조건 포함)")
     void find_popular_theme() {
         // given
-        ReservationRepository reservationRepository = new JdbcReservationRepository(dataSource);
-        ReservationTimeRepository reservationTimeRepository = new JdbcReservationTimeRepository(dataSource);
-        MemberRepository memberRepository = new JdbcMemberRepository(dataSource);
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(10, 11));
         Theme theme1 = Theme.createWithoutId("a", "a", "a");
         Theme theme2 = Theme.createWithoutId("b", "b", "b");
         Theme theme3 = Theme.createWithoutId("c", "c", "c");
 
-        Long timeId1 = reservationTimeRepository.save(reservationTime1);
-        Long timeId2 = reservationTimeRepository.save(reservationTime2);
-        Long themeId1 = repository.save(theme1);
-        Long themeId2 = repository.save(theme2);
-        repository.save(theme3);
+        em.persist(reservationTime1);
+        em.persist(reservationTime2);
+        em.persist(theme1);
+        em.persist(theme2);
+        em.persist(theme3);
 
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
-        Long memberId = memberRepository.save(member);
-        member = member.assignId(memberId);
+        em.persist(member);
 
         Reservation reservation1 = Reservation.createWithoutId(
                 LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2000, 11, 2),
-                reservationTime1.assignId(timeId1), theme1.assignId(themeId1));
+                reservationTime1, theme1);
         Reservation reservation2 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 3),
-                reservationTime2.assignId(timeId2), theme1.assignId(themeId1));
+                reservationTime2, theme1);
         Reservation reservation3 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 3),
-                reservationTime1.assignId(timeId1), theme2.assignId(themeId2));
+                reservationTime1, theme2);
         Reservation reservation4 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2000, 11, 4),
-                reservationTime1.assignId(timeId1), theme2.assignId(themeId2));
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
-        reservationRepository.save(reservation3);
-        reservationRepository.save(reservation4);
+                reservationTime1, theme2);
+        em.persist(reservation1);
+        em.persist(reservation2);
+        em.persist(reservation3);
+        em.persist(reservation4);
+        em.flush();
 
         ReservationPeriod period = new ReservationPeriod(LocalDate.of(2000, 11, 5), 2, 1);
         // when
-        List<Theme> popularThemes = repository.findPopularThemes(period, 1);
+        List<Theme> popularThemes = repository.findPopularThemes(period.findStartDate(),period.findEndDate(), 1);
         List<String> names = popularThemes.stream()
                 .map(Theme::getName)
                 .toList();

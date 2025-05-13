@@ -30,3 +30,18 @@
 ### 정책
 - [x] 지나간 날짜와 시간에 대한 예약 생성은 불가능하다.
 - [x] 중복 예약은 불가능하다.
+
+
+### JPA 전환
+- [x] 엔티티 매핑
+  - [x] Member
+  - [x] Theme
+  - [x] Reservation
+  - [x] ReservationTime
+- [x] 연관관계 매핑
+  - [x] Reservation
+- [ ] 기존 레포지토리를 Spring Data Jpa 레포지토리로 교체
+  - [x] ThemeRepository
+  - [ ] MemberRepository
+  - [ ] ReservationRepository
+  - [ ] ReservationTimeRepository

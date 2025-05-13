@@ -1,23 +1,37 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
+@Entity
 public class Theme {
 
     private static int MAX_NAME = 255;
     private static int MAX_DESCRIPTION = 255;
     private static int MAX_THUMBNAIL = 255;
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private String description;
+
+    private String thumbnail;
 
     private Theme(final Long id, final String name, final String description, final String thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    public Theme() {
+
     }
 
     public static Theme createWithoutId(final String name, final String description, final String thumbnail) {
