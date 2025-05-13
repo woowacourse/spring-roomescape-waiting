@@ -11,7 +11,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
-import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
 
 import java.sql.PreparedStatement;
@@ -21,7 +20,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcTemplateThemeRepository implements ThemeRepository {
+public class JdbcTemplateThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -33,7 +32,6 @@ public class JdbcTemplateThemeRepository implements ThemeRepository {
                     ThemeThumbnail.from(resultSet.getString("thumbnail"))
             );
 
-    @Override
     public boolean existsById(final ThemeId id) {
         final String sql = """
                 select exists
@@ -44,7 +42,6 @@ public class JdbcTemplateThemeRepository implements ThemeRepository {
                 jdbcTemplate.queryForObject(sql, Boolean.class, id.getValue()));
     }
 
-    @Override
     public boolean existsByName(final ThemeName name) {
         final String sql = """
                 select exists
@@ -55,7 +52,6 @@ public class JdbcTemplateThemeRepository implements ThemeRepository {
                 jdbcTemplate.queryForObject(sql, Boolean.class, name.getValue()));
     }
 
-    @Override
     public List<Theme> findAll() {
         final String sql = """
                 select id, name, description, thumbnail from themes
@@ -65,7 +61,6 @@ public class JdbcTemplateThemeRepository implements ThemeRepository {
                 .toList();
     }
 
-    @Override
     public Optional<Theme> findById(final ThemeId id) {
         final String sql = """
                 select id, name, description, thumbnail from themes where id = ?
@@ -74,7 +69,6 @@ public class JdbcTemplateThemeRepository implements ThemeRepository {
         return JdbcUtils.queryForOptional(jdbcTemplate, sql, themeMapper, id.getValue());
     }
 
-    @Override
     public Theme save(final Theme theme) {
         final KeyHolder keyHolder = new GeneratedKeyHolder();
         final String sql = """
@@ -99,7 +93,6 @@ public class JdbcTemplateThemeRepository implements ThemeRepository {
                 theme.getThumbnail());
     }
 
-    @Override
     public void deleteById(final ThemeId id) {
         final String sql = "delete from themes where id = ?";
 

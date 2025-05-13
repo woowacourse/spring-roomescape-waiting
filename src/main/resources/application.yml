@@ -2,7 +2,11 @@ spring:
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
-
+  jpa:
+    show-sql: true
+    properties.hibernate.format_sql: true
+    ddl-auto: create-drop
+    defer-datasource-initialization: true
   h2:
     console:
       enabled: true
