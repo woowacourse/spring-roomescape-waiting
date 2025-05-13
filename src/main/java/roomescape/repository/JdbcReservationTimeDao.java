@@ -17,9 +17,8 @@ import roomescape.domain.ReservationTime;
 public class JdbcReservationTimeDao implements ReservationTimeRepository {
 
     private static final RowMapper<ReservationTime> rowMapper = ((rs, rowNum) -> {
-        String startAt = rs.getString("start_at");
-        LocalTime reservationStartAt = LocalTime.parse(startAt);
-        return new ReservationTime(rs.getLong("id"), reservationStartAt);
+        LocalTime startAt = rs.getTime("start_at").toLocalTime();
+        return new ReservationTime(rs.getLong("id"), startAt);
     });
 
     private final JdbcTemplate jdbcTemplate;

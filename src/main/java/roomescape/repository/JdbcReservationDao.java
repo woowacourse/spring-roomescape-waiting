@@ -25,12 +25,12 @@ import roomescape.util.WhereClauseParamSetBuilder;
 public class JdbcReservationDao implements ReservationRepository {
 
     private static final RowMapper<Reservation> rowMapper = (rs, rowNum) -> {
-        String date = rs.getString("date");
+        LocalDate date = rs.getDate("date").toLocalDate();
         Long memberId = rs.getLong("member_id");
         Long timeId = rs.getLong("reservation_time_id");
-        String timeValue = rs.getString("start_at");
+        LocalTime timeValue = rs.getTime("start_at").toLocalTime();
         ReservationName reservationName = new ReservationName(memberId, rs.getString("member_name"));
-        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.parse(timeValue));
+        ReservationTime reservationTime = new ReservationTime(timeId, timeValue);
         Theme theme = new Theme(
                 rs.getLong("reservation_theme_id"),
                 rs.getString("theme_name"),
@@ -41,7 +41,7 @@ public class JdbcReservationDao implements ReservationRepository {
         return new Reservation(
                 rs.getLong("id"),
                 reservationName,
-                LocalDate.parse(date),
+                date,
                 reservationTime,
                 theme
         );
