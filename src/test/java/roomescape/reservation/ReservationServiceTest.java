@@ -3,14 +3,19 @@ package roomescape.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
@@ -28,26 +33,27 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservationtime.FakeReservationTimeRepository;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.theme.FakeThemeRepository;
 import roomescape.theme.Theme;
+import roomescape.theme.ThemeRepository;
 
+@ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
 
     private final ReservationService reservationService;
+    private final ThemeRepository themeRepository;
     private final FakeReservationRepository fakeReservationRepository;
     private final FakeReservationTimeRepository fakeReservationTimeRepository;
-    private final FakeThemeRepository fakeThemeRepository;
     private final FakeMemberRepository fakeMemberRepository;
 
     public ReservationServiceTest() {
         fakeReservationRepository = new FakeReservationRepository();
         fakeReservationTimeRepository = new FakeReservationTimeRepository();
-        fakeThemeRepository = new FakeThemeRepository();
+        themeRepository = mock(ThemeRepository.class);
         fakeMemberRepository = new FakeMemberRepository();
         reservationService = new ReservationService(
                 fakeReservationRepository,
                 fakeReservationTimeRepository,
-                fakeThemeRepository,
+                themeRepository,
                 fakeMemberRepository
         );
     }
@@ -56,7 +62,6 @@ public class ReservationServiceTest {
     void setUp() {
         fakeReservationRepository.clear();
         fakeReservationTimeRepository.clear();
-        fakeThemeRepository.clear();
         fakeMemberRepository.clear();
     }
 
@@ -73,7 +78,8 @@ public class ReservationServiceTest {
                     1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when
@@ -111,7 +117,8 @@ public class ReservationServiceTest {
                     LocalDate.now().plusDays(1),
                     1L, 1L);
             final LoginMember loginMember = new LoginMember("로키", "asd@email.com", MemberRole.MEMBER);
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.findById(1L))
+                    .willReturn(Optional.of(new Theme("1", "2", "3")));
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when & then
@@ -128,7 +135,8 @@ public class ReservationServiceTest {
                     LocalDate.now().plusDays(1),
                     1L, 1L);
             final LoginMember loginMember = new LoginMember("로키", "asd@email.com", MemberRole.MEMBER);
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
 
             // when & then
@@ -147,7 +155,8 @@ public class ReservationServiceTest {
                     1L, 1L);
             final LoginMember loginMember = new LoginMember("로키", "asd@email.com", MemberRole.MEMBER);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
             fakeReservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(1)),
@@ -169,7 +178,8 @@ public class ReservationServiceTest {
                     1L, 1L);
             final LoginMember loginMember = new LoginMember("로키", "asd@email.com", MemberRole.MEMBER);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when & then
@@ -187,7 +197,8 @@ public class ReservationServiceTest {
                     1L, 1L);
             final LoginMember loginMember = new LoginMember("로키", "asd@email.com", MemberRole.MEMBER);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.now().minusHours(1)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when & then
@@ -208,7 +219,8 @@ public class ReservationServiceTest {
             final AdminReservationRequest request = new AdminReservationRequest(
                     LocalDate.now().plusDays(1), 1L, 1L, 1L);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when
@@ -242,7 +254,8 @@ public class ReservationServiceTest {
             // given
             final AdminReservationRequest request = new AdminReservationRequest(
                     LocalDate.now().plusDays(1), 1L, 1L, 1L);
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.findById(1L))
+                    .willReturn(Optional.of(new Theme("1", "2", "3")));
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when & then
@@ -257,7 +270,8 @@ public class ReservationServiceTest {
             // given
             final AdminReservationRequest request = new AdminReservationRequest(
                     LocalDate.now().plusDays(1), 1L, 1L, 1L);
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
 
             // when & then
@@ -274,14 +288,14 @@ public class ReservationServiceTest {
             final AdminReservationRequest request = new AdminReservationRequest(
                     LocalDate.now().plusDays(1), 1L, 1L, 1L);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
             fakeReservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(1)),
                     1L, 1L, 2L
             );
-
 
             // when & then
             assertThatThrownBy(() -> {
@@ -296,7 +310,8 @@ public class ReservationServiceTest {
             final AdminReservationRequest request = new AdminReservationRequest(
                     LocalDate.now().minusDays(1), 1L, 1L, 1L);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when & then
@@ -312,7 +327,8 @@ public class ReservationServiceTest {
             final AdminReservationRequest request = new AdminReservationRequest(
                     LocalDate.now(), 1L, 1L, 1L);
             fakeReservationTimeRepository.save(new ReservationTime(LocalTime.now().minusHours(1)));
-            fakeThemeRepository.save(new Theme("1", "2", "3"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeMemberRepository.saveMember(new Member("asd@email.com", "password", "boogie", MemberRole.MEMBER));
 
             // when & then
@@ -515,6 +531,5 @@ public class ReservationServiceTest {
         }
 
     }
-
 
 }

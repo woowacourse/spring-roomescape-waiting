@@ -18,16 +18,16 @@ INSERT INTO theme (name, description, thumbnail) VALUES
 
 -- member
 INSERT INTO member (email, password, name, role) VALUES
-                                               ('user1@example.com', 'pass1', 'Alice', 'MEMBER'),
-                                               ('user2@example.com', 'pass2', 'Bob', 'MEMBER'),
-                                               ('user3@example.com', 'pass3', 'Charlie', 'MEMBER'),
-                                               ('user4@example.com', 'pass4', 'David', 'MEMBER'),
-                                               ('user5@example.com', 'pass5', 'Eve', 'MEMBER'),
-                                               ('user6@example.com', 'pass6', 'Frank', 'MEMBER'),
-                                               ('user7@example.com', 'pass7', 'Grace', 'MEMBER'),
-                                               ('user8@example.com', 'pass8', 'Hannah', 'MEMBER'),
-                                               ('user9@example.com', 'pass9', 'Isaac', 'MEMBER'),
-                                               ('user10@example.com', 'pass10', 'Jane', 'MEMBER');
+                                                     ('user1@example.com', 'pass1', 'Alice', 'MEMBER'),
+                                                     ('user2@example.com', 'pass2', 'Bob', 'MEMBER'),
+                                                     ('user3@example.com', 'pass3', 'Charlie', 'MEMBER'),
+                                                     ('user4@example.com', 'pass4', 'David', 'MEMBER'),
+                                                     ('user5@example.com', 'pass5', 'Eve', 'MEMBER'),
+                                                     ('user6@example.com', 'pass6', 'Frank', 'MEMBER'),
+                                                     ('user7@example.com', 'pass7', 'Grace', 'MEMBER'),
+                                                     ('user8@example.com', 'pass8', 'Hannah', 'MEMBER'),
+                                                     ('user9@example.com', 'pass9', 'Isaac', 'MEMBER'),
+                                                     ('user10@example.com', 'pass10', 'Jane', 'MEMBER');
 
 -- reservation (조합 생성)
 INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES

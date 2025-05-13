@@ -3,6 +3,7 @@ package roomescape.reservationtime;
 import java.time.LocalTime;
 import java.util.Objects;
 
+
 public class ReservationTime {
 
     private final Long id;
