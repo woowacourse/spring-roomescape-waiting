@@ -18,7 +18,7 @@ public class ReservationMemberRepositoryImpl implements ReservationMemberReposit
 
     @Override
     public long add(Reservation reservation, Member member) {
-        ReservationMemberIds reservationMemberIds = new ReservationMemberIds(-1, reservation.getId(), member.getId());
+        ReservationMemberIds reservationMemberIds = new ReservationMemberIds(null, reservation.getId(), member.getId());
         return jpaReservationMemberRepository.save(reservationMemberIds).getId();
     }
 

@@ -26,14 +26,14 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(Long id) {
+    public Optional<Theme> findById(long id) {
         return themes.stream()
                 .filter(theme -> theme.getId().equals(id))
                 .findAny();
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteById(long id) {
         Optional<Theme> findTheme = themes.stream()
                 .filter(theme -> theme.getId().equals(id))
                 .findAny();

@@ -10,7 +10,7 @@ public class ReservationMemberIds {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     private long reservationId;
     private long memberId;
 
@@ -18,7 +18,7 @@ public class ReservationMemberIds {
 
     }
 
-    public ReservationMemberIds(long id, long reservationId, long memberId) {
+    public ReservationMemberIds(Long id, long reservationId, long memberId) {
         this.id = id;
         this.reservationId = reservationId;
         this.memberId = memberId;
