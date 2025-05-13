@@ -28,7 +28,10 @@ public class ReservationTimeService {
     }
 
     public Long create(CreateReservationTimeParam createReservationTimeParam) {
-        return reservationTImeRepository.create(new ReservationTime(createReservationTimeParam.startAt()));
+        ReservationTime reservationTime = reservationTImeRepository.save(
+                new ReservationTime(createReservationTimeParam.startAt())
+        );
+        return reservationTime.id();
     }
 
     public ReservationTimeResult findById(Long reservationTimeId) {
