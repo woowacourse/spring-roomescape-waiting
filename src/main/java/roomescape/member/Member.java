@@ -1,21 +1,33 @@
 package roomescape.member;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
+@Entity
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Getter
 public class Member {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private final Long id;
     private final String email;
     private final String password;
     private final String name;
+    @Enumerated(EnumType.STRING)
     private final MemberRole role;
 
-    public Member(final Long id, final String email, final String password, final String name, final MemberRole role) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.role = role;
+    public Member() {
+        this(null, null, null, null, null);
     }
 
     public Member(final String email, final String password, final String name, final MemberRole role) {
@@ -24,25 +36,5 @@ public class Member {
 
     public boolean matchesPassword(final String password) {
         return Objects.equals(this.password, password);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public MemberRole getRole() {
-        return role;
     }
 }

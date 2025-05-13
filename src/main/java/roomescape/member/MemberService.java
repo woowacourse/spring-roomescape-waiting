@@ -23,7 +23,7 @@ public class MemberService {
         validateDuplicationEmail(request);
 
         final Member notSavedMember = new Member(request.email(), request.password(), request.name(), MemberRole.MEMBER);
-        memberRepository.saveMember(notSavedMember);
+        memberRepository.save(notSavedMember);
     }
 
     public List<MemberResponse> readAllMember() {

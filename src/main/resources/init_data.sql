@@ -30,7 +30,7 @@ INSERT INTO member (email, password, name, role) VALUES
                                                      ('user10@example.com', 'pass10', 'Jane', 'MEMBER');
 
 -- reservation (조합 생성)
-INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES
                                                                  ('2025-05-01', 1, 1, 1),
                                                                  ('2025-05-01', 2, 2, 2),
                                                                  ('2025-05-02', 3, 3, 3),
@@ -42,7 +42,7 @@ INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES
                                                                  ('2025-05-05', 9, 9, 9),
                                                                  ('2025-05-05', 10, 10, 10);
 
-INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES
                                                                  ('2025-05-01', 1, 1, 1),
                                                                  ('2025-05-01', 2, 2, 2),
                                                                  ('2025-05-01', 3, 3, 3),

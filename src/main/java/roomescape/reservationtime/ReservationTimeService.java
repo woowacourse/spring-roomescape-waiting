@@ -4,9 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
+import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExistsThemeException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservation.Reservation;
@@ -14,28 +15,22 @@ import roomescape.reservation.ReservationRepository;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeRepository;
 
 @Service
+@AllArgsConstructor
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
-
-    @Autowired
-    public ReservationTimeService(
-            final ReservationTimeRepository reservationTimeRepository,
-            final ReservationRepository reservationRepository
-    ) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
-    }
+    private final ThemeRepository themeRepository;
 
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
         validateDuplicateTime(request);
 
         final ReservationTime reservationTime = new ReservationTime(request.startAt());
-        final Long id = reservationTimeRepository.save(reservationTime);
-        final ReservationTime savedReservationTime = reservationTimeRepository.findById(id);
+        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
@@ -47,7 +42,10 @@ public class ReservationTimeService {
 
     public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
-        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeIdAndDate(themeId, date).stream()
+        final Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new ReservationTimeNotExistsThemeException());
+
+        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(theme, date).stream()
                 .map(Reservation::getReservationTime)
                 .collect(Collectors.toSet());
 
@@ -62,22 +60,14 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final Long id) {
-        validateExistsReservationTime(id);
-        validateUnusedReservationTime(id);
+        final ReservationTime reservationTime = reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new ReservationTimeNotFoundException());
 
-        reservationTimeRepository.deleteById(id);
-    }
-
-    private void validateUnusedReservationTime(final Long id) {
-        if (reservationRepository.existsByReservationTime(id)) {
+        if(reservationRepository.existsByReservationTime(reservationTime)){
             throw new ReservationTimeUsedException();
         }
-    }
 
-    private void validateExistsReservationTime(final Long id) {
-        if (!reservationTimeRepository.existsById(id)) {
-            throw new ReservationTimeNotFoundException();
-        }
+        reservationTimeRepository.delete(reservationTime);
     }
 
     private void validateDuplicateTime(final ReservationTimeRequest request) {
