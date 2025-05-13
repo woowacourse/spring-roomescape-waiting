@@ -42,6 +42,6 @@
   - [x] Reservation
 - [ ] 기존 레포지토리를 Spring Data Jpa 레포지토리로 교체
   - [x] ThemeRepository
-  - [ ] MemberRepository
+  - [x] MemberRepository
   - [ ] ReservationRepository
   - [ ] ReservationTimeRepository

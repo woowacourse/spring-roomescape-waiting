@@ -20,13 +20,13 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeJpaRepository;
+import roomescape.theme.domain.JpaThemeRepository;
 
 @DataJpaTest
 class ThemeCustomRepositoryImplTest {
 
     @Autowired
-    private ThemeJpaRepository repository;
+    private JpaThemeRepository repository;
     @Autowired
     private EntityManager em;
 
