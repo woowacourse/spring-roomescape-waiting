@@ -16,7 +16,7 @@ import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.reservationTime.repository.JdbcReservationTimeRepository;
+import roomescape.reservationTime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.dto.PopularThemeRequestDto;
 import roomescape.user.MemberTestDataConfig;
@@ -24,14 +24,14 @@ import roomescape.user.domain.User;
 import roomescape.user.repository.JdbcUserRepository;
 
 @JdbcTest
-@Import({JdbcThemeRepository.class, JdbcReservationRepository.class, JdbcReservationTimeRepository.class,
+@Import({JdbcThemeRepository.class, JdbcReservationRepository.class,
         MemberTestDataConfig.class, KeyHolderManager.class, JdbcUserRepository.class})
 class JdbcThemeRepositoryTest {
 
     @Autowired
     private JdbcThemeRepository repository;
     @Autowired
-    private JdbcReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private JdbcReservationRepository reservationRepository;
     @Autowired
@@ -53,8 +53,8 @@ class JdbcThemeRepositoryTest {
         Theme savedTheme10 = repository.save(new Theme("name10", "dd10", "tt10"));
         Theme savedTheme11 = repository.save(new Theme("name11", "dd11", "tt11"));
 
-        ReservationTime savedTime1 = reservationTimeRepository.add(ReservationTimeFixture.create(LocalTime.of(11, 0)));
-        ReservationTime savedTime2 = reservationTimeRepository.add(ReservationTimeFixture.create(LocalTime.of(11, 30)));
+        ReservationTime savedTime2 = reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(11, 30)));
+        ReservationTime savedTime1 = reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(11, 0)));
 
         // theme1을 사용한 예약 9개
         reservationRepository.add(

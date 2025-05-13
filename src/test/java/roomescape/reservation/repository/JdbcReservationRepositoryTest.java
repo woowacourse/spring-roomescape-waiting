@@ -13,7 +13,7 @@ import roomescape.common.KeyHolderManager;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.repository.JdbcReservationTimeRepository;
+import roomescape.reservationTime.repository.ReservationTimeRepository;
 import roomescape.theme.ThemeTestDataConfig;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.user.MemberTestDataConfig;
@@ -21,7 +21,6 @@ import roomescape.user.repository.JdbcUserRepository;
 
 @JdbcTest
 @Import({JdbcReservationRepository.class,
-        JdbcReservationTimeRepository.class,
         JdbcThemeRepository.class,
         ThemeTestDataConfig.class,
         MemberTestDataConfig.class,
@@ -33,7 +32,7 @@ class JdbcReservationRepositoryTest {
     @Autowired
     private JdbcReservationRepository reservationRepository;
     @Autowired
-    private JdbcReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ThemeTestDataConfig themeTestDataConfig;
     @Autowired
@@ -49,7 +48,7 @@ class JdbcReservationRepositoryTest {
     @Test
     void existsByReservationTime() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.add(new ReservationTime(LocalTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
 
         Reservation reservation = createReservation(1, reservationTime);
         reservationRepository.add(reservation);

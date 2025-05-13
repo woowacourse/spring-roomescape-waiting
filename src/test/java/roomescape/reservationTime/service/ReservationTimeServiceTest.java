@@ -25,7 +25,6 @@ import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationTime.exception.AlreadyReservedTimeException;
 import roomescape.reservationTime.exception.DuplicateReservationException;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.reservationTime.repository.JdbcReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
@@ -37,7 +36,6 @@ import roomescape.user.repository.UserRepository;
 
 @JdbcTest
 @Import({
-        JdbcReservationTimeRepository.class,
         ReservationTimeService.class,
         JdbcReservationRepository.class,
         ReservationService.class,

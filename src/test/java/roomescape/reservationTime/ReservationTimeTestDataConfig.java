@@ -21,7 +21,7 @@ public class ReservationTimeTestDataConfig {
     @PostConstruct
     public void setUpTestData() {
         ReservationTime reservationTime = ReservationTimeFixture.create(TIME_FIELD);
-        savedReservationTime = repository.add(reservationTime);
+        savedReservationTime = repository.save(reservationTime);
         savedId = savedReservationTime.getId();
     }
 

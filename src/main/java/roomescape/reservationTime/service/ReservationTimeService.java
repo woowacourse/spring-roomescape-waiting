@@ -13,6 +13,7 @@ import roomescape.reservationTime.domain.dto.ReservationTimeRequestDto;
 import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationTime.exception.AlreadyReservedTimeException;
 import roomescape.reservationTime.exception.DuplicateReservationException;
+import roomescape.reservationTime.exception.NotFoundReservationTimeException;
 import roomescape.reservationTime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.InvalidThemeException;
@@ -66,7 +67,7 @@ public class ReservationTimeService {
     }
 
     public void deleteById(Long id) {
-        ReservationTime reservationTime = repository.findByIdOrThrow(id);
+        ReservationTime reservationTime = findByIdOrThrow(id);
         if (reservationRepository.existsByReservationTime(reservationTime)) {
             throw new AlreadyReservedTimeException();
         }
@@ -76,12 +77,12 @@ public class ReservationTimeService {
     public ReservationTimeResponseDto add(ReservationTimeRequestDto requestDto) {
         ReservationTime reservationTime = convertToReservationTimeRequestDto(requestDto);
         validateDuplicateTime(reservationTime);
-        ReservationTime savedReservationTime = repository.add(reservationTime);
+        ReservationTime savedReservationTime = repository.save(reservationTime);
         return convertToReservationTimeResponseDto(savedReservationTime);
     }
 
     private void validateDuplicateTime(ReservationTime inputReservationTime) {
-        boolean exists = repository.existsByReservationTime(inputReservationTime.getStartAt());
+        boolean exists = repository.existsByStartAt(inputReservationTime.getStartAt());
 
         if (exists) {
             throw new DuplicateReservationException();
@@ -94,5 +95,10 @@ public class ReservationTimeService {
 
     private ReservationTimeResponseDto convertToReservationTimeResponseDto(ReservationTime reservationTime) {
         return ReservationTimeResponseDto.of(reservationTime);
+    }
+
+    private ReservationTime findByIdOrThrow(Long id) {
+        return  repository.findById(id)
+                .orElseThrow(NotFoundReservationTimeException::new);
     }
 }
