@@ -1,22 +1,41 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Entity
 public class Reservation {
-    private final Long id;
-    private final Member member;
-    private final Theme theme;
-    private final LocalDate reservationDate;
-    private final ReservationTime reservationTime;
 
-    private Reservation(Long id, Member member, Theme theme, LocalDate reservationDate,
-                        ReservationTime reservationTime) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate reservationDate;
+
+    // TODO: 연관관계 설정
+    private ReservationTime reservationTime;
+    private Member member;
+    private Theme theme;
+
+    // TODO: 호출 순서 변경
+    private Reservation(
+            Long id,
+            Member member,
+            Theme theme,
+            LocalDate reservationDate,
+            ReservationTime reservationTime
+    ) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.reservationDate = reservationDate;
         this.reservationTime = reservationTime;
+    }
+
+    public Reservation() {
     }
 
     public static Reservation of(Long id, Member member, Theme theme, LocalDate date, ReservationTime time) {
