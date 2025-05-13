@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.business.service.PlayTimeService;
+import roomescape.business.service.ReservationTimeService;
 import roomescape.business.service.ReservationService;
 import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
@@ -24,11 +24,11 @@ import roomescape.presentation.dto.ReservationResponse;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final PlayTimeService playTimeService;
+    private final ReservationTimeService reservationTimeService;
 
-    public ReservationController(final ReservationService reservationService, final PlayTimeService playTimeService) {
+    public ReservationController(final ReservationService reservationService, final ReservationTimeService reservationTimeService) {
         this.reservationService = reservationService;
-        this.playTimeService = playTimeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
     @PostMapping
@@ -81,7 +81,7 @@ public class ReservationController {
             @RequestParam("themeId") final Long themeId
     ) {
         final List<ReservationAvailableTimeResponse> availableTimeResponses =
-                playTimeService.findAvailableTimes(date, themeId);
+                reservationTimeService.findAvailableTimes(date, themeId);
 
         return ResponseEntity.ok(availableTimeResponses);
     }

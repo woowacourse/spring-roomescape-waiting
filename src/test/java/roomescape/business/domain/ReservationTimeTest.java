@@ -7,7 +7,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class PlayTimeTest {
+class ReservationTimeTest {
 
     @Test
     @DisplayName("startAt 필드에 null 들어오면 예외가 발생한다")
@@ -17,9 +17,9 @@ class PlayTimeTest {
 
         // when & then
         assertAll(
-                () -> assertThatThrownBy(() -> new PlayTime(invalidStartAt))
+                () -> assertThatThrownBy(() -> new ReservationTime(invalidStartAt))
                         .isInstanceOf(IllegalArgumentException.class),
-                () -> assertThatThrownBy(() -> new PlayTime(1L, invalidStartAt))
+                () -> assertThatThrownBy(() -> new ReservationTime(1L, invalidStartAt))
                         .isInstanceOf(IllegalArgumentException.class)
         );
     }

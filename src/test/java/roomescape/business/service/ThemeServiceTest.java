@@ -12,38 +12,35 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.dao.JdbcReservationDao;
-import roomescape.persistence.dao.JdbcThemeDao;
-import roomescape.persistence.dao.ReservationDao;
-import roomescape.persistence.dao.ThemeDao;
+import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
 import roomescape.util.CurrentUtil;
 
-@JdbcTest
+@DataJpaTest
 @Sql("classpath:data-themeService.sql")
 class ThemeServiceTest {
 
     private ThemeService themeService;
-    private final JdbcTemplate jdbcTemplate;
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     @Autowired
-    public ThemeServiceTest(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.themeDao = new JdbcThemeDao(jdbcTemplate);
+    public ThemeServiceTest(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
+        this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     @BeforeEach
     void setUp() {
-        final ReservationDao reservationDao = new JdbcReservationDao(jdbcTemplate);
         final CurrentUtil currentUtil = () -> LocalDate.of(2025, 5, 10);
-        themeService = new ThemeService(themeDao, reservationDao, currentUtil);
+        themeService = new ThemeService(themeRepository, reservationRepository, currentUtil);
     }
 
     @Test
@@ -131,7 +128,7 @@ class ThemeServiceTest {
         themeService.deleteById(id);
 
         // then
-        Optional<Theme> findTheme = themeDao.findById(id);
+        Optional<Theme> findTheme = themeRepository.findById(id);
         assertThat(findTheme).isEmpty();
     }
 

@@ -10,31 +10,26 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.business.domain.Reservation;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.dao.JdbcMemberDao;
-import roomescape.persistence.dao.JdbcPlayTimeDao;
-import roomescape.persistence.dao.JdbcReservationDao;
-import roomescape.persistence.dao.JdbcThemeDao;
-import roomescape.persistence.dao.MemberDao;
-import roomescape.persistence.dao.PlayTimeDao;
-import roomescape.persistence.dao.ReservationDao;
-import roomescape.persistence.dao.ThemeDao;
+import roomescape.persistence.repository.MemberRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
+import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ThemeRepository;
 import roomescape.presentation.dto.ReservationResponse;
 
-@JdbcTest
+@DataJpaTest
 @Sql("classpath:data-reservationService.sql")
 public class ReservationServiceTest {
 
     private static final LocalDate MAX_DATE_FIXTURE = LocalDate.of(9999, 12, 31);
 
     private final ReservationService reservationService;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
     // data-reservationService.sql
     private final Long memberId = 100L;
@@ -42,12 +37,16 @@ public class ReservationServiceTest {
     private final Long themeId = 100L;
 
     @Autowired
-    public ReservationServiceTest(final JdbcTemplate jdbcTemplate) {
-        reservationDao = new JdbcReservationDao(jdbcTemplate);
-        final MemberDao memberDao = new JdbcMemberDao(jdbcTemplate);
-        final PlayTimeDao playTimeDao = new JdbcPlayTimeDao(jdbcTemplate);
-        final ThemeDao themeDao = new JdbcThemeDao(jdbcTemplate);
-        reservationService = new ReservationService(reservationDao, memberDao, playTimeDao, themeDao);
+    public ReservationServiceTest(final MemberRepository memberRepository,
+                                  final ReservationTimeRepository reservationTimeRepository,
+                                  final ThemeRepository themeRepository,
+                                  final ReservationRepository reservationRepository) {
+
+        this.reservationService = new ReservationService(reservationRepository,
+                                                         memberRepository,
+                reservationTimeRepository,
+                                                         themeRepository);
+        this.reservationRepository = reservationRepository;
     }
 
     @Test
@@ -63,7 +62,7 @@ public class ReservationServiceTest {
                 // member
                 () -> assertThat(reservationResponse.member()
                         .id()).isEqualTo(memberId),
-                ()-> assertThat(reservationResponse.member()
+                () -> assertThat(reservationResponse.member()
                         .name()).isEqualTo("kim"),
                 () -> assertThat(reservationResponse.member()
                         .email()).isEqualTo("email@test.com"),
@@ -183,7 +182,7 @@ public class ReservationServiceTest {
         reservationService.deleteById(id);
 
         // then
-        final Optional<Reservation> findReservation = reservationDao.findById(id);
+        final Optional<Reservation> findReservation = reservationRepository.findById(id);
         assertThat(findReservation).isEmpty();
     }
 

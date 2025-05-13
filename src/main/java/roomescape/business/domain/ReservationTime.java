@@ -7,29 +7,29 @@ import jakarta.persistence.Id;
 import java.time.LocalTime;
 
 @Entity
-public class PlayTime {
+public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
 
-    public PlayTime(final Long id, final LocalTime startAt) {
+    public ReservationTime(final Long id, final LocalTime startAt) {
         validateStartAt(startAt);
         this.id = id;
         this.startAt = startAt;
     }
 
-    public PlayTime(final LocalTime startAt) {
+    public ReservationTime(final LocalTime startAt) {
         this(null, startAt);
     }
 
-    public PlayTime(final Long id) {
+    public ReservationTime(final Long id) {
         this.id = id;
         this.startAt = null;
     }
 
-    public PlayTime() {
+    public ReservationTime() {
     }
 
     private void validateStartAt(final LocalTime startAt) {
@@ -38,8 +38,8 @@ public class PlayTime {
         }
     }
 
-    public boolean isSamePlayTime(final PlayTime playTime) {
-        return id.equals(playTime.getId());
+    public boolean isSameReservationTime(final ReservationTime reservationTime) {
+        return id.equals(reservationTime.getId());
     }
 
     public Long getId() {

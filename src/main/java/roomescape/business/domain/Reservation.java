@@ -16,11 +16,11 @@ public class Reservation {
     @ManyToOne
     private Member member;
     @ManyToOne
-    private PlayTime playTime;
+    private ReservationTime reservationTime;
     @ManyToOne
     private Theme theme;
 
-    public Reservation(final Long id, final LocalDate date, final Member member, final PlayTime playTime,
+    public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime reservationTime,
                        final Theme theme
     ) {
         validateDate(date);
@@ -28,12 +28,12 @@ public class Reservation {
         this.id = id;
         this.date = date;
         this.member = member;
-        this.playTime = playTime;
+        this.reservationTime = reservationTime;
         this.theme = theme;
     }
 
-    public Reservation(final LocalDate date, final Member member, final PlayTime playTime, final Theme theme) {
-        this(null, date, member, playTime, theme);
+    public Reservation(final LocalDate date, final Member member, final ReservationTime reservationTime, final Theme theme) {
+        this(null, date, member, reservationTime, theme);
     }
 
     public Reservation() {
@@ -46,8 +46,8 @@ public class Reservation {
         }
     }
 
-    public boolean isSamePlayTime(final PlayTime playTime) {
-        return this.playTime.isSamePlayTime(playTime);
+    public boolean isSameReservationTime(final ReservationTime reservationTime) {
+        return this.reservationTime.isSameReservationTime(reservationTime);
     }
 
     public Long getId() {
@@ -62,8 +62,8 @@ public class Reservation {
         return member;
     }
 
-    public PlayTime getPlayTime() {
-        return playTime;
+    public ReservationTime getReservationTime() {
+        return reservationTime;
     }
 
     public Theme getTheme() {

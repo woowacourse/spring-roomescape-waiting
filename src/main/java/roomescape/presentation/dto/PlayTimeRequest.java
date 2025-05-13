@@ -1,11 +1,11 @@
 package roomescape.presentation.dto;
 
 import java.time.LocalTime;
-import roomescape.business.domain.PlayTime;
+import roomescape.business.domain.ReservationTime;
 
 public record PlayTimeRequest(LocalTime startAt) {
 
-    public PlayTime toDomain() {
-        return new PlayTime(startAt);
+    public ReservationTime toDomain() {
+        return new ReservationTime(startAt);
     }
 }

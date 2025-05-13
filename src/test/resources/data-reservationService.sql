@@ -14,10 +14,10 @@ INSERT INTO member (id, name, role, email, password) VALUES (101, 'lee', 'USER',
 
 
 -- 방탈출 예약 삽입
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (100, '2025-05-10', 100, 100, 100);
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (101, '2025-05-09', 100, 100, 100);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (100, '2025-05-10', 100, 100, 100);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (101, '2025-05-09', 100, 100, 100);
 
 -- 방탈출 예약 필터링에서 조회되지 않는 데이터
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (102, '2025-05-08', 100, 100, 100);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (102, '2025-05-08', 100, 100, 100);
 
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (103, '2025-05-10', 101, 100, 100);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (103, '2025-05-10', 101, 100, 100);

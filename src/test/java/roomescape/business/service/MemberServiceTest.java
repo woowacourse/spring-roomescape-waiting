@@ -6,23 +6,20 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.persistence.dao.JdbcMemberDao;
-import roomescape.persistence.dao.MemberDao;
+import roomescape.persistence.repository.MemberRepository;
 import roomescape.presentation.dto.MemberResponse;
 
-@JdbcTest
+@DataJpaTest
 @Sql("classpath:data-memberService.sql")
 class MemberServiceTest {
 
     private final MemberService memberService;
 
     @Autowired
-    public MemberServiceTest(final JdbcTemplate jdbcTemplate) {
-        final MemberDao memberDao = new JdbcMemberDao(jdbcTemplate);
-        this.memberService = new MemberService(memberDao);
+    public MemberServiceTest(final MemberRepository memberRepository) {
+        this.memberService = new MemberService(memberRepository);
     }
 
     @Test

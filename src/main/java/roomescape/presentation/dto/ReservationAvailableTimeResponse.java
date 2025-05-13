@@ -1,6 +1,6 @@
 package roomescape.presentation.dto;
 
-import roomescape.business.domain.PlayTime;
+import roomescape.business.domain.ReservationTime;
 
-public record ReservationAvailableTimeResponse(PlayTime playTime, boolean alreadyBooked) {
+public record ReservationAvailableTimeResponse(ReservationTime reservationTime, boolean alreadyBooked) {
 }

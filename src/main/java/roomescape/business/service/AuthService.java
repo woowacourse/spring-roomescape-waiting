@@ -9,7 +9,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 import roomescape.business.domain.Member;
 import roomescape.exception.UnauthorizedException;
-import roomescape.persistence.dao.MemberDao;
+import roomescape.persistence.repository.MemberRepository;
 import roomescape.presentation.dto.LoginMember;
 
 @Service
@@ -18,17 +18,17 @@ public class AuthService {
     private final static String secretKey = "ThisSecretKeyIsOnlyUseLearningTestSoIsNotImportant1234567890Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=";
 
     private final JwtParser jwtParser;
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
-    public AuthService(final MemberDao memberDao) {
-        this.memberDao = memberDao;
+    public AuthService(final MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
         jwtParser = Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .build();
     }
 
     public String login(final String email, final String password) {
-        final Member member = memberDao.findByEmailAndPassword(email, password)
+        final Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new UnauthorizedException("해당하는 사용자를 찾을 수 없습니다. email: %s".formatted(email)));
         return createAccessToken(member.getId(), member.getName(), member.getEmail(), member.getRole());
     }

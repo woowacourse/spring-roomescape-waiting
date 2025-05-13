@@ -6,23 +6,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.UnauthorizedException;
-import roomescape.persistence.dao.JdbcMemberDao;
-import roomescape.persistence.dao.MemberDao;
+import roomescape.persistence.repository.MemberRepository;
 
-@JdbcTest
+@DataJpaTest
 @Sql("classpath:data-authService.sql")
 class AuthServiceTest {
 
     private final AuthService authService;
 
     @Autowired
-    public AuthServiceTest(final JdbcTemplate jdbcTemplate) {
-        final MemberDao memberDao = new JdbcMemberDao(jdbcTemplate);
-        this.authService = new AuthService(memberDao);
+    public AuthServiceTest(final MemberRepository memberRepository) {
+        this.authService = new AuthService(memberRepository);
     }
 
     @Test

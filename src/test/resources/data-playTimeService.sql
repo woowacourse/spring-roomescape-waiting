@@ -12,4 +12,4 @@ INSERT INTO member (id, name, role, email, password) VALUES (100, 'kim', 'USER',
 
 
 -- 방탈출 예약 삽입
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (100, '2025-05-10', 100, 100, 100);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (100, '2025-05-10', 100, 100, 100);

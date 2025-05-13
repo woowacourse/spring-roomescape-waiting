@@ -9,8 +9,8 @@ import roomescape.business.domain.Reservation;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.dao.ReservationDao;
-import roomescape.persistence.dao.ThemeDao;
+import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
 import roomescape.util.CurrentUtil;
@@ -18,60 +18,60 @@ import roomescape.util.CurrentUtil;
 @Service
 public class ThemeService {
 
-    private final ThemeDao themeDao;
-    private final ReservationDao reservationDao;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
     private final CurrentUtil currentUtil;
 
-    public ThemeService(final ThemeDao themeDao, final ReservationDao reservationDao, final CurrentUtil currentUtil) {
-        this.themeDao = themeDao;
-        this.reservationDao = reservationDao;
+    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository, final CurrentUtil currentUtil) {
+        this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
         this.currentUtil = currentUtil;
     }
 
     public ThemeResponse insert(final ThemeRequest themeRequest) {
         validateNameIsNotDuplicate(themeRequest.name());
         final Theme theme = themeRequest.toDomain();
-        final Long id = themeDao.insert(theme)
+        final Long id = themeRepository.save(theme)
                 .getId();
         return new ThemeResponse(id, theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 
     private void validateNameIsNotDuplicate(final String name) {
-        if (themeDao.existsByName(name)) {
+        if (themeRepository.existsByName(name)) {
             throw new DuplicateException("추가 하려는 테마 이름이 이미 존재합니다.");
         }
     }
 
     public List<ThemeResponse> findAll() {
-        return themeDao.findAll()
+        return themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public ThemeResponse findById(final Long id) {
-        final Theme theme = themeDao.findById(id)
+        final Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(id)));
         return ThemeResponse.from(theme);
     }
 
     public void deleteById(final Long id) {
-        if (!themeDao.deleteById(id)) {
+        if (!themeRepository.existsById(id)) {
             throw new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(id));
         }
+        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponse> findPopularThemes() {
         final LocalDate now = currentUtil.getCurrentDate();
-        final String endDate = now.toString();
-        final String startDate = now.minusDays(7)
-                .toString();
+        final LocalDate endDate = now;
+        final LocalDate startDate = now.minusDays(7);
         return findPopularThemesBetween(startDate, endDate);
     }
 
-    private List<ThemeResponse> findPopularThemesBetween(final String startDate, final String endDate) {
-        final List<Theme> themes = themeDao.findAll();
-        final List<Reservation> reservations = reservationDao.findByDateBetween(startDate, endDate);
+    private List<ThemeResponse> findPopularThemesBetween(final LocalDate startDate, final LocalDate endDate) {
+        final List<Theme> themes = themeRepository.findAll();
+        final List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
         final Map<Long, Long> themeReservationCount = calculateThemeReservationCount(reservations);
         final List<Theme> sortedThemes = sortedThemesByReservationCount(themes, themeReservationCount);
         return sortedThemes.stream()

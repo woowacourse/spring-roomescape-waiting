@@ -10,7 +10,7 @@ public record ReservationResponse(Long id, LocalDate date, MemberResponse member
                 reservation.getId(),
                 reservation.getDate(),
                 MemberResponse.from(reservation.getMember()),
-                PlayTimeResponse.from(reservation.getPlayTime()),
+                PlayTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme())
         );
     }

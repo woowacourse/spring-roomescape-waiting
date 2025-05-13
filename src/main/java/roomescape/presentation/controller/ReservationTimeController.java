@@ -10,25 +10,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.business.service.PlayTimeService;
+import roomescape.business.service.ReservationTimeService;
 import roomescape.presentation.dto.PlayTimeRequest;
 import roomescape.presentation.dto.PlayTimeResponse;
 
 @RestController
 @RequestMapping("/times")
-public class PlayTimeController {
+public class ReservationTimeController {
 
-    private final PlayTimeService playTimeService;
+    private final ReservationTimeService reservationTimeService;
 
-    public PlayTimeController(final PlayTimeService playTimeService) {
-        this.playTimeService = playTimeService;
+    public ReservationTimeController(final ReservationTimeService reservationTimeService) {
+        this.reservationTimeService = reservationTimeService;
     }
 
     @PostMapping
     public ResponseEntity<PlayTimeResponse> create(
             @RequestBody final PlayTimeRequest playTimeRequest
     ) {
-        final PlayTimeResponse playTimeResponse = playTimeService.insert(playTimeRequest);
+        final PlayTimeResponse playTimeResponse = reservationTimeService.insert(playTimeRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(playTimeResponse);
 
@@ -36,14 +36,14 @@ public class PlayTimeController {
 
     @GetMapping
     public ResponseEntity<List<PlayTimeResponse>> readAll() {
-        final List<PlayTimeResponse> playTimeResponse = playTimeService.findAll();
+        final List<PlayTimeResponse> playTimeResponse = reservationTimeService.findAll();
 
         return ResponseEntity.ok(playTimeResponse);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
-        playTimeService.deleteById(id);
+        reservationTimeService.deleteById(id);
 
         return ResponseEntity.noContent().build();
     }

@@ -14,13 +14,13 @@ INSERT INTO member (id, name, role, email, password) VALUES (100, 'kim', 'USER',
 
 
 -- 방탈출 예약 삽입
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (100, '2025-05-10', 100, 100, 101);
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (101, '2025-05-02', 100, 100, 101);
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (102, '2025-05-01', 100, 100, 101);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (100, '2025-05-10', 100, 100, 101);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (101, '2025-05-02', 100, 100, 101);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (102, '2025-05-01', 100, 100, 101);
 
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (103, '2025-05-10', 100, 100, 102);
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (104, '2025-05-09', 100, 100, 102);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (103, '2025-05-10', 100, 100, 102);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (104, '2025-05-09', 100, 100, 102);
 
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (105, '2025-05-10', 100, 100, 103);
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (106, '2025-05-09', 100, 100, 103);
-INSERT INTO reservation (id, date, member_id, time_id, theme_id) VALUES (107, '2025-05-08', 100, 100, 103);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (105, '2025-05-10', 100, 100, 103);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (106, '2025-05-09', 100, 100, 103);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (107, '2025-05-08', 100, 100, 103);

@@ -15,7 +15,7 @@ class ReservationTest {
         final LocalDate invalidDate = null;
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(invalidDate, new Member(1L), new PlayTime(1L), new Theme(1L)))
+        assertThatThrownBy(() -> new Reservation(invalidDate, new Member(1L), new ReservationTime(1L), new Theme(1L)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
