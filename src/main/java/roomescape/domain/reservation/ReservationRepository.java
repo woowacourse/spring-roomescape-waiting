@@ -2,26 +2,22 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findAll();
+    boolean existsByTimeId(@Param("timeId") Long reservationTimeId);
 
-    Long create(Reservation reservation);
+    boolean existsByDateAndTimeId(@Param("date") LocalDate reservationDate, @Param("timeId") Long timeId);
 
-    void deleteById(Long reservationId);
+    boolean existsByThemeId(@Param("themeId") Long themeId);
 
-    Optional<Reservation> findById(Long reservationId);
+    List<Reservation> findByThemeIdAndDate(@Param("themeId") Long themeId, @Param("date") LocalDate reservationDate);
 
-    boolean existByTimeId(Long reservationTimeId);
-
-    boolean existByDateAndTimeId(LocalDate reservationDate, Long timeId);
-
-    boolean existByThemeId(Long themeId);
-
-    List<Reservation> findByThemeIdAndReservationDate(Long themeId, LocalDate reservationDate);
-
-    List<Reservation> findByThemeIdAndMemberIdBetweenDate(Long themeId, Long memberId, LocalDate from, LocalDate to);
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(@Param("themeId") Long themeId,
+                                                             @Param("memberId") Long memberId,
+                                                             @Param("from") LocalDate from,
+                                                             @Param("to") LocalDate to);
 }

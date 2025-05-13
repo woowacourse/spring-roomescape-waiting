@@ -50,16 +50,17 @@ public class ReservationService {
         Theme theme = themeRepository.findById(createReservationParam.themeId())
                 .orElseThrow(() -> new NotFoundEntityException(
                         createReservationParam.themeId() + "에 해당하는 theme 튜플이 없습니다."));
-        if (reservationRepository.existByDateAndTimeId(createReservationParam.date(), reservationTime.id())) {
+        if (reservationRepository.existsByDateAndTimeId(createReservationParam.date(), reservationTime.getId())) {
             throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
         }
         Reservation reservation = new Reservation(
                 member,
                 createReservationParam.date(),
                 reservationTime,
-                theme);
+                theme
+        );
         reservation.validateReservable(LocalDateTime.now(clock));
-        return reservationRepository.create(reservation);
+        return reservationRepository.save(reservation).getId();
     }
 
     public void deleteById(Long reservationId) {
@@ -80,7 +81,7 @@ public class ReservationService {
     }
 
     public List<ReservationResult> findReservationsBy(ReservationSearchParam reservationSearchParam) {
-        List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdBetweenDate(
+        List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
                 reservationSearchParam.themeId(),
                 reservationSearchParam.memberId(), reservationSearchParam.from(), reservationSearchParam.to());
         return reservations.stream()

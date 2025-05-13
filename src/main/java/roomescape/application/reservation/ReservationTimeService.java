@@ -31,7 +31,7 @@ public class ReservationTimeService {
         ReservationTime reservationTime = reservationTImeRepository.save(
                 new ReservationTime(createReservationTimeParam.startAt())
         );
-        return reservationTime.id();
+        return reservationTime.getId();
     }
 
     public ReservationTimeResult findById(Long reservationTimeId) {
@@ -51,7 +51,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId,
                                                                                    LocalDate reservationDate) {
         List<ReservationTime> reservationTimes = reservationTImeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findByThemeIdAndReservationDate(
+        List<Reservation> reservations = reservationRepository.findByThemeIdAndDate(
                 themeId,
                 reservationDate
         );
@@ -64,8 +64,8 @@ public class ReservationTimeService {
         return reservationTimes.stream()
                 .map(reservationTime ->
                         new AvailableReservationTimeResult(
-                                reservationTime.id(),
-                                reservationTime.startAt(),
+                                reservationTime.getId(),
+                                reservationTime.getStartAt(),
                                 bookedTimes.contains(reservationTime)
                         )
                 )
@@ -73,13 +73,13 @@ public class ReservationTimeService {
     }
 
     public void deleteById(Long reservationTimeId) {
-        if (reservationRepository.existByTimeId(reservationTimeId)) {
+        if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new BusinessRuleViolationException("해당 예약 시간에 예약이 존재합니다.");
         }
         reservationTImeRepository.deleteById(reservationTimeId);
     }
 
     private ReservationTimeResult toReservationResult(ReservationTime reservationTime) {
-        return new ReservationTimeResult(reservationTime.id(), reservationTime.startAt());
+        return new ReservationTimeResult(reservationTime.getId(), reservationTime.getStartAt());
     }
 }

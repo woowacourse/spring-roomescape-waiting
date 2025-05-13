@@ -47,7 +47,7 @@ public class Reservation {
     }
 
     public void validateReservable(LocalDateTime currentDateTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.startAt());
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (reservationDateTime.isBefore(currentDateTime)) {
             throw new BusinessRuleViolationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
         }
