@@ -41,7 +41,7 @@ class MemberServiceImplTest {
                 new Member(1L, "슬링키", "email1", "pw1", Role.USER),
                 new Member(2L, "에드", "email2", "pw2", Role.ADMIN)
         );
-        when(memberRepository.findAllMembers()).thenReturn(mockMembers);
+        when(memberRepository.findAll()).thenReturn(mockMembers);
 
         // when
         List<MemberResponse> responses = memberService.findAllMembers();
@@ -56,7 +56,7 @@ class MemberServiceImplTest {
     void findMemberById_success() {
         // given
         Member member = new Member(1L, "슬링키", "email", "pw", Role.USER);
-        when(memberRepository.findMemberById(1L)).thenReturn(Optional.of(member));
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
         // when
         Member found = memberService.findMemberById(1L);
@@ -69,7 +69,7 @@ class MemberServiceImplTest {
     @DisplayName("존재하지 않는 회원 ID를 조회하면 예외 발생")
     void findMemberById_fail() {
         // given
-        when(memberRepository.findMemberById(99L)).thenReturn(Optional.empty());
+        when(memberRepository.findById(99L)).thenReturn(Optional.empty());
 
         // then
         assertThatThrownBy(() -> memberService.findMemberById(99L))
@@ -82,7 +82,7 @@ class MemberServiceImplTest {
         // given
         SignupRequest request = new SignupRequest("email", "pw","슬링키");
 
-        when(memberRepository.addMember(any())).thenReturn(10L);
+        when(memberRepository.save(any())).thenReturn(new Member(10L, "슬링키", "email", "pw", Role.USER));
 
         // when
         MemberResponse response = memberService.addMember(request);

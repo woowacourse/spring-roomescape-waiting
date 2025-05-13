@@ -2,6 +2,7 @@ package roomescape.service.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -63,13 +64,12 @@ class ReservationTimeServiceImplTest {
     @Test
     void deleteNotFoundReservationTime() {
         // given
-        Long id = 1L;
+
         // when
-        when(reservationRepository.existsByTimeId(id)).thenReturn(false);
-        when(timeRepository.deleteById(id)).thenReturn(0);
+        when(reservationRepository.existsByTimeId(anyLong())).thenReturn(true);
         // then
-        assertThatThrownBy(() -> reservationTimeService.deleteById(id))
-                .isInstanceOf(ReservationTimeNotFoundException.class);
+        assertThatThrownBy(() -> reservationTimeService.deleteById(anyLong()))
+                .isInstanceOf(UsingReservationTimeException.class);
     }
 
     @DisplayName("예약 가능한 시간을 조회한다")
@@ -80,7 +80,7 @@ class ReservationTimeServiceImplTest {
         Long themeId = 1L;
 
         // when
-        when(reservationRepository.findTimeIdsByDateAndTheme(date, themeId)).thenReturn(List.of(1L));
+        when(reservationRepository.findAllTimeIdByDateAndThemeId(date, themeId)).thenReturn(List.of(1L));
         when(timeRepository.findAll()).thenReturn(List.of(new ReservationTime(1L, LocalTime.now()),
                 new ReservationTime(2L, LocalTime.now())));
         List<AvailableTimeResponse> actual = reservationTimeService.getAvailableTimes(date, themeId);

@@ -14,7 +14,6 @@ import roomescape.dto.search.SearchConditions;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
 import roomescape.exception.reservation.ReservationInPastException;
-import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
@@ -24,13 +23,15 @@ import roomescape.repository.theme.ThemeRepository;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationServiceImpl(ReservationRepository reservationRepository, ReservationTimeRepository timeRepository,
-                                  ThemeRepository themeRepository, MemberRepository memberRepository) {
+    public ReservationServiceImpl(ReservationRepository reservationRepository,
+                                  ReservationTimeRepository timeRepository, ThemeRepository themeRepository,
+                                  MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
@@ -48,25 +49,22 @@ public class ReservationServiceImpl implements ReservationService {
             throw new ReservationInPastException();
         }
 
-        if (reservationRepository.existsByDateAndTime(request.date(), reservationTime.getId())) {
+        if (reservationRepository.existsByDateAndTime(request.date(), reservationTime)) {
             throw new ReservationAlreadyExistsException();
         }
 
         Reservation newReservation = new Reservation(request.date(),
                 reservationTime, theme, member);
 
-        return ReservationResponse.from(reservationRepository.addReservation(newReservation));
+        return ReservationResponse.from(reservationRepository.save(newReservation));
     }
 
     public List<ReservationResponse> getAll() {
-        return ReservationResponse.from(reservationRepository.findAllReservation());
+        return ReservationResponse.from(reservationRepository.findAll());
     }
 
     public void deleteById(Long id) {
-        int affectedCount = reservationRepository.deleteReservationById(id);
-        if (affectedCount != 1) {
-            throw new ReservationNotFoundException(id);
-        }
+        reservationRepository.deleteById(id);
     }
 
     @Override
@@ -77,19 +75,24 @@ public class ReservationServiceImpl implements ReservationService {
         Theme theme = themeRepository.findById(adminReservationRequest.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(adminReservationRequest.themeId()));
 
-        Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
+        Member member = memberRepository.findById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new MemberNotFoundException(adminReservationRequest.memberId()));
 
         Reservation newReservation = new Reservation(adminReservationRequest.date(),
                 reservationTime, theme, member);
 
-        return ReservationResponse.from(reservationRepository.addReservation(newReservation));
+        return ReservationResponse.from(reservationRepository.save(newReservation));
     }
 
     @Override
     public List<ReservationResponse> getReservationsByConditions(SearchConditions searchConditions) {
 
-        List<Reservation> reservations = reservationRepository.findReservationsByConditions(searchConditions);
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+                searchConditions.themeId(),
+                searchConditions.memberId(),
+                searchConditions.dateFrom(),
+                searchConditions.dateTo()
+        );
         return reservations.stream().
                 map(reservation -> ReservationResponse.from(reservation))
                 .toList();

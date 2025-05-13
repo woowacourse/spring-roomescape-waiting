@@ -17,28 +17,28 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public MemberServiceImpl(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
-        this.memberRepository = memberRepository;
+    public MemberServiceImpl( JwtTokenProvider jwtTokenProvider,
+                             MemberRepository memberRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.memberRepository = memberRepository;
     }
 
     @Override
     public List<MemberResponse> findAllMembers() {
-        List<Member> members = memberRepository.findAllMembers();
+        List<Member> members = memberRepository.findAll();
         return members.stream().map(member -> MemberResponse.from(member)).toList();
     }
 
     @Override
     public Member findMemberById(Long id) {
-        return memberRepository.findMemberById(id).orElseThrow(() -> new MemberNotFoundException(id));
+        return memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(id));
     }
 
     @Override
     public MemberResponse addMember(SignupRequest signupRequest) {
         Member member = new Member(null, signupRequest.name(), signupRequest.email(), signupRequest.password(),
                 Role.USER);
-        Long id = memberRepository.addMember(member);
-        Member addedMember = member.withId(id);
+        Member addedMember = memberRepository.save(member);
         return MemberResponse.from(addedMember);
     }
 

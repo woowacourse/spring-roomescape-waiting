@@ -24,7 +24,6 @@ import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
-import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
@@ -100,30 +99,17 @@ class ReservationServiceImplTest {
         ReservationRequest request = new ReservationRequest(today, timeId, themeId);
 
         // when
+        ReservationTime time = new ReservationTime(timeId, LocalTime.now().plusHours(1));
         when(timeRepository.findById(timeId)).thenReturn(
-                Optional.of(new ReservationTime(timeId, LocalTime.now().plusHours(1))));
+                Optional.of(time));
 
         when(themeRepository.findById(themeId)).thenReturn(
                 Optional.of(new Theme(themeId, "test", "test", "test")));
-        when(reservationRepository.existsByDateAndTime(today, timeId)).thenReturn(true);
+        when(reservationRepository.existsByDateAndTime(today, time)).thenReturn(true);
 
         //then
         assertThatThrownBy(() -> reservationService.create(request, new Member(1L, "슬링키", "이메일", "비밀번호", Role.ADMIN)))
                 .isInstanceOf(ReservationAlreadyExistsException.class);
-    }
-
-    @DisplayName("존재하지 않는 예약을 삭제 시도하면 예외를 발생시킨다")
-    @Test
-    void delete() {
-        // given
-        long id = 99L;
-
-        // when
-        when(reservationRepository.deleteReservationById(id)).thenReturn(0);
-
-        // then
-        assertThatThrownBy(() -> reservationService.deleteById(id))
-                .isInstanceOf(ReservationNotFoundException.class);
     }
 
     @DisplayName("관리자가 정상적으로 예약을 생성할 수 있다")
@@ -145,8 +131,8 @@ class ReservationServiceImplTest {
         // when
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
-        when(memberRepository.findMemberById(anyLong())).thenReturn(Optional.of(member));
-        when(reservationRepository.addReservation(any())).thenReturn(reservation);
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
+        when(reservationRepository.save(any())).thenReturn(reservation);
 
         // then
         ReservationResponse response = reservationService.createByAdmin(request);

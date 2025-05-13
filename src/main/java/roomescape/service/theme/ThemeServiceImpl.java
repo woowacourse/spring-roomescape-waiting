@@ -25,7 +25,7 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     public ThemeResponse create(ThemeRequest request) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
-        return ThemeResponse.from(themeRepository.add(theme));
+        return ThemeResponse.from(themeRepository.save(theme));
     }
 
     @Override
@@ -36,10 +36,7 @@ public class ThemeServiceImpl implements ThemeService {
 
     @Override
     public void deleteById(Long id) {
-        int affectedCount = themeRepository.deleteById(id);
-        if (affectedCount == 0) {
-            throw new ThemeNotFoundException(id);
-        }
+        themeRepository.deleteById(id);
     }
 
     @Override
