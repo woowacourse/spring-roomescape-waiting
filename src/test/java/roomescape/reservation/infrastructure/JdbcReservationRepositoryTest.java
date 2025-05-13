@@ -111,23 +111,6 @@ class JdbcReservationRepositoryTest {
 
     }
 
-    @ParameterizedTest
-    @DisplayName("삭제 성공 관련 테스트")
-    @CsvSource({"3,false", "4,false"})
-    void delete_test(Long id, boolean expected) {
-        // given
-        ReservationTime reservationTime = timeRepository.findById(1L);
-        Theme theme = themeRepository.findById(1L);
-        Optional<Member> member = memberRepository.findById(1L);
-        Reservation reservation = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member.get(),
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
-        reservationRepository.save(reservation);
-        // when
-        boolean isDeleted = reservationRepository.deleteById(id);
-        // then
-        assertThat(isDeleted).isEqualTo(expected);
-    }
-
     @Test
     @DisplayName("전체 조회 테스트")
     void find_all_test() {
@@ -169,7 +152,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 조건 조회 테스트")
+    @DisplayName("특정 조건 예약 존재 확인 테스트")
     void exist_by_test() {
         // given
         ReservationTime reservationTime = timeRepository.findById(1L);

@@ -40,8 +40,8 @@
   - [x] ReservationTime
 - [x] 연관관계 매핑
   - [x] Reservation
-- [ ] 기존 레포지토리를 Spring Data Jpa 레포지토리로 교체
+- [x] 기존 레포지토리를 Spring Data Jpa 레포지토리로 교체
   - [x] ThemeRepository
   - [x] MemberRepository
-  - [ ] ReservationRepository
+  - [x] ReservationRepository
   - [x] ReservationTimeRepository
