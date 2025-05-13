@@ -21,7 +21,7 @@ public class ThemeService {
 
     public long addTheme(AddThemeDto addThemeDto) {
         Theme theme = addThemeDto.toEntity();
-        return themeRepository.add(theme);
+        return themeRepository.save(theme);
     }
 
     public void deleteThemeById(long id) {

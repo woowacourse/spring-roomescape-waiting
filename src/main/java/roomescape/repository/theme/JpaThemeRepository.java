@@ -6,6 +6,6 @@ import roomescape.domain.theme.Theme;
 
 
 @Repository
-public interface JpaThemeRepository extends JpaRepository<Theme, Long>, ThemeRepository {
+public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
 }

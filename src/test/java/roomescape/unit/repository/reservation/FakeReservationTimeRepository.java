@@ -15,7 +15,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     private final List<ReservationTime> reservationTimes = new ArrayList<>();
 
     @Override
-    public long add(ReservationTime reservationTime) {
+    public long save(ReservationTime reservationTime) {
         long id = index.getAndIncrement();
         reservationTimes.add(new ReservationTime(id, reservationTime.getTime()));
         return id;

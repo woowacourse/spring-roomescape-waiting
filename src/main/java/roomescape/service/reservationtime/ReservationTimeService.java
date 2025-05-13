@@ -26,7 +26,7 @@ public class ReservationTimeService {
         if (reservationTimeRepository.existsByTime(reservationTime.getTime())) {
             throw new InvalidReservationTimeException("중복된 예약시간입니다");
         }
-        return reservationTimeRepository.add(reservationTime);
+        return reservationTimeRepository.save(reservationTime);
     }
 
     public void deleteReservationTime(Long id) {

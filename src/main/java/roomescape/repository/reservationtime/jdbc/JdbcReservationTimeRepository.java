@@ -30,7 +30,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     };
 
     @Override
-    public long add(ReservationTime reservationTime) {
+    public long save(ReservationTime reservationTime) {
         String sql = "insert into reservation_time (start_at) values(?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {

@@ -50,7 +50,7 @@ class ThemeServiceTest {
     @Test
     void 테마를_조회할_수_있다() {
         Theme theme = new Theme(null, "방탈출", "게임입니다.", "thumbnail");
-        themeRepository.add(theme);
+        themeRepository.save(theme);
 
         assertThat(themeService.findAll()).hasSize(1);
     }
@@ -58,7 +58,7 @@ class ThemeServiceTest {
     @Test
     void 테마를_삭제할_수_있다() {
         Theme theme = new Theme(null, "방탈출", "게임입니다.", "thumbnail");
-        themeRepository.add(theme);
+        themeRepository.save(theme);
         themeService.deleteThemeById(1L);
         assertThat(themeRepository.findAll()).hasSize(0);
     }
@@ -66,7 +66,7 @@ class ThemeServiceTest {
     @Test
     void 예약이_존재하는_테마는_삭제할_수_없다() {
         Theme theme = new Theme(null, "방탈출", "게임입니다.", "thumbnail");
-        themeRepository.add(theme);
+        themeRepository.save(theme);
 
         Long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.now()));
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(1L), timeId, 1L));

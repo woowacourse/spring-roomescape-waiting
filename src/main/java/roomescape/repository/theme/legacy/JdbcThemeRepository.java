@@ -31,7 +31,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public long add(Theme theme) {
+    public long save(Theme theme) {
         String sql = "insert into theme (name,description,thumbnail) values(?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -52,7 +52,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(Long id) {
+    public Optional<Theme> findById(long id) {
         try {
             String sql = "select id, name, description, thumbnail from theme where id=?";
             return Optional.of(jdbcTemplate.queryForObject(sql, themeRowMapper, id));
@@ -62,7 +62,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteById(long id) {
         String sql = "delete from theme where id = ?";
         jdbcTemplate.update(sql, id);
     }
