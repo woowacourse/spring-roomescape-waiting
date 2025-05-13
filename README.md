@@ -80,8 +80,8 @@
 
 ### JPA 전환
 
-- [ ] gradle 의존성 추가
-    - [ ] `as is: spring-boot-starter-jdbc` -> `to be: spring-boot-starter-data-jpa`
+- [x] gradle 의존성 추가
+    - [x] `as is: spring-boot-starter-jdbc` -> `to be: spring-boot-starter-data-jpa`
 - [ ] 엔티티 매핑
     - [ ] 의존이 없는 클래스를 먼저 엔티티로 설정한다
 - [ ] 연관관계 매핑
