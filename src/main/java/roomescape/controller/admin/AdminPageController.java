@@ -12,4 +12,19 @@ public class AdminPageController {
     public String adminMainPage() {
         return "admin/index";
     }
+
+    @GetMapping("/reservation")
+    public String reservationPage() {
+        return "admin/reservation-new";
+    }
+
+    @GetMapping("/time")
+    public String reservationTimePage() {
+        return "admin/time";
+    }
+
+    @GetMapping("/theme")
+    public String themePage() {
+        return "admin/theme";
+    }
 }
