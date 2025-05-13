@@ -12,16 +12,16 @@ import roomescape.member.controller.request.TokenLoginCreateRequest;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.controller.response.TokenLoginResponse;
 import roomescape.member.resolver.LoginMember;
-import roomescape.member.service.AutoService;
+import roomescape.member.service.AuthService;
 
 @RequestMapping("login")
 @RestController
 public class TokenLoginApiController {
 
-    private final AutoService autoService;
+    private final AuthService authService;
 
-    public TokenLoginApiController(AutoService autoService) {
-        this.autoService = autoService;
+    public TokenLoginApiController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping
@@ -29,7 +29,7 @@ public class TokenLoginApiController {
             @RequestBody TokenLoginCreateRequest tokenLoginCreateRequest,
             HttpServletResponse response
     ){
-        TokenLoginResponse tokenLoginResponse = autoService.tokenLogin(tokenLoginCreateRequest);
+        TokenLoginResponse tokenLoginResponse = authService.tokenLogin(tokenLoginCreateRequest);
         Cookie cookie = new Cookie("token", tokenLoginResponse.tokenResponse());
         cookie.setHttpOnly(true);
         cookie.setPath("/");

@@ -2,7 +2,6 @@ package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,10 +17,10 @@ import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JwtTokenProvider;
 import roomescape.member.repository.MemberJdbcRepository;
 
-class AutoServiceTest extends BaseTest {
+class AuthServiceTest extends BaseTest {
 
     @Autowired
-    AutoService autoService;
+    AuthService authService;
     @Autowired
     MemberJdbcRepository memberJdbcRepository;
     @Autowired
@@ -36,7 +35,7 @@ class AutoServiceTest extends BaseTest {
         String password = matt.getPassword();
 
         //when
-        TokenLoginResponse tokenLoginResponse = autoService.tokenLogin(new TokenLoginCreateRequest(email, password));
+        TokenLoginResponse tokenLoginResponse = authService.tokenLogin(new TokenLoginCreateRequest(email, password));
 
         //then
         assertThat(tokenLoginResponse.tokenResponse()).isNotBlank();
@@ -50,18 +49,18 @@ class AutoServiceTest extends BaseTest {
 
         //when - then
         assertThatThrownBy(() ->
-                autoService.tokenLogin(new TokenLoginCreateRequest("matt.kakao", "123")))
+                authService.tokenLogin(new TokenLoginCreateRequest("matt.kakao", "123")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("[ERROR] 등록되지 않은 회원입니다.");
 
         assertThatThrownBy(() ->
-                autoService.tokenLogin(new TokenLoginCreateRequest("matt.kaka", "1234")))
+                authService.tokenLogin(new TokenLoginCreateRequest("matt.kaka", "1234")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("[ERROR] 등록되지 않은 회원입니다."
                 );
 
         assertThatThrownBy(() ->
-                autoService.tokenLogin(new TokenLoginCreateRequest("matt.kaka", "123")))
+                authService.tokenLogin(new TokenLoginCreateRequest("matt.kaka", "123")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("[ERROR] 등록되지 않은 회원입니다."
                 );
@@ -75,7 +74,7 @@ class AutoServiceTest extends BaseTest {
         String token = jwtTokenProvider.createToken(matt.getEmail());
 
         //when
-        MemberResponse userByToken = autoService.findUserByToken(token);
+        MemberResponse userByToken = authService.findUserByToken(token);
 
         //then
         assertThat(userByToken.name()).isEqualTo("매트");

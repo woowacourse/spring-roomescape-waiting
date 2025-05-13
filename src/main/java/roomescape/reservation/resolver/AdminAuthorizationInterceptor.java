@@ -8,14 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.resolver.UnauthenticatedException;
-import roomescape.member.service.AutoService;
+import roomescape.member.service.AuthService;
 
 public class AdminAuthorizationInterceptor implements HandlerInterceptor {
     public static final String TOKEN = "token";
-    private final AutoService autoService;
+    private final AuthService authService;
 
-    public AdminAuthorizationInterceptor(AutoService autoService) {
-        this.autoService = autoService;
+    public AdminAuthorizationInterceptor(AuthService authService) {
+        this.authService = authService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
         }
 
         try {
-            MemberResponse member = autoService.findUserByToken(token);
+            MemberResponse member = authService.findUserByToken(token);
 
             if (!ADMIN.getRole().equals(member.role())) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

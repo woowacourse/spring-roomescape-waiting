@@ -10,11 +10,11 @@ import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JwtTokenProvider;
 
 @Service
-public class AutoService {
+public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
 
-    public AutoService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
+    public AuthService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.memberRepository = memberRepository;
     }

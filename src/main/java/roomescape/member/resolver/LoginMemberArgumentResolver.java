@@ -9,16 +9,16 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.member.controller.response.MemberResponse;
-import roomescape.member.service.AutoService;
+import roomescape.member.service.AuthService;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     public static final String TOKEN = "token";
-    private final AutoService autoService;
+    private final AuthService authService;
 
-    public LoginMemberArgumentResolver(AutoService autoService) {
-        this.autoService = autoService;
+    public LoginMemberArgumentResolver(AuthService authService) {
+        this.authService = authService;
     }
 
 
@@ -47,7 +47,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
         String token = extractTokenFromCookie(cookies);
 
-        return autoService.findUserByToken(token);
+        return authService.findUserByToken(token);
     }
 
     private String extractTokenFromCookie(Cookie[] cookies) {

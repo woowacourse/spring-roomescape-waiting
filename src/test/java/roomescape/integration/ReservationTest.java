@@ -17,7 +17,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.common.BaseTest;
 import roomescape.member.controller.request.TokenLoginCreateRequest;
-import roomescape.member.service.AutoService;
+import roomescape.member.service.AuthService;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeRepository;
@@ -31,7 +31,7 @@ public class ReservationTest extends BaseTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private AutoService autoService;
+    private AuthService authService;
 
     private Theme theme;
 
@@ -54,7 +54,7 @@ public class ReservationTest extends BaseTest {
         );
 
         //토큰추출
-        token = autoService.tokenLogin(new TokenLoginCreateRequest("matt.kakao", "1234")).tokenResponse();
+        token = authService.tokenLogin(new TokenLoginCreateRequest("matt.kakao", "1234")).tokenResponse();
 
         reservation = new HashMap<>();
         reservation.put("date", "2025-08-05");
