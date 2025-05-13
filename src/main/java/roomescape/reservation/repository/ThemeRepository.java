@@ -6,9 +6,9 @@ import java.util.Optional;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 
-public interface ThemeDao {
+public interface ThemeRepository {
 
-    boolean isExists(ThemeName name);
+    boolean existsByName(ThemeName name);
 
     Theme save(Theme theme);
 

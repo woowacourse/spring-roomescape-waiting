@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.member.domain.Member;
 
-public interface MemberDao {
+public interface MemberRepository {
 
     Optional<Member> findByEmailAndPassword(String email, String password);
 

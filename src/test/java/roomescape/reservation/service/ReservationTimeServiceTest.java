@@ -11,22 +11,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.AvailableTimeInfo;
 import roomescape.reservation.service.dto.ReservationTimeCreateCommand;
 import roomescape.reservation.service.dto.ReservationTimeInfo;
-import roomescape.fake.FakeReservationDao;
-import roomescape.fake.FakeReservationTimeDao;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
+import roomescape.fake.FakeReservationRepository;
+import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
 class ReservationTimeServiceTest {
 
-    ReservationTimeDao reservationTimeDao = new FakeReservationTimeDao();
-    ReservationDao reservationDao = new FakeReservationDao();
-    ReservationTimeService reservationTimeService = new ReservationTimeService(reservationTimeDao, reservationDao);
+    ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    ReservationRepository reservationRepository = new FakeReservationRepository();
+    ReservationTimeService reservationTimeService = new ReservationTimeService(reservationTimeRepository,
+            reservationRepository);
 
     @DisplayName("이미 존재하는 시간을 저장할 경우 예외가 발생한다")
     @Test
@@ -50,7 +51,7 @@ class ReservationTimeServiceTest {
         // when
         ReservationTimeInfo result = reservationTimeService.createReservationTime(request);
         // then
-        ReservationTime savedTime = reservationTimeDao.findById(1L).get();
+        ReservationTime savedTime = reservationTimeRepository.findById(1L).get();
         assertAll(
                 () -> assertThat(result.id()).isEqualTo(1L),
                 () -> assertThat(result.startAt()).isEqualTo(time),
@@ -75,14 +76,14 @@ class ReservationTimeServiceTest {
 
     @DisplayName("예약 시간을 삭제할 수 있다")
     @Test
-    void testDelete() {
+    void delete() {
         // given
         ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
         reservationTimeService.createReservationTime(request);
         // when
         reservationTimeService.deleteReservationTimeById(1L);
         // then
-        assertThat(reservationTimeDao.findById(1L)).isEmpty();
+        assertThat(reservationTimeRepository.findById(1L)).isEmpty();
     }
 
     @DisplayName("예약이 존재하는 시간은 삭제할 경우 예외가 발생한다")
@@ -94,7 +95,7 @@ class ReservationTimeServiceTest {
         ReservationTime time = new ReservationTime(response.id(), response.startAt());
         Theme theme = new Theme(1L, "우테코방탈출", "탈출탈출탈출", "abcdefg");
         Member member = new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN);
-        reservationDao.save(new Reservation(null, member, LocalDate.now().plusDays(1), time, theme));
+        reservationRepository.save(new Reservation(null, member, LocalDate.now().plusDays(1), time, theme));
         // when
         // then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(response.id()))
@@ -106,12 +107,12 @@ class ReservationTimeServiceTest {
     @Test
     void findAvailableTimes() {
         // given
-        ReservationTime savedTime1 = reservationTimeDao.save(new ReservationTime(LocalTime.of(10, 0)));
-        ReservationTime savedTime2 = reservationTimeDao.save(new ReservationTime(LocalTime.of(15, 0)));
+        ReservationTime savedTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime savedTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 0)));
         Theme theme = new Theme(1L, "우테코 탈출", "우테코 방탈출", "wwwwww");
         Member member = new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN);
         LocalDate date = LocalDate.of(2025, 5, 1);
-        reservationDao.save(new Reservation(1L, member, date, savedTime1, theme));
+        reservationRepository.save(new Reservation(1L, member, date, savedTime1, theme));
         // when
         List<AvailableTimeInfo> result = reservationTimeService.findAvailableTimes(date, theme.getId());
         // then

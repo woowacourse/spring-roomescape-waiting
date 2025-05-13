@@ -15,7 +15,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeDao;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.dto.AvailableTimeInfo;
 import roomescape.reservation.service.dto.ReservationTimeCreateCommand;
@@ -27,7 +27,7 @@ import roomescape.reservation.service.dto.ReservationTimeInfo;
 public class TimeServiceIntegrationTest {
 
     @Autowired
-    ReservationTimeDao reservationTimeDao;
+    ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     ReservationTimeService reservationTimeService;
@@ -53,7 +53,7 @@ public class TimeServiceIntegrationTest {
         // when
         ReservationTimeInfo result = reservationTimeService.createReservationTime(request);
         // then
-        ReservationTime savedTime = reservationTimeDao.findById(result.id()).get();
+        ReservationTime savedTime = reservationTimeRepository.findById(result.id()).get();
         assertAll(
                 () -> assertThat(result.id()).isEqualTo(4L),
                 () -> assertThat(result.startAt()).isEqualTo(time),
@@ -87,7 +87,7 @@ public class TimeServiceIntegrationTest {
         // when
         reservationTimeService.deleteReservationTimeById(3L);
         // then
-        List<ReservationTime> times = reservationTimeDao.findAll();
+        List<ReservationTime> times = reservationTimeRepository.findAll();
         assertThat(times).hasSize(2);
     }
 

@@ -15,11 +15,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.fake.TestCurrentDateTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.ThemeCreateCommand;
 import roomescape.reservation.service.dto.ThemeInfo;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.service.ThemeService;
 
 @SpringBootTest
@@ -28,10 +28,10 @@ import roomescape.reservation.service.ThemeService;
 public class ThemeServiceIntegrationTest {
 
     @Autowired
-    ThemeDao themeDao;
+    ThemeRepository themeRepository;
 
     @Autowired
-    ReservationDao reservationDao;
+    ReservationRepository reservationRepository;
     ThemeService themeService;
     TestCurrentDateTime currentDateTime;
 
@@ -39,7 +39,7 @@ public class ThemeServiceIntegrationTest {
     void init() {
         LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
         currentDateTime = new TestCurrentDateTime(now);
-        themeService = new ThemeService(themeDao, reservationDao, currentDateTime);
+        themeService = new ThemeService(themeRepository, reservationRepository, currentDateTime);
     }
 
     @DisplayName("테마를 생성할 수 있다")
@@ -50,7 +50,7 @@ public class ThemeServiceIntegrationTest {
         // when
         ThemeInfo result = themeService.createTheme(request);
         // then
-        Theme savedTheme = themeDao.findById(result.id()).get();
+        Theme savedTheme = themeRepository.findById(result.id()).get();
         assertAll(
                 () -> assertThat(result.id()).isNotNull(),
                 () -> assertThat(result.name()).isEqualTo(request.name()),

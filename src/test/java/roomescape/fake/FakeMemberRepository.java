@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 
-public class FakeMemberDao implements MemberDao {
+public class FakeMemberRepository implements MemberRepository {
 
     List<Member> members = new ArrayList<>();
     Long index = 1L;
 
-    @Override
     public Optional<Member> findByEmailAndPassword(String email, String password) {
         return members.stream()
                 .filter(member -> member.getEmail().equals(email))
@@ -19,14 +18,12 @@ public class FakeMemberDao implements MemberDao {
                 .findAny();
     }
 
-    @Override
     public Optional<Member> findById(long memberId) {
         return members.stream()
                 .filter(member -> member.getId() == memberId)
                 .findAny();
     }
 
-    @Override
     public Member save(Member member) {
         Member newMember = new Member(index++, member.getName(), member.getEmail(), member.getPassword(),
                 member.getRole());
@@ -34,7 +31,6 @@ public class FakeMemberDao implements MemberDao {
         return newMember;
     }
 
-    @Override
     public List<Member> findAll() {
         return new ArrayList<>(members);
     }

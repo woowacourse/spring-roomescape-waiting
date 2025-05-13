@@ -18,13 +18,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.fake.TestCurrentDateTime;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.service.ReservationService;
 
 @SpringBootTest
@@ -33,16 +33,16 @@ import roomescape.reservation.service.ReservationService;
 public class ReservationServiceIntegrationTest {
 
     @Autowired
-    ReservationDao reservationDao;
+    ReservationRepository reservationRepository;
 
     @Autowired
-    ThemeDao themeDao;
+    ThemeRepository themeRepository;
 
     @Autowired
-    ReservationTimeDao reservationTimeDao;
+    ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    MemberDao memberDao;
+    MemberRepository memberRepository;
 
     ReservationService reservationService;
     TestCurrentDateTime currentDateTime;
@@ -51,7 +51,9 @@ public class ReservationServiceIntegrationTest {
     void init() {
         LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
         currentDateTime = new TestCurrentDateTime(now);
-        reservationService = new ReservationService(reservationDao, reservationTimeDao, themeDao, memberDao,
+        reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
+                themeRepository,
+                memberRepository,
                 currentDateTime);
     }
 
@@ -128,7 +130,7 @@ public class ReservationServiceIntegrationTest {
         // when
         reservationService.cancelReservationById(1L);
         // then
-        List<Reservation> reservations = reservationDao.findAll();
+        List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).hasSize(12);
     }
 }

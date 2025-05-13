@@ -11,28 +11,28 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.CurrentDateTime;
-import roomescape.fake.FakeMemberDao;
+import roomescape.fake.FakeMemberRepository;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
-import roomescape.fake.FakeReservationDao;
-import roomescape.fake.FakeReservationTimeDao;
-import roomescape.fake.FakeThemeDao;
-import roomescape.reservation.repository.ReservationTimeDao;
+import roomescape.fake.FakeReservationRepository;
+import roomescape.fake.FakeReservationTimeRepository;
+import roomescape.fake.FakeThemeRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
 class ReservationServiceTest {
 
-    ReservationTimeDao reservationTimeDao = new FakeReservationTimeDao();
-    FakeReservationDao reservationDao = new FakeReservationDao();
-    FakeThemeDao themeDao = new FakeThemeDao();
-    FakeMemberDao memberDao = new FakeMemberDao();
+    ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    FakeReservationRepository reservationDao = new FakeReservationRepository();
+    FakeThemeRepository themeDao = new FakeThemeRepository();
+    FakeMemberRepository memberDao = new FakeMemberRepository();
     CurrentDateTime currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 4, 2, 11, 0));
-    ReservationService reservationService = new ReservationService(reservationDao, reservationTimeDao, themeDao,
+    ReservationService reservationService = new ReservationService(reservationDao, reservationTimeRepository, themeDao,
             memberDao, currentDateTime);
     LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
 
@@ -40,7 +40,7 @@ class ReservationServiceTest {
     @Test
     void should_ThrowException_WhenDuplicateReservation() {
         // given
-        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(LocalTime.of(11, 0)));
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Theme savedTheme = themeDao.save(new Theme(null, "우테코탈출", "탈출탈출탈출, ", "aaaa"));
         Member savedMember = memberDao.save(
                 new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
@@ -59,7 +59,7 @@ class ReservationServiceTest {
     @Test
     void shouldNot_ThrowException_WhenThemeIsDifferent() {
         // given
-        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(LocalTime.of(11, 0)));
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Member savedMember = memberDao.save(
                 new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
         Theme savedTheme1 = themeDao.save(new Theme(null, "우테코탈출", "탈출탈출탈출, ", "aaaa"));
@@ -97,7 +97,7 @@ class ReservationServiceTest {
     @Test
     void validateTheme() {
         // given
-        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(LocalTime.of(11, 0)));
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Member savedMember = memberDao.save(
                 new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
         ReservationCreateCommand request = new ReservationCreateCommand(tomorrow, savedMember.getId(),
@@ -113,7 +113,7 @@ class ReservationServiceTest {
     @Test
     void validatePastTime() {
         // given
-        reservationTimeDao.save(new ReservationTime(LocalTime.of(11, 0)));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Theme savedTheme = themeDao.save(new Theme(null, "우테코탈출", "탈출탈출탈출, ", "aaaa"));
         Member savedMember = memberDao.save(
                 new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
@@ -132,7 +132,7 @@ class ReservationServiceTest {
     void create() {
         // given
         LocalTime time = LocalTime.of(11, 0);
-        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Theme savedTheme = themeDao.save(new Theme(null, "우테코탈출", "탈출탈출탈출, ", "aaaa"));
         Member savedMember = memberDao.save(
                 new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
@@ -167,7 +167,7 @@ class ReservationServiceTest {
     void findAll() {
         // given
         LocalTime time = LocalTime.of(11, 0);
-        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Theme theme = new Theme(null, "우테코탈출", "탈출탈출탈출, ", "aaaa");
         Theme savedTheme = themeDao.save(theme);
         Member savedMember = memberDao.save(
@@ -189,7 +189,7 @@ class ReservationServiceTest {
     void cancelById() {
         // given
         LocalTime time = LocalTime.of(11, 0);
-        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Theme theme = new Theme(null, "우테코탈출", "탈출탈출탈출, ", "aaaa");
         Theme savedTheme = themeDao.save(theme);
         Member savedMember = memberDao.save(

@@ -18,7 +18,9 @@ public class Reservation {
     private Long id;
     @ManyToOne
     private Member member;
-    private ReservationDateTime dateTime;
+    private LocalDate date;
+    @ManyToOne
+    private ReservationTime time;
     @ManyToOne
     private Theme theme;
 
@@ -26,9 +28,12 @@ public class Reservation {
                        final Theme theme) {
         validateMember(member);
         validateTheme(theme);
+        validateDate(date);
+        validateTime(time);
         this.id = id;
         this.member = member;
-        this.dateTime = new ReservationDateTime(date, time);
+        this.date = date;
+        this.time = time;
         this.theme = theme;
     }
 
@@ -47,12 +52,30 @@ public class Reservation {
         }
     }
 
-    public boolean isBefore(final LocalDateTime other) {
-        return dateTime.isBefore(other);
+    private void validateDate(final LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("날짜를 입력해야 합니다.");
+        }
     }
 
-    public boolean isSameTime(final ReservationTime reservationTime) {
-        return dateTime.isSameTime(reservationTime);
+    private void validateTime(final ReservationTime time) {
+        if (time == null) {
+            throw new IllegalArgumentException("시간을 입력해야 합니다.");
+        }
+    }
+
+    public boolean isBefore(final LocalDateTime other) {
+        if (date.isBefore(other.toLocalDate())) {
+            return true;
+        }
+        if (date.equals(other.toLocalDate())) {
+            return time.isBefore(other.toLocalTime());
+        }
+        return false;
+    }
+
+    public boolean isSameTime(final ReservationTime other) {
+        return time.equals(other);
     }
 
     public boolean isMemberHasSameId(final long other) {
@@ -64,7 +87,7 @@ public class Reservation {
     }
 
     public boolean isBetween(final LocalDate from, final LocalDate to) {
-        return dateTime.isBetween(from, to);
+        return (date.isAfter(from) || date.isEqual(from)) && (date.isBefore(to) || date.isEqual(to));
     }
 
     public Member getMember() {
@@ -80,15 +103,15 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return dateTime.getDate();
+        return date;
     }
 
     public ReservationTime getTime() {
-        return dateTime.getTime();
+        return time;
     }
 
     public Theme getTheme() {
-        return this.theme;
+        return theme;
     }
 
     @Override

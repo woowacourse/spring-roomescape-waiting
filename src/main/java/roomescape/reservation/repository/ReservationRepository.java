@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import roomescape.reservation.domain.Reservation;
 
-public interface ReservationDao {
+public interface ReservationRepository {
 
     List<Reservation> findAll();
 
@@ -12,11 +12,11 @@ public interface ReservationDao {
 
     void deleteById(long id);
 
-    boolean isExistsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
-    boolean isExistsByTimeId(long timeId);
+    boolean existsByTimeId(long timeId);
 
-    boolean isExistsByThemeId(Long id);
+    boolean existsByThemeId(Long themeId);
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 }

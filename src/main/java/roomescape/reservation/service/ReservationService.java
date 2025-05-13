@@ -7,13 +7,13 @@ import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.ReservationSearchCondition;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -24,19 +24,19 @@ public class ReservationService {
     private static final LocalDate MINIMUM_SEARCH_DATE = LocalDate.of(2000, 1, 1);
     private static final LocalDate MAXIMUM_SEARCH_DATE = LocalDate.of(2999, 12, 31);
 
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
-    private final MemberDao memberDao;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
     private final CurrentDateTime currentDateTime;
 
-    public ReservationService(final ReservationDao reservationDao, final ReservationTimeDao reservationTimeDao,
-                              final ThemeDao themeDao, final MemberDao memberDao,
+    public ReservationService(final ReservationRepository reservationRepository, final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository, final MemberRepository memberRepository,
                               final CurrentDateTime dateTimeGenerator) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
-        this.memberDao = memberDao;
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
         this.currentDateTime = dateTimeGenerator;
     }
 
@@ -45,15 +45,15 @@ public class ReservationService {
         if (reservation.isBefore(currentDateTime.getDateTime())) {
             throw new IllegalArgumentException("지나간 날짜와 시간은 예약 불가합니다.");
         }
-        if (reservationDao.isExistsByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId())) {
             throw new IllegalArgumentException("해당 시간에 이미 예약이 존재합니다.");
         }
-        final Reservation savedReservation = reservationDao.save(reservation);
+        final Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationInfo(savedReservation);
     }
 
     public List<ReservationInfo> getReservations() {
-        return reservationDao.findAll().stream()
+        return reservationRepository.findAll().stream()
                 .map(ReservationInfo::new)
                 .toList();
     }
@@ -63,7 +63,7 @@ public class ReservationService {
         Predicate<Reservation> themePredicate = reservationThemePredicate(condition);
         Predicate<Reservation> datePredicate = reservationDatePredicate(condition);
         Predicate<Reservation> totalPredicate = memberPredicate.and(themePredicate).and(datePredicate);
-        return reservationDao.findAll().stream()
+        return reservationRepository.findAll().stream()
                 .filter(totalPredicate)
                 .map(ReservationInfo::new)
                 .toList();
@@ -90,7 +90,7 @@ public class ReservationService {
     }
 
     public void cancelReservationById(final long id) {
-        reservationDao.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 
     private Reservation makeReservation(final ReservationCreateCommand request) {
@@ -101,17 +101,17 @@ public class ReservationService {
     }
 
     private Member findMember(final long memberId) {
-        return memberDao.findById(memberId)
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
     }
 
     private ReservationTime findReservationTime(final long timeId) {
-        return reservationTimeDao.findById(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
     }
 
     private Theme findTheme(final long themeId) {
-        return themeDao.findById(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
     }
 }

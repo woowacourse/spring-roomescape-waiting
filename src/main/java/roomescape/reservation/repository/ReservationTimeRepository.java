@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.ReservationTime;
 
-public interface ReservationTimeDao {
+public interface ReservationTimeRepository {
 
     ReservationTime save(ReservationTime reservationTime);
 
@@ -13,7 +13,7 @@ public interface ReservationTimeDao {
 
     Optional<ReservationTime> findById(long id);
 
-    boolean isExistsByTime(LocalTime reservationTime);
+    boolean existsByTime(LocalTime reservationTime);
 
     void deleteById(long id);
 }

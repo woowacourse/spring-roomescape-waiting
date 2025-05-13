@@ -2,20 +2,20 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.dto.MemberInfo;
 
 @Service
 public class MemberService {
 
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
-    public MemberService(final MemberDao memberDao) {
-        this.memberDao = memberDao;
+    public MemberService(final MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     public List<MemberInfo> findAll() {
-        return memberDao.findAll()
+        return memberRepository.findAll()
                 .stream()
                 .map(MemberInfo::new)
                 .toList();
