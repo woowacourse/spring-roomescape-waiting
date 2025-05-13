@@ -1,8 +1,10 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.domain.BusinessRuleViolationException;
 
+@Embeddable
 public record Email(
         String email
 ) {
