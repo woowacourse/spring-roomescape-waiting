@@ -1,13 +1,23 @@
 package roomescape.domain;
 
 import java.util.Objects;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
+@NoArgsConstructor
+@Getter
 public class Theme {
-
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
 
     public Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;
@@ -18,22 +28,6 @@ public class Theme {
 
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
     }
 
     @Override

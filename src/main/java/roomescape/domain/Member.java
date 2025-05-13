@@ -1,16 +1,28 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.exception.ReservationException;
 
 import java.util.Objects;
 
+@Entity
+@NoArgsConstructor
+@Getter
 public class Member {
 
-    private final Long id;
-    private final String name;
-    private final MemberRole role;
-    private final String email;
-    private final String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String name;
+    private MemberRole role;
+    private String email;
+    private String password;
 
     public Member(final Long id, final String name, final MemberRole role, final String email, final String password) {
         if (name.length() < 2 || name.length() > 10) {
@@ -21,26 +33,6 @@ public class Member {
         this.role = role;
         this.email = email;
         this.password = password;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public MemberRole getRole() {
-        return role;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     @Override
