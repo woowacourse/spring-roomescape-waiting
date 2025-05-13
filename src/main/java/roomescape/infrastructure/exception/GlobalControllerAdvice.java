@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.infrastructure.exception;
 
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.ResponseEntity;
