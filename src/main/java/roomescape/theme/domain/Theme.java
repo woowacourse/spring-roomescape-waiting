@@ -52,6 +52,7 @@ public class Theme extends BaseEntity {
     private Theme(final ThemeName name,
                   final ThemeDescription description,
                   final ThemeThumbnail thumbnail) {
+        validate(name, description, thumbnail);
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;

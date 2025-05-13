@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.common.jdbc.JdbcUtils;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.domain.ReservationTimeRepository;
 
 import java.sql.PreparedStatement;
 import java.sql.Time;
@@ -20,7 +19,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcTemplateReservationTimeRepository implements ReservationTimeRepository {
+public class JdbcTemplateReservationTimeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -30,7 +29,6 @@ public class JdbcTemplateReservationTimeRepository implements ReservationTimeRep
                     resultSet.getTime("start_at").toLocalTime()
             );
 
-    @Override
     public boolean existsById(final ReservationTimeId id) {
         final String sql = """
                 select exists
@@ -41,7 +39,6 @@ public class JdbcTemplateReservationTimeRepository implements ReservationTimeRep
                 jdbcTemplate.queryForObject(sql, Boolean.class, id.getValue()));
     }
 
-    @Override
     public boolean existsByStartAt(final LocalTime startAt) {
         final String sql = """
                 select exists
@@ -52,13 +49,11 @@ public class JdbcTemplateReservationTimeRepository implements ReservationTimeRep
                 jdbcTemplate.queryForObject(sql, Boolean.class, startAt));
     }
 
-    @Override
     public Optional<ReservationTime> findById(final ReservationTimeId id) {
         final String sql = "select id, start_at from reservation_times where id = ?";
         return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationTimeMapper, id.getValue());
     }
 
-    @Override
     public List<ReservationTime> findAll() {
         final String sql = "select id, start_at from reservation_times";
 
@@ -66,7 +61,6 @@ public class JdbcTemplateReservationTimeRepository implements ReservationTimeRep
                 .toList();
     }
 
-    @Override
     public ReservationTime save(final ReservationTime reservationTime) {
         final String sql = "insert into reservation_times (start_at) values (?)";
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -83,7 +77,6 @@ public class JdbcTemplateReservationTimeRepository implements ReservationTimeRep
         return ReservationTime.withId(ReservationTimeId.from(generatedId), reservationTime.getStartAt());
     }
 
-    @Override
     public void deleteById(final ReservationTimeId id) {
         final String sql = "delete from reservation_times where id = ?";
         jdbcTemplate.update(sql, id.getValue());
