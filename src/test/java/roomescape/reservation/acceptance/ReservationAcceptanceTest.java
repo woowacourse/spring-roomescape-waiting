@@ -146,4 +146,24 @@ class ReservationAcceptanceTest {
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(0));
     }
+
+    @Test
+    @DisplayName("유저 예약 기록을 확인한다.")
+    void getReservationsByMember() {
+        // given
+        String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
+        var reservationRequest = new ReservationCreateRequest(
+                LocalDate.now().plusDays(1),
+                1L,
+                1L
+        );
+
+        TestHelper.postWithToken("/reservations", reservationRequest, token);
+
+        // when & then
+        TestHelper.getWithToken("/reservations/mine", token)
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("$", hasSize(1));
+    }
 }

@@ -189,4 +189,22 @@ class ReservationIntegrationTest {
         var reservations = reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
     }
+
+    @Test
+    @DisplayName("유저 예약 기록을 확인한다.")
+    void getReservationsByMember() {
+        // given
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
+        var date = LocalDate.now().plusDays(1);
+        var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
+        var reservationResponse = reservationService.createReservation(member.getId(), request);
+
+        // when
+        var response = reservationService.getReservationsByMember(member.getId());
+
+        // then
+        assertThat(response).hasSize(1);
+    }
 }
