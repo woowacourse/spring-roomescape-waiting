@@ -18,7 +18,7 @@ public record ReservationResponse(
         this(
                 reservation.getId(),
                 new MemberResponse(reservation.getMember()),
-                reservation.getDateTime().getDate(),
+                reservation.getDate(),
                 new ReservationTimeResponse(reservation.getTime()),
                 new ThemeResponse(reservation.getTheme())
         );

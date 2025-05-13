@@ -76,7 +76,7 @@ class ReservationServiceTest {
                     () -> assertThat(result.theme().description()).isEqualTo(THEME.getDescription()),
                     () -> assertThat(result.theme().thumbnail()).isEqualTo(THEME.getThumbnail()),
 
-                    () -> assertThat(savedReservation.getDateTime().getDate()).isEqualTo(REQUEST.date()),
+                    () -> assertThat(savedReservation.getDate()).isEqualTo(REQUEST.date()),
                     () -> assertThat(savedReservation.getTime().getStartAt()).isEqualTo(TIME.getStartAt()),
                     () -> assertThat(savedReservation.getTime().getId()).isEqualTo(REQUEST.timeId()),
 

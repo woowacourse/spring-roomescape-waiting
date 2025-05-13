@@ -1,14 +1,20 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
+@Embeddable
 public final class ThemeName {
 
-    private final String name;
+    private String name;
 
     public ThemeName(final String name) {
         validateName(name);
         this.name = name;
+    }
+
+    public ThemeName() {
+
     }
 
     private static void validateName(String name) {

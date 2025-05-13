@@ -1,14 +1,12 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.dto.CreateReservationWithMemberRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -89,12 +87,7 @@ public class ReservationService {
                 .orElseThrow(() -> new BadRequestException("테마가 존재하지 않습니다."));
         final ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new BadRequestException("예약 시간이 존재하지 않습니다."));
-        final ReservationDateTime dateTime = new ReservationDateTime(date, time);
-        if (dateTime.isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("지나간 날짜와 시간은 예약 불가합니다.");
-        }
-        if (reservationRepository.existsByDateAndTimeAndTheme(dateTime.getDate(), dateTime.getTimeId(),
-                theme.getId())) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, time.getId(), theme.getId())) {
             throw new BadRequestException("해당 시간에 이미 예약이 존재합니다.");
         }
         return Reservation.register(member, date, time, theme);

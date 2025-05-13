@@ -42,7 +42,7 @@ public class FakeReservationDao implements ReservationRepository {
     @Override
     public boolean existsByTimeId(final long timeId) {
         return reservations.stream()
-                .anyMatch(reservation -> reservation.getDateTime().getTimeId() == timeId);
+                .anyMatch(reservation -> reservation.getTime().getId() == timeId);
     }
 
     @Override
@@ -56,8 +56,8 @@ public class FakeReservationDao implements ReservationRepository {
         return reservations.stream()
                 .anyMatch(reservation ->
                         reservation.getTheme().getId() == themeId
-                                && reservation.getDateTime().getDate().isEqual(date)
-                                && reservation.getDateTime().getTimeId() == timeId);
+                                && reservation.getDate().isEqual(date)
+                                && reservation.getTime().getId() == timeId);
     }
 
     public Reservation findById(final long id) {

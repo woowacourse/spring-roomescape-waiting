@@ -1,14 +1,20 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
+@Embeddable
 public final class ThemeThumbnail {
 
-    private final String thumbnail;
+    private String thumbnail;
 
     public ThemeThumbnail(final String thumbnail) {
         validateUrl(thumbnail);
         this.thumbnail = thumbnail;
+    }
+
+    public ThemeThumbnail() {
+
     }
 
     private void validateUrl(final String thumbnail) {

@@ -1,14 +1,20 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
+@Embeddable
 public final class MemberName {
 
-    private final String name;
+    private String name;
 
     public MemberName(final String name) {
         validateName(name);
         this.name = name;
+    }
+
+    public MemberName() {
+
     }
 
     private void validateName(final String name) {
