@@ -1,9 +1,11 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
@@ -12,13 +14,15 @@ import roomescape.common.validate.Validator;
 import java.net.URI;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@FieldNameConstants(level = AccessLevel.PRIVATE)
+@FieldNameConstants
 @EqualsAndHashCode
 @ToString
+@Embeddable
 public class ThemeThumbnail {
 
-    private final URI value;
+    private URI value;
 
     public static ThemeThumbnail from(final String uri) {
         validate(uri);

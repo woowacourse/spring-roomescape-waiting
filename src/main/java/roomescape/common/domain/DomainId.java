@@ -1,23 +1,34 @@
 package roomescape.common.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.validate.Validator;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @FieldNameConstants
-public abstract class DomainId {
+@MappedSuperclass
+public abstract class DomainId implements Serializable {
 
-    private final Long value;
+    @Column(name = "id")
+    private Long value;
+    @Transient
     @Getter
-    private final boolean assigned;
+    private boolean assigned;
 
     protected DomainId(final Long value, final boolean assigned) {
         validate(value, assigned);
 
         this.value = value;
         this.assigned = assigned;
+    }
+
+    protected DomainId() {
+
     }
 
     private void validate(final Long value,
