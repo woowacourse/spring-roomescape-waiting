@@ -1,21 +1,47 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 import java.util.regex.Pattern;
 
+@Entity
 public class Theme {
 
     private static final String URL_REGEX = "^https://.*";
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
+    private String name;
+
+    @NotBlank
+    private String description;
+
+    @NotBlank
+    private String thumbnail;
+
+    public Theme() {
+    }
+
+    public Theme(String name, String description, String thumbnail) {
+        validateName(name);
+        validateDescription(description);
+        validateThumbnail(thumbnail);
+
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
+    }
 
     public Theme(Long id, String name, String description, String thumbnail) {
         validateName(name);
         validateDescription(description);
         validateThumbnail(thumbnail);
-
         this.id = id;
         this.name = name;
         this.description = description;

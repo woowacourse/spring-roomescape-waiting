@@ -1,31 +1,49 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.time.LocalDate;
 
+@Entity
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id;
-    private final ReservationName name;
+
+    @ManyToOne
+    private final Member member;
+
+    @Temporal(TemporalType.DATE)
     private final LocalDate date;
+
+    @ManyToOne
     private final ReservationTime time;
+
+    @ManyToOne
     private final Theme theme;
 
-    public Reservation(Long id, ReservationName name, LocalDate date, ReservationTime time, Theme theme) {
-        validateName(name);
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        validateMember(member);
         validateDate(date);
         validateReservationTime(time);
         validateTheme(theme);
 
         this.id = id;
-        this.name = name;
+        this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    private void validateName(ReservationName name) {
-        if (name == null) {
-            throw new IllegalArgumentException("[ERROR] 예약자의 이름은 반드시 입력해야 합니다.");
+    private void validateMember(Member member) {
+        if (member == null) {
+            throw new IllegalArgumentException("[ERROR] 회원 정보는 반드시 입력해야 합니다.");
         }
     }
 
@@ -51,8 +69,8 @@ public class Reservation {
         return id;
     }
 
-    public ReservationName getName() {
-        return name;
+    public Member getMember() {
+        return member;
     }
 
     public LocalDate getDate() {
