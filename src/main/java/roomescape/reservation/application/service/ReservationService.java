@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
@@ -47,14 +47,14 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+        final Reservation reservation = new Reservation(
                 member,
                 theme,
                 date,
                 reservationTime
         );
 
-        return new ReservationResponse(reservationRepository.insert(createReservationRequest));
+        return new ReservationResponse(reservationRepository.save(reservation));
     }
 
     @Transactional
@@ -67,14 +67,14 @@ public class ReservationService {
         Member member = memberRepository.findById(adminReservationRequest.getMemberId())
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
 
-        CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+        final Reservation reservation = new Reservation(
                 member,
                 theme,
                 date,
                 reservationTime
         );
 
-        return new ReservationResponse(reservationRepository.insert(createReservationRequest));
+        return new ReservationResponse(reservationRepository.save(reservation));
     }
 
     public List<ReservationResponse> getReservations(Long memberId, Long themeId, LocalDate dateFrom,
@@ -84,16 +84,19 @@ public class ReservationService {
             throw new IllegalArgumentException("dateFrom은 dateTo보다 이전이어야 합니다.");
         }
 
-        return reservationRepository.findReservationsBy(memberId, themeId, dateFrom, dateTo).stream()
+        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
+                .stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
     @Transactional
     public void deleteReservation(final Long id) {
-        if (reservationRepository.delete(id) == 0) {
-            throw new IllegalStateException("이미 삭제되어 있는 리소스입니다.");
-        }
+
+        reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
+
+        reservationRepository.deleteById(id);
     }
 
     private ReservationTime getReservationTime(Long timeId) {
@@ -107,11 +110,10 @@ public class ReservationService {
     }
 
     private void validateReservationDateTime(LocalDate reservationDate, ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate,
-                reservationTime.getStartAt());
+        final LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate, reservationTime.getStartAt());
 
         validateIsPast(reservationDateTime);
-        validateIsDuplicate(reservationDateTime);
+        validateIsDuplicate(reservationDate, reservationTime);
     }
 
     private static void validateIsPast(LocalDateTime reservationDateTime) {
@@ -120,8 +122,9 @@ public class ReservationService {
         }
     }
 
-    private void validateIsDuplicate(LocalDateTime reservationDateTime) {
-        if (reservationRepository.existsByDateTime(reservationDateTime)) {
+    private void validateIsDuplicate(final LocalDate reservationDate, final ReservationTime reservationTime) {
+        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservationDate,
+                reservationTime.getStartAt())) {
             throw new IllegalStateException("중복된 일시의 예약은 불가능합니다.");
         }
     }

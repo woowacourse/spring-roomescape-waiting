@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.jwt.TokenProvider;
 import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.SignUpRequest;
 import roomescape.member.presentation.dto.SignUpResponse;
@@ -48,11 +49,19 @@ public class MemberService {
         if (memberRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
-        return new SignUpResponse(memberRepository.insert(signUpRequest).getId());
+
+        Member member = new Member(
+                signUpRequest.getEmail(),
+                signUpRequest.getPassword(),
+                signUpRequest.getName(),
+                Role.USER
+        );
+
+        return new SignUpResponse(memberRepository.save(member).getId());
     }
 
     public List<MemberResponse> getMembers() {
-        return memberRepository.findAllMembers().stream()
+        return memberRepository.findAll().stream()
                 .map(MemberResponse::new)
                 .toList();
     }

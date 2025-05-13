@@ -1,10 +1,7 @@
 package roomescape.member.presentation.dto;
 
 public class SignUpResponse {
-    private Long id;
-
-    private SignUpResponse() {
-    }
+    private final Long id;
 
     public SignUpResponse(Long id) {
         this.id = id;

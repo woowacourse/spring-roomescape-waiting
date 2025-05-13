@@ -23,7 +23,7 @@ public class MemberDaoTest {
 
     @Test
     @DisplayName("유저 추가 확인 테스트")
-    void insertTest() {
+    void saveTest() {
         // given
         SignUpRequest signUpRequest = new SignUpRequest(
                 "test@test.com",
@@ -32,7 +32,7 @@ public class MemberDaoTest {
         );
 
         // when
-        memberDao.insert(signUpRequest);
+        memberDao.save(signUpRequest);
 
         // then
         assertThat(count()).isEqualTo(3);
@@ -52,8 +52,8 @@ public class MemberDaoTest {
 
     @Test
     @DisplayName("유저 전체 조회 테스트")
-    void findAllMembersTest() {
-        assertThat(memberDao.findAllMembers()).hasSize(2);
+    void findAllTest() {
+        assertThat(memberDao.findAll()).hasSize(2);
     }
 
     private int count() {

@@ -10,7 +10,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.global.jwt.AuthorizationExtractor;
 import roomescape.global.jwt.CookieAuthorizationExtractor;
 import roomescape.global.jwt.TokenProvider;
-import roomescape.member.domain.Member;
 
 @Component
 public class MemberArgumentResolver implements HandlerMethodArgumentResolver {

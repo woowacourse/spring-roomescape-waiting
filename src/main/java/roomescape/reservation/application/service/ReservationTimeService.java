@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.presentation.dto.ReservationTimeResponse;
@@ -27,11 +28,12 @@ public class ReservationTimeService {
     public ReservationTimeResponse createReservationTime(final ReservationTimeRequest reservationTimeRequest) {
         validateIsDuplicatedTime(reservationTimeRequest);
 
-        return new ReservationTimeResponse(reservationTimeRepository.insert(reservationTimeRequest.getStartAt()));
+        final ReservationTime reservationTime = new ReservationTime(reservationTimeRequest.getStartAt());
+        return new ReservationTimeResponse(reservationTimeRepository.save(reservationTime));
     }
 
     public List<ReservationTimeResponse> getReservationTimes() {
-        return reservationTimeRepository.findAllTimes().stream()
+        return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::new)
                 .toList();
     }
@@ -40,15 +42,16 @@ public class ReservationTimeService {
     public void deleteReservationTime(final Long id) {
         validateIsDuplicatedReservation(id);
 
-        if (reservationTimeRepository.delete(id) == 0) {
-            throw new IllegalStateException("이미 삭제되어 있는 리소스입니다.");
-        }
+        reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
+
+        reservationTimeRepository.deleteById(id);
     }
 
     public List<AvailableReservationTimeResponse> getReservationTimes(final LocalDate date, final Long themeId) {
-        Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findBookedTimeIds(date, themeId));
+        Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findTimeIdByDateAndThemeId(date, themeId));
 
-        return reservationTimeRepository.findAllTimes().stream()
+        return reservationTimeRepository.findAll().stream()
                 .map(reservationTime -> {
                     boolean alreadyBooked = bookedTimeIds.contains(reservationTime.getId());
                     return new AvailableReservationTimeResponse(reservationTime, alreadyBooked);
@@ -57,13 +60,13 @@ public class ReservationTimeService {
     }
 
     private void validateIsDuplicatedTime(ReservationTimeRequest reservationTimeRequest) {
-        if (reservationTimeRepository.isExists(reservationTimeRequest.getStartAt())) {
+        if (reservationTimeRepository.existsByStartAt(reservationTimeRequest.getStartAt())) {
             throw new IllegalStateException("중복된 시간은 추가할 수 없습니다.");
         }
     }
 
     private void validateIsDuplicatedReservation(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByReservationTimeId(id)) {
             throw new IllegalStateException("예약이 이미 존재하는 시간입니다.");
         }
     }

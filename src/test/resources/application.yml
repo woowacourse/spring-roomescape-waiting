@@ -10,6 +10,13 @@ spring:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:testData.sql
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
 
 security:
   jwt:

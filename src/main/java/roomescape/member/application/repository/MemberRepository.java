@@ -2,15 +2,13 @@ package roomescape.member.application.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
-import roomescape.member.presentation.dto.SignUpRequest;
 
-public interface MemberRepository {
-    Member insert(SignUpRequest signUpRequest);
-
+@Repository
+public interface MemberRepository extends CrudRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
-    Optional<Member> findById(Long id);
-
-    List<Member> findAllMembers();
+    List<Member> findAll();
 }

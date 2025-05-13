@@ -22,11 +22,16 @@ public class ThemeService {
 
     @Transactional
     public ThemeResponse createTheme(final ThemeRequest themeRequest) {
-        return new ThemeResponse(themeRepository.insert(themeRequest));
+        Theme theme = new Theme(
+                themeRequest.getName(),
+                themeRequest.getDescription(),
+                themeRequest.getThumbnail()
+        );
+        return new ThemeResponse(themeRepository.save(theme));
     }
 
     public List<ThemeResponse> getThemes() {
-        List<Theme> themes = themeRepository.findAllThemes();
+        List<Theme> themes = themeRepository.findAll();
         return themes.stream()
                 .map(ThemeResponse::new)
                 .toList();
@@ -36,9 +41,10 @@ public class ThemeService {
     public void deleteTheme(final Long id) {
         validateIsDuplicated(id);
 
-        if (themeRepository.delete(id) == 0) {
-            throw new IllegalStateException("이미 삭제되어 있는 리소스입니다.");
-        }
+        themeRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
+
+        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponse> getPopularThemes() {

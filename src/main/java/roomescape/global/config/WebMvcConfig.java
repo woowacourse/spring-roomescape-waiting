@@ -10,20 +10,21 @@ import roomescape.global.interceptor.LogInterceptor;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    private final HandlerMethodArgumentResolver handlerMethodArgumentResolver;
+    
+    private final HandlerMethodArgumentResolver memberArgumentResolver;
     private final AuthorizationInterceptor authorizationInterceptor;
     private final LogInterceptor logInterceptor;
 
-    public WebMvcConfig(HandlerMethodArgumentResolver handlerMethodArgumentResolver,
+    public WebMvcConfig(HandlerMethodArgumentResolver memberArgumentResolver,
                         AuthorizationInterceptor authorizationInterceptor, LogInterceptor logInterceptor) {
-        this.handlerMethodArgumentResolver = handlerMethodArgumentResolver;
+        this.memberArgumentResolver = memberArgumentResolver;
         this.authorizationInterceptor = authorizationInterceptor;
         this.logInterceptor = logInterceptor;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(handlerMethodArgumentResolver);
+        resolvers.add(memberArgumentResolver);
     }
 
     @Override
@@ -38,5 +39,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns("/h2-console", "/js/**", "/image/**", "/css/**");
     }
-
 }
