@@ -1,9 +1,16 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import roomescape.domain.BusinessRuleViolationException;
 
+@Entity
 public record ReservationTime(
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         Long id,
         LocalTime startAt
 ) {
