@@ -20,7 +20,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.JpaThemeRepository;
 
 @DataJpaTest
 class ThemeCustomRepositoryImplTest {
@@ -132,7 +131,7 @@ class ThemeCustomRepositoryImplTest {
         ReservationPeriod period = new ReservationPeriod(LocalDate.of(2000, 11, 5), 3, 1);
         em.flush();
         // when
-        List<Theme> popularThemes = repository.findPopularThemes(period.findStartDate(), period.findEndDate(), 3);
+        List<Theme> popularThemes = repository.findPopularThemes(period, 3);
         List<String> names = popularThemes.stream()
                 .map(Theme::getName)
                 .toList();
@@ -179,7 +178,7 @@ class ThemeCustomRepositoryImplTest {
         em.flush();
         ReservationPeriod period = new ReservationPeriod(LocalDate.of(2000, 11, 5), 2, 1);
         // when
-        List<Theme> popularThemes = repository.findPopularThemes(period.findStartDate(),period.findEndDate(), 3);
+        List<Theme> popularThemes = repository.findPopularThemes(period, 3);
         List<String> names = popularThemes.stream()
                 .map(Theme::getName)
                 .toList();
@@ -227,7 +226,7 @@ class ThemeCustomRepositoryImplTest {
 
         ReservationPeriod period = new ReservationPeriod(LocalDate.of(2000, 11, 5), 2, 1);
         // when
-        List<Theme> popularThemes = repository.findPopularThemes(period.findStartDate(),period.findEndDate(), 1);
+        List<Theme> popularThemes = repository.findPopularThemes(period, 1);
         List<String> names = popularThemes.stream()
                 .map(Theme::getName)
                 .toList();
