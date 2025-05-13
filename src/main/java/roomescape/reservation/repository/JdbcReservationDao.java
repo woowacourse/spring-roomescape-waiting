@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -31,12 +30,10 @@ public class JdbcReservationDao implements ReservationRepository {
                             resultSet.getString("member_password"),
                             resultSet.getString("member_role")
                     ),
-                    new ReservationDateTime(
-                            resultSet.getDate("date").toLocalDate(),
-                            new ReservationTime(
-                                    resultSet.getLong("time_id"),
-                                    resultSet.getTime("time_value").toLocalTime()
-                            )
+                    resultSet.getDate("date").toLocalDate(),
+                    new ReservationTime(
+                            resultSet.getLong("time_id"),
+                            resultSet.getTime("time_value").toLocalTime()
                     ),
                     new Theme(
                             resultSet.getLong("theme_id"),
@@ -56,9 +53,9 @@ public class JdbcReservationDao implements ReservationRepository {
     @Override
     public Reservation save(final Reservation reservation) {
         final Map<String, Object> parameters = Map.of(
-                "date", Date.valueOf(reservation.getDateTime().getDate()),
+                "date", Date.valueOf(reservation.getDate()),
                 "member_id", reservation.getMember().getId(),
-                "time_id", reservation.getDateTime().getTimeId(),
+                "time_id", reservation.getTime().getId(),
                 "theme_id", reservation.getTheme().getId()
         );
         final long id = reservationInserter.executeAndReturnKey(parameters).longValue();
