@@ -1,19 +1,9 @@
 package roomescape.auth.dto.request;
 
-import roomescape.global.exception.InvalidInputException;
+import jakarta.validation.constraints.NotNull;
 
-public record LoginRequest(String email, String password) {
+public record LoginRequest(
+        @NotNull(message = "이메일이 입력되지 않았다.") String email,
+        @NotNull(message = "패스워드가 입력되지 않았다.") String password) {
 
-    public LoginRequest {
-        validateNull(email, password);
-    }
-
-    private void validateNull(String email, String password) {
-        if (email == null) {
-            throw new InvalidInputException("이메일이 입력되지 않았다.");
-        }
-        if (password == null) {
-            throw new InvalidInputException("패스워드가 입력되지 않았다.");
-        }
-    }
 }

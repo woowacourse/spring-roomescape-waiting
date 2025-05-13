@@ -1,5 +1,6 @@
 package roomescape.reservation.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +28,7 @@ public class AdminReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    private ReservationGetResponse createAdminReservation(@RequestBody AdminReservationCreateRequest requestBody) {
+    private ReservationGetResponse createAdminReservation(@RequestBody @Valid AdminReservationCreateRequest requestBody) {
         return ReservationGetResponse.from(reservationService.createReservation(requestBody));
     }
 

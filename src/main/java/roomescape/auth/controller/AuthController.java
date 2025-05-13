@@ -1,8 +1,8 @@
 package roomescape.auth.controller;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping
-    public void login(@RequestBody LoginRequest requestBody, HttpServletResponse response) {
+    public void login(@RequestBody @Valid LoginRequest requestBody, HttpServletResponse response) {
         String accessToken = authService.login(requestBody);
         Cookie cookie = new Cookie(AuthConstant.COOKIE_KEY_OF_ACCESS_TOKEN, accessToken);
         cookie.setHttpOnly(true);
@@ -36,7 +36,7 @@ public class AuthController {
 
     @Login
     @GetMapping("/check")
-    public AuthenticationCheckResponse authenticationCheck(Member member, HttpServletRequest request) {
+    public AuthenticationCheckResponse authenticationCheck(Member member) {
         return AuthenticationCheckResponse.from(member);
     }
 }

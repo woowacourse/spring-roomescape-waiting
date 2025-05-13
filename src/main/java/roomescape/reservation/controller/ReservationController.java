@@ -1,5 +1,6 @@
 package roomescape.reservation.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,7 @@ public class ReservationController {
     @Login
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationGetResponse createReservation(@RequestBody ReservationCreateRequest requestBody, Member member) {
+    public ReservationGetResponse createReservation(@RequestBody @Valid ReservationCreateRequest requestBody, Member member) {
         return ReservationGetResponse.from(reservationService.createReservationAfterNow(requestBody, member));
     }
 
