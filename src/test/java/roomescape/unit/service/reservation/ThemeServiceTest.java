@@ -11,7 +11,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.AddReservationTimeDto;
 import roomescape.dto.reservation.AddThemeDto;
-import roomescape.repository.reservation.ThemeRepository;
+import roomescape.repository.theme.ThemeRepository;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.ReservationTimeService;
 import roomescape.service.reservation.ThemeService;

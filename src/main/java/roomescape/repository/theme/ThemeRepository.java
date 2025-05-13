@@ -1,4 +1,4 @@
-package roomescape.repository.reservation;
+package roomescape.repository.theme;
 
 import java.util.List;
 import java.util.Optional;

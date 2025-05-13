@@ -18,8 +18,8 @@ import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.exception.reservation.InvalidReservationTimeException;
 import roomescape.exception.reservation.InvalidThemeException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ReservationTimeRepository;
-import roomescape.repository.reservation.ThemeRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
+import roomescape.repository.theme.ThemeRepository;
 
 @Service
 public class ReservationService {

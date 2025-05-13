@@ -1,4 +1,4 @@
-package roomescape.repository.reservation;
+package roomescape.repository.reservation.legacy;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.repository.reservation.ReservationRepository;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {

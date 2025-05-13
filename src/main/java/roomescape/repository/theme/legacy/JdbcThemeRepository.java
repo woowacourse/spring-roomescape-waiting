@@ -1,4 +1,4 @@
-package roomescape.repository.reservation;
+package roomescape.repository.theme.legacy;
 
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Theme;
+import roomescape.repository.theme.ThemeRepository;
 
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {

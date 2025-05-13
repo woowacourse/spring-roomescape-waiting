@@ -15,7 +15,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.dto.reservation.AddReservationTimeDto;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ReservationTimeRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.reservation.ReservationTimeService;
 import roomescape.unit.config.ServiceFixture;
 

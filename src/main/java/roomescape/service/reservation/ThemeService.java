@@ -6,7 +6,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.dto.reservation.AddThemeDto;
 import roomescape.exception.reservation.InvalidThemeException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ThemeRepository;
+import roomescape.repository.theme.ThemeRepository;
 
 @Service
 public class ThemeService {

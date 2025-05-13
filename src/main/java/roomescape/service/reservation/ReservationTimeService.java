@@ -7,7 +7,7 @@ import roomescape.dto.reservation.AddReservationTimeDto;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.exception.reservation.InvalidReservationTimeException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ReservationTimeRepository;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {

@@ -1,4 +1,4 @@
-package roomescape.repository.reservationmember;
+package roomescape.repository.reservationmember.legacy;
 
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationmember.ReservationMemberIds;
+import roomescape.repository.reservationmember.ReservationMemberRepository;
 
 @Repository
 public class JdbcReservationMemberRepository implements ReservationMemberRepository {

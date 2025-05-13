@@ -1,4 +1,4 @@
-package roomescape.repository.reservation;
+package roomescape.repository.theme;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
