@@ -66,6 +66,14 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResult> findMemberReservationsById(Long memberId) {
+        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
+
+        return reservations.stream()
+                .map(ReservationResult::from)
+                .toList();
+    }
+
     private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
             throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");

@@ -23,20 +23,24 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+
     public Reservation() {
 
     }
 
-    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public static Reservation createNew(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, member, date, time, theme);
+        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
     }
 
     public Long getId() {
@@ -57,6 +61,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override

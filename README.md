@@ -5,7 +5,8 @@
   - [x] 연관관계 매핑
     - [x] Reservation이 Member나 Theme, ReservationTime 객체에 의존하도록
 
-
+- [x] 내 예약 목록 조회 API 추가
+- 
 
 
 ---
