@@ -1,15 +1,9 @@
 package roomescape.repository.theme;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
 
-public interface ThemeRepository {
-    Theme add(Theme theme);
-
-    List<Theme> findAll();
-
-    int deleteById(Long id);
-
-    Optional<Theme> findById(Long id);
+@Repository
+public interface ThemeRepository extends JpaRepository<Theme,Long> {
 }
