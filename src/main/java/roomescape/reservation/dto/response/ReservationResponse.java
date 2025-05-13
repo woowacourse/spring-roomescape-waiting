@@ -9,12 +9,14 @@ import roomescape.theme.entity.Theme;
 public class ReservationResponse {
 
     public record ReservationCreateResponse(
+            Long id,
             LocalDate date,
             ReservationTime time,
             Theme theme
     ) {
         public static ReservationCreateResponse from(Reservation reservation, Theme theme) {
             return new ReservationCreateResponse(
+                    reservation.getId(),
                     reservation.getDate(),
                     reservation.getTime(),
                     theme

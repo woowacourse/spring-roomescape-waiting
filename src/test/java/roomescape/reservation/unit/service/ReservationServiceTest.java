@@ -8,13 +8,13 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.global.error.exception.NotFoundException;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.unit.repository.FakeMemberRepository;
 import roomescape.reservation.dto.request.ReservationRequest.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationRequest.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationRequest.ReservationReadFilteredRequest;
@@ -22,26 +22,28 @@ import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.unit.repository.FakeReservationRepository;
-import roomescape.reservation.unit.repository.FakeReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.unit.repository.FakeThemeRepository;
 
+@DataJpaTest
 class ReservationServiceTest {
 
     private ReservationService reservationService;
+
+    @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
     private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
-        reservationRepository = new FakeReservationRepository();
-        reservationTimeRepository = new FakeReservationTimeRepository();
-        themeRepository = new FakeThemeRepository();
-        memberRepository = new FakeMemberRepository();
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
@@ -54,9 +56,9 @@ class ReservationServiceTest {
     @DisplayName("예약을 생성한다.")
     void createReservation() {
         // given
-        var member = memberRepository.save(new Member(1L, "테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var request = new ReservationCreateRequest(
                 LocalDate.now().plusDays(1),
                 time.getId(),
@@ -76,9 +78,9 @@ class ReservationServiceTest {
     @DisplayName("관리자가 예약을 생성한다.")
     void createReservationByAdmin() {
         // given
-        var member = memberRepository.save(new Member(1L, "테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var request = new ReservationAdminCreateRequest(
                 LocalDate.now().plusDays(1),
                 theme.getId(),
@@ -99,9 +101,9 @@ class ReservationServiceTest {
     @DisplayName("과거 날짜로 예약을 생성하면 예외가 발생한다.")
     void createReservationWithPastDate() {
         // given
-        var member = memberRepository.save(new Member(1L, "테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var request = new ReservationCreateRequest(
                 LocalDate.now().minusDays(1),
                 time.getId(),
@@ -118,9 +120,9 @@ class ReservationServiceTest {
     @DisplayName("이미 예약된 시간에 예약을 생성하면 예외가 발생한다.")
     void createReservationWithDuplicateTime() {
         // given
-        var member = memberRepository.save(new Member(1L, "테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
@@ -135,9 +137,9 @@ class ReservationServiceTest {
     @DisplayName("모든 예약을 조회한다.")
     void getAllReservations() {
         // given
-        var member = memberRepository.save(new Member(1L, "테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
@@ -157,9 +159,9 @@ class ReservationServiceTest {
     @DisplayName("필터링된 예약을 조회한다.")
     void getFilteredReservations() {
         // given
-        var member = memberRepository.save(new Member(1L, "테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
@@ -186,26 +188,17 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제한다.")
     void deleteReservation() {
         // given
-        var member = memberRepository.save(new Member(1L, "테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
-        reservationService.createReservation(member.getId(), request);
+        var response = reservationService.createReservation(member.getId(), request);
 
         // when
-        reservationService.deleteReservation(1L);
+        reservationService.deleteReservation(response.id());
 
         // then
         assertThat(reservationService.getAllReservations()).isEmpty();
     }
-
-    @Test
-    @DisplayName("존재하지 않는 예약을 삭제하면 예외가 발생한다.")
-    void deleteNonExistentReservation() {
-        // when & then
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 id 입니다.");
-    }
-} 
+}

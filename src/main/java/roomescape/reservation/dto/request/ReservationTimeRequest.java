@@ -10,7 +10,7 @@ public class ReservationTimeRequest {
             @NotNull LocalTime startAt
     ) {
         public ReservationTime toEntity() {
-            return new ReservationTime(0L, startAt);
+            return new ReservationTime(null, startAt);
         }
     }
 }

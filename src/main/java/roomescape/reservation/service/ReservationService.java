@@ -40,7 +40,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
 
-        Reservation newReservation = new Reservation(0L, request.date(), time, request.themeId(), member.getId());
+        Reservation newReservation = new Reservation(null, request.date(), time, theme, member);
         validateDateTime(newReservation);
         validateDuplicated(newReservation);
 
@@ -48,6 +48,7 @@ public class ReservationService {
         return ReservationCreateResponse.from(saved, theme);
     }
 
+    // TODO: 중복 코드 제거 리팩토링
     public ReservationAdminCreateResponse createReservationByAdmin(ReservationAdminCreateRequest request) {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
@@ -56,7 +57,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
 
-        Reservation newReservation = new Reservation(0L, request.date(), time, theme.getId(), member.getId());
+        Reservation newReservation = new Reservation(null, request.date(), time, theme, member);
         validateDateTime(newReservation);
         validateDuplicated(newReservation);
 
@@ -67,9 +68,9 @@ public class ReservationService {
     public List<ReservationReadResponse> getAllReservations() {
         return reservationRepository.findAll().stream()
                 .map(reservation -> {
-                    Theme theme = themeRepository.findById(reservation.getThemeId())
+                    Theme theme = themeRepository.findById(reservation.getTheme().getId())
                             .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
-                    Member member = memberRepository.findById(reservation.getMemberId())
+                    Member member = memberRepository.findById(reservation.getMember().getId())
                             .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
                     return ReservationReadResponse.from(reservation, member, theme);
                 })
@@ -85,7 +86,7 @@ public class ReservationService {
 
         return reservations.stream()
                 .map(reservation -> {
-                    Theme theme = themeRepository.findById(reservation.getThemeId())
+                    Theme theme = themeRepository.findById(reservation.getTheme().getId())
                             .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
                     return ReservationReadFilteredResponse.from(reservation, member, theme);
                 })
@@ -93,10 +94,7 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        boolean deleted = reservationRepository.deleteById(id);
-        if (!deleted) {
-            throw new NotFoundException("존재하지 않는 id 입니다.");
-        }
+        reservationRepository.deleteById(id);
     }
 
     private void validateDateTime(Reservation reservation) {

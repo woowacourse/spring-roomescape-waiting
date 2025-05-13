@@ -30,7 +30,7 @@ class ThemeAcceptanceTest {
 
     @BeforeEach
     void setUp() {
-        Member member = new Member(0L, DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
+        Member member = new Member(null, DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
         memberRepository.save(member);
     }
 
@@ -170,18 +170,5 @@ class ThemeAcceptanceTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(0));
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 테마를 삭제하면 예외가 발생한다.")
-    void deleteNonExistentTheme() {
-        // given
-        String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
-
-        // when & then
-        TestHelper.deleteWithToken("/themes/1", token)
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("존재하지 않는 테마입니다."));
     }
 }

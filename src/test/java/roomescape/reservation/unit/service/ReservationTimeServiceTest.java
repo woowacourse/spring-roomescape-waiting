@@ -8,28 +8,45 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.global.error.exception.NotFoundException;
+import roomescape.member.entity.Member;
+import roomescape.member.entity.RoleType;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationTimeRequest.ReservationTimeCreateRequest;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationTimeService;
-import roomescape.reservation.unit.repository.FakeReservationRepository;
-import roomescape.reservation.unit.repository.FakeReservationTimeRepository;
+import roomescape.theme.entity.Theme;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.service.ThemeService;
 
+@DataJpaTest
 class ReservationTimeServiceTest {
 
     private ReservationTimeService reservationTimeService;
+
+    private ThemeService themeService;
+
+    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
-        reservationTimeRepository = new FakeReservationTimeRepository();
-        reservationRepository = new FakeReservationRepository();
+        themeService = new ThemeService(themeRepository);
         reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
     }
 
@@ -44,8 +61,7 @@ class ReservationTimeServiceTest {
         var response = reservationTimeService.createTime(request);
 
         // then
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.startAt()).isEqualTo(startAt.toString());
+        assertThat(response.startAt()).isEqualTo(startAt);
     }
 
     @Test
@@ -88,9 +104,7 @@ class ReservationTimeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        var response = responses.get(0);
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.startAt()).isEqualTo(startAt.toString());
+        assertThat(responses.getFirst().startAt()).isEqualTo(startAt.toString());
     }
 
     @Test
@@ -109,7 +123,6 @@ class ReservationTimeServiceTest {
         // then
         assertThat(responses).hasSize(1);
         var response = responses.getFirst();
-        assertThat(response.id()).isEqualTo(1L);
         assertThat(response.startAt()).isEqualTo(startAt.toString());
         assertThat(response.alreadyBooked()).isFalse();
     }
@@ -131,24 +144,17 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 시간을 삭제하면 예외가 발생한다.")
-    void deleteNonExistentTime() {
-        // when & then
-        assertThatThrownBy(() -> reservationTimeService.deleteTime(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 id 입니다.");
-    }
-
-    @Test
     @DisplayName("예약이 있는 시간을 삭제하면 예외가 발생한다.")
     void deleteTimeWithReservation() {
         // given
         var startAt = LocalTime.of(10, 0);
-        var request = new ReservationTimeCreateRequest(startAt);
-        var response = reservationTimeService.createTime(request);
+        var timeRequest = new ReservationTimeCreateRequest(startAt);
+        var response = reservationTimeService.createTime(timeRequest);
+        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "1234", RoleType.USER));
 
         var time = new ReservationTime(response.id(), startAt);
-        var reservation = new Reservation(1L, LocalDate.now(), time, 1L, 1L);
+        var reservation = new Reservation(null, LocalDate.now(), time, theme, member);
         reservationRepository.save(reservation);
 
         // when & then
@@ -156,4 +162,4 @@ class ReservationTimeServiceTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("해당 시간에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
     }
-} 
+}

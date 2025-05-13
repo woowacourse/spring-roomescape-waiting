@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.global.error.exception.NotFoundException;
 import roomescape.reservation.dto.request.ReservationTimeRequest.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.response.ReservationTimeResponse.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse.ReservationTimeCreateResponse;
@@ -38,18 +37,25 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
-        return reservationTimeRepository.findAvailableTimes(date, themeId);
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> reservedTimes = reservationTimeRepository.findAllReservedTimeByDateAndThemeId(date,
+                themeId);
+        return reservationTimes.stream()
+                .map(reservationTime -> new AvailableReservationTimeResponse(
+                        reservationTime.getId(),
+                        reservationTime.getStartAt(),
+                        reservedTimes.contains(reservationTime)
+                ))
+                .toList();
     }
 
     public void deleteTime(Long id) {
+        // TODO: exist 메서드로 변경
         List<Reservation> reservations = reservationRepository.findAllByTimeId(id);
         if (!reservations.isEmpty()) {
             throw new BadRequestException("해당 시간에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
         }
-        boolean deleted = reservationTimeRepository.deleteById(id);
-        if (!deleted) {
-            throw new NotFoundException("존재하지 않는 id 입니다.");
-        }
+        reservationTimeRepository.deleteById(id);
     }
 
     private void validateOperatingTime(ReservationTime entity) {

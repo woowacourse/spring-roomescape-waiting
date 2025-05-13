@@ -1,6 +1,5 @@
 package roomescape.member.acceptance;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
@@ -31,7 +30,7 @@ class MemberAcceptanceTest {
 
     @BeforeEach
     void setUp() {
-        Member member = new Member(0L, DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
+        Member member = new Member(null, DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
         memberRepository.save(member);
     }
 
@@ -79,18 +78,5 @@ class MemberAcceptanceTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(0));
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 회원을 삭제하면 예외가 발생한다.")
-    void deleteNonExistentMember() {
-        // given
-        String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
-
-        // when & then
-        TestHelper.deleteWithToken("/members/999", token)
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("존재하지 않는 id 입니다."));
     }
 }

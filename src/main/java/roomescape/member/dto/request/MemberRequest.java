@@ -12,7 +12,7 @@ public class MemberRequest {
             @NotNull String password
     ) {
         public Member toEntity() {
-            return new Member(0L, name, email, password, RoleType.USER);
+            return new Member(null, name, email, password, RoleType.USER);
         }
     }
 }

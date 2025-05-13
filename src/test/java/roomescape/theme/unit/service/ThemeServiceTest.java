@@ -6,21 +6,24 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.global.error.exception.NotFoundException;
 import roomescape.theme.dto.request.ThemeRequest.ThemeCreateRequest;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.ThemeService;
-import roomescape.theme.unit.repository.FakeThemeRepository;
 
+// TODO: Fake 모키토 추가해야할까?
+@DataJpaTest
 class ThemeServiceTest {
 
     private ThemeService themeService;
+
+    @Autowired
     private ThemeRepository themeRepository;
 
     @BeforeEach
     void setUp() {
-        themeRepository = new FakeThemeRepository();
         themeService = new ThemeService(themeRepository);
     }
 
@@ -85,15 +88,6 @@ class ThemeServiceTest {
 
         // then
         assertThat(themeService.getAllThemes()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 테마를 삭제하면 예외가 발생한다.")
-    void deleteNonExistentTheme() {
-        // when & then
-        assertThatThrownBy(() -> themeService.deleteTheme(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 테마입니다.");
     }
 
     @Test

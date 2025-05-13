@@ -1,7 +1,6 @@
 package roomescape.member.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.global.error.exception.NotFoundException;
 import roomescape.member.dto.request.MemberRequest.MemberCreateRequest;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
@@ -47,8 +45,8 @@ class MemberIntegrationTest {
     @DisplayName("모든 회원을 조회한다.")
     void getAllMembers() {
         // given
-        var member1 = new Member(0L, "미소", "miso@email.com", "password", RoleType.USER);
-        var member2 = new Member(0L, "브라운", "brown@email.com", "password", RoleType.USER);
+        var member1 = new Member(null, "미소", "miso@email.com", "password", RoleType.USER);
+        var member2 = new Member(null, "브라운", "brown@email.com", "password", RoleType.USER);
         memberRepository.save(member1);
         memberRepository.save(member2);
 
@@ -65,7 +63,7 @@ class MemberIntegrationTest {
     @DisplayName("회원을 삭제한다.")
     void deleteMember() {
         // given
-        var member = new Member(0L, "미소", "miso@email.com", "password", RoleType.USER);
+        var member = new Member(null, "미소", "miso@email.com", "password", RoleType.USER);
         var savedMember = memberRepository.save(member);
 
         // when
@@ -74,14 +72,5 @@ class MemberIntegrationTest {
         // then
         var members = memberService.getAllMembers();
         assertThat(members).isEmpty();
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 회원을 삭제하면 예외가 발생한다.")
-    void deleteNonExistentMember() {
-        // when & then
-        assertThatThrownBy(() -> memberService.deleteMember(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 id 입니다.");
     }
 } 

@@ -11,7 +11,7 @@ public class ThemeRequest {
             @NotNull String thumbnail
     ) {
         public Theme toEntity() {
-            return new Theme(0L, name, description, thumbnail);
+            return new Theme(null, name, description, thumbnail);
         }
     }
 }

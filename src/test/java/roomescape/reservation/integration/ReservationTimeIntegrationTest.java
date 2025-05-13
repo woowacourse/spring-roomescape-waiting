@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.global.error.exception.NotFoundException;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
@@ -105,11 +104,11 @@ class ReservationTimeIntegrationTest {
     @DisplayName("특정 날짜와 테마에 대한 예약 가능한 시간을 조회한다.")
     void getAvailableTimes() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.of(2024, 3, 20);
-        var reservation = new Reservation(0L, date, time, theme.getId(), member.getId());
+        var reservation = new Reservation(null, date, time, theme, member);
         reservationRepository.save(reservation);
 
         // when
@@ -139,23 +138,14 @@ class ReservationTimeIntegrationTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 시간을 삭제하면 예외가 발생한다.")
-    void deleteNonExistentTime() {
-        // when & then
-        assertThatThrownBy(() -> reservationTimeService.deleteTime(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 id 입니다.");
-    }
-
-    @Test
     @DisplayName("예약이 있는 시간을 삭제하면 예외가 발생한다.")
     void deleteTimeWithReservation() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.of(2024, 3, 20);
-        var reservation = new Reservation(0L, date, time, theme.getId(), member.getId());
+        var reservation = new Reservation(null, date, time, theme, member);
         reservationRepository.save(reservation);
 
         // when & then

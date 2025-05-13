@@ -1,26 +1,27 @@
 package roomescape.member.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.global.error.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.dto.request.MemberRequest.MemberCreateRequest;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
-import roomescape.member.unit.repository.FakeMemberRepository;
 
+@DataJpaTest
 class MemberServiceTest {
 
     private MemberService memberService;
+
+    @Autowired
     private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
-        memberRepository = new FakeMemberRepository();
         memberService = new MemberService(memberRepository);
     }
 
@@ -72,14 +73,5 @@ class MemberServiceTest {
         // then
         var members = memberService.getAllMembers();
         assertThat(members).isEmpty();
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 회원을 삭제하면 예외가 발생한다.")
-    void deleteNonExistentMember() {
-        // when & then
-        assertThatThrownBy(() -> memberService.deleteMember(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 id 입니다.");
     }
 }

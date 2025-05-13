@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.global.error.exception.NotFoundException;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
@@ -50,9 +49,9 @@ class ReservationIntegrationTest {
     @DisplayName("예약을 생성한다.")
     void createReservation() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
 
@@ -69,9 +68,9 @@ class ReservationIntegrationTest {
     @DisplayName("관리자가 예약을 생성한다.")
     void createReservationByAdmin() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationAdminCreateRequest(date, theme.getId(), time.getId(), member.getId());
 
@@ -88,9 +87,9 @@ class ReservationIntegrationTest {
     @DisplayName("과거 날짜로 예약을 생성하면 예외가 발생한다.")
     void createReservationWithPastDate() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.now().minusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
 
@@ -104,9 +103,9 @@ class ReservationIntegrationTest {
     @DisplayName("중복된 시간에 예약을 생성하면 예외가 발생한다.")
     void createReservationWithDuplicateTime() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
@@ -121,9 +120,9 @@ class ReservationIntegrationTest {
     @DisplayName("모든 예약을 조회한다.")
     void getAllReservations() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
@@ -145,9 +144,9 @@ class ReservationIntegrationTest {
     @DisplayName("필터링된 예약을 조회한다.")
     void getFilteredReservations() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
@@ -176,27 +175,18 @@ class ReservationIntegrationTest {
     @DisplayName("예약을 삭제한다.")
     void deleteReservation() {
         // given
-        var member = memberRepository.save(new Member(0L, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(1L, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
-        reservationService.createReservation(member.getId(), request);
+        var response = reservationService.createReservation(member.getId(), request);
 
         // when
-        reservationService.deleteReservation(1L);
+        reservationService.deleteReservation(response.id());
 
         // then
         var reservations = reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 예약을 삭제하면 예외가 발생한다.")
-    void deleteNonExistentReservation() {
-        // when & then
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 id 입니다.");
     }
 }
