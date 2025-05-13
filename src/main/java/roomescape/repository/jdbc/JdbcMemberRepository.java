@@ -8,12 +8,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.entity.Member;
 import roomescape.entity.Role;
 import roomescape.repository.MemberRepository;
 
-@Repository
 public class JdbcMemberRepository implements MemberRepository {
 
     private static final String DEFAULT_SELECT_SQL = "select id, name, email, password, role from member";
@@ -34,7 +32,7 @@ public class JdbcMemberRepository implements MemberRepository {
 
 
     @Override
-    public Member add(Member member) {
+    public Member save(Member member) {
         String sql = "insert into member (name, email, password, role) values(?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 

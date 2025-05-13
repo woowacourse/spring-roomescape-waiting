@@ -8,11 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.entity.Theme;
 import roomescape.repository.ThemeRepository;
 
-@Repository
 public class JdbcThemeRepository implements ThemeRepository {
 
     private static final String DEFAULT_SELECT_SQL = "select id, name, description, thumbnail from theme";
@@ -33,7 +31,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Theme add(Theme theme) {
+    public Theme save(Theme theme) {
         String sql = "insert into theme (name, description, thumbnail) values(?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
