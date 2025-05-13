@@ -1,16 +1,21 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
+@Embeddable
 public final class ThemeName {
 
     private static final int MAX_LENGTH = 20;
 
-    private final String name;
+    private String name;
 
     public ThemeName(final String name) {
         validateName(name);
         this.name = name;
+    }
+
+    public ThemeName() {
     }
 
     private void validateName(String name) {

@@ -1,17 +1,29 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
 public final class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
 
     public ReservationTime(final Long id, final LocalTime startAt) {
         validateStartAt(startAt);
         this.id = id;
         this.startAt = startAt;
+    }
+
+    public ReservationTime() {
     }
 
     private void validateStartAt(final LocalTime startAt) {

@@ -1,13 +1,20 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
+@Entity
 public final class Theme {
 
-    private final Long id;
-    private final ThemeName name;
-    private final ThemeDescription description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private ThemeName name;
+    private ThemeDescription description;
+    private String thumbnail;
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateThumbnail(thumbnail);
@@ -17,9 +24,12 @@ public final class Theme {
         this.thumbnail = thumbnail;
     }
 
+    public Theme() {
+    }
+
     private void validateThumbnail(final String thumbnail) {
         if (thumbnail == null) {
-            throw new IllegalArgumentException("테마를 입력해야 합니다.");
+            throw new IllegalArgumentException("썸네일을 입력해야 합니다.");
         }
     }
 

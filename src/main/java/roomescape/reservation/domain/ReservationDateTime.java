@@ -1,19 +1,27 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public final class ReservationDateTime {
+@Embeddable
+public class ReservationDateTime {
 
-    private final LocalDate date;
-    private final ReservationTime time;
+    private LocalDate date;
+    @ManyToOne
+    private ReservationTime time;
 
     public ReservationDateTime(final LocalDate date, final ReservationTime time) {
         validateDate(date);
         validateTime(time);
         this.date = date;
         this.time = time;
+    }
+
+    public ReservationDateTime() {
     }
 
     private void validateDate(final LocalDate date) {
