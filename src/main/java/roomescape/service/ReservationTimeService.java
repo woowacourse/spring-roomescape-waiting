@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
@@ -28,11 +27,9 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse createReservationTime(final ReservationTimeCreateRequest requestDto) {
-        ReservationTime requestTime = requestDto.createWithoutId();
         try {
-            ReservationTime savedTime = reservationTimeRepository.save(requestTime)
-                    .orElseThrow(() -> new IllegalStateException("[ERROR] 예약시간을 저장할 수 없습니다. 관리자에게 문의해 주세요."));
-
+            ReservationTime requestTime = requestDto.createWithoutId();
+            ReservationTime savedTime = reservationTimeRepository.save(requestTime);
             return ReservationTimeResponse.from(savedTime);
         } catch (DuplicateKeyException e) {
             throw new DuplicateContentException("[ERROR] 이미 동일한 예약 시간이 존재합니다.");
@@ -48,7 +45,7 @@ public class ReservationTimeService {
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(LocalDate date, Long themeId) {
         List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> reservationsOnDate = reservationRepository.findByDateAndTheme(date, themeId);
+        List<Reservation> reservationsOnDate = reservationRepository.findByDateAndThemeId(date, themeId);
 
         List<ReservationTime> reservedTimes = reservationsOnDate.stream()
                 .map(Reservation::getTime)
@@ -64,14 +61,12 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTimeById(final Long id) {
-        try {
-            int deletedReservationCount = reservationTimeRepository.deleteById(id);
-
-            if (deletedReservationCount == 0) {
-                throw new NotFoundException("[ERROR] 등록된 예약 시간 번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
-            }
-        } catch (DataIntegrityViolationException e) {
+        if (reservationTimeRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("[ERROR] 등록된 예약 시간 번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+        }
+        if (reservationRepository.findByTimeId(id).isPresent()) {
             throw new ConstrainedDataException("[ERROR] 해당 시간에 예약 기록이 존재합니다. 예약을 먼저 삭제해 주세요.");
         }
+        reservationTimeRepository.deleteById(id);
     }
 }
