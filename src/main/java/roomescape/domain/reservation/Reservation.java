@@ -8,6 +8,8 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.reservation.InvalidReservationException;
 
 @Entity

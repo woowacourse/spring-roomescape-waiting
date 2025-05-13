@@ -1,9 +1,10 @@
-package roomescape.domain.reservation;
+package roomescape.domain.theme;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import roomescape.domain.reservation.Reservation;
 
 public class ThemeRanking {
 

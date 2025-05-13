@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTime;
 
 @Repository
 public interface JpaReservationTimeRepository extends JpaRepository<ReservationTime, Long>, ReservationTimeRepository {

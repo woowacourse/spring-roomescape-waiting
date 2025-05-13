@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.dto.admin;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import java.time.LocalDate;

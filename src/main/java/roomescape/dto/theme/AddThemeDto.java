@@ -1,7 +1,7 @@
-package roomescape.dto.reservation;
+package roomescape.dto.theme;
 
 import jakarta.validation.constraints.NotBlank;
-import roomescape.domain.reservation.Theme;
+import roomescape.domain.theme.Theme;
 
 public record AddThemeDto(@NotBlank(message = "테마 이름은 비어있을 수 없습니다.") String name,
                           @NotBlank(message = "설명은 비어있을 수 없습니다.") String description,

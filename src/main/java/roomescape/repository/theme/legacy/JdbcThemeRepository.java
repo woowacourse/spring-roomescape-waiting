@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.repository.theme.ThemeRepository;
 
 @Repository

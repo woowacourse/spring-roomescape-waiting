@@ -2,7 +2,7 @@ package roomescape.repository.theme;
 
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.reservation.Theme;
+import roomescape.domain.theme.Theme;
 
 
 public interface ThemeRepository {

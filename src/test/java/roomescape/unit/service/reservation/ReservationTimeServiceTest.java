@@ -11,12 +11,12 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
-import roomescape.dto.reservation.AddReservationTimeDto;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.dto.reservationtime.AddReservationTimeDto;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
-import roomescape.service.reservation.ReservationTimeService;
+import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.unit.config.ServiceFixture;
 
 

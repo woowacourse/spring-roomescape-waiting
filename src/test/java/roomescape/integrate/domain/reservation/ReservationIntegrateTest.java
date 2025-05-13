@@ -21,9 +21,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
-import roomescape.dto.reservation.ThemeResponseDto;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.integrate.fixture.RequestFixture;
 import roomescape.repository.reservation.ReservationRepository;
 

@@ -5,8 +5,8 @@ import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.dto.reservation.ReservationTimeResponseDto;
-import roomescape.dto.reservation.ThemeResponseDto;
+import roomescape.dto.reservationtime.ReservationTimeResponseDto;
+import roomescape.dto.theme.ThemeResponseDto;
 
 public class RequestFixture {
 

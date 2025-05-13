@@ -7,9 +7,9 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRanking;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRanking;
 
 class ThemeRankingTest {
 

@@ -1,9 +1,9 @@
-package roomescape.service.reservation;
+package roomescape.service.reservationtime;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.dto.reservation.AddReservationTimeDto;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.dto.reservationtime.AddReservationTimeDto;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.exception.reservation.InvalidReservationTimeException;
 import roomescape.repository.reservation.ReservationRepository;

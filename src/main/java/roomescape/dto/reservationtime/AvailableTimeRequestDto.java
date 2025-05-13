@@ -1,4 +1,4 @@
-package roomescape.dto.reservation;
+package roomescape.dto.reservationtime;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import java.time.LocalDate;

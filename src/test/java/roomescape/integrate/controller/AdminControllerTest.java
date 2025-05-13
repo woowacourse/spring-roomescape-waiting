@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.dto.AdminReservationAddDto;
+import roomescape.dto.admin.AdminReservationAddDto;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)

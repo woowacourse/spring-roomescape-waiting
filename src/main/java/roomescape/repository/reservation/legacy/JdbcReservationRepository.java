@@ -13,8 +13,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.repository.reservation.ReservationRepository;
 
 @Repository

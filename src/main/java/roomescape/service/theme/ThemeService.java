@@ -1,9 +1,9 @@
-package roomescape.service.reservation;
+package roomescape.service.theme;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Theme;
-import roomescape.dto.reservation.AddThemeDto;
+import roomescape.domain.theme.Theme;
+import roomescape.dto.theme.AddThemeDto;
 import roomescape.exception.reservation.InvalidThemeException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.theme.ThemeRepository;

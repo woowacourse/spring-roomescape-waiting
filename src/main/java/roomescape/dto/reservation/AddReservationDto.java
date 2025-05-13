@@ -4,8 +4,8 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 
 public record AddReservationDto(@NotBlank(message = "이름이 비어있을 수 없습니다.") String name,
                                 @FutureOrPresent(message = "날짜는 현재보다 미래여야합니다.") LocalDate date,

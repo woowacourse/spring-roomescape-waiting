@@ -1,4 +1,4 @@
-package roomescape.controller.reservation;
+package roomescape.controller.theme;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservation.Theme;
-import roomescape.dto.reservation.AddThemeDto;
-import roomescape.dto.reservation.ThemeResponseDto;
-import roomescape.service.reservation.ThemeService;
+import roomescape.domain.theme.Theme;
+import roomescape.dto.theme.AddThemeDto;
+import roomescape.dto.theme.ThemeResponseDto;
+import roomescape.service.theme.ThemeService;
 
 @RestController
 @RequestMapping("/themes")
