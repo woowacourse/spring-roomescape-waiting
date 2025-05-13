@@ -21,21 +21,21 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public Long create(ReservationTime reservationTime) {
-        reservationTimes.add(new ReservationTime(++id, reservationTime.startAt()));
+        reservationTimes.add(new ReservationTime(++id, reservationTime.getStartAt()));
         return id;
     }
 
     @Override
     public void deleteById(Long reservationTimeId) {
         reservationTimes = reservationTimes.stream()
-                .filter(reservationTime -> !Objects.equals(reservationTime.id(), reservationTimeId))
+                .filter(reservationTime -> !Objects.equals(reservationTime.getId(), reservationTimeId))
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<ReservationTime> findById(Long reservationTimeId) {
         return reservationTimes.stream()
-                .filter(reservationTime -> Objects.equals(reservationTime.id(), reservationTimeId))
+                .filter(reservationTime -> Objects.equals(reservationTime.getId(), reservationTimeId))
                 .findFirst();
     }
 }

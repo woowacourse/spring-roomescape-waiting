@@ -55,8 +55,8 @@ public class ReservationTimeService {
         return reservationTimes.stream()
                 .map(reservationTime ->
                         new AvailableReservationTimeResult(
-                                reservationTime.id(),
-                                reservationTime.startAt(),
+                                reservationTime.getId(),
+                                reservationTime.getStartAt(),
                                 bookedTimes.contains(reservationTime)
                         )
                 )
@@ -71,6 +71,6 @@ public class ReservationTimeService {
     }
 
     private ReservationTimeResult toReservationResult(ReservationTime reservationTime) {
-        return new ReservationTimeResult(reservationTime.id(), reservationTime.startAt());
+        return new ReservationTimeResult(reservationTime.getId(), reservationTime.getStartAt());
     }
 }

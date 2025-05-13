@@ -28,7 +28,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservationTime.startAt().toString());
+            ps.setString(1, reservationTime.getStartAt().toString());
             return ps;
         }, keyHolder);
 
