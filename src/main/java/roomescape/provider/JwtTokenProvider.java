@@ -16,7 +16,7 @@ public class JwtTokenProvider {
 
     public String createToken(Member member) {
         return Jwts.builder()
-            .subject(member.getId().toString())
+            .setSubject(member.getId().toString())
             .claim("email", member.getEmail())
             .claim("name", member.getName())
             .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
@@ -24,11 +24,11 @@ public class JwtTokenProvider {
     }
 
     public Long getMemberIdFromToken(String token) {
-        return Long.valueOf(Jwts.parser()
-            .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+        return Long.valueOf(Jwts.parserBuilder()
+            .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
             .build()
-            .parseSignedClaims(token)
-            .getPayload()
+            .parseClaimsJws(token)
+            .getBody()
             .getSubject());
     }
 }
