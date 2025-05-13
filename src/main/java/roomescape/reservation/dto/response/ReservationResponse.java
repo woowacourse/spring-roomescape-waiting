@@ -1,6 +1,7 @@
 package roomescape.reservation.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.member.entity.Member;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
@@ -42,21 +43,6 @@ public class ReservationResponse {
         }
     }
 
-    public record ReservationAdminCreateResponse(
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-
-        public static ReservationAdminCreateResponse from(Reservation reservation, Theme theme) {
-            return new ReservationAdminCreateResponse(
-                    reservation.getDate(),
-                    reservation.getTime(),
-                    theme
-            );
-        }
-    }
-
     public record ReservationReadFilteredResponse(
             Long id,
             LocalDate date,
@@ -73,5 +59,40 @@ public class ReservationResponse {
                     theme
             );
         }
+    }
+
+    public record ReservationReadMemberResponse(
+            Long reservationId,
+            String theme,
+            LocalDate date,
+            LocalTime time,
+            String status
+    ) {
+        public static ReservationReadMemberResponse from(Reservation reservation) {
+            return new ReservationReadMemberResponse(
+                    reservation.getId(),
+                    reservation.getTheme().getName(),
+                    reservation.getDate(),
+                    reservation.getTime().getStartAt(),
+                    // TODO: 3단계에서 구현
+                    "예약"
+            );
+        }
+    }
+
+    public record ReservationAdminCreateResponse(
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    ) {
+
+        public static ReservationAdminCreateResponse from(Reservation reservation, Theme theme) {
+            return new ReservationAdminCreateResponse(
+                    reservation.getDate(),
+                    reservation.getTime(),
+                    theme
+            );
+        }
+
     }
 }

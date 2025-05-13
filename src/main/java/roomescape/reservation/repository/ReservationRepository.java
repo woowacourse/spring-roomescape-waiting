@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.member.entity.Member;
 import roomescape.reservation.entity.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -31,6 +32,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ORDER BY r.date, rt.start_at
             """, nativeQuery = true)
     List<Reservation> findAllFiltered(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+
+    List<Reservation> findAllByMember(Member member);
 
     boolean existsByDateAndTimeId(LocalDate date, Long timeId);
 }

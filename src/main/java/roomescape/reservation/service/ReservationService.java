@@ -15,6 +15,7 @@ import roomescape.reservation.dto.request.ReservationRequest.ReservationReadFilt
 import roomescape.reservation.dto.response.ReservationResponse.ReservationAdminCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse.ReservationReadFilteredResponse;
+import roomescape.reservation.dto.response.ReservationResponse.ReservationReadMemberResponse;
 import roomescape.reservation.dto.response.ReservationResponse.ReservationReadResponse;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
@@ -90,6 +91,15 @@ public class ReservationService {
                             .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
                     return ReservationReadFilteredResponse.from(reservation, member, theme);
                 })
+                .toList();
+    }
+
+    public List<ReservationReadMemberResponse> getReservationsByMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        return reservations.stream()
+                .map(ReservationReadMemberResponse::from)
                 .toList();
     }
 

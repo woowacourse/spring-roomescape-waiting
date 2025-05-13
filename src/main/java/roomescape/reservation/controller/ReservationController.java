@@ -19,6 +19,7 @@ import roomescape.reservation.dto.request.ReservationRequest.ReservationCreateRe
 import roomescape.reservation.dto.request.ReservationRequest.ReservationReadFilteredRequest;
 import roomescape.reservation.dto.response.ReservationResponse.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse.ReservationReadFilteredResponse;
+import roomescape.reservation.dto.response.ReservationResponse.ReservationReadMemberResponse;
 import roomescape.reservation.dto.response.ReservationResponse.ReservationReadResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -42,6 +43,14 @@ public class ReservationController {
     public ResponseEntity<List<ReservationReadResponse>> getAllReservations() {
         List<ReservationReadResponse> responses = reservationService.getAllReservations();
         return ResponseEntity.ok().body(responses);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<ReservationReadMemberResponse>> getMyReservations(
+            @AuthenticationPrincipal LoginMember loginMember
+    ) {
+        List<ReservationReadMemberResponse> responses = reservationService.getReservationsByMember(loginMember.id());
+        return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/{id}")

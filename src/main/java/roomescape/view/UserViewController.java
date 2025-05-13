@@ -20,4 +20,9 @@ public class UserViewController {
     public String showReservations() {
         return "reservation";
     }
+
+    @GetMapping("/reservation-mine")
+    public String showMyReservations() {
+        return "reservation-mine";
+    }
 }
