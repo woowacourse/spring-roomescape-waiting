@@ -5,6 +5,7 @@ import roomescape.application.auth.dto.JwtPayload;
 import roomescape.application.auth.dto.LoginParam;
 import roomescape.application.auth.dto.LoginResult;
 import roomescape.application.support.exception.UnauthorizedException.LoginAuthException;
+import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.infrastructure.security.JwtProvider;
@@ -21,7 +22,7 @@ public class AuthService {
     }
 
     public LoginResult login(LoginParam loginParam) {
-        Member member = memberRepository.findByEmail(loginParam.email())
+        Member member = memberRepository.findByEmail(new Email(loginParam.email()))
                 .orElseThrow(() -> new LoginAuthException(loginParam.email() + "에 해당하는 멤버가 존재하지 않습니다."));
         if (member.isNotPassword(loginParam.password())) {
             throw new LoginAuthException(loginParam.email() + " 사용자의 비밀번호가 같지 않습니다.");
