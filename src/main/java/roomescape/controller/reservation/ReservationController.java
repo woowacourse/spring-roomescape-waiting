@@ -98,7 +98,8 @@ public class ReservationController {
         List<ReservationSlot> availableBookTimes = reservationSlotTimes.getAvailableBookTimes();
 
         List<ReservationTimeSlotResponseDto> reservationTimeSlotResponseDtos = availableBookTimes.stream()
-                .map((time) -> new ReservationTimeSlotResponseDto(time.getId(), time.getTime(), time.isReserved()))
+                .map((time) -> new ReservationTimeSlotResponseDto(time.getReservationId(), time.getTime(),
+                        time.isReserved()))
                 .toList();
         return ResponseEntity.ok(reservationTimeSlotResponseDtos);
     }

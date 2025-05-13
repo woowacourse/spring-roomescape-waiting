@@ -1,15 +1,15 @@
-package roomescape.controller.reservation;
+package roomescape.controller.admin;
 
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
 import roomescape.dto.AdminReservationAddDto;
 import roomescape.dto.reservation.AddReservationDto;
@@ -17,22 +17,18 @@ import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationmember.ReservationMemberService;
 
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 
+    private static final String ADMIN_CREATED_MESSAGE = "어드민이 생성한 예약입니다.";
+
     private final ReservationService reservationService;
     private final ReservationMemberService reservationMemberService;
-    private static final String ADMIN_CREATED_MESSAGE = "어드민이 생성한 예약입니다.";
 
     public AdminController(ReservationService reservationService, ReservationMemberService reservationMemberService) {
         this.reservationService = reservationService;
         this.reservationMemberService = reservationMemberService;
-    }
-
-    @GetMapping
-    public String adminMainPage() {
-        return "admin/index";
     }
 
     @GetMapping("/reservation")
@@ -56,7 +52,7 @@ public class AdminController {
         AddReservationDto addReservationDto = new AddReservationDto(ADMIN_CREATED_MESSAGE, newReservationDto.date(),
                 newReservationDto.timeId(),
                 newReservationDto.themeId());
-        
+
         long addedReservationId = reservationMemberService.addReservation(addReservationDto,
                 newReservationDto.memberId());
         Reservation reservation = reservationService.getReservationById(addedReservationId);

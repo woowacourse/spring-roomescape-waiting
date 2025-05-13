@@ -1,10 +1,22 @@
 package roomescape.domain.reservationmember;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class ReservationMemberIds {
 
-    private final long id;
-    private final long reservationId;
-    private final long memberId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    private long reservationId;
+    private long memberId;
+
+    public ReservationMemberIds() {
+
+    }
 
     public ReservationMemberIds(long id, long reservationId, long memberId) {
         this.id = id;
