@@ -41,15 +41,15 @@ public class ThemeService {
         }
     }
 
-    private void validateIsDuplicated(Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
-            throw new IllegalStateException("예약이 이미 존재하는 테마입니다.");
-        }
-    }
-
     public List<ThemeResponse> getPopularThemes() {
         return themeRepository.findPopularThemes().stream()
                 .map(ThemeResponse::new)
                 .toList();
+    }
+
+    private void validateIsDuplicated(final Long id) {
+        if (reservationRepository.existsByThemeId(id)) {
+            throw new IllegalStateException("예약이 이미 존재하는 테마입니다.");
+        }
     }
 }
