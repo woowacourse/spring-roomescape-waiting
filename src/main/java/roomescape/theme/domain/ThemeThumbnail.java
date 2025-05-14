@@ -22,11 +22,11 @@ import java.net.URI;
 @Embeddable
 public class ThemeThumbnail {
 
-    private URI value;
+    private String value;
 
     public static ThemeThumbnail from(final String uri) {
         validate(uri);
-        return new ThemeThumbnail(URI.create(uri));
+        return new ThemeThumbnail(uri);
     }
 
     private static void validate(final String value) {
