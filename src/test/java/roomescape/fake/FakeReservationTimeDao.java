@@ -19,7 +19,6 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
         return newReservationTime;
     }
 
-
     @Override
     public <S extends ReservationTime> Iterable<S> saveAll(final Iterable<S> entities) {
         return null;
@@ -27,7 +26,9 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
 
     @Override
     public Optional<ReservationTime> findById(final Long aLong) {
-        return Optional.empty();
+        return times.stream()
+                .filter(time -> time.getId() == aLong)
+                .findFirst();
     }
 
     @Override
@@ -73,20 +74,6 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     @Override
     public void deleteAll() {
 
-    }
-
-
-    @Override
-    public Optional<ReservationTime> findById(final long id) {
-        return times.stream()
-                .filter(time -> time.getId() == id)
-                .findFirst();
-    }
-
-    @Override
-    public void deleteById(final long id) {
-        ReservationTime reservationTime = findById(id).orElseThrow();
-        times.remove(reservationTime);
     }
 
     @Override
