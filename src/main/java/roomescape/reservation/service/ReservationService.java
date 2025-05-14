@@ -11,6 +11,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.AdminReservationRequest;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -52,7 +53,7 @@ public class ReservationService {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
 
-        final Member member = new Member(loginMember.id(), loginMember.name(), loginMember.email(), loginMember.role());
+        final Member member = new Member(loginMember);
         final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
@@ -82,5 +83,12 @@ public class ReservationService {
 //        if (deletedCount == 0) {
 //            throw new NotFoundException("존재하지 않는 예약입니다. id=" + id);
 //        }
+    }
+
+    public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
+        final Member member = new Member(loginMember);
+        return reservationRepository.findAllByMember(member).stream()
+                .map(MyReservationResponse::new)
+                .toList();
     }
 }

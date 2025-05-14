@@ -24,6 +24,7 @@ import roomescape.error.UnauthorizedException;
 public class AuthController {
 
     private static final String COOKIE_TOKEN = "token";
+
     private final AuthService authService;
 
     @PostMapping("/login")

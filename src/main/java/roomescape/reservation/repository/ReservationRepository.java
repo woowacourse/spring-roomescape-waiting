@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -30,4 +31,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByThemeId(final Long themeId);
 
     boolean existsByTimeId(final Long timeId);
+
+    List<Reservation> findAllByMember(Member member);
 }
