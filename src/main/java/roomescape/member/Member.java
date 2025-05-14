@@ -17,17 +17,20 @@ import lombok.Getter;
 @Getter
 public class Member {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private final Long id;
-    private final String email;
-    private final String password;
-    private final String name;
+
+    private String email;
+    private String password;
+    private String name;
+
     @Enumerated(EnumType.STRING)
-    private final MemberRole role;
+    private MemberRole role;
 
     public Member() {
-        this(null, null, null, null, null);
+        id = null;
     }
 
     public Member(final String email, final String password, final String name, final MemberRole role) {

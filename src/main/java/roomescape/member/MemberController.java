@@ -3,7 +3,7 @@ package roomescape.member;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,16 +16,10 @@ import roomescape.member.dto.MemberResponse;
 
 @RestController
 @RequestMapping("/members")
+@AllArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
-
-    @Autowired
-    public MemberController(
-            final MemberService memberService
-    ) {
-        this.memberService = memberService;
-    }
 
     @PostMapping
     public ResponseEntity<Void> createMember(

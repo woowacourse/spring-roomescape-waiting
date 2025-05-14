@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -13,17 +14,12 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.auth.AuthNotExistsCookieException;
 import roomescape.exception.custom.reason.auth.AuthNotValidTokenException;
 
+@AllArgsConstructor
 public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
 
     private static final String TOKEN_NAME = "token";
 
     private final JwtProvider jwtProvider;
-
-    public AuthenticationPrincipalArgumentResolver(
-            final JwtProvider jwtProvider
-    ) {
-        this.jwtProvider = jwtProvider;
-    }
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {

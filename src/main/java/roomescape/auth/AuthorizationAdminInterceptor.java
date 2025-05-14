@@ -5,23 +5,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.exception.custom.reason.auth.AuthNotExistsCookieException;
 import roomescape.exception.custom.reason.auth.AuthNotValidTokenException;
 import roomescape.member.MemberRole;
 
+@AllArgsConstructor
 public class AuthorizationAdminInterceptor implements HandlerInterceptor {
 
     private static final String TOKEN_NAME = "token";
 
     private final JwtProvider jwtProvider;
-
-    public AuthorizationAdminInterceptor(
-            final JwtProvider jwtProvider
-    ) {
-        this.jwtProvider = jwtProvider;
-    }
 
     @Override
     public boolean preHandle(

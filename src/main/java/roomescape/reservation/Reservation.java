@@ -23,19 +23,19 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private final Long id;
-    private final LocalDate date;
+    private LocalDate date;
 
     @ManyToOne
-    private final Member member;
+    private Member member;
 
     @ManyToOne
-    private final ReservationTime reservationTime;
+    private ReservationTime reservationTime;
 
     @ManyToOne
-    private final Theme theme;
+    private Theme theme;
 
     public Reservation() {
-        this(null, null, null, null, null);
+        id = null;
     }
 
     public Reservation(

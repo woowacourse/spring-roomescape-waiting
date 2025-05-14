@@ -1,6 +1,6 @@
 package roomescape.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.exception.custom.reason.auth.AuthNotExistsEmailException;
@@ -9,19 +9,11 @@ import roomescape.member.Member;
 import roomescape.member.MemberRepository;
 
 @Service
+@AllArgsConstructor
 public class AuthService {
 
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
-
-    @Autowired
-    public AuthService(
-            final MemberRepository memberRepository,
-            final JwtProvider jwtProvider
-    ) {
-        this.memberRepository = memberRepository;
-        this.jwtProvider = jwtProvider;
-    }
 
     public String generateToken(final LoginRequest loginRequest) {
         validateExistsMemberByEmail(loginRequest.email());

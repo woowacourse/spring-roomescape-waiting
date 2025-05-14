@@ -1,23 +1,17 @@
 package roomescape.member;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
 
 @Service
+@AllArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
-
-    @Autowired
-    public MemberService(
-            final MemberRepository memberRepository
-    ) {
-        this.memberRepository = memberRepository;
-    }
 
     public void createMember(final MemberRequest request) {
         validateDuplicationEmail(request);
