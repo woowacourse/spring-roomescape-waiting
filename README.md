@@ -87,4 +87,9 @@
 - [x] 연관관계 매핑
     - [x] 의존이 있는 클래스의 연관관계 매핑을 추가한다
 - [x] JpaRepository 사용
-    - [x] dao -> JpaRepository 상속 인터페이스로 변경 
+    - [x] dao -> JpaRepository 상속 인터페이스로 변경
+
+### 내 예약 목록 조회
+
+- [ ] 내 예약 목록 조회 기능
+    - [ ] `/reservations-mine` 으로 요청시 내 예약 목록 조회 API 추가
