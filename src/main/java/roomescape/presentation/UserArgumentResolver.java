@@ -7,6 +7,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.application.AuthenticationService;
+import roomescape.exception.custom.AuthenticationException;
 
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -33,6 +34,6 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         if (tokenCookie.hasToken()) {
             return authenticationService.getUserByToken(tokenCookie.token());
         }
-        throw new AuthorizationException("사용자 인증이 필요합니다.");
+        throw new AuthenticationException("사용자 인증이 필요합니다.");
     }
 }

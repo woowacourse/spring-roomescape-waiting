@@ -2,7 +2,7 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenProvider;
+import roomescape.domain.AuthenticationTokenHandler;
 import roomescape.domain.User;
 import roomescape.domain.repository.UserRepository;
 import roomescape.exception.custom.AuthenticationException;
@@ -10,10 +10,10 @@ import roomescape.exception.custom.AuthenticationException;
 @Service
 public class AuthenticationService {
 
-    private final AuthenticationTokenProvider tokenProvider;
+    private final AuthenticationTokenHandler tokenProvider;
     private final UserRepository userRepository;
 
-    public AuthenticationService(final AuthenticationTokenProvider tokenProvider, final UserRepository userRepository) {
+    public AuthenticationService(final AuthenticationTokenHandler tokenProvider, final UserRepository userRepository) {
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
     }

@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenProvider;
+import roomescape.domain.AuthenticationTokenHandler;
 import roomescape.domain.UserRole;
 
 class JwtTokenProviderTest {
 
-    private final AuthenticationTokenProvider tokenProvider = new JwtTokenProvider();
+    private final AuthenticationTokenHandler tokenProvider = new JwtTokenHandler();
 
     @Test
     @DisplayName("인증 정보로부터 토큰을 생성한다.")

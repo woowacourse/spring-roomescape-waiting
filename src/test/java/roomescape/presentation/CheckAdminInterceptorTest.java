@@ -9,9 +9,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenProvider;
+import roomescape.domain.AuthenticationTokenHandler;
 import roomescape.domain.UserRole;
-import roomescape.infrastructure.JwtTokenProvider;
+import roomescape.infrastructure.JwtTokenHandler;
 
 class CheckAdminInterceptorTest {
 
@@ -22,7 +22,7 @@ class CheckAdminInterceptorTest {
 
     private final MockHttpServletRequest request = new MockHttpServletRequest();
     private final MockHttpServletResponse response = new MockHttpServletResponse();
-    private final AuthenticationTokenProvider tokenProvider = new JwtTokenProvider();
+    private final AuthenticationTokenHandler tokenProvider = new JwtTokenHandler();
     private final HandlerInterceptor interceptor = new CheckAdminInterceptor(tokenProvider);
 
     @Test

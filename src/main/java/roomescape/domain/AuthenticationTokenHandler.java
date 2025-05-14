@@ -1,6 +1,6 @@
 package roomescape.domain;
 
-public interface AuthenticationTokenProvider {
+public interface AuthenticationTokenHandler {
 
     String createToken(AuthenticationInfo authenticationInfo);
 

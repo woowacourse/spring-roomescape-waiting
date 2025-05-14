@@ -6,18 +6,18 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.application.AuthenticationService;
-import roomescape.domain.AuthenticationTokenProvider;
+import roomescape.domain.AuthenticationTokenHandler;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     private final AuthenticationService authenticationService;
-    private final AuthenticationTokenProvider authenticationTokenProvider;
+    private final AuthenticationTokenHandler authenticationTokenHandler;
 
     public WebMvcConfiguration(final AuthenticationService authenticationService,
-        final AuthenticationTokenProvider authenticationTokenProvider) {
+        final AuthenticationTokenHandler authenticationTokenHandler) {
         this.authenticationService = authenticationService;
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.authenticationTokenHandler = authenticationTokenHandler;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
-        registry.addInterceptor(new CheckAdminInterceptor(authenticationTokenProvider))
+        registry.addInterceptor(new CheckAdminInterceptor(authenticationTokenHandler))
             .addPathPatterns("/admin/**");
     }
 }

@@ -1,10 +1,10 @@
 package roomescape.infrastructure.fake;
 
 import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenProvider;
+import roomescape.domain.AuthenticationTokenHandler;
 import roomescape.domain.UserRole;
 
-public class DummyTokenProvider implements AuthenticationTokenProvider {
+public class DummyTokenHandler implements AuthenticationTokenHandler {
 
     private static final String SEPARATOR = ";";
 

@@ -8,11 +8,11 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenProvider;
+import roomescape.domain.AuthenticationTokenHandler;
 import roomescape.domain.UserRole;
 
 @Component
-public class JwtTokenProvider implements AuthenticationTokenProvider {
+public class JwtTokenHandler implements AuthenticationTokenHandler {
 
     private static final SecretKey SECRET_KEY = SIG.HS256.key().build();
     private static final long EXPIRATION_DURATION_IN_MILLISECONDS = 900_000L;
