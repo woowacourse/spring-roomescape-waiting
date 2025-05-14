@@ -41,16 +41,17 @@ public class ReservationService {
 
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 시간입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
         Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
         Optional<Member> findMember = memberRepository.findById(memberId);
         if (findMember.isEmpty()) {
             throw new IllegalArgumentException("존재 하지 않는 유저입니다.");
         }
 
-        Reservation reservation = Reservation.createWithoutId(dateTime.now(), findMember.get(), request.date(), time, theme);
+        Reservation reservation = Reservation.createWithoutId(dateTime.now(), findMember.get(), request.date(), time,
+                theme);
 
         if (reservationRepository.existsByDateAndTime_StartAtAndTheme_Id(reservation.getDate(),
                 reservation.getReservationTime(), reservation.getThemeId())) {

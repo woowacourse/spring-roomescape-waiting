@@ -12,7 +12,7 @@ public class ReservationPageController {
     }
 
     @GetMapping("/reservation-mine")
-    public String reservationMine(){
+    public String reservationMine() {
         return "reservation-mine";
     }
 }

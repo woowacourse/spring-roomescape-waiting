@@ -15,7 +15,7 @@ public class ThemeCustomRepositoryImpl implements ThemeCustomRepository {
 
 
     @Override
-    public List<Theme> findPopularThemes(ReservationPeriod period, int popularCount){
+    public List<Theme> findPopularThemes(ReservationPeriod period, int popularCount) {
         return em.createQuery("""
                         SELECT t
                         FROM Theme as t

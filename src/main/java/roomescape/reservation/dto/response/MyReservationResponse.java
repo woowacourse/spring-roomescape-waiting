@@ -1,7 +1,6 @@
 package roomescape.reservation.dto.response;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.theme.domain.Theme;
 
 public record MyReservationResponse(
         Long reservationId,

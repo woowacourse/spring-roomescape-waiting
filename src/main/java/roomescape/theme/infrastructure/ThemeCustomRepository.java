@@ -5,5 +5,5 @@ import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.theme.domain.Theme;
 
 public interface ThemeCustomRepository {
-     List<Theme> findPopularThemes(ReservationPeriod period, int popularCount);
+    List<Theme> findPopularThemes(ReservationPeriod period, int popularCount);
 }
