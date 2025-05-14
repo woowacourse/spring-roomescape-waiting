@@ -6,7 +6,6 @@ import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.ui.ReservationSearchRequest;
-import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.theme.domain.ThemeId;
 import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;

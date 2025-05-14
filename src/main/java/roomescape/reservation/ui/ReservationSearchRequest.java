@@ -10,4 +10,5 @@ public record ReservationSearchRequest(
         ReservationDate dateFrom,
         ReservationDate dateTo
 ) {
+
 }

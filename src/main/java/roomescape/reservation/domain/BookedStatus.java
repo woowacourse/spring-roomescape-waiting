@@ -28,10 +28,10 @@ public final class BookedStatus {
         if (value) {
             return new BookedStatus(0);
         }
-        int unBookedSequence = 1; //Todo. 3단계 수정 예정
+        final int unBookedSequence = 1; //Todo. 3단계 수정 예정
         return new BookedStatus(unBookedSequence);
     }
-    
+
     public boolean isBooked() {
         return sequence == 0;
     }

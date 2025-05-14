@@ -8,12 +8,12 @@ import roomescape.common.validate.Validator;
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public record SignInResult(Cookie cookie) {
 
-    public static SignInResult from(final Cookie cookie) {
-        return new SignInResult(cookie);
+    public SignInResult {
+        validate(cookie);
     }
 
-    public SignInResult{
-        validate(cookie);
+    public static SignInResult from(final Cookie cookie) {
+        return new SignInResult(cookie);
     }
 
     private void validate(final Cookie cookie) {

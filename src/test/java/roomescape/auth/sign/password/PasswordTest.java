@@ -56,8 +56,8 @@ class PasswordTest {
     @DisplayName("유효한 비밀번호로 Password 객체를 생성할 수 있다")
     void createValidPassword() {
         // when
-        Password password1 = Password.fromRaw("password123", encoder);
-        Password password2 = Password.fromEncoded("encodedPassword");
+        final Password password1 = Password.fromRaw("password123", encoder);
+        final Password password2 = Password.fromEncoded("encodedPassword");
 
         // then
         assertAll(() -> {
@@ -73,8 +73,8 @@ class PasswordTest {
     @DisplayName("비밀번호가 일치하는지 확인할 수 있다")
     void matchPassword() {
         // given
-        String rawPassword = "password123";
-        Password password = Password.fromRaw(rawPassword, encoder);
+        final String rawPassword = "password123";
+        final Password password = Password.fromRaw(rawPassword, encoder);
 
         // when
         // then

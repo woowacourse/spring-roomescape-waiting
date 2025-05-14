@@ -63,13 +63,13 @@ class ThemeThumbnailTest {
         // then
         Assertions.assertAll(() -> {
             assertThat(themeThumbnail1).isNotNull();
-            assertThat(themeThumbnail1.getValue().toString()).isEqualTo("https://example.com/image.jpg");
+            assertThat(themeThumbnail1.getValue()).isEqualTo("https://example.com/image.jpg");
 
             assertThat(themeThumbnail2).isNotNull();
-            assertThat(themeThumbnail2.getValue().toString()).isEqualTo("http://example.com/image.jpg");
+            assertThat(themeThumbnail2.getValue()).isEqualTo("http://example.com/image.jpg");
 
             assertThat(themeThumbnail3).isNotNull();
-            assertThat(themeThumbnail3.getValue().toString()).isEqualTo("file:///path/to/image.jpg");
+            assertThat(themeThumbnail3.getValue()).isEqualTo("file:///path/to/image.jpg");
         });
     }
 }

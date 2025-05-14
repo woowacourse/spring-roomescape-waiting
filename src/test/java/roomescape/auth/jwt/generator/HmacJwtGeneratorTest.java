@@ -23,14 +23,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class HmacJwtGeneratorTest {
 
-    @Autowired
-    private JwtGenerator jwtGenerator;
-
-    @Autowired
-    private JwtParser jwtParser;
-
     private static final SecretKey secretKey =
             Keys.hmacShaKeyFor("ZMQ5kFGf1MTmnkhik/7rOcmT6OPvlz5Z+4aP4pAfNtk=".getBytes(StandardCharsets.UTF_8));
+    @Autowired
+    private JwtGenerator jwtGenerator;
+    @Autowired
+    private JwtParser jwtParser;
 
     @Test
     @DisplayName("JWT가 정상적으로 생성된다")

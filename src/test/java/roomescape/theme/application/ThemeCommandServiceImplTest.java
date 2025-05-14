@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
@@ -54,7 +53,7 @@ class ThemeCommandServiceImplTest {
                     .isEqualTo(name);
             assertThat(foundTheme.getDescription().getValue())
                     .isEqualTo(description);
-            assertThat(foundTheme.getThumbnail().getValue().toString())
+            assertThat(foundTheme.getThumbnail().getValue())
                     .isEqualTo(url);
         });
     }

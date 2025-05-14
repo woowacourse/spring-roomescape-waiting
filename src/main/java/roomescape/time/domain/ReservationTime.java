@@ -11,7 +11,6 @@ import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.BaseEntity;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
-import roomescape.reservation.domain.ReservationId;
 
 import java.time.LocalTime;
 

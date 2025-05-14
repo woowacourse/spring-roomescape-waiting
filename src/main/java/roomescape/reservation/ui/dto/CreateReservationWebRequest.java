@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
-import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;
 

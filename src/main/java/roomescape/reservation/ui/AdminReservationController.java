@@ -51,7 +51,7 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public ResponseEntity<List<ReservationResponse>> searchReservations(
-            @ModelAttribute final ReservationSearchWebRequest request){
+            @ModelAttribute final ReservationSearchWebRequest request) {
         return ResponseEntity.ok(
                 reservationFacade.getByParams(request));
     }

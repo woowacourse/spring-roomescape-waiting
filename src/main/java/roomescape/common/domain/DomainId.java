@@ -24,7 +24,6 @@ public abstract class DomainId {
     }
 
     private void validate(final Long value) {
-
         Validator.of(DomainId.class)
                 .validateNotNull(Fields.value, value, DomainTerm.DOMAIN_ID.label());
     }
