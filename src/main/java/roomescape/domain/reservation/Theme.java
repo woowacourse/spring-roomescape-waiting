@@ -13,8 +13,11 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     private String description;
+
     private String thumbnail;
 
     public Theme(final String name, final String description, final String thumbnail) {

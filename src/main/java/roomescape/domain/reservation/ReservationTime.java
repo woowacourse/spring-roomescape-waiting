@@ -17,15 +17,14 @@ public final class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalTime startAt;
 
+    private LocalTime startAt;
 
     public ReservationTime(LocalTime startAt) {
         this(null, startAt);
     }
 
-    public ReservationTime(
-            Long id, LocalTime startAt) {
+    public ReservationTime(Long id, LocalTime startAt) {
         if (startAt.isBefore(RESERVATION_START_TIME) || startAt.isAfter(RESERVATION_END_TIME)) {
             throw new BusinessRuleViolationException("해당 시간은 예약 가능 시간이 아닙니다.");
         }
