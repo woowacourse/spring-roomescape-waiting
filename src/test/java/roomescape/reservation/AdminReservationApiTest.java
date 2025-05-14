@@ -12,8 +12,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.login.business.service.TokenCookieService;
-import roomescape.login.presentation.request.LoginRequest;
+import roomescape.login.application.TokenCookieService;
+import roomescape.login.application.dto.LoginRequest;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
