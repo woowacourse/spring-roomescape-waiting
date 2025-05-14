@@ -94,34 +94,12 @@ public class ReservationService {
     }
 
     public List<ReservationInfo> getReservations(ReservationSearchCondition condition) {
-        Predicate<Reservation> memberPredicate = reservationMemberPredicate(condition);
-        Predicate<Reservation> themePredicate = reservationThemePredicate(condition);
-        Predicate<Reservation> datePredicate = reservationDatePredicate(condition);
-        Predicate<Reservation> totalPredicate = memberPredicate.and(themePredicate).and(datePredicate);
-        return reservationRepository.findAll().stream()
-                .filter(totalPredicate)
-                .map(ReservationInfo::new)
-                .toList();
-    }
-
-    private Predicate<Reservation> reservationMemberPredicate(ReservationSearchCondition condition) {
-        if (condition.memberId() == null) {
-            return reservation -> true;
-        }
-        return reservation -> reservation.isMemberHasSameId(condition.memberId());
-    }
-
-    private Predicate<Reservation> reservationThemePredicate(ReservationSearchCondition condition) {
-        if (condition.themeId() == null) {
-            return reservation -> true;
-        }
-        return reservation -> reservation.isThemeHasSameId(condition.themeId());
-    }
-
-    private Predicate<Reservation> reservationDatePredicate(ReservationSearchCondition condition) {
         LocalDate fromDate = Optional.ofNullable(condition.fromDate()).orElse(MINIMUM_SEARCH_DATE);
         LocalDate toDate = Optional.ofNullable(condition.toDate()).orElse(MAXIMUM_SEARCH_DATE);
-        return reservation -> reservation.isBetween(fromDate, toDate);
+        return reservationRepository.findAllByCondition(condition.memberId(), condition.themeId(), fromDate, toDate)
+                .stream()
+                .map(ReservationInfo::new)
+                .toList();
     }
 
     public List<ReservationInfo> findReservationsByMemberId(final Long id) {

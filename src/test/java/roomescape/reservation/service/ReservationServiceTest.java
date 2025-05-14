@@ -9,8 +9,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Stream;
+import net.bytebuddy.asm.MemberSubstitution.Argument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.CurrentDateTime;
 import roomescape.fake.FakeMemberRepository;
 import roomescape.fake.TestCurrentDateTime;
@@ -25,6 +30,7 @@ import roomescape.fake.FakeThemeRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.service.dto.ReservationSearchCondition;
 
 class ReservationServiceTest {
 
@@ -228,6 +234,45 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).containsExactlyElementsOf(List.of(createdReservation1));
+    }
+
+    @DisplayName("기간을 지정하지 않은 예약 목록을 조회하다")
+    @MethodSource(value = "getConditionAndResultSize")
+    @ParameterizedTest()
+    void getReservationsOfNullDate(ReservationSearchCondition condition, int expectedSize) {
+        // given
+        LocalTime time = LocalTime.of(11, 0);
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+        Theme theme1 = new Theme(null, "우테코탈출1", "탈출탈출탈출, ", "aaaa");
+        Theme theme2 = new Theme(null, "우테코탈출2", "탈출탈출탈출, ", "aaaa");
+        Theme savedTheme1 = themeDao.save(theme1);
+        Theme savedTheme2 = themeDao.save(theme2);
+        Member savedMember1 = memberDao.save(new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
+        Member savedMember2 = memberDao.save(new Member(null, "리버", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
+        ReservationCreateCommand request1 = new ReservationCreateCommand(tomorrow, savedMember1.getId(), savedTime.getId(), savedTheme1.getId());
+        ReservationCreateCommand request2 = new ReservationCreateCommand(tomorrow, savedMember1.getId(), savedTime.getId(), savedTheme2.getId());
+        ReservationCreateCommand request3 = new ReservationCreateCommand(tomorrow.plusDays(1), savedMember2.getId(), savedTime.getId(), savedTheme1.getId());
+        ReservationCreateCommand request4 = new ReservationCreateCommand(tomorrow.plusDays(2), savedMember1.getId(), savedTime.getId(), savedTheme1.getId());
+        ReservationCreateCommand request5 = new ReservationCreateCommand(tomorrow.plusDays(4), savedMember1.getId(), savedTime.getId(), savedTheme1.getId());
+
+        ReservationInfo createdReservation1 = reservationService.createReservation(request1);
+        ReservationInfo createdReservation2 = reservationService.createReservation(request2);
+        ReservationInfo createdReservation3 = reservationService.createReservation(request3);
+        ReservationInfo createdReservation4 = reservationService.createReservation(request4);
+        ReservationInfo createdReservation5 = reservationService.createReservation(request5);
+
+        // when & then
+        assertThat(reservationService.getReservations(condition)).hasSize(expectedSize);
+    }
+
+    private static Stream<Arguments> getConditionAndResultSize() {
+        return Stream.of(
+                Arguments.arguments(new ReservationSearchCondition(null, null, null, null), 5),
+                Arguments.arguments(new ReservationSearchCondition(1L, null, null, null), 4),
+                Arguments.arguments(new ReservationSearchCondition(null, 1L, null, null), 4),
+                Arguments.arguments(new ReservationSearchCondition(1L, 1L, null, null), 3),
+                Arguments.arguments(new ReservationSearchCondition(1L, 1L,  LocalDate.of(2025, 4, 4), LocalDate.of(2025, 4, 6)), 1)
+        );
     }
 }
 

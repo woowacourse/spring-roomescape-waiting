@@ -64,6 +64,16 @@ public class FakeReservationRepository implements ReservationRepository {
                 .toList();
     }
 
+    @Override
+    public List<Reservation> findAllByCondition(final Long memberId, final Long themeId, final LocalDate from,
+                                                final LocalDate to) {
+        return reservations.stream()
+                .filter(reservation -> memberId == null || reservation.isMemberHasSameId(memberId))
+                .filter(reservation -> themeId == null || reservation.isThemeHasSameId(themeId))
+                .filter(reservation -> reservation.isBetween(from, to))
+                .toList();
+    }
+
     public Reservation findById(final long id) {
         return reservations.stream()
                 .filter(reservation -> reservation.getId() == id)
