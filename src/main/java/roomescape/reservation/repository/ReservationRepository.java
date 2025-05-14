@@ -11,26 +11,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByTimeId(Long id);
-
     @Query(value = """
-            SELECT 
-                r.id,
-                r.date,
-                r.time_id,
-                rt.start_at as time_value,
-                r.theme_id, 
-                r.member_id 
-            FROM reservation r 
-            LEFT JOIN reservation_time rt ON r.time_id = rt.id 
-            LEFT JOIN theme t ON r.theme_id = t.id 
-            LEFT JOIN member m ON r.member_id = m.id
-            WHERE r.theme_id = :themeId
-            AND r.member_id = :memberId
+            SELECT r
+            FROM Reservation r
+            LEFT JOIN ReservationTime rt ON r.time.id = rt.id
+            LEFT JOIN Theme t ON r.theme.id = t.id 
+            LEFT JOIN Member m ON r.member.id = m.id
+            WHERE r.theme.id = :themeId
+            AND r.member.id = :memberId
             AND r.date >= :dateFrom
             AND r.date <= :dateTo
-            ORDER BY r.date, rt.start_at
-            """, nativeQuery = true)
+            ORDER BY r.date, rt.startAt
+            """)
     List<Reservation> findAllFiltered(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
