@@ -12,22 +12,22 @@ import roomescape.entity.Theme;
 import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaMemberRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
+import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
-    private final MemberRepository memberRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final JpaReservationRepository reservationRepository;
+    private final JpaMemberRepository memberRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaThemeRepository themeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository,
-        MemberRepository memberRepository,
-        ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+    public ReservationService(JpaReservationRepository reservationRepository,
+        JpaMemberRepository memberRepository,
+        JpaReservationTimeRepository reservationTimeRepository, JpaThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;

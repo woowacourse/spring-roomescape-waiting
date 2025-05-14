@@ -1,10 +1,9 @@
 package roomescape.repository.jpa;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.entity.Member;
-import roomescape.repository.MemberRepository;
 
-public interface JpaMemberRepository extends MemberRepository, CrudRepository<Member, Long> {
+public interface JpaMemberRepository extends JpaRepository<Member, Long> {
 
     Member findByEmail(String email);
 

@@ -5,14 +5,14 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.request.MemberRequest;
 import roomescape.entity.Member;
 import roomescape.exception.custom.DuplicatedException;
-import roomescape.repository.MemberRepository;
+import roomescape.repository.jpa.JpaMemberRepository;
 
 @Service
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+    private final JpaMemberRepository memberRepository;
 
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(JpaMemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 

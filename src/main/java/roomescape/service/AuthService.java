@@ -6,15 +6,15 @@ import roomescape.entity.Member;
 import roomescape.exception.custom.AuthenticatedException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.provider.JwtTokenProvider;
-import roomescape.repository.MemberRepository;
+import roomescape.repository.jpa.JpaMemberRepository;
 
 @Service
 public class AuthService {
 
-    private final MemberRepository memberRepository;
+    private final JpaMemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
+    public AuthService(JpaMemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
         this.memberRepository = memberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
     }

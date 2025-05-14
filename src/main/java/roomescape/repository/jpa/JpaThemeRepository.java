@@ -2,13 +2,12 @@ package roomescape.repository.jpa;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.entity.Theme;
-import roomescape.repository.ThemeRepository;
 
-public interface JpaThemeRepository extends ThemeRepository, CrudRepository<Theme, Long> {
+public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(
         value = """

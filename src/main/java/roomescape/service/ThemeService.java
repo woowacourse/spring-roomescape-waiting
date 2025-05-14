@@ -6,16 +6,16 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.entity.Theme;
 import roomescape.exception.custom.DuplicatedException;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
 
 @Service
 public class ThemeService {
 
     public static final int TOP_RANK_PERIOD_DAYS = 7;
 
-    private final ThemeRepository themeRepository;
+    private final JpaThemeRepository themeRepository;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(JpaThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
     }
 

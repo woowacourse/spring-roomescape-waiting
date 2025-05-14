@@ -41,7 +41,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("토큰에서 쿠키 정보를 추출하여 사용자 이름을 반환")
     void checkLogin() {
-        Member member = new Member(1L, "sana123", "sa123", "na123");
+        Member member = Member.createUser("sana123", "sa123", "na123");
         String token = jwtTokenProvider.createToken(member);
 
         RestAssured.given().log().all()

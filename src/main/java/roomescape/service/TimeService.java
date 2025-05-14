@@ -6,14 +6,14 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.request.TimeRequest;
 import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.DuplicatedException;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationTimeRepository;
 
 @Service
 public class TimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
 
-    public TimeService(ReservationTimeRepository reservationTimeRepository) {
+    public TimeService(JpaReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 

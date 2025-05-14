@@ -3,14 +3,12 @@ package roomescape.repository.jpa;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.entity.ReservationTime;
-import roomescape.repository.ReservationTimeRepository;
 
-public interface JpaReservationTimeRepository extends ReservationTimeRepository,
-    CrudRepository<ReservationTime, Long> {
+public interface JpaReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
     @Query(
         value = """
