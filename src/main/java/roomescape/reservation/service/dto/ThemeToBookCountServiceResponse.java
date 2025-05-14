@@ -6,18 +6,14 @@ import roomescape.common.utils.Validator;
 import roomescape.theme.domain.Theme;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record ThemeToBookCountServiceResponse(
-        Theme theme,
-        int bookedCount
-) {
+public record ThemeToBookCountServiceResponse(Theme theme) {
 
     public ThemeToBookCountServiceResponse {
-        validate(theme, bookedCount);
+        validate(theme);
     }
 
-    private void validate(final Theme theme, final int bookedCount) {
+    private void validate(final Theme theme) {
         Validator.of(ThemeToBookCountServiceResponse.class)
-                .notNullField(Fields.theme, theme)
-                .notNullField(Fields.bookedCount, bookedCount);
+                .notNullField(Fields.theme, theme);
     }
 }

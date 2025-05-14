@@ -1,31 +1,36 @@
 package roomescape.reservation.repository;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 
-public interface ReservationRepository {
+@Repository
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByParams(Long timeId);
+    boolean existsByTimeId(Long timeId);
 
-    boolean existsByParams(ReservationDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
-    Optional<Reservation> findById(Long id);
+    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
+                                                             ReservationDate to);
 
-    List<Reservation> findByParams(Long memberId, Long themeId, ReservationDate from, ReservationDate to);
-
-    List<Long> findTimeIdByParams(ReservationDate date, Long themeId);
+    List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId);
 
     List<Reservation> findAllByMemberId(Long memberId);
 
-    List<Reservation> findAll();
+    @Query("SELECT t FROM Theme t " +
+            "LEFT JOIN Reservation r ON r.theme.id = t.id " +
+            "WHERE r.date BETWEEN :startDate AND :endDate " +
+            "GROUP BY t " +
+            "ORDER BY COUNT(r) DESC " +
+            "LIMIT :limit")
+    List<Theme> findThemesWithReservationCount(@Param("startDate") ReservationDate startDate,
+                                               @Param("endDate") ReservationDate endDate,
+                                               int limit);
 
-    Reservation save(Reservation reservation);
-
-    void deleteById(Long id);
-
-    Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(ReservationDate startDate, ReservationDate endDate, int count);
 }

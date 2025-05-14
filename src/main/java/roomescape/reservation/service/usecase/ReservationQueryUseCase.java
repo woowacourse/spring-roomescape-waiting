@@ -34,9 +34,11 @@ public class ReservationQueryUseCase {
             final AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest) {
         final List<ReservationTime> allTimes = reservationTimeQueryUseCase.getAll();
 
-        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findTimeIdByParams(
-                ReservationDate.from(availableReservationTimeServiceRequest.date()),
-                availableReservationTimeServiceRequest.themeId())
+        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findByDateAndThemeId(
+                        ReservationDate.from(availableReservationTimeServiceRequest.date()),
+                        availableReservationTimeServiceRequest.themeId()).stream()
+                .map(reservation -> reservation.getTime().getId())
+                .toList()
         );
 
         final List<AvailableReservationTimeServiceResponse> responses = new ArrayList<>();
@@ -44,7 +46,7 @@ public class ReservationQueryUseCase {
         for (final ReservationTime reservationTime : allTimes) {
             final boolean isBooked = bookedTimeIds.contains(reservationTime.getId());
             responses.add(new AvailableReservationTimeServiceResponse(
-                    reservationTime.getTime(),
+                    reservationTime.getStartAt(),
                     reservationTime.getId(),
                     isBooked));
         }
@@ -56,26 +58,25 @@ public class ReservationQueryUseCase {
                                                             final ReservationDate endDate,
                                                             final int bookCount) {
 
-        return reservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, bookCount)
-                .entrySet().stream()
-                .map(entry -> new ThemeToBookCountServiceResponse(entry.getKey(), entry.getValue()))
+        return reservationRepository.findThemesWithReservationCount(startDate, endDate, bookCount).stream()
+                .map(ThemeToBookCountServiceResponse::new)
                 .toList();
     }
 
     public boolean existsByTimeId(final Long timeId) {
-        return reservationRepository.existsByParams(timeId);
+        return reservationRepository.existsByTimeId(timeId);
     }
 
     public boolean existsByParams(final ReservationDate date,
                                   final Long timeId,
                                   final Long themeId) {
-        return reservationRepository.existsByParams(date, timeId, themeId);
+        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     public List<Reservation> search(final Long memberId,
                                     final Long themeId,
                                     final ReservationDate from,
                                     final ReservationDate to) {
-        return reservationRepository.findByParams(memberId, themeId, from, to);
+        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
     }
 }

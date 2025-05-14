@@ -1,6 +1,5 @@
 package roomescape.time.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,28 +25,27 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "reservation_time")
-    private LocalTime time;
+    private LocalTime startAt;
 
-    private static ReservationTime of(final Long id, final LocalTime time) {
-        validate(time);
-        return new ReservationTime(id, time);
+    private static ReservationTime of(final Long id, final LocalTime startAt) {
+        validate(startAt);
+        return new ReservationTime(id, startAt);
     }
 
-    public static ReservationTime withId(final Long id, final LocalTime time) {
-        return of(id, time);
+    public static ReservationTime withId(final Long id, final LocalTime startAt) {
+        return of(id, startAt);
     }
 
-    public static ReservationTime withoutId(final LocalTime time) {
-        return of(null, time);
+    public static ReservationTime withoutId(final LocalTime startAt) {
+        return of(null, startAt);
     }
 
-    private static void validate(final LocalTime time) {
+    private static void validate(final LocalTime startAt) {
         Validator.of(ReservationTime.class)
-                .notNullField(Fields.time, time);
+                .notNullField(Fields.startAt, startAt);
     }
 
     public boolean isBefore(final LocalTime time) {
-        return this.time.isBefore(time);
+        return this.startAt.isBefore(time);
     }
 }
