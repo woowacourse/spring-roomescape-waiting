@@ -127,7 +127,7 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = reservationTimeDao.save(new ReservationTime(LocalTime.of(8, 0)));
         Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
-        reservationDao.save(Reservation.withoutId(member, LocalDate.now(), reservationTime, theme));
+        reservationDao.save(new Reservation(member, LocalDate.now(), reservationTime, theme));
         Long timeId = reservationTime.getId();
 
         // when & then

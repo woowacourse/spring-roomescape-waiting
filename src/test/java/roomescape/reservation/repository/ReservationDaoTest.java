@@ -60,7 +60,7 @@ class ReservationDaoTest {
         Member member = saveMember(MEMBER_ID, NAME, EMAIL, PASSWORD);
 
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = Reservation.withoutId(member, now.toLocalDate(), reservationTime, theme);
+        Reservation reservation = new Reservation(member, now.toLocalDate(), reservationTime, theme);
 
         // when
         Reservation result = reservationDao.save(reservation);

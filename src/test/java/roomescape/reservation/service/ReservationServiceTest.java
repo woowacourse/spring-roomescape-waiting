@@ -65,7 +65,7 @@ class ReservationServiceTest {
         Member savedMember = memberDao.save(member);
 
         LocalDate date = LocalDate.of(2024, 4, 29);
-        reservationDao.save(Reservation.withoutId(savedMember, date, savedTime, savedTheme));
+        reservationDao.save(new Reservation(savedMember, date, savedTime, savedTheme));
 
         // when
         List<ReservationResponse> response = reservationService.getAll();
@@ -206,7 +206,7 @@ class ReservationServiceTest {
 
         LocalDate date = nextDay();
         Reservation savedReservation = reservationDao.save(
-                Reservation.withoutId(savedMember, date, savedTime, savedTheme));
+                new Reservation(savedMember, date, savedTime, savedTheme));
 
         Long id = savedReservation.getId();
 
@@ -236,7 +236,7 @@ class ReservationServiceTest {
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
-        reservationDao.save(Reservation.withoutId(savedMember, date, reservationTime1, savedTheme));
+        reservationDao.save(new Reservation(savedMember, date, reservationTime1, savedTheme));
 
         // when
         List<BookedReservationTimeResponse> responses = reservationService.getAvailableTimes(date, themeId);

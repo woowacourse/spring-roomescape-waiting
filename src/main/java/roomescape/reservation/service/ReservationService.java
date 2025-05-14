@@ -87,7 +87,7 @@ public class ReservationService {
         ReservationTime reservationTime = gerReservationTime(request);
         Theme theme = getTheme(request);
 
-        return Reservation.withoutId(member, request.date(), reservationTime, theme);
+        return new Reservation(member, request.date(), reservationTime, theme);
     }
 
     private Theme getTheme(final ReservationRequest request) {

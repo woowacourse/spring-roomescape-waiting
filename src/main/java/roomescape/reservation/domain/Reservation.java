@@ -4,17 +4,24 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
+import jakarta.persistence.*;
 import roomescape.member.domain.Member;
 
+@Entity
 public class Reservation {
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @ManyToOne @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+    @Column(nullable = false)
+    private LocalDate reservationDate;
+    @ManyToOne @JoinColumn(name = "time_id", nullable = false)
+    private ReservationTime reservationTime;
+    @ManyToOne @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
 
-    private static final long EMPTY_ID = 0L;
-
-    private final Long id;
-    private final Member member;
-    private final LocalDate reservationDate;
-    private final ReservationTime reservationTime;
-    private final Theme theme;
+    protected Reservation() {
+    }
 
     public Reservation(
             final Long id,
@@ -28,26 +35,10 @@ public class Reservation {
         this.reservationDate = reservationDate;
         this.reservationTime = reservationTime;
         this.theme = theme;
-        validateNull();
     }
 
-    public static Reservation withoutId(
-            final Member member,
-            final LocalDate reservationDate,
-            final ReservationTime reservationTime,
-            final Theme theme
-    ) {
-        return new Reservation(EMPTY_ID, member, reservationDate, reservationTime, theme);
-    }
-
-    private void validateNull() {
-        if (member == null || reservationDate == null || reservationTime == null || theme == null) {
-            throw new IllegalArgumentException("Reservation field cannot be null");
-        }
-    }
-
-    public boolean existId() {
-        return id != EMPTY_ID;
+    public Reservation(Member member, LocalDate reservationDate, ReservationTime reservationTime, Theme theme) {
+        this(null, member, reservationDate, reservationTime, theme);
     }
 
     public Long getId() {

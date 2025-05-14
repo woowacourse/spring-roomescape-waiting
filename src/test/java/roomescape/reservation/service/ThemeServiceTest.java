@@ -123,7 +123,7 @@ class ThemeServiceTest {
         Member savedMember = memberDao.save(member);
 
         LocalDate date = LocalDate.of(2024, 4, 29);
-        reservationDao.save(Reservation.withoutId(savedMember, date, savedTime, savedTheme));
+        reservationDao.save(new Reservation(savedMember, date, savedTime, savedTheme));
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(themeId))
@@ -142,12 +142,12 @@ class ThemeServiceTest {
         Theme theme1 = themeDao.save(new Theme("테마1", "테마1", "www.m.com"));
         Theme theme2 = themeDao.save(new Theme("테마2", "테마2", "www.m.com"));
         Theme theme3 = themeDao.save(new Theme("테마3", "테마3", "www.m.com"));
-        reservationDao.save(Reservation.withoutId(member, date.minusDays(1), reservationTime, theme1));
-        reservationDao.save(Reservation.withoutId(member, date.minusDays(2), reservationTime, theme1));
-        reservationDao.save(Reservation.withoutId(member, date.minusDays(3), reservationTime, theme1));
-        reservationDao.save(Reservation.withoutId(member, date.minusDays(4), reservationTime, theme2));
-        reservationDao.save(Reservation.withoutId(member, date.minusDays(5), reservationTime, theme2));
-        reservationDao.save(Reservation.withoutId(member, date.minusDays(6), reservationTime, theme3));
+        reservationDao.save(new Reservation(member, date.minusDays(1), reservationTime, theme1));
+        reservationDao.save(new Reservation(member, date.minusDays(2), reservationTime, theme1));
+        reservationDao.save(new Reservation(member, date.minusDays(3), reservationTime, theme1));
+        reservationDao.save(new Reservation(member, date.minusDays(4), reservationTime, theme2));
+        reservationDao.save(new Reservation(member, date.minusDays(5), reservationTime, theme2));
+        reservationDao.save(new Reservation(member, date.minusDays(6), reservationTime, theme3));
 
         // when
         List<ThemeResponse> responses = themeService.getPopularThemes();
