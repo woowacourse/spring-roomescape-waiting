@@ -122,7 +122,8 @@ class ReservationTimeServiceTest extends BaseTest {
     @Test
     void 예약가능한_시간을_조회한다() {
         ReservationTime time = reservationTimeDbFixture.예약시간_10시();
-        AvailableReservationTimeRequest request = new AvailableReservationTimeRequest(LocalDate.of(2025, 5, 20), time.getId());
+        Theme theme = themeDbFixture.공포();
+        AvailableReservationTimeRequest request = new AvailableReservationTimeRequest(LocalDate.of(2025, 5, 20), theme.getId());
 
         List<AvailableReservationTimeResponse> responses = reservationTimeService.getAvailableReservationTimes(request);
 
