@@ -46,7 +46,7 @@ public abstract class AbstractDaoTemplate<T> {
 
     protected boolean existsBy(final String column, final Object value) {
         String sql = String.format("select count(*) from %s where %s = :value", tableName, column);
-        int count = jdbcTemplate.queryForObject(sql, Map.of("value", value), Integer.class);
+        int count = jdbcTemplate.queryForObject(sql, Map.of("email", value), Integer.class);
         return count > 0;
     }
 }

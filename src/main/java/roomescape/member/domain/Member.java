@@ -2,15 +2,31 @@ package roomescape.member.domain;
 
 import java.util.Objects;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Member {
 
-    private static final long EMPTY_ID = 0L;
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @Embedded @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
+    private MemberName name;
+    @Embedded @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+    private Email email;
+    @Embedded @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
+    private Password password;
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
 
-    private final Long id;
-    private final MemberName name;
-    private final Email email;
-    private final Password password;
-    private final Role role;
+    protected Member() {}
 
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
         validateNull(id, name, email, password);
@@ -22,7 +38,7 @@ public class Member {
     }
 
     public Member(final String name, final String email, final String password, final Role role) {
-        this(EMPTY_ID, name, email, password, role);
+        this(null, name, email, password, role);
     }
 
     private void validateNull(final Long id, final String name, final String email, final String password) {
@@ -36,15 +52,15 @@ public class Member {
     }
 
     public String getName() {
-        return name.value();
+        return name.name();
     }
 
     public String getEmail() {
-        return email.value();
+        return email.email();
     }
 
     public String getPassword() {
-        return password.value();
+        return password.password();
     }
 
     public String getRole() {

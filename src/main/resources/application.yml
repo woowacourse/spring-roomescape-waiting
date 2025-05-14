@@ -14,6 +14,17 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:h2:mem:database
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: never
 
 security:
   jwt:

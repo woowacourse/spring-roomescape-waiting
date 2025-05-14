@@ -15,7 +15,7 @@ public class Name {
 
     private void validateNameValue(final String value) {
         if (value == null || value.isBlank() || value.length() > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("invalid reservation value");
+            throw new IllegalArgumentException("invalid reservation email");
         }
     }
 
