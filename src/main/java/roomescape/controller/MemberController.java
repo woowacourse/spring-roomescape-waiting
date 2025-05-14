@@ -21,7 +21,7 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @PostMapping //TODO:응답 형식 고려
+    @PostMapping
     public ResponseEntity<RegisterUserResponse> signup(@RequestBody final RegisterMemberRequest registerMemberRequest) {
         RegisterMemberParam registerMemberParam = registerMemberRequest.toServiceParam();
         MemberResult memberResult = memberService.create(registerMemberParam);

@@ -3,6 +3,8 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.util.Objects;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,7 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class Reservation {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
@@ -28,19 +31,27 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
+                       ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
+        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date)
+               && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
     }
 
     @Override
@@ -51,11 +62,11 @@ public class Reservation {
     @Override
     public String toString() {
         return "Reservation{" +
-                "id=" + id +
-                ", member=" + member +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
-                '}';
+               "id=" + id +
+               ", member=" + member +
+               ", date=" + date +
+               ", time=" + time +
+               ", theme=" + theme +
+               '}';
     }
 }

@@ -42,6 +42,8 @@ public class MemberService {
                 registerMemberParam.password()
         );
 
+        // TODO: 이메일 중복 체크
+
         Member savedMember = memberRepository.save(member);
         return MemberResult.from(savedMember);
     }

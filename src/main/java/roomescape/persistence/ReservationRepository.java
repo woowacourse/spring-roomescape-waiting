@@ -19,10 +19,14 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
 
     List<Reservation> findByThemeIdAndDate(Long themeId, LocalDate date);
 
+    List<Reservation> findByMemberId(Long memberId);
+
+    // TODO: JPQL 고려
     @Query(value = """
             SELECT
                 r.id as reservation_id,
                 r.date,
+                r.status,
                 t.id as time_id,
                 t.start_at as time_value,
                 tm.id as theme_id,

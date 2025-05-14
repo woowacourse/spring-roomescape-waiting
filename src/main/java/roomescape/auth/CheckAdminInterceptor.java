@@ -27,6 +27,7 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"message\": \"접근 권한이 없습니다.\"}");
         return false;
     }

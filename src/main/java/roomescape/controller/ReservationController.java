@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
 import roomescape.controller.request.CreateReservationRequest;
 import roomescape.controller.request.LoginMemberInfo;
+import roomescape.controller.response.MyReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.result.ReservationResult;
@@ -15,7 +16,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -24,7 +24,7 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping
+    @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> findReservations(@RequestParam(required = false) Long memberId,
                                                                       @RequestParam(required = false) Long themeId,
                                                                       @RequestParam(required = false) LocalDate dateFrom,
@@ -36,7 +36,16 @@ public class ReservationController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @PostMapping
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
+        List<ReservationResult> reservationResults = reservationService.findByMemberId(loginMemberInfo.id());
+        List<MyReservationResponse> myReservationResponses = reservationResults.stream()
+                .map(MyReservationResponse::from)
+                .toList();
+        return ResponseEntity.ok(myReservationResponses);
+    }
+
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody CreateReservationRequest createReservationRequest,
             @LoginMember LoginMemberInfo loginMemberInfo) {
@@ -45,7 +54,7 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse.from(reservationResult));
     }
 
-    @DeleteMapping("/{reservationId}")
+    @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId) {
         reservationService.deleteById(reservationId);
         return ResponseEntity.noContent().build();

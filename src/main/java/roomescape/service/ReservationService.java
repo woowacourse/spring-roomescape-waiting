@@ -1,20 +1,26 @@
 package roomescape.service;
 
-import org.springframework.stereotype.Service;
-import roomescape.domain.*;
-import roomescape.exception.*;
-import roomescape.persistence.MemberRepository;
-import roomescape.persistence.ReservationRepository;
-import roomescape.persistence.ReservationTimeRepository;
-import roomescape.persistence.ThemeRepository;
-import roomescape.persistence.query.CreateReservationQuery;
-import roomescape.service.param.CreateReservationParam;
-import roomescape.service.result.ReservationResult;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.stereotype.Service;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.exception.NotFoundMemberException;
+import roomescape.exception.NotFoundReservationException;
+import roomescape.exception.NotFoundReservationTimeException;
+import roomescape.exception.NotFoundThemeException;
+import roomescape.exception.UnAvailableReservationException;
+import roomescape.persistence.MemberRepository;
+import roomescape.persistence.ReservationRepository;
+import roomescape.persistence.ReservationTimeRepository;
+import roomescape.persistence.ThemeRepository;
+import roomescape.service.param.CreateReservationParam;
+import roomescape.service.result.ReservationResult;
 
 @Service
 public class ReservationService {
@@ -47,7 +53,8 @@ public class ReservationService {
                 member,
                 createReservationParam.date(),
                 reservationTime,
-                theme
+                theme,
+                ReservationStatus.RESERVED
         );
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -69,6 +76,13 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundReservationException(reservationId + "에 해당하는 reservation 튜플이 없습니다."));
         return ReservationResult.from(reservation);
+    }
+
+    public List<ReservationResult> findByMemberId(Long memberId) {
+        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
+        return reservations.stream()
+                .map(ReservationResult::from)
+                .toList();
     }
 
     public List<ReservationResult> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
