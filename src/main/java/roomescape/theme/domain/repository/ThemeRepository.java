@@ -3,10 +3,8 @@ package roomescape.theme.domain.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
-import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 
-@Repository
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @NativeQuery(value = """
