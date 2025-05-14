@@ -1,6 +1,7 @@
 package roomescape.application;
 
 import java.util.List;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateDto;
@@ -44,12 +45,11 @@ public class ReservationService {
         Theme theme = themeService.getThemeById(request.themeId()).toEntity();
         ReservationTime reservationTime = timeService.getTimeById(request.timeId()).toEntity();
         Member member = memberService.getMemberById(request.memberId()).toEntity();
-        Reservation reservation = Reservation.withoutId(member, theme, request.date(), reservationTime);
-        validateNotPast(reservation);
-        validateNotDuplicate(reservation);
-        Long id = reservationRepository.save(reservation);
-
-        return ReservationDto.from(Reservation.assignId(id, reservation));
+        Reservation reservationWithoutId = Reservation.withoutId(member, theme, request.date(), reservationTime);
+        validateNotPast(reservationWithoutId);
+        validateNotDuplicate(reservationWithoutId);
+        Reservation reservation = reservationRepository.save(reservationWithoutId);
+        return ReservationDto.from(reservation);
     }
 
     private void validateNotDuplicate(Reservation reservation) {
@@ -73,13 +73,20 @@ public class ReservationService {
     }
 
     public List<ReservationDto> searchReservationsWith(ReservationSearchFilter reservationSearchFilter) {
-        List<Reservation> reservations = reservationRepository.searchWith(reservationSearchFilter);
+        List<Reservation> reservations = reservationRepository
+                .findByThemeIdAndMemberIdAndDateGreaterThanEqualAndDateLessThanEqual(
+                        reservationSearchFilter.themeId(),
+                        reservationSearchFilter.memberId(),
+                        reservationSearchFilter.dateFrom(),
+                        reservationSearchFilter.dateTo()
+                );
         return ReservationDto.from(reservations);
     }
 
     public void deleteReservation(Long id) {
-        boolean deleted = reservationRepository.deleteById(id);
-        if (!deleted) {
+        try {
+            reservationRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id);
         }
     }

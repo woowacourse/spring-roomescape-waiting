@@ -1,15 +1,22 @@
 package roomescape.domain.repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Reservation;
-import roomescape.domain.repository.dto.ReservationSearchFilter;
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    Reservation save(Reservation reservation);
+
     List<Reservation> findAll();
 
-    Long save(Reservation reservation);
+    void deleteById(Long id);
 
-    boolean deleteById(Long id);
-
-    List<Reservation> searchWith(ReservationSearchFilter reservationSearchFilter);
+    List<Reservation> findByThemeIdAndMemberIdAndDateGreaterThanEqualAndDateLessThanEqual(
+            long themeId,
+            long memberId,
+            LocalDate dateFrom,
+            LocalDate dateTo
+    );
 }
