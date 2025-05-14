@@ -25,7 +25,7 @@ function render(data) {
 
         const theme = item.theme.name;
         const date = item.date;
-        const time = item.time.name;
+        const time = item.time.startAt;
         const status = item.statusText;
 
         row.insertCell(0).textContent = theme;
