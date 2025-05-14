@@ -1,13 +1,38 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.util.Objects;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@Entity
+@Table(name = "member")
 public class Member {
-    private final Long id;
-    private final MemberName name;
-    private final MemberEmail email;
-    private final MemberEncodedPassword password;
-    private final MemberRole role;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private MemberName name;
+
+    @Embedded
+    private MemberEmail email;
+
+    @Embedded
+    private MemberEncodedPassword password;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
+
+    protected Member() {
+    }
 
     public Member(
             final Long id,
@@ -17,10 +42,10 @@ public class Member {
             final MemberRole role
     ) {
         this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
+        this.name = Objects.requireNonNull(name);
+        this.email = Objects.requireNonNull(email);
+        this.password = Objects.requireNonNull(password);
+        this.role = Objects.requireNonNull(role);
     }
 
     public boolean isMatchPassword(final MemberPassword rawPassword, final PasswordEncoder encoder) {

@@ -1,9 +1,16 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.Size;
 import java.util.Objects;
 
-public record MemberName(String name) {
-
+@Embeddable
+public record MemberName(
+        @Column(nullable = false)
+        @Size(max = MemberName.MAXIMUM_NAME_LENGTH)
+        String name
+) {
     public static final int MAXIMUM_NAME_LENGTH = 5;
 
     public MemberName(final String name) {

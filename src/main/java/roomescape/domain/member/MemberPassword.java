@@ -1,10 +1,17 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.Size;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public record MemberPassword(String password) {
-
+@Embeddable
+public record MemberPassword(
+        @Column(nullable = false)
+        @Size(max = MemberPassword.MAXIMUM_PASSWORD_LENGTH)
+        String password
+) {
     private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
     private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[!@#$%^&*(),.?\":{}|<>]");
     private static final Pattern LETTER_PATTERN = Pattern.compile("[A-Za-z]");

@@ -1,5 +1,13 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
@@ -7,13 +15,28 @@ import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 
+@Entity
+@Table(name = "reservation")
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final ReservationDate reservationDate;
-    private final ReservationTime reservationTime;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Member member;
+
+    @Embedded
+    private ReservationDate reservationDate;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private ReservationTime reservationTime;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Theme theme;
+
+    protected Reservation() {
+    }
 
     public Reservation(
             final Long id,
@@ -22,17 +45,11 @@ public class Reservation {
             final ReservationTime reservationTime,
             final Theme theme
     ) {
-        this.id = Objects.requireNonNull(id, "id는 null일 수 없습니다.");
-        this.member = Objects.requireNonNull(
-                member,
-                "예약자 이름은 null일 수 없습니다."
-        );
-        this.reservationDate = Objects.requireNonNull(
-                reservationDate,
-                "예약일은 null일 수 없습니다."
-        );
-        this.reservationTime = Objects.requireNonNull(reservationTime, "예약 시간은 null일 수 없습니다.");
-        this.theme = Objects.requireNonNull(theme, "테마는 null일 수 없습니다.");
+        this.id = id;
+        this.member = Objects.requireNonNull(member);
+        this.reservationDate = Objects.requireNonNull(reservationDate);
+        this.reservationTime = Objects.requireNonNull(reservationTime);
+        this.theme = Objects.requireNonNull(theme);
     }
 
     public Long getId() {
@@ -44,7 +61,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return reservationDate.getDate();
+        return reservationDate.date();
     }
 
     public LocalTime getStartAt() {

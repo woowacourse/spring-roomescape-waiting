@@ -1,8 +1,16 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.Size;
 import java.util.Objects;
 
-public record ThemeName(String name) {
+@Embeddable
+public record ThemeName(
+        @Column(nullable = false)
+        @Size(max = ThemeName.MAX_NAME_LENGTH)
+        String name
+) {
     private static final int MAX_NAME_LENGTH = 5;
 
     public ThemeName(final String name) {

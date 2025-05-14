@@ -27,7 +27,7 @@ public class ReservationDateTime {
             final Clock clock
     ) {
         LocalDateTime reservationDateTime = LocalDateTime.of(
-                reservationDate.getDate(),
+                reservationDate.date(),
                 reservationTime.getStartAt()
         );
         LocalDateTime now = LocalDateTime.now(clock);
