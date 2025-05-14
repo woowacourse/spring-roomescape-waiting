@@ -4,10 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.repository.ReservationRepository;
 import roomescape.business.model.vo.Id;
 
+@Primary
+@Repository
 public class JpaReservationRepository implements ReservationRepository {
 
     private final JpaReservationDao dao;
@@ -43,17 +47,17 @@ public class JpaReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existByTimeId(Id timeId) {
-        return dao.existByTimeId(timeId);
+        return dao.existsByTimeId(timeId);
     }
 
     @Override
     public boolean existByThemeId(Id themeId) {
-        return dao.existByThemeId(themeId);
+        return dao.existsByThemeId(themeId);
     }
 
     @Override
     public boolean isDuplicateDateAndTimeAndTheme(LocalDate date, LocalTime time, Id themeId) {
-        return dao.existsByDateAndTimeAndTheme(date, time, themeId);
+        return dao.existsByDateValueAndTimeStartTimeValueAndThemeId(date, time, themeId);
     }
 
     @Override

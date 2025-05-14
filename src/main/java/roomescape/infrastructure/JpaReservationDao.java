@@ -19,8 +19,8 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
               JOIN FETCH r.user u
              WHERE (:themeId  IS NULL OR t.id    = :themeId)
                AND (:userId   IS NULL OR u.id    = :userId)
-               AND (:dateFrom IS NULL OR r.date >= :dateFrom)
-               AND (:dateTo   IS NULL OR r.date <= :dateTo)
+               AND (:dateFrom IS NULL OR r.date.value >= :dateFrom)
+               AND (:dateTo   IS NULL OR r.date.value <= :dateTo)
             """)
     List<Reservation> findAllWithFilter(
             @Param("themeId") Id themeId,
@@ -29,20 +29,9 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
             @Param("dateTo") LocalDate dateTo
     );
 
-    @Query("""
-            SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END 
-              FROM Reservation r
-             WHERE r.date      = :date
-               AND r.time.startTime = :time
-               AND r.theme.id  = :themeId
-            """)
-    boolean existsByDateAndTimeAndTheme(
-            @Param("date") LocalDate date,
-            @Param("time") LocalTime time,
-            @Param("themeId") Id themeId
-    );
+    boolean existsByDateValueAndTimeStartTimeValueAndThemeId(LocalDate date, LocalTime time, Id themeId);
 
-    boolean existByTimeId(Id timeId);
+    boolean existsByTimeId(Id timeId);
 
-    boolean existByThemeId(Id themeId);
+    boolean existsByThemeId(Id themeId);
 }

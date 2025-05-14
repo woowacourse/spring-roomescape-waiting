@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ReservationDate;
+import roomescape.business.model.vo.StartTime;
 
 public interface JpaThemeDao extends JpaRepository<Theme, Id> {
 
@@ -15,7 +17,7 @@ public interface JpaThemeDao extends JpaRepository<Theme, Id> {
             SELECT t
               FROM Reservation r
               JOIN r.theme t
-             WHERE r.date BETWEEN :start AND :end
+             WHERE r.date.value BETWEEN :start AND :end
              GROUP BY t
              ORDER BY COUNT(r) DESC
             """)
