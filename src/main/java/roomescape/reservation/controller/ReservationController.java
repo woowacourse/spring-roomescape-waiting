@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,10 +63,10 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/filtered")
+    @GetMapping("/filtered")
     @RoleRequired(roleType = RoleType.ADMIN)
     public ResponseEntity<List<ReservationReadFilteredResponse>> getFilteredReservations(
-            @RequestBody @Valid ReservationReadFilteredRequest request
+            @ModelAttribute @Valid ReservationReadFilteredRequest request
     ) {
         List<ReservationReadFilteredResponse> responses = reservationService.getFilteredReservations(request);
         return ResponseEntity.ok(responses);

@@ -200,19 +200,13 @@ function applyFilter(event) {
     TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
       요청 포맷에 맞게 설정
     */
-    const requestBody = {
-        themeId: themeId || null,
-        memberId: memberId || null,
-        dateFrom: dateFrom || null,
-        dateTo: dateTo || null
-    };
+    const filteredUrl = `/reservations/filtered?themeId=${themeId}&memberId=${memberId}&dateFrom=${dateFrom}&dateTo=${dateTo}`;
 
-    fetch('/reservations/filtered', {
-        method: 'POST',
+    fetch(filteredUrl, {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(requestBody)
     }).then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');

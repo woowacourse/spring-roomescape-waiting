@@ -167,8 +167,11 @@ class ReservationAcceptanceTest {
                 LocalDate.now().plusDays(7)
         );
 
+        String url = String.format("/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
+                1L, 1L, LocalDate.now(), LocalDate.now().plusDays(7));
+
         // when & then
-        TestHelper.postWithToken("/reservations/filtered", filterRequest, token)
+        TestHelper.getWithToken(url, token)
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(1))
