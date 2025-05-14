@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import roomescape.common.exception.BusinessException;
 
 @Entity
 public class Member {
@@ -29,17 +28,6 @@ public class Member {
         this.name = name;
         this.email = email;
         this.password = password;
-    }
-
-    public static Member createWithId(final Long id, String name, String email, String password) {
-        validateIdIsNonNull(id);
-        return new Member(id, new Name(name), new Email(email), new Password(password));
-    }
-
-    private static void validateIdIsNonNull(final Long id) {
-        if (id == null) {
-            throw new BusinessException("회원 id는 null일 수 없습니다.");
-        }
     }
 
     public static Member createWithoutId(String name, String email, String password) {

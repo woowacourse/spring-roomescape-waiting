@@ -5,13 +5,20 @@ import java.util.Objects;
 import roomescape.member.exception.EmailException;
 
 @Embeddable
-public record Email(String email) {
+public class Email {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
-    public Email {
+    private String email;
+
+    public Email() {
+    }
+
+    public Email(final String email) {
         validateEmailIsNonBlank(email);
         validateEmailFormat(email);
+
+        this.email = email;
     }
 
     private void validateEmailIsNonBlank(final String email) {

@@ -5,11 +5,18 @@ import java.util.Objects;
 import roomescape.member.exception.NameException;
 
 @Embeddable
-public record Name(String name) {
+public class Name {
 
-    public Name {
+    private String name;
+
+    public Name() {
+    }
+
+    public Name(final String name) {
         validateNameIsNonEmpty(name);
         validateNameLength(name);
+
+        this.name = name;
     }
 
     private void validateNameIsNonEmpty(final String name) {

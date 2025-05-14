@@ -5,10 +5,17 @@ import java.util.Objects;
 import roomescape.member.exception.PasswordException;
 
 @Embeddable
-public record Password(String password) {
+public class Password {
 
-    public Password {
+    private String password;
+
+    public Password() {
+    }
+
+    public Password(final String password) {
         validatePasswordIsNonEmpty(password);
+
+        this.password = password;
     }
 
     private void validatePasswordIsNonEmpty(final String password) {
