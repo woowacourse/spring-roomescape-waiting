@@ -11,12 +11,10 @@ spring:
     url: jdbc:h2:mem:testdb
     username: test
     password: password
-  # DB initialization
-  sql:
-    init:
-      mode: embedded
-      schema-locations: classpath:schema.sql
-      data-locations: classpath:data.sql
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
 
 security:
   jwt:

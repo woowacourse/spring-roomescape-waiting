@@ -46,7 +46,8 @@ public class ReservationService {
         final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
 
         final Long id = reservationCommandRepository.save(reservation);
-        final Reservation found = reservationQueryRepository.getById(id);
+        final Reservation found = reservationQueryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
 
         return ReservationResponse.from(found);
     }
@@ -70,7 +71,8 @@ public class ReservationService {
     }
 
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
-        final Reservation reservation = reservationQueryRepository.getById(reservationId);
+        final Reservation reservation = reservationQueryRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
         final Member member = memberQueryRepository.findById(memberAuthInfo.id())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
@@ -110,7 +112,7 @@ public class ReservationService {
             final AvailableReservationTimeRequest request
     ) {
         final List<ReservationTime> reservationTimes = reservationTimeQueryRepository.findAll();
-        final List<LocalTime> bookedTimes = reservationQueryRepository.findReservationsByDateAndThemeId(
+        final List<LocalTime> bookedTimes = reservationQueryRepository.findAllByDateAndThemeId(
                         request.date(),
                         request.themeId()
                 ).stream()
