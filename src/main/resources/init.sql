@@ -12,7 +12,7 @@ INSERT INTO member (name, email, password) VALUES ('유저3', 'member3@email.com
 
 INSERT INTO admin (name, email, password) VALUES ('어드민', 'admin@email.com', 'password');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-04-28', 1, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-04-28', 2, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-04-26', 1, 3, 2);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-04-18', 1, 2, 3);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-05-13', 1, 1, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-05-13', 2, 1, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-05-01', 1, 3, 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2025-05-12', 1, 2, 3);
