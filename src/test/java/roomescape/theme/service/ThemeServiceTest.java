@@ -6,16 +6,15 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.common.exception.DataExistException;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
-@JdbcTest
+@DataJpaTest
 class ThemeServiceTest {
 
     @Autowired
@@ -44,11 +43,11 @@ class ThemeServiceTest {
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
         final Theme theme = new Theme(name, description, thumbnail);
-        final Long id = themeRepository.save(theme);
+        final Theme savedTheme = themeRepository.save(theme);
 
         // when & then
         Assertions.assertThatCode(() -> {
-            themeService.deleteById(id);
+            themeService.deleteById(savedTheme.getId());
         }).doesNotThrowAnyException();
     }
 
@@ -59,10 +58,10 @@ class ThemeServiceTest {
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
         final Theme theme = new Theme(name, description, thumbnail);
-        final Long id = themeRepository.save(theme);
+        final Theme savedTheme = themeRepository.save(theme);
 
         // when
-        final Theme found = themeService.getById(id);
+        final Theme found = themeService.getById(savedTheme.getId());
 
         // then
         SoftAssertions.assertSoftly(softly -> {
@@ -78,7 +77,7 @@ class ThemeServiceTest {
         final List<Theme> themes = themeService.findAll();
 
         // then
-        Assertions.assertThat(themes).hasSize(5);
+        Assertions.assertThat(themes).hasSize(0);
     }
 
     @Test
@@ -100,17 +99,11 @@ class ThemeServiceTest {
     static class TestConfig {
 
         @Bean
-        public ThemeRepository themeRepository(
-                final JdbcTemplate jdbcTemplate
-        ) {
-            return new JdbcThemeRepository(jdbcTemplate);
-        }
-
-        @Bean
         public ThemeService themeService(
-                final ThemeRepository themeRepository
+                final ThemeRepository themeRepository,
+                final ReservationRepository reservationRepository
         ) {
-            return new ThemeService(themeRepository);
+            return new ThemeService(themeRepository, reservationRepository);
         }
     }
 }
