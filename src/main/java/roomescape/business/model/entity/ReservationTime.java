@@ -1,5 +1,8 @@
 package roomescape.business.model.entity;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -13,12 +16,19 @@ import roomescape.business.model.vo.StartTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 @Getter
+@Entity
 public class ReservationTime {
 
     private static final int MINUTE_INTERVAL = 30;
 
+    @EmbeddedId
     private final Id id;
-    private final StartTime startTime;
+    @Embedded
+    private StartTime startTime;
+
+    public ReservationTime() {
+        id = Id.issue();
+    }
 
     public static ReservationTime create(final LocalTime startTime) {
         return new ReservationTime(Id.issue(), new StartTime(startTime));

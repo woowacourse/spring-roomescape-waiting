@@ -1,5 +1,9 @@
 package roomescape.business.model.entity;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -15,13 +19,23 @@ import roomescape.business.model.vo.UserRole;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 @Getter
+@Entity
+@Table(name = "users")
 public class User {
 
+    @EmbeddedId
     private final Id id;
-    private final UserRole userRole;
-    private final UserName name;
-    private final Email email;
-    private final Password password;
+    private UserRole userRole;
+    @Embedded
+    private UserName name;
+    @Embedded
+    private Email email;
+    @Embedded
+    private Password password;
+
+    public User() {
+        id = Id.issue();
+    }
 
     public static User create(final String name, final String email, final String password) {
         return new User(Id.issue(), UserRole.USER, new UserName(name), new Email(email), Password.encode(password));
