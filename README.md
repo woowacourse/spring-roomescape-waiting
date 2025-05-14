@@ -52,5 +52,5 @@
         }
     ]
     ```
-- [ ] 화면 응답
+- [x] 화면 응답
   - [2단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/849391b31f2dfa359e851e95f5f2a64e21650cc8)
