@@ -19,6 +19,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.request.AdminCreateReservationRequest;
 import roomescape.service.request.ReservationCreateRequest;
+import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
 
 @Service
@@ -118,5 +119,10 @@ public class ReservationService {
                 .and(ReservationSpecifications.dateBeforeOrEqual(toDate));
 
         return ReservationResponse.from(reservationRepository.findAll(spec));
+    }
+
+    public List<MyReservationResponse> findAllMyReservation(final Long id) {
+        List<Reservation> reservations = reservationRepository.findByMember_Id(id);
+        return MyReservationResponse.from(reservations);
     }
 }

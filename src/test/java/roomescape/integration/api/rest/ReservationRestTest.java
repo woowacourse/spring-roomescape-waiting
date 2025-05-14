@@ -15,6 +15,8 @@ import roomescape.integration.api.RestLoginMember;
 
 class ReservationRestTest extends RestAssuredTestBase {
 
+    public static final LocalDate RESERVATION_DATE = LocalDate.now(FIXED_CLOCK).plusDays(1);
+    public static final String THEME_NAME = "어드벤처";
     private Integer timeId;
     private Integer themeId;
     private RestLoginMember restLoginMember;
@@ -33,7 +35,7 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .contentType(ContentType.JSON)
                 .cookie("JSESSIONID", restLoginMember.sessionId())
                 .body(Map.of(
-                        "name", "어드벤처",
+                        "name", THEME_NAME,
                         "description", "정글 탐험 컨셉",
                         "thumbnail", "https://example.com/adventure.jpg"
                 ))
@@ -58,7 +60,7 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .statusCode(201)
                 .body("id", is(1))
                 .body("name", is("홍길동"))
-                .body("date", is(LocalDate.now(FIXED_CLOCK).plusDays(1).toString()))
+                .body("date", is(RESERVATION_DATE.toString()))
                 .body("time.startAt", is("10:00"))
                 .body("theme.name", is("어드벤처"));
     }
@@ -109,5 +111,21 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .when().delete("/reservations/{id}", 1)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    void 내_예약을_조회한다() {
+        예약을_생성한다();
+        RestAssured.given().log().all()
+                .cookie("JSESSIONID", restLoginMember.sessionId())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].reservationId", is(1))
+                .body("[0].theme", is(THEME_NAME))
+                .body("[0].date", is(RESERVATION_DATE.toString()))
+                .body("[0].time", is("10:00"))
+                .body("[0].status", is("예약"));
     }
 }

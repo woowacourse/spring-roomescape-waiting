@@ -19,4 +19,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     boolean existsByTheme_Id(final Long themeId);
 
     List<Reservation> findAll();
+
+    List<Reservation> findByMember_Id(final Long memberId);
 }

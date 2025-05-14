@@ -28,12 +28,18 @@ import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThemeThumbnail;
 import roomescape.domain.time.ReservationTime;
+import roomescape.integration.fixture.MemberDbFixture;
+import roomescape.integration.fixture.ReservationDbFixture;
+import roomescape.integration.fixture.ReservationTimeDbFixture;
+import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationCreateRequest;
+import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
 
 @Transactional
@@ -59,6 +65,16 @@ class ReservationServiceTest {
     private ReservationService service;
 
     private final LocalTime time = LocalTime.of(10, 0);
+    @Autowired
+    private ReservationDbFixture reservationDbFixture;
+    @Autowired
+    private MemberDbFixture memberDbFixture;
+    @Autowired
+    private ReservationTimeDbFixture reservationTimeDbFixture;
+    @Autowired
+    private ThemeDbFixture themeDbFixture;
+    @Autowired
+    private MemberService memberService;
 
     @Test
     void 모든_예약을_조회한다() {
@@ -245,5 +261,28 @@ class ReservationServiceTest {
     void 삭제할_예약이_없으면_예외() {
         assertThatThrownBy(() -> service.deleteReservationById(999L))
                 .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void 내_예약_조회() {
+        // given
+        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        ReservationTime 예약시간_10시 = reservationTimeDbFixture.예약시간_10시();
+        Theme 공포 = themeDbFixture.공포();
+        Reservation reservation = reservationDbFixture.예약_25_4_22(예약시간_10시, 공포, 한스);
+
+        // when
+        List<MyReservationResponse> all = service.findAllMyReservation(한스.getId());
+
+        // then
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(all).hasSize(1);
+            MyReservationResponse response = all.get(0);
+            softly.assertThat(response.reservationId()).isEqualTo(reservation.getId());
+            softly.assertThat(response.theme()).isEqualTo(reservation.getTheme().getName().name());
+            softly.assertThat(response.date()).isEqualTo(reservation.getDate());
+            softly.assertThat(response.time()).isEqualTo(reservation.getStartAt());
+            softly.assertThat(response.status()).isEqualTo("예약");
+        });
     }
 }

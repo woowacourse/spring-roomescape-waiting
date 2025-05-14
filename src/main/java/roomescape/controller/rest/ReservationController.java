@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.dto.SessionMember;
 import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationCreateRequest;
+import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
 
 @RestController
@@ -45,6 +46,14 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationResponse>> findMyReservation(
+            final SessionMember sessionMember
+    ) {
+        final List<MyReservationResponse> response = reservationService.findAllMyReservation(sessionMember.id());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getReservationsWithFilter(
             @RequestParam(required = false) final Long memberId,
@@ -52,7 +61,7 @@ public class ReservationController {
             @RequestParam(required = false) final LocalDate fromDate,
             @RequestParam(required = false) final LocalDate toDate
     ) {
-        List<ReservationResponse> responses = reservationService.findAllReservationsWithFilter(
+        final List<ReservationResponse> responses = reservationService.findAllReservationsWithFilter(
                 memberId,
                 themeId,
                 fromDate,
