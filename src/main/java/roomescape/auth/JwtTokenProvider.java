@@ -26,7 +26,8 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .subject(member.id().toString())
-                .claim("ROLE", member.role())
+                .claim("name", member.name())
+                .claim("role", member.role())
                 .expiration(expirationDate)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
@@ -47,8 +48,17 @@ public class JwtTokenProvider {
         }
 
         Claims claims = extractAllClaimsFromToken(token);
-        String role = (String) claims.get("ROLE");
+        String role = (String) claims.get("role");
         return MemberRole.of(role);
+    }
+
+    public String  extractMemberNameFromToken(final String token) {
+        if (token == null || token.isBlank()) {
+            throw new UnAuthorizedException();
+        }
+
+        Claims claims = extractAllClaimsFromToken(token);
+        return (String) claims.get("name");
     }
 
     private Claims extractAllClaimsFromToken(final String token) {

@@ -30,7 +30,7 @@ public class AuthController {
         this.memberService = memberService;
     }
 
-    @PostMapping("/login") //TODO: 응답 형식 고려
+    @PostMapping("/login")
     public ResponseEntity<LoginMemberResponse> login(@RequestBody LoginMemberRequest loginMemberRequest, HttpServletResponse response) {
         MemberResult memberResult = memberService.login(loginMemberRequest.toServiceParam());
         String token = jwtTokenProvider.createToken(memberResult);
@@ -42,10 +42,9 @@ public class AuthController {
     @GetMapping("/login/check")
     public ResponseEntity<CheckLoginUserResponse> loginCheck(@CookieValue("token") Cookie cookie) {
         String token = cookieProvider.extractTokenFromCookie(cookie);
-        Long id = jwtTokenProvider.extractIdFromToken(token);
+        String name = jwtTokenProvider.extractMemberNameFromToken(token);
 
-        // TODO: DB 접근하지 않고 Claim 정보를 사용하도록 리팩터링 고려
-        return ResponseEntity.ok().body(CheckLoginUserResponse.from(memberService.findById(id)));
+        return ResponseEntity.ok().body(new CheckLoginUserResponse(name));
     }
 
     @PostMapping("/logout")
