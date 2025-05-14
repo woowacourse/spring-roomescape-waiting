@@ -26,6 +26,7 @@ import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
@@ -35,7 +36,6 @@ import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeCommandRepository;
 import roomescape.theme.domain.ThemeQueryRepository;
-
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -74,11 +74,12 @@ class ReservationServiceTest {
         final Long themeId = themeCommandRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberQueryRepository.findById(memberCommandRepository.save(NOT_SAVED_MEMBER_1()))
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-        final CreateReservationRequest request = new CreateReservationRequest(date, timeId, themeId);
+        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, timeId,
+                themeId);
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatCode(() -> reservationService.create(request, memberAuthInfo))
+        Assertions.assertThatCode(() -> reservationService.create(request, memberAuthInfo.id()))
                 .doesNotThrowAnyException();
     }
 
@@ -96,7 +97,8 @@ class ReservationServiceTest {
         final Member member1 = memberQueryRepository.findById(memberId1)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1);
+        final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
+                ReservationStatus.CONFIRMED);
         final Long reservationId = reservationCommandRepository.save(reservation);
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
@@ -122,7 +124,8 @@ class ReservationServiceTest {
         final Member member2 = memberQueryRepository.findById(memberId2)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1);
+        final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
+                ReservationStatus.CONFIRMED);
         final Long reservationId = reservationCommandRepository.save(reservation);
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
@@ -166,7 +169,8 @@ class ReservationServiceTest {
                 .stream()
                 .filter(AvailableReservationTimeResponse::alreadyBooked)
                 .count();
-        reservationCommandRepository.save(new Reservation(date, reservationTime1, theme, member));
+        reservationCommandRepository.save(
+                new Reservation(date, reservationTime1, theme, member, ReservationStatus.CONFIRMED));
 
         // when
         final long afterCount = reservationService.findAvailableReservationTimes(request)
@@ -192,13 +196,15 @@ class ReservationServiceTest {
         final Member member = memberQueryRepository.findById(memberCommandRepository.save(NOT_SAVED_MEMBER_1()))
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        reservationCommandRepository.save(new Reservation(date, reservationTime, theme, member));
+        reservationCommandRepository.save(
+                new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
 
-        final CreateReservationRequest request = new CreateReservationRequest(date, timeId, themeId);
+        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, timeId,
+                themeId);
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo))
+        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
                 .isInstanceOf(AlreadyExistException.class);
     }
 
@@ -215,13 +221,15 @@ class ReservationServiceTest {
         final Member member = memberQueryRepository.findById(memberCommandRepository.save(NOT_SAVED_MEMBER_1()))
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        final CreateReservationRequest request = new CreateReservationRequest(date, timeId, themeId);
+        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, timeId,
+                themeId);
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
-        reservationCommandRepository.save(new Reservation(date, reservationTime, theme, member));
+        reservationCommandRepository.save(
+                new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo))
+        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
                 .isInstanceOf(AlreadyExistException.class);
     }
 
@@ -237,7 +245,7 @@ class ReservationServiceTest {
         final Member member1 = memberQueryRepository.findById(memberId1)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        return new Reservation(date, reservationTime1, theme1, member1);
+        return new Reservation(date, reservationTime1, theme1, member1, ReservationStatus.CONFIRMED);
     }
 
     private Reservation createNotSavedReservation2() {
@@ -252,6 +260,6 @@ class ReservationServiceTest {
         final Member member2 = memberQueryRepository.findById(memberId2)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        return new Reservation(date, reservationTime2, theme2, member2);
+        return new Reservation(date, reservationTime2, theme2, member2, ReservationStatus.CONFIRMED);
     }
 }

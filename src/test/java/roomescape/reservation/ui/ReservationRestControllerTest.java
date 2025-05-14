@@ -90,7 +90,7 @@ class ReservationRestControllerTest {
 
         RestAssured.given().log().all()
                 .cookies(adminCookies)
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", is(1));
@@ -103,7 +103,7 @@ class ReservationRestControllerTest {
 
         RestAssured.given().log().all()
                 .cookies(adminCookies)
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", is(0));
@@ -129,7 +129,7 @@ class ReservationRestControllerTest {
         final int sizeBeforeCreate = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().path("size()");
@@ -145,7 +145,7 @@ class ReservationRestControllerTest {
         final int sizeAfterCreate = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
