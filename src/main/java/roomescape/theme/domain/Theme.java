@@ -21,7 +21,6 @@ public class Theme {
     private String thumbnail;
 
     public Theme(String name, String description, String thumbnail) {
-        this.id = null;
         this.name = Objects.requireNonNull(name);
         this.description = Objects.requireNonNull(description);
         this.thumbnail = Objects.requireNonNull(thumbnail);
