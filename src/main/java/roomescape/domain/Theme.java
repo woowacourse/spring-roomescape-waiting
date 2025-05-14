@@ -3,21 +3,32 @@ package roomescape.domain;
 import jakarta.persistence.*;
 
 @Entity
-public record Theme(
+public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id,
-    @Column(unique = true, nullable = false)
-    String name,
-    @Column(nullable = false)
-    String description,
-    @Column(nullable = false)
-    String thumbnail) {
+    private Long id;
 
-    public Theme {
+    private String name;
+
+    private String description;
+
+    private String thumbnail;
+
+    public Theme(
+            Long id,
+            String name,
+            String description,
+            String thumbnail) {
         validateName(name);
         validateDescription(description);
         validateThumbnail(thumbnail);
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
+    }
+
+    public Theme() {
     }
 
     private void validateName(String name) {
@@ -36,5 +47,21 @@ public record Theme(
         if (thumbnail == null) {
             throw new IllegalArgumentException("[ERROR] 테마 이미지가 없습니다.");
         }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
     }
 }
