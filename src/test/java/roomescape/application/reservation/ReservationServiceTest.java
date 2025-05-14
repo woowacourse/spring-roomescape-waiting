@@ -121,16 +121,18 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    void 중복된_예약은_불가능하다() {
+    void 같은_날짜와_같은_시간과_같은_테마에_예약이_존재한다면_예약을_생성하면_예외가_발생한다() {
         // given
         Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-
         reservationRepository.save(new Reservation(member, LocalDate.now(clock), time, theme));
-
-        CreateReservationParam param = new CreateReservationParam(LocalDate.now(clock), time.getId(), theme.getId(),
-                member.getId());
+        CreateReservationParam param = new CreateReservationParam(
+                LocalDate.now(clock),
+                time.getId(),
+                theme.getId(),
+                member.getId()
+        );
 
         // when
         // then

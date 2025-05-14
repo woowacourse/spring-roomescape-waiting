@@ -47,7 +47,7 @@ public class ReservationService {
         Member member = getMemberById(createReservationParam.memberId());
         ReservationTime reservationTime = getReservationTimeById(createReservationParam.timeId());
         Theme theme = getThemeById(createReservationParam.themeId());
-        if (isAlreadyReservedAt(createReservationParam.date(), reservationTime)) {
+        if (isAlreadyReservedAt(createReservationParam.date(), reservationTime, theme)) {
             throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
         }
         Reservation reservation = new Reservation(
@@ -75,8 +75,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
     }
 
-    private boolean isAlreadyReservedAt(LocalDate date, ReservationTime reservationTime) {
-        return reservationRepository.existsByDateAndTimeId(date, reservationTime.getId());
+    private boolean isAlreadyReservedAt(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, reservationTime.getId(), theme.getId());
     }
 
     public void deleteById(Long reservationId) {
