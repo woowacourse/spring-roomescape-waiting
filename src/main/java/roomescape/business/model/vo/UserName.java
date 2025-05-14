@@ -4,8 +4,10 @@ import static roomescape.exception.ErrorCode.USER_NAME_CONTAINS_NUMBER;
 import static roomescape.exception.ErrorCode.USER_NAME_LENGTH_TOO_LONG;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
+@Embeddable
 public record UserName(
         @Column(name = "user_name")
         String value

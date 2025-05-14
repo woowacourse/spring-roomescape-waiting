@@ -1,9 +1,11 @@
 package roomescape.business.model.vo;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
+@Embeddable
 public record ThemeName(
         @Column(name = "theme_name")
         String value

@@ -3,9 +3,11 @@ package roomescape.business.model.vo;
 import static roomescape.exception.ErrorCode.EMAIL_FORMAT_INVALID;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
+@Embeddable
 public record Email(
         @Column(name = "email")
         String value

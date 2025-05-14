@@ -3,9 +3,11 @@ package roomescape.business.model.vo;
 import static roomescape.exception.ErrorCode.START_TIME_INVALID;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.time.LocalTime;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
+@Embeddable
 public record StartTime(
         @Column(name = "start_time")
         LocalTime value

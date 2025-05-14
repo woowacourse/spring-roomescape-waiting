@@ -1,9 +1,11 @@
 package roomescape.business.model.vo;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@Embeddable
 public record Password(
         @Column(name = "password")
         String value
