@@ -93,6 +93,13 @@ function signup() {
   window.location.href = '/signup';
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.getElementById('signup-form')) {
+        const signupForm = document.getElementById('signup-form');
+        signupForm.addEventListener('submit', register);
+    }
+});
+
 function register(event) {
   // 폼 데이터 수집
   const email = document.getElementById('email').value;
@@ -113,29 +120,27 @@ function register(event) {
   };
 
   // AJAX 요청 생성 및 전송
-  fetch('/members', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(formData)
-  })
-      .then(response => {
-        if (!response.ok) {
-          alert('Signup request failed');
-          throw new Error('Signup request failed');
-        }
-        return response.json(); // 여기서 응답을 JSON 형태로 변환
-      })
-      .then(data => {
-        // 성공적인 응답 처리
-        console.log('Signup successful:', data);
-        window.location.href = '/login';
-      })
-      .catch(error => {
-        // 에러 처리
-        console.error('Error during signup:', error);
-      });
+    fetch('/members', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+        .then(response => {
+            if (response.status !== 201) {
+                return response.json().then(error => {
+                    throw new Error(error.message); // 에러 메시지를 실제로 추출
+                });
+            }
+        })
+        .then(data => {
+            // 성공적인 응답 처리
+            window.location.href = '/login';
+        })
+        .catch(error => {
+            alert(error.message);
+        });
 
   // 폼 제출에 의한 페이지 리로드 방지
   event.preventDefault();

@@ -30,6 +30,10 @@ public class Member {
         this(null, name, email, password, role);
     }
 
+    public Member(String name, Email email, String password) {
+        this(null, name, email, password, Role.NORMAL);
+    }
+
     public Member(Long id, String name, Email email, String password, Role role) {
         this.id = id;
         this.name = name;
