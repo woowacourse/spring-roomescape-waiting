@@ -2,42 +2,45 @@ package roomescape.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
-import roomescape.reservation.FakeReservationRepository;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeRepository;
 
+@ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
 
     private final ReservationTimeService reservationTimeService;
-    private final FakeReservationTimeRepository fakeReservationTimeRepository;
-    private final FakeReservationRepository fakeReservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     public ReservationTimeServiceTest() {
-        fakeReservationTimeRepository = new roomescape.reservationtime.FakeReservationTimeRepository();
-        fakeReservationRepository = new FakeReservationRepository();
-        reservationTimeService = new ReservationTimeService(fakeReservationTimeRepository, fakeReservationRepository);
+        reservationTimeRepository = mock(ReservationTimeRepository.class);
+        reservationRepository = mock(ReservationRepository.class);
+        themeRepository = mock(ThemeRepository.class);
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository,
+                themeRepository);
     }
-
-    @BeforeEach
-    void setUp() {
-        fakeReservationTimeRepository.clear();
-        fakeReservationRepository.clear();
-    }
-
 
     @Nested
     @DisplayName("예약 시간 생성")
@@ -47,33 +50,39 @@ public class ReservationTimeServiceTest {
         @Test
         void createTime1() {
             // given
-            final ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(12, 40));
+            final LocalTime startAt = LocalTime.of(12, 40);
+            final ReservationTimeRequest request = new ReservationTimeRequest(startAt);
+            given(reservationTimeRepository.existsByStartAt(startAt))
+                    .willReturn(false);
+            final ReservationTime reservationTime = new ReservationTime(1L, startAt);
+            given(reservationTimeRepository.save(new ReservationTime(startAt)))
+                    .willReturn(reservationTime);
 
             // when
             final ReservationTimeResponse actual = reservationTimeService.create(request);
 
             // then
-            assertSoftly(s -> {
-                s.assertThat(actual.id()).isEqualTo(1L);
-                s.assertThat(actual.startAt()).isEqualTo(LocalTime.of(12, 40));
-            });
+            assertThat(actual).isEqualTo(ReservationTimeResponse.from(reservationTime));
         }
 
         @DisplayName("이미 존재하는 시간이라면, 예외가 발생한다.")
         @Test
         void createTime2() {
             // given
-            final ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(12, 40));
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
+            final LocalTime startAt = LocalTime.of(12, 40);
+            final ReservationTimeRequest request = new ReservationTimeRequest(startAt);
+            given(reservationTimeRepository.existsByStartAt(startAt))
+                    .willReturn(true);
+            final ReservationTime reservationTime = new ReservationTime(1L, startAt);
+            given(reservationTimeRepository.save(new ReservationTime(startAt)))
+                    .willReturn(reservationTime);
 
             // when
             assertThatThrownBy(() -> {
                 reservationTimeService.create(request);
             }).isInstanceOf(ReservationTimeConflictException.class);
         }
-
     }
-
 
     @Nested
     @DisplayName("예약 시간 모두 조회")
@@ -83,7 +92,10 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllTime1() {
             // given
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
+            given(reservationTimeRepository.findAll())
+                    .willReturn(List.of(
+                            new ReservationTime(1L, LocalTime.of(12, 40))
+                    ));
 
             // when
             final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
@@ -97,7 +109,11 @@ public class ReservationTimeServiceTest {
         @DisplayName("저장된 TimeResponse이 없다면 빈 컬렉션을 반환한다.")
         @Test
         void findAllTime2() {
-            // given & when
+            // given
+            given(reservationTimeRepository.findAll())
+                    .willReturn(List.of());
+
+            // when
             final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
 
             // then
@@ -113,11 +129,19 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes() {
             // given
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 5)));
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 10)));
             final Long dummyThemeId = 1L;
+            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
+            given(reservationTimeRepository.findAll())
+                    .willReturn(List.of(
+                            new ReservationTime(1L,LocalTime.of(12, 0)),
+                            new ReservationTime(2L,LocalTime.of(13, 0)),
+                            new ReservationTime(3L,LocalTime.of(14, 0))
+                    ));
+            given(themeRepository.findById(dummyThemeId))
+                    .willReturn(Optional.of(theme));
+            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+                    .willReturn(List.of());
 
             // when
             final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
@@ -131,13 +155,24 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes1() {
             // given
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
             final Long dummyThemeId = 1L;
+            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
-            fakeReservationRepository.save(new Reservation(targetDate), 1L, dummyThemeId, 1L);
+            final ReservationTime savedTime = new ReservationTime(1L, LocalTime.of(12, 0));
+            given(reservationTimeRepository.findAll())
+                    .willReturn(List.of(
+                            savedTime
+                    ));
+            given(themeRepository.findById(dummyThemeId))
+                    .willReturn(Optional.of(theme));
+            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+                    .willReturn(List.of(
+                            new Reservation(1L, null, null, savedTime, theme))
+                    );
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(dummyThemeId, targetDate);
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+                    dummyThemeId, targetDate);
 
             // then
             assertThat(allAvailableTimes.getFirst().alreadyBooked()).isTrue();
@@ -147,12 +182,20 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes2() {
             // given
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
             final Long dummyThemeId = 1L;
+            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
-
+            given(reservationTimeRepository.findAll())
+                    .willReturn(List.of(
+                            new ReservationTime(1L,LocalTime.of(12, 0))
+                    ));
+            given(themeRepository.findById(dummyThemeId))
+                    .willReturn(Optional.of(theme));
+            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+                    .willReturn(List.of());
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(dummyThemeId, targetDate);
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+                    dummyThemeId, targetDate);
 
             // then
             assertThat(allAvailableTimes.getFirst().alreadyBooked()).isFalse();
@@ -169,19 +212,28 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById1() {
             // given
-            fakeReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(12, 40)));
+            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
+            given(reservationTimeRepository.findById(reservationTime.getId()))
+                    .willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByReservationTime(reservationTime))
+                    .willReturn(false);
 
             // when
             reservationTimeService.deleteById(1L);
 
             // then
-            assertThat(fakeReservationTimeRepository.isInvokeDeleteId(1L)).isTrue();
+            then(reservationTimeRepository).should().delete(reservationTime);
         }
 
         @DisplayName("id에 해당하는 time이 없다면 예외가 발생한다.")
         @Test
         void deleteTimeById2() {
-            // given & when & then
+            // given
+            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
+            given(reservationTimeRepository.findById(reservationTime.getId()))
+                    .willReturn(Optional.empty());
+
+            // when & then
             assertThatThrownBy(() -> {
                 reservationTimeService.deleteById(1L);
             }).isInstanceOf(ReservationTimeNotFoundException.class);
@@ -191,10 +243,11 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById3() {
             // given
-            fakeReservationRepository.save(new Reservation(
-                    LocalDate.of(2026, 12, 01)), 1L, 1L, 1L
-            );
-            fakeReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 40)));
+            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
+            given(reservationTimeRepository.findById(reservationTime.getId()))
+                    .willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByReservationTime(reservationTime))
+                    .willReturn(true);
 
             // when & then
             assertThatThrownBy(() -> {

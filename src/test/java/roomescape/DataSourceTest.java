@@ -94,7 +94,7 @@ public class DataSourceTest {
         jdbcTemplate.update("INSERT INTO member (name, email, password, role) VALUES (?, ?, ?, ?)", "name", "email@email.com", "password", "MEMBER");
         jdbcTemplate.update("INSERT INTO THEME (name, description, thumbnail) VALUES (?, ?, ?)", "name", "dest", "thumb");
         jdbcTemplate.update("INSERT INTO RESERVATION_TIME (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO RESERVATION (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)", "2023-08-05",
+        jdbcTemplate.update("INSERT INTO RESERVATION (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)", "2023-08-05",
                 "1", "1", "1");
         final Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 

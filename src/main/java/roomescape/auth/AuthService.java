@@ -16,19 +16,11 @@ public class AuthService {
     private final JwtProvider jwtProvider;
 
     public String generateToken(final LoginRequest loginRequest) {
-        validateExistsMemberByEmail(loginRequest.email());
-
         final Member memberByEmail = memberRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new AuthNotExistsEmailException());
         validatePassword(loginRequest, memberByEmail);
 
         return jwtProvider.provideToken(memberByEmail.getEmail(), memberByEmail.getRole(), memberByEmail.getName());
-    }
-
-    private void validateExistsMemberByEmail(final String email) {
-        if (!memberRepository.existsByEmail(email)) {
-            throw new AuthNotExistsEmailException();
-        }
     }
 
     private void validatePassword(final LoginRequest loginRequest, final Member memberByEmail) {
