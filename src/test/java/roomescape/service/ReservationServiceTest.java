@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import roomescape.domain.*;
 import roomescape.exception.NotFoundReservationException;
 import roomescape.exception.NotFoundReservationTimeException;
-import roomescape.exception.UnAvailableReservationException;
+import roomescape.exception.UnableCreateReservationException;
 import roomescape.fake.FakeMemberRepository;
 import roomescape.fake.FakeReservationRepository;
 import roomescape.fake.FakeReservationTimeRepository;
@@ -160,7 +160,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(1L, RESERVATION_DATE, 1L, 1L), LocalDateTime.now()))
-                .isInstanceOf(UnAvailableReservationException.class)
+                .isInstanceOf(UnableCreateReservationException.class)
                 .hasMessage("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
     }
 
@@ -174,7 +174,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(1L, reservationDateTime.toLocalDate(), 1L, 1L), currentDateTime))
-                .isInstanceOf(UnAvailableReservationException.class)
+                .isInstanceOf(UnableCreateReservationException.class)
                 .hasMessage("지난 날짜와 시간에 대한 예약은 불가능합니다.");
     }
 
@@ -188,7 +188,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(1L, reservationDateTime.toLocalDate(), 1L, 1L), currentDateTime))
-                .isInstanceOf(UnAvailableReservationException.class)
+                .isInstanceOf(UnableCreateReservationException.class)
                 .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
     }
 

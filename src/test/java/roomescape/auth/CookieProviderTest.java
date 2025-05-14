@@ -3,7 +3,7 @@ package roomescape.auth;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
-import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.UnauthorizedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -60,7 +60,7 @@ class CookieProviderTest {
     @Test
     void 쿠키가_null이면_예외가_발생한다() {
         assertThatThrownBy(() -> cookieProvider.extractTokenFromCookies(null))
-                .isInstanceOf(UnAuthorizedException.class);
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test
@@ -73,6 +73,6 @@ class CookieProviderTest {
 
         //when & then
         assertThatThrownBy(() -> cookieProvider.extractTokenFromCookies(cookies))
-                .isInstanceOf(UnAuthorizedException.class);
+                .isInstanceOf(UnauthorizedException.class);
     }
 }

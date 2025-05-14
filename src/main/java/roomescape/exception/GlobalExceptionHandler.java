@@ -23,20 +23,14 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "요청 형식이 올바르지 않습니다.");
     }
 
-    @ExceptionHandler(ReservationException.class)
-    public ProblemDetail handleReservationException(ReservationException e) {
-        log.error("예외 발생: ", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-
-    @ExceptionHandler(UnAuthorizedException.class)
-    public ProblemDetail handleUnAuthorizedException(UnAuthorizedException e) {
+    @ExceptionHandler(UnauthorizedException.class)
+    public ProblemDetail handleUnAuthorizedException(UnauthorizedException e) {
         log.error("예외 발생: ", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "인증 정보를 찾을 수 없습니다.");
     }
 
-    @ExceptionHandler(UnAvailableReservationException.class)
-    public ProblemDetail handleUnAvailableReservationException(UnAvailableReservationException e) {
+    @ExceptionHandler(UnableCreateReservationException.class)
+    public ProblemDetail handleUnAvailableReservationException(UnableCreateReservationException e) {
         log.error("예외 발생: ", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }

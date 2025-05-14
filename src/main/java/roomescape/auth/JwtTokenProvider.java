@@ -7,7 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.MemberRole;
-import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.service.result.MemberResult;
 
 import java.util.Date;
@@ -35,7 +35,7 @@ public class JwtTokenProvider {
 
     public Long extractIdFromToken(final String token) {
         if (token == null || token.isBlank()) {
-            throw new UnAuthorizedException();
+            throw new UnauthorizedException();
         }
 
         Claims claims = extractAllClaimsFromToken(token);
@@ -44,7 +44,7 @@ public class JwtTokenProvider {
 
     public MemberRole extractMemberRoleFromToken(final String token) {
         if (token == null || token.isBlank()) {
-            throw new UnAuthorizedException();
+            throw new UnauthorizedException();
         }
 
         Claims claims = extractAllClaimsFromToken(token);
@@ -54,7 +54,7 @@ public class JwtTokenProvider {
 
     public String  extractMemberNameFromToken(final String token) {
         if (token == null || token.isBlank()) {
-            throw new UnAuthorizedException();
+            throw new UnauthorizedException();
         }
 
         Claims claims = extractAllClaimsFromToken(token);
@@ -69,7 +69,7 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (JwtException e) {
-            throw new UnAuthorizedException();
+            throw new UnauthorizedException();
         }
     }
 }

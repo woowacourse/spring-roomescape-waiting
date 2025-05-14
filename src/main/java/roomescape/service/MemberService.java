@@ -6,7 +6,7 @@ import roomescape.exception.UnableCreateMemberException;
 import roomescape.persistence.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.exception.NotFoundMemberException;
-import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.service.param.LoginMemberParam;
 import roomescape.service.param.RegisterMemberParam;
 import roomescape.service.result.MemberResult;
@@ -28,7 +28,7 @@ public class MemberService {
                 .orElseThrow(() -> new NotFoundMemberException(loginMemberParam.email() + "에 해당하는 유저가 없습니다."));
 
         if (!Objects.equals(member.getPassword(), loginMemberParam.password())) {
-            throw new UnAuthorizedException("비밀 번호가 일치하지 않습니다.");
+            throw new UnauthorizedException("비밀 번호가 일치하지 않습니다.");
         }
 
         return MemberResult.from(member);

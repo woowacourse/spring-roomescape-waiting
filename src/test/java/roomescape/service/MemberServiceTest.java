@@ -3,7 +3,7 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.MemberRole;
 import roomescape.exception.NotFoundMemberException;
-import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.fake.FakeMemberRepository;
 import roomescape.persistence.query.CreateMemberQuery;
 import roomescape.service.param.LoginMemberParam;
@@ -36,7 +36,7 @@ class MemberServiceTest {
 
         //when & then
         assertThatThrownBy(() -> memberService.login(new LoginMemberParam("email1", "password2")))
-                .isInstanceOf(UnAuthorizedException.class)
+                .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("비밀 번호가 일치하지 않습니다.");
     }
 

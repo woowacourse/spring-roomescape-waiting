@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.domain.MemberRole;
-import roomescape.exception.UnAuthorizedException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.service.result.MemberResult;
 
 import java.util.Date;
@@ -61,7 +61,7 @@ class JwtTokenProviderTest {
 
         //when & then
         assertThatThrownBy(() -> jwtTokenProvider.extractIdFromToken(token))
-                .isInstanceOf(UnAuthorizedException.class);
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     private String generateValidToken(Long id) {

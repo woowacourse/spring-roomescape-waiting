@@ -14,7 +14,7 @@ import roomescape.exception.NotFoundMemberException;
 import roomescape.exception.NotFoundReservationException;
 import roomescape.exception.NotFoundReservationTimeException;
 import roomescape.exception.NotFoundThemeException;
-import roomescape.exception.UnAvailableReservationException;
+import roomescape.exception.UnableCreateReservationException;
 import roomescape.persistence.MemberRepository;
 import roomescape.persistence.ReservationRepository;
 import roomescape.persistence.ReservationTimeRepository;
@@ -94,18 +94,18 @@ public class ReservationService {
 
     private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
-            throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
+            throw new UnableCreateReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
     }
 
     private void validateReservationDateTime(final CreateReservationParam createReservationParam, final LocalDateTime currentDateTime, final ReservationTime reservationTime) {
         LocalDateTime reservationDateTime = LocalDateTime.of(createReservationParam.date(), reservationTime.getStartAt());
         if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new UnAvailableReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
+            throw new UnableCreateReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
         }
         Duration duration = Duration.between(currentDateTime, reservationDateTime);
         if (duration.toMinutes() < 10) {
-            throw new UnAvailableReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
+            throw new UnableCreateReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
         }
     }
 }
