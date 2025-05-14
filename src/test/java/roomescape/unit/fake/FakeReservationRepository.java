@@ -95,4 +95,11 @@ public class FakeReservationRepository implements ReservationRepository {
                 .filter(reservation -> reservation.getDate().minusDays(1).isBefore(dateTo))
                 .toList();
     }
+
+    @Override
+    public List<Reservation> findByMemberId(Long memberId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getMember().getId().equals(memberId))
+                .toList();
+    }
 }

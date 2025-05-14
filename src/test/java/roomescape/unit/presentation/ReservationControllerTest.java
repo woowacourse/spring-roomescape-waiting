@@ -2,6 +2,7 @@ package roomescape.unit.presentation;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,6 +22,7 @@ import roomescape.auth.AuthorizationExtractor;
 import roomescape.dto.request.ReservationCreateRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.ReservationWithStatusResponse;
 import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.presentation.ReservationController;
 import roomescape.service.ReservationService;
@@ -58,10 +61,31 @@ class ReservationControllerTest {
     }
 
     @Test
+    void 사용자가_예약을_조회한다() throws Exception {
+        // given
+
+        ReservationWithStatusResponse response = new ReservationWithStatusResponse(1L, "memberName1",
+                LocalDate.of(2025, 1, 1),
+                new ReservationTimeResponse(1L, LocalTime.of(9, 0)), "themeName1", "예약");
+
+        given(reservationService.findReservationByMemberId(1L)).willReturn(List.of(response));
+        given(tokenProvider.extractSubject("accessToken")).willReturn("1");
+        // when & then
+
+        mockMvc.perform(get("/api/reservations/my")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("token", "accessToken")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(List.of(response))));
+    }
+
+    @Test
     void 예약을_삭제하는데_성공한다() throws Exception {
         // when & then
         mockMvc.perform(delete("/api/reservations/{reservationId}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
+
+
 }

@@ -42,4 +42,9 @@ public class PageController {
     public String getSignUpPage() {
         return "signup";
     }
+
+    @GetMapping("/reservation-mine")
+    public String getMyReservationPage() {
+        return "reservation-mine";
+    }
 }

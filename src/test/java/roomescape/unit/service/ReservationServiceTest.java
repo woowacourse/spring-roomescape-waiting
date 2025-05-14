@@ -20,6 +20,7 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.request.ReservationCondition;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationWithStatusResponse;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.service.ReservationService;
@@ -53,11 +54,14 @@ class ReservationServiceTest {
         reservationTimeRepository.save(reservationTime1);
         Theme theme1 = new Theme(1L, "themeName1", "des", "th");
         themeRepository.save(theme1);
-        Member member1 = new Member(1L, "포라", "email1@domain.com", "password1", Role.MEMBER);
-        memberRepository.save(member1);
+        Member member1 = memberRepository.save(new Member(null, "포라", "email1@domain.com", "password1", Role.MEMBER));
+        Member member2 = memberRepository.save(new Member(null, "아마", "email2@domain.com", "password2", Role.MEMBER));
         Reservation reservation1 = Reservation.of(null, member1, LocalDate.of(2025, 7, 25),
                 reservationTime1, theme1);
         reservationRepository.save(reservation1);
+        Reservation reservation2 = Reservation.of(null, member2, LocalDate.of(2025, 7, 26),
+                reservationTime1, theme1);
+        reservationRepository.save(reservation2);
         // when
         List<ReservationResponse> all = reservationService.findReservations(
                 new ReservationCondition(theme1.getId(), member1.getId(), LocalDate.of(2025, 7, 25),
@@ -66,6 +70,26 @@ class ReservationServiceTest {
         // then
         assertThat(all.size()).isEqualTo(1);
         assertThat(all.get(0).memberName()).isEqualTo("포라");
+    }
+
+    @Test
+    void 샤용자가_예약을_조회할_수_있다() {
+        // given
+        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(10, 0));
+        reservationTimeRepository.save(reservationTime1);
+        Theme theme1 = new Theme(1L, "themeName1", "des", "th");
+        themeRepository.save(theme1);
+        Member member1 = new Member(1L, "포라", "email1@domain.com", "password1", Role.MEMBER);
+        memberRepository.save(member1);
+        Reservation reservation1 = Reservation.of(null, member1, LocalDate.of(2025, 7, 25),
+                reservationTime1, theme1);
+        reservationRepository.save(reservation1);
+        // when
+        List<ReservationWithStatusResponse> memberReservations = reservationService.findReservationByMemberId(1L);
+
+        // then
+        assertThat(memberReservations.size()).isEqualTo(1);
+        assertThat(memberReservations.get(0).memberName()).isEqualTo("포라");
     }
 
     @Test

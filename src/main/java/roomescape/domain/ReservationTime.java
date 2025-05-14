@@ -37,10 +37,6 @@ public class ReservationTime {
         }
     }
 
-    public ReservationTime withId(Long id) {
-        return new ReservationTime(id, startAt);
-    }
-
     public Long getId() {
         return id;
     }

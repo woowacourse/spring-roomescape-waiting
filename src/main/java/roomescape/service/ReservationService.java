@@ -13,6 +13,7 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.request.ReservationCondition;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationWithStatusResponse;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.MemberNotFoundException;
 import roomescape.exception.ReservationNotFoundException;
@@ -68,5 +69,11 @@ public class ReservationService {
     public void deleteReservationById(Long id) {
         reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.deleteById(id);
+    }
+
+    public List<ReservationWithStatusResponse> findReservationByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId).stream()
+                .map(ReservationWithStatusResponse::toDto)
+                .toList();
     }
 }

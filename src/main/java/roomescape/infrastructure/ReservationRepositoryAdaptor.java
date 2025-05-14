@@ -68,4 +68,9 @@ public class ReservationRepositoryAdaptor implements ReservationRepository {
     public List<Reservation> findByThemeId(Long themeId) {
         return jpaReservationRepository.findByThemeId(themeId);
     }
+
+    @Override
+    public List<Reservation> findByMemberId(Long memberId) {
+        return jpaReservationRepository.findByMemberId(memberId);
+    }
 }

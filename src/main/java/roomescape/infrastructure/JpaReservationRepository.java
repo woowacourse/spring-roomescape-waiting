@@ -21,4 +21,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
                                                              LocalDate dateTo);
+
+    List<Reservation> findByMemberId(Long memberId);
 }
