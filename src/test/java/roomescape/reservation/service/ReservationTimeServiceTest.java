@@ -6,19 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.JdbcReservationRepository;
-import roomescape.reservation.repository.JdbcReservationTimeRepository;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
-@JdbcTest
+@DataJpaTest
 class ReservationTimeServiceTest {
 
     @Autowired
@@ -41,10 +37,10 @@ class ReservationTimeServiceTest {
     void 예약시간을_삭제한다() {
         // given
         final LocalTime startAt = LocalTime.of(20, 28);
-        final Long id = reservationTimeRepository.save(new ReservationTime(startAt));
+        final ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(startAt));
 
         // when & then
-        Assertions.assertThatCode(() -> reservationTimeService.deleteById(id))
+        Assertions.assertThatCode(() -> reservationTimeService.deleteById(savedReservationTime.getId()))
                 .doesNotThrowAnyException();
     }
 
@@ -53,10 +49,10 @@ class ReservationTimeServiceTest {
         // given
         final LocalTime startAt = LocalTime.of(20, 28);
         final ReservationTime reservationTime = new ReservationTime(startAt);
-        final Long id = reservationTimeRepository.save(reservationTime);
+        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
         // when
-        final ReservationTime found = reservationTimeService.getById(id);
+        final ReservationTime found = reservationTimeService.getById(savedReservationTime.getId());
 
         // then
         Assertions.assertThat(found.getStartAt()).isEqualTo(reservationTime.getStartAt());
@@ -85,20 +81,6 @@ class ReservationTimeServiceTest {
 
     @TestConfiguration
     static class TestConfig {
-
-        @Bean
-        public ReservationTimeRepository reservationTimeRepository(
-                final JdbcTemplate jdbcTemplate
-        ) {
-            return new JdbcReservationTimeRepository(jdbcTemplate);
-        }
-
-        @Bean
-        public ReservationRepository reservationRepository(
-                final JdbcTemplate jdbcTemplate
-        ) {
-            return new JdbcReservationRepository(jdbcTemplate);
-        }
 
         @Bean
         public ReservationTimeService reservationTimeService(

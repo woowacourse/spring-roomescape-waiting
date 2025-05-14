@@ -3,20 +3,23 @@ package roomescape.auth.service;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.auth.jwt.JwtTokenProvider;
 import roomescape.common.exception.DataNotFoundException;
-import roomescape.member.repository.JdbcMemberRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
-@JdbcTest
+@DataJpaTest
 public class AuthServiceTest {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -25,6 +28,9 @@ public class AuthServiceTest {
     void 토큰_기준으로_이름_찾기_성공() {
         //given
         final String email = "east@email.com";
+        memberRepository.save(
+                new Member("이스트", email, "1234", Role.ADMIN)
+        );
         final String token = jwtTokenProvider.createToken(email);
 
         //when
@@ -50,6 +56,9 @@ public class AuthServiceTest {
         //given
         final String email = "east@email.com";
         final String password = "1234";
+        memberRepository.save(
+                new Member("이스트", email, password, Role.ADMIN)
+        );
 
         //when
         final String token = authService.createToken(email, password);
@@ -77,13 +86,6 @@ public class AuthServiceTest {
         @Bean
         public JwtTokenProvider jwtTokenProvider() {
             return new JwtTokenProvider();
-        }
-
-        @Bean
-        public MemberRepository memberRepository(
-                final JdbcTemplate jdbcTemplate
-        ) {
-            return new JdbcMemberRepository(jdbcTemplate);
         }
 
         @Bean
