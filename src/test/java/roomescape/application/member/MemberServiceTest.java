@@ -6,34 +6,21 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class MemberServiceTest {
+class MemberServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     private MemberService memberService;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
         memberService = new MemberService(memberRepository);
     }
 

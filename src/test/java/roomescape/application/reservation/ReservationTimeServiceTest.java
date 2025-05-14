@@ -10,10 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.reservation.dto.AvailableReservationTimeResult;
 import roomescape.application.reservation.dto.CreateReservationTimeParam;
 import roomescape.application.reservation.dto.ReservationTimeResult;
@@ -30,10 +27,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ReservationTimeServiceTest {
+class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -47,17 +41,10 @@ class ReservationTimeServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     private ReservationTimeService reservationTimeService;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
         reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
     }
 

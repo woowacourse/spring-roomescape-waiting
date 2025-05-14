@@ -3,20 +3,13 @@ package roomescape.application.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.reservation.dto.CreateThemeParam;
 import roomescape.application.reservation.dto.ThemeResult;
 import roomescape.application.support.exception.NotFoundEntityException;
@@ -32,10 +25,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ThemeServiceTest {
+class ThemeServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -49,23 +39,13 @@ class ThemeServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private Clock clock = Clock.fixed(Instant.parse("2025-05-08T13:00:00Z"), ZoneId.of("Asia/Seoul"));
-
     private ThemeService themeService;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
         themeService = new ThemeService(themeRepository, reservationRepository, clock);
     }
 
-    @DisplayName("테마를 등록할 수 있다")
     @Test
     void 테마를_생성할_수_있다() {
         // given
@@ -84,7 +64,6 @@ class ThemeServiceTest {
                 });
     }
 
-    @DisplayName("등록된 모든 테마를 조회할 수 있다")
     @Test
     void 모든_테마를_조회할_수_있다() {
         // given
@@ -100,7 +79,6 @@ class ThemeServiceTest {
                 .containsExactlyInAnyOrder("테마1", "테마2");
     }
 
-    @DisplayName("테마 id로 조회할 수 있다")
     @Test
     void 테마를_id로_조회할_수_있다() {
         // given
@@ -115,7 +93,6 @@ class ThemeServiceTest {
         assertThat(result.thumbnail()).isEqualTo("image1.png");
     }
 
-    @DisplayName("존재하지 않는 테마 조회 시 예외가 발생한다")
     @Test
     void 존재하지_않는_테마는_조회할_수_없다() {
         // given
@@ -127,7 +104,6 @@ class ThemeServiceTest {
                 .hasMessage("999에 해당하는 theme 튜플이 없습니다.");
     }
 
-    @DisplayName("예약이 없는 테마는 삭제할 수 있다")
     @Test
     void 테마를_삭제할_수_있다() {
         // given
@@ -140,7 +116,6 @@ class ThemeServiceTest {
         assertThat(themeRepository.findById(theme.getId())).isNotPresent();
     }
 
-    @DisplayName("예약이 있는 테마는 삭제할 수 없다")
     @Test
     void 예약이_존재하는_테마는_삭제할_수_없다() {
         // given
@@ -156,7 +131,6 @@ class ThemeServiceTest {
                 .hasMessage("해당 테마에 예약이 존재합니다.");
     }
 
-    @DisplayName("지난 일주일 간 가장 많이 예약된 테마를 조회할 수 있다")
     @Test
     void 테마_예약_랭킹을_조회할_수_있다() {
         // given

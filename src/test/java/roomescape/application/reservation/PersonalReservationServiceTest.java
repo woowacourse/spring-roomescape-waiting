@@ -2,19 +2,13 @@ package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.reservation.dto.ReservationWithStatusResult;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
@@ -28,10 +22,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class PersonalReservationServiceTest {
+class PersonalReservationServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -45,19 +36,10 @@ class PersonalReservationServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private final Clock clock = Clock.fixed(Instant.parse("2025-05-08T13:00:00Z"), ZoneId.of("Asia/Seoul"));
-
     private PersonalReservationService personalReservationService;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
         personalReservationService = new PersonalReservationService(reservationRepository);
     }
 

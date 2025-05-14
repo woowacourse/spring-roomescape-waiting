@@ -3,20 +3,13 @@ package roomescape.application.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.member.MemberResult;
 import roomescape.application.reservation.dto.CreateReservationParam;
 import roomescape.application.reservation.dto.ReservationResult;
@@ -36,10 +29,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ReservationServiceTest {
+class ReservationServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -53,19 +43,10 @@ class ReservationServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private final Clock clock = Clock.fixed(Instant.parse("2025-05-08T13:00:00Z"), ZoneId.of("Asia/Seoul"));
-
     private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
         reservationService = new ReservationService(
                 reservationTimeRepository,
                 reservationRepository,
@@ -75,7 +56,6 @@ class ReservationServiceTest {
         );
     }
 
-    @DisplayName("예약을 생성할 수 있다")
     @Test
     void 예약을_생성할_수_있다() {
         // given
@@ -93,7 +73,6 @@ class ReservationServiceTest {
         assertThat(reservationRepository.findById(id)).isPresent();
     }
 
-    @DisplayName("존재하지 않는 회원으로 예약 생성 시 예외가 발생한다")
     @Test
     void 존재하지_않는_회원으로_예약할_수_없다() {
         // given
@@ -141,7 +120,6 @@ class ReservationServiceTest {
                 .hasMessage("999에 해당하는 theme 튜플이 없습니다.");
     }
 
-    @DisplayName("중복된 날짜와 시간으로 예약 시 예외가 발생한다")
     @Test
     void 중복된_예약은_불가능하다() {
         // given
@@ -161,7 +139,6 @@ class ReservationServiceTest {
                 .hasMessage("날짜와 시간이 중복된 예약이 존재합니다.");
     }
 
-    @DisplayName("예약을 삭제할 수 있다")
     @Test
     void 예약을_삭제할_수_있다() {
         // given
@@ -212,7 +189,6 @@ class ReservationServiceTest {
                 );
     }
 
-    @DisplayName("예약 id로 조회할 수 있다")
     @Test
     void 예약을_id로_조회할_수_있다() {
         // given

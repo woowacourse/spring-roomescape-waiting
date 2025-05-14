@@ -3,17 +3,11 @@ package roomescape.application.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.auth.dto.JwtPayload;
 import roomescape.application.auth.dto.LoginParam;
 import roomescape.application.auth.dto.LoginResult;
@@ -25,32 +19,22 @@ import roomescape.domain.member.Role;
 import roomescape.infrastructure.security.JwtProperties;
 import roomescape.infrastructure.security.JwtProvider;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class AuthServiceTest {
+class AuthServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
 
     private AuthService authService;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private Clock clock = Clock.fixed(Instant.parse("2025-05-08T13:00:00Z"), ZoneId.of("Asia/Seoul"));
-
     private JwtProvider jwtProvider;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
-        jwtProvider = new JwtProvider(new JwtProperties(
-                "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.ih1aovtQShabQ7l0cINw4k1fagApg3qLWiB8Kt59Lno",
-                Duration.ofHours(1L)),
+        jwtProvider = new JwtProvider(
+                new JwtProperties(
+                        "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.ih1aovtQShabQ7l0cINw4k1fagApg3qLWiB8Kt59Lno",
+                        Duration.ofHours(1L)
+                ),
                 clock);
         authService = new AuthService(memberRepository, jwtProvider);
     }
