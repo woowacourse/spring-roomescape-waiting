@@ -8,6 +8,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.domain.dto.ReservationResponseDto;
 import roomescape.reservation.exception.InvalidReservationTimeException;
+import roomescape.reservation.exception.NotFoundReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
@@ -44,17 +45,22 @@ public class ReservationService {
     public ReservationResponseDto add(ReservationRequestDto requestDto, User user) {
         Reservation reservation = convertReservation(requestDto, user);
         validateDuplicateDateTime(reservation);
-        Reservation savedReservation = repository.add(reservation);
+        Reservation savedReservation = repository.save(reservation);
         return convertReservationResponseDto(savedReservation);
     }
 
     public void deleteById(Long id) {
-        repository.findByIdOrThrow(id);
+        findByIdOrThrow(id);
         repository.deleteById(id);
     }
 
+    private Reservation findByIdOrThrow(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundReservationException("해당 예약 id가 존재하지 않습니다."));
+    }
+
     private void validateDuplicateDateTime(Reservation inputReservation) {
-        boolean exists = repository.existsByDateAndTime(
+        boolean exists = repository.existsByDateAndReservationTime(
                 inputReservation.getDate(),
                 inputReservation.getReservationTime()
         );
@@ -66,7 +72,11 @@ public class ReservationService {
     public List<ReservationResponseDto> findReservationsByUserAndThemeAndFromAndTo(
             SearchReservationRequestDto searchReservationRequestDto) {
         List<Reservation> reservations = repository.findReservationsByUserAndThemeAndFromAndTo(
-                searchReservationRequestDto);
+                searchReservationRequestDto.userId(),
+                searchReservationRequestDto.themeId(),
+                searchReservationRequestDto.from(),
+                searchReservationRequestDto.to()
+                );
 
         return reservations.stream()
                 .map(this::convertReservationResponseDto)

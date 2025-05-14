@@ -50,7 +50,7 @@ public class ReservationTimeService {
         List<ReservationTime> allTime = repository.findAll();
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(InvalidThemeException::new);
-        Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findByThemeAndDate(theme, date,
+        Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findByThemeAndDateAndUser(theme, date,
                         user)
                 .stream()
                 .map(Reservation::getReservationTime)

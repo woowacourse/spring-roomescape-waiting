@@ -17,15 +17,15 @@ import roomescape.user.domain.User;
 public class Reservation {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private final Long id;
-    private final LocalDate date;
+    private Long id;
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private final ReservationTime reservationTime;
+    private ReservationTime reservationTime;
     @ManyToOne(fetch = FetchType.LAZY)
-    private final Theme theme;
+    private Theme theme;
     @ManyToOne(fetch = FetchType.LAZY)
-    private final User user;
+    private User user;
 
     public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, User user) {
         this.id = id;
@@ -33,6 +33,9 @@ public class Reservation {
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.user = user;
+    }
+
+    protected Reservation() {
     }
 
     public static Reservation of(LocalDate date, ReservationTime reservationTime, Theme theme, User user) {

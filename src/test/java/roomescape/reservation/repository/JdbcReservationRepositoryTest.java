@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.KeyHolderManager;
@@ -19,15 +18,14 @@ import roomescape.theme.ThemeTestDataConfig;
 import roomescape.user.MemberTestDataConfig;
 
 @DataJpaTest
-@Import({JdbcReservationRepository.class,
-        ThemeTestDataConfig.class,
+@Import({ThemeTestDataConfig.class,
         MemberTestDataConfig.class,
         KeyHolderManager.class,
 })
 class JdbcReservationRepositoryTest {
 
     @Autowired
-    private JdbcReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -48,7 +46,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
 
         Reservation reservation = createReservation(1, reservationTime);
-        reservationRepository.add(reservation);
+        reservationRepository.save(reservation);
 
         // when
         boolean actual = reservationRepository.existsByReservationTime(reservationTime);

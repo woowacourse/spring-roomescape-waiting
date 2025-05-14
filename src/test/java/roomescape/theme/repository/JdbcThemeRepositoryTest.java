@@ -10,13 +10,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.KeyHolderManager;
 import roomescape.reservation.fixture.ReservationFixture;
-import roomescape.reservation.repository.JdbcReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.reservationTime.repository.ReservationTimeRepository;
@@ -27,8 +25,7 @@ import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.User;
 
 @DataJpaTest
-@Import({JdbcReservationRepository.class,
-        MemberTestDataConfig.class, KeyHolderManager.class})
+@Import({MemberTestDataConfig.class, KeyHolderManager.class})
 class JdbcThemeRepositoryTest {
 
     @Autowired
@@ -36,7 +33,7 @@ class JdbcThemeRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private JdbcReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
     @Autowired
     private MemberTestDataConfig memberTestDataConfig;
 
@@ -60,131 +57,131 @@ class JdbcThemeRepositoryTest {
         ReservationTime savedTime1 = reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(11, 0)));
 
         // theme1을 사용한 예약 9개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(4), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(2), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(1), savedTime1, savedTheme1, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(1), savedTime1, savedTheme1, savedUser));
 
         // theme2를 사용한 예약 8개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme2, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme2, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme2, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(5), savedTime2, savedTheme2, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(4), savedTime2, savedTheme2, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(3), savedTime2, savedTheme2, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(2), savedTime2, savedTheme2, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(1), savedTime2, savedTheme2, savedUser));
 
 // theme3: 예약 8개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme3, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme3, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme3, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme3, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(4), savedTime1, savedTheme3, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme3, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(2), savedTime1, savedTheme3, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(1), savedTime1, savedTheme3, savedUser));
 
 // theme4: 예약 7개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme4, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme4, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme4, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(5), savedTime2, savedTheme4, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(4), savedTime2, savedTheme4, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(3), savedTime2, savedTheme4, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(2), savedTime2, savedTheme4, savedUser));
 
 // theme5: 예약 6개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme5, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme5, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme5, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme5, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(4), savedTime1, savedTheme5, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme5, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme5, savedUser));
 
         // theme6: 예약 5개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme6, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme6, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme6, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(5), savedTime2, savedTheme6, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(4), savedTime2, savedTheme6, savedUser));
 
         // theme7: 예약 4개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme7, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme7, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme7, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme7, savedUser));
 
         // theme8: 예약 3개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme8, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme8, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme8, savedUser));
 
         // theme9: 예약 2개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme9, savedUser));
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme9, savedUser));
 
         // theme10: 예약 1개
-        reservationRepository.add(
+        reservationRepository.save(
                 ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme10, savedUser));
     }
 

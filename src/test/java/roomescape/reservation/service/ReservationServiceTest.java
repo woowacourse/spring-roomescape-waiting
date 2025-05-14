@@ -16,7 +16,7 @@ import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.fixture.ReservationFixture;
-import roomescape.reservation.repository.JdbcReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.reservationTime.repository.ReservationTimeRepository;
@@ -34,7 +34,7 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService service;
     @Autowired
-    private JdbcReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -81,8 +81,8 @@ class ReservationServiceTest {
             ReservationTime reservationTime2 = createAndSaveReservationTime(LocalTime.of(22, 44));
             Reservation reservation2 = createReservation(2, reservationTime2);
 
-            reservationRepository.add(reservation1);
-            reservationRepository.add(reservation2);
+            reservationRepository.save(reservation1);
+            reservationRepository.save(reservation2);
 
             // when & then
             LocalDate duplicateDate = reservation1.getDate();
@@ -105,8 +105,8 @@ class ReservationServiceTest {
             ReservationTime reservationTime2 = createAndSaveReservationTime(LocalTime.of(22, 44));
             Reservation reservation2 = createReservation(2, reservationTime2);
 
-            reservationRepository.add(reservation1);
-            reservationRepository.add(reservation2);
+            reservationRepository.save(reservation1);
+            reservationRepository.save(reservation2);
 
             // when & then
             Long duplicateReservationTimeId = reservationTime1.getId();
