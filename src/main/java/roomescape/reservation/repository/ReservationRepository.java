@@ -13,7 +13,6 @@ import roomescape.user.domain.User;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-
     List<Reservation> findByThemeAndDateAndUser(Theme theme, LocalDate date, User user);
 
     boolean existsByReservationTime(ReservationTime reservationTime);

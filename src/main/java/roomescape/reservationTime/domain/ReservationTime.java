@@ -10,8 +10,11 @@ import java.time.LocalTime;
 public class ReservationTime {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private final Long id;
-    private final LocalTime startAt;
+    private Long id;
+    private LocalTime startAt;
+
+    protected ReservationTime() {
+    }
 
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;

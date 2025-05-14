@@ -10,10 +10,13 @@ import java.util.Objects;
 public class Theme {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
+
+    protected Theme() {
+    }
 
     public Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;

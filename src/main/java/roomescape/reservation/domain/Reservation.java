@@ -16,7 +16,8 @@ import roomescape.user.domain.User;
 @Entity
 public class Reservation {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private LocalDate date;
 
@@ -27,15 +28,15 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    protected Reservation() {
+    }
+
     public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, User user) {
         this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.user = user;
-    }
-
-    protected Reservation() {
     }
 
     public static Reservation of(LocalDate date, ReservationTime reservationTime, Theme theme, User user) {

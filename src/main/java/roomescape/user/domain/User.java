@@ -12,18 +12,18 @@ import roomescape.reservation.domain.Reservation;
 @Entity(name = "users")
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private  Role role;
-    private  String name;
-    private  String email;
-    private  String password;
+    private Role role;
+    private String name;
+    private String email;
+    private String password;
 
     @OneToMany(mappedBy = "user")
-    private  Set<Reservation> reservations;
+    private Set<Reservation> reservations;
 
     protected User() {
-
     }
 
     public User(Long id, Role role, String name, String email, String password) {
