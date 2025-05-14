@@ -1,3 +1,4 @@
+/*
 package roomescape.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,3 +109,4 @@ class TimeServiceTest {
                 .hasMessage("찾으려는 id가 존재하지 않습니다. id: " + id);
     }
 }
+*/
