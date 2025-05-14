@@ -8,8 +8,6 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema.sql
-#      defer-datasource-initialization: true
   jpa:
     show-sql: true
     properties:
@@ -17,6 +15,7 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: create-drop
+    defer-datasource-initialization: true
 
 security:
   jwt:

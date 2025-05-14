@@ -2,14 +2,12 @@ package roomescape.reservation.application.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Theme;
 
 @Repository
-public interface ThemeRepository extends CrudRepository<Theme, Long> {
-    List<Theme> findAll();
-
+public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
     @Query("""
                         SELECT t.id, t.name, t.description, t.thumbnail
                         FROM Theme t
