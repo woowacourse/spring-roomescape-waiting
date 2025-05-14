@@ -2,7 +2,10 @@ package roomescape.dto.request;
 
 import roomescape.exception.custom.InvalidInputException;
 
-public record ThemeRequest(String name, String description, String thumbnail) {
+public record ThemeRequest(
+    String name,
+    String description,
+    String thumbnail) {
 
     public ThemeRequest {
         validateNull(name, description, thumbnail);

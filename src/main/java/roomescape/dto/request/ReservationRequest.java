@@ -15,7 +15,7 @@ public record ReservationRequest(
     }
 
     private void validateNull(LocalDate date, Long timeId, Long themeId) {
-        if(date == null || timeId == null || themeId == null) {
+        if (date == null || timeId == null || themeId == null) {
             throw new InvalidInputException("선택되지 않은 값 존재");
         }
     }

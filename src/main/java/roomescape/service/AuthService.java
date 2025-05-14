@@ -1,13 +1,12 @@
 package roomescape.service;
 
-import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.exception.custom.NotFoundException;
-import roomescape.repository.MemberRepository;
-import roomescape.entity.Member;
 import roomescape.dto.request.LoginRequest;
+import roomescape.entity.Member;
 import roomescape.exception.custom.AuthenticatedException;
+import roomescape.exception.custom.NotFoundException;
 import roomescape.provider.JwtTokenProvider;
+import roomescape.repository.MemberRepository;
 
 @Service
 public class AuthService {
@@ -28,7 +27,7 @@ public class AuthService {
     }
 
     private void validatePassword(String password, Member member) {
-        if(!password.equals(member.getPassword())) {
+        if (!password.equals(member.getPassword())) {
             throw new AuthenticatedException();
         }
     }

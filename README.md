@@ -22,9 +22,9 @@
 - [x] `Member`, `Theme`, `ReservationTime`을 엔티티로 변환
 - [x] `Reservation`를 엔티티로 변환
 - [x] `Member`, `Theme`, `ReservationTime`와 연관관계 매핑 (단방향)
-  - [x] `Reservation` : `Member` = N : 1
-  - [x] `Reservation` : `Theme` = N : 1
-  - [x] `Reservation` : `ReservationTime` = N : 1
+    - [x] `Reservation` : `Member` = N : 1
+    - [x] `Reservation` : `Theme` = N : 1
+    - [x] `Reservation` : `ReservationTime` = N : 1
 - [x] 테마와 시간이 같은 예약은 하나만 존재해야한다.(alreadyBooked)
 - [x] 예약이 존재하는 시간과 테마는 삭제할 수 없다.
 

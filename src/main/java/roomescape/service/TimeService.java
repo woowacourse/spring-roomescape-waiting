@@ -3,10 +3,10 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.entity.ReservationTime;
 import roomescape.dto.request.TimeRequest;
+import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.DuplicatedException;
+import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class TimeService {

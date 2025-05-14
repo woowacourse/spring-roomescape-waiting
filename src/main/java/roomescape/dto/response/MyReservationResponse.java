@@ -12,7 +12,7 @@ public record MyReservationResponse(
     @JsonFormat(pattern = "HH:mm") LocalTime time,
     String status) {
 
-    public static MyReservationResponse from(Reservation reservation){
+    public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
             reservation.getId(),
             reservation.getTheme().getName(),

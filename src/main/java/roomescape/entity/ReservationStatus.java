@@ -6,7 +6,7 @@ public enum ReservationStatus {
 
     private final String text;
 
-    ReservationStatus(String text){
+    ReservationStatus(String text) {
         this.text = text;
     }
 

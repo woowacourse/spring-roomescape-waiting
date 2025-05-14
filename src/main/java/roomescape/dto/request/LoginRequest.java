@@ -4,7 +4,7 @@ import roomescape.exception.custom.InvalidInputException;
 
 public record LoginRequest(
     String email,
-    String password ) {
+    String password) {
 
     public LoginRequest {
         validateNull(email, password);

@@ -22,7 +22,7 @@ public class UserController {
     }
 
     @GetMapping("/reservation-mine")
-    public String minePage(){
+    public String minePage() {
         return "reservation-mine";
     }
 }

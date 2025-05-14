@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import roomescape.entity.Reservation;
 
-public interface ReservationRepository{
+public interface ReservationRepository {
 
     List<Reservation> findAll();
 

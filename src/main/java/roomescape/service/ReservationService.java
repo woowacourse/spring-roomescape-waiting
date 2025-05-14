@@ -3,20 +3,19 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
+import roomescape.dto.request.ReservationRequest;
+import roomescape.entity.Member;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
+import roomescape.exception.custom.DuplicatedException;
+import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.entity.Member;
-import roomescape.entity.Reservation;
-import roomescape.entity.ReservationTime;
-import roomescape.entity.Theme;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.exception.custom.DuplicatedException;
-import roomescape.exception.custom.InvalidInputException;
 
 @Service
 public class ReservationService {
@@ -26,7 +25,8 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, MemberRepository memberRepository,
+    public ReservationService(ReservationRepository reservationRepository,
+        MemberRepository memberRepository,
         ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
@@ -83,7 +83,7 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(ReservationRequest request) {
-        if (reservationRepository. existsByDateAndTimeIdAndThemeId(
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
             request.date(), request.timeId(), request.themeId())) {
             throw new DuplicatedException("reservation");
         }
