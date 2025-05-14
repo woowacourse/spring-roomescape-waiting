@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.NoSuchElementException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,6 @@ class ReservationServiceV2Test {
         );
     }
 
-    @Disabled
     @Test
     @DisplayName("미래가 아닌 날짜로 예약 시도 시 예외 발생")
     void createReservationTest3() {
@@ -132,15 +131,47 @@ class ReservationServiceV2Test {
         );
     }
 
+
+    @DisplayName("예약이 중복되어 예외가 발생 한다.")
     @Test
-    void addReservationForAdmin() {
+    void duplicateTest() {
+        // given
+        Long memberId = memberService.addMember(new MemberRegisterRequest("", "", "")).id();
+        Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
+        Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("", "", "")).id();
+
+        ReservationRequestV2 reservationRequest = new ReservationRequestV2(
+                LocalDate.now().plusDays(1),
+                themeId,
+                timeId
+        );
+        reservationService.addReservationWithMemberId(reservationRequest,
+                memberId);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.addReservationWithMemberId(reservationRequest, memberId))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void getAllReservations() {
-    }
+    @DisplayName("모든 예약 정보를 가져온다.")
+    void getAllReservationsTest() {
+        // given
+        Long memberId = memberService.addMember(new MemberRegisterRequest("", "", "")).id();
+        Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
+        Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("", "", "")).id();
 
-    @Test
-    void getFilteredReservations() {
+        ReservationRequestV2 reservationRequest = new ReservationRequestV2(
+                LocalDate.now().plusDays(1),
+                themeId,
+                timeId
+        );
+        reservationService.addReservationWithMemberId(reservationRequest,
+                memberId);
+        //when
+        final List<ReservationResponse> expected = reservationService.getAllReservations();
+
+        //then
+        assertThat(expected).hasSize(1);
     }
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,6 +48,19 @@ public class ReservationV2 {
 
     @Builder
     public ReservationV2(Member member, LocalDate date, ReservationTime time, ReservationTheme theme) {
-        this(null, member, date, time, theme);
+        validateLocalDate(date, time);
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
+
+    private void validateLocalDate(final LocalDate date, final ReservationTime time) {
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
+        if (dateTime.isBefore(now) || dateTime.isEqual(now)) {
+            throw new IllegalArgumentException("[ERROR] 예약시간은 과거일 수 없습니다.");
+        }
+    }
+
 }

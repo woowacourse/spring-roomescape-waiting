@@ -35,27 +35,37 @@ public class ReservationServiceV2 {
     }
 
     public ReservationResponse addReservationWithMemberId(final ReservationRequestV2 request, final long memberId) {
-        long timeId = request.timeId();
+        final long timeId = request.timeId();
         final long themeId = request.themeId();
-
         final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 사용자 입니다."));
-        final ReservationTime time = reservationTimeRepository.findById(timeId).orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간 입니다."));
-        final ReservationTheme theme = reservationThemeRepository.findById(themeId).orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다."));
+        final ReservationTime time = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간 입니다."));
+        final ReservationTheme theme = reservationThemeRepository.findById(themeId)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다."));
+        validateDuplicateReservation(request.date(), timeId, themeId);
         final ReservationV2 reservationV2 = new ReservationV2(member, request.date(), time, theme);
         ReservationV2 saved = reservationRepository.saveWithMember(reservationV2);
         return ReservationResponse.fromV2(saved);
     }
 
     public ReservationResponse addReservationForAdmin(final AdminReservationRequest request) {
-        long timeId = request.timeId();
+        final long timeId = request.timeId();
         final long themeId = request.themeId();
-
         final Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 사용자 입니다."));
-        final ReservationTime time = reservationTimeRepository.findById(timeId).orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간 입니다."));
-        final ReservationTheme theme = reservationThemeRepository.findById(themeId).orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다."));
-        final ReservationV2 reservationV2 = new ReservationV2(member, request.date(), time, theme);
+        final ReservationTime time = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간 입니다."));
+        final ReservationTheme theme = reservationThemeRepository.findById(themeId)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다."));
+        final LocalDate date = request.date();
+        validateDuplicateReservation(date, timeId, themeId);
+        final ReservationV2 reservationV2 = ReservationV2.builder()
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .build();
         ReservationV2 saved = reservationRepository.saveWithMember(reservationV2);
         return ReservationResponse.fromV2(saved);
     }
@@ -67,11 +77,17 @@ public class ReservationServiceV2 {
     }
 
     public List<ReservationResponse> getFilteredReservations(final Long memberId, final Long themeId,
-                                                       final LocalDate dateFrom, final LocalDate dateTo) {
+                                                             final LocalDate dateFrom, final LocalDate dateTo) {
         final List<ReservationV2> reservations = reservationRepository.findByMemberIdAndThemeIdAndDateFromAndDateTo(
                 memberId, themeId, dateFrom, dateTo);
         return reservations.stream()
                 .map(ReservationResponse::fromV2)
                 .toList();
+    }
+
+    private void validateDuplicateReservation(final LocalDate localDate, final long timeId, final long themeId) {
+        if (reservationRepository.existByDateAndTimeIdAndThemeId(localDate, timeId, themeId)) {
+            throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약 입니다.");
+        }
     }
 }
