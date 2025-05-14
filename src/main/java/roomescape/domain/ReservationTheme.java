@@ -1,43 +1,38 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class ReservationTheme {
 
-    private final long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    private Long id;
 
-    public ReservationTheme(final long id, final String name, final String description, final String thumbnail) {
+    private String name;
+
+    private String description;
+
+    private String thumbnail;
+
+    @Builder
+    public ReservationTheme(String name, String description, String thumbnail) {
+        this(null, name, description, thumbnail);
+    }
+
+    public ReservationTheme(final Long id, final String name, final String description, final String thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    public ReservationTheme(final String name, final String description, final String thumbnail) {
-        this.id = 0L;
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
-    }
-
-    public ReservationTheme toEntity(long id) {
-        return new ReservationTheme(id, name, description, thumbnail);
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
     }
 }

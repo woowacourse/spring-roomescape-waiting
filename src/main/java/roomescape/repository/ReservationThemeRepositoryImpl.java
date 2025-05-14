@@ -1,12 +1,9 @@
 package roomescape.repository;
 
-import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTheme;
 import roomescape.repository.jpa.ReservationThemeJpaRepository;
@@ -25,18 +22,12 @@ public class ReservationThemeRepositoryImpl implements ReservationThemeRepositor
 
     @Override
     public Optional<ReservationTheme> findById(final Long id) {
-        String sql = "SELECT * FROM reservation_theme WHERE id = ?";
-        final List<ReservationTheme> reservationThemes = template.query(sql, reservationThemeRowMapper(), id);
-        if (reservationThemes.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(reservationThemes.getFirst());
+       return reservationThemeJpaRepository.findById(id);
     }
 
     @Override
     public List<ReservationTheme> findAll() {
-        String sql = "select * from reservation_theme";
-        return template.query(sql, reservationThemeRowMapper());
+        return reservationThemeJpaRepository.findAll();
     }
 
     @Override
@@ -55,18 +46,7 @@ public class ReservationThemeRepositoryImpl implements ReservationThemeRepositor
 
     @Override
     public ReservationTheme save(final ReservationTheme reservationTheme) {
-        String sql = "insert into reservation_theme (name, description, thumbnail) values (?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        template.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservationTheme.getName());
-            ps.setString(2, reservationTheme.getDescription());
-            ps.setString(3, reservationTheme.getThumbnail());
-            return ps;
-        }, keyHolder);
-
-        long id = keyHolder.getKey().longValue();
-        return reservationTheme.toEntity(id);
+        return reservationThemeJpaRepository.save(reservationTheme);
     }
 
     @Override
@@ -81,8 +61,7 @@ public class ReservationThemeRepositoryImpl implements ReservationThemeRepositor
 
     @Override
     public boolean existsByName(final String name) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_theme WHERE name = ?)";
-        return Boolean.TRUE.equals(template.queryForObject(sql, Boolean.class, name));
+        return reservationThemeJpaRepository.existsByName(name);
     }
 
     private RowMapper<ReservationTheme> reservationThemeRowMapper() {

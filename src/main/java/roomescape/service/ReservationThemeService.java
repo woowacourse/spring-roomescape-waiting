@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTheme;
 import roomescape.dto.ReservationThemeRequest;
@@ -30,8 +29,11 @@ public class ReservationThemeService {
     }
 
     public ReservationThemeResponse addReservationTheme(final ReservationThemeRequest request) {
-        ReservationTheme reservationTheme = new ReservationTheme(request.name(), request.description(),
-                request.thumbnail());
+        final ReservationTheme reservationTheme = ReservationTheme.builder()
+                .name(request.name())
+                .description(request.description())
+                .thumbnail(request.thumbnail())
+                .build();
         validateUniqueThemes(reservationTheme);
         ReservationTheme saved = reservationThemeRepository.save(reservationTheme);
         return ReservationThemeResponse.from(saved);
