@@ -20,13 +20,13 @@ import roomescape.utils.JdbcTemplateUtils;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationTimeDao.class})
-class ReservationTimeDaoTest {
+@Import({ReservationTimeRepository.class})
+class ReservationTimeRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private ReservationTimeDao reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @AfterEach
     void tearDown() {

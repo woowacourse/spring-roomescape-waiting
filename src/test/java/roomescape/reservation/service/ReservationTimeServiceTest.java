@@ -1,5 +1,13 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
@@ -18,25 +27,19 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.*;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeRepository.class, MemberDao.class,
+@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberDao.class,
         ReservationTimeService.class})
 class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationDao reservationDao;
     @Autowired
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired
@@ -46,7 +49,7 @@ class ReservationTimeServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeService = new ReservationTimeService(reservationTimeDao, reservationDao);
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationDao);
     }
 
     @DisplayName("모든 시간 정보를 가져온다.")
@@ -58,7 +61,7 @@ class ReservationTimeServiceTest {
         List<LocalTime> localTimes = List.of(localTime1, localTime2);
 
         for (LocalTime localTime : localTimes) {
-            reservationTimeDao.save(new ReservationTime(localTime));
+            reservationTimeRepository.save(new ReservationTime(localTime));
         }
 
         // when
@@ -98,7 +101,7 @@ class ReservationTimeServiceTest {
     @Test
     void test4() {
         // given
-        ReservationTime saved = reservationTimeDao.save(new ReservationTime(LocalTime.of(8, 0)));
+        ReservationTime saved = reservationTimeRepository.save(new ReservationTime(LocalTime.of(8, 0)));
         Long id = saved.getId();
 
         // when & then
@@ -121,7 +124,7 @@ class ReservationTimeServiceTest {
     void test6() {
         // given
         Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.m.com"));
-        ReservationTime reservationTime = reservationTimeDao.save(new ReservationTime(LocalTime.of(8, 0)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(8, 0)));
         Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
         reservationDao.save(new Reservation(member, LocalDate.now(), reservationTime, theme));

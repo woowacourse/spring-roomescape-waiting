@@ -10,22 +10,24 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
+import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeDao reservationTimeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationDao reservationDao;
 
-    public ReservationTimeService(final ReservationTimeDao reservationTimeDao,
-                                  final ReservationDao reservationDao) {
-        this.reservationTimeDao = reservationTimeDao;
+    public ReservationTimeService(
+            final ReservationTimeRepository reservationTimeRepository,
+            final ReservationDao reservationDao
+    ) {
+        this.reservationTimeRepository = reservationTimeRepository;
         this.reservationDao = reservationDao;
     }
 
     public List<ReservationTimeResponse> getAll() {
-        List<ReservationTime> reservationTimes = reservationTimeDao.findAll();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return reservationTimes.stream()
                 .map(ReservationTimeResponse::from)
@@ -33,12 +35,12 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
-        if (reservationTimeDao.existsByStartAt(request.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new AlreadyInUseException("Reservation time already exists");
         }
         ReservationTime reservationTime = request.toEntity();
 
-        ReservationTime savedReservationTime = reservationTimeDao.save(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
         return ReservationTimeResponse.from(savedReservationTime);
     }
@@ -47,10 +49,6 @@ public class ReservationTimeService {
         if (reservationDao.existsByTimeId(id)) {
             throw new AlreadyInUseException("Reservation is already in use");
         }
-
-        int updatedRow = reservationTimeDao.deleteById(id);
-        if (updatedRow == 0) {
-            throw new EntityNotFoundException("Reservation time not found");
-        }
+        reservationTimeRepository.deleteById(id);
     }
 }
