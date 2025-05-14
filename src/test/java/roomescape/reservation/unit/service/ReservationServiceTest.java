@@ -72,8 +72,8 @@ class ReservationServiceTest {
         // then
         assertAll(
                 () -> assertThat(response.date()).isEqualTo(request.date()),
-                () -> assertThat(response.time().getStartAt()).isEqualTo("10:00"),
-                () -> assertThat(response.theme().getName()).isEqualTo("테마1")
+                () -> assertThat(response.startAt()).isEqualTo("10:00"),
+                () -> assertThat(response.themeName()).isEqualTo("테마1")
         );
     }
 
@@ -97,8 +97,8 @@ class ReservationServiceTest {
         // then
         assertAll(
                 () -> assertThat(response.date()).isEqualTo(request.date()),
-                () -> assertThat(response.time().getStartAt()).isEqualTo("10:00"),
-                () -> assertThat(response.theme().getName()).isEqualTo("테마1")
+                () -> assertThat(response.startAt()).isEqualTo("10:00"),
+                () -> assertThat(response.themeName()).isEqualTo("테마1")
         );
     }
 
@@ -156,9 +156,9 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(responses).hasSize(1),
                 () -> assertThat(responses.getFirst().date()).isEqualTo(date),
-                () -> assertThat(responses.getFirst().time().getStartAt()).isEqualTo("10:00"),
-                () -> assertThat(responses.getFirst().theme().getName()).isEqualTo("테마1"),
-                () -> assertThat(responses.getFirst().member().getName()).isEqualTo("테스트")
+                () -> assertThat(responses.getFirst().startAt()).isEqualTo("10:00"),
+                () -> assertThat(responses.getFirst().themeName()).isEqualTo("테마1"),
+                () -> assertThat(responses.getFirst().memberName()).isEqualTo("테스트")
         );
     }
 
@@ -187,9 +187,9 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(responses).hasSize(1),
                 () -> assertThat(responses.getFirst().date()).isEqualTo(date),
-                () -> assertThat(responses.getFirst().time().getStartAt()).isEqualTo("10:00"),
-                () -> assertThat(responses.getFirst().theme().getName()).isEqualTo("테마1"),
-                () -> assertThat(responses.getFirst().member().getName()).isEqualTo("테스트")
+                () -> assertThat(responses.getFirst().startAt()).isEqualTo("10:00"),
+                () -> assertThat(responses.getFirst().themeName()).isEqualTo("테마1"),
+                () -> assertThat(responses.getFirst().memberName()).isEqualTo("테스트")
         );
     }
 

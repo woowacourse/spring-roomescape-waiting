@@ -19,7 +19,6 @@ import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
@@ -68,12 +67,8 @@ class ReservationAcceptanceTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("time.id", equalTo(1))
-                .body("time.startAt", equalTo("10:00:00"))
-                .body("theme.id", equalTo(1))
-                .body("theme.name", equalTo("테마"))
-                .body("theme.description", equalTo("설명"))
-                .body("theme.thumbnail", equalTo("썸네일"));
+                .body("startAt", equalTo("10:00:00"))
+                .body("themeName", equalTo("테마"));
     }
 
     @Test
@@ -114,15 +109,9 @@ class ReservationAcceptanceTest {
                 .body("$", hasSize(1))
                 .body("[0].id", equalTo(1))
                 .body("[0].date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("[0].time.id", equalTo(1))
-                .body("[0].time.startAt", equalTo("10:00:00"))
-                .body("[0].member.id", equalTo(1))
-                .body("[0].member.name", equalTo(DEFAULT_NAME))
-                .body("[0].member.email", equalTo(DEFAULT_EMAIL))
-                .body("[0].theme.id", equalTo(1))
-                .body("[0].theme.name", equalTo("테마"))
-                .body("[0].theme.description", equalTo("설명"))
-                .body("[0].theme.thumbnail", equalTo("썸네일"));
+                .body("[0].startAt", equalTo("10:00:00"))
+                .body("[0].memberName", equalTo(DEFAULT_NAME))
+                .body("[0].themeName", equalTo("테마"));
     }
 
     @Test
@@ -160,13 +149,6 @@ class ReservationAcceptanceTest {
                 1L
         );
         TestHelper.postWithToken("/reservations", reservationRequest, token);
-        var filterRequest = new ReservationReadFilteredRequest(
-                1L,
-                1L,
-                LocalDate.now(),
-                LocalDate.now().plusDays(7)
-        );
-
         String url = String.format("/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
                 1L, 1L, LocalDate.now(), LocalDate.now().plusDays(7));
 
@@ -177,15 +159,9 @@ class ReservationAcceptanceTest {
                 .body("$", hasSize(1))
                 .body("[0].id", equalTo(1))
                 .body("[0].date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("[0].time.id", equalTo(1))
-                .body("[0].time.startAt", equalTo("10:00:00"))
-                .body("[0].member.id", equalTo(1))
-                .body("[0].member.name", equalTo(DEFAULT_NAME))
-                .body("[0].member.email", equalTo(DEFAULT_EMAIL))
-                .body("[0].theme.id", equalTo(1))
-                .body("[0].theme.name", equalTo("테마"))
-                .body("[0].theme.description", equalTo("설명"))
-                .body("[0].theme.thumbnail", equalTo("썸네일"));
+                .body("[0].startAt", equalTo("10:00:00"))
+                .body("[0].memberName", equalTo(DEFAULT_NAME))
+                .body("[0].themeName", equalTo("테마"));
     }
 
     @Test
@@ -215,16 +191,11 @@ class ReservationAcceptanceTest {
         Member nonAdminMember = new Member("일반회원", "user@email.com", "password", RoleType.USER);
         memberRepository.save(nonAdminMember);
         String token = TestHelper.login("user@email.com", "password");
-
-        var filterRequest = new ReservationReadFilteredRequest(
-                1L,
-                1L,
-                LocalDate.now(),
-                LocalDate.now().plusDays(7)
-        );
+        String url = String.format("/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
+                1L, 1L, LocalDate.now(), LocalDate.now().plusDays(7));
 
         // when & then
-        TestHelper.postWithToken("/reservations/filtered", filterRequest, token)
+        TestHelper.getWithToken(url, token)
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }
@@ -249,12 +220,8 @@ class ReservationAcceptanceTest {
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("time.id", equalTo(1))
-                .body("time.startAt", equalTo("10:00:00"))
-                .body("theme.id", equalTo(1))
-                .body("theme.name", equalTo("테마"))
-                .body("theme.description", equalTo("설명"))
-                .body("theme.thumbnail", equalTo("썸네일"));
+                .body("startAt", equalTo("10:00:00"))
+                .body("themeName", equalTo("테마"));
     }
 
     @Test

@@ -14,7 +14,7 @@ import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.ThemeService;
 
-// TODO: Fake 모키토 추가해야할까?
+// TODO: 모키토 라이브러리 추가
 @DataJpaTest
 class ThemeServiceTest {
 

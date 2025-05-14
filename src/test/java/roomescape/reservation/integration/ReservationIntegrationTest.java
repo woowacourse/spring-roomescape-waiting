@@ -58,8 +58,8 @@ class ReservationIntegrationTest {
         // then
         assertAll(
                 () -> assertThat(response.date()).isEqualTo(date),
-                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
-                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+                () -> assertThat(response.startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(response.themeName()).isEqualTo(theme.getName())
         );
     }
 
@@ -79,8 +79,8 @@ class ReservationIntegrationTest {
         // then
         assertAll(
                 () -> assertThat(response.date()).isEqualTo(date),
-                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
-                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+                () -> assertThat(response.startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(response.themeName()).isEqualTo(theme.getName())
         );
     }
 
@@ -137,9 +137,9 @@ class ReservationIntegrationTest {
                 () -> assertThat(responses).hasSize(1),
                 () -> assertThat(response.id()).isNotNull(),
                 () -> assertThat(response.date()).isEqualTo(date),
-                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
-                () -> assertThat(response.member().getId()).isEqualTo(member.getId()),
-                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+                () -> assertThat(response.startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(response.memberName()).isEqualTo(member.getName()),
+                () -> assertThat(response.themeName()).isEqualTo(theme.getName())
         );
     }
 
@@ -170,9 +170,9 @@ class ReservationIntegrationTest {
                 () -> assertThat(responses).hasSize(1),
                 () -> assertThat(response.id()).isNotNull(),
                 () -> assertThat(response.date()).isEqualTo(date),
-                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
-                () -> assertThat(response.member().getId()).isEqualTo(member.getId()),
-                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+                () -> assertThat(response.startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(response.memberName()).isEqualTo(member.getName()),
+                () -> assertThat(response.themeName()).isEqualTo(theme.getName())
         );
     }
 

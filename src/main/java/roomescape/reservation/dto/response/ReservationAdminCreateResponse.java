@@ -8,7 +8,7 @@ import roomescape.theme.entity.Theme;
 public record ReservationAdminCreateResponse(
         LocalDate date,
         LocalTime startAt,
-        String theme
+        String themeName
 ) {
     public static ReservationAdminCreateResponse from(Reservation reservation, Theme theme) {
         return new ReservationAdminCreateResponse(
