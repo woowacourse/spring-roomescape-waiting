@@ -14,6 +14,7 @@ import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.dto.AdminReservationRequest;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
+import roomescape.reservation.application.dto.MyReservation;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -81,6 +82,13 @@ public class ReservationService {
                 .findByTheme_IdAndMember_IdAndDateBetween(themeId, memberId, start, end);
         return reservations.stream()
                 .map(ReservationResponse::of)
+                .toList();
+    }
+
+    public List<MyReservation> findByMemberId(final Long memberId) {
+        final List<Reservation> reservations = reservationRepository.findByMember_Id(memberId);
+        return reservations.stream()
+                .map(MyReservation::from)
                 .toList();
     }
 

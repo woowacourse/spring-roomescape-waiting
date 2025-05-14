@@ -10,4 +10,9 @@ public class UserPageController {
     public String userReservationDashBoard() {
         return "reservation";
     }
+
+    @GetMapping("/reservation-mine")
+    public String myReservationDashBoard() {
+        return "reservation-mine";
+    }
 }
