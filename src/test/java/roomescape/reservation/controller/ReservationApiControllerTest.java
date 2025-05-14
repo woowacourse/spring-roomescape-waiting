@@ -37,6 +37,7 @@ import roomescape.reservation.service.ReservationService;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.dto.ThemeResponse;
 
 @WebMvcTest(ReservationApiController.class)
 @Import({WebMvcConfiguration.class, GlobalExceptionHandler.class})
@@ -74,8 +75,8 @@ class ReservationApiControllerTest {
         List<ReservationResponse> expectedResponses = List.of(
                 new ReservationResponse(
                         reservation.getId(),
-                        reservation.getMember(),
-                        reservation.getTheme(),
+                        MemberResponse.from(reservation.getMember()),
+                        ThemeResponse.from(reservation.getTheme()),
                         reservation.getDate(),
                         ReservationTimeResponse.from(reservation.getTime())
                 )

@@ -1,13 +1,13 @@
 package roomescape.reservation.controller.admin;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.dto.MemberResponse;
 import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
 import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
@@ -24,8 +26,10 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.admin.AdminReservationRequest;
 import roomescape.reservation.dto.admin.AdminReservationSearchRequest;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.dto.ThemeResponse;
 
 @WebMvcTest(AdminReservationApiController.class)
 class AdminReservationApiControllerTest {
@@ -47,9 +51,9 @@ class AdminReservationApiControllerTest {
     @DisplayName("관리자가 새로운 예약을 추가한다")
     @Test
     void add() throws Exception {
-        Member member = mock(Member.class);
-        Theme theme = mock(Theme.class);
-        ReservationTimeResponse time = mock(ReservationTimeResponse.class);
+        Member member = new Member(1L, "name", "email", "password", Role.USER);
+        Theme theme = new Theme(1L, "name", "des", "thu");
+        ReservationTime time = new ReservationTime(1L, LocalTime.now());
 
         String requestBody = """
                 {
@@ -61,7 +65,8 @@ class AdminReservationApiControllerTest {
                 """;
 
         when(reservationService.addByAdmin(any(AdminReservationRequest.class)))
-                .thenReturn(new ReservationResponse(1L, member, theme, LocalDate.of(2026, 5, 5), time));
+                .thenReturn(new ReservationResponse(1L, MemberResponse.from(member), ThemeResponse.from(theme),
+                        LocalDate.of(2026, 5, 5), ReservationTimeResponse.from(time)));
 
         mockMvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)

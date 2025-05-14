@@ -11,6 +11,7 @@ import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ReservationExceptionMessage;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.dto.MyReservationResponse;
@@ -23,6 +24,7 @@ import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.dto.ThemeResponse;
 
 @Service
 public class ReservationService {
@@ -44,8 +46,8 @@ public class ReservationService {
         return reservationRepository.findAll().stream()
                 .map(reservation -> new ReservationResponse(
                         reservation.getId(),
-                        reservation.getMember(),
-                        reservation.getTheme(),
+                        MemberResponse.from(reservation.getMember()),
+                        ThemeResponse.from(reservation.getTheme()),
                         reservation.getDate(),
                         ReservationTimeResponse.from(reservation.getTime()))
                 )
@@ -75,8 +77,8 @@ public class ReservationService {
         return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
                 .stream().map(reservation -> new ReservationResponse(
                         reservation.getId(),
-                        reservation.getMember(),
-                        reservation.getTheme(),
+                        MemberResponse.from(reservation.getMember()),
+                        ThemeResponse.from(reservation.getTheme()),
                         reservation.getDate(),
                         ReservationTimeResponse.from(reservation.getTime()))
                 )
@@ -100,8 +102,8 @@ public class ReservationService {
 
         return new ReservationResponse(
                 savedReservation.getId(),
-                savedReservation.getMember(),
-                savedReservation.getTheme(),
+                MemberResponse.from(savedReservation.getMember()),
+                ThemeResponse.from(savedReservation.getTheme()),
                 savedReservation.getDate(),
                 ReservationTimeResponse.from(savedReservation.getTime())
         );
@@ -124,8 +126,8 @@ public class ReservationService {
 
         return new ReservationResponse(
                 savedReservation.getId(),
-                savedReservation.getMember(),
-                savedReservation.getTheme(),
+                MemberResponse.from(savedReservation.getMember()),
+                ThemeResponse.from(savedReservation.getTheme()),
                 savedReservation.getDate(),
                 ReservationTimeResponse.from(savedReservation.getTime())
         );

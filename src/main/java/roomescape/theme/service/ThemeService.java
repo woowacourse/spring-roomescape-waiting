@@ -8,7 +8,6 @@ import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ThemeExceptionMessage;
-import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
@@ -19,12 +18,10 @@ import roomescape.theme.dto.ThemeResponse;
 @Service
 public class ThemeService {
 
-    private final ReservationDao reservationDao;
     private final ThemeRepository themeRepository;
     private final ThemeDao themeDao;
 
-    public ThemeService(ReservationDao reservationDao, ThemeRepository themeRepository, ThemeDao themeDao) {
-        this.reservationDao = reservationDao;
+    public ThemeService(ThemeRepository themeRepository, ThemeDao themeDao) {
         this.themeRepository = themeRepository;
         this.themeDao = themeDao;
     }

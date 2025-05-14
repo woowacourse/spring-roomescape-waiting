@@ -9,27 +9,27 @@ import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ReservationTimeExceptionMessage;
-import roomescape.reservation.dao.ReservationDao;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.reservationTime.dto.admin.ReservationTimeRequest;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.reservationTime.dto.user.AvailableReservationTimeRequest;
 import roomescape.reservationTime.dto.user.AvailableReservationTimeResponse;
-import roomescape.theme.dao.ThemeDao;
+import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
 public class ReservationTimeService {
 
     private final ReservationTimeRepository timeRepository;
-    private final ReservationDao reservationDao;
-    private final ThemeDao themeDao;
+    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationTimeService(ReservationTimeRepository timeRepository, ReservationDao reservationDao,
-                                  ThemeDao themeDao) {
+    public ReservationTimeService(ReservationTimeRepository timeRepository, ReservationRepository reservationRepository,
+                                  ThemeRepository themeRepository) {
         this.timeRepository = timeRepository;
-        this.reservationDao = reservationDao;
-        this.themeDao = themeDao;
+        this.reservationRepository = reservationRepository;
+        this.themeRepository = themeRepository;
     }
 
     public List<ReservationTimeResponse> findAll() {
@@ -61,7 +61,7 @@ public class ReservationTimeService {
     private void searchTheme(
             final AvailableReservationTimeRequest availableReservationTimeRequest
     ) {
-        themeDao.findById(availableReservationTimeRequest.themeId())
+        themeRepository.findById(availableReservationTimeRequest.themeId())
                 .orElseThrow(() -> new InvalidIdException(
                         IdExceptionMessage.INVALID_THEME_ID.getMessage()
                 ));
@@ -70,7 +70,7 @@ public class ReservationTimeService {
     private List<ReservationTime> findReservedTimes(
             final AvailableReservationTimeRequest availableReservationTimeRequest
     ) {
-        return reservationDao.findAll().stream()
+        return reservationRepository.findAll().stream()
                 .filter(reservation -> reservation.getDate().equals(availableReservationTimeRequest.date())
                         && reservation.getTheme().getId().equals(availableReservationTimeRequest.themeId())
                 ).map(reservation -> new ReservationTime(

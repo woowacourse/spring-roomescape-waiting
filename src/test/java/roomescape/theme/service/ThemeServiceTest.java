@@ -18,8 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
-import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationDaoImpl;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.dao.ThemeDaoImpl;
 import roomescape.theme.domain.Theme;
@@ -30,17 +28,15 @@ import roomescape.theme.dto.ThemeRequest;
 class ThemeServiceTest {
 
     private ThemeDao themeDao;
-    private ReservationDao reservationDao;
     private ThemeRepository themeRepository;
     private ThemeService themeService;
 
     @BeforeEach
     void setUp() {
         themeDao = mock(ThemeDaoImpl.class);
-        reservationDao = mock(ReservationDaoImpl.class);
         themeRepository = mock(ThemeRepository.class);
 
-        themeService = new ThemeService(reservationDao, themeRepository, themeDao);
+        themeService = new ThemeService(themeRepository, themeDao);
     }
 
     @DisplayName("테마 내역을 조회하는 기능을 구현한다")
