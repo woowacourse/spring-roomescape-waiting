@@ -34,8 +34,7 @@ public class ReservationTimeService {
     public void deleteReservationTimeById(final Long id) {
         validateExistIdToDelete(id);
 
-        reservationTimeRepository.findById(id)
-            .orElseThrow(() -> new ReservationTimeException("존재하지 않는 예약 시간입니다."));
+        reservationTimeRepository.findById(id).orElseThrow(() -> new ReservationTimeException("존재하지 않는 예약 시간입니다."));
         reservationTimeRepository.deleteById(id);
     }
 
@@ -46,22 +45,17 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> getReservationTimes() {
-        return reservationTimeRepository.findAll().stream()
-            .map(ReservationTimeResponse::from)
-            .toList();
+        return reservationTimeRepository.findAll().stream().map(ReservationTimeResponse::from).toList();
     }
 
     public List<TimeConditionResponse> getTimesWithCondition(final TimeConditionRequest request) {
         List<Reservation> reservations = reservationRepository.findBy(request.date(), request.themeId());
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
-
-        return times.stream()
-            .map(time -> {
-                boolean hasTime = reservations.stream()
-                    .anyMatch(reservation -> reservation.isSameTime(time));
-                return new TimeConditionResponse(time.getId(), time.getStartAt(), hasTime);
-            })
-            .toList();
+        return times.stream().map(time -> {
+            boolean hasTime = reservations.stream()
+                .anyMatch(reservation -> reservation.isSameTime(time));
+            return new TimeConditionResponse(time.getId(), time.getStartAt(), hasTime);
+        }).toList();
     }
 }
