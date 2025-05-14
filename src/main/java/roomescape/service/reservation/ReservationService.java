@@ -6,7 +6,7 @@ import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.search.SearchConditions;
+import roomescape.dto.search.SearchConditionsRequest;
 
 public interface ReservationService {
 
@@ -18,7 +18,7 @@ public interface ReservationService {
 
     ReservationResponse createByAdmin(AdminReservationRequest adminReservationRequest);
 
-    List<ReservationResponse> getReservationsByConditions(SearchConditions searchConditions);
+    List<ReservationResponse> getReservationsByConditions(SearchConditionsRequest searchConditionsRequest);
 
     List<MemberReservationResponse> getReservationByMember(Member member);
 }

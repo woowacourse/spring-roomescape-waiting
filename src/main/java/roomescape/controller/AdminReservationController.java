@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.search.SearchConditions;
+import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.service.reservation.ReservationService;
 
 @RestController
 @RequestMapping("admin/reservations")
 public class AdminReservationController {
 
-    private ReservationService reservationService;
+    private final ReservationService reservationService;
 
     public AdminReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
@@ -42,9 +42,9 @@ public class AdminReservationController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
 
-        SearchConditions searchConditions = new SearchConditions(themeId, memberId, dateFrom, dateTo);
+        SearchConditionsRequest searchConditionsRequest = new SearchConditionsRequest(themeId, memberId, dateFrom, dateTo);
 
         return ResponseEntity.ok()
-                .body(reservationService.getReservationsByConditions(searchConditions));
+                .body(reservationService.getReservationsByConditions(searchConditionsRequest));
     }
 }

@@ -12,7 +12,7 @@ import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.search.SearchConditions;
+import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
 import roomescape.exception.reservation.ReservationInPastException;
@@ -87,13 +87,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<ReservationResponse> getReservationsByConditions(@Valid SearchConditions searchConditions) {
+    public List<ReservationResponse> getReservationsByConditions(@Valid SearchConditionsRequest searchConditionsRequest) {
 
         List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
-                searchConditions.themeId(),
-                searchConditions.memberId(),
-                searchConditions.dateFrom(),
-                searchConditions.dateTo()
+                searchConditionsRequest.themeId(),
+                searchConditionsRequest.memberId(),
+                searchConditionsRequest.dateFrom(),
+                searchConditionsRequest.dateTo()
         );
         return reservations.stream().
                 map(reservation -> ReservationResponse.from(reservation))
