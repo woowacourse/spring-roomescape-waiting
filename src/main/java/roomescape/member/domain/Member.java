@@ -14,17 +14,17 @@ public final class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private MemberName memberName;
+    private MemberName name;
     private MemberEmail email;
     private String password;
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member(final Long id, final MemberName memberName,
+    public Member(final Long id, final MemberName name,
                   final MemberEmail email, final String password, final Role role) {
-        validateNotNull(memberName, email, password, role);
+        validateNotNull(name, email, password, role);
         this.id = id;
-        this.memberName = memberName;
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -38,21 +38,21 @@ public final class Member {
 
     }
 
-    public static Member register(final MemberName memberName, final MemberEmail email, final String password) {
-        return new Member(null, memberName, email, password, Role.USER);
+    public static Member register(final MemberName name, final MemberEmail email, final String password) {
+        return new Member(null, name, email, password, Role.USER);
     }
 
     public Member withId(final long id) {
-        return new Member(id, memberName, email, password, Role.USER);
+        return new Member(id, name, email, password, Role.USER);
     }
 
     public boolean hasRole(final Role other) {
         return this.role == other;
     }
 
-    private void validateNotNull(final MemberName memberName, final MemberEmail email,
+    private void validateNotNull(final MemberName name, final MemberEmail email,
                                  final String password, final Role role) {
-        if (memberName == null) {
+        if (name == null) {
             throw new IllegalArgumentException("이름을 입력해야 합니다.");
         }
         if (email == null) {
@@ -71,7 +71,7 @@ public final class Member {
     }
 
     public MemberName getMemberName() {
-        return memberName;
+        return name;
     }
 
     public MemberEmail getMemberEmail() {
@@ -79,7 +79,7 @@ public final class Member {
     }
 
     public String getName() {
-        return memberName.getName();
+        return name.getName();
     }
 
     public String getEmail() {

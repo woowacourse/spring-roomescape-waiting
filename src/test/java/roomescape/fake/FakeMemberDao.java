@@ -21,15 +21,60 @@ public class FakeMemberDao implements MemberRepository {
     }
 
     @Override
+    public <S extends Member> Iterable<S> saveAll(final Iterable<S> entities) {
+        return null;
+    }
+
+    @Override
+    public Optional<Member> findById(final Long id) {
+        return members.stream()
+                .filter(member -> member.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
+    public boolean existsById(final Long aLong) {
+        return false;
+    }
+
+    @Override
     public List<Member> findAll() {
         return members;
     }
 
     @Override
-    public Optional<Member> findById(final long id) {
-        return members.stream()
-                .filter(member -> member.getId().equals(id))
-                .findFirst();
+    public Iterable<Member> findAllById(final Iterable<Long> longs) {
+        return null;
+    }
+
+    @Override
+    public long count() {
+        return 0;
+    }
+
+    @Override
+    public void deleteById(final Long aLong) {
+
+    }
+
+    @Override
+    public void delete(final Member entity) {
+
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends Long> longs) {
+
+    }
+
+    @Override
+    public void deleteAll(final Iterable<? extends Member> entities) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
     }
 
     @Override
