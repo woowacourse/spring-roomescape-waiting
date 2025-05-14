@@ -8,17 +8,14 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenHandler;
-import roomescape.domain.UserRole;
+import roomescape.domain.auth.AuthenticationInfo;
+import roomescape.domain.auth.AuthenticationTokenHandler;
+import roomescape.domain.user.UserRole;
 import roomescape.infrastructure.JwtTokenHandler;
+import roomescape.presentation.auth.AuthenticationTokenCookie;
+import roomescape.presentation.auth.CheckAdminInterceptor;
 
 class CheckAdminInterceptorTest {
-
-    @Controller
-    private static class TestController {
-
-    }
 
     private final MockHttpServletRequest request = new MockHttpServletRequest();
     private final MockHttpServletResponse response = new MockHttpServletResponse();
@@ -77,5 +74,10 @@ class CheckAdminInterceptorTest {
         boolean actual = interceptor.preHandle(request, response, new TestController());
 
         assertThat(actual).isFalse();
+    }
+
+    @Controller
+    private static class TestController {
+
     }
 }

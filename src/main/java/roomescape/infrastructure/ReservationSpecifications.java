@@ -4,8 +4,8 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
-import roomescape.domain.Reservation;
-import roomescape.domain.repository.ReservationSearchFilter;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSearchFilter;
 
 public class ReservationSpecifications {
     public static Specification<Reservation> byFilter(ReservationSearchFilter filter) {

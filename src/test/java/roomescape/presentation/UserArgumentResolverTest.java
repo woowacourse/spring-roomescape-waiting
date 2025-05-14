@@ -18,8 +18,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import roomescape.application.AuthenticationService;
-import roomescape.domain.User;
-import roomescape.domain.UserRole;
+import roomescape.domain.user.User;
+import roomescape.domain.user.UserRole;
+import roomescape.presentation.auth.Authenticated;
+import roomescape.presentation.auth.AuthenticationTokenCookie;
+import roomescape.presentation.auth.UserArgumentResolver;
 
 @ExtendWith(MockitoExtension.class)
 class UserArgumentResolverTest {

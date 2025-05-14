@@ -1,11 +1,11 @@
 package roomescape.application;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenHandler;
-import roomescape.domain.User;
-import roomescape.domain.repository.UserRepository;
-import roomescape.exception.custom.AuthenticationException;
+import roomescape.domain.auth.AuthenticationInfo;
+import roomescape.domain.auth.AuthenticationTokenHandler;
+import roomescape.domain.user.User;
+import roomescape.domain.user.UserRepository;
+import roomescape.exception.AuthenticationException;
 
 @Service
 public class AuthenticationService {

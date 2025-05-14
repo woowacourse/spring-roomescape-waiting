@@ -28,7 +28,8 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> reserve(@RequestBody @Valid final CreateReservationAdminRequest request) {
+    public ResponseEntity<ReservationResponse> reserve(
+            @RequestBody @Valid final CreateReservationAdminRequest request) {
         var user = userService.getById(request.userId());
         var reservation = reservationService.reserve(user, request.date(), request.timeId(), request.themeId());
         var response = ReservationResponse.from(reservation);

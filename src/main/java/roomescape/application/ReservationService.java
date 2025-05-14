@@ -3,16 +3,16 @@ package roomescape.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-import roomescape.domain.User;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ReservationSearchFilter;
-import roomescape.domain.repository.ThemeRepository;
-import roomescape.domain.repository.TimeSlotRepository;
-import roomescape.exception.custom.AlreadyExistedException;
-import roomescape.exception.custom.NotFoundException;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSearchFilter;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.timeslot.TimeSlotRepository;
+import roomescape.domain.user.User;
+import roomescape.exception.AlreadyExistedException;
+import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.ReservationSpecifications;
 
 @Service

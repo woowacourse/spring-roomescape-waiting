@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import roomescape.presentation.auth.AuthenticationTokenCookie;
 
 class AuthenticationTokenCookieTest {
 
@@ -38,8 +39,8 @@ class AuthenticationTokenCookieTest {
 
         // then
         assertAll(
-            () -> assertThat(tokenCookie).isNotNull(),
-            () -> assertThat(tokenCookie.token()).isEqualTo("abcd")
+                () -> assertThat(tokenCookie).isNotNull(),
+                () -> assertThat(tokenCookie.token()).isEqualTo("abcd")
         );
     }
 
@@ -49,10 +50,10 @@ class AuthenticationTokenCookieTest {
         var cookie = AuthenticationTokenCookie.forResponse("abcd");
 
         assertAll(
-            () -> assertThat(cookie.getName()).isEqualTo(AuthenticationTokenCookie.COOKIE_KEY),
-            () -> assertThat(cookie.getValue()).isEqualTo("abcd"),
-            () -> assertThat(cookie.isHttpOnly()).isTrue(),
-            () -> assertThat(cookie.getPath()).isEqualTo("/")
+                () -> assertThat(cookie.getName()).isEqualTo(AuthenticationTokenCookie.COOKIE_KEY),
+                () -> assertThat(cookie.getValue()).isEqualTo("abcd"),
+                () -> assertThat(cookie.isHttpOnly()).isTrue(),
+                () -> assertThat(cookie.getPath()).isEqualTo("/")
         );
     }
 
@@ -62,8 +63,8 @@ class AuthenticationTokenCookieTest {
         var cookie = AuthenticationTokenCookie.forExpire();
 
         assertAll(
-            () -> assertThat(cookie.getName()).isEqualTo(AuthenticationTokenCookie.COOKIE_KEY),
-            () -> assertThat(cookie.getMaxAge()).isEqualTo(0)
+                () -> assertThat(cookie.getName()).isEqualTo(AuthenticationTokenCookie.COOKIE_KEY),
+                () -> assertThat(cookie.getMaxAge()).isEqualTo(0)
         );
     }
 }

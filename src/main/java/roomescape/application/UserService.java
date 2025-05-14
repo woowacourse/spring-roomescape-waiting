@@ -2,11 +2,11 @@ package roomescape.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.User;
-import roomescape.domain.repository.UserRepository;
-import roomescape.exception.custom.AlreadyExistedException;
-import roomescape.exception.custom.NotFoundException;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.user.User;
+import roomescape.domain.user.UserRepository;
+import roomescape.exception.AlreadyExistedException;
+import roomescape.exception.NotFoundException;
 
 @Service
 public class UserService {

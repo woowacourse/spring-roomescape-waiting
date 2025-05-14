@@ -1,8 +1,8 @@
 package roomescape.infrastructure.fake;
 
-import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenHandler;
-import roomescape.domain.UserRole;
+import roomescape.domain.auth.AuthenticationInfo;
+import roomescape.domain.auth.AuthenticationTokenHandler;
+import roomescape.domain.user.UserRole;
 
 public class DummyTokenHandler implements AuthenticationTokenHandler {
 

@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.application.AuthenticationService;
-import roomescape.domain.User;
-import roomescape.presentation.Authenticated;
-import roomescape.presentation.AuthenticationTokenCookie;
+import roomescape.domain.user.User;
+import roomescape.presentation.auth.Authenticated;
+import roomescape.presentation.auth.AuthenticationTokenCookie;
 import roomescape.presentation.request.LoginRequest;
 import roomescape.presentation.response.UserResponse;
 
@@ -26,8 +26,8 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> performLogin(
-        @RequestBody @Valid final LoginRequest request,
-        final HttpServletResponse response
+            @RequestBody @Valid final LoginRequest request,
+            final HttpServletResponse response
     ) {
         var issuedToken = authenticationService.issueToken(request.email(), request.password());
         var tokenCookie = AuthenticationTokenCookie.forResponse(issuedToken);

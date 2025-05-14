@@ -7,9 +7,9 @@ import io.jsonwebtoken.Jwts.SIG;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
-import roomescape.domain.AuthenticationInfo;
-import roomescape.domain.AuthenticationTokenHandler;
-import roomescape.domain.UserRole;
+import roomescape.domain.auth.AuthenticationInfo;
+import roomescape.domain.auth.AuthenticationTokenHandler;
+import roomescape.domain.user.UserRole;
 
 @Component
 public class JwtTokenHandler implements AuthenticationTokenHandler {
@@ -21,9 +21,9 @@ public class JwtTokenHandler implements AuthenticationTokenHandler {
         var userId = String.valueOf(authenticationInfo.id());
         var userRole = authenticationInfo.role().name();
         Claims claims = Jwts.claims()
-            .subject(userId)
-            .add("role", userRole)
-            .build();
+                .subject(userId)
+                .add("role", userRole)
+                .build();
         Date now = new Date();
         Date validity = new Date(now.getTime() + EXPIRATION_DURATION_IN_MILLISECONDS);
 
@@ -42,10 +42,10 @@ public class JwtTokenHandler implements AuthenticationTokenHandler {
 
     public AuthenticationInfo extractAuthenticationInfo(final String token) {
         var payload = Jwts.parser()
-            .verifyWith(SECRET_KEY)
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
+                .verifyWith(SECRET_KEY)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
 
         var id = Long.parseLong(payload.getSubject());
         var role = UserRole.valueOf(payload.get("role", String.class));

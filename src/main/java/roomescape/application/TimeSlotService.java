@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.AvailableTimeSlot;
-import roomescape.domain.Reservation;
-import roomescape.domain.TimeSlot;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.TimeSlotRepository;
-import roomescape.exception.custom.InUseException;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.timeslot.AvailableTimeSlot;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.timeslot.TimeSlotRepository;
+import roomescape.exception.InUseException;
 
 @Service
 public class TimeSlotService {
