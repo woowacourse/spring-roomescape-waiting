@@ -8,6 +8,7 @@ import roomescape.dto.member.MemberResponseDto;
 import roomescape.dto.member.MemberSignupResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.UnauthorizationException;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.MemberRepository;
 
 import java.util.List;
@@ -15,9 +16,9 @@ import java.util.List;
 @Service
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+    private final JpaMemberRepository memberRepository;
 
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(JpaMemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 

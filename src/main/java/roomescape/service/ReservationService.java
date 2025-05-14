@@ -8,6 +8,10 @@ import roomescape.domain.member.Member;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
+import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.JpaReservationRepository;
+import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.repository.JpaThemeRepository;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -21,12 +25,15 @@ import java.util.List;
 @Service
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final JpaReservationRepository reservationRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaThemeRepository themeRepository;
+    private final JpaMemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, MemberRepository memberRepository) {
+    public ReservationService(final JpaReservationRepository reservationRepository,
+                              final JpaReservationTimeRepository reservationTimeRepository,
+                              final JpaThemeRepository themeRepository,
+                              final JpaMemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;

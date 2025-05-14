@@ -8,16 +8,19 @@ import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
+import roomescape.repository.JpaReservationRepository;
+import roomescape.repository.JpaThemeRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
 
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final JpaThemeRepository themeRepository;
+    private final JpaReservationRepository reservationRepository;
 
-    public ThemeService(ReservationRepository reservationRepository,ThemeRepository themeRepository) {
+    public ThemeService(final JpaThemeRepository themeRepository,
+                        final JpaReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -44,6 +47,7 @@ public class ThemeService {
             throw new IllegalStateException("[ERROR] 이 테마는 이미 예약이 존재합니다. id : " + id);
         }
 
+        //TODO: 반환 값 안맞음
         int deletedThemeCount = themeRepository.deleteById(id);
 
         if (deletedThemeCount == 0) {

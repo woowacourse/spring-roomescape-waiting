@@ -10,16 +10,17 @@ import roomescape.dto.time.ReservationTimeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.JpaReservationRepository;
+import roomescape.repository.JpaReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ReservationRepository reservationRepository) {
+    public ReservationTimeService(final JpaReservationTimeRepository reservationTimeRepository,
+                                  final JpaReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -59,7 +60,7 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTimeById(final Long id) {
-        if(reservationRepository.existsByTimeId(id)){
+        if (reservationRepository.existsByTimeId(id)) {
             throw new IllegalStateException("[ERROR] 이 시간의 예약이 이미 존재합니다. id : " + id);
         }
 
