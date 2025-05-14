@@ -171,7 +171,6 @@ function requestCreate(reservation) {
         .then(response => {
             if (response.status === 201) return response.json();
             response.json().then(error => alert(error.message));
-            // response.json().then(error => alert(error.message));
             throw new Error('Create failed');
         });
 }
