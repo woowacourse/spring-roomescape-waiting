@@ -6,8 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.login.presentation.dto.LoginMemberInfo;
+import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.member.presentation.dto.MemberRequest;
 import roomescape.member.presentation.dto.MemberResponse;
+import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.member.service.MemberService;
 
 @RestController
@@ -27,6 +30,13 @@ public class MemberController {
     @PostMapping("/members")
     public ResponseEntity<MemberResponse> createMember(@RequestBody MemberRequest request) {
         MemberResponse response = memberService.save(request);
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
+        List<MyReservationResponse> response = memberService.getMemberReservations(loginMemberInfo);
 
         return ResponseEntity.ok().body(response);
     }

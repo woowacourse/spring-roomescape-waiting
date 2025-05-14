@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.common.exception.BusinessException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
@@ -9,6 +10,7 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.exception.EmailException;
 import roomescape.member.presentation.dto.MemberRequest;
 import roomescape.member.presentation.dto.MemberResponse;
+import roomescape.member.presentation.dto.MyReservationResponse;
 
 @Service
 public class MemberService {
@@ -53,5 +55,14 @@ public class MemberService {
         return memberRepository.findAll().stream()
                 .map(member -> new MemberResponse(member.getId(), member.getName()))
                 .toList();
+    }
+
+    public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
+        Member member = memberRepository.findById(loginMemberInfo.id())
+            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+
+        return member.getReservations().stream()
+            .map(MyReservationResponse::from)
+            .toList();
     }
 }
