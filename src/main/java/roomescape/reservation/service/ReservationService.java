@@ -11,6 +11,7 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -57,7 +58,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findBy(request.themeId(), request.date());
         validateExistDuplicateReservation(reservations, time);
 
-        Reservation reservation = Reservation.createWithoutId(request.date(), time, theme, member);
+        Reservation reservation = Reservation.createWithoutId(request.date(), time, theme, member, Status.RESERVED);
         validateCanReserveDateTime(reservation, dateTime.now());
         reservation = reservationRepository.save(reservation);
 

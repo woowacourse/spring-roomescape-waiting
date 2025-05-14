@@ -1,6 +1,8 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,12 +23,18 @@ public class Reservation {
     private Long id;
 
     private LocalDate date;
+
     @ManyToOne
     private ReservationTime time;
+
     @ManyToOne
     private Theme theme;
+
     @ManyToOne
     private Member member;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     public Reservation() {
     }
@@ -35,18 +43,22 @@ public class Reservation {
                         final LocalDate date,
                         final ReservationTime time,
                         final Theme theme,
-                        final Member member
+                        final Member member,
+                        final Status status
     ) {
         validateIsNonNull(date);
         validateIsNonNull(time);
         validateIsNonNull(theme);
         validateIsNonNull(member);
+        validateIsNonNull(status);
 
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
+        this.status = status;
+        this.member.addReservation(this);
     }
 
     private void validateIsNonNull(final Object object) {
@@ -58,9 +70,10 @@ public class Reservation {
     public static Reservation createWithoutId(final LocalDate date,
                                               final ReservationTime time,
                                               final Theme theme,
-                                              final Member member
+                                              final Member member,
+                                              final Status status
     ) {
-        return new Reservation(null, date, time, theme, member);
+        return new Reservation(null, date, time, theme, member, status);
     }
 
     public boolean isCannotReserveDateTime(final LocalDateTime dateTime) {
@@ -93,6 +106,10 @@ public class Reservation {
 
     public Member getMember() {
         return member;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     @Override
