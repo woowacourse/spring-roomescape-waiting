@@ -4,6 +4,8 @@ package roomescape.theme.application;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,6 +20,7 @@ import roomescape.theme.ui.dto.ThemeResponse;
 
 @DataJpaTest
 @Import(TestConfig.class)
+@DisplayNameGeneration(ReplaceUnderscores.class)
 class ThemeServiceTest {
 
     @Autowired

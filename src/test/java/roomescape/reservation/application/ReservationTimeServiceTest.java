@@ -2,6 +2,8 @@ package roomescape.reservation.application;
 
 import java.time.LocalTime;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,6 +19,7 @@ import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 
 @DataJpaTest
 @Import(TestConfig.class)
+@DisplayNameGeneration(ReplaceUnderscores.class)
 class ReservationTimeServiceTest {
 
     @Autowired

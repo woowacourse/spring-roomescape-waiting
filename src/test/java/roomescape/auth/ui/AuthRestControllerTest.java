@@ -7,19 +7,20 @@ import static roomescape.fixture.ui.MemberApiFixture.signUpParams1;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.AuthTokenProvider;
 import roomescape.auth.ui.dto.CheckAccessTokenResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@ActiveProfiles("test")
+@DisplayNameGeneration(ReplaceUnderscores.class)
 class AuthRestControllerTest {
 
     @Autowired
