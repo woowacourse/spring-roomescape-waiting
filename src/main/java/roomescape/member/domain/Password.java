@@ -1,19 +1,12 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import roomescape.global.exception.InvalidArgumentException;
 
 @Embeddable
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class Password {
+public record Password(String password) {
 
     private static final int PASSWORD_MAX_LENGTH = 25;
-    private String password;
 
     public static Password encrypt(String rawPassword, PasswordEncryptor passwordEncoder) {
         validateRawPassword(rawPassword);

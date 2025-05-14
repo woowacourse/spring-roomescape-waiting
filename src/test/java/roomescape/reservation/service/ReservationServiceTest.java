@@ -67,7 +67,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeDbFixture.열시();
         Theme theme = themeDbFixture.공포();
         Member reserver = memberDbFixture.유저1_생성();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
 
         ReserveCommand command = new ReserveCommand(
                 date,

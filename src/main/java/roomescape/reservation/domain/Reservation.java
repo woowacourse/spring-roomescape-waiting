@@ -68,18 +68,18 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return reservationDatetime.getReservationDate().getDate();
+        return reservationDatetime.reservationDate().date();
     }
 
     public LocalTime getStartAt() {
-        return reservationDatetime.getReservationTime().getStartAt();
+        return reservationDatetime.reservationTime().getStartAt();
     }
 
     public ReservationTime getReservationTime() {
-        return reservationDatetime.getReservationTime();
+        return reservationDatetime.reservationTime();
     }
 
     public Long getTimeId() {
-        return reservationDatetime.getReservationTime().getId();
+        return reservationDatetime.reservationTime().getId();
     }
 }

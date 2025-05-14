@@ -28,12 +28,6 @@ public class ReservationService {
     private final ThemeService themeService;
     private final MemberService memberService;
 
-    private List<ReservationResponse> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        return ReservationResponse.from(reservations);
-    }
-
     public ReservationResponse reserve(ReserveCommand reserveCommand) {
         LocalDate date = reserveCommand.date();
         Long timeId = reserveCommand.timeId();
@@ -80,6 +74,13 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findFilteredReservations(
                 themeId, memberId, from, to
         );
+
+        return ReservationResponse.from(reservations);
+    }
+
+
+    private List<ReservationResponse> getAllReservations() {
+        List<Reservation> reservations = reservationRepository.findAll();
 
         return ReservationResponse.from(reservations);
     }
