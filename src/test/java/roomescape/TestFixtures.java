@@ -52,13 +52,13 @@ public final class TestFixtures {
     public static final ReservationTime RESERVATION_TIME_4 = new ReservationTime(4L, LocalTime.of(15, 0));
     public static final ReservationTime RESERVATION_TIME_5 = new ReservationTime(5L, LocalTime.of(16, 0));
     public static final ReservationTimeResult RESERVATION_TIME_1_RESULT = new ReservationTimeResult(
-            RESERVATION_TIME_1.id(), RESERVATION_TIME_1.startAt());
+            RESERVATION_TIME_1.getId(), RESERVATION_TIME_1.getStartAt());
     public static final ReservationTimeResult RESERVATION_TIME_2_RESULT = new ReservationTimeResult(
-            RESERVATION_TIME_2.id(), RESERVATION_TIME_2.startAt());
+            RESERVATION_TIME_2.getId(), RESERVATION_TIME_2.getStartAt());
     public static final ReservationTimeResult RESERVATION_TIME_3_RESULT = new ReservationTimeResult(
-            RESERVATION_TIME_3.id(), RESERVATION_TIME_3.startAt());
+            RESERVATION_TIME_3.getId(), RESERVATION_TIME_3.getStartAt());
     public static final ReservationTimeResult RESERVATION_TIME_4_RESULT = new ReservationTimeResult(
-            RESERVATION_TIME_4.id(), RESERVATION_TIME_4.startAt());
+            RESERVATION_TIME_4.getId(), RESERVATION_TIME_4.getStartAt());
     public static final ReservationTimeResult RESERVATION_TIME_5_RESULT = new ReservationTimeResult(
-            RESERVATION_TIME_5.id(), RESERVATION_TIME_5.startAt());
+            RESERVATION_TIME_5.getId(), RESERVATION_TIME_5.getStartAt());
 }
