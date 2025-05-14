@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.reservation.infrastructure.db.dao.ReservationH2Dao;
-import roomescape.domain.reservation.model.entity.Reservation;
-import roomescape.domain.reservation.model.entity.ReservationTheme;
-import roomescape.domain.reservation.model.entity.ReservationTime;
+import roomescape.reservation.infrastructure.db.dao.ReservationH2Dao;
+import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.ReservationTheme;
+import roomescape.reservation.model.entity.ReservationTime;
 import roomescape.support.JdbcTestSupport;
 
 

@@ -10,8 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.member.model.Member;
-import roomescape.domain.member.model.Role;
+import roomescape.member.infrastructure.db.MemberH2Dao;
+import roomescape.member.model.Member;
+import roomescape.member.model.Role;
 import roomescape.support.JdbcTestSupport;
 
 @Import(MemberH2Dao.class)

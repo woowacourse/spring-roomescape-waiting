@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.domain.reservation.model.dto.ReservationDetails;
-import roomescape.domain.reservation.model.entity.Reservation;
-import roomescape.domain.reservation.model.entity.ReservationTheme;
-import roomescape.domain.reservation.model.entity.ReservationTime;
-import roomescape.domain.reservation.model.exception.ReservationException.InvalidReservationTimeException;
+import roomescape.reservation.model.dto.ReservationDetails;
+import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.ReservationTheme;
+import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 
 class ReservationTest {
 

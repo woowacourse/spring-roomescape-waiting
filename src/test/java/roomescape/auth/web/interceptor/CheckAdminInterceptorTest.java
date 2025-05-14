@@ -18,7 +18,7 @@ import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.infrastructure.TokenService;
 import roomescape.auth.web.constant.AuthConstant;
 import roomescape.auth.web.support.AuthorizationExtractor;
-import roomescape.domain.member.model.Role;
+import roomescape.member.model.Role;
 import roomescape.global.exception.AuthorizationException;
 
 @ExtendWith(MockitoExtension.class)

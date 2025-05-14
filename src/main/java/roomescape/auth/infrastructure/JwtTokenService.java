@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.auth.config.JwtProperties;
 import roomescape.auth.dto.AuthenticatedMember;
-import roomescape.domain.member.model.Member;
-import roomescape.domain.member.model.Role;
+import roomescape.member.model.Member;
+import roomescape.member.model.Role;
 import roomescape.global.exception.AuthenticationException.InvalidTokenException;
 import roomescape.global.util.NumberParser;
 

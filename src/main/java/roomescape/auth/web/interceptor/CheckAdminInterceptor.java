@@ -4,13 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.infrastructure.TokenService;
 import roomescape.auth.web.support.AuthorizationExtractor;
-import roomescape.domain.member.model.Role;
+import roomescape.member.model.Role;
 import roomescape.global.exception.AuthorizationException;
 
 @Component
