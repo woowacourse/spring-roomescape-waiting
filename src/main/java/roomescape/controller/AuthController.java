@@ -30,7 +30,7 @@ public class AuthController {
         this.memberService = memberService;
     }
 
-    @PostMapping("/login") //TODO: 응답 형식 고려
+    @PostMapping("/login")
     public ResponseEntity<LoginMemberResponse> login(@RequestBody LoginMemberRequest loginMemberRequest, HttpServletResponse response) {
         MemberResult memberResult = memberService.login(loginMemberRequest.toServiceParam());
         String token = jwtTokenProvider.createToken(memberResult);
