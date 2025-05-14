@@ -1,10 +1,12 @@
-package roomescape.entity;
+package roomescape.domain;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
 
 public class ReservationSlots {
 
@@ -18,7 +20,7 @@ public class ReservationSlots {
 
         for (ReservationTime time : times) {
             boolean contains = alreadyReservationTimes.contains(time);
-            ReservationSlot reservationSlot = new ReservationSlot(time.getId(), time.getTime(), contains);
+            ReservationSlot reservationSlot = new ReservationSlot(time.getId(), time.getStartAt(), contains);
             reservationSlots.add(reservationSlot);
         }
 

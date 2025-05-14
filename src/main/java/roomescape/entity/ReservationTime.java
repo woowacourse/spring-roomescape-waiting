@@ -12,26 +12,26 @@ public class ReservationTime {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalTime time;
+    private LocalTime startAt;
 
     public ReservationTime() {
     }
 
-    public ReservationTime(Long id, LocalTime time) {
+    public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
-        this.time = time;
+        this.startAt = startAt;
     }
 
-    public ReservationTime(LocalTime time) {
-        this(null, time);
+    public ReservationTime(LocalTime startAt) {
+        this(null, startAt);
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalTime getTime() {
-        return time;
+    public LocalTime getStartAt() {
+        return startAt;
     }
 
     @Override
@@ -40,11 +40,11 @@ public class ReservationTime {
             return false;
         }
         ReservationTime that = (ReservationTime) o;
-        return Objects.equals(id, that.id) && Objects.equals(time, that.time);
+        return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time);
+        return Objects.hash(id, startAt);
     }
 }

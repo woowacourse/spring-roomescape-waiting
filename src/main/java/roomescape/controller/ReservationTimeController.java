@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
-import roomescape.entity.ReservationSlot;
-import roomescape.entity.ReservationSlots;
-import roomescape.entity.ReservationTime;
-import roomescape.global.Role;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationSlots;
 import roomescape.dto.request.AvailableTimeRequest;
 import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeSlotResponse;
+import roomescape.entity.ReservationTime;
+import roomescape.global.Role;
 import roomescape.service.ReservationTimeService;
 
 @RestController

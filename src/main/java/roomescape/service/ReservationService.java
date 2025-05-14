@@ -62,11 +62,11 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
-        boolean exists = reservationRepository.existsByDateAndReservationTime_IdAndTheme_Id( //TODO: 메서드명 이대로 괜찮은가
-                reservation.getDate(),
+        boolean exists = reservationRepository.existsByTimeIdAndThemeIdAndDate(
                 reservation.getReservationTime().getId(),
-                reservation.getTheme().getId()
-        );
+                reservation.getTheme().getId(),
+                reservation.getDate()
+                );
         if (exists) {
             throw new InvalidReservationException("중복된 예약신청입니다");
         }

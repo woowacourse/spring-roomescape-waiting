@@ -11,7 +11,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByDateAndTheme_Id(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByDateBetween(LocalDate end, LocalDate start);
+    List<Reservation> findAllByDateBetween(LocalDate start, LocalDate end);
 
     @Query(value = """
         select r from Reservation r
@@ -25,9 +25,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                       @Param("dateFrom") LocalDate dateFrom,
                                       @Param("dateTo") LocalDate dateTo);
 
-    boolean existsByDateAndReservationTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
+    boolean existsByTimeIdAndThemeIdAndDate(Long reservationTimeId, Long themeId, LocalDate date);
 
-    boolean existsByTime_Id(Long timeId); //TODO: 검증필요
+//    @Query(value = """
+//        select exists (select r from Reservation r
+//        join ReservationTime rt on r.time.id = rt.id
+//        join Theme  t on r.theme.id = t.id
+//        where :reservationTimeId = rt.id
+//        and :themeId = t.id
+//        and :date = r.date)
+//    """)
+//    boolean existsFilter(@Param("reservationTimeId")Long reservationTimeId,
+//                         @Param("themeId") Long themeId,
+//                         @Param("date") LocalDate date);
 
-    boolean existsByTheme_Id(Long themeId); //TODO: 검증필요
+    boolean existsByTimeId(Long timeId);
+
+    boolean existsByThemeId(Long themeId);
 }

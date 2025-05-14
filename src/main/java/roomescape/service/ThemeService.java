@@ -3,10 +3,10 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.ThemeRanking;
 import roomescape.dto.request.CreateThemeRequest;
 import roomescape.entity.Reservation;
 import roomescape.entity.Theme;
-import roomescape.domain.ThemeRanking;
 import roomescape.exception.custom.InvalidThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -27,6 +27,10 @@ public class ThemeService {
 
     public Theme addTheme(CreateThemeRequest request) {
         Theme theme = request.toTheme();
+        boolean existsByName = themeRepository.existsByName(theme.getName());
+        if (existsByName){
+            throw new InvalidThemeException("중복된 테마 이름입니다.");
+        }
         return themeRepository.save(theme);
     }
 
@@ -35,7 +39,7 @@ public class ThemeService {
     }
 
     public void deleteThemeById(long id) {
-        if (reservationRepository.existsByTheme_Id(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new InvalidThemeException("예약이 존재하는 테마는 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);
@@ -45,7 +49,7 @@ public class ThemeService {
         LocalDate end = originDate.minusDays(THEME_RANKING_START_RANGE);
         LocalDate start = end.minusDays(THEME_RANKING_END_RANGE);
 
-        List<Reservation> inRangeReservations = reservationRepository.findAllByDateBetween(end, start);
+        List<Reservation> inRangeReservations = reservationRepository.findAllByDateBetween(start, end);
 
         ThemeRanking themeRanking = new ThemeRanking(inRangeReservations);
         return themeRanking.getAscendingRanking();

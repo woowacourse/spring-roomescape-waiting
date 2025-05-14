@@ -68,7 +68,7 @@ public class Reservation {
     }
 
     public LocalTime getStartAt() {
-        return time.getTime();
+        return time.getStartAt();
     }
 
     public Theme getTheme() {

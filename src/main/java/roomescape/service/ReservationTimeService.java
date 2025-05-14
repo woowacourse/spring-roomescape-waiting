@@ -2,10 +2,10 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.ReservationSlots;
 import roomescape.dto.request.AvailableTimeRequest;
 import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.entity.Reservation;
-import roomescape.entity.ReservationSlots;
 import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.InvalidReservationTimeException;
 import roomescape.repository.ReservationRepository;
@@ -25,7 +25,7 @@ public class ReservationTimeService {
 
     public ReservationTime addReservationTime(CreateReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
-        if (reservationTimeRepository.existsByTime(reservationTime.getTime())) {
+        if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
             throw new InvalidReservationTimeException("중복된 예약시간입니다");
         }
         return reservationTimeRepository.save(reservationTime);
@@ -36,7 +36,7 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTime(Long id) {
-        if (reservationRepository.existsByTime_Id(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new InvalidReservationTimeException("예약이 되어있는 시간은 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);

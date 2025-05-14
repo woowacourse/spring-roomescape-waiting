@@ -6,4 +6,5 @@ import roomescape.entity.Theme;
 
 @Repository
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
+    boolean existsByName(String name);
 }
