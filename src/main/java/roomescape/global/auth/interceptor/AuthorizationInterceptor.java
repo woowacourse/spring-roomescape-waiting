@@ -17,7 +17,7 @@ import roomescape.member.entity.RoleType;
 
 @Component
 @RequiredArgsConstructor
-public class AuthenticationInterceptor implements HandlerInterceptor {
+public class AuthorizationInterceptor implements HandlerInterceptor {
 
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;

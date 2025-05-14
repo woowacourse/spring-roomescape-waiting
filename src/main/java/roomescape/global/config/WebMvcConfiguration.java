@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.global.auth.interceptor.AuthenticationInterceptor;
-import roomescape.global.auth.resolver.AuthorizationArgumentResolver;
+import roomescape.global.auth.interceptor.AuthorizationInterceptor;
+import roomescape.global.auth.resolver.AuthenticationArgumentResolver;
 import roomescape.global.auth.util.CookieUtil;
 import roomescape.global.auth.util.JwtUtil;
 
@@ -20,12 +20,12 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AuthenticationInterceptor(jwtUtil, cookieUtil))
+        registry.addInterceptor(new AuthorizationInterceptor(jwtUtil, cookieUtil))
                 .addPathPatterns("/**");
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthorizationArgumentResolver(jwtUtil, cookieUtil));
+        resolvers.add(new AuthenticationArgumentResolver(jwtUtil, cookieUtil));
     }
 }

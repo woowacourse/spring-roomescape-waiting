@@ -19,7 +19,7 @@ import roomescape.member.entity.RoleType;
 
 @Component
 @RequiredArgsConstructor
-public class AuthorizationArgumentResolver implements HandlerMethodArgumentResolver {
+public class AuthenticationArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
