@@ -127,4 +127,14 @@ class ReservationMemberServiceTest {
 
         assertThat(searchedReservations).hasSize(1);
     }
+
+    @Test
+    void 멤버_별_예약_정보를_확인할_수_있다() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        reservationMemberService.addReservation(new AddReservationDto("name", LocalDate.now().plusDays(1), timeId, themeId), memberId);
+        reservationMemberService.addReservation(new AddReservationDto("name", LocalDate.now().plusDays(2), timeId, themeId), memberId);
+        assertThat(reservationMemberService.memberReservations(memberId)).hasSize(2);
+    }
 }
