@@ -42,7 +42,7 @@ public class ReservationService {
     public Long create(CreateReservationParam createReservationParam) {
         Member member = memberRepository.findById(createReservationParam.memberId())
                 .orElseThrow(() -> new NotFoundEntityException(
-                        createReservationParam.timeId() + "에 해당하는 member 튜플이 없습니다."));
+                        createReservationParam.memberId() + "에 해당하는 member 튜플이 없습니다."));
         ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId())
                 .orElseThrow(
                         () -> new NotFoundEntityException(
