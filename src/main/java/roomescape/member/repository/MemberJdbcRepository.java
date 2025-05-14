@@ -3,8 +3,8 @@ package roomescape.member.repository;
 import static roomescape.member.role.Role.MEMBER;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,10 +12,10 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Email;
+import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.role.Role;
-import roomescape.member.domain.Member;
 import roomescape.member.service.MemberRepository;
 
 @Repository
@@ -40,58 +40,48 @@ public class MemberJdbcRepository implements MemberRepository {
     }
 
     @Override
-    public Member save(Name name, Email email, Password password) {
+    public Member save(Member member) {
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("name", name.getName())
-                .addValue("email", email.getEmail())
-                .addValue("password", password.getPassword())
+                .addValue("name", member.getName())
+                .addValue("email", member.getEmail())
+                .addValue("password", member.getPassword())
                 .addValue("role", "MEMBER");
 
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
 
-        return new Member(id, name, email, password, MEMBER);
+        return new Member(id,
+                new Name(member.getName()),
+                new Email(member.getEmail()),
+                new Password(member.getPassword()),
+                MEMBER);
     }
 
     @Override
-    public boolean isExistUser(String email, String password) {
+    public boolean existsByEmailAndPassword(Email email, Password password) {
         String sql = "SELECT 1 FROM users WHERE email = ? AND password = ? LIMIT 1";
-        List<Integer> result = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt(1), email, password);
+        List<Integer> result = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt(1), email.getEmail(),
+                password.getPassword());
         return !result.isEmpty();
     }
 
     @Override
-    public Member findUserByEmail(String payload) {
+    public Optional<Member> findByEmail(Email payload) {
         String sql = "SELECT * FROM users WHERE email = ?";
-        Member member;
-        try {
-            member = jdbcTemplate.queryForObject(sql, memberRowMapper, payload);
-        } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 회원입니다.");
-        }
-        return member;
+        return jdbcTemplate.query(sql, memberRowMapper, payload.getEmail())
+                .stream().findFirst();
     }
 
     @Override
-    public Member findMemberById(Long id) {
+    public Optional<Member> findById(Long id) {
         String sql = "SELECT * FROM users WHERE id = ?";
-        Member member;
-        try {
-            member = jdbcTemplate.queryForObject(sql, memberRowMapper, id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 회원입니다.");
-        }
-        return member;
+        return jdbcTemplate.query(sql, memberRowMapper, id)
+                .stream().findFirst();
     }
 
     @Override
-    public Member findMemberByName(String name) {
+    public Optional<Member> findByName(Name name) {
         String sql = "SELECT * FROM users WHERE name = ?";
-        Member member;
-        try {
-            member = jdbcTemplate.queryForObject(sql, memberRowMapper, name);
-        } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 회원입니다.");
-        }
-        return member;
+        return jdbcTemplate.query(sql, memberRowMapper, name.getName())
+                .stream().findFirst();
     }
 }

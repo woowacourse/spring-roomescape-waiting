@@ -30,12 +30,11 @@ public class AuthService {
         Email email = new Email(tokenLoginCreateRequest.email());
         Password password = new Password(tokenLoginCreateRequest.password());
 
-        if (!memberRepository.existsByEmailAndPassword(email, password)) {
-            throw new IllegalArgumentException("[ERROR] 아이디 또는 비밀번호를 올바르게 입력해주세요.");
+        if (memberRepository.existsByEmailAndPassword(email, password)) {
+            String accessToken = jwtTokenProvider.createToken(tokenLoginCreateRequest.email());
+            return new TokenLoginResponse(accessToken);
         }
-
-        String accessToken = jwtTokenProvider.createToken(tokenLoginCreateRequest.email());
-        return new TokenLoginResponse(accessToken);
+        throw new IllegalArgumentException("[ERROR] 아이디 또는 비밀번호를 올바르게 입력해주세요.");
     }
 
     public MemberResponse findUserByToken(String token) {
