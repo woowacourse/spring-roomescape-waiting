@@ -2,6 +2,8 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,23 +41,28 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
-
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+    
     public Reservation(final Long id, final LocalDate date, final ReservationTime time,
-                       final Theme theme, final Member member) {
+                       final Theme theme, final Member member, final ReservationStatus status) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
         validateMember(member);
+        validateStatus(status);
 
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
+        this.status = status;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
+                       final ReservationStatus status) {
+        this(null, date, time, theme, member, status);
     }
 
     private void validateMember(final Member member) {
@@ -79,6 +86,12 @@ public class Reservation {
     private void validateTheme(final Theme theme) {
         if (theme == null) {
             throw new IllegalArgumentException("테마는 null이면 안됩니다.");
+        }
+    }
+
+    private void validateStatus(final ReservationStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("예약 상태는 null이면 안됩니다.");
         }
     }
 }
