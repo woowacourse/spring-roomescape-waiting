@@ -37,7 +37,7 @@ public class JdbcReservationMemberRepository implements ReservationMemberReposit
     }
 
     @Override
-    public Optional<ReservationMemberIds> findById(long id) {
+    public Optional<ReservationMemberIds> findByReservationId(long id) {
         try {
             String sql = "select id,reservation_id,member_id from reservation_member where id = ?";
             return Optional.of(jdbcTemplate.queryForObject(sql, reservationMemberIdRowMapper, id));
