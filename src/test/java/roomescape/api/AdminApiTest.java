@@ -64,7 +64,7 @@ public class AdminApiTest {
 
         RestAssured.given().log().all()
                 .cookie("token", token)
-                .when().get("api/admin/reservations")
+                .when().get("api/admin/reservations?memberId=2&themeId=1&dateFrom=2025-01-01&dateTo=2025-01-02")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));

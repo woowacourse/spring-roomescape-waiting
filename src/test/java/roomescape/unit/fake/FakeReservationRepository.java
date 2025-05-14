@@ -10,7 +10,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
-import roomescape.dto.request.ReservationCondition;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -40,13 +39,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByTimeId(Long id) {
-        return reservations.stream()
-                .filter(reservation -> reservation.getReservationTime().getId().equals(id))
-                .toList();
-    }
-
-    @Override
     public Optional<Reservation> findById(Long id) {
         return reservations.stream()
                 .filter(reservation -> reservation.getId().equals(id))
@@ -54,40 +46,53 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
+    public List<Reservation> findByDateAndTheme(LocalDate date, Theme theme) {
         return reservations.stream()
                 .filter(reservation -> reservation.getDate().equals(date))
-                .filter(reservation -> reservation.getReservationTime().getId().equals(time.getId()))
                 .filter(reservation -> reservation.getTheme().getId().equals(theme.getId()))
-                .findFirst();
-    }
-
-    @Override
-    public List<Reservation> findByCondition(ReservationCondition cond) {
-        List<Reservation> filteredReservations = new ArrayList<>(reservations);
-        if (cond.memberId().isPresent()) {
-            filteredReservations = filteredReservations.stream()
-                    .filter(reservation -> cond.memberId().get().equals(reservation.getMember().getId()))
-                    .toList();
-        }
-        if (cond.themeId().isPresent()) {
-            filteredReservations = filteredReservations.stream()
-                    .filter(reservation -> cond.themeId().get().equals(reservation.getTheme().getId()))
-                    .toList();
-        }
-        if (cond.dateFrom().isPresent() && cond.dateTo().isPresent()) {
-            filteredReservations = filteredReservations.stream()
-                    .filter(reservation -> reservation.getDate().isAfter(cond.dateFrom().get().minusDays(1)))
-                    .filter(reservation -> reservation.getDate().isBefore(cond.dateTo().get().plusDays(1)))
-                    .toList();
-        }
-        return filteredReservations;
+                .toList();
     }
 
     @Override
     public List<Reservation> findByThemeId(Long themeId) {
         return reservations.stream()
                 .filter(reservation -> reservation.getTheme().getId().equals(themeId))
+                .toList();
+    }
+
+    @Override
+    public Optional<Reservation> findByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time,
+                                                                      Theme theme) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getDate().equals(date))
+                .filter(reservation -> reservation.getReservationTime().equals(time))
+                .filter(reservation -> reservation.getTheme().equals(theme))
+                .findFirst();
+    }
+
+    @Override
+    public List<Reservation> findByDateBetween(LocalDate dateFrom, LocalDate dateTo) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getDate().plusDays(1).isAfter(dateFrom))
+                .filter(reservation -> reservation.getDate().minusDays(1).isBefore(dateTo))
+                .toList();
+    }
+
+    @Override
+    public List<Reservation> findByReservationTimeId(Long timeId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getReservationTime().getId().equals(timeId))
+                .toList();
+    }
+
+    @Override
+    public List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
+                                                                    LocalDate dateTo) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getTheme().getId().equals(themeId))
+                .filter(reservation -> reservation.getMember().getId().equals(memberId))
+                .filter(reservation -> reservation.getDate().plusDays(1).isAfter(dateFrom))
+                .filter(reservation -> reservation.getDate().minusDays(1).isBefore(dateTo))
                 .toList();
     }
 }

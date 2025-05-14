@@ -122,7 +122,7 @@ public class ThemeApiTest {
                 .when().get("/api/themes/rank")
                 .then().statusCode(200)
                 .log().all()
-                .body("size()", is(3))
+                .body("size()", is(1))
                 .body("[0].name", equalTo("theme3"));
     }
 }

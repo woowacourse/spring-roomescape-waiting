@@ -1,17 +1,31 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.exception.ArgumentNullException;
 import roomescape.exception.PastDateTimeReservationException;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime reservationTime;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    private Member member;
+    @ManyToOne
+    private ReservationTime reservationTime;
+    @ManyToOne
+    private Theme theme;
+    @Column(nullable = false)
+    private LocalDate date;
 
     private Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
                         final Theme theme) {
@@ -21,6 +35,9 @@ public class Reservation {
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
+    }
+
+    public Reservation() {
     }
 
     public static Reservation of(final Long id, final Member member, final LocalDate date,

@@ -2,7 +2,9 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
@@ -50,18 +52,26 @@ public class ThemeService {
                 .toList();
     }
 
-    public int deleteThemeById(long id) {
+    public void deleteThemeById(long id) {
         List<Reservation> reservations = reservationRepository.findByThemeId(id);
         if (reservations.size() > 0) {
             throw new ExistedReservationException();
         }
-        return themeRepository.deleteById(id);
+        themeRepository.deleteById(id);
     }
 
-    public List<ThemeResponse> getTop10MostReservedThemesInLast7Days() {
+    public List<ThemeResponse> getTopThemes() {
         LocalDate startDate = LocalDate.now().minusDays(8);
-        List<Theme> themes = themeRepository.findByDateRangeOrderByReservationCountLimitN(startDate,
-                LocalDate.now().minusDays(1), 10);
+        List<Reservation> reservations = reservationRepository.findByDateBetween(startDate,
+                LocalDate.now().minusDays(1));
+
+        List<Theme> themes = reservations.stream()
+                .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()))
+                .entrySet().stream()
+                .sorted(Entry.<Theme, Long>comparingByValue().reversed())
+                .limit(10)
+                .map(Entry::getKey)
+                .toList();
 
         return themes.stream().map(theme -> new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(),
                 theme.getThumbnail())).toList();

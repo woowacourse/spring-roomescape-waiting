@@ -1,15 +1,12 @@
 package roomescape.unit.fake;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.dto.response.AvailableTimeResponse;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
 
@@ -44,18 +41,5 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
         return reservationTimes.stream()
                 .filter(reservationTime -> reservationTime.getId().equals(id))
                 .findFirst();
-    }
-
-    @Override
-    public List<AvailableTimeResponse> findByDateAndThemeIdWithBooked(LocalDate date, Long themeId) {
-        List<ReservationTime> nonAvailableReservations = reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getDate().equals(date))
-                .filter(reservation -> reservation.getTheme().getId().equals(themeId))
-                .map(Reservation::getReservationTime)
-                .toList();
-
-        return reservationTimes.stream()
-                .map(t -> new AvailableTimeResponse(t.getId(), t.getStartAt(), nonAvailableReservations.contains(t)))
-                .toList();
     }
 }

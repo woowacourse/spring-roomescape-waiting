@@ -2,7 +2,6 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema.sql
       data-locations:
   # h2-console
   h2.console:

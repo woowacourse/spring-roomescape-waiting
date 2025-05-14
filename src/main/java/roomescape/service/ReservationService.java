@@ -40,7 +40,8 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservations(ReservationCondition cond) {
-        List<Reservation> filteredReservations = reservationRepository.findByCondition(cond);
+        List<Reservation> filteredReservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
+                cond.themeId(), cond.memberId(), cond.dateFrom(), cond.dateTo());
         return filteredReservations.stream()
                 .map(ReservationResponse::toDto)
                 .toList();
@@ -59,7 +60,7 @@ public class ReservationService {
     }
 
     private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
-        if (reservationRepository.findByDateTimeAndTheme(date, time, theme).isPresent()) {
+        if (reservationRepository.findByDateAndReservationTimeAndTheme(date, time, theme).isPresent()) {
             throw new ExistedReservationException();
         }
     }

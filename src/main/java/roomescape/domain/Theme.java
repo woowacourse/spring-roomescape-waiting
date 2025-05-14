@@ -1,13 +1,25 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.exception.ArgumentNullException;
 
+@Entity
 public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
+    private String description;
+    @Column(nullable = false)
+    private String thumbnail;
 
     public Theme(Long id, String name, String description, String thumbnail) {
         validateNull(name, description, thumbnail);
@@ -15,6 +27,9 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    public Theme() {
     }
 
     private void validateNull(String name, String description, String thumbnail) {

@@ -1,24 +1,17 @@
-package roomescape.domain.repository;
+package roomescape.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-public interface ReservationRepository {
-    List<Reservation> findAll();
-
-    Reservation save(Reservation reservation);
-
-    void deleteById(Long id);
-
-    Optional<Reservation> findById(Long id);
-
-    List<Reservation> findByThemeId(Long themeId);
-
+public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
     Optional<Reservation> findByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+
+    List<Reservation> findByThemeId(Long id);
 
     List<Reservation> findByDateBetween(LocalDate dateFrom, LocalDate dateTo);
 
@@ -29,4 +22,3 @@ public interface ReservationRepository {
     List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
                                                              LocalDate dateTo);
 }
-

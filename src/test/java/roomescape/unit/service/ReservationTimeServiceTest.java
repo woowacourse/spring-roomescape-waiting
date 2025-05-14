@@ -16,6 +16,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
+import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
@@ -23,11 +24,13 @@ import roomescape.exception.ExistedReservationException;
 import roomescape.service.ReservationTimeService;
 import roomescape.unit.fake.FakeReservationRepository;
 import roomescape.unit.fake.FakeReservationTimeRepository;
+import roomescape.unit.fake.FakeThemeRepository;
 
 class ReservationTimeServiceTest {
 
     private ReservationTimeRepository reservationTimeRepository;
     private ReservationRepository reservationRepository;
+    private ThemeRepository themeRepository;
     private ReservationTimeService reservationTimeService;
 
     private final Theme theme = new Theme(1L, "themeName1", "des", "th");
@@ -36,7 +39,9 @@ class ReservationTimeServiceTest {
     void setUp() {
         reservationRepository = new FakeReservationRepository();
         reservationTimeRepository = new FakeReservationTimeRepository(reservationRepository);
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+        themeRepository = new FakeThemeRepository();
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository,
+                themeRepository);
     }
 
     @Test
@@ -106,7 +111,7 @@ class ReservationTimeServiceTest {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(
                 ReservationTime.createWithoutId(LocalTime.of(9, 0)));
-        Theme theme = new Theme(1L, "name", "desc", "thumb");
+        Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
         Member member = new Member(1L, "name1", "email@domain.com", "pass1", Role.MEMBER);
         reservationRepository.save(
                 Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), savedTime, theme)

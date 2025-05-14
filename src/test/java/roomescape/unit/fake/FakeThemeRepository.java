@@ -1,6 +1,5 @@
 package roomescape.unit.fake;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,9 +35,8 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public int deleteById(long id) {
+    public void deleteById(long id) {
         fakeThemes.removeIf(theme -> theme.getId().equals(id));
-        return fakeThemes.size();
     }
 
     @Override
@@ -51,11 +49,5 @@ public class FakeThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(Long id) {
         return fakeThemes.stream().filter(theme -> theme.getId().equals(id)).findFirst();
-    }
-
-    @Override
-    public List<Theme> findByDateRangeOrderByReservationCountLimitN(LocalDate startDate,
-                                                                    LocalDate endDate, int count) {
-        return List.of();
     }
 }

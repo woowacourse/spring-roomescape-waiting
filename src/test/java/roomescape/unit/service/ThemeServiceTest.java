@@ -2,14 +2,11 @@ package roomescape.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import roomescape.auth.Role;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -97,21 +94,16 @@ public class ThemeServiceTest {
     @Test
     void 인기_테마를_조회한다() {
         // given
-        List<Theme> themes = new ArrayList<>();
-        for (long i = 1; i <= 10; i++) {
-            themes.add(new Theme(i, "name" + i, "desc", "thumb"));
-        }
-        ThemeRepository mockThemeRepository = Mockito.mock(ThemeRepository.class);
-        when(
-                mockThemeRepository.findByDateRangeOrderByReservationCountLimitN(
-                        LocalDate.now().minusDays(8), LocalDate.now().minusDays(1), 10
-                )
-        ).thenReturn(themes);
-        themeService = new ThemeService(mockThemeRepository, reservationRepository);
+        Theme theme1 = themeRepository.save(Theme.createWithoutId("name1", "desc", "thumb"));
+        Theme theme2 = themeRepository.save(Theme.createWithoutId("name2", "desc", "thumb"));
+        Member member = new Member(1L, "name1", "email1@email.com", "password1", Role.MEMBER);
+        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        Reservation reservation = Reservation.createWithoutId(member, LocalDate.now().minusDays(1), time, theme1);
+        reservationRepository.save(reservation);
         // when
-        List<ThemeResponse> rank = themeService.getTop10MostReservedThemesInLast7Days();
+        List<ThemeResponse> rank = themeService.getTopThemes();
         // then
-        assertThat(rank).hasSize(10);
+        assertThat(rank).hasSize(1);
         assertThat(rank.getFirst().name()).isEqualTo("name1");
     }
 }
