@@ -1,10 +1,15 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.exception.BadRequestException;
 import roomescape.common.utils.Validator;
@@ -12,17 +17,28 @@ import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
+@Entity
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 public class Reservation {
 
-    private final ReservationId id;
-    private final Member member;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @EmbeddedId
+    private ReservationId id;
+
+    @ManyToOne
+    private Member member;
+
+    @Embedded
+    private ReservationDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
 
     private static Reservation of(final ReservationId id,
                                   final Member member,

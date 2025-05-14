@@ -1,21 +1,30 @@
 package roomescape.time.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.utils.Validator;
 
+@Entity
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 public class ReservationTime {
 
-    private final ReservationTimeId id;
-    private final LocalTime value;
+    @EmbeddedId
+    private ReservationTimeId id;
+
+    @Column(name = "reservation_time")
+    private LocalTime value;
 
     private static ReservationTime of(final ReservationTimeId id, final LocalTime value) {
         validate(id, value);

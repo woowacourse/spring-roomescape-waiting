@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.member.domain;
 
 import jakarta.persistence.Embeddable;
 import lombok.EqualsAndHashCode;
@@ -8,20 +8,20 @@ import roomescape.common.domain.DomainId;
 @Embeddable
 @NoArgsConstructor
 @EqualsAndHashCode
-public class ReservationId {
+public class AccountId {
 
     private DomainId domainId;
 
-    private ReservationId(final DomainId domainId) {
+    private AccountId(DomainId domainId) {
         this.domainId = domainId;
     }
 
-    public static ReservationId unassigned() {
-        return new ReservationId(new DomainId());
+    public static AccountId unassigned() {
+        return new AccountId(new DomainId());
     }
 
-    public static ReservationId from(final Long id) {
-        return new ReservationId(new DomainId(id));
+    public static AccountId from(final Long id) {
+        return new AccountId(new DomainId(id));
     }
 
     public Long getValue() {

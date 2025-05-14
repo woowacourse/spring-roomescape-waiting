@@ -2,20 +2,22 @@ package roomescape.member.repository;
 
 import java.util.List;
 import java.util.Optional;
-import roomescape.member.domain.Account;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberId;
 
-public interface MemberRepository {
+@Repository
+public interface MemberRepository extends JpaRepository<Member, MemberId> {
 
     boolean existsByEmail(MemberEmail email);
 
-    Member save(Account account);
+    Member save(Member member);
 
     Optional<Member> findById(MemberId id);
 
-    Optional<Account> findAccountByEmail(MemberEmail email);
+    Optional<Member> findByEmail(MemberEmail email);
 
     List<Member> findAll();
 }

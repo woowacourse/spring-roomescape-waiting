@@ -1,20 +1,26 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.utils.Validator;
 
+@Embeddable
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public final class ReservationDate {
 
-    private final LocalDate value;
+    @Column(name = "reservation_date")
+    private LocalDate value;
 
     public static ReservationDate from(final LocalDate date) {
         validate(date);

@@ -1,19 +1,25 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.utils.Validator;
 
+@Embeddable
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public class ThemeThumbnail {
 
-    private final String value;
+    @Column(name = "thumbnail")
+    private String value;
 
     public static ThemeThumbnail from(final String url) {
         validate(url);

@@ -12,6 +12,7 @@ import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberId;
+import roomescape.member.repository.AccountRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberConverter;
 
@@ -20,10 +21,13 @@ import roomescape.member.service.MemberConverter;
 public class MemberQueryUseCase {
 
     private final MemberRepository memberRepository;
+    private final AccountRepository accountRepository;
 
     public Account getAccount(LoginRequest loginRequest) {
-        return memberRepository.findAccountByEmail(MemberEmail.from(loginRequest.email())
+        final Member member = memberRepository.findByEmail(MemberEmail.from(loginRequest.email())
         ).orElseThrow(() -> new NotFoundException("등록된 이메일이 존재하지 않습니다."));
+
+        return accountRepository.findByMemberId(member.getId());
     }
 
     public Member get(MemberId id) {

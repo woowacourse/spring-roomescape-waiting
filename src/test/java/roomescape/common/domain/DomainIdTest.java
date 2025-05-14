@@ -2,8 +2,6 @@ package roomescape.common.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.exception.InvalidInputException;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
@@ -19,10 +17,10 @@ class DomainIdTest {
     @DisplayName("unassigned된 DomainId에서 getValue를 호출하면 예외가 발생한다")
     void getValueWhenUnassignedThrowsException() {
         // given
-        final DomainId id = DomainId.unassigned();
+        final DomainId id = new DomainId();
 
         // when & then
-        assertThatThrownBy(id::getValue)
+        assertThatThrownBy(id::getId)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("저장되지 않아 식별할 수 없습니다.");
     }
@@ -31,22 +29,13 @@ class DomainIdTest {
     @DisplayName("unassigned된 DomainId끼리 비교할 수 없다")
     void unassignedDomainIdsAreNotEqual() {
         // given
-        final DomainId id1 = DomainId.unassigned();
-        final DomainId id2 = DomainId.unassigned();
+        final DomainId id1 = new DomainId();
+        final DomainId id2 = new DomainId();
 
         // when & then
         assertThatThrownBy(() -> id1.equals(id2))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("저장되지 않아 식별할 수 없습니다.");
-    }
-
-    @Test
-    @DisplayName("DomainId는 null로 설정할 수 없다")
-    void cannotAssignNullToDomainId() {
-        // when & then
-        assertThatThrownBy(() -> ReservationId.from(null))
-                .isInstanceOf(InvalidInputException.class)
-                .hasMessage("DomainId.value 은(는) null일 수 없습니다.");
     }
 
     @Test

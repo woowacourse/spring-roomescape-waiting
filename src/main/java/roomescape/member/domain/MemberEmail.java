@@ -1,19 +1,25 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.utils.Validator;
 
+@Embeddable
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public class MemberEmail {
 
-    private final String value;
+    @Column(name = "email")
+    private String value;
 
     public static MemberEmail from(final String value) {
         validate(value);

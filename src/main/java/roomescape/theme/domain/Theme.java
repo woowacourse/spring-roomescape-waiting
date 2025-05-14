@@ -1,22 +1,35 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.utils.Validator;
 
+@Entity
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 public class Theme {
 
-    private final ThemeId id;
-    private final ThemeName name;
-    private final ThemeDescription description;
-    private final ThemeThumbnail thumbnail;
+    @EmbeddedId
+    private ThemeId id;
+
+    @Embedded
+    private ThemeName name;
+
+    @Embedded
+    private ThemeDescription description;
+
+    @Embedded
+    private ThemeThumbnail thumbnail;
 
     private static Theme of(final ThemeId id,
                             final ThemeName name,

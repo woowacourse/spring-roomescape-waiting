@@ -10,6 +10,14 @@ spring:
   datasource:
     url: jdbc:h2:mem:DATABASE
 
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+        hibernate:
+            format_sql: true
+
 jwt:
   key: /VCEkdrvbjkCLRp0G0LK12VsDYViO/kufd8UVphCq80MdiZzNlefqOcwqfpvW+jIRNBmhiNKbNUGXSwum0DSgUjkEl2To/350R/ffncBkVeO7tfNq/4rNXWGGHre9p8s14m0k2z/QS4=
   expiration: 360000
