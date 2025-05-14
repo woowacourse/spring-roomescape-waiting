@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
+import org.hibernate.annotations.ColumnDefault;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.theme.domain.Theme;
@@ -22,7 +23,7 @@ public class Reservation {
     private Long id;
 
     private LocalDate date;
-    
+
     @ManyToOne
     private ReservationTime time;
 
@@ -33,6 +34,7 @@ public class Reservation {
     private Member member;
 
     @Enumerated(EnumType.STRING)
+    @ColumnDefault(value = "'CONFIRMATION'")
     private Status status;
 
     public Reservation() {
@@ -40,17 +42,18 @@ public class Reservation {
     }
 
     public Reservation(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
-                       final Member member) {
+                       final Member member, final Status status) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = Status.CONFIRMATION;
+        this.status = status;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
+                       final Status status) {
+        this(null, date, time, theme, member, status);
     }
 
     public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
