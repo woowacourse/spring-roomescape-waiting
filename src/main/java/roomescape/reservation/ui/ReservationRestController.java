@@ -74,6 +74,13 @@ public class ReservationRestController {
         return ResponseEntity.ok(reservationResponses);
     }
 
+    @GetMapping("/reservations-mine")
+    @RequiresRole(authRoles = {ADMIN, MEMBER})
+    public ResponseEntity<List<ReservationResponse.ForMember>> myReservations(final MemberAuthInfo memberAuthInfo) {
+        return ResponseEntity.ok()
+                .body(reservationService.findReservationsByMemberId(memberAuthInfo.id()));
+    }
+
     @GetMapping("/admin/reservations/filtered")
     @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<List<ReservationResponse>> findAllByFilter(
@@ -91,12 +98,5 @@ public class ReservationRestController {
                 reservationService.findAvailableReservationTimes(request);
 
         return ResponseEntity.ok(availableReservationTimes);
-    }
-
-    @GetMapping("/reservations-mine")
-    @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<ReservationResponse.ForMember>> myReservations(final MemberAuthInfo memberAuthInfo) {
-        return ResponseEntity.ok()
-                .body(reservationService.findReservationsByMemberId(memberAuthInfo.id()));
     }
 }
