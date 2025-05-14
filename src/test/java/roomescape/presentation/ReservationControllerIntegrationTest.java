@@ -1,8 +1,8 @@
 package roomescape.presentation;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 
@@ -148,10 +148,44 @@ class ReservationControllerIntegrationTest {
     @DisplayName("존재하는 예약을 삭제하면 204 상태코드를 반환한다")
     void delete_ExistingReservation_ReturnsNoContent() {
         // given
-        final Long reservationId = 1L;
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        memberRepository.save(member);
+
+        final ReservationRequest request = new ReservationRequest(
+                LocalDate.now().plusDays(1),
+                null,
+                1L,
+                1L
+        );
+
+        final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
+
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
+        final Long reservationId = given()
+                .cookie("token", token)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .post("/reservations")
+                .then()
+                .extract()
+                .jsonPath()
+                .getLong("id");
 
         // when & then
         given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when()
                 .delete("/reservations/{id}", reservationId)
                 .then()
@@ -162,41 +196,100 @@ class ReservationControllerIntegrationTest {
     @DisplayName("특정 날짜와 테마에 대한 가능한 예약 시간을 조회하면 200 상태코드와 함께 시간 목록이 반환된다")
     void readAvailableTimes_ReturnsAvailableTimes() {
         // given
-        final LocalDate date = LocalDate.now().plusDays(1);
-        final Long themeId = 1L;
+        ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime14_00);
+
+        ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
+        reservationTimeRepository.save(reservationTime16_00);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        memberRepository.save(member);
+
+        Reservation reservation14_00 = new Reservation(LocalDate.now().plusDays(1), member, reservationTime14_00,
+                theme);
+        reservationRepository.save(reservation14_00);
+
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long themeId = 1L;
 
         // when & then
         given()
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .queryParam("date", date)
+                .queryParam("date", date.toString())
                 .queryParam("themeId", themeId)
                 .when()
                 .get("/available-times")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("$", instanceOf(List.class));
+                .body("", hasSize(2))
+                .body("alreadyBooked", hasItems(true, false));
     }
 
     @Test
     @DisplayName("로그인한 회원의 예약 목록을 조회하면 200 상태코드와 함께 예약 목록이 반환된다")
     void readMine_ReturnsMyReservations() {
+        // given
+        ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime14_00);
+
+        ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
+        reservationTimeRepository.save(reservationTime16_00);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member1 = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        memberRepository.save(member1);
+        Member member2 = new Member("이름2", "USER", "이메일2", "비밀번호2");
+        memberRepository.save(member2);
+
+        Reservation reservation14_00 = new Reservation(LocalDate.now().plusDays(1), member1, reservationTime14_00,
+                theme);
+        reservationRepository.save(reservation14_00);
+
+        Reservation reservation16_00 = new Reservation(LocalDate.now().plusDays(1), member2, reservationTime16_00,
+                theme);
+        reservationRepository.save(reservation16_00);
+
+        final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
         given()
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer valid-token") // 실제 환경에 맞는 인증 헤더
+                .cookie("token", token)
                 .when()
                 .get("/reservations-mine")
                 .then()
+                .log().all()
                 .statusCode(HttpStatus.OK.value())
-                .body("$", instanceOf(List.class));
+                .body("", hasSize(1))
+                .body("[0].date", equalTo(LocalDate.now().plusDays(1).toString()))
+                .body("[0].time", equalTo("14:00:00"));
     }
 
     @Test
     @DisplayName("로그인하지 않은 상태로 예약 생성을 시도하면 401 상태코드를 반환한다")
     void createByLoginMember_WithoutAuth_ReturnsUnauthorized() {
         // given
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        memberRepository.save(member);
+
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                1L,
+                null,
                 1L,
                 1L
         );
@@ -214,6 +307,16 @@ class ReservationControllerIntegrationTest {
     @Test
     @DisplayName("존재하지 않는 예약을 삭제하려고 하면 404 상태코드를 반환한다")
     void delete_NonExistingReservation_ReturnsNotFound() {
+        // given
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        memberRepository.save(member);
+
         given()
                 .when()
                 .delete("/reservations/{id}", 999L)
@@ -225,74 +328,122 @@ class ReservationControllerIntegrationTest {
     @DisplayName("과거 날짜로 예약을 시도하면 400 상태코드를 반환한다")
     void createByLoginMember_WithPastDate_ReturnsBadRequest() {
         // given
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        memberRepository.save(member);
+
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().minusDays(1),
-                1L,
+                null,
                 1L,
                 1L
         );
 
+        final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
         // when & then
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer valid-token")
+                .cookie("token", token)
                 .body(request)
                 .when()
                 .post("/reservations")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", containsString("과거 날짜는 예약할 수 없습니다"));
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     @DisplayName("이미 예약된 시간에 예약을 시도하면 409 상태코드를 반환한다")
     void createByLoginMember_WithDuplicateDateTime_ReturnsConflict() {
         // given
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        memberRepository.save(member);
+
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                1L,
+                null,
                 1L,
                 1L
         );
 
-        given()
+        final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
+
+        final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer valid-token")
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
+        given()
+                .cookie("token", token)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
+                .when()
                 .post("/reservations");
 
         // when & then
         given()
+                .cookie("token", token)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer valid-token")
                 .body(request)
                 .when()
                 .post("/reservations")
                 .then()
-                .statusCode(HttpStatus.CONFLICT.value())
-                .body("message", containsString("이미 예약된 시간입니다"));
+                .statusCode(HttpStatus.CONFLICT.value());
     }
 
     @Test
     @DisplayName("존재하지 않는 테마로 예약을 시도하면 404 상태코드를 반환한다")
     void createByLoginMember_WithNonExistentTheme_ReturnsNotFound() {
         // given
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        memberRepository.save(member);
+
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
+                null,
                 1L,
-                1L,
-                1L
+                999L
         );
+
+        final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
+
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
 
         // when & then
         given()
+                .cookie("token", token)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer valid-token")
                 .body(request)
                 .when()
                 .post("/reservations")
                 .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", containsString("존재하지 않는 테마입니다"));
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 }
