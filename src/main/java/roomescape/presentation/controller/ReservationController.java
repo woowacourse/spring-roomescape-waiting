@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.business.service.ReservationTimeService;
 import roomescape.business.service.ReservationService;
+import roomescape.config.AuthenticationPrincipal;
 import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
 import roomescape.presentation.dto.ReservationMineResponse;
@@ -27,7 +28,8 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
 
-    public ReservationController(final ReservationService reservationService, final ReservationTimeService reservationTimeService) {
+    public ReservationController(final ReservationService reservationService,
+                                 final ReservationTimeService reservationTimeService) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
     }
@@ -88,7 +90,8 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<ReservationMineResponse>> readMine(final LoginMember loginMember) {
+    public ResponseEntity<List<ReservationMineResponse>> readMine(
+            @AuthenticationPrincipal final LoginMember loginMember) {
         final List<ReservationMineResponse> reservationMineResponses =
                 reservationService.findByMemberId(loginMember.id());
 

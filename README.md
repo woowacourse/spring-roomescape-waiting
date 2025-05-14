@@ -96,7 +96,7 @@
 
 ### 리팩터링
 
-- [ ] arguments resolver 명시적으로 annotation 까지 확인하기
+- [x] arguments resolver 명시적으로 annotation 까지 확인하기
 
 - [ ] 테스트 추가하기
     - [ ] 컨트롤러 테스트 추가하기
