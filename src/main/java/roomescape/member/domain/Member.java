@@ -4,9 +4,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 @Getter
@@ -20,6 +24,8 @@ public class Member {
     private String email;
     private String password;
     private Role role;
+    @OneToMany(mappedBy = "member")
+    private Set<Reservation> reservations = new HashSet<>();
 
     public Member(String name, String email, String password) {
         this.name = Objects.requireNonNull(name);

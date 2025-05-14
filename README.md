@@ -68,14 +68,15 @@
 
 
 5. JPA 적용 전환
-    - [ ] 엔티티 매핑
-        - [ ] Reservation
-        - [ ] ReservationTime
-        - [ ] Member
+    - [x] 엔티티 매핑
+        - [x] Reservation
+        - [x] ReservationTime
+        - [x] Member
+        - [x] Theme
 
-    - [ ] 연관관계 매핑
-        - [ ] Reservation과 Member
-        - [ ] Reservation과 ReservationTime
-        - [ ] Reservation과 Theme
+    - [x] 연관관계 매핑
+        - [x] Reservation과 Member
+        - [x] Reservation과 ReservationTime
+        - [x] Reservation과 Theme
 
-    - [ ] DAO 클래스를 JpaRepository를 상속받는 Repository로 대체
+    - [x] DAO 클래스를 JpaRepository를 상속받는 Repository로 대체
