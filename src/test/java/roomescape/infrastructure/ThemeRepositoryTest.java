@@ -10,28 +10,24 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.business.model.entity.Theme;
+import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.JdbcThemeRepository;
-import roomescape.test_util.JdbcTestUtil;
+import roomescape.test_util.JpaTestUtil;
 
-@JdbcTest
-@Import(JdbcThemeRepository.class)
-class JdbcThemeRepositoryTest {
+@DataJpaTest
+@Import({JpaThemeRepository.class, JpaTestUtil.class})
+class ThemeRepositoryTest {
 
     private static final LocalDate DATE = LocalDate.now().plusDays(5);
 
-    private final JdbcThemeRepository sut;
-    private final JdbcTestUtil testUtil;
-
     @Autowired
-    public JdbcThemeRepositoryTest(final JdbcThemeRepository sut, final JdbcTemplate jdbcTemplate) {
-        this.sut = sut;
-        this.testUtil = new JdbcTestUtil(jdbcTemplate);
-    }
+    private ThemeRepository sut;
+    @Autowired
+    private JpaTestUtil testUtil;
 
     @AfterEach
     void tearDown() {

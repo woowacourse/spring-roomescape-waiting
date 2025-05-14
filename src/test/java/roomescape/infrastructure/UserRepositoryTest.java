@@ -9,24 +9,25 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.business.model.entity.User;
+import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.JdbcUserRepository;
-import roomescape.test_util.JdbcTestUtil;
+import roomescape.test_util.JpaTestUtil;
 
-@JdbcTest
-@Import(JdbcUserRepository.class)
-class JdbcUserRepositoryTest {
+@DataJpaTest
+@Import({JpaUserRepository.class, JpaTestUtil.class})
+class UserRepositoryTest {
 
-    private final JdbcUserRepository sut;
-    private final JdbcTestUtil testUtil;
+    private final UserRepository sut;
+    private final JpaTestUtil testUtil;
 
     @Autowired
-    public JdbcUserRepositoryTest(final JdbcUserRepository sut, final JdbcTemplate jdbcTemplate) {
+    UserRepositoryTest(UserRepository sut, JpaTestUtil testUtil) {
         this.sut = sut;
-        this.testUtil = new JdbcTestUtil(jdbcTemplate);
+        this.testUtil = testUtil;
     }
 
     @AfterEach
@@ -113,7 +114,7 @@ class JdbcUserRepositoryTest {
     @Test
     void 이메일이_존재하는지_확인할_수_있다() {
         // given
-        final String name = "유저1";
+        final String name = "유저";
         final String email = name + "@email.com";
         testUtil.insertUser("1", name);
 

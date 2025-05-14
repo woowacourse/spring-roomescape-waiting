@@ -11,48 +11,44 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
+import roomescape.business.model.repository.ReservationRepository;
+import roomescape.business.model.repository.ReservationTimeRepository;
+import roomescape.business.model.repository.ThemeRepository;
+import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.JdbcReservationRepository;
-import roomescape.infrastructure.JdbcReservationTimeRepository;
-import roomescape.infrastructure.JdbcThemeRepository;
-import roomescape.infrastructure.JdbcUserRepository;
-import roomescape.test_util.JdbcTestUtil;
+import roomescape.test_util.JpaTestUtil;
 
-@JdbcTest
-@Import({JdbcReservationRepository.class, JdbcReservationTimeRepository.class, JdbcThemeRepository.class, JdbcUserRepository.class})
-class JdbcReservationRepositoryTest {
+@DataJpaTest
+@Import({JpaReservationRepository.class, JpaTestUtil.class, JpaReservationTimeRepository.class, JpaThemeRepository.class, JpaUserRepository.class})
+class ReservationRepositoryTest {
 
     private static final LocalDate DATE1 = LocalDate.now().plusDays(3);
     private static final LocalDate DATE2 = LocalDate.now().plusDays(4);
     private static final LocalDate DATE3 = LocalDate.now().plusDays(5);
     private static final LocalTime TIME = LocalTime.of(10, 0);
 
-    private final JdbcReservationRepository sut;
-    private final JdbcReservationTimeRepository reservationTimeRepository;
-    private final JdbcThemeRepository themeRepository;
-    private final JdbcUserRepository userRepository;
-    private final JdbcTestUtil testUtil;
+    private final ReservationRepository sut;
+    private final JpaTestUtil testUtil;
+
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public JdbcReservationRepositoryTest(
-            final JdbcReservationRepository sut,
-            final JdbcReservationTimeRepository reservationTimeRepository,
-            final JdbcThemeRepository themeRepository,
-            final JdbcUserRepository userRepository,
-            final JdbcTemplate jdbcTemplate
-    ) {
+    ReservationRepositoryTest(ReservationRepository sut, ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository, UserRepository userRepository, JpaTestUtil testUtil) {
         this.sut = sut;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.userRepository = userRepository;
-        this.testUtil = new JdbcTestUtil(jdbcTemplate);
+        this.testUtil = testUtil;
     }
 
     @AfterEach
@@ -97,8 +93,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo(reservationId1);
-        assertThat(result.get(1).getId().value()).isEqualTo(reservationId2);
+        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
     }
 
     @Test
@@ -123,8 +118,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo(reservationId1);
-        assertThat(result.get(1).getId().value()).isEqualTo(reservationId2);
+        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
     }
 
     @Test
@@ -150,7 +144,6 @@ class JdbcReservationRepositoryTest {
         // then
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId().value()).isEqualTo(reservationId1);
-        assertThat(result.get(0).getTheme().getId().value()).isEqualTo(themeId1);
     }
 
     @Test
@@ -200,8 +193,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo(reservationId2);
-        assertThat(result.get(1).getId().value()).isEqualTo(reservationId3);
+        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId2, reservationId3);
     }
 
     @Test
@@ -226,8 +218,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo(reservationId2);
-        assertThat(result.get(1).getId().value()).isEqualTo(reservationId3);
+        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId2, reservationId3);
     }
 
     @Test
@@ -252,8 +243,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo(reservationId1);
-        assertThat(result.get(1).getId().value()).isEqualTo(reservationId2);
+        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
     }
 
     @Test

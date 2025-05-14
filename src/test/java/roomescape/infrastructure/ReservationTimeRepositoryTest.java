@@ -13,28 +13,27 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.business.model.entity.ReservationTime;
+import roomescape.business.model.repository.ReservationTimeRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.JdbcReservationTimeRepository;
-import roomescape.test_util.JdbcTestUtil;
+import roomescape.test_util.JpaTestUtil;
 
-@JdbcTest
-@Import(JdbcReservationTimeRepository.class)
-class JdbcReservationTimeRepositoryTest {
+@DataJpaTest
+@Import({JpaReservationTimeRepository.class, JpaTestUtil.class})
+class ReservationTimeRepositoryTest {
 
     private static final LocalTime TIME1 = LocalTime.of(10, 0);
     private static final LocalTime TIME2 = LocalTime.of(15, 0);
 
-    private final JdbcReservationTimeRepository sut;
-    private final JdbcTestUtil testUtil;
+    private final ReservationTimeRepository sut;
+    private final JpaTestUtil testUtil;
 
     @Autowired
-    public JdbcReservationTimeRepositoryTest(final JdbcReservationTimeRepository sut, final JdbcTemplate jdbcTemplate) {
+    ReservationTimeRepositoryTest(ReservationTimeRepository sut, JpaTestUtil testUtil) {
         this.sut = sut;
-        this.testUtil = new JdbcTestUtil(jdbcTemplate);
+        this.testUtil = testUtil;
     }
 
     @AfterEach
