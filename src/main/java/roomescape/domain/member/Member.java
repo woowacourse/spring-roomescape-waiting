@@ -1,16 +1,30 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
+@Entity
 public class Member {
 
     private static final int MAX_NAME_LENGTH = 255;
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final Role role;
-    private final String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private String email;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    private String password;
 
     public Member(Long id, String name, String email, Role role, String password) {
         validateName(name);
@@ -23,6 +37,9 @@ public class Member {
         this.email = email;
         this.role = role;
         this.password = password;
+    }
+
+    public Member() {
     }
 
     public static Member createWithoutId(String name, String email, Role role, String password) {

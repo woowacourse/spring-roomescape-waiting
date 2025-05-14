@@ -1,5 +1,10 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import roomescape.domain.member.Member;
 import roomescape.exception.InvalidRequestException;
 
@@ -8,15 +13,23 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
 public class Reservation {
 
-    private static final int MAX_NAME_LENGTH = 255;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @ManyToOne
+    private Member member;
+
+    private LocalDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
 
     public Reservation(
             final Long id,
@@ -33,6 +46,9 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    public Reservation() {
     }
 
     public static Reservation createWithoutId(Member member, LocalDate date, ReservationTime time, Theme theme) {
