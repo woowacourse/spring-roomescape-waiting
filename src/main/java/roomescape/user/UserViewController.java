@@ -25,4 +25,9 @@ public class UserViewController {
     public String displaySignup() {
         return "signup";
     }
+
+    @GetMapping("/reservation-mine")
+    public String displayMyReservation() {
+        return "reservation-mine";
+    }
 }

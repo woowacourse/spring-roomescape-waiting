@@ -13,6 +13,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.admin.AdminReservationRequest;
 import roomescape.reservation.dto.admin.AdminReservationSearchRequest;
@@ -51,14 +52,14 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllByMemberId(final Long memberId) {
+    public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(reservation -> new ReservationResponse(
+                .map(reservation -> new MyReservationResponse(
                         reservation.getId(),
-                        reservation.getMember(),
-                        reservation.getTheme(),
+                        reservation.getTheme().getName(),
                         reservation.getDate(),
-                        ReservationTimeResponse.from(reservation.getTime()))
+                        reservation.getTime().getStartAt(),
+                        "예약")
                 )
                 .toList();
     }
