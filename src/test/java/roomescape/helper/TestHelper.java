@@ -52,6 +52,14 @@ public class TestHelper {
                 .post(path);
     }
 
+    public static Response postWithToken(String path, String token) {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when()
+                .post(path);
+    }
+
     public static Response delete(String path) {
         return RestAssured.given()
                 .when()

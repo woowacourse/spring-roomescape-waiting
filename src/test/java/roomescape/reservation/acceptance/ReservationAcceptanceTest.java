@@ -17,7 +17,9 @@ import roomescape.helper.TestHelper;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
@@ -165,5 +167,75 @@ class ReservationAcceptanceTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(1));
+    }
+
+    @Test
+    @DisplayName("관리자가 아닌 사용자는 필터링된 예약을 조회할 수 없다.")
+    void getFilteredReservationsWithNonAdmin() {
+        // given
+        Member nonAdminMember = new Member("일반회원", "user@email.com", "password", RoleType.USER);
+        memberRepository.save(nonAdminMember);
+        String token = TestHelper.login("user@email.com", "password");
+
+        var filterRequest = new ReservationReadFilteredRequest(
+                1L,
+                1L,
+                LocalDate.now(),
+                LocalDate.now().plusDays(7)
+        );
+
+        // when & then
+        TestHelper.postWithToken("/reservations/filtered", filterRequest, token)
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    @DisplayName("관리자가 다른 회원의 예약을 생성한다.")
+    void createReservationByAdmin() {
+        // given
+        String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
+        Member userMember = new Member("일반회원", "user@email.com", "password", RoleType.USER);
+        memberRepository.save(userMember);
+
+        var adminCreateRequest = new ReservationAdminCreateRequest(
+                LocalDate.now().plusDays(1),
+                1L,
+                1L,
+                userMember.getId()
+        );
+
+        // when & then
+        TestHelper.postWithToken("/admin/reservations", adminCreateRequest, token)
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
+                .body("time.id", equalTo(1))
+                .body("time.startAt", equalTo("10:00:00"))
+                .body("theme.id", equalTo(1))
+                .body("theme.name", equalTo("테마"))
+                .body("theme.description", equalTo("설명"))
+                .body("theme.thumbnail", equalTo("썸네일"));
+    }
+
+    @Test
+    @DisplayName("관리자가 아닌 사용자는 다른 회원의 예약을 생성할 수 없다.")
+    void createReservationByNonAdmin() {
+        // given
+        Member nonAdminMember = new Member("일반회원", "user@email.com", "password", RoleType.USER);
+        memberRepository.save(nonAdminMember);
+        String token = TestHelper.login("user@email.com", "password");
+
+        var adminCreateRequest = new ReservationAdminCreateRequest(
+                LocalDate.now().plusDays(1),
+                1L,
+                1L,
+                1L
+        );
+
+        // when & then
+        TestHelper.postWithToken("/admin/reservations", adminCreateRequest, token)
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value());
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.global.auth.util.CookieUtil;
 import roomescape.global.auth.util.JwtUtil;
+import roomescape.global.error.exception.ForbiddenException;
 import roomescape.global.error.exception.UnauthorizedException;
 import roomescape.member.entity.RoleType;
 
@@ -49,7 +50,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         RoleType role = RoleType.valueOf(jwtUtil.extractAllClaims(token).get("role", String.class));
         if (!Arrays.asList(roleRequired.roleType()).contains(role)) {
-            throw new UnauthorizedException("권한이 없습니다.");
+            throw new ForbiddenException("권한이 없습니다.");
         }
 
         return true;

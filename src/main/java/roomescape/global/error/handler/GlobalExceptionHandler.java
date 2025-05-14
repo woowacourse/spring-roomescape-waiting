@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
+import roomescape.global.error.exception.ForbiddenException;
 import roomescape.global.error.exception.NotFoundException;
 import roomescape.global.error.exception.UnauthorizedException;
 
@@ -46,6 +47,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> unauthorized(UnauthorizedException e) {
         log.error("UnauthorizedException : {}", e);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<String> forbidden(ForbiddenException e) {
+        log.error("ForbiddenException : {}", e);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
