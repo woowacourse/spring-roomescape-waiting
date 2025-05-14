@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.AvailableReservationTimeResult;
 import roomescape.application.reservation.dto.CreateReservationTimeParam;
 import roomescape.application.reservation.dto.ReservationTimeResult;
@@ -75,6 +76,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(Long reservationTimeId) {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new BusinessRuleViolationException("해당 예약 시간에 예약이 존재합니다.");

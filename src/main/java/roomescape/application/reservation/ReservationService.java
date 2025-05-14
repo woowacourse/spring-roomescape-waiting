@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.CreateReservationParam;
 import roomescape.application.reservation.dto.ReservationResult;
 import roomescape.application.reservation.dto.ReservationSearchParam;
@@ -41,6 +42,7 @@ public class ReservationService {
         this.clock = clock;
     }
 
+    @Transactional
     public Long create(CreateReservationParam createReservationParam) {
         Member member = getMemberById(createReservationParam.memberId());
         ReservationTime reservationTime = getReservationTimeById(createReservationParam.timeId());

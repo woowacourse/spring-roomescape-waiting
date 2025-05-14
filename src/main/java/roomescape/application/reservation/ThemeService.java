@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.CreateThemeParam;
 import roomescape.application.reservation.dto.ThemeResult;
 import roomescape.application.support.exception.NotFoundEntityException;
@@ -11,8 +12,6 @@ import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-
-
 
 @Service
 public class ThemeService {
@@ -56,6 +55,7 @@ public class ThemeService {
                 .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
     }
 
+    @Transactional
     public void deleteById(final Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
             throw new BusinessRuleViolationException("해당 테마에 예약이 존재합니다.");

@@ -1,6 +1,7 @@
 package roomescape.application.auth;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.auth.dto.JwtPayload;
 import roomescape.application.auth.dto.LoginParam;
 import roomescape.application.auth.dto.LoginResult;
@@ -21,6 +22,7 @@ public class AuthService {
         this.jwtProvider = jwtProvider;
     }
 
+    @Transactional
     public LoginResult login(LoginParam loginParam) {
         Member member = getMemberByEmail(new Email(loginParam.email()));
         if (member.isNotPassword(loginParam.password())) {
