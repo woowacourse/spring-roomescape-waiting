@@ -48,5 +48,4 @@ public class ReservationApiController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
-
 }

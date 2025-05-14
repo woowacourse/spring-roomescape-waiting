@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -11,9 +14,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.member.domain.Email;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Name;
+import roomescape.member.domain.Password;
+import roomescape.member.role.Role;
+import roomescape.reservation.domain.Reservation;
+import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.ThemeService;
+import roomescape.time.domain.ReservationTime;
 
 @ExtendWith(MockitoExtension.class)
 public class ThemeServiceTest {
@@ -54,33 +65,41 @@ public class ThemeServiceTest {
                 .isInstanceOf(NoSuchElementException.class);
     }
 
-    //TODO
+    @Test
+    void 인기_테마를_최근_9일_이내_예약기준으로_조회한다() {
 
-//    @Test
-//    void 지난_일주일_간_인기_테마_10개를_조회한다() {
-//        memberJdbcRepository.save(new Name("매트"), new Email("matt.kakao"), new Password("1234"));
-//
-//        List<Theme> themes = new ArrayList<>();
-//        for (int i = 0; i < 20; i++) {
-//            themes.add(themeDbFixture.커스텀_테마("테마" + i));
-//        }
-//
-//        for (int i = 0; i < 20; i++) {
-//            addReservation(i, ReservationDateFixture.예약날짜_오늘, reservationTimeDbFixture.예약시간_10시(), themes.get(i));
-//            addReservation(19 - i, ReservationDateFixture.예약날짜_7일전, reservationTimeDbFixture.예약시간_10시(), themes.get(i));
-//        }
-//
-//        List<ThemeResponse> popularThemes = themeService.getPopularThemes(LocalDate.now());
-//
-//        assertThat(popularThemes)
-//                .hasSize(10)
-//                .extracting(ThemeResponse::id)
-//                .containsExactlyInAnyOrder(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
-//    }
-//
-//    private void addReservation(int count, ReservationDate date, ReservationTime time, Theme theme) {
-//        for (int i = 0; i < count; i++) {
-//            reservationDbFixture.예약_생성_한스(date, time, theme);
-//        }
-//    }
+        // given
+        LocalDate now = LocalDate.now();
+        Theme themeRecentMost = new Theme(1L, "최근인기", "desc", "img");
+        Theme themeOldMost = new Theme(2L, "예전인기", "desc", "img");
+        Theme themeMedium = new Theme(3L, "보통", "desc", "img");
+
+        Member member = new Member(1L, new Name("테스터"), new Email("test@test.com"), new Password("1234"), Role.MEMBER);
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+
+        Reservation r1 = Reservation.create(now.minusDays(1), time, themeRecentMost, member);
+        Reservation r2 = Reservation.create(now.minusDays(2), time, themeRecentMost, member);
+        Reservation r3 = Reservation.create(now.minusDays(3), time, themeRecentMost, member);
+
+        Reservation r4 = Reservation.create(now.minusDays(5), time, themeMedium, member);
+        Reservation r5 = Reservation.create(now.minusDays(6), time, themeMedium, member);
+
+        Reservation o1 = Reservation.create(now.minusDays(10), time, themeOldMost, member);
+        Reservation o2 = Reservation.create(now.minusDays(11), time, themeOldMost, member);
+        Reservation o3 = Reservation.create(now.minusDays(12), time, themeOldMost, member);
+        Reservation o4 = Reservation.create(now.minusDays(13), time, themeOldMost, member);
+        Reservation o5 = Reservation.create(now.minusDays(14), time, themeOldMost, member);
+
+        List<Reservation> allReservations = List.of(r1, r2, r3, r4, r5, o1, o2, o3, o4, o5);
+
+        when(reservationRepository.findAll()).thenReturn(allReservations);
+
+        // when
+        List<ThemeResponse> responses = themeService.getPopularThemes();
+
+        // then
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).id()).isEqualTo(themeRecentMost.getId());
+        assertThat(responses.get(1).id()).isEqualTo(themeMedium.getId());
+    }
 }

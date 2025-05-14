@@ -1,8 +1,12 @@
 package roomescape.theme.service;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
 import roomescape.theme.controller.response.ThemeResponse;
@@ -21,7 +25,7 @@ public class ThemeService {
     }
 
     public void deleteById(Long id) {
-        if (reservationRepository.existReservationByThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
         Theme theme = getTheme(id);
@@ -44,12 +48,28 @@ public class ThemeService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 
-//    public List<ThemeResponse> getPopularThemes(LocalDate now) {
-//        List<Theme> themes = themeRepository.findPopularThemeDuringAWeek(10, now);
-//        return ThemeResponse.from(themes);
-//    }
+    public List<ThemeResponse> getPopularThemes() {
+        LocalDate now = LocalDate.now();
 
-//    public List<ThemeResponse> getPopularThemes() {
-//        return getPopularThemes(LocalDate.now());
-//    }
+        List<Reservation> reservations = reservationRepository.findAll();
+
+        List<Reservation> recentReservations = reservations.stream()
+                .filter(reservation -> reservation.getDate().isBefore(now))
+                .filter(reservation -> reservation.getDate().isAfter(now.minusDays(8)))
+                .toList();
+
+        Map<Theme, Integer> themeCount = new HashMap<>();
+
+        recentReservations
+                .forEach(reservation -> themeCount.put(reservation.getTheme(),
+                        themeCount.getOrDefault(reservation.getTheme(), 0) + 1));
+
+        List<Theme> themesSortedByPopularity = themeCount.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        return ThemeResponse.from(themesSortedByPopularity);
+    }
+
 }
