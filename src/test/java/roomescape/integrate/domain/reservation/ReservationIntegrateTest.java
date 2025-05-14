@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.integrate.fixture.RequestFixture;
 import roomescape.repository.reservation.ReservationRepository;
@@ -117,5 +119,37 @@ class ReservationIntegrateTest {
                 .toList();
 
         assertThat(rankingThemeIds).containsExactlyElementsOf(List.of(themeId1, themeId2, themeId3));
+    }
+
+    @Test
+    void 유저의_예약을_가져올_수_있다(){
+        requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(1).toString(), themeId, timeId, cookies);
+        requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
+
+        RestAssured.given().log().all()
+                .cookies(cookies)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2));
+    }
+
+    @Test
+    void 유저의_예약은_예약_상태를_가진다(){
+        requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(1).toString(), themeId, timeId, cookies);
+        requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
+
+        Response response = RestAssured.given().log().all()
+                .cookies(cookies)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .extract().response();
+
+        List<MyReservationMemberResponseDto> myReservationMemberResponseDtos = response.jsonPath()
+                .getList("", MyReservationMemberResponseDto.class);
+
+        assertThat(myReservationMemberResponseDtos.getFirst().status()).contains("예약");
     }
 }

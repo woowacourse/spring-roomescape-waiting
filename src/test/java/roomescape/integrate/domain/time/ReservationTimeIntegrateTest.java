@@ -1,4 +1,4 @@
-package roomescape.integrate.domain.member;
+package roomescape.integrate.domain.time;
 
 import static org.hamcrest.Matchers.is;
 
