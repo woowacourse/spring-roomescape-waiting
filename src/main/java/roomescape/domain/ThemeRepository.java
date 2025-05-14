@@ -18,6 +18,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                     GROUP BY t.id, t.name, t.description, t.thumbnail
                     ORDER BY COUNT(r.id) DESC, t.name ASC
                     LIMIT :limit
-                """, nativeQuery = true) //TODO: nativeQuery??
+                """, nativeQuery = true)
     List<Theme> findRankByDate(LocalDate startDate, LocalDate endDate, int limit);
 }
