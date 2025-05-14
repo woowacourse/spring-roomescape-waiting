@@ -19,5 +19,4 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     boolean existsByThemeId(Long id);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
-
 }

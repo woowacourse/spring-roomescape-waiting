@@ -1,9 +1,11 @@
 package roomescape.fake;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import roomescape.time.domain.ReservationAvailability;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
@@ -81,5 +83,10 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     public boolean existsByStartAt(final LocalTime reservationTime) {
         return times.stream()
                 .anyMatch(time -> time.getStartAt().equals(reservationTime));
+    }
+
+    @Override
+    public List<ReservationAvailability> findAllReservationAvailability(final LocalDate date, final Long themeId) {
+        return List.of();
     }
 }

@@ -1,33 +1,29 @@
 package roomescape.time.domain;
 
-import java.time.LocalDate;
+import java.sql.Time;
 import java.time.LocalTime;
-import roomescape.theme.domain.Theme;
 
 public final class ReservationAvailability {
 
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final boolean isBooked;
+    private Long timeId;
+    private LocalTime startAt;
+    private boolean isBooked;
 
-    public ReservationAvailability(final LocalDate date, final ReservationTime time, final Theme theme,
-                                   final boolean isBooked) {
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+    public ReservationAvailability(final Long timeId, final Time startAt, final boolean isBooked) {
+        this.timeId = timeId;
+        this.startAt = startAt.toLocalTime();
         this.isBooked = isBooked;
+    }
+
+    public Long getTimeId() {
+        return timeId;
+    }
+
+    public LocalTime getStartAt() {
+        return startAt;
     }
 
     public boolean isBooked() {
         return isBooked;
-    }
-
-    public long getTimeId() {
-        return time.getId();
-    }
-
-    public LocalTime getStartAt() {
-        return time.getStartAt();
     }
 }
