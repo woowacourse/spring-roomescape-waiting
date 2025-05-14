@@ -4,6 +4,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ import roomescape.common.validate.Validator;
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @ToString
 @Entity
+@Table(name = "themes")
 public class Theme extends BaseEntity {
 
     @Embedded
