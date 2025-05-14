@@ -9,9 +9,11 @@ import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.UserReservationCreateDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 
 public class Fixture {
     public static final Theme THEME_1 = Theme.of(1L, "테마1", "테마 1입니다.", "썸네일1");
@@ -22,8 +24,14 @@ public class Fixture {
     public static final Member MEMBER2_USER = Member.of(2L, "브라운", "brown@email.com", "brown");
     public static final Member MEMBER3_USER = Member.of(3L, "브리", "brie@email.com", "brie");
     public static final Member MEMBER4_USER = Member.of(4L, "솔라", "solar@email.com", "solar");
-    public static final Reservation RESERVATION_1 =
-            Reservation.of(1L, MEMBER1_ADMIN, THEME_1, LocalDate.now().plusDays(1), RESERVATION_TIME_1);
+    public static final Reservation RESERVATION_1 = Reservation.of(
+            1L,
+            MEMBER1_ADMIN,
+            THEME_1,
+            LocalDate.now().plusDays(1),
+            RESERVATION_TIME_1,
+            new Waiting(ReservationStatus.RESERVED)
+    );
 
     public static final UserReservationCreateDto RESERVATION_BODY = createUserReservationBody();
 

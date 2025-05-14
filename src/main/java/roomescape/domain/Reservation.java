@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,7 +18,7 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Waiting waiting;
     @ManyToOne
     private ReservationTime time;
@@ -32,30 +33,50 @@ public class Reservation {
             Member member,
             Theme theme,
             LocalDate date,
-            ReservationTime time
+            ReservationTime time,
+            Waiting waiting
     ) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
+        this.waiting = waiting;
     }
 
     public Reservation() {
     }
 
-    public static Reservation of(Long id, Member member, Theme theme, LocalDate date, ReservationTime time) {
-        return new Reservation(id, member, theme, date, time);
+    public static Reservation of(
+            Long id,
+            Member member,
+            Theme theme,
+            LocalDate date,
+            ReservationTime time,
+            Waiting waiting
+    ) {
+        return new Reservation(id, member, theme, date, time, waiting);
     }
 
-    public static Reservation withoutId(Member member, Theme theme, LocalDate reservationDate,
-                                        ReservationTime reservationTime) {
-        return new Reservation(null, member, theme, reservationDate, reservationTime);
+    public static Reservation withoutId(
+            Member member,
+            Theme theme,
+            LocalDate reservationDate,
+            ReservationTime reservationTime,
+            Waiting waiting
+    ) {
+        return new Reservation(null, member, theme, reservationDate, reservationTime, waiting);
     }
 
     public static Reservation assignId(Long id, Reservation reservation) {
-        return new Reservation(id, reservation.getMember(), reservation.getTheme(), reservation.getDate(),
-                reservation.getTime());
+        return new Reservation(
+                id,
+                reservation.getMember(),
+                reservation.getTheme(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getWaiting()
+        );
     }
 
     public boolean isPast() {
@@ -73,7 +94,7 @@ public class Reservation {
     public boolean isAlreadyBookedTime(LocalDate date, Long themeId, Long timeId) {
         return this.date.equals(date)
                && this.theme.getId().equals(themeId)
-                && this.time.getId().equals(timeId);
+               && this.time.getId().equals(timeId);
     }
 
     public Long getId() {
