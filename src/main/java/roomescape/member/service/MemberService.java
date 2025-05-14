@@ -3,29 +3,29 @@ package roomescape.member.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.request.SignupRequest;
 import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.dto.response.SignupResponse;
+import roomescape.member.infrastructure.JpaMemberRepository;
 
 @Service
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+    private final JpaMemberRepository memberRepository;
 
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(JpaMemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
     public SignupResponse createUser(SignupRequest request) {
-        if (memberRepository.existByEmail(request.email())) {
+        if (memberRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다");
         }
 
         Member member = Member.createWithoutId(request.name(), request.email(), request.password(), Role.USER);
-        Long id = memberRepository.save(member);
-        return SignupResponse.from(member.assignId(id));
+        Member save = memberRepository.save(member);
+        return SignupResponse.from(save);
     }
 
     public List<MemberResponse> findAllMember() {

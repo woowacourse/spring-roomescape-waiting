@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import roomescape.member.domain.JpaMemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.JdbcMemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -42,7 +42,7 @@ class JdbcReservationRepositoryTest {
     private ReservationRepository reservationRepository;
     private ThemeRepository themeRepository;
     private ReservationTimeRepository timeRepository;
-    private MemberRepository memberRepository;
+    private JpaMemberRepository memberRepository;
 
     private static Stream<Arguments> findByMemberIdAndThemeIdAndDate_test() {
         return Stream.of(

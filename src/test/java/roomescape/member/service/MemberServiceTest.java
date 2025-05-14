@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import roomescape.member.domain.JpaMemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.dto.request.SignupRequest;
@@ -16,7 +16,7 @@ import roomescape.member.dto.response.SignupResponse;
 
 class MemberServiceTest {
 
-    private MemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
+    private JpaMemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
     private MemberService memberService = new MemberService(memberRepository);
 
     @Test

@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import roomescape.member.domain.JpaMemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.service.FakeMemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -50,7 +50,7 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository = new FakeThemeRepository(themes, reservations);
     private ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository(reservationTimes);
     private ReservationRepository reservationRepository = new FakeReservationRepository(reservations);
-    private MemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
+    private JpaMemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
     private ReservationService reservationService = new ReservationService(dateTime, reservationRepository,
             reservationTimeRepository, themeRepository, memberRepository);
 

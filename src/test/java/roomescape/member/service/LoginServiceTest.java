@@ -13,14 +13,14 @@ import roomescape.common.exception.LoginException;
 import roomescape.common.util.JwtTokenContainer;
 import roomescape.common.util.SystemDateTime;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.request.LoginMember;
 import roomescape.member.dto.request.LoginRequest;
+import roomescape.member.infrastructure.JpaMemberRepository;
 
 class LoginServiceTest {
 
-    private MemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
+    private JpaMemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
     private LoginService loginService = new LoginService(
             new JwtTokenContainer("sadasdsasdfasdfasdfsaddsadsadsadadsaasdasdasd"),
             memberRepository,

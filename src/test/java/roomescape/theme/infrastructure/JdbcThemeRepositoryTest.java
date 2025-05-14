@@ -16,7 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import roomescape.member.domain.JpaMemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.JdbcMemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -116,7 +116,7 @@ class JdbcThemeRepositoryTest {
         // given
         ReservationRepository reservationRepository = new JdbcReservationRepository(dataSource);
         ReservationTimeRepository reservationTimeRepository = new JdbcReservationTimeRepository(dataSource);
-        MemberRepository memberRepository = new JdbcMemberRepository(dataSource);
+        JpaMemberRepository memberRepository = new JdbcMemberRepository(dataSource);
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(10, 11));
         Theme theme1 = Theme.createWithoutId("a", "a", "a");
@@ -164,7 +164,7 @@ class JdbcThemeRepositoryTest {
         // given
         ReservationRepository reservationRepository = new JdbcReservationRepository(dataSource);
         ReservationTimeRepository reservationTimeRepository = new JdbcReservationTimeRepository(dataSource);
-        MemberRepository memberRepository = new JdbcMemberRepository(dataSource);
+        JpaMemberRepository memberRepository = new JdbcMemberRepository(dataSource);
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(10, 11));
         Theme theme1 = Theme.createWithoutId("a", "a", "a");
@@ -215,7 +215,7 @@ class JdbcThemeRepositoryTest {
         // given
         ReservationRepository reservationRepository = new JdbcReservationRepository(dataSource);
         ReservationTimeRepository reservationTimeRepository = new JdbcReservationTimeRepository(dataSource);
-        MemberRepository memberRepository = new JdbcMemberRepository(dataSource);
+        JpaMemberRepository memberRepository = new JdbcMemberRepository(dataSource);
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(10, 11));
         Theme theme1 = Theme.createWithoutId("a", "a", "a");

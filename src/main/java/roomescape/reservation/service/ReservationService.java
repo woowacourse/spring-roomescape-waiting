@@ -5,31 +5,31 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.ReservationTimeRepository;
+import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
+import roomescape.theme.infrastructure.JpaThemeRepository;
 
 @Service
 public class ReservationService {
 
     private final DateTime dateTime;
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final JpaReservationRepository reservationRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaThemeRepository themeRepository;
+    private final JpaMemberRepository memberRepository;
 
     public ReservationService(
             final DateTime dateTime,
-            final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository, MemberRepository memberRepository
+            final JpaReservationRepository reservationRepository,
+            final JpaReservationTimeRepository reservationTimeRepository,
+            final JpaThemeRepository themeRepository, JpaMemberRepository memberRepository
     ) {
         this.dateTime = dateTime;
         this.reservationRepository = reservationRepository;
@@ -39,8 +39,10 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
-        ReservationTime time = reservationTimeRepository.findById(request.timeId());
-        Theme theme = themeRepository.findById(request.themeId());
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 시간입니다."));
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 테마입니다."));
 
         Optional<Member> findMember = memberRepository.findById(memberId);
         if (findMember.isEmpty()) {
@@ -50,13 +52,14 @@ public class ReservationService {
         Reservation reservation = Reservation.createWithoutId(dateTime.now(), findMember.get(), request.date(), time,
                 theme);
 
-        if (reservationRepository.hasSameReservation(reservation)) {
+        if (reservationRepository.existsByDateAndTime_StartAtAndTheme_Id(reservation.getDate(),
+                reservation.getReservationTime(), reservation.getThemeId())) {
             throw new IllegalArgumentException("이미 예약이 존재합니다.");
         }
 
-        Long id = reservationRepository.save(reservation);
+        Reservation save = reservationRepository.save(reservation);
 
-        return ReservationResponse.from(reservation.assignId(id));
+        return ReservationResponse.from(save);
     }
 
     public List<ReservationResponse> getReservations(ReservationConditionRequest request) {
@@ -73,13 +76,6 @@ public class ReservationService {
     }
 
     public void deleteReservationById(final Long id) {
-        boolean isDeleted = reservationRepository.deleteById(id);
-        validateExistIdToDelete(isDeleted);
-    }
-
-    private void validateExistIdToDelete(boolean isDeleted) {
-        if (!isDeleted) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 예약입니다.");
-        }
+        reservationRepository.deleteById(id);
     }
 }

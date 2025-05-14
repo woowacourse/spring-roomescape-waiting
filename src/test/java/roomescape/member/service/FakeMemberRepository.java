@@ -6,9 +6,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
+import roomescape.member.domain.JpaMemberRepository;
 
-public class FakeMemberRepository implements MemberRepository {
+public class FakeMemberRepository implements JpaMemberRepository {
 
     private final List<Member> members;
 

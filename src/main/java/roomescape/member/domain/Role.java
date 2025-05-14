@@ -3,8 +3,8 @@ package roomescape.member.domain;
 import java.util.Arrays;
 
 public enum Role {
-    USER("user"),
-    ADMIN("admin");
+    USER("USER"),
+    ADMIN("ADMIN");
 
     private final String role;
 
