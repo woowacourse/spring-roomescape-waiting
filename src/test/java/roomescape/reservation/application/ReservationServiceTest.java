@@ -3,6 +3,7 @@ package roomescape.reservation.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -110,6 +111,30 @@ public class ReservationServiceTest {
 
         // when - then
         assertThat(reservationService.getReservations(null, null, null, null).size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("유저 예약 조회 테스트")
+    void getUserReservationsTest() {
+        // given
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 40)));
+
+        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
+
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(
+                LocalDate.of(2025, 8, 5),
+                theme.getId(),
+                reservationTime.getId(),
+                2L
+        );
+        reservationService.createReservation(adminReservationRequest);
+
+        // when - then
+        assertAll(
+                () -> assertThat(reservationService.getUserReservations(1L).size()).isEqualTo(0),
+                () -> assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(1)
+        );
     }
 
     @Test

@@ -217,4 +217,32 @@ class ReservationControllerTest {
                 .statusCode(200)
                 .body("size()", is(1));
     }
+
+    @Test
+    @DisplayName("유저 예약 조회 테스트")
+    void getUserReservationsTest() {
+        // given
+        final Map<String, String> adminCookies = memberFixture.loginAdmin();
+        final Map<String, String> userCookies = memberFixture.loginUser();
+        reservationFixture.createReservationTime(LocalTime.of(10, 30), adminCookies);
+
+        reservationFixture.createTheme(
+                "레벨2 탈출",
+                "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
+                adminCookies
+        );
+
+        reservationFixture.createReservation(LocalDate.of(2025, 8, 5), 1L, 1L, adminCookies);
+        reservationFixture.createReservation(LocalDate.of(2025, 8, 12), 1L, 1L, userCookies);
+
+        // when - then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(adminCookies)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
 }
