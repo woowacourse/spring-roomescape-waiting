@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public record ReservationResponse(Long reservationId,
                                   UserResponse user,
                                   LocalDate date,
+                                  int sequence,
                                   ReservationTimeResponse time,
                                   ThemeResponse theme) {
 
@@ -33,7 +34,8 @@ public record ReservationResponse(Long reservationId,
                 domain.getId().getValue(),
                 UserResponse.from(user),
                 domain.getDate().getValue(),
-                ReservationTimeResponse.from(domain.getTime()),
+                domain.getStatus().getSequence(),
+                roomescape.time.ui.dto.ReservationTimeResponse.from(domain.getTime()),
                 ThemeResponse.from(domain.getTheme()));
     }
 
@@ -60,7 +62,8 @@ public record ReservationResponse(Long reservationId,
                           final UserResponse user,
                           final LocalDate date,
                           final ReservationTimeResponse time,
-                          final ThemeResponse theme) {
+                          final ThemeResponse theme
+    ) {
         Validator.of(ReservationResponse.class)
                 .validateNotNull(Fields.reservationId, reservationId, DomainTerm.RESERVATION_ID.label())
                 .validateNotNull(Fields.user, user, DomainTerm.USER.label())

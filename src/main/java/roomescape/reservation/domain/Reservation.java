@@ -42,6 +42,12 @@ public class Reservation extends BaseEntity {
             column = @Column(name = Fields.date))
     private ReservationDate date;
 
+    @Embedded
+    @AttributeOverride(
+            name = BookedStatus.Fields.sequence,
+            column = @Column(name = Fields.status))
+    private BookedStatus status;
+
     @ManyToOne
     private ReservationTime time;
 
@@ -51,20 +57,23 @@ public class Reservation extends BaseEntity {
     public Reservation(final UserId userId,
                        final ReservationDate date,
                        final ReservationTime time,
-                       final Theme theme
+                       final Theme theme,
+                       final BookedStatus status
     ) {
         validate(userId, date, time, theme);
         this.userId = userId;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public Reservation(final Long id,
                        final UserId userId,
                        final ReservationDate date,
                        final ReservationTime time,
-                       final Theme theme
+                       final Theme theme,
+                       final BookedStatus status
     ) {
         super(id);
         validate(userId, date, time, theme);
@@ -72,6 +81,7 @@ public class Reservation extends BaseEntity {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public static Reservation withId(final ReservationId id,
@@ -79,14 +89,14 @@ public class Reservation extends BaseEntity {
                                      final ReservationDate date,
                                      final ReservationTime time,
                                      final Theme theme) {
-        return new Reservation(id.getValue(), userId, date, time, theme);
+        return new Reservation(id.getValue(), userId, date, time, theme, BookedStatus.from(0));
     }
 
     public static Reservation withoutId(final UserId userId,
                                         final ReservationDate date,
                                         final ReservationTime time,
                                         final Theme theme) {
-        return new Reservation(userId, date, time, theme);
+        return new Reservation(userId, date, time, theme, BookedStatus.from(0));
     }
 
     private static void validate(

@@ -3,8 +3,6 @@ package roomescape.reservation.infrastructure;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.common.jdbc.JdbcUtils;
 import roomescape.reservation.domain.Reservation;
@@ -19,14 +17,10 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -61,39 +55,6 @@ public class JdbcTemplateReservationRepository {
         );
     };
 
-    public boolean existsByParams(final ReservationId id) {
-        final String sql = """
-                select exists 
-                    (select 1 from reservations where id = ?)
-                """;
-
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, id.getValue()));
-    }
-
-    public boolean existsByParams(final ReservationTimeId timeId) {
-        final String sql = """
-                select exists 
-                    (select 1 from reservations where time_id = ?)
-                """;
-
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, timeId.getValue()));
-    }
-
-    public boolean existsByParams(final ReservationDate date,
-                                  final ReservationTimeId timeId,
-                                  final ThemeId themeId) {
-        final String sql = """
-                select exists 
-                    (select 1 from reservations where date = ? and time_id = ? and theme_id = ?)
-                """;
-
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, date.getValue(), timeId.getValue(), themeId.getValue()));
-
-    }
-
     public Optional<Reservation> findById(final ReservationId id) {
         final String sql = """
                 select
@@ -115,104 +76,6 @@ public class JdbcTemplateReservationRepository {
                 """;
 
         return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationMapper, id.getValue());
-    }
-
-    public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
-        final String sql = """
-                select
-                    r.time_id
-                from reservations r
-                join reservation_times rt
-                    on r.time_id = rt.id
-                join themes t
-                    on r.theme_id = t.id
-                where
-                    r.date = ? and t.id = ?
-                """;
-
-        return jdbcTemplate.query(
-                        sql,
-                        (rs, rowNum) -> rs.getLong("time_id"),
-                        date.getValue(),
-                        themeId.getValue()).stream()
-                .map(ReservationTimeId::from)
-                .toList();
-    }
-
-    public List<Reservation> findAll() {
-        final String sql = """
-                select
-                    r.id,
-                    r.user_id,
-                    r.date,
-                    rt.id as time_id,
-                    rt.start_at as start_at,
-                    t.id as theme_id,
-                    t.name as theme_name,
-                    t.description as description,
-                    t.thumbnail as thumbnail
-                from reservations r
-                join reservation_times rt
-                    on r.time_id = rt.id
-                join themes t
-                    on r.theme_id = t.id
-                """;
-
-        return jdbcTemplate.query(sql, reservationMapper).stream()
-                .toList();
-    }
-
-    public List<Reservation> findAllByUserId(final UserId userId) {
-        final String sql = """
-                select
-                    r.id,
-                    r.user_id,
-                    r.date,
-                    rt.id as time_id,
-                    rt.start_at as start_at,
-                    t.id as theme_id,
-                    t.name as theme_name,
-                    t.description as description,
-                    t.thumbnail as thumbnail
-                from reservations r
-                    where r.user_id = ?
-                join reservation_times rt
-                    on r.time_id = rt.id
-                join themes t
-                    on r.theme_id = t.id
-                """;
-
-        return jdbcTemplate.query(sql, reservationMapper, userId).stream()
-                .toList();
-    }
-
-    public Reservation save(final Reservation reservation) {
-        final String sql = "insert into reservations (user_id, date, time_id, theme_id) values (?, ?, ?, ?)";
-        final KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            final PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setLong(1, reservation.getUserId().getValue());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate().getValue()));
-            preparedStatement.setLong(3, reservation.getTime().getId().getValue());
-            preparedStatement.setLong(4, reservation.getTheme().getId().getValue());
-
-            return preparedStatement;
-        }, keyHolder);
-
-        final long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-
-        return Reservation.withId(
-                ReservationId.from(generatedId),
-                reservation.getUserId(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme());
-    }
-
-    public void deleteById(final ReservationId id) {
-        final String sql = "delete from reservations where id = ?";
-        jdbcTemplate.update(sql, id.getValue());
     }
 
     public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate,
