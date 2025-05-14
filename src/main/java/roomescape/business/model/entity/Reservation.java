@@ -37,11 +37,11 @@ public class Reservation {
     }
 
     public static Reservation create(final User user, final LocalDate date, final ReservationTime time, final Theme theme) {
-        return new Reservation(Id.issue(), user, new ReservationDate(date), time, theme);
+        return new Reservation(Id.issue(), user, ReservationDate.create(date), time, theme);
     }
 
     public static Reservation restore(final String id, final User user, final LocalDate date, final ReservationTime time, final Theme theme) {
-        return new Reservation(Id.create(id), user, new ReservationDate(date), time, theme);
+        return new Reservation(Id.create(id), user, ReservationDate.restore(date), time, theme);
     }
 
     public boolean isSameReserver(final String userId) {
