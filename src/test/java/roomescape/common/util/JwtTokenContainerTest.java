@@ -13,7 +13,7 @@ import roomescape.member.domain.Role;
 
 class JwtTokenContainerTest {
 
-    private final  JwtTokenContainer jwtTokenContainer = new JwtTokenContainer(
+    private final JwtTokenContainer jwtTokenContainer = new JwtTokenContainer(
             "aasdasdasadsadasdsadsadsadsdsadasfsdf134fsgdafgdfgs");
 
     @Test

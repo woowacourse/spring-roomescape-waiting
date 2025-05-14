@@ -5,28 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import java.util.Optional;
-import javax.sql.DataSource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
-@JdbcTest
-class JdbcMemberRepositoryTest {
+@DataJpaTest
+public class JpaMemberRepositoryTest {
 
     @Autowired
-    private DataSource dataSource;
-    private JdbcMemberRepository jdbcMemberRepository;
-
-    @BeforeEach
-    void beforeEach() {
-        jdbcMemberRepository = new JdbcMemberRepository(dataSource);
-    }
+    private JpaMemberRepository repository;
 
     @Test
     @DisplayName("정상적으로 저장되어 id를 반환하는지 확인한다.")
@@ -34,9 +26,9 @@ class JdbcMemberRepositoryTest {
         // given
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
         // when
-        Long id = jdbcMemberRepository.save(member);
+        Member save = repository.save(member);
         // then
-        assertThat(id).isNotNull();
+        assertThat(save.getId()).isNotNull();
     }
 
     @Test
@@ -44,13 +36,13 @@ class JdbcMemberRepositoryTest {
     void findById_test() {
         // given
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
-        Long id = jdbcMemberRepository.save(member);
+        Member save = repository.save(member);
         // when
-        Optional<Member> findMember = jdbcMemberRepository.findById(id);
+        Optional<Member> findMember = repository.findById(save.getId());
         // then
         assertAll(
                 () -> assertThat(findMember.isPresent()).isTrue(),
-                () -> assertThat(findMember.get().getId()).isEqualTo(id),
+                () -> assertThat(findMember.get().getId()).isEqualTo(save.getId()),
                 () -> assertThat(findMember.get().getName()).isEqualTo(member.getName()),
                 () -> assertThat(findMember.get().getEmail()).isEqualTo(member.getEmail()),
                 () -> assertThat(findMember.get().getPassword()).isEqualTo(member.getPassword())
@@ -60,12 +52,12 @@ class JdbcMemberRepositoryTest {
     @ParameterizedTest
     @CsvSource({"a,true", "b,false"})
     @DisplayName("이메일 존재 확인 테스트")
-    void existByEmail_test(String email, boolean expected) {
+    void existsByEmail_test(String email, boolean expected) {
         // given
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
-        jdbcMemberRepository.save(member);
+        repository.save(member);
         // when
-        boolean existed = jdbcMemberRepository.existByEmail(email);
+        boolean existed = repository.existsByEmail(email);
         // then
         assertThat(existed).isEqualTo(expected);
     }
@@ -73,12 +65,12 @@ class JdbcMemberRepositoryTest {
     @ParameterizedTest
     @CsvSource({"a,a,true", "a,b,false", "b,a,false", "c,c,false"})
     @DisplayName("이메일, 비밀번호 존재 확인 테스트")
-    void existByEmailAndPassword(String email, String password, boolean expected) {
+    void existsByEmailAndPassword(String email, String password, boolean expected) {
         // given
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
-        jdbcMemberRepository.save(member);
+        repository.save(member);
         // when
-        Optional<Member> findMember = jdbcMemberRepository.findByEmailAndPassword(email, password);
+        Optional<Member> findMember = repository.findByEmailAndPassword(email, password);
         // then
         assertThat(findMember.isPresent()).isEqualTo(expected);
     }
@@ -88,11 +80,11 @@ class JdbcMemberRepositoryTest {
     void findAll_test() {
         // given
         Member member1 = Member.createWithoutId("a", "a", "a", Role.USER);
-        jdbcMemberRepository.save(member1);
+        repository.save(member1);
         Member member2 = Member.createWithoutId("b", "b", "b", Role.USER);
-        jdbcMemberRepository.save(member2);
+        repository.save(member2);
         // when
-        List<Member> members = jdbcMemberRepository.findAll();
+        List<Member> members = repository.findAll();
         // then
         assertThat(members).hasSize(2);
     }

@@ -49,8 +49,7 @@ public class ReservationService {
             throw new IllegalArgumentException("존재 하지 않는 유저입니다.");
         }
 
-        Reservation reservation = Reservation.createWithoutId(dateTime.now(), findMember.get(), request.date(), time,
-                theme);
+        Reservation reservation = Reservation.createWithoutId(dateTime.now(), findMember.get(), request.date(), time, theme);
 
         if (reservationRepository.existsByDateAndTime_StartAtAndTheme_Id(reservation.getDate(),
                 reservation.getReservationTime(), reservation.getThemeId())) {

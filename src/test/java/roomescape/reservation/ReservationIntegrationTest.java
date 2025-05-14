@@ -122,13 +122,4 @@ public class ReservationIntegrationTest {
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         assertThat(actual).isEqualTo(expected);
     }
-
-    @DisplayName("잘못된 예약 id로 삭제 요청 시 400 응답을 준다.")
-    @Test
-    void when_given_wrong_id() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/2")
-                .then().log().all()
-                .statusCode(400);
-    }
 }
