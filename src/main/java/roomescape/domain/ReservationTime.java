@@ -28,10 +28,6 @@ public class ReservationTime {
         this(null, startAt);
     }
 
-    public ReservationTime withId(Long id) {
-        return new ReservationTime(id, startAt);
-    }
-
     private void validateStartAt(LocalTime startAt) {
         if (startAt == null) {
             throw new ReservationTimeFieldRequiredException("시작 시간");

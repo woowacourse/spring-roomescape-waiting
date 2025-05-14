@@ -33,10 +33,6 @@ public class Member {
         this.role = role;
     }
 
-    public Member withId(Long id) {
-        return new Member(id, name, email, password, role);
-    }
-
     private void validate(String name, String email, String password, Role role) {
         validateName(name);
         validateEmail(email);

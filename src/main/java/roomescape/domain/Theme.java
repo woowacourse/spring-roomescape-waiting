@@ -31,10 +31,6 @@ public class Theme {
         this(null, name, description, thumbnail);
     }
 
-    public Theme withId(Long id) {
-        return new Theme(id, this.name, this.description, this.thumbnail);
-    }
-
     private void validate(String name, String description, String thumbnail) {
         validateName(name);
         validateDescription(description);

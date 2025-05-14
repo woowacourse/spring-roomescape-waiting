@@ -1,10 +1,14 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import roomescape.exception.reservation.ReservationFieldRequiredException;
 
@@ -14,11 +18,11 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -36,10 +40,6 @@ public class Reservation {
 
     public Reservation() {
 
-    }
-
-    public Reservation withId(Long id) {
-        return new Reservation(id, date, time, theme, member);
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
