@@ -1,6 +1,7 @@
 package roomescape.application.reservation;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -40,17 +41,10 @@ public class ReservationService {
     }
 
     public Long create(CreateReservationParam createReservationParam) {
-        Member member = memberRepository.findById(createReservationParam.memberId())
-                .orElseThrow(() -> new NotFoundEntityException(
-                        createReservationParam.memberId() + "에 해당하는 member 튜플이 없습니다."));
-        ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId())
-                .orElseThrow(
-                        () -> new NotFoundEntityException(
-                                createReservationParam.timeId() + "에 해당하는 reservation_time 튜플이 없습니다."));
-        Theme theme = themeRepository.findById(createReservationParam.themeId())
-                .orElseThrow(() -> new NotFoundEntityException(
-                        createReservationParam.themeId() + "에 해당하는 theme 튜플이 없습니다."));
-        if (reservationRepository.existsByDateAndTimeId(createReservationParam.date(), reservationTime.getId())) {
+        Member member = getMemberById(createReservationParam.memberId());
+        ReservationTime reservationTime = getReservationTimeById(createReservationParam.timeId());
+        Theme theme = getThemeById(createReservationParam.themeId());
+        if (isAlreadyReservedAt(createReservationParam.date(), reservationTime)) {
             throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
         }
         Reservation reservation = new Reservation(
@@ -61,6 +55,25 @@ public class ReservationService {
         );
         reservation.validateReservable(LocalDateTime.now(clock));
         return reservationRepository.save(reservation).getId();
+    }
+
+    private Member getMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundEntityException(memberId + "에 해당하는 member 튜플이 없습니다."));
+    }
+
+    private ReservationTime getReservationTimeById(Long timeId) {
+        return reservationTImeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundEntityException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
+    }
+
+    private Theme getThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
+    }
+
+    private boolean isAlreadyReservedAt(LocalDate date, ReservationTime reservationTime) {
+        return reservationRepository.existsByDateAndTimeId(date, reservationTime.getId());
     }
 
     public void deleteById(Long reservationId) {
@@ -75,15 +88,22 @@ public class ReservationService {
     }
 
     public ReservationResult findById(Long reservationId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundEntityException(reservationId + "에 해당하는 reservation 튜플이 없습니다."));
+        Reservation reservation = getReservationById(reservationId);
         return ReservationResult.from(reservation);
+    }
+
+    private Reservation getReservationById(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundEntityException(reservationId + "에 해당하는 reservation 튜플이 없습니다."));
     }
 
     public List<ReservationResult> findReservationsBy(ReservationSearchParam reservationSearchParam) {
         List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
                 reservationSearchParam.themeId(),
-                reservationSearchParam.memberId(), reservationSearchParam.from(), reservationSearchParam.to());
+                reservationSearchParam.memberId(),
+                reservationSearchParam.from(),
+                reservationSearchParam.to()
+        );
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();

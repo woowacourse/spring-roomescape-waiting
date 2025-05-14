@@ -124,7 +124,7 @@ class ThemeServiceTest {
         // when & then
         assertThatThrownBy(() -> themeService.findById(invalidId))
                 .isInstanceOf(NotFoundEntityException.class)
-                .hasMessage("id에 해당하는 Theme이 없습니다.");
+                .hasMessage("999에 해당하는 theme 튜플이 없습니다.");
     }
 
     @DisplayName("예약이 없는 테마는 삭제할 수 있다")

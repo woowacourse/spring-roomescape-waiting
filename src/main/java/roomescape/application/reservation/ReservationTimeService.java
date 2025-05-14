@@ -35,10 +35,13 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResult findById(Long reservationTimeId) {
-        ReservationTime reservationTime = reservationTImeRepository.findById(reservationTimeId)
-                .orElseThrow(
-                        () -> new NotFoundEntityException(reservationTimeId + "에 해당하는 reservation_time 튜플이 없습니다."));
+        ReservationTime reservationTime = getReservationTimeById(reservationTimeId);
         return toReservationResult(reservationTime);
+    }
+
+    private ReservationTime getReservationTimeById(Long timeId) {
+        return reservationTImeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundEntityException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
     }
 
     public List<ReservationTimeResult> findAll() {

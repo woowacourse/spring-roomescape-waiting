@@ -47,9 +47,13 @@ public class ThemeService {
     }
 
     public ThemeResult findById(Long id) {
-        Theme theme = themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundEntityException("id에 해당하는 Theme이 없습니다."));
+        Theme theme = getThemeById(id);
         return ThemeResult.from(theme);
+    }
+
+    private Theme getThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
     }
 
     public void deleteById(final Long themeId) {
@@ -61,7 +65,7 @@ public class ThemeService {
 
     public List<ThemeResult> findRankBetweenDate() {
         LocalDate today = LocalDate.now(clock);
-        LocalDate startDate = today.minusWeeks(1);
+        LocalDate startDate = today.minusDays(7);
         LocalDate endDate = today.minusDays(1);
         List<Theme> rankForWeek = themeRepository.findRankBetweenDate(startDate, endDate, RANK_LIMIT);
         return rankForWeek.stream()

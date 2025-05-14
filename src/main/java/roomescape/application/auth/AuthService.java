@@ -22,11 +22,20 @@ public class AuthService {
     }
 
     public LoginResult login(LoginParam loginParam) {
-        Member member = memberRepository.findByEmail(new Email(loginParam.email()))
-                .orElseThrow(() -> new LoginAuthException(loginParam.email() + "에 해당하는 멤버가 존재하지 않습니다."));
+        Member member = getMemberByEmail(new Email(loginParam.email()));
         if (member.isNotPassword(loginParam.password())) {
             throw new LoginAuthException(loginParam.email() + " 사용자의 비밀번호가 같지 않습니다.");
         }
-        return new LoginResult(jwtProvider.issue(new JwtPayload(member.getId(), member.getName(), member.getRole())));
+        return createLoginResult(member);
+    }
+
+    private Member getMemberByEmail(Email email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new LoginAuthException(email.value() + "에 해당하는 멤버가 존재하지 않습니다."));
+    }
+
+    private LoginResult createLoginResult(Member member) {
+        String accessToken = jwtProvider.issue(new JwtPayload(member.getId(), member.getName(), member.getRole()));
+        return new LoginResult(accessToken);
     }
 }
