@@ -1,22 +1,35 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+@Entity
+@NoArgsConstructor
+@Getter
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne
+    private Member member;
+    private LocalDate date;
+    @ManyToOne
+    private ReservationTime time;
+    @ManyToOne
+    private Theme theme;
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this.id = null;
         this.member = Objects.requireNonNull(member);
         this.date = Objects.requireNonNull(date);
         this.time = Objects.requireNonNull(time);
@@ -31,57 +44,17 @@ public class Reservation {
         this.theme = Objects.requireNonNull(theme);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public String getMemberName() {
-        return member.getName();
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public LocalTime getTimeStartAt() {
-        return time.getStartAt();
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
     @Override
     public boolean equals(Object other) {
         if (other == null || getClass() != other.getClass()) {
             return false;
         }
         Reservation that = (Reservation) other;
-        return Objects.equals(id, that.id)
-                && Objects.equals(member, that.member)
-                && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
+        return Objects.hash(id);
     }
 }
