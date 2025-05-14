@@ -26,9 +26,8 @@ public class MemberService {
                 createDto.password(),
                 Role.USER
         );
-        Long id = memberRepository.save(memberWithoutId);
-        Member member = Member.assignId(id, memberWithoutId);
-        return MemberDto.from(member);
+        Member savedMember = memberRepository.save(memberWithoutId);
+        return MemberDto.from(savedMember);
     }
 
     public MemberDto getMemberById(Long id) {
@@ -38,7 +37,7 @@ public class MemberService {
     }
 
     public MemberDto getMemberBy(String email, String password) {
-        Member member = memberRepository.findBy(email, password)
+        Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new NotFoundException("이메일과 비밀번호가 일치하는 사용자가 없습니다."));
         return MemberDto.from(member);
     }
