@@ -20,6 +20,7 @@ import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoun
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
@@ -167,7 +168,7 @@ public class ReservationTimeServiceTest {
                     .willReturn(Optional.of(theme));
             given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of(
-                            new Reservation(1L, null, null, savedTime, theme))
+                            new Reservation(1L, null, null, savedTime, theme, ReservationStatus.PENDING))
                     );
 
             // when

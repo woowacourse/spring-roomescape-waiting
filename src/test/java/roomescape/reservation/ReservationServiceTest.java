@@ -77,7 +77,8 @@ public class ReservationServiceTest {
                 REQUEST.date(),
                 MEMBER_BY_EMAIL.get(),
                 TIME_BY_ID.get(),
-                THEME_BY_ID.get()
+                THEME_BY_ID.get(),
+                ReservationStatus.PENDING
         );
 
         @BeforeEach
@@ -89,7 +90,7 @@ public class ReservationServiceTest {
             given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
                     .willReturn(MEMBER_BY_EMAIL);
             given(reservationRepository.save(
-                    new Reservation(REQUEST.date(), MEMBER_BY_EMAIL.get(), TIME_BY_ID.get(), THEME_BY_ID.get())))
+                    new Reservation(REQUEST.date(), MEMBER_BY_EMAIL.get(), TIME_BY_ID.get(), THEME_BY_ID.get(), ReservationStatus.PENDING)))
                     .willReturn(RESERVATION);
             given(reservationRepository.existsById(RESERVATION.getId()))
                     .willReturn(true);
@@ -208,7 +209,8 @@ public class ReservationServiceTest {
                 REQUEST.date(),
                 MEMBER_BY_ID.get(),
                 TIME_BY_ID.get(),
-                THEME_BY_ID.get()
+                THEME_BY_ID.get(),
+                ReservationStatus.PENDING
         );
 
         @BeforeEach
@@ -218,7 +220,7 @@ public class ReservationServiceTest {
             given(themeRepository.findById(REQUEST.themeId()))
                     .willReturn(THEME_BY_ID);
             given(reservationRepository.save(
-                    new Reservation(REQUEST.date(), MEMBER_BY_ID.get(), TIME_BY_ID.get(), THEME_BY_ID.get())))
+                    new Reservation(REQUEST.date(), MEMBER_BY_ID.get(), TIME_BY_ID.get(), THEME_BY_ID.get(), ReservationStatus.PENDING)))
                     .willReturn(RESERVATION);
             given(memberRepository.findById(MEMBER_BY_ID.get().getId()))
                     .willReturn(MEMBER_BY_ID);
@@ -347,7 +349,8 @@ public class ReservationServiceTest {
                             LocalDate.of(2024, 1, 1),
                             new Member(1L, "boogie", "password", "boogie", MemberRole.MEMBER),
                             new ReservationTime(1L, LocalTime.of(12, 40)),
-                            new Theme(1L, "야당", "야당당", "123")
+                            new Theme(1L, "야당", "야당당", "123"),
+                            ReservationStatus.PENDING
                     )));
 
             // when
@@ -403,8 +406,8 @@ public class ReservationServiceTest {
             given(themeRepository.findById(request.themeId()))
                     .willReturn(Optional.of(theme));
             given(reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, request.from(), request.to())).willReturn(List.of(
-                    new Reservation(1L, LocalDate.of(2024, 6, 15), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme),
-                    new Reservation(2L, LocalDate.of(2024, 7, 20), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme)
+                    new Reservation(1L, LocalDate.of(2024, 6, 15), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING),
+                    new Reservation(2L, LocalDate.of(2024, 7, 20), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING)
             ));
 
             // when
