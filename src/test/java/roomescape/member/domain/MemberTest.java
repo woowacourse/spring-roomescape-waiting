@@ -41,13 +41,13 @@ class MemberTest {
     void null_값_입력_시_IllegalArgumentException_발생() {
         SoftAssertions.assertSoftly(soft -> {
             soft.assertThatThrownBy(() -> new Member(1L, null, "b", "c", "MEMBER"))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             soft.assertThatThrownBy(() -> new Member(1L, "a", null, "c", "MEMBER"))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             soft.assertThatThrownBy(() -> new Member(1L, "a", "b", null, "MEMBER"))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             soft.assertThatThrownBy(() -> new Member(1L, "a", "b", "c", (String) null))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
         });
     }
 }

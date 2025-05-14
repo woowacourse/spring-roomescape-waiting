@@ -50,7 +50,6 @@ public class Reservation {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
-
     public Reservation(@NonNull final LocalDate date,
                        @NonNull final ReservationTime reservationTime,
                        @NonNull final Theme theme, @NonNull final Member member) {

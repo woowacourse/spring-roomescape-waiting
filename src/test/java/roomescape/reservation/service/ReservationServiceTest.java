@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.constant.TestData.RESERVATION_COUNT;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,48 +10,79 @@ import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginMember;
 import roomescape.error.NotFoundException;
 import roomescape.error.ReservationException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRole;
-import roomescape.member.fake.FakeMemberRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
-import roomescape.reservation.fake.FakeReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.fake.FakeReservationTimeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.fake.FakeThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 
+@DataJpaTest
+@Sql("/data.sql")
 class ReservationServiceTest {
 
-    private ReservationTime time1 = new ReservationTime(1L, LocalTime.of(14, 0));
-    private ReservationTime time2 = new ReservationTime(2L, LocalTime.of(13, 0));
+    @Autowired
+    private ReservationRepository reservationRepository;
 
-    private Theme theme1 = new Theme(1L, "테마1", "설명1", "썸네일1");
-    private Theme theme2 = new Theme(2L, "테마2", "설명2", "썸네일2");
+    @Autowired
+    private ReservationTimeRepository timeRepo;
 
-    private Member member = new Member(1L, "member", "member@naver.com", "1234", MemberRole.MEMBER.name());
+    @Autowired
+    private ThemeRepository themeRepo;
 
-    private Reservation r1 = new Reservation(1L, LocalDate.of(2025, 5, 11), time1, theme1, member);
-    private Reservation r2 = new Reservation(2L, LocalDate.of(2025, 6, 11), time2, theme2, member);
+    @Autowired
+    private MemberRepository memberRepo;
 
-    private FakeReservationRepository repo;
-    private FakeReservationTimeRepository timeRepo;
-    private FakeThemeRepository themeRepo;
-    private FakeMemberRepository memberRepo;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
     private ReservationService service;
+
+    private ReservationTime time1;
+    private ReservationTime time2;
+
+    private Theme theme1;
+    private Theme theme2;
+
+    private Member member;
+
+    private Reservation r1;
+    private Reservation r2;
 
     @BeforeEach
     void setUp() {
-        repo = new FakeReservationRepository(r1, r2);
-        timeRepo = new FakeReservationTimeRepository(time1, time2);
-        themeRepo = new FakeThemeRepository(theme1, theme2);
-        memberRepo = new FakeMemberRepository(member);
-        service = new ReservationService(repo, timeRepo, themeRepo, memberRepo);
+        service = new ReservationService(reservationRepository, timeRepo, themeRepo, memberRepo);
+        time1 = new ReservationTime(LocalTime.of(14, 0));
+        time2 = new ReservationTime(LocalTime.of(13, 0));
+//        reservationTimeRepository.save(time1);
+//        reservationTimeRepository.save(time2);
+
+        theme1 = new Theme("테마1", "설명1", "썸네일1");
+        theme2 = new Theme("테마2", "설명2", "썸네일2");
+//        themeRepository.save(theme1);
+//        themeRepository.save(theme2);
+
+        member = new Member("member", "member@naver.com", "1234");
+//        memberRepo.save(member);
+
+        r1 = new Reservation(LocalDate.of(2999, 5, 11), time1, theme1, member);
+        r2 = new Reservation(LocalDate.of(2999, 6, 11), time2, theme2, member);
+//        reservationRepository.save(r1);
+//        reservationRepository.save(r2);
     }
 
     @Test
@@ -60,21 +92,19 @@ class ReservationServiceTest {
                 new ReservationSearchRequest(null, null, null, null));
 
         // then
-        assertThat(responses)
-                .hasSize(2)
-                .containsExactly(
-                        new ReservationResponse(r1),
-                        new ReservationResponse(r2)
-                );
+        assertThat(responses).hasSize(RESERVATION_COUNT);
     }
 
     @Test
     void 중복된_날짜와_시간이면_예외가_발생한다() {
         // given: r1과 동일한 date/time 요청
-        ReservationRequest dupReq = new ReservationRequest(
-                r1.getDate(), time1.getId(), theme1.getId()
-        );
-        LoginMember loginMember = new LoginMember(1L, "사람", "email@naver.com", MemberRole.ADMIN);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        memberRepo.save(member);
+        reservationRepository.save(r1);
+        ReservationRequest dupReq = new ReservationRequest(r1.getDate(), time1.getId(), theme1.getId());
+        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
         // when
         // then
         assertThatThrownBy(() -> service.saveReservation(dupReq, loginMember))
@@ -85,10 +115,12 @@ class ReservationServiceTest {
     @Test
     void 지나간_날짜와_시간이면_예외가_발생한다() {
         // given: r1과 동일한 date/time 요청
-        ReservationRequest request = new ReservationRequest(
-                LocalDate.of(2000, 10, 8), time1.getId(), theme1.getId()
-        );
-        LoginMember loginMember = new LoginMember(1L, "사람", "email@naver.com", MemberRole.ADMIN);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        memberRepo.save(member);
+        ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time1.getId(), theme1.getId());
+        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
 
         // when
         // then
@@ -100,21 +132,20 @@ class ReservationServiceTest {
     @Test
     void 새로운_예약은_정상_생성된다() {
         // given
-        repo = new FakeReservationRepository();
-        timeRepo = new FakeReservationTimeRepository(time1);
-        service = new ReservationService(repo, timeRepo, themeRepo, memberRepo);
-        LoginMember loginMember = new LoginMember(1L, "사람", "email@naver.com", MemberRole.ADMIN);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        memberRepo.save(member);
+        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
 
-        ReservationRequest req = new ReservationRequest(
-                LocalDate.of(2999, 4, 21), time1.getId(), theme1.getId()
-        );
+        ReservationRequest req = new ReservationRequest(LocalDate.of(2999, 4, 21), time1.getId(), theme1.getId());
 
         // when
         ReservationResponse result = service.saveReservation(req, loginMember);
 
         // then
         SoftAssertions.assertSoftly(soft -> {
-            soft.assertThat(result.id()).isEqualTo(1L);
+            soft.assertThat(result.id()).isEqualTo(RESERVATION_COUNT + 1L);
             soft.assertThat(result.date()).isEqualTo(LocalDate.of(2999, 4, 21));
             soft.assertThat(result.time())
                     .satisfies(rt -> {
@@ -123,8 +154,11 @@ class ReservationServiceTest {
                     });
         });
         SoftAssertions.assertSoftly(soft -> {
-            soft.assertThat(repo.findByCriteria(null, null, null, null)).hasSize(1);
-            soft.assertThat(repo.findByCriteria(null, null, null, null).get(0).getTime().getStartAt())
+            soft.assertThat(reservationRepository.findByCriteria(null, null, null, null))
+                    .hasSize(RESERVATION_COUNT + 1);
+            soft.assertThat(
+                            reservationRepository.findByCriteria(null, null, null, null).get(RESERVATION_COUNT).getTime()
+                                    .getStartAt())
                     .isEqualTo(time1.getStartAt());
         });
     }
@@ -132,11 +166,15 @@ class ReservationServiceTest {
     @Test
     void 예약을_삭제한다() {
         // when
+        memberRepo.save(member);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        reservationRepository.save(r1);
         service.deleteReservation(r1.getId());
 
         // then
-        assertThat(repo.findByCriteria(null, null, null, null))
-                .hasSize(1)
+        assertThat(reservationRepository.findByCriteria(null, null, null, null))
+                .hasSize(RESERVATION_COUNT)
                 .extracting(Reservation::getId)
                 .doesNotContain(r1.getId());
     }

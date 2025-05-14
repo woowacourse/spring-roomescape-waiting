@@ -9,16 +9,25 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.ReservationController;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -26,6 +35,32 @@ class MissionStepTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.update("""
+                SET REFERENTIAL_INTEGRITY FALSE;
+                TRUNCATE TABLE reservation;
+                ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;
+                TRUNCATE TABLE reservation_time;
+                ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;
+                TRUNCATE TABLE theme;
+                ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;
+                TRUNCATE TABLE member;
+                ALTER TABLE member ALTER COLUMN id RESTART WITH 1;
+                SET REFERENTIAL_INTEGRITY TRUE;
+                """);
+        memberRepository.save(new Member("name", "admin@naver.com", "1234", MemberRole.ADMIN));
+    }
 
     @Test
     void 일단계_어드민_페이지_접근() {
@@ -87,12 +122,14 @@ class MissionStepTest {
         LocalDate now = LocalDate.now();
         LocalDate localDate = now.plusDays(1);
         params.put("date", localDate.toString());
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        themeRepository.save(new Theme("name", "desc", "thumb"));
         params.put("timeId", "1");
         params.put("themeId", "1");
-        Map<String, String> normalUser = Map.of("email", "member@naver.com", "password", "1234");
+        Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(normalUser)
+                .body(adminUser)
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(200)
@@ -150,17 +187,20 @@ class MissionStepTest {
     @Test
     void 오단계_예약_조회() {
         // given
-        Map<String, String> normalUser = Map.of("email", "member@naver.com", "password", "1234");
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        themeRepository.save(new Theme("name", "desc", "thumb"));
+
+        Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(normalUser)
+                .body(adminUser)
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
                 .cookie("token");
         jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                "2023-08-05", 1, 1, 2);
+                "2023-08-05", 1, 1, 1);
 
         // when
         // then
@@ -177,10 +217,13 @@ class MissionStepTest {
     @Test
     void 육단계_예약_삭제() {
         // given
-        Map<String, String> normalUser = Map.of("email", "member@naver.com", "password", "1234");
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        themeRepository.save(new Theme("name", "desc", "thumb"));
+        Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
+
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(normalUser)
+                .body(adminUser)
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(200)
@@ -213,11 +256,13 @@ class MissionStepTest {
 
     @Test
     void 칠단계_예약_시간_삭제() {
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+
         RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(1));
 
         RestAssured.given().log().all()
                 .when().delete("/times/1")
@@ -228,10 +273,13 @@ class MissionStepTest {
     @Test
     void 팔단계_예약_조회() {
         // given
-        Map<String, String> normalUser = Map.of("email", "member@naver.com", "password", "1234");
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        themeRepository.save(new Theme("name", "desc", "thumb"));
+
+        Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(normalUser)
+                .body(adminUser)
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(200)

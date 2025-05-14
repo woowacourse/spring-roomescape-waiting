@@ -79,6 +79,14 @@ public class Member {
         this.role = role;
     }
 
+    public Member(@NonNull final String name, @NonNull final String email, @NonNull final String password,
+                  @NonNull final MemberRole role) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
     public boolean matchesPassword(final String password) {
         return this.password.equals(password);
     }

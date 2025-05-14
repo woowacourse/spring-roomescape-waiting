@@ -76,7 +76,7 @@ public class ReservationService {
     public void deleteReservation(final Long id) {
         /*final int deletedCount =*/
         if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("예약이 존재하지 않습니다.");
+            throw new NotFoundException("존재하지 않는 예약입니다. id=" + id);
         }
         reservationRepository.deleteById(id);
 //        if (deletedCount == 0) {

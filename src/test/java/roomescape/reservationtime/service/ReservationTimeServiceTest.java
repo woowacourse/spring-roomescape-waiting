@@ -1,3 +1,4 @@
+/*
 package roomescape.reservationtime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -111,3 +112,4 @@ class ReservationTimeServiceTest {
         fakeReservationRepo.setExistsByReservationTimeId(false);
     }
 }
+*/

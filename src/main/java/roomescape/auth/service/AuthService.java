@@ -28,7 +28,7 @@ public class AuthService {
                 .orElseThrow(() -> new UnauthorizedException("이메일 또는 패스워드가 올바르지 않습니다."));
         return jwtTokenProvider.createToken(createClaims(member));
     }
-
+    
     private Claims createClaims(final Member member) {
         return Jwts.claims()
                 .subject(member.getId().toString())

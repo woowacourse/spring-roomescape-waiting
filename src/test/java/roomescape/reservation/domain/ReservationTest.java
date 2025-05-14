@@ -74,19 +74,19 @@ class ReservationTest {
         // then
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> new Reservation(null, null, reservationTime, theme, member))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             softly.assertThatThrownBy(() -> new Reservation(null, localDate, null, theme, member))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             softly.assertThatThrownBy(() -> new Reservation(null, localDate, reservationTime, null, member))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             softly.assertThatThrownBy(() -> new Reservation(null, reservationTime, theme, member))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             softly.assertThatThrownBy(() -> new Reservation(localDate, null, theme, member))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             softly.assertThatThrownBy(() -> new Reservation(localDate, reservationTime, null, member))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
             softly.assertThatThrownBy(() -> new Reservation(localDate, reservationTime, theme, null))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalStateException.class);
         });
     }
 }
