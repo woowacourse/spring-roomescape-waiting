@@ -48,11 +48,17 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations")
+    public ResponseEntity<List<ReservationResponse>> findAll() {
+        final List<ReservationResponse> responses = reservationService.getReservations();
+        return ResponseEntity.ok().body(responses);
+    }
+
+    @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> findAll(
-            @RequestParam(value = "memberId", required = false) final Long memberId,
-            @RequestParam(value = "themeId", required = false) final Long themeId,
-            @RequestParam(value = "dateFrom", required = false) final LocalDate dateFrom,
-            @RequestParam(value = "dateTo", required = false) final LocalDate dateTo
+            @RequestParam(value = "memberId") final Long memberId,
+            @RequestParam(value = "themeId") final Long themeId,
+            @RequestParam(value = "dateFrom") final LocalDate dateFrom,
+            @RequestParam(value = "dateTo") final LocalDate dateTo
     ) {
         final List<ReservationResponse> responses = reservationService.getReservations(
                 memberId,

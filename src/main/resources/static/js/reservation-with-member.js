@@ -192,14 +192,7 @@ function applyFilter(event) {
     const dateFrom = document.getElementById('date-from').value;
     const dateTo = document.getElementById('date-to').value;
 
-    const params = new URLSearchParams();
-
-    if (themeId) params.append('themeId', themeId);
-    if (memberId) params.append('memberId', memberId);
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-
-    fetch(RESERVATION_API_ENDPOINT + "?" + params.toString(), { // 예약 검색 API 호출
+    fetch(`/admin/reservations?themeId=${themeId}&memberId=${memberId}&dateFrom=${dateFrom}&dateTo=${dateTo}`, { // 예약 검색 API 호출
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
