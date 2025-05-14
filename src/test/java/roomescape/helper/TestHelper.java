@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.springframework.http.HttpStatus;
-import roomescape.member.dto.request.AuthRequest.LoginRequest;
+import roomescape.member.dto.request.LoginRequest;
 
 public class TestHelper {
 

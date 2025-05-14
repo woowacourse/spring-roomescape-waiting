@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.member.entity.RoleType;
-import roomescape.reservation.dto.request.ReservationRequest.ReservationAdminCreateRequest;
-import roomescape.reservation.dto.response.ReservationResponse.ReservationAdminCreateResponse;
+import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
+import roomescape.reservation.dto.response.ReservationAdminCreateResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController

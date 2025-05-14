@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.theme.dto.request.ThemeRequest.ThemeCreateRequest;
+import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)

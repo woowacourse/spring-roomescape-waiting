@@ -15,7 +15,7 @@ import roomescape.helper.TestHelper;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
-import roomescape.theme.dto.request.ThemeRequest.ThemeCreateRequest;
+import roomescape.theme.dto.request.ThemeCreateRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

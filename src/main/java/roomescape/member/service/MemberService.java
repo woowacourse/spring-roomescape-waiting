@@ -4,9 +4,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.member.dto.request.MemberRequest.MemberCreateRequest;
-import roomescape.member.dto.response.MemberResponse.MemberCreateResponse;
-import roomescape.member.dto.response.MemberResponse.MemberReadResponse;
+import roomescape.member.dto.request.MemberCreateRequest;
+import roomescape.member.dto.response.MemberCreateResponse;
+import roomescape.member.dto.response.MemberReadResponse;
 import roomescape.member.entity.Member;
 import roomescape.member.repository.MemberRepository;
 

@@ -15,12 +15,12 @@ import roomescape.global.auth.annotation.AuthenticationPrincipal;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.member.entity.RoleType;
-import roomescape.reservation.dto.request.ReservationRequest.ReservationCreateRequest;
-import roomescape.reservation.dto.request.ReservationRequest.ReservationReadFilteredRequest;
-import roomescape.reservation.dto.response.ReservationResponse.ReservationCreateResponse;
-import roomescape.reservation.dto.response.ReservationResponse.ReservationReadFilteredResponse;
-import roomescape.reservation.dto.response.ReservationResponse.ReservationReadMemberResponse;
-import roomescape.reservation.dto.response.ReservationResponse.ReservationReadResponse;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.dto.response.ReservationCreateResponse;
+import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
+import roomescape.reservation.dto.response.ReservationReadMemberResponse;
+import roomescape.reservation.dto.response.ReservationReadResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController

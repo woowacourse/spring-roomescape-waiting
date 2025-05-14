@@ -5,9 +5,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.theme.dto.request.ThemeRequest.ThemeCreateRequest;
-import roomescape.theme.dto.response.ThemeResponse.ThemeCreateResponse;
-import roomescape.theme.dto.response.ThemeResponse.ThemeReadResponse;
+import roomescape.theme.dto.request.ThemeCreateRequest;
+import roomescape.theme.dto.response.ThemeCreateResponse;
+import roomescape.theme.dto.response.ThemeReadResponse;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
 

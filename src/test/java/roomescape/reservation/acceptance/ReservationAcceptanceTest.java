@@ -17,7 +17,7 @@ import roomescape.helper.TestHelper;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.dto.request.ReservationRequest.ReservationCreateRequest;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;

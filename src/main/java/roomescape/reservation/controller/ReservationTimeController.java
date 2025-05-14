@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.member.entity.RoleType;
-import roomescape.reservation.dto.request.ReservationTimeRequest.ReservationTimeCreateRequest;
-import roomescape.reservation.dto.response.ReservationTimeResponse.AvailableReservationTimeResponse;
-import roomescape.reservation.dto.response.ReservationTimeResponse.ReservationTimeCreateResponse;
-import roomescape.reservation.dto.response.ReservationTimeResponse.ReservationTimeReadResponse;
+import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
+import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
+import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
+import roomescape.reservation.dto.response.ReservationTimeReadResponse;
 import roomescape.reservation.service.ReservationTimeService;
 
 @RestController

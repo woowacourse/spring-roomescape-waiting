@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.global.error.exception.ConflictException;
-import roomescape.member.dto.request.MemberRequest.MemberCreateRequest;
+import roomescape.member.dto.request.MemberCreateRequest;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;

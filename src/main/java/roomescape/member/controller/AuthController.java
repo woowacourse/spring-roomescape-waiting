@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.AuthenticationPrincipal;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.auth.util.CookieUtil;
-import roomescape.member.dto.request.AuthRequest.LoginRequest;
-import roomescape.member.dto.response.AuthResponse.LoginResponse;
+import roomescape.member.dto.request.LoginRequest;
+import roomescape.member.dto.response.LoginResponse;
 import roomescape.member.service.AuthService;
 
 @RestController
