@@ -43,7 +43,7 @@ public class ReservationService {
 
         Long reservationId = reservationDao.saveReservation(reservation);
 
-        ReservationTime time = reservation.getTime();
+        ReservationTime time = reservation.getReservationTime();
         Theme theme = reservation.getTheme();
         return new ReservationResponseDto(
                 reservationId,

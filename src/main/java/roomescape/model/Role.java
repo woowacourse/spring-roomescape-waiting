@@ -3,6 +3,7 @@ package roomescape.model;
 import java.util.Arrays;
 
 public enum Role {
+
     ADMIN("ADMIN"),
     USER("USER");
 

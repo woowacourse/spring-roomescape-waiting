@@ -1,21 +1,36 @@
 package roomescape.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final Role role;
 
-    public Member(Long id, String name, String email, String password, Role role) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
+    private String name;
 
-    public Member(String name, String email, String password, Role role) {
+    private String email;
+
+    private String password;
+
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
+
+    public Member(final String name, final String email, final String password, final Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -24,25 +39,5 @@ public class Member {
 
     public boolean hasSamePassword(final String comparedPassword) {
         return this.password.equals(comparedPassword);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Role getRole() {
-        return role;
     }
 }

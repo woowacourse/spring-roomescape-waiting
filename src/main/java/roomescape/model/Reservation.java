@@ -1,52 +1,49 @@
 package roomescape.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
 
-    private final Long id;
-    private final LocalDate date;
-    private final ReservationTime reservationTime;
-    private final Theme theme;
-    private final Member member;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme,
-                       Member member) {
-        this.id = id;
+    private LocalDate date;
+
+    @ManyToOne
+    private ReservationTime reservationTime;
+
+    @ManyToOne
+    private Theme theme;
+
+    @ManyToOne
+    private Member member;
+
+    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member, LocalDate today) {
+        validateReservationDateInFuture(today);
+
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
     }
 
-    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member, LocalDate today) {
-        this(null, date, reservationTime, theme, member);
-        validateReservationDateInFuture(today);
-    }
-
     private void validateReservationDateInFuture(LocalDate today) {
         if (!this.date.isAfter(today)) {
             throw new IllegalStateException("과거 및 당일 예약은 불가능합니다.");
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return this.reservationTime;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Member getMember() {
-        return member;
     }
 }

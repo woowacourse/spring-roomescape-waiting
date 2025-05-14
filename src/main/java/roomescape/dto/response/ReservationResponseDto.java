@@ -14,7 +14,7 @@ public record ReservationResponseDto(
         ThemeResponseDto theme
 ) {
     public static ReservationResponseDto from(Reservation reservationInfo) {
-        ReservationTime timeInfo = reservationInfo.getTime();
+        ReservationTime timeInfo = reservationInfo.getReservationTime();
         Theme themeInfo = reservationInfo.getTheme();
         Member member = reservationInfo.getMember();
 

@@ -20,7 +20,7 @@ public class FakeReservationDao implements ReservationDao {
     @Override
     public Long saveReservation(Reservation reservation) {
         Long id = nextId.getAndIncrement();
-        ReservationTime time = reservation.getTime();
+        ReservationTime time = reservation.getReservationTime();
         Theme theme = reservation.getTheme();
         Member member = reservation.getMember();
 
@@ -45,7 +45,8 @@ public class FakeReservationDao implements ReservationDao {
     public Optional<Reservation> findByDateAndTime(Reservation reservation) {
         return database.values().stream()
                 .filter(reservation1 -> reservation1.getDate().equals(reservation.getDate()))
-                .filter(reservation1 -> reservation1.getTime().getId().equals(reservation.getTime().getId()))
+                .filter(reservation1 -> reservation1.getReservationTime().getId()
+                        .equals(reservation.getReservationTime().getId()))
                 .findAny();
     }
 

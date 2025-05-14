@@ -1,30 +1,28 @@
 package roomescape.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationTime {
-    private final Long id;
-    private final LocalTime startAt;
 
-    public ReservationTime(Long id, LocalTime startAt) {
-        this.id = id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalTime startAt;
+
+    public ReservationTime(final LocalTime startAt) {
         this.startAt = startAt;
-    }
-
-    public ReservationTime(LocalTime startAt) {
-        this(null, startAt);
-    }
-
-    public ReservationTime(Long id) {
-        this.id = id;
-        this.startAt = null;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
     }
 }

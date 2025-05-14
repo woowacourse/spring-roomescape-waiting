@@ -221,7 +221,7 @@ public class ReservationJdbcDaoTest {
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setDate(1, Date.valueOf(reservation.getDate()));
-            ps.setLong(2, reservation.getTime().getId());
+            ps.setLong(2, reservation.getReservationTime().getId());
             ps.setLong(3, reservation.getTheme().getId());
             ps.setLong(4, reservation.getMember().getId());
             return ps;
