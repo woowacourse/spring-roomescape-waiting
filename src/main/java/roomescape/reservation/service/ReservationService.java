@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.domain.dto.SearchReservationRequestDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
@@ -22,6 +23,7 @@ import roomescape.user.domain.User;
 import roomescape.user.domain.dto.UserResponseDto;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository repository;

@@ -2,6 +2,7 @@ package roomescape.admin.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.domain.dto.AdminReservationRequestDto;
 import roomescape.admin.domain.dto.SearchReservationRequestDto;
 import roomescape.member.exception.UnauthorizedUserRoleException;
@@ -12,6 +13,7 @@ import roomescape.user.domain.User;
 import roomescape.user.service.UserService;
 
 @Service
+@Transactional
 public class AdminService {
 
     private final ReservationService reservationService;

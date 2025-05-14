@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.dto.PopularThemeRequestDto;
 import roomescape.theme.domain.dto.ThemeRequestDto;
@@ -10,6 +11,7 @@ import roomescape.theme.domain.dto.ThemeResponseDto;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private final ThemeRepository repository;

@@ -2,6 +2,7 @@ package roomescape.user.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.dto.ReservationWithBookStateDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
@@ -12,6 +13,7 @@ import roomescape.user.exception.NotFoundUserException;
 import roomescape.user.repository.UserRepository;
 
 @Service
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -34,15 +36,20 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findByIdOrThrow(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(NotFoundUserException::new);
-    }
-
     public List<ReservationWithBookStateDto> findAllReservationByMember(User member) {
+        validateExistsUser(member.getId());
         List<Reservation> reservations = reservationRepository.findByUser(member);
         return reservations.stream()
                 .map(ReservationWithBookStateDto::new)
                 .toList();
+    }
+
+    private void validateExistsUser(Long id) {
+        findByIdOrThrow(id);
+    }
+
+    public User findByIdOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(NotFoundUserException::new);
     }
 }

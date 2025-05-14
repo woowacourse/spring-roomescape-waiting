@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -21,6 +22,7 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.user.domain.User;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final ReservationTimeRepository repository;
