@@ -10,14 +10,14 @@ import roomescape.domain.Theme;
 public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
 
     @Query(value = """
-                SELECT t.id, t.name, t.description, t.thumbnail
-                FROM theme t
-                INNER JOIN reservation r ON t.id = r.theme_id
-                WHERE r.date BETWEEN :startDate AND :endDate
-                GROUP BY t.id
-                ORDER BY COUNT(r.id) DESC, t.name ASC
-                LIMIT :limit
-            """, nativeQuery = true)
+            SELECT t
+            FROM Theme t
+            INNER JOIN Reservation r ON t.id = r.theme.id
+            WHERE r.date BETWEEN :startDate AND :endDate
+            GROUP BY t.id
+            ORDER BY COUNT(r.id) DESC, t.name ASC
+            LIMIT :limit
+            """)
     List<Theme> findRankByDate(@Param("startDate") LocalDate startDate,
                      @Param("endDate") LocalDate endDate,
                      @Param("limit") int limit);
