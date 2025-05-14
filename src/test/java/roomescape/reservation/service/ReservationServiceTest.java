@@ -30,6 +30,7 @@ import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -145,6 +146,26 @@ class ReservationServiceTest {
 
         // when
         List<ReservationResponse> responses = reservationService.getReservations(request);
+        // then
+        assertThat(responses).hasSize(3);
+        assertThat(responses.get(0)).isEqualTo(expected1);
+        assertThat(responses.get(1)).isEqualTo(expected2);
+        assertThat(responses.get(2)).isEqualTo(expected3);
+    }
+
+    @Test
+    @DisplayName("본인 예약들을 dto로 변환한다.")
+    void getMyReservations_dto_test() {
+        // given
+        List<Reservation> reservations = createReservations();
+        when(jpaReservationRepository.findByMember_Id(1L))
+                .thenReturn(reservations);
+        MyReservationResponse expected1 = MyReservationResponse.from(reservations.get(0));
+        MyReservationResponse expected2 = MyReservationResponse.from(reservations.get(1));
+        MyReservationResponse expected3 = MyReservationResponse.from(reservations.get(2));
+
+        // when
+        List<MyReservationResponse> responses = reservationService.getMyReservations(1L);
         // then
         assertThat(responses).hasSize(3);
         assertThat(responses.get(0)).isEqualTo(expected1);

@@ -122,4 +122,13 @@ public class ReservationIntegrationTest {
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    @DisplayName("마이 페이지를 반환한다.")
+    void get_my_page(){
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }

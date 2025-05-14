@@ -201,4 +201,16 @@ class JpaReservationRepositoryTest {
         // then
         assertThat(reservations).hasSize(expectedSize);
     }
+
+    @Test
+    @DisplayName("본인 예약들을 조회한다.")
+    void findByMemberId_test() {
+        // when
+        List<Reservation> findReservations = repository.findByMember_Id(1L);
+        // then
+        assertThat(findReservations).hasSize(3);
+        assertThat(findReservations.get(0).getName()).isEqualTo("코기");
+        assertThat(findReservations.get(1).getName()).isEqualTo("코기");
+        assertThat(findReservations.get(2).getName()).isEqualTo("코기");
+    }
 }
