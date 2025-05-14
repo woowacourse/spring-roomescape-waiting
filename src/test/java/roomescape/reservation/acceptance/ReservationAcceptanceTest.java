@@ -42,11 +42,11 @@ class ReservationAcceptanceTest {
 
     @BeforeEach
     void setUp() {
-        Member member = new Member(null, DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
+        Member member = new Member(DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
         memberRepository.save(member);
-        Theme theme = new Theme(null, "테마", "설명", "썸네일");
+        Theme theme = new Theme("테마", "설명", "썸네일");
         themeRepository.save(theme);
-        ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(10, 0));
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
         reservationTimeRepository.save(reservationTime);
     }
 

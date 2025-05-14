@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode
 public class ReservationTime {
 
@@ -26,6 +27,10 @@ public class ReservationTime {
     private Long id;
 
     private LocalTime startAt;
+
+    public ReservationTime(LocalTime startAt) {
+        this(null, startAt);
+    }
 
     public boolean isDuplicatedWith(ReservationTime other) {
         LocalTime otherStartAt = other.startAt;

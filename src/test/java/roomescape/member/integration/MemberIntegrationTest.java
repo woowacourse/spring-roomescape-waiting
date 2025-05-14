@@ -48,8 +48,8 @@ class MemberIntegrationTest {
     @DisplayName("모든 회원을 조회한다.")
     void getAllMembers() {
         // given
-        var member1 = new Member(null, "미소", "miso@email.com", "password", RoleType.USER);
-        var member2 = new Member(null, "브라운", "brown@email.com", "password", RoleType.USER);
+        var member1 = new Member("미소", "miso@email.com", "password", RoleType.USER);
+        var member2 = new Member("브라운", "brown@email.com", "password", RoleType.USER);
         memberRepository.save(member1);
         memberRepository.save(member2);
 
@@ -68,7 +68,7 @@ class MemberIntegrationTest {
     @DisplayName("회원을 삭제한다.")
     void deleteMember() {
         // given
-        var member = new Member(null, "미소", "miso@email.com", "password", RoleType.USER);
+        var member = new Member("미소", "miso@email.com", "password", RoleType.USER);
         var savedMember = memberRepository.save(member);
 
         // when

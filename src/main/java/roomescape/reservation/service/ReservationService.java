@@ -41,7 +41,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
 
-        Reservation newReservation = new Reservation(null, request.date(), time, theme, member);
+        Reservation newReservation = new Reservation(request.date(), time, theme, member);
         validateDateTime(newReservation);
         validateDuplicated(newReservation);
 
@@ -58,7 +58,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
 
-        Reservation newReservation = new Reservation(null, request.date(), time, theme, member);
+        Reservation newReservation = new Reservation(request.date(), time, theme, member);
         validateDateTime(newReservation);
         validateDuplicated(newReservation);
 

@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ import roomescape.theme.entity.Theme;
 @Entity
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
 
     @Id
@@ -33,6 +34,10 @@ public class Reservation {
 
     @ManyToOne
     private Member member;
+
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(null, date, time, theme, member);
+    }
 
     public LocalDateTime getDateTime() {
         return LocalDateTime.of(date, time.getStartAt());

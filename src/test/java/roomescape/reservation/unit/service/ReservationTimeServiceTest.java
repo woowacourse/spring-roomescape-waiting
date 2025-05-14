@@ -151,11 +151,11 @@ class ReservationTimeServiceTest {
         var startAt = LocalTime.of(10, 0);
         var timeRequest = new ReservationTimeCreateRequest(startAt);
         var response = reservationTimeService.createTime(timeRequest);
-        var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
-        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "1234", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마1", "테마1 설명", "테마1 썸네일"));
+        var member = memberRepository.save(new Member("미소", "miso@email.com", "1234", RoleType.USER));
 
         var time = new ReservationTime(response.id(), startAt);
-        var reservation = new Reservation(null, LocalDate.now(), time, theme, member);
+        var reservation = new Reservation(LocalDate.now(), time, theme, member);
         reservationRepository.save(reservation);
 
         // when & then

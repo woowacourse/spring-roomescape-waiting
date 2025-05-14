@@ -31,7 +31,7 @@ class ReservationTimeAcceptanceTest {
 
     @BeforeEach
     void setUp() {
-        Member member = new Member(null, DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
+        Member member = new Member(DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.ADMIN);
         memberRepository.save(member);
     }
 

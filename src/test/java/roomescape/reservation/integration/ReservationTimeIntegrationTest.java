@@ -109,11 +109,11 @@ class ReservationTimeIntegrationTest {
     @DisplayName("특정 날짜와 테마에 대한 예약 가능한 시간을 조회한다.")
     void getAvailableTimes() {
         // given
-        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member("미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.of(2024, 3, 20);
-        var reservation = new Reservation(null, date, time, theme, member);
+        var reservation = new Reservation(date, time, theme, member);
         reservationRepository.save(reservation);
 
         // when
@@ -148,11 +148,11 @@ class ReservationTimeIntegrationTest {
     @DisplayName("예약이 있는 시간을 삭제하면 예외가 발생한다.")
     void deleteTimeWithReservation() {
         // given
-        var member = memberRepository.save(new Member(null, "미소", "miso@email.com", "password", RoleType.USER));
-        var theme = themeRepository.save(new Theme(null, "테마", "설명", "썸네일"));
-        var time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        var member = memberRepository.save(new Member("미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.of(2024, 3, 20);
-        var reservation = new Reservation(null, date, time, theme, member);
+        var reservation = new Reservation(date, time, theme, member);
         reservationRepository.save(reservation);
 
         // when & then
