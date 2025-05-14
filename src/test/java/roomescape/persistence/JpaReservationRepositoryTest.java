@@ -247,4 +247,28 @@ class JpaReservationRepositoryTest {
                 () -> assertThat(result.getFirst()).isEqualTo(reservation1)
         );
     }
+
+    @Test
+    @DisplayName("조건이 없으면 모든 예약을 조회한다.")
+    void findReservationsInConditionsAll() {
+        // given
+        Member member = TestFixture.createDefaultMember();
+        entityManager.persist(member);
+
+        Theme theme = TestFixture.createDefaultTheme();
+        entityManager.persist(theme);
+        ReservationTime time = TestFixture.createDefaultReservationTime();
+        entityManager.persist(time);
+
+        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme);
+        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme);
+        entityManager.persist(reservation1);
+        entityManager.persist(reservation2);
+
+        // when
+        List<Reservation> result = jpaReservationRepository.findReservationsInConditions(null, null, null, null);
+
+        // then
+        assertThat(result.size()).isEqualTo(2);
+    }
 }
