@@ -150,6 +150,42 @@ class ReservationAcceptanceTest {
     }
 
     @Test
+    @DisplayName("필터링된 예약을 조회할 수 없다.")
+    void getFilteredReservations() {
+        // given
+        String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
+        var reservationRequest = new ReservationCreateRequest(
+                LocalDate.now().plusDays(1),
+                1L,
+                1L
+        );
+        TestHelper.postWithToken("/reservations", reservationRequest, token);
+        var filterRequest = new ReservationReadFilteredRequest(
+                1L,
+                1L,
+                LocalDate.now(),
+                LocalDate.now().plusDays(7)
+        );
+
+        // when & then
+        TestHelper.postWithToken("/reservations/filtered", filterRequest, token)
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("$", hasSize(1))
+                .body("[0].id", equalTo(1))
+                .body("[0].date", equalTo(LocalDate.now().plusDays(1).toString()))
+                .body("[0].time.id", equalTo(1))
+                .body("[0].time.startAt", equalTo("10:00:00"))
+                .body("[0].member.id", equalTo(1))
+                .body("[0].member.name", equalTo(DEFAULT_NAME))
+                .body("[0].member.email", equalTo(DEFAULT_EMAIL))
+                .body("[0].theme.id", equalTo(1))
+                .body("[0].theme.name", equalTo("테마"))
+                .body("[0].theme.description", equalTo("설명"))
+                .body("[0].theme.thumbnail", equalTo("썸네일"));
+    }
+
+    @Test
     @DisplayName("유저 예약 기록을 확인한다.")
     void getReservationsByMember() {
         // given
