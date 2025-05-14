@@ -11,6 +11,7 @@ import roomescape.common.exception.message.ThemeExceptionMessage;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.RankedThemeResponse;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
@@ -19,15 +20,17 @@ import roomescape.theme.dto.ThemeResponse;
 public class ThemeService {
 
     private final ReservationDao reservationDao;
+    private final ThemeRepository themeRepository;
     private final ThemeDao themeDao;
 
-    public ThemeService(ThemeDao themeDao, ReservationDao reservationDao) {
-        this.themeDao = themeDao;
+    public ThemeService(ReservationDao reservationDao, ThemeRepository themeRepository, ThemeDao themeDao) {
         this.reservationDao = reservationDao;
+        this.themeRepository = themeRepository;
+        this.themeDao = themeDao;
     }
 
     public List<ThemeResponse> findAll() {
-        return themeDao.findAll().stream()
+        return themeRepository.findAll().stream()
                 .map(theme -> new ThemeResponse(
                         theme.getId(),
                         theme.getName(),
@@ -39,7 +42,8 @@ public class ThemeService {
     public List<RankedThemeResponse> findRankedByPeriod() {
         List<Theme> topRankedThemes = themeDao.findRankedByPeriod(
                 LocalDate.now().minusDays(7),
-                LocalDate.now().minusDays(1)
+                LocalDate.now().minusDays(1),
+                10
         );
         return topRankedThemes.stream()
                 .map(theme -> new RankedThemeResponse(
@@ -53,7 +57,7 @@ public class ThemeService {
     public ThemeResponse add(final ThemeRequest themeRequest) {
         validateDuplicate(themeRequest);
         Theme newTheme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
-        Theme savedTheme = themeDao.add(newTheme);
+        Theme savedTheme = themeRepository.save(newTheme);
 
         return new ThemeResponse(
                 savedTheme.getId(),
@@ -64,7 +68,7 @@ public class ThemeService {
     }
 
     private void validateDuplicate(final ThemeRequest themeRequest) {
-        boolean isDuplicate = themeDao.existsByName(themeRequest.name());
+        boolean isDuplicate = themeRepository.existsByName(themeRequest.name());
 
         if (isDuplicate) {
             throw new DuplicateException(ThemeExceptionMessage.DUPLICATE_THEME.getMessage());
@@ -74,16 +78,16 @@ public class ThemeService {
     public void deleteById(final Long id) {
         validateThemeId(id);
         validateUnoccupiedThemeId(id);
-        themeDao.deleteById(id);
+        themeRepository.deleteById(id);
     }
 
     private void validateThemeId(final Long id) {
-        themeDao.findById(id)
+        themeRepository.findById(id)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_THEME_ID.getMessage()));
     }
 
     private void validateUnoccupiedThemeId(final Long id) {
-        boolean isOccupiedThemeId = themeDao.existsByReservationThemeId(id);
+        boolean isOccupiedThemeId = themeRepository.existsById(id);
 
         if (isOccupiedThemeId) {
             throw new ForeignKeyException(ThemeExceptionMessage.RESERVED_THEME.getMessage());

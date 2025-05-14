@@ -129,7 +129,7 @@ class ThemeDaoImplTest {
         LocalDate startDate = LocalDate.now().minusDays(7);
         LocalDate endDate = LocalDate.now().minusDays(1);
 
-        List<Theme> rankedThemes = themeDaoImpl.findRankedByPeriod(startDate, endDate);
+        List<Theme> rankedThemes = themeDaoImpl.findRankedByPeriod(startDate, endDate, 10);
 
         assertThat(rankedThemes).hasSize(1);
     }

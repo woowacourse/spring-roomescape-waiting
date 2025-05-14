@@ -47,7 +47,7 @@ public class ThemeDaoImpl implements ThemeDao {
     }
 
     @Override
-    public List<Theme> findRankedByPeriod(final LocalDate startDate, final LocalDate endDate) {
+    public List<Theme> findRankedByPeriod(final LocalDate startDate, final LocalDate endDate, int count) {
         String sql = """
                 SELECT t.id, t.name, t.description, t.thumbnail 
                 FROM theme AS t 
@@ -55,9 +55,9 @@ public class ThemeDaoImpl implements ThemeDao {
                 WHERE r.date BETWEEN :startDate AND :endDate 
                 GROUP BY t.id, t.name, t.description, t.thumbnail 
                 ORDER BY COUNT(r.id) DESC 
-                LIMIT 10
+                LIMIT :count
                 """;
-        Map<String, Object> parameters = Map.of("startDate", startDate, "endDate", endDate);
+        Map<String, Object> parameters = Map.of("startDate", startDate, "endDate", endDate, "count", count);
 
         return namedParameterJdbcTemplate.query(sql, parameters,
                 (resultSet, rowNum) -> createTheme(resultSet));
@@ -85,7 +85,7 @@ public class ThemeDaoImpl implements ThemeDao {
         Integer count = namedParameterJdbcTemplate.queryForObject(sql, parameter, Integer.class);
         return count != 0;
     }
-    
+
     @Override
     public Theme add(final Theme theme) {
         Map<String, Object> parameters = new HashMap<>();
