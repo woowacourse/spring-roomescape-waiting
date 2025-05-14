@@ -33,7 +33,6 @@ class ReservationRestControllerTest {
     private final String date = LocalDate.now().plusDays(1).toString();
     private List<ValidatableResponse> createReservationTimeResponses;
     private List<ValidatableResponse> createThemeResponses;
-    private List<ValidatableResponse> createMemberResponses;
 
     @BeforeEach
     void setUp() {
@@ -43,7 +42,7 @@ class ReservationRestControllerTest {
         // 관리자 권한으로 테마 추가 (2개)
         createThemeResponses = createThemes(adminCookies, 2);
         // 회원 추가 (2명)
-        createMemberResponses = signUpMembers(2);
+        signUpMembers(2);
     }
 
 
@@ -191,6 +190,39 @@ class ReservationRestControllerTest {
                 .count();
 
         assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void 특정_회원의_예약_목록을_조회한다() {
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final Map<String, String> reservationParams1 = reservationParams1();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(memberCookies)
+                .body(reservationParams1)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        final Map<String, String> reservationParams2 = reservationParams2();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(memberCookies)
+                .body(reservationParams2)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(memberCookies)
+                .body(reservationParams2)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", is(2));
     }
 
     private Map<String, String> reservationParams1() {
