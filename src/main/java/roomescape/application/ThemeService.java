@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.application.dto.ThemeCreateDto;
 import roomescape.application.dto.ThemeDto;
@@ -28,19 +29,16 @@ public class ThemeService {
 
     public ThemeDto registerTheme(@Valid ThemeCreateDto createDto) {
         Theme themeWithoutId = Theme.withoutId(createDto.name(), createDto.description(), createDto.thumbnail());
-        Long id = themeRepository.save(themeWithoutId);
-        Theme theme = Theme.assignId(id, themeWithoutId);
-        return ThemeDto.from(theme);
+        Theme savedTheme = themeRepository.save(themeWithoutId);
+        return ThemeDto.from(savedTheme);
     }
 
     public void deleteTheme(Long id) {
-        boolean deleted;
         try {
-            deleted = themeRepository.deleteById(id);
+            themeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("예약이 존재하는 테마는 삭제할 수 없습니다.");
-        }
-        if (!deleted) {
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("삭제하려는 id가 존재하지 않습니다. id: " + id);
         }
     }
@@ -55,7 +53,7 @@ public class ThemeService {
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusWeeks(1);
         LocalDate endDate = today.minusDays(1);
-        List<Theme> themeRanking = themeRepository.findThemeRanking(RANKING_LIMIT_COUNT, startDate, endDate);
+        List<Theme> themeRanking = themeRepository.findThemeRanking(startDate, endDate, RANKING_LIMIT_COUNT);
         return ThemeDto.from(themeRanking);
     }
 }
