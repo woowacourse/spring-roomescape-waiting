@@ -14,19 +14,22 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final Long id;
+    private Long id;
 
     @ManyToOne
-    private final Member member;
+    private Member member;
 
     @Temporal(TemporalType.DATE)
-    private final LocalDate date;
+    private LocalDate date;
 
     @ManyToOne
-    private final ReservationTime time;
+    private ReservationTime time;
 
     @ManyToOne
-    private final Theme theme;
+    private Theme theme;
+
+    public Reservation() {
+    }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         validateMember(member);
