@@ -205,7 +205,7 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         );
 
         // when
-        boolean exists = reservationRepository.existReservationByThemeId(theme.getId());
+        boolean exists = reservationRepository.existsByTheme_Id(theme.getId());
 
         // then
         assertThat(exists).isTrue();
@@ -217,7 +217,7 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         Theme theme = themeDbFixture.공포();
 
         // when
-        boolean exists = reservationRepository.existReservationByThemeId(theme.getId());
+        boolean exists = reservationRepository.existsByTheme_Id(theme.getId());
 
         // then
         assertThat(exists).isFalse();

@@ -87,11 +87,13 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버가 존재하지 않습니다."));
 
-        return reservationRepository.save(member, dateTime, theme);
+        return reservationRepository.save(
+                new Reservation(null, member, dateTime.getReservationDate(), dateTime.getReservationTime(), theme));
     }
 
     private void validateReservationAvailability(final ReservationDateTime dateTime) {
-        if (reservationRepository.existSameDateTime(dateTime.getReservationDate(), dateTime.getTimeId())) {
+        if (reservationRepository.existsByReservationDateAndReservationTime_Id(dateTime.getReservationDate(),
+                dateTime.getTimeId())) {
             throw new IllegalStateException("이미 예약이 찼습니다.");
         }
     }
@@ -107,12 +109,12 @@ public class ReservationService {
             final LocalDate fromDate,
             final LocalDate toDate
     ) {
-        List<Reservation> allWithCondition = reservationRepository.findAllWithCondition(
-                memberId,
-                themeId,
-                fromDate,
-                toDate
-        );
-        return ReservationResponse.from(allWithCondition);
+//        List<Reservation> allWithCondition = reservationRepository.findAllWithCondition(
+//                memberId,
+//                themeId,
+//                fromDate,
+//                toDate
+//        );
+        return null;
     }
 }

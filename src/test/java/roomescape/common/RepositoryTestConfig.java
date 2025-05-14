@@ -11,13 +11,9 @@ import roomescape.integration.fixture.ReservationDbFixture;
 import roomescape.integration.fixture.ReservationTimeDbFixture;
 import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.MemberRepositoryImpl;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationRepositoryImpl;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ReservationTimeRepositoryImpl;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.ThemeRepositoryImpl;
 
 @TestConfiguration
 public class RepositoryTestConfig {

@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.theme.DateRange;
 import roomescape.domain.theme.Theme;
@@ -32,7 +33,7 @@ public class ThemeService {
     }
 
     public void deleteThemeById(final Long id) {
-        if (reservationRepository.existReservationByThemeId(id)) {
+        if (reservationRepository.existsByTheme_Id(id)) {
             throw new IllegalStateException("이미 예약이 존재해서 테마를 삭제할 수 없습니다.");
         }
         Theme theme = getTheme(id);
@@ -40,10 +41,12 @@ public class ThemeService {
     }
 
     public ThemeResponse createTheme(final CreateThemeRequest request) {
-        Theme theme = themeRepository.save(
-                new ThemeName(request.name()),
-                new ThemeDescription(request.description()),
-                new ThemeThumbnail(request.thumbnail())
+        Theme theme = themeRepository.save(new Theme(
+                        null,
+                        new ThemeName(request.name()),
+                        new ThemeDescription(request.description()),
+                        new ThemeThumbnail(request.thumbnail())
+                )
         );
         return ThemeResponse.from(theme);
     }
@@ -55,7 +58,12 @@ public class ThemeService {
 
     public List<ThemeResponse> getWeeklyPopularThemes() {
         DateRange dateRange = DateRange.createLastWeekRange(clock);
-        List<Theme> themes = themeRepository.findPopularThemeDuringAWeek(10L, dateRange);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Theme> themes = themeRepository.findPopularThemeDuringAWeek(
+                dateRange.getStartDate(),
+                dateRange.getEndDate(),
+                pageRequest
+        );
         return ThemeResponse.from(themes);
     }
 

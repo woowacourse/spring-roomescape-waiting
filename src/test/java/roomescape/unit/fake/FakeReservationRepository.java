@@ -1,31 +1,16 @@
 package roomescape.unit.fake;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberEncodedPassword;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeDescription;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThemeThumbnail;
-import roomescape.domain.time.ReservationTime;
-import roomescape.repository.DynamicReservationSelectQuery;
 import roomescape.repository.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -78,7 +63,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existReservationByThemeId(final Long themeId) {
+    public boolean existsByTheme_Id(final Long themeId) {
         return values.stream().anyMatch(reservation -> reservation.getTheme().getId().equals(themeId));
     }
 

@@ -1,26 +1,30 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import roomescape.domain.theme.DateRange;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeDescription;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThemeThumbnail;
 
-public interface ThemeRepository {
-
-    Theme save(
-            final ThemeName name,
-            final ThemeDescription description,
-            final ThemeThumbnail thumbnail
-    );
-
-    void deleteById(final Long id);
+public interface ThemeRepository extends CrudRepository<Theme, Long> {
 
     List<Theme> findAll();
 
-    Optional<Theme> findById(final Long id);
-
-    List<Theme> findPopularThemeDuringAWeek(final long limit, final DateRange dateRange);
+    @Query("""
+            SELECT t
+            FROM Theme t
+            LEFT JOIN Reservation r ON r.theme = t
+            WHERE r.reservationDate.date IS NOT NULL
+              AND r.reservationDate.date >= :startDate
+              AND r.reservationDate.date < :endDate
+            GROUP BY t
+            ORDER BY COUNT(r.id) DESC
+            """)
+    List<Theme> findPopularThemeDuringAWeek(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable
+    );
 }
