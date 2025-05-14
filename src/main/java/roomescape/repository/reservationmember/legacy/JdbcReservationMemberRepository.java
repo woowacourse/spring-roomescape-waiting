@@ -93,8 +93,36 @@ public class JdbcReservationMemberRepository implements ReservationMemberReposit
 
     @Override
     public void deleteById(long id) {
-        String sql = "DELETE FROM reservation_member WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+        ReservationMember reservationMember = findReservationMemberById(id);
+
+        String deleteReservationMemberSql = "DELETE FROM reservation_member WHERE id = ?";
+        jdbcTemplate.update(deleteReservationMemberSql, id);
+
+        Long reservationId = reservationMember.getReservationId();
+        deleteReservationById(reservationId);
+    }
+
+    private void deleteReservationById(Long reservationId) {
+        String sql = "delete from reservation where id=?";
+        jdbcTemplate.update(sql, reservationId);
+    }
+
+    private ReservationMember findReservationMemberById(long id) {
+        String findByIdSql = """
+                    SELECT rm.id,
+                           r.id AS reservation_id, r.name AS reservation_name, r.date AS reservation_date,
+                           t.id AS time_id, t.time,
+                           th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail AS theme_thumbnail,
+                           m.id AS member_id, m.username, m.password, m.role, m.name AS member_name
+                    FROM reservation_member rm
+                    JOIN reservation r ON rm.reservation_id = r.id
+                    JOIN reservation_time t ON r.time_id = t.id
+                    JOIN theme th ON r.theme_id = th.id
+                    JOIN member m ON rm.member_id = m.id
+                    where rm.id = ?
+                """;
+
+        return jdbcTemplate.queryForObject(findByIdSql, this.reservationMemberRowMapper, id);
     }
 
     @Override

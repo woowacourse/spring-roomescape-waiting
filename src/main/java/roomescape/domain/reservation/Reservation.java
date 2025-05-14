@@ -31,7 +31,7 @@ public class Reservation {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(255) default 'RESERVATION'")
-    private ReservationStatus reservationStatus;
+    private ReservationStatus reservationStatus = ReservationStatus.RESERVATION;
 
     @PrePersist
     public void prePersist() {
