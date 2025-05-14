@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -16,6 +17,8 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
+    @OneToOne
+    private Waiting waiting;
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
