@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
 

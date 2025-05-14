@@ -23,15 +23,9 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.JpaMemberRepository;
 import roomescape.member.domain.Role;
-import roomescape.member.infrastructure.JdbcMemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.ReservationTimeRepository;
-import roomescape.reservationTime.infrastructure.JdbcReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
-import roomescape.theme.infrastructure.JdbcThemeRepository;
 
 @Sql(scripts = "/data/reservationConditionTest.sql")
 @JdbcTest
@@ -42,7 +36,7 @@ class JdbcReservationRepositoryTest {
     private ReservationRepository reservationRepository;
     private ThemeRepository themeRepository;
     private ReservationTimeRepository timeRepository;
-    private JpaMemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     private static Stream<Arguments> findByMemberIdAndThemeIdAndDate_test() {
         return Stream.of(

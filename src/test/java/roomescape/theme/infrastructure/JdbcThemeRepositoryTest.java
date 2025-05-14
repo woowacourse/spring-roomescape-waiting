@@ -18,16 +18,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.JpaMemberRepository;
 import roomescape.member.domain.Role;
-import roomescape.member.infrastructure.JdbcMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.infrastructure.JdbcReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.ReservationTimeRepository;
-import roomescape.reservationTime.infrastructure.JdbcReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 
 @JdbcTest
 class JdbcThemeRepositoryTest {

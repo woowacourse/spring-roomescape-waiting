@@ -14,11 +14,9 @@ import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.service.FakeReservationRepository;
 import roomescape.reservation.service.FakeThemeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.dto.response.PopularThemeResponse;
 
 class ThemeServiceTest {

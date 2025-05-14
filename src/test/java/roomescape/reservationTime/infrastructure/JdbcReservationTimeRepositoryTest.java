@@ -14,7 +14,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.ReservationTimeRepository;
 
 @JdbcTest
 class JdbcReservationTimeRepositoryTest {

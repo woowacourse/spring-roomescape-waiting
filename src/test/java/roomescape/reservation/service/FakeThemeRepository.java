@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
 

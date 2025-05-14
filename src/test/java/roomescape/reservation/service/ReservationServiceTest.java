@@ -21,14 +21,11 @@ import roomescape.member.domain.JpaMemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.service.FakeMemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 
 class ReservationServiceTest {
 
