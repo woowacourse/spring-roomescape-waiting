@@ -3,7 +3,7 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public final class ThemeDescription {
+public class ThemeDescription {
 
     private static final int MIN_LENGTH = 5;
     private static final int MAX_LENGTH = 200;

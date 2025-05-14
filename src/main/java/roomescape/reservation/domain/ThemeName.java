@@ -4,7 +4,7 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
-public final class ThemeName {
+public class ThemeName {
 
     private static final int MAX_LENGTH = 20;
 

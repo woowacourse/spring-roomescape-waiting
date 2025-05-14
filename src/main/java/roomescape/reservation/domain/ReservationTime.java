@@ -8,7 +8,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-public final class ReservationTime {
+public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

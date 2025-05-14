@@ -3,7 +3,7 @@ package roomescape.member.domain;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public final class MemberName {
+public class MemberName {
 
     private static final int MAX_LENGTH = 5;
 
