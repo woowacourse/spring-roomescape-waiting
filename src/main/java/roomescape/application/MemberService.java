@@ -1,6 +1,7 @@
 package roomescape.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.infrastructure.repository.MemberRepository;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -29,6 +31,7 @@ public class MemberService {
         return MemberResponse.from(members);
     }
 
+    @Transactional
     public MemberResponse createMember(MemberCreateRequest request) {
         Member member = Member.create(request.name(), Role.USER, request.email(), request.password());
         Member created = memberRepository.save(member);

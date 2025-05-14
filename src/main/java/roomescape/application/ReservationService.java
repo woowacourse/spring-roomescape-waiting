@@ -1,6 +1,7 @@
 package roomescape.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -44,11 +46,12 @@ public class ReservationService {
         return ReservationResponse.from(reservations);
     }
 
+    @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest request, LoginMember loginMember) {
         ReservationDate reservationDate = new ReservationDate(request.date());
         Long timeId = request.timeId();
         Long themeId = request.themeId();
-        ReservationTime time = reservationTimeService.findReservationTimeById(themeId);
+        ReservationTime time = reservationTimeService.findReservationTimeById(timeId);
         Theme theme = themeService.findThemeById(themeId);
 
         validateExistsReservation(reservationDate, time, theme);
@@ -61,11 +64,12 @@ public class ReservationService {
         return ReservationResponse.from(created);
     }
 
+    @Transactional
     public ReservationResponse createAdminReservation(AdminReservationCreateRequest request) {
         ReservationDate reservationDate = new ReservationDate(request.date());
         Long timeId = request.timeId();
         Long themeId = request.themeId();
-        ReservationTime time = reservationTimeService.findReservationTimeById(themeId);
+        ReservationTime time = reservationTimeService.findReservationTimeById(timeId);
         Theme theme = themeService.findThemeById(themeId);
 
         validateExistsReservation(reservationDate, time, theme);
@@ -89,6 +93,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservationById(Long id) {
         Reservation reservation = findReservationById(id);
         reservationRepository.deleteById(reservation.getId());

@@ -3,6 +3,7 @@ package roomescape.application;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ThemeRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int START_DATE_INTERVAL = 7;
@@ -37,12 +39,14 @@ public class ThemeService {
         return ThemeResponse.from(themes);
     }
 
+    @Transactional
     public ThemeResponse createTheme(ThemeCreateRequest request) {
         Theme theme = Theme.create(request.name(), request.description(), request.thumbnail());
         Theme created = themeRepository.save(theme);
         return ThemeResponse.from(created);
     }
 
+    @Transactional
     public void deleteThemeById(Long id) {
         Theme theme = findThemeById(id);
         if (reservationRepository.existsByTheme(theme)) {
@@ -59,7 +63,7 @@ public class ThemeService {
     public List<ThemeResponse> getPopularThemes() {
         LocalDate now = currentTimeService.now().toLocalDate();
         LocalDate dateFrom = now.minusDays(START_DATE_INTERVAL);
-        LocalDate dateTo = now.plusDays(END_DATE_INTERVAL);
+        LocalDate dateTo = now.minusDays(END_DATE_INTERVAL);
         Pageable pageable = PageRequest.of(0, POPULAR_COUNT);
         List<Theme> themes = themeRepository.findRecentPopularThemes(dateFrom, dateTo, pageable);
         return ThemeResponse.from(themes);

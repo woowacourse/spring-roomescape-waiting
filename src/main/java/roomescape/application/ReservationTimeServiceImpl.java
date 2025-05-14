@@ -1,6 +1,7 @@
 package roomescape.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.repository.ReservationRepository;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeServiceImpl implements ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -38,6 +40,7 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
     }
 
     @Override
+    @Transactional
     public ReservationTimeResponse createReservationTime(ReservationTimeCreateRequest request) {
 
         LocalTime startAt = request.startAt();
@@ -52,6 +55,7 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
     }
 
     @Override
+    @Transactional
     public void deleteReservationTimeById(Long id) {
         ReservationTime reservationTime = findReservationTimeById(id);
         if (reservationRepository.existsByTime(reservationTime)) {
