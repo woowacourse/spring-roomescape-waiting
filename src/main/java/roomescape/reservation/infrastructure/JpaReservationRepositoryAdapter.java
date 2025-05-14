@@ -58,6 +58,6 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
 
     @Override
     public boolean existBy(final Long themeId) {
-        return false;
+        return jpaReservationRepository.existsById(themeId);
     }
 }
