@@ -25,7 +25,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
         JOIN Reservation r ON r.theme = t
         WHERE r.date BETWEEN :dateFrom AND :dateTo
         GROUP BY t
-        ORDER BY COUNT(r) DESC
+        ORDER BY COUNT(r) DESC, MAX(r.date) DESC
     """)
     List<Theme> findRecentPopularThemes(LocalDate dateFrom, LocalDate dateTo, Pageable pageable);
 }
