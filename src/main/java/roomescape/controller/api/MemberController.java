@@ -31,7 +31,7 @@ public class MemberController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MemberResponse createTheme(@RequestBody MemberRequest request) {
+    public MemberResponse createMember(@RequestBody MemberRequest request) {
         return MemberResponse.from(memberService.addMember(request));
     }
 }

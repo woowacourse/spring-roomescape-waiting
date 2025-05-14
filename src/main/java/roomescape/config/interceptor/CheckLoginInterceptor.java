@@ -5,14 +5,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.entity.Member;
+import roomescape.entity.Role;
 import roomescape.exception.custom.AuthenticatedException;
 import roomescape.service.AuthService;
 
 public class CheckLoginInterceptor implements HandlerInterceptor {
-
-    private static final String ADMIN_NAME = "admin";
-    private static final String ADMIN_EMAIL = "admin";
-    private static final String ADMIN_PASSWORD = "1234";
 
     private final AuthService authService;
 
@@ -26,10 +23,8 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
         String token = extractTokenFromCookie(request.getCookies());
         Member member = authService.findMemberByToken(token);
 
-        if (!member.getName().equals(ADMIN_NAME)
-            || !member.getEmail().equals(ADMIN_EMAIL)
-            || !member.getPassword().equals(ADMIN_PASSWORD)) {
-            response.setStatus(401);
+        if (member == null || member.getRole() != Role.ADMIN) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
         return true;

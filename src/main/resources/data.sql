@@ -1,7 +1,7 @@
-INSERT INTO member (name, email, password) VALUES ('admin', 'admin', '1234');
-INSERT INTO member (name, email, password) VALUES ('sana123', 'sa123', 'na123');
-INSERT INTO member (name, email, password) VALUES ('sana234', 'sa234', 'na234');
-INSERT INTO member (name, email, password) VALUES ('sana345', 'sa345', 'na345');
+INSERT INTO member (name, email, password, role) VALUES ('admin', 'admin', '1234', 'ADMIN');
+INSERT INTO member (name, email, password, role) VALUES ('sana123', 'sa123', 'na123', 'USER');
+INSERT INTO member (name, email, password, role) VALUES ('sana234', 'sa234', 'na234', 'USER');
+INSERT INTO member (name, email, password, role) VALUES ('sana345', 'sa345', 'na345', 'USER');
 
 INSERT INTO reservation_time (start_at) VALUES ('10:00');
 INSERT INTO reservation_time (start_at) VALUES ('12:00');
