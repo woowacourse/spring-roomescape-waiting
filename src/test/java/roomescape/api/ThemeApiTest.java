@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.Role;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -107,22 +108,35 @@ public class ThemeApiTest {
                 .body("message", equalTo("예약이 존재합니다."));
     }
 
+
     @Test
+    @Sql(value = "/sql/data.sql")
     void 인기테마_상위10개_조회_테스트() {
         // given
-        themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
-        themeRepository.save(Theme.createWithoutId("theme2", "desc", "thumb2"));
-        Theme theme = themeRepository.save(Theme.createWithoutId("theme3", "desc", "thumb3"));
-        ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
-        Member member = memberRepository.save(new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER));
-        reservationRepository.save(Reservation.createWithoutId(member, LocalDate.now().minusDays(1), time, theme));
+        Member member1 = memberRepository.findById(1L).get();
+        Member member2 = memberRepository.findById(2L).get();
+        ReservationTime time1 = timeRepository.findById(1L).get();
+        Theme theme1 = themeRepository.findById(1L).get();
+        Theme theme2 = themeRepository.findById(2L).get();
+        Theme theme3 = themeRepository.findById(3L).get();
+
+        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme1));
+        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time1, theme1));
+        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(3), time1, theme1));
+
+        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme2));
+        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time1, theme2));
+
+        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(3), time1, theme3));
         // when & then
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .when().get("/api/themes/rank")
                 .then().statusCode(200)
                 .log().all()
-                .body("size()", is(1))
-                .body("[0].name", equalTo("theme3"));
+                .body("size()", is(3))
+                .body("[0].name", equalTo("테마1"))
+                .body("[1].name", equalTo("테마2"))
+                .body("[2].name", equalTo("테마3"));
     }
 }
