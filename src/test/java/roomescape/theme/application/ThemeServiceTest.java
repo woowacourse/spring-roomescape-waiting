@@ -6,7 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.fixture.config.TestConfig;
@@ -16,7 +16,7 @@ import roomescape.theme.domain.ThemeCommandRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
-@JdbcTest
+@DataJpaTest
 @Import(TestConfig.class)
 class ThemeServiceTest {
 

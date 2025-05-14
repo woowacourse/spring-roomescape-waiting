@@ -3,80 +3,83 @@ package roomescape.fixture.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
-import roomescape.member.infrastructure.JdbcMemberRepository;
+import roomescape.member.infrastructure.JpaMemberRepository;
+import roomescape.member.infrastructure.MemberRepositoryImpl;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
-import roomescape.reservation.infrastructure.JdbcReservationRepository;
-import roomescape.reservation.infrastructure.JdbcReservationTimeRepository;
+import roomescape.reservation.infrastructure.JpaReservationRepository;
+import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
+import roomescape.reservation.infrastructure.ReservationRepositoryImpl;
+import roomescape.reservation.infrastructure.ReservationTimeRepositoryImpl;
 import roomescape.theme.applcation.ThemeService;
 import roomescape.theme.domain.ThemeCommandRepository;
 import roomescape.theme.domain.ThemeQueryRepository;
-import roomescape.theme.infrastructure.JdbcThemeRepository;
+import roomescape.theme.infrastructure.JpaThemeRepository;
+import roomescape.theme.infrastructure.ThemeRepositoryImpl;
 
 @TestConfiguration
 public class TestConfig {
 
     @Bean
-    public ReservationTimeCommandRepository reservationTimeCommandRepository(
-            final JdbcTemplate jdbcTemplate
+    public ReservationTimeQueryRepository reservationTimeQueryRepository(
+            final JpaReservationTimeRepository jpaReservationTimeRepository
     ) {
-        return new JdbcReservationTimeRepository(jdbcTemplate);
+        return new ReservationTimeRepositoryImpl(jpaReservationTimeRepository);
     }
 
     @Bean
-    public ReservationTimeQueryRepository reservationTimeQueryRepository(
-            final JdbcTemplate jdbcTemplate
+    public ReservationTimeCommandRepository reservationTimeCommandRepository(
+            final JpaReservationTimeRepository jpaReservationTimeRepository
     ) {
-        return new JdbcReservationTimeRepository(jdbcTemplate);
+        return new ReservationTimeRepositoryImpl(jpaReservationTimeRepository);
     }
 
     @Bean
     public ThemeCommandRepository themeCommandRepository(
-            final JdbcTemplate jdbcTemplate
+            final JpaThemeRepository jpaThemeRepository
     ) {
-        return new JdbcThemeRepository(jdbcTemplate);
+        return new ThemeRepositoryImpl(jpaThemeRepository);
     }
 
     @Bean
     public ThemeQueryRepository themeQueryRepository(
-            final JdbcTemplate jdbcTemplate
+            final JpaThemeRepository jpaThemeRepository
     ) {
-        return new JdbcThemeRepository(jdbcTemplate);
+        return new ThemeRepositoryImpl(jpaThemeRepository);
     }
 
     @Bean
     public MemberCommandRepository memberCommandRepository(
-            final JdbcTemplate jdbcTemplate
+            final JpaMemberRepository jpaMemberRepository
     ) {
-        return new JdbcMemberRepository(jdbcTemplate);
+        return new MemberRepositoryImpl(jpaMemberRepository);
     }
 
     @Bean
     public MemberQueryRepository memberQueryRepository(
-            final JdbcTemplate jdbcTemplate
+            final JpaMemberRepository jpaMemberRepository
     ) {
-        return new JdbcMemberRepository(jdbcTemplate);
+        return new MemberRepositoryImpl(jpaMemberRepository);
     }
 
     @Bean
     public ReservationCommandRepository reservationCommandRepository(
-            final JdbcTemplate jdbcTemplate
+            final JpaReservationRepository jpaReservationRepository
     ) {
-        return new JdbcReservationRepository(jdbcTemplate);
+        return new ReservationRepositoryImpl(jpaReservationRepository);
     }
 
     @Bean
     public ReservationQueryRepository reservationQueryRepository(
-            final JdbcTemplate jdbcTemplate
+            final JpaReservationRepository jpaReservationRepository
     ) {
-        return new JdbcReservationRepository(jdbcTemplate);
+        return new ReservationRepositoryImpl(jpaReservationRepository);
     }
 
     @Bean
@@ -86,7 +89,6 @@ public class TestConfig {
     ) {
         return new ReservationTimeService(reservationTimeCommandRepository, reservationTimeQueryRepository);
     }
-
 
     @Bean
     public ThemeService themeService(

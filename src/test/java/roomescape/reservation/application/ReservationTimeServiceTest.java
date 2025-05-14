@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
@@ -15,7 +15,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 
-@JdbcTest
+@DataJpaTest
 @Import(TestConfig.class)
 class ReservationTimeServiceTest {
 
