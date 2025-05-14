@@ -11,4 +11,8 @@ public class ReservationPageController {
         return "reservation";
     }
 
+    @GetMapping("/reservation-mine")
+    public String reservationMine(){
+        return "reservation-mine";
+    }
 }

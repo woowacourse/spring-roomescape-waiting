@@ -9,6 +9,7 @@ import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -76,5 +77,12 @@ public class ReservationService {
 
     public void deleteReservationById(final Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    public List<MyReservationResponse> getMyReservations(final Long id) {
+        List<Reservation> reservations = reservationRepository.findByMember_Id(id);
+        return reservations.stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 }

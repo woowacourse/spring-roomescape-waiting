@@ -1,5 +1,7 @@
 package roomescape.reservation.presentation;
 
+import static roomescape.reservation.presentation.ReservationController.RESERVATION_BASE_URL;
+
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.format.DateTimeParseException;
@@ -19,11 +21,12 @@ import roomescape.common.exceptionHandler.dto.ExceptionResponse;
 import roomescape.member.dto.request.LoginMember;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
-@RequestMapping(ReservationController.RESERVATION_BASE_URL)
+@RequestMapping(RESERVATION_BASE_URL)
 public class ReservationController {
 
     public static final String RESERVATION_BASE_URL = "/reservations";
@@ -62,5 +65,11 @@ public class ReservationController {
                 "[ERROR] 요청 날짜 형식이 맞지 않습니다.", request.getRequestURI()
         );
         return ResponseEntity.badRequest().body(exceptionResponse);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@Login LoginMember loginMember) {
+        List<MyReservationResponse> myReservationResponses = reservationService.getMyReservations(loginMember.id());
+        return ResponseEntity.ok().body(myReservationResponses);
     }
 }

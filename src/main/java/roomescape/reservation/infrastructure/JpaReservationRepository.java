@@ -16,4 +16,5 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByTheme_Id(Long themeId);
 
+    List<Reservation> findByMember_Id(Long id);
 }
