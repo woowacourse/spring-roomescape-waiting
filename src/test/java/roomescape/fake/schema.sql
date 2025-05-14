@@ -1,9 +1,9 @@
-DROP TABLE reservation IF EXISTS;
-DROP TABLE member IF EXISTS;
-DROP TABLE theme IF EXISTS;
-DROP TABLE reservation_time IF EXISTS;
+drop table reservation IF EXISTS;
+drop table member IF EXISTS;
+drop table theme IF EXISTS;
+drop table reservation_time IF EXISTS;
 
-CREATE TABLE member
+create TABLE member
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     name     VARCHAR(255) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE member
     PRIMARY KEY (id)
 );
 
-CREATE TABLE theme
+create TABLE theme
 (
     id          BIGINT       NOT NULL AUTO_INCREMENT,
     name        VARCHAR(255) NOT NULL,
@@ -22,20 +22,21 @@ CREATE TABLE theme
     PRIMARY KEY (id)
 );
 
-CREATE TABLE reservation_time
+create TABLE reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     start_at VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE reservation
+create TABLE reservation
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     date     VARCHAR(255) NOT NULL,
     member_id BIGINT,
     time_id  BIGINT,
     theme_id BIGINT,
+    status   ENUM('RESERVED')
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

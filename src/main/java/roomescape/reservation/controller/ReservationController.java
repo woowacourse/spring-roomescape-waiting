@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.service.dto.LoginMemberInfo;
 import roomescape.reservation.controller.dto.AdminReservationCreateRequest;
+import roomescape.reservation.controller.dto.MemberReservationResponse;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationSearchConditionRequest;
@@ -58,6 +59,15 @@ public class ReservationController {
         final List<ReservationInfo> reservationInfos = reservationService.getReservations(condition);
         List<ReservationResponse> responses = reservationInfos.stream()
                 .map(ReservationResponse::new)
+                .toList();
+        return ResponseEntity.ok().body(responses);
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MemberReservationResponse>> findAllMine(LoginMemberInfo loginMemberInfo) {
+        final List<ReservationInfo> reservationInfos = reservationService.findReservationsByMemberId(loginMemberInfo.id());
+        final List<MemberReservationResponse> responses = reservationInfos.stream()
+                .map(MemberReservationResponse::new)
                 .toList();
         return ResponseEntity.ok().body(responses);
     }

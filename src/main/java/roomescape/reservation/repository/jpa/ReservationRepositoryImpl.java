@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.dto.ReservationInfo;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -47,6 +48,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId) {
-        return reservationJpaRepository.findByDateAndThemeId(date, themeId);
+        return reservationJpaRepository.findAllByDateAndThemeId(date, themeId);
+    }
+
+    @Override
+    public List<Reservation> findAllByMemberId(long id) {
+        return reservationJpaRepository.findAllByMemberId(id);
     }
 }

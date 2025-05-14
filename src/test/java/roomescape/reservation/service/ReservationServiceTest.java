@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.CurrentDateTime;
@@ -202,6 +203,31 @@ class ReservationServiceTest {
         reservationService.cancelReservationById(1L);
         // then
         assertThat(reservationService.getReservations()).isEmpty();
+    }
+
+    @DisplayName("멤버 예약 목록을 조회할 수 있다")
+    @Test
+    void findReservationsByMember() {
+        // given
+        LocalTime time1 = LocalTime.of(11, 0);
+        LocalTime time2 = LocalTime.of(12, 0);
+        ReservationTime savedTime1 = reservationTimeRepository.save(new ReservationTime(time1));
+        ReservationTime savedTime2 = reservationTimeRepository.save(new ReservationTime(time2));
+        Theme theme = new Theme(null, "우테코탈출", "탈출탈출탈출, ", "aaaa");
+        Theme savedTheme = themeDao.save(theme);
+        Member savedMember1 = memberDao.save(new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
+        Member savedMember2 = memberDao.save(new Member(null, "리버", "admin@gmail.com", "qwer!", MemberRole.ADMIN));
+        ReservationCreateCommand request1 = new ReservationCreateCommand(tomorrow, savedMember1.getId(), savedTime1.getId(), savedTheme.getId());
+        ReservationCreateCommand request2 = new ReservationCreateCommand(tomorrow, savedMember2.getId(), savedTime2.getId(), savedTheme.getId());
+
+        ReservationInfo createdReservation1 = reservationService.createReservation(request1);
+        ReservationInfo createdReservation2 = reservationService.createReservation(request2);
+
+        // when
+        List<ReservationInfo> result = reservationService.findReservationsByMemberId(savedMember1.getId());
+
+        // then
+        assertThat(result).containsExactlyElementsOf(List.of(createdReservation1));
     }
 }
 

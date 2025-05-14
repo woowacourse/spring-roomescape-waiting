@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.ReservationSearchCondition;
@@ -54,6 +55,13 @@ public class ReservationService {
 
     public List<ReservationInfo> getReservations() {
         return reservationRepository.findAll().stream()
+                .map(ReservationInfo::new)
+                .toList();
+    }
+
+    public List<ReservationInfo> findReservationsByMemberId(final Long id) {
+        return reservationRepository.findAllByMemberId(id)
+                .stream()
                 .map(ReservationInfo::new)
                 .toList();
     }
