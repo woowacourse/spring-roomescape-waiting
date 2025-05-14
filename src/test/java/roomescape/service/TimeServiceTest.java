@@ -8,7 +8,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dao.fake.FakeReservationTimeDao;
+import roomescape.repository.fake.FakeReservationTimeRepository;
 import roomescape.entity.ReservationTime;
 import roomescape.dto.request.TimeRequest;
 import roomescape.exception.custom.DuplicatedException;
@@ -19,7 +19,7 @@ class TimeServiceTest {
 
     @BeforeEach
     void setUp() {
-        timeService = new TimeService(new FakeReservationTimeDao());
+        timeService = new TimeService(new FakeReservationTimeRepository());
     }
 
     @Test

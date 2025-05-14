@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 
 @Entity
@@ -12,10 +13,20 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
     private Member member;
+
     private LocalDate date;
+
+    @ManyToOne
     private ReservationTime time;
+
+    @ManyToOne
     private Theme theme;
+
+    public Reservation() {
+    }
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.member = member;

@@ -2,7 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.dao.MemberDao;
+import roomescape.repository.MemberRepository;
 import roomescape.entity.Member;
 import roomescape.dto.request.MemberRequest;
 import roomescape.exception.custom.DuplicatedException;
@@ -10,25 +10,25 @@ import roomescape.exception.custom.DuplicatedException;
 @Service
 public class MemberService {
 
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
-    public MemberService(MemberDao memberDao) {
-        this.memberDao = memberDao;
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     public List<Member> findAllMembers() {
-        return memberDao.findAllMembers();
+        return memberRepository.findAll();
     }
 
     public Member addMember(MemberRequest request) {
         validateDuplicateMember(request);
 
-        return memberDao.addMember(
+        return memberRepository.save(
             new Member(request.name(), request.email(), request.password()));
     }
 
     private void validateDuplicateMember(MemberRequest request) {
-        if (memberDao.existMemberByEmail(request.email())) {
+        if (memberRepository.existsByEmail(request.email())) {
             throw new DuplicatedException("member");
         }
     }

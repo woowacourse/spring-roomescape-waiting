@@ -4,7 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class ReservationTime {
@@ -13,13 +16,14 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
+    private Boolean alreadyBooked;
 
     public ReservationTime() {
     }
 
-    public ReservationTime(Long id, LocalTime startAt) {
-        this.id = id;
+    public ReservationTime(LocalTime startAt, Boolean alreadyBooked) {
         this.startAt = startAt;
+        this.alreadyBooked = alreadyBooked;
     }
 
     public boolean isBefore(LocalTime time) {
@@ -32,5 +36,9 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    public Boolean getAlreadyBooked() {
+        return alreadyBooked;
     }
 }

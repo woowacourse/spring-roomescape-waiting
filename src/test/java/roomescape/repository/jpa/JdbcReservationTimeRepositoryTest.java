@@ -1,4 +1,4 @@
-package roomescape.dao.jdbc;
+package roomescape.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -17,11 +17,11 @@ import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.NotFoundException;
 
 @JdbcTest
-@Import(JdbcReservationTimeDao.class)
-class JdbcReservationTimeDaoTest {
+@Import(JdbcReservationTimeRepository.class)
+class JdbcReservationTimeRepositoryTest {
 
     @Autowired
-    private JdbcReservationTimeDao jdbcReservationTimeDao;
+    private JdbcReservationTimeRepository jdbcReservationTimeDao;
 
     @Test
     @DisplayName("전체 시간을 조회할 수 있다.")

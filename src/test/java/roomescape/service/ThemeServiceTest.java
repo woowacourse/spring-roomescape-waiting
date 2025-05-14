@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dao.fake.FakeThemeDao;
+import roomescape.repository.fake.FakeThemeRepository;
 import roomescape.entity.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.exception.custom.DuplicatedException;
@@ -18,7 +18,7 @@ class ThemeServiceTest {
 
     @BeforeEach
     void setUp() {
-        themeService = new ThemeService(new FakeThemeDao());
+        themeService = new ThemeService(new FakeThemeRepository());
     }
 
     @Test

@@ -1,4 +1,4 @@
-package roomescape.dao.jdbc;
+package roomescape.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,17 +12,17 @@ import roomescape.entity.Member;
 import roomescape.exception.custom.NotFoundException;
 
 @JdbcTest
-@Import(JdbcMemberDao.class)
-class JdbcMemberDaoTest {
+@Import(JdbcMemberRepository.class)
+class JdbcMemberRepositoryTest {
 
     @Autowired
-    private JdbcMemberDao jdbcMemberDao;
+    private JdbcMemberRepository jdbcMemberDao;
 
     @Test
     @DisplayName("이메일이 존재한다면 조회할 수 있다.")
     void findMemberByExistedEmail() {
         String email = "sa123";
-        Member expected = jdbcMemberDao.findMemberByEmail(email);
+        Member expected = jdbcMemberDao.findByEmail(email);
 
         assertThat(expected.getEmail()).isEqualTo(email);
     }
@@ -30,7 +30,7 @@ class JdbcMemberDaoTest {
     @Test
     @DisplayName("이메일이 존재하지 않는다면 예외가 발생한다.")
     void findMemberByNotExistedEmail() {
-        assertThatThrownBy(() -> jdbcMemberDao.findMemberByEmail("notEmail"))
+        assertThatThrownBy(() -> jdbcMemberDao.findByEmail("notEmail"))
             .isInstanceOf(NotFoundException.class)
             .hasMessageContaining("member");
     }
@@ -54,19 +54,19 @@ class JdbcMemberDaoTest {
 
     @Test
     @DisplayName("해당 이메일이 없다면 true를 반환한다.")
-    void existMemberByEmail() {
+    void existsByEmail() {
         Member member = new Member("이름", "이메일", "비밀번호");
         jdbcMemberDao.addMember(member);
 
-        assertThat(jdbcMemberDao.existMemberByEmail(member.getEmail())).isTrue();
+        assertThat(jdbcMemberDao.existByEmail(member.getEmail())).isTrue();
     }
 
     @Test
     @DisplayName("해당 이메일이 없다면 false를 반환한다.")
-    void notExistMemberByEmail() {
+    void notExistsByEmail() {
         Member member = new Member("이름", "이메일", "비밀번호");
 
-        assertThat(jdbcMemberDao.existMemberByEmail(member.getEmail())).isFalse();
+        assertThat(jdbcMemberDao.existByEmail(member.getEmail())).isFalse();
     }
 
     @Test

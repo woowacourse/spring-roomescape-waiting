@@ -3,7 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ThemeRepository;
 import roomescape.entity.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.exception.custom.DuplicatedException;
@@ -12,39 +12,37 @@ import roomescape.exception.custom.DuplicatedException;
 public class ThemeService {
 
     public static final int TOP_RANK_PERIOD_DAYS = 7;
-    public static final int TOP_RANK_THRESHOLD = 10;
 
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
 
-    public ThemeService(ThemeDao themeDao) {
-        this.themeDao = themeDao;
+    public ThemeService(ThemeRepository themeRepository) {
+        this.themeRepository = themeRepository;
     }
 
     public List<Theme> findAllThemes() {
-        return themeDao.findAllThemes();
+        return themeRepository.findAll();
     }
 
     public List<Theme> findTopReservedThemes() {
         LocalDate today = LocalDate.now();
 
-        return themeDao.findTopReservedThemesInPeriodWithLimit(
-            today.minusDays(TOP_RANK_PERIOD_DAYS), today, TOP_RANK_THRESHOLD);
+        return themeRepository.findTop10ByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today);
     }
 
     public Theme addTheme(ThemeRequest request) {
         validateDuplicateTheme(request);
 
-        return themeDao.addTheme(
+        return themeRepository.save(
             new Theme(request.name(), request.description(), request.thumbnail()));
     }
 
     private void validateDuplicateTheme(ThemeRequest request) {
-        if (themeDao.existThemeByName(request.name())) {
+        if (themeRepository.existsByName(request.name())) {
             throw new DuplicatedException("theme");
         }
     }
 
     public void removeTheme(Long id) {
-        themeDao.removeThemeById(id);
+        themeRepository.deleteById(id);
     }
 }

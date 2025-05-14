@@ -3,7 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.entity.ReservationTime;
 import roomescape.dto.request.TimeRequest;
 import roomescape.exception.custom.DuplicatedException;
@@ -11,32 +11,32 @@ import roomescape.exception.custom.DuplicatedException;
 @Service
 public class TimeService {
 
-    private final ReservationTimeDao reservationTimeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    public TimeService(ReservationTimeDao reservationTimeDao) {
-        this.reservationTimeDao = reservationTimeDao;
+    public TimeService(ReservationTimeRepository reservationTimeRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public List<ReservationTime> findAllReservationTimes() {
-        return reservationTimeDao.findAllTimes();
+        return reservationTimeRepository.findAll();
     }
 
     public List<ReservationTime> findAllTimesWithBooked(LocalDate date, Long themeId) {
-        return reservationTimeDao.findAllTimesWithBooked(date, themeId);
+        return reservationTimeRepository.findAllTimesWithBooked(date, themeId);
     }
 
     public ReservationTime addReservationTime(TimeRequest request) {
         validateDuplicateTime(request);
-        return reservationTimeDao.addTime(new ReservationTime(request.startAt()));
+        return reservationTimeRepository.save(new ReservationTime(request.startAt(), false));
     }
 
     private void validateDuplicateTime(TimeRequest request) {
-        if (reservationTimeDao.existTimeByStartAt(request.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new DuplicatedException("reservationTime");
         }
     }
 
     public void removeReservationTime(Long id) {
-        reservationTimeDao.removeTimeById(id);
+        reservationTimeRepository.deleteById(id);
     }
 }

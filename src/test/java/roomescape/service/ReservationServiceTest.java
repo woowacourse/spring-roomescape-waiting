@@ -9,14 +9,14 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
-import roomescape.dao.fake.FakeMemberDao;
-import roomescape.dao.fake.FakeReservationDao;
-import roomescape.dao.fake.FakeReservationTimeDao;
-import roomescape.dao.fake.FakeThemeDao;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.fake.FakeMemberRepository;
+import roomescape.repository.fake.FakeReservationRepository;
+import roomescape.repository.fake.FakeReservationTimeRepository;
+import roomescape.repository.fake.FakeThemeRepository;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -31,16 +31,17 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationDao reservationDao = new FakeReservationDao();
-        MemberDao memberDao = new FakeMemberDao();
-        ReservationTimeDao reservationTimeDao = new FakeReservationTimeDao();
-        ThemeDao themeDao = new FakeThemeDao();
-        reservationService = new ReservationService(reservationDao, memberDao, reservationTimeDao, themeDao);
+        ReservationRepository reservationRepository = new FakeReservationRepository();
+        MemberRepository memberRepository = new FakeMemberRepository();
+        ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+        ThemeRepository themeRepository = new FakeThemeRepository();
+        reservationService = new ReservationService(reservationRepository, memberRepository,
+            reservationTimeRepository, themeRepository);
 
         // 기본 예약 시간, 테마 추가
-        memberDao.addMember(new Member(1L, "사나", "이메일", "비밀번호"));
-        reservationTimeDao.addTime(new ReservationTime(1L, LocalTime.of(10, 0)));
-        themeDao.addTheme(new Theme(1L, "테마", "설명", "썸네일"));
+        memberRepository.addMember(new Member(1L, "사나", "이메일", "비밀번호"));
+        reservationTimeRepository.addTime(new ReservationTime(1L, LocalTime.of(10, 0)));
+        themeRepository.addTheme(new Theme(1L, "테마", "설명", "썸네일"));
     }
 
     @Test

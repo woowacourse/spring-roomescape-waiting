@@ -1,45 +1,42 @@
-package roomescape.dao.fake;
+package roomescape.repository.fake;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ThemeRepository;
 import roomescape.entity.Theme;
 import roomescape.exception.custom.NotFoundException;
 
-public class FakeThemeDao implements ThemeDao {
+public class FakeThemeRepository implements ThemeRepository {
 
     private final List<Theme> themes = new ArrayList<>();
-    private final AtomicLong index = new AtomicLong(1);
 
-    public List<Theme> findAllThemes() {
+    public List<Theme> findAll() {
         return Collections.unmodifiableList(themes);
     }
 
-    public Theme findThemeById(Long id) {
+    public Optional<Theme> findById(Long id) {
         return themes.stream()
             .filter(t -> t.getId().equals(id))
-            .findFirst()
-            .orElseThrow(() -> new NotFoundException("theme"));
+            .findFirst();
     }
 
-    public List<Theme> findTopReservedThemesInPeriodWithLimit(LocalDate startDate,
-        LocalDate endDate, int limitCount) {
+    public List<Theme> findTop10ByDateBetween(LocalDate startDate, LocalDate endDate) {
         return themes.stream()
-            .limit(limitCount)
+            .limit(10)
             .toList();
     }
 
-    public boolean existThemeByName(String name) {
+    public boolean existsByName(String name) {
         return themes.stream()
             .anyMatch(t -> t.getName().equals(name));
     }
 
-    public Theme addTheme(Theme theme) {
+    public Theme save(Theme theme) {
         Theme newTheme = new Theme(
-            index.getAndIncrement(),
             theme.getName(),
             theme.getDescription(),
             theme.getThumbnail());
@@ -48,7 +45,7 @@ public class FakeThemeDao implements ThemeDao {
         return newTheme;
     }
 
-    public void removeThemeById(Long id) {
+    public void deleteById(Long id) {
         themes.removeIf(t -> t.getId().equals(id));
     }
 }
