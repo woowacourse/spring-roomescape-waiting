@@ -1,10 +1,8 @@
 package roomescape.repository;
 
-import java.util.List;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.ReservationTime;
 
-public interface ReservationTimeRepository extends CrudRepository<ReservationTime, Long> {
+public interface ReservationTimeRepository extends ListCrudRepository<ReservationTime, Long> {
 
-    List<ReservationTime> findAll();
 }

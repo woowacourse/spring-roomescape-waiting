@@ -1,10 +1,8 @@
 package roomescape.repository;
 
-import java.util.List;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.Theme;
 
-public interface ThemeRepository extends CrudRepository<Theme, Long> {
+public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
 
-    List<Theme> findAll();
 }
