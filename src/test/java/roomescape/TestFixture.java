@@ -12,6 +12,10 @@ public class TestFixture {
         return ReservationTime.createNew(LocalTime.of(12, 0));
     }
 
+    public static ReservationTime createDefaultReservationTimeByTime(LocalTime time) {
+        return ReservationTime.createNew(time);
+    }
+
     public static Member createDefaultMember() {
         return Member.createNew("name", MemberRole.USER, "email", "password");
     }
