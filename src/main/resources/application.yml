@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:33061/roomescape
+    username: root
+    password: root
+
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    org:
+      springframework:
+        jdbc: debug
+
+jwt:
+  secret-key: secretsecretsecretsecretsecretsecret
+  expire-time: 31536000000
