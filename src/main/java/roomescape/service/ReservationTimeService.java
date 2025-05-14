@@ -36,7 +36,7 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTime(Long id) {
-        if (reservationTimeRepository.existsReservationByTimeId(id)) {
+        if (reservationRepository.existsByTime_Id(id)) {
             throw new InvalidReservationTimeException("예약이 되어있는 시간은 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);
@@ -45,7 +45,7 @@ public class ReservationTimeService {
     public ReservationSlots getReservationSlots(AvailableTimeRequest request) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
-        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndThemeId(request.date(),
+        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndTheme_Id(request.date(),
                 request.themeId());
 
         return new ReservationSlots(times, alreadyReservedReservations);

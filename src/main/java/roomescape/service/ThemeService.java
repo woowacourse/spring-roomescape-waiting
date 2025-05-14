@@ -35,7 +35,7 @@ public class ThemeService {
     }
 
     public void deleteThemeById(long id) {
-        if (themeRepository.existsReservationByThemeId(id)) {
+        if (reservationRepository.existsByTheme_Id(id)) {
             throw new InvalidThemeException("예약이 존재하는 테마는 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);
@@ -45,7 +45,7 @@ public class ThemeService {
         LocalDate end = originDate.minusDays(THEME_RANKING_START_RANGE);
         LocalDate start = end.minusDays(THEME_RANKING_END_RANGE);
 
-        List<Reservation> inRangeReservations = reservationRepository.findAllByDateInRange(start, end);
+        List<Reservation> inRangeReservations = reservationRepository.findAllByDateBetween(end, start);
 
         ThemeRanking themeRanking = new ThemeRanking(inRangeReservations);
         return themeRanking.getAscendingRanking();

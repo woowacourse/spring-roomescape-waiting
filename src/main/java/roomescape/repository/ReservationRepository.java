@@ -2,25 +2,32 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.entity.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Reservation save(Reservation reservation); //TODO: 이미 구현되어있어서 나중에 삭제
+    List<Reservation> findAllByDateAndTheme_Id(LocalDate date, Long themeId);
 
-    List<Reservation> findAll(); //TODO: 이미 구현되어있어서 나중에 삭제
+    List<Reservation> findAllByDateBetween(LocalDate end, LocalDate start);
 
-    Optional<Reservation> findById(long addedReservationId); //TODO: 이미 구현되어있어서 나중에 삭제
+    @Query(value = """
+        select r from Reservation r
+        where (:memberId is null or r.member.id  = :memberId)
+        and (:themeId is null or r.theme.id = :themeId)
+        and (:dateFrom is null or r.date >= :dateFrom)
+        and (:dateTo is null or r.date <= :dateTo)
+    """)
+    List<Reservation> findAllByFilter(@Param("memberId") Long memberId,
+                                      @Param("themeId") Long themeId,
+                                      @Param("dateFrom") LocalDate dateFrom,
+                                      @Param("dateTo") LocalDate dateTo);
 
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId); //TODO: 테마 확인 필요
+    boolean existsByDateAndReservationTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
 
-    List<Reservation> findAllByDateInRange(LocalDate start, LocalDate end); //TODO: 메서드 작성 규칙 확인 필요
+    boolean existsByTime_Id(Long timeId); //TODO: 검증필요
 
-    List<Reservation> findAllByFilter(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo); //TODO: 동적쿼리
-
-    boolean existsByDateAndTimeIdAndTheme(Reservation reservation); //TODO: 파라미터 변경 필요
-
-    void deleteById(Long id); //TODO: 이미 구현되어있어서 나중에 삭제
+    boolean existsByTheme_Id(Long themeId); //TODO: 검증필요
 }

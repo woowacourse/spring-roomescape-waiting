@@ -62,7 +62,12 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndTheme(reservation)) {
+        boolean exists = reservationRepository.existsByDateAndReservationTime_IdAndTheme_Id( //TODO: 메서드명 이대로 괜찮은가
+                reservation.getDate(),
+                reservation.getReservationTime().getId(),
+                reservation.getTheme().getId()
+        );
+        if (exists) {
             throw new InvalidReservationException("중복된 예약신청입니다");
         }
     }
@@ -78,7 +83,12 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> findAllByFilter(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<Reservation> findAllByFilter(
+            Long memberId,
+            Long themeId,
+            LocalDate dateFrom,
+            LocalDate dateTo
+    ) {
         return reservationRepository.findAllByFilter(memberId, themeId, dateFrom, dateTo);
     }
 
