@@ -19,7 +19,7 @@ public record MemberReservationResponse(
                 reservationInfo.theme().name(),
                 reservationInfo.date(),
                 reservationInfo.time().startAt(),
-                reservationInfo.status().name()
+                reservationInfo.status().getDisplayName()
         );
     }
 }
