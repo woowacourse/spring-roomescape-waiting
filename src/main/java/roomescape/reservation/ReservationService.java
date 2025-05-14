@@ -42,7 +42,7 @@ public class ReservationService {
         validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
         validatePastDateTime(request.date(), reservationTime);
 
-        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme);
+        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme, ReservationStatus.PENDING);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -55,7 +55,7 @@ public class ReservationService {
         validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
         validatePastDateTime(request.date(), reservationTime);
 
-        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme);
+        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme, ReservationStatus.PENDING);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }

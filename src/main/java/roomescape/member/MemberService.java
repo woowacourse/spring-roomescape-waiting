@@ -3,8 +3,11 @@ package roomescape.member;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
+import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.member.dto.MemberRequest;
+import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
 
 @Service
@@ -18,6 +21,15 @@ public class MemberService {
 
         final Member notSavedMember = new Member(request.email(), request.password(), request.name(), MemberRole.MEMBER);
         memberRepository.save(notSavedMember);
+    }
+
+    public List<MemberReservationResponse> readAllReservationsByMember(final LoginMember loginMember){
+        final Member member = memberRepository.findByEmail(loginMember.email())
+                .orElseThrow(() -> new MemberNotFoundException());
+
+        return member.getReservations().stream()
+                .map(MemberReservationResponse::of)
+                .toList();
     }
 
     public List<MemberResponse> readAllMember() {
