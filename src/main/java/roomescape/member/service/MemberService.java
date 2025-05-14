@@ -10,9 +10,9 @@ import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.LoginExceptionMessage;
 import roomescape.common.exception.message.MemberExceptionMessage;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.MemberSignupRequest;
@@ -23,17 +23,17 @@ import roomescape.member.login.authorization.JwtTokenProvider;
 public class MemberService {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final MemberDao memberDao;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
 
-    public MemberService(JwtTokenProvider jwtTokenProvider, MemberDao memberDao) {
+    public MemberService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.memberDao = memberDao;
         this.passwordEncoder = new BCryptPasswordEncoder();
+        this.memberRepository = memberRepository;
     }
 
     public List<MemberResponse> findAll() {
-        return memberDao.findAll().stream()
+        return memberRepository.findAll().stream()
                 .map(member -> new MemberResponse(
                         member.getId(),
                         member.getName(),
@@ -43,13 +43,13 @@ public class MemberService {
     }
 
     public MemberResponse findById(Long id) {
-        Member member = memberDao.findById(id)
+        Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_MEMBER_ID.getMessage()));
         return new MemberResponse(member.getId(), member.getName(), member.getEmail());
     }
 
     public MemberResponse findByEmail(final String email) {
-        Member member = memberDao.findByEmail(email)
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new InvalidEmailException(MemberExceptionMessage.INVALID_MEMBER_EMAIL.getMessage()));
         return new MemberResponse(member.getId(), member.getName(), member.getEmail());
     }
@@ -60,7 +60,7 @@ public class MemberService {
     }
 
     public MemberTokenResponse createToken(final MemberLoginRequest memberLoginRequest) {
-        Member member = memberDao.findByEmail(memberLoginRequest.email())
+        Member member = memberRepository.findByEmail(memberLoginRequest.email())
                 .orElseThrow(() -> new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage()));
         validatePassword(memberLoginRequest.password(), member.getPassword());
         String role = assignRole(memberLoginRequest.email()).getRole();
@@ -69,7 +69,7 @@ public class MemberService {
     }
 
     public MemberResponse add(final MemberSignupRequest memberSignupRequest) {
-        if (memberDao.existsByEmail(memberSignupRequest.email())) {
+        if (memberRepository.existsByEmail(memberSignupRequest.email())) {
             throw new AuthorizationException(MemberExceptionMessage.DUPLICATE_MEMBER.getMessage());
         }
         String hashedPassword = passwordEncoder.encode(memberSignupRequest.password());
@@ -78,7 +78,7 @@ public class MemberService {
                 memberSignupRequest.email(),
                 hashedPassword
         );
-        Member savedMember = memberDao.add(member);
+        Member savedMember = memberRepository.save(member);
 
         return new MemberResponse(
                 savedMember.getId(),
@@ -88,7 +88,7 @@ public class MemberService {
     }
 
     private Role assignRole(String email) {
-        Member member = memberDao.findByEmail(email).get();
+        Member member = memberRepository.findByEmail(email).get();
         return member.getRole();
     }
 
