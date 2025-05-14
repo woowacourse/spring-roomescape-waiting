@@ -4,12 +4,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
+import java.util.Objects;
+
 @FieldNameConstants
-@EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @MappedSuperclass
 public abstract class BaseEntity {
@@ -32,6 +32,28 @@ public abstract class BaseEntity {
 
     private boolean isAssigned() {
         return id != null;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        final BaseEntity that = (BaseEntity) o;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        if (this.id == null || that.id == null) {
+            return false;
+        }
+
+        return this.id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id == null) {
+            return System.identityHashCode(this);
+        }
+        return Objects.hash(id);
     }
 }
 

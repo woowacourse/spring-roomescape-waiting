@@ -4,11 +4,10 @@ import lombok.Getter;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.validate.Validator;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 @FieldNameConstants
-public abstract class DomainId implements Serializable {
+public abstract class DomainId {
 
     private final Long value;
     @Getter
