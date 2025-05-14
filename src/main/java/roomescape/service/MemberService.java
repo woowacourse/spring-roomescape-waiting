@@ -3,34 +3,31 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.exception.InvalidAuthorizationException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
-import roomescape.util.TokenProvider;
+import roomescape.util.JwtTokenProvider;
 
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final TokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public MemberService(MemberRepository memberRepository, TokenProvider jwtTokenProvider) {
+    public MemberService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
         this.memberRepository = memberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public Member findMemberByToken(String token) {
-        if (token == null || token.isBlank()) throw new InvalidAuthorizationException("[ERROR] 로그인이 필요합니다.");
-        if (!jwtTokenProvider.validateToken(token)) throw new InvalidAuthorizationException("[ERROR] 로그인 상태가 만료되었습니다.");
-        String payload = jwtTokenProvider.getPayload(token);
-        return findMember(payload);
-    }
-
-    private Member findMember(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidAuthorizationException("[ERROR] 유효하지 않은 가입 정보입니다."));
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        return findMemberById(memberId);
     }
 
     public List<Member> findAllMembers() {
         return memberRepository.findAll();
+    }
+
+    public Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException("[ERROR] 멤버가 존재하지 않습니다."));
     }
 }

@@ -8,34 +8,28 @@ import roomescape.dto.member.MemberResponse;
 import roomescape.dto.member.TokenResponse;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.repository.MemberRepository;
-import roomescape.util.TokenProvider;
+import roomescape.util.JwtTokenProvider;
 
 @Service
 public class LoginService {
 
     private final MemberRepository memberRepository;
     private final MemberService memberService;
-    private final TokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginService(MemberRepository memberRepository, MemberService memberService, TokenProvider jwtTokenProvider) {
+    public LoginService(MemberRepository memberRepository, MemberService memberService, JwtTokenProvider jwtTokenProvider) {
         this.memberRepository = memberRepository;
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public TokenResponse createToken(LoginRequest loginRequest) {
-        if (checkInvalidLogin(loginRequest.email(), loginRequest.password())) {
+        Optional<Member> memberOptional = memberRepository.findByEmailAndPassword(loginRequest.email(), loginRequest.password());
+        if (memberOptional.isEmpty()) {
             throw new InvalidAuthorizationException("[ERROR] 로그인 정보를 다시 확인해 주세요.");
         }
-
-        String token = jwtTokenProvider.createToken(loginRequest.email());
+        String token = jwtTokenProvider.createToken(memberOptional.get());
         return new TokenResponse(token);
-    }
-
-    private boolean checkInvalidLogin(String email, String password) {
-        Optional<Member> member = memberRepository.findByEmailAndPassword(email, password);
-        return member.map(value -> !email.equals(value.getEmail()) || !password.equals(value.getPassword()))
-                .orElse(true);
     }
 
     public MemberResponse findMemberByToken(String token) {
