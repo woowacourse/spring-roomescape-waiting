@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.user.domain.User;
 import roomescape.user.domain.dto.UserRequestDto;
 import roomescape.user.domain.dto.UserResponseDto;
+import roomescape.user.exception.NotFoundUserException;
 import roomescape.user.repository.UserRepository;
 
 @Service
@@ -28,7 +29,8 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findById(Long id) {
-        return userRepository.findByIdOrThrow(id);
+    public User findByIdOrThrow(Long id) {
+        return  userRepository.findById(id)
+                .orElseThrow(NotFoundUserException::new);
     }
 }

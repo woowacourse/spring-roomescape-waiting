@@ -6,21 +6,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
 
-@JdbcTest
-@Import({JdbcUserRepository.class, MemberTestDataConfig.class})
-class JdbcUserRepositoryTest {
+@DataJpaTest
+@Import({MemberTestDataConfig.class})
+class UserRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private JdbcUserRepository jdbcUserRepository;
+    private UserRepository userRepository;
 
     @Nested
     @DisplayName("저장된 모든 유저 불러오는 기능")
@@ -31,7 +31,7 @@ class JdbcUserRepositoryTest {
         void findAll_success_whenDataExists() {
             // given
             // when
-            List<User> users = jdbcUserRepository.findAll();
+            List<User> users = userRepository.findAll();
 
             // then
             Assertions.assertThat(users).hasSize(1);
@@ -44,7 +44,7 @@ class JdbcUserRepositoryTest {
             deleteAll();
 
             // when
-            List<User> users = jdbcUserRepository.findAll();
+            List<User> users = userRepository.findAll();
 
             // then
             Assertions.assertThat(users).hasSize(0);
@@ -57,32 +57,17 @@ class JdbcUserRepositoryTest {
 
     @DisplayName("이메일과 비밀번호가 일치하는 User를 찾을 수 있다.")
     @Test
-    void findUserByEmailAndPassword_byEmailAndPassword() {
+    void findOneByEmailAndPassword_byEmailAndPassword() {
         // given
         User user = new User(1L, Role.ROLE_MEMBER, "name", "email", "password");
-        User expected = jdbcUserRepository.save(user);
+        User expected = userRepository.save(user);
 
         // when
-        User actual = jdbcUserRepository.findUserByEmailAndPassword(user.getEmail(),
+        User actual = userRepository.findOneByEmailAndPassword(user.getEmail(),
                         user.getPassword())
                 .get();
 
         // then
         Assertions.assertThat(actual).isEqualTo(expected);
-    }
-
-    @DisplayName("이메일과 비밀번호가 일치하는 User가 존재하는 지를 검사할 수 있다.")
-    @Test
-    void existUserByEmailAndPassword() {
-        // given
-        User user = new User(1L, Role.ROLE_MEMBER, "name", "email", "password");
-        jdbcUserRepository.save(user);
-
-        // when
-        boolean actual = jdbcUserRepository.existUserByEmailAndPassword(user.getEmail(),
-                user.getPassword());
-
-        // then
-        Assertions.assertThat(actual).isTrue();
     }
 }

@@ -23,7 +23,7 @@ public class AuthService {
     }
 
     public TokenResponseDto login(TokenRequestDto tokenRequestDto) {
-        User user = userRepository.findUserByEmailAndPassword(tokenRequestDto.email(), tokenRequestDto.password())
+        User user = userRepository.findOneByEmailAndPassword(tokenRequestDto.email(), tokenRequestDto.password())
                 .orElseThrow(NotFoundUserException::new);
         return createToken(TokenInfoDto.of(user));
     }

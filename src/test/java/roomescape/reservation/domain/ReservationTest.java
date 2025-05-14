@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import roomescape.reservation.exception.InvalidReservationTimeException;
@@ -18,12 +19,10 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.theme.ThemeTestDataConfig;
 import roomescape.user.MemberTestDataConfig;
-import roomescape.user.repository.JdbcUserRepository;
 
+@DataJpaTest
 @ExtendWith(SpringExtension.class)
-@JdbcTest
 @ContextConfiguration(classes = {
-        JdbcUserRepository.class,
         ThemeTestDataConfig.class,
         MemberTestDataConfig.class
 })

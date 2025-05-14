@@ -31,7 +31,7 @@ public class AdminService {
     }
 
     private User getUser(Long memberId) {
-        User member = userService.findById(memberId);
+        User member = userService.findByIdOrThrow(memberId);
         if (!member.isMember()) {
             throw new UnauthorizedUserRoleException();
         }

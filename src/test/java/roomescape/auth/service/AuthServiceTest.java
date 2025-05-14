@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.auth.domain.dto.TokenResponseDto;
@@ -16,13 +17,11 @@ import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
 import roomescape.user.domain.dto.UserResponseDto;
 import roomescape.user.fixture.UserFixture;
-import roomescape.user.repository.JdbcUserRepository;
 import roomescape.user.repository.UserRepository;
 
-@JdbcTest
+@DataJpaTest
 @Import({
         AuthService.class,
-        JdbcUserRepository.class,
         JwtTokenProvider.class,
 })
 class AuthServiceTest {

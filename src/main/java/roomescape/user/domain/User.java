@@ -9,18 +9,22 @@ import java.util.HashSet;
 import java.util.Set;
 import roomescape.reservation.domain.Reservation;
 
-@Entity
+@Entity(name = "users")
 public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private final Long id;
-    private final Role role;
-    private final String name;
-    private final String email;
-    private final String password;
+    private Long id;
+    private  Role role;
+    private  String name;
+    private  String email;
+    private  String password;
 
     @OneToMany(mappedBy = "user")
-    private final Set<Reservation> reservations;
+    private  Set<Reservation> reservations;
+
+    protected User() {
+
+    }
 
     public User(Long id, Role role, String name, String email, String password) {
         this.id = id;

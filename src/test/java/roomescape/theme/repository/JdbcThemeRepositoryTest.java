@@ -25,11 +25,10 @@ import roomescape.theme.domain.dto.PopularThemeRequestDto;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.User;
-import roomescape.user.repository.JdbcUserRepository;
 
 @DataJpaTest
 @Import({JdbcReservationRepository.class,
-        MemberTestDataConfig.class, KeyHolderManager.class, JdbcUserRepository.class})
+        MemberTestDataConfig.class, KeyHolderManager.class})
 class JdbcThemeRepositoryTest {
 
     @Autowired
