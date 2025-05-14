@@ -14,3 +14,6 @@ values ('09:00');
 
 insert into reservation_time (start_at)
 values ('11:00');
+
+insert into reservation (theme_id, member_id, date, reservation_time_id)
+values (1, 1, '2025-01-01', 1)
