@@ -15,5 +15,7 @@ public interface JpaReservationRepository extends CrudRepository<Reservation, Lo
 
     List<Reservation> findAll();
 
-    boolean existsByTimeId(Long reservationTimeId);
+    boolean existsByTimeId(Long timeId);
+
+    boolean existsByThemeId(Long themeId);
 }
