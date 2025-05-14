@@ -2,6 +2,7 @@ package roomescape.member.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,11 +38,13 @@ class MemberServiceTest {
         var response = memberService.createMember(request);
 
         // then
-        assertThat(response.id()).isNotNull();
-        assertThat(response.name()).isEqualTo("미소");
-        assertThat(response.email()).isEqualTo("miso@email.com");
-        assertThat(response.password()).isEqualTo("password");
-        assertThat(response.role()).isEqualTo(RoleType.USER);
+        assertAll(
+                () -> assertThat(response.id()).isNotNull(),
+                () -> assertThat(response.name()).isEqualTo("미소"),
+                () -> assertThat(response.email()).isEqualTo("miso@email.com"),
+                () -> assertThat(response.password()).isEqualTo("password"),
+                () -> assertThat(response.role()).isEqualTo(RoleType.USER)
+        );
     }
 
     @Test
@@ -57,9 +60,11 @@ class MemberServiceTest {
         var responses = memberService.getAllMembers();
 
         // then
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).name()).isEqualTo("미소");
-        assertThat(responses.get(1).name()).isEqualTo("브라운");
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).name()).isEqualTo("미소"),
+                () -> assertThat(responses.get(1).name()).isEqualTo("브라운")
+        );
     }
 
     @Test

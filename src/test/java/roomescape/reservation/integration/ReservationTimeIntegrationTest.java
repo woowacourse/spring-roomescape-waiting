@@ -2,6 +2,7 @@ package roomescape.reservation.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -54,8 +55,10 @@ class ReservationTimeIntegrationTest {
         var response = reservationTimeService.createTime(request);
 
         // then
-        assertThat(response.id()).isNotNull();
-        assertThat(response.startAt()).isEqualTo("10:00");
+        assertAll(
+                () -> assertThat(response.id()).isNotNull(),
+                () -> assertThat(response.startAt()).isEqualTo("10:00")
+        );
     }
 
     @Test
@@ -94,10 +97,12 @@ class ReservationTimeIntegrationTest {
         var responses = reservationTimeService.getAllTimes();
 
         // then
-        assertThat(responses).hasSize(1);
         var response = responses.getFirst();
-        assertThat(response.id()).isNotNull();
-        assertThat(response.startAt()).isEqualTo("10:00");
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(response.id()).isNotNull(),
+                () -> assertThat(response.startAt()).isEqualTo("10:00")
+        );
     }
 
     @Test
@@ -115,11 +120,13 @@ class ReservationTimeIntegrationTest {
         var responses = reservationTimeService.getAvailableTimes(date, theme.getId());
 
         // then
-        assertThat(responses).hasSize(1);
         var response = responses.getFirst();
-        assertThat(response.id()).isEqualTo(time.getId());
-        assertThat(response.startAt()).isEqualTo("10:00");
-        assertThat(response.alreadyBooked()).isTrue();
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(response.id()).isEqualTo(time.getId()),
+                () -> assertThat(response.startAt()).isEqualTo("10:00"),
+                () -> assertThat(response.alreadyBooked()).isTrue()
+        );
     }
 
     @Test

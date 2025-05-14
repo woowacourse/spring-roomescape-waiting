@@ -1,6 +1,7 @@
 package roomescape.reservation.unit.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
@@ -20,8 +21,10 @@ class ReservationTimeTest {
         var time3 = new ReservationTime(3L, LocalTime.of(12, 0));
 
         // when & then
-        assertThat(time1.isDuplicatedWith(time2)).isTrue();
-        assertThat(time1.isDuplicatedWith(time3)).isFalse();
+        assertAll(
+                () -> assertThat(time1.isDuplicatedWith(time2)).isTrue(),
+                () -> assertThat(time1.isDuplicatedWith(time3)).isFalse()
+        );
     }
 
     @ParameterizedTest
@@ -43,4 +46,4 @@ class ReservationTimeTest {
         // then
         assertThat(result).isEqualTo(expected);
     }
-} 
+}

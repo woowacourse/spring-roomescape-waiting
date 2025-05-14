@@ -2,6 +2,7 @@ package roomescape.theme.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +38,11 @@ class ThemeServiceTest {
         var response = themeService.createTheme(request);
 
         // then
-        assertThat(response.name()).isEqualTo("테마1");
-        assertThat(response.description()).isEqualTo("테마1 설명");
-        assertThat(response.thumbnail()).isEqualTo("테마1 썸네일");
+        assertAll(
+                () -> assertThat(response.name()).isEqualTo("테마1"),
+                () -> assertThat(response.description()).isEqualTo("테마1 설명"),
+                () -> assertThat(response.thumbnail()).isEqualTo("테마1 썸네일")
+        );
     }
 
     @Test
@@ -55,9 +58,11 @@ class ThemeServiceTest {
         var responses = themeService.getAllThemes();
 
         // then
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).name()).isEqualTo("테마1");
-        assertThat(responses.get(1).name()).isEqualTo("테마2");
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).name()).isEqualTo("테마1"),
+                () -> assertThat(responses.get(1).name()).isEqualTo("테마2")
+        );
     }
 
     @Test

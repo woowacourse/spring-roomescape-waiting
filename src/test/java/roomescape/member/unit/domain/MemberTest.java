@@ -34,4 +34,4 @@ class MemberTest {
         // then
         assertThat(result).isFalse();
     }
-} 
+}

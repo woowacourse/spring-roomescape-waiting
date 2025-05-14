@@ -2,6 +2,7 @@ package roomescape.reservation.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,7 +21,6 @@ import roomescape.reservation.dto.request.ReservationRequest.ReservationAdminCre
 import roomescape.reservation.dto.request.ReservationRequest.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationRequest.ReservationReadFilteredRequest;
 import roomescape.reservation.entity.ReservationTime;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
@@ -32,9 +32,6 @@ class ReservationIntegrationTest {
 
     @Autowired
     private ReservationService reservationService;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -59,9 +56,11 @@ class ReservationIntegrationTest {
         var response = reservationService.createReservation(member.getId(), request);
 
         // then
-        assertThat(response.date()).isEqualTo(date);
-        assertThat(response.time().getId()).isEqualTo(time.getId());
-        assertThat(response.theme().getId()).isEqualTo(theme.getId());
+        assertAll(
+                () -> assertThat(response.date()).isEqualTo(date),
+                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
+                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+        );
     }
 
     @Test
@@ -78,9 +77,11 @@ class ReservationIntegrationTest {
         var response = reservationService.createReservationByAdmin(request);
 
         // then
-        assertThat(response.date()).isEqualTo(date);
-        assertThat(response.time().getId()).isEqualTo(time.getId());
-        assertThat(response.theme().getId()).isEqualTo(theme.getId());
+        assertAll(
+                () -> assertThat(response.date()).isEqualTo(date),
+                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
+                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+        );
     }
 
     @Test
@@ -131,13 +132,15 @@ class ReservationIntegrationTest {
         var responses = reservationService.getAllReservations();
 
         // then
-        assertThat(responses).hasSize(1);
         var response = responses.getFirst();
-        assertThat(response.id()).isNotNull();
-        assertThat(response.date()).isEqualTo(date);
-        assertThat(response.time().getId()).isEqualTo(time.getId());
-        assertThat(response.member().getId()).isEqualTo(member.getId());
-        assertThat(response.theme().getId()).isEqualTo(theme.getId());
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(response.id()).isNotNull(),
+                () -> assertThat(response.date()).isEqualTo(date),
+                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
+                () -> assertThat(response.member().getId()).isEqualTo(member.getId()),
+                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+        );
     }
 
     @Test
@@ -162,13 +165,15 @@ class ReservationIntegrationTest {
         var responses = reservationService.getFilteredReservations(filterRequest);
 
         // then
-        assertThat(responses).hasSize(1);
         var response = responses.getFirst();
-        assertThat(response.id()).isNotNull();
-        assertThat(response.date()).isEqualTo(date);
-        assertThat(response.time().getId()).isEqualTo(time.getId());
-        assertThat(response.member().getId()).isEqualTo(member.getId());
-        assertThat(response.theme().getId()).isEqualTo(theme.getId());
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(response.id()).isNotNull(),
+                () -> assertThat(response.date()).isEqualTo(date),
+                () -> assertThat(response.time().getId()).isEqualTo(time.getId()),
+                () -> assertThat(response.member().getId()).isEqualTo(member.getId()),
+                () -> assertThat(response.theme().getId()).isEqualTo(theme.getId())
+        );
     }
 
     @Test
@@ -199,7 +204,7 @@ class ReservationIntegrationTest {
         var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
-        var reservationResponse = reservationService.createReservation(member.getId(), request);
+        reservationService.createReservation(member.getId(), request);
 
         // when
         var response = reservationService.getReservationsByMember(member.getId());

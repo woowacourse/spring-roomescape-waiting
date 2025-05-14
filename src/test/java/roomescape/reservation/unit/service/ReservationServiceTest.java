@@ -2,6 +2,7 @@ package roomescape.reservation.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -69,9 +70,11 @@ class ReservationServiceTest {
         var response = reservationService.createReservation(member.getId(), request);
 
         // then
-        assertThat(response.date()).isEqualTo(request.date());
-        assertThat(response.time().getStartAt()).isEqualTo("10:00");
-        assertThat(response.theme().getName()).isEqualTo("테마1");
+        assertAll(
+                () -> assertThat(response.date()).isEqualTo(request.date()),
+                () -> assertThat(response.time().getStartAt()).isEqualTo("10:00"),
+                () -> assertThat(response.theme().getName()).isEqualTo("테마1")
+        );
     }
 
     @Test
@@ -92,9 +95,11 @@ class ReservationServiceTest {
         var response = reservationService.createReservationByAdmin(request);
 
         // then
-        assertThat(response.date()).isEqualTo(request.date());
-        assertThat(response.time().getStartAt()).isEqualTo("10:00");
-        assertThat(response.theme().getName()).isEqualTo("테마1");
+        assertAll(
+                () -> assertThat(response.date()).isEqualTo(request.date()),
+                () -> assertThat(response.time().getStartAt()).isEqualTo("10:00"),
+                () -> assertThat(response.theme().getName()).isEqualTo("테마1")
+        );
     }
 
     @Test
@@ -148,11 +153,13 @@ class ReservationServiceTest {
         var responses = reservationService.getAllReservations();
 
         // then
-        assertThat(responses).hasSize(1);
-        assertThat(responses.getFirst().date()).isEqualTo(date);
-        assertThat(responses.getFirst().time().getStartAt()).isEqualTo("10:00");
-        assertThat(responses.getFirst().theme().getName()).isEqualTo("테마1");
-        assertThat(responses.getFirst().member().getName()).isEqualTo("테스트");
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(responses.getFirst().date()).isEqualTo(date),
+                () -> assertThat(responses.getFirst().time().getStartAt()).isEqualTo("10:00"),
+                () -> assertThat(responses.getFirst().theme().getName()).isEqualTo("테마1"),
+                () -> assertThat(responses.getFirst().member().getName()).isEqualTo("테스트")
+        );
     }
 
     @Test
@@ -177,11 +184,13 @@ class ReservationServiceTest {
         var responses = reservationService.getFilteredReservations(filterRequest);
 
         // then
-        assertThat(responses).hasSize(1);
-        assertThat(responses.getFirst().date()).isEqualTo(date);
-        assertThat(responses.getFirst().time().getStartAt()).isEqualTo("10:00");
-        assertThat(responses.getFirst().theme().getName()).isEqualTo("테마1");
-        assertThat(responses.getFirst().member().getName()).isEqualTo("테스트");
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(responses.getFirst().date()).isEqualTo(date),
+                () -> assertThat(responses.getFirst().time().getStartAt()).isEqualTo("10:00"),
+                () -> assertThat(responses.getFirst().theme().getName()).isEqualTo("테마1"),
+                () -> assertThat(responses.getFirst().member().getName()).isEqualTo("테스트")
+        );
     }
 
     @Test
@@ -211,7 +220,7 @@ class ReservationServiceTest {
         var theme = themeRepository.save(new Theme(null, "테마1", "테마1 설명", "테마1 썸네일"));
         var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
-        var reservationResponse = reservationService.createReservation(member.getId(), request);
+        reservationService.createReservation(member.getId(), request);
 
         // when
         var response = reservationService.getReservationsByMember(member.getId());

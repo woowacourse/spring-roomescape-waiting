@@ -2,6 +2,7 @@ package roomescape.theme.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.theme.dto.request.ThemeRequest.ThemeCreateRequest;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -20,9 +20,6 @@ class ThemeIntegrationTest {
 
     @Autowired
     private ThemeService themeService;
-
-    @Autowired
-    private ThemeRepository themeRepository;
 
     @Test
     @DisplayName("테마를 생성한다.")
@@ -38,10 +35,12 @@ class ThemeIntegrationTest {
         var response = themeService.createTheme(request);
 
         // then
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo("미소");
-        assertThat(response.description()).isEqualTo("미소 테마");
-        assertThat(response.thumbnail()).isEqualTo("https://miso.com");
+        assertAll(
+                () -> assertThat(response.id()).isEqualTo(1L),
+                () -> assertThat(response.name()).isEqualTo("미소"),
+                () -> assertThat(response.description()).isEqualTo("미소 테마"),
+                () -> assertThat(response.thumbnail()).isEqualTo("https://miso.com")
+        );
     }
 
     @Test
@@ -88,9 +87,11 @@ class ThemeIntegrationTest {
         var responses = themeService.getAllThemes();
 
         // then
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).name()).isEqualTo("미소");
-        assertThat(responses.get(1).name()).isEqualTo("우테코");
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).name()).isEqualTo("미소"),
+                () -> assertThat(responses.get(1).name()).isEqualTo("우테코")
+        );
     }
 
     @Test

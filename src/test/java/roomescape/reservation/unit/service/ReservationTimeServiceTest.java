@@ -2,6 +2,7 @@ package roomescape.reservation.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,14 +24,11 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.ThemeService;
 
 @DataJpaTest
 class ReservationTimeServiceTest {
 
     private ReservationTimeService reservationTimeService;
-
-    private ThemeService themeService;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -46,7 +44,6 @@ class ReservationTimeServiceTest {
 
     @BeforeEach
     void setUp() {
-        themeService = new ThemeService(themeRepository);
         reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
     }
 
@@ -103,8 +100,10 @@ class ReservationTimeServiceTest {
         var responses = reservationTimeService.getAllTimes();
 
         // then
-        assertThat(responses).hasSize(1);
-        assertThat(responses.getFirst().startAt()).isEqualTo(startAt.toString());
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(responses.getFirst().startAt()).isEqualTo(startAt.toString())
+        );
     }
 
     @Test
@@ -121,10 +120,12 @@ class ReservationTimeServiceTest {
         var responses = reservationTimeService.getAvailableTimes(date, themeId);
 
         // then
-        assertThat(responses).hasSize(1);
         var response = responses.getFirst();
-        assertThat(response.startAt()).isEqualTo(startAt.toString());
-        assertThat(response.alreadyBooked()).isFalse();
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(response.startAt()).isEqualTo(startAt.toString()),
+                () -> assertThat(response.alreadyBooked()).isFalse()
+        );
     }
 
     @Test
