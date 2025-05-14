@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /*
     TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출
     */
-    requestRead('api/themes/rank') // 인기 테마 목록 조회 API endpoint
+    requestRead('/api/themes/rank') // 인기 테마 목록 조회 API endpoint
         .then(render)
         .catch(error => console.error('Error fetching times:', error));
 });

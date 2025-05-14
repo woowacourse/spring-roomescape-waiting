@@ -1,4 +1,4 @@
-const THEME_API_ENDPOINT = 'api/themes';
+const THEME_API_ENDPOINT = '/api/themes';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
@@ -91,7 +91,7 @@ function fetchAvailableTimes(date, themeId) {
     TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
           요청 포맷에 맞게 설정
     */
-    fetch('api/times/theme/' + themeId + '?date=' + date, { // 예약 가능 시간 조회 API endpoint
+    fetch('/api/times/theme/' + themeId + '?date=' + date, { // 예약 가능 시간 조회 API endpoint
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ function onReservationButtonClick() {
             timeId: selectedTimeId,
         };
 
-        fetch('api/reservations', {
+        fetch('/api/reservations', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

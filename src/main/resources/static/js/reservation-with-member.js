@@ -1,8 +1,8 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = 'api/reservations';
-const TIME_API_ENDPOINT = 'api/times';
-const THEME_API_ENDPOINT = 'api/themes';
-const MEMBER_API_ENDPOINT = 'api/members';
+const RESERVATION_API_ENDPOINT = '/api/reservations';
+const TIME_API_ENDPOINT = '/api/times';
+const THEME_API_ENDPOINT = '/api/themes';
+const MEMBER_API_ENDPOINT = '/api/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead("/admin/reservations")
+    requestRead("/api/admin/reservations")
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
@@ -215,7 +215,7 @@ function applyFilter(event) {
         params.append('dateTo', dateTo);
     }
 
-    fetch(`api/admin/reservations?${params.toString()}`, { // 예약 검색 API 호출
+    fetch(`/api/admin/reservations?${params.toString()}`, { // 예약 검색 API 호출
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
