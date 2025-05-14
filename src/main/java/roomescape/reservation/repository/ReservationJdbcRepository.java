@@ -82,7 +82,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("date", reservation.getDate())
-                .addValue("time_id", reservation.getTimeId())
+                .addValue("time_id", reservation.getReservationTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId())
                 .addValue("user_id", reservation.getMember().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
@@ -148,14 +148,14 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByReservationDateAndTimeId(ReservationDate reservationDate, Long timeId) {
+    public boolean existsByReservationDateAndReservationTimeId(ReservationDate reservationDate, Long timeId) {
         String sql = "SELECT 1 FROM reservation WHERE date = ? AND time_id = ? LIMIT 1";
         List<Integer> result = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt(1), reservationDate.getDate(), timeId);
         return !result.isEmpty();
     }
 
     @Override
-    public boolean existsByTimeId(Long timeId) {
+    public boolean existsByReservationTimeId(Long timeId) {
         String sql = "SELECT 1 FROM reservation WHERE time_id = ? LIMIT 1";
         List<Integer> result = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt(1), timeId);
         return !result.isEmpty();
@@ -171,13 +171,13 @@ public class ReservationJdbcRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByFilter(Long memberId, Long themeId, LocalDate start, LocalDate end) {
         String sql = """
-                select r.id as reservation_id, 
-                       r.date, 
-                       t.id as time_id, 
-                       t.start_at as time_value, 
-                       th.id as theme_id, 
-                       th.name as theme_name, 
-                       th.description as theme_description, 
+                select r.id as reservation_id,
+                       r.date,
+                       t.id as time_id,
+                       t.start_at as time_value,
+                       th.id as theme_id,
+                       th.name as theme_name,
+                       th.description as theme_description,
                        th.thumbnail as theme_thumbnail,
                        u.id as user_id,
                        u.name as user_name,
@@ -188,8 +188,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 inner join reservation_time as t on r.time_id = t.id
                 inner join theme as th on r.theme_id = th.id
                 inner join users as u on r.user_id = u.id
-                where r.user_id = ? 
-                  and r.theme_id = ? 
+                where r.user_id = ?
+                  and r.theme_id = ?
                   and r.date between ? and ?
                 """;
 
@@ -215,5 +215,4 @@ public class ReservationJdbcRepository implements ReservationRepository {
                                 Role.valueOf(resultSet.getString("user_role"))
                         )), memberId, themeId, start.toString(), end.toString());
     }
-
 }

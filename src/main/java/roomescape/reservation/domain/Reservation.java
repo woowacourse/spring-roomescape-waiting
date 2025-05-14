@@ -70,11 +70,7 @@ public class Reservation {
     public ReservationTime getReservationTime() {
         return reservationTime;
     }
-
-    public Long getTimeId() {
-        return reservationTime.getId();
-    }
-
+    
     public Theme getTheme() {
         return theme;
     }

@@ -32,7 +32,7 @@ public class ReservationTimeServiceTest {
     @Test
     void 예약시간을_삭제한다() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
-        when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
+        when(reservationRepository.existsByReservationTimeId(1L)).thenReturn(false);
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         reservationTimeService.deleteById(1L);
         assertThat(reservationTimeService.getAll()).isEmpty();
@@ -40,7 +40,7 @@ public class ReservationTimeServiceTest {
 
     @Test
     void 존재하지_않는_예약시간을_삭제할_수_없다() {
-        when(reservationRepository.existsByTimeId(3L)).thenReturn(false);
+        when(reservationRepository.existsByReservationTimeId(3L)).thenReturn(false);
         when(reservationTimeRepository.findById(3L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> reservationTimeService.deleteById(3L))
                 .isInstanceOf(NoSuchElementException.class);
@@ -48,7 +48,7 @@ public class ReservationTimeServiceTest {
 
     @Test
     void 이미_해당_시간의_예약이_존재한다면_삭제할_수_없다() {
-        when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
+        when(reservationRepository.existsByReservationTimeId(1L)).thenReturn(true);
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(IllegalArgumentException.class);
     }

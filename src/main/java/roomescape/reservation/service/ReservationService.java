@@ -43,7 +43,7 @@ public class ReservationService {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
 
-        if (reservationRepository.existsByReservationDateAndTimeId(reservationDate, timeId)) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
 
@@ -61,7 +61,7 @@ public class ReservationService {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
 
-        if (reservationRepository.existsByReservationDateAndTimeId(reservationDate, timeId)) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
 

@@ -4,8 +4,11 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.service.ReservationRepository;
+import roomescape.time.controller.request.AvailableReservationTimeRequest;
 import roomescape.time.controller.request.ReservationTimeCreateRequest;
+import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
@@ -41,7 +44,7 @@ public class ReservationTimeService {
     }
 
     public void deleteById(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByReservationTimeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
 
@@ -54,8 +57,9 @@ public class ReservationTimeService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
-//    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
-//            AvailableReservationTimeRequest request) {
-//        return reservationTimeRepository.findAllAvailableReservationTimes(request.date(), request.themeId());
-//    }
+    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
+            AvailableReservationTimeRequest request) {
+        return reservationTimeRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),
+                request.themeId());
+    }
 }
