@@ -9,8 +9,6 @@ import roomescape.reservation.entity.ReservationTime;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    List<ReservationTime> findAll();
-
     @Query(value = """
             SELECT rt
             FROM ReservationTime rt

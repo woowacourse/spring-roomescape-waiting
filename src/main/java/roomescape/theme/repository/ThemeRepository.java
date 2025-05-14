@@ -10,8 +10,6 @@ import roomescape.theme.entity.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    List<Theme> findAll();
-
     @Query("""
             SELECT t
             FROM Theme t
