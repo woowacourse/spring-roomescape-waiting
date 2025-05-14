@@ -2,16 +2,11 @@ package roomescape.theme.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import roomescape.theme.entity.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
-
-    List<Theme> findAll();
-
     @Query("""
             SELECT t
             FROM Theme t
@@ -20,9 +15,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             ORDER BY COUNT(r) DESC, t.id DESC
             LIMIT :limit
             """)
-    List<Theme> findPopularDescendingUpTo(@Param("startDate") LocalDate startDate,
-                                          @Param("endDate") LocalDate endDate,
-                                          @Param("limit") int limit);
+    List<Theme> findPopularDescendingUpTo(LocalDate startDate, LocalDate endDate, int limit);
 
-    Optional<Theme> findByName(String name);
+    boolean existsByName(String name);
 }
