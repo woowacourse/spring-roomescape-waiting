@@ -6,6 +6,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -26,11 +28,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private String email;
     private String password;
+    @OneToMany(mappedBy = "user")
+    private Set<Reservation> reservations;
 
     public User(final Long id, final String name, final UserRole role, final String email, final String password) {
         validateNameLength(name);
