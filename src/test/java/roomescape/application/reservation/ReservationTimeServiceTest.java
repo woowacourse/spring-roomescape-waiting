@@ -75,6 +75,19 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    void 이미_존재하는_예약시간을_추가하는_경우_예외가_발생한다() {
+        // given
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        CreateReservationTimeParam createReservationTimeParam = new CreateReservationTimeParam(LocalTime.of(12, 0));
+
+        // when
+        // then
+        assertThatCode(() -> reservationTimeService.create(createReservationTimeParam))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessage("이미 존재하는 얘약시간입니다.");
+    }
+
+    @Test
     void 예약시간을_조회할_수_있다() {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
