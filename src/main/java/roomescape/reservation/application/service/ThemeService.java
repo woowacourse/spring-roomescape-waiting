@@ -1,8 +1,6 @@
 package roomescape.reservation.application.service;
 
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.repository.ReservationRepository;
@@ -13,8 +11,6 @@ import roomescape.reservation.presentation.dto.ThemeResponse;
 
 @Service
 public class ThemeService {
-
-    private static final Logger log = LogManager.getLogger(ThemeService.class);
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 

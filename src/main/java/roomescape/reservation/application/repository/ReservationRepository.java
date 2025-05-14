@@ -9,12 +9,6 @@ import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
-    boolean existsByReservationTimeId(Long timeId);
-
-    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
-
-    boolean existsByThemeId(Long themeId);
-
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query("""
@@ -30,4 +24,12 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
             @Param("fromDate") LocalDate fromDate,
             @Param("endDate") LocalDate endDate
     );
+
+    List<Reservation> findByMemberId(Long memberId);
+
+    boolean existsByReservationTimeId(Long timeId);
+
+    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
+
+    boolean existsByThemeId(Long themeId);
 }

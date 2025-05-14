@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.global.auth.Auth;
-import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.reservation.presentation.dto.UserReservationsResponse;
 
 @RestController
 @RequestMapping("/reservations")
@@ -37,7 +37,6 @@ public class ReservationController {
             final @RequestBody @Valid ReservationRequest reservationRequest,
             final Long memberId
     ) {
-        System.out.println("memberId = " + memberId);
         ReservationResponse reservation = reservationService.createReservation(reservationRequest, memberId);
 
         return ResponseEntity.created(createUri(reservation.getId()))
@@ -47,13 +46,23 @@ public class ReservationController {
     @Auth(Role.USER)
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getReservations(
-        final @RequestParam(required = false) Long memberId,
-        final @RequestParam(required = false) Long themeId,
-        final @RequestParam(required = false) LocalDate dateFrom,
-        final @RequestParam(required = false) LocalDate dateTo
+            final @RequestParam(required = false) Long memberId,
+            final @RequestParam(required = false) Long themeId,
+            final @RequestParam(required = false) LocalDate dateFrom,
+            final @RequestParam(required = false) LocalDate dateTo
     ) {
         return ResponseEntity.ok().body(
                 reservationService.getReservations(memberId, themeId, dateFrom, dateTo)
+        );
+    }
+
+    @Auth(Role.USER)
+    @GetMapping("mine")
+    public ResponseEntity<List<UserReservationsResponse>> getUserReservations(
+            final Long memberId
+    ) {
+        return ResponseEntity.ok().body(
+                reservationService.getUserReservations(memberId)
         );
     }
 

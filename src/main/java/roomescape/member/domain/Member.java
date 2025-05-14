@@ -40,10 +40,7 @@ public class Member {
     }
 
     public Member(final String email, final String password, final String name, final Role role) {
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.role = role;
+        this(null, email, password, name, role);
     }
 
     public Long getId() {

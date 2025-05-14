@@ -18,6 +18,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.reservation.presentation.dto.UserReservationsResponse;
 
 @Service
 public class ReservationService {
@@ -64,8 +65,7 @@ public class ReservationService {
         final LocalDate date = adminReservationRequest.getDate();
         validateReservationDateTime(date, reservationTime);
 
-        Member member = memberRepository.findById(adminReservationRequest.getMemberId())
-                .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+        Member member = findMemberById(adminReservationRequest.getMemberId());
 
         final Reservation reservation = new Reservation(
                 member,
@@ -87,6 +87,14 @@ public class ReservationService {
         return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<UserReservationsResponse> getUserReservations(final Long memberId) {
+        findMemberById(memberId);
+
+        return reservationRepository.findByMemberId(memberId).stream()
+                .map(UserReservationsResponse::new)
                 .toList();
     }
 
@@ -127,5 +135,10 @@ public class ReservationService {
                 reservationTime.getStartAt())) {
             throw new IllegalStateException("중복된 일시의 예약은 불가능합니다.");
         }
+    }
+
+    private Member findMemberById(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
     }
 }

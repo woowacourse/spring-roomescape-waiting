@@ -33,9 +33,7 @@ public class Theme {
     }
 
     public Theme(final String name, final String description, final String thumbnail) {
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
+        this(null, name, description, thumbnail);
     }
 
     public Long getId() {

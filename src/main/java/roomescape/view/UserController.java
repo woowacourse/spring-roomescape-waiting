@@ -35,4 +35,11 @@ public class UserController {
     ) {
         return "/index";
     }
+
+    @Auth(Role.USER)
+    @GetMapping("/reservation-mine")
+    public String reservationMine(
+    ) {
+        return "/reservation-mine";
+    }
 }
