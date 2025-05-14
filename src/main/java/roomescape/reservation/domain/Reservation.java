@@ -1,6 +1,8 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,6 +22,8 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private LocalDate date;
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime reservationTime;
@@ -31,18 +35,21 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, User user) {
+    public Reservation(Long id, LocalDate date, ReservationStatus status, ReservationTime reservationTime, Theme theme,
+            User user) {
         this.id = id;
         this.date = date;
+        this.status = status;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.user = user;
     }
 
-    public static Reservation of(LocalDate date, ReservationTime reservationTime, Theme theme, User user) {
+    public static Reservation of(LocalDate date, ReservationStatus status, ReservationTime reservationTime, Theme theme,
+            User user) {
         LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         validateTense(dateTime);
-        return new Reservation(null, date, reservationTime, theme, user);
+        return new Reservation(null, date, status, reservationTime, theme, user);
     }
 
     private static void validateTense(LocalDateTime dateTime) {
@@ -70,6 +77,10 @@ public class Reservation {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public ReservationTime getReservationTime() {

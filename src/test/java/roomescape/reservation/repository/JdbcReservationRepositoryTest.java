@@ -35,7 +35,7 @@ class JdbcReservationRepositoryTest {
 
     private Reservation createReservation(int plusDays, ReservationTime time) {
         LocalDate date = LocalDate.now().plusDays(plusDays);
-        return ReservationFixture.create(date, time, themeTestDataConfig.getSavedTheme(),
+        return ReservationFixture.createByBookedStatus(date, time, themeTestDataConfig.getSavedTheme(),
                 memberTestDataConfig.getSavedMember());
     }
 

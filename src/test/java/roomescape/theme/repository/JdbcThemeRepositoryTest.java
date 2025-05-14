@@ -53,136 +53,191 @@ class JdbcThemeRepositoryTest {
         Theme savedTheme10 = repository.save(new Theme("name10", "dd10", "tt10"));
         Theme savedTheme11 = repository.save(new Theme("name11", "dd11", "tt11"));
 
-        ReservationTime savedTime2 = reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(11, 30)));
+        ReservationTime savedTime2 = reservationTimeRepository.save(
+                ReservationTimeFixture.create(LocalTime.of(11, 30)));
         ReservationTime savedTime1 = reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(11, 0)));
 
         // theme1을 사용한 예약 9개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(5), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(4), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(4), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(3), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(2), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(1), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(1), savedTime1, savedTheme1,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(1), savedTime1, savedTheme1, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(1), savedTime1, savedTheme1,
+                        savedUser));
 
         // theme2를 사용한 예약 8개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime2, savedTheme2,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime2, savedTheme2,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime2, savedTheme2,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(5), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(5), savedTime2, savedTheme2,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(4), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(4), savedTime2, savedTheme2,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(3), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(3), savedTime2, savedTheme2,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(2), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2), savedTime2, savedTheme2,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(1), savedTime2, savedTheme2, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(1), savedTime2, savedTheme2,
+                        savedUser));
 
 // theme3: 예약 8개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime1, savedTheme3,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime1, savedTheme3,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime1, savedTheme3,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(5), savedTime1, savedTheme3,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(4), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(4), savedTime1, savedTheme3,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(3), savedTime1, savedTheme3,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(2), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2), savedTime1, savedTheme3,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(1), savedTime1, savedTheme3, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(1), savedTime1, savedTheme3,
+                        savedUser));
 
 // theme4: 예약 7개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme4, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime2, savedTheme4,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme4, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime2, savedTheme4,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme4, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime2, savedTheme4,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(5), savedTime2, savedTheme4, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(5), savedTime2, savedTheme4,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(4), savedTime2, savedTheme4, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(4), savedTime2, savedTheme4,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(3), savedTime2, savedTheme4, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(3), savedTime2, savedTheme4,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(2), savedTime2, savedTheme4, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2), savedTime2, savedTheme4,
+                        savedUser));
 
 // theme5: 예약 6개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme5, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime1, savedTheme5,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme5, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime1, savedTheme5,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme5, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime1, savedTheme5,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme5, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(5), savedTime1, savedTheme5,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(4), savedTime1, savedTheme5, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(4), savedTime1, savedTheme5,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme5, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(3), savedTime1, savedTheme5,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(3), savedTime1, savedTheme5, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(3), savedTime1, savedTheme5,
+                        savedUser));
 
         // theme6: 예약 5개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme6, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime2, savedTheme6,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme6, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime2, savedTheme6,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme6, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime2, savedTheme6,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(5), savedTime2, savedTheme6, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(5), savedTime2, savedTheme6,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(4), savedTime2, savedTheme6, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(4), savedTime2, savedTheme6,
+                        savedUser));
 
         // theme7: 예약 4개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme7, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime1, savedTheme7,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme7, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime1, savedTheme7,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime1, savedTheme7, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime1, savedTheme7,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(5), savedTime1, savedTheme7, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(5), savedTime1, savedTheme7,
+                        savedUser));
 
         // theme8: 예약 3개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme8, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime2, savedTheme8,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime2, savedTheme8, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime2, savedTheme8,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(6), savedTime2, savedTheme8, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(6), savedTime2, savedTheme8,
+                        savedUser));
 
         // theme9: 예약 2개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime1, savedTheme9, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime1, savedTheme9,
+                        savedUser));
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(7), savedTime1, savedTheme9, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(7), savedTime1, savedTheme9,
+                        savedUser));
 
         // theme10: 예약 1개
         reservationRepository.save(
-                ReservationFixture.create(LocalDate.now().plusDays(8), savedTime2, savedTheme10, savedUser));
+                ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime2, savedTheme10,
+                        savedUser));
     }
 
     @DisplayName("ID에 해당하는 테마를 조회할 수 있다")
@@ -217,7 +272,8 @@ class JdbcThemeRepositoryTest {
             LocalDate to = now.plusDays(8);
 
             // when
-            List<Theme> actual = repository.findThemesOrderByReservationCount(from, to, new PopularThemeRequestDto().size());
+            List<Theme> actual = repository.findThemesOrderByReservationCount(from, to,
+                    new PopularThemeRequestDto().size());
 
             // then
             SoftAssertions.assertSoftly(s -> {

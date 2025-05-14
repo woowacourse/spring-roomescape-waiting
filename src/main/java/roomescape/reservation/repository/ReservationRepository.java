@@ -5,13 +5,14 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.admin.domain.dto.SearchReservationRequestDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.user.domain.User;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    List<Reservation> findByUser(User user);
 
     List<Reservation> findByThemeAndDateAndUser(Theme theme, LocalDate date, User user);
 
@@ -39,7 +40,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "AND theme.id = :themeId " +
             "AND reservation.date BETWEEN :fromDate AND :toDate",
             nativeQuery = true)
-
     List<Reservation> findReservationsByUserAndThemeAndFromAndTo(
             @Param("userId") Long userId,
             @Param("themeId") Long themeId,

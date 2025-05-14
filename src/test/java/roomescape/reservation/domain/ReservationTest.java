@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -34,7 +33,7 @@ class ReservationTest {
     private MemberTestDataConfig memberTestDataConfig;
 
     private Reservation createReservation(LocalDate date, ReservationTime time) {
-        return ReservationFixture.create(date, time, themeTestDataConfig.getSavedTheme(),
+        return ReservationFixture.createByBookedStatus(date, time, themeTestDataConfig.getSavedTheme(),
                 memberTestDataConfig.getSavedMember());
     }
 
