@@ -24,6 +24,10 @@ public class Member {
         this.password = password;
     }
 
+    public Member(final String name, final String role, final String email, final String password) {
+        this(null, name, role, email, password);
+    }
+
     public Member(final Long id) {
         this.id = id;
         this.name = null;
