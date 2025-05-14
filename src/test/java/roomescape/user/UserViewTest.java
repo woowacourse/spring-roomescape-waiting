@@ -54,4 +54,13 @@ public class UserViewTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @DisplayName("/reservation-mine으로 요청이 들어오면 내 예약 페이지를 응답한다.")
+    @Test
+    void reservationMine() {
+        RestAssured.given().port(port).log().all()
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
