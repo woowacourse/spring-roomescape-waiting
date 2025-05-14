@@ -26,6 +26,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+        System.out.println("request = " + request.getRequestURI());
 
         AuthorizationPayload authorizationPayload =
             (AuthorizationPayload) request.getAttribute("authorizationPayload");

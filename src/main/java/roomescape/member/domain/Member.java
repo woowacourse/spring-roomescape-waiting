@@ -1,17 +1,41 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import roomescape.exception.DomainValidationException;
 
+@Entity
+@Table(name = "member")
 public class Member {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final MemberRole role;
-    private final String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberRole role;
+
+    @Column(nullable = false)
+    private String password;
+
+    public Member() {
+    }
 
     public Member(Long id, String name, String email, MemberRole role, String password) {
         validate(name, email, role, password);

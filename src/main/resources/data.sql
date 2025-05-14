@@ -11,7 +11,7 @@ VALUES ('12:00:00'),
        ('16:00:00');
 
 -- Member (회원 + 이메일, 비밀번호 포함)
-INSERT INTO member (name, email, member_role, password)
+INSERT INTO member (name, email, role, password)
 VALUES ('히스타', 'hista@example.com', 'USER', 'password1'),
        ('권건형', 'rjsgud19566@gmail.com', 'USER', '123'),
        ('관리자', 'rjsgud1956@naver.com', 'ADMIN', '123'),

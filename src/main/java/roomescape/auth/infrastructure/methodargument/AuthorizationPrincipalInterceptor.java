@@ -27,7 +27,6 @@ public class AuthorizationPrincipalInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         Optional<AuthorizationPrincipal> authorizationPrincipal = authorizationHandler.get(request);
         if (authorizationPrincipal.isEmpty()) {
-            System.out.println("authorizationPrincipal = " + authorizationPrincipal);
             request.setAttribute("authorizationPayload", null);
             return true;
         }

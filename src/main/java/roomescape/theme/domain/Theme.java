@@ -1,13 +1,29 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
 import roomescape.exception.DomainValidationException;
 
+@Entity
+@Table(name = "theme")
 public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, unique = true)
+    private String name;
+    @Column
+    private String description;
+    @Column
+    private String thumbnail;
+
+    public Theme() {
+    }
 
     public Theme(Long id, String name, String description, String thumbnail) {
         validate(name);
