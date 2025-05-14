@@ -1,8 +1,10 @@
 package roomescape.time.domain;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,32 +22,32 @@ import roomescape.common.utils.Validator;
 @EqualsAndHashCode(of = "id")
 public class ReservationTime {
 
-    @EmbeddedId
-    private ReservationTimeId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "reservation_time")
-    private LocalTime value;
+    private LocalTime time;
 
-    private static ReservationTime of(final ReservationTimeId id, final LocalTime value) {
-        validate(id, value);
-        return new ReservationTime(id, value);
+    private static ReservationTime of(final Long id, final LocalTime time) {
+        validate(time);
+        return new ReservationTime(id, time);
     }
 
-    public static ReservationTime withId(final ReservationTimeId id, final LocalTime value) {
-        return of(id, value);
+    public static ReservationTime withId(final Long id, final LocalTime time) {
+        return of(id, time);
     }
 
-    public static ReservationTime withoutId(final LocalTime value) {
-        return of(ReservationTimeId.unassigned(), value);
+    public static ReservationTime withoutId(final LocalTime time) {
+        return of(null, time);
     }
 
-    private static void validate(final ReservationTimeId id, final LocalTime value) {
+    private static void validate(final LocalTime time) {
         Validator.of(ReservationTime.class)
-                .notNullField(Fields.id, id)
-                .notNullField(Fields.value, value);
+                .notNullField(Fields.time, time);
     }
 
     public boolean isBefore(final LocalTime time) {
-        return value.isBefore(time);
+        return this.time.isBefore(time);
     }
 }

@@ -7,7 +7,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.common.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
 
 public class FakeThemeRepository implements ThemeRepository {
 
@@ -20,9 +19,9 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(ThemeId id) {
+    public Optional<Theme> findById(Long id) {
         try {
-            return Optional.of(themes.get((int) (id.getValue() - 1)));
+            return Optional.of(themes.get((int) (id - 1)));
         } catch (IndexOutOfBoundsException e) {
             return Optional.empty();
         }
@@ -31,7 +30,7 @@ public class FakeThemeRepository implements ThemeRepository {
     @Override
     public Theme save(Theme theme) {
         Theme saved = Theme.withId(
-                ThemeId.from(index.getAndIncrement()),
+                index.getAndIncrement(),
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnail());
@@ -42,7 +41,7 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public void deleteById(ThemeId id) {
+    public void deleteById(Long id) {
         Theme targetTheme = themes.stream()
                 .filter(theme -> Objects.equals(theme.getId(), id))
                 .findFirst()

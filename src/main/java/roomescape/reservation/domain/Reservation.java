@@ -3,6 +3,9 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -25,8 +28,9 @@ import roomescape.time.domain.ReservationTime;
 @EqualsAndHashCode(of = "id")
 public class Reservation {
 
-    @EmbeddedId
-    private ReservationId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     private Member member;
@@ -40,40 +44,46 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    private static Reservation of(final ReservationId id,
-                                  final Member member,
-                                  final ReservationDate date,
-                                  final ReservationTime time,
-                                  final Theme theme) {
-        validate(id, member, date, time, theme);
+    private static Reservation of(
+            final Long id,
+            final Member member,
+            final ReservationDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
+        validate(member, date, time, theme);
         return new Reservation(id, member, date, time, theme);
     }
 
-    public static Reservation withId(final ReservationId id,
-                                     final Member member,
-                                     final ReservationDate date,
-                                     final ReservationTime time,
-                                     final Theme theme) {
+    public static Reservation withId(
+            final Long id,
+            final Member member,
+            final ReservationDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
         return of(id, member, date, time, theme);
     }
 
-    public static Reservation withoutId(final Member member,
-                                        final ReservationDate date,
-                                        final ReservationTime time,
-                                        final Theme theme) {
+    public static Reservation withoutId(
+            final Member member,
+            final ReservationDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
 
         validatePast(date, time);
-        return of(ReservationId.unassigned(), member, date, time, theme);
+        return of(null, member, date, time, theme);
     }
 
-    private static void validate(final ReservationId id,
-                                 final Member member,
-                                 final ReservationDate date,
-                                 final ReservationTime time,
-                                 final Theme theme) {
+    private static void validate(
+            final Member member,
+            final ReservationDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
 
         Validator.of(Reservation.class)
-                .notNullField(Fields.id, id)
                 .notNullField(Fields.member, member)
                 .notNullField(Fields.date, date)
                 .notNullField(Fields.time, time)

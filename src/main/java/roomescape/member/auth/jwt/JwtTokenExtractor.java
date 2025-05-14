@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import roomescape.common.exception.AuthenticationException;
 import roomescape.common.exception.AuthorizationException;
 import roomescape.common.exception.ErrorCode;
-import roomescape.member.domain.MemberId;
 import roomescape.member.domain.MemberName;
 
 @Component
@@ -39,9 +38,9 @@ public class JwtTokenExtractor {
         return MemberName.from(name);
     }
 
-    public MemberId extractMemberIdFromToken(String token) {
+    public Long extractMemberIdFromToken(String token) {
         Long id = Long.valueOf(extractClaimsFromToken(token).getSubject());
-        return MemberId.from(id);
+        return id;
     }
 
     private Claims extractClaimsFromToken(String token) {

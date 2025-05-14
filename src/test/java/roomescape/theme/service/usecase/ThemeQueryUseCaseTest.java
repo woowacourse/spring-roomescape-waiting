@@ -11,7 +11,7 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.FakeMemberRepository;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.FakeReservationRepository;
@@ -40,7 +40,7 @@ class ThemeQueryUseCaseTest {
     private ThemeRepository themeRepository;
     private ReservationRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
-    private MemberRepository memberRepository;
+    private MemberRepositoryInterface memberRepository;
 
     @BeforeEach
     void setUp() {

@@ -11,14 +11,14 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.FakeMemberRepository;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.member.service.MemberConverter;
 
 import static org.assertj.core.api.Assertions.*;
 
 class MemberQueryUseCaseTest {
 
-    private MemberRepository memberRepository;
+    private MemberRepositoryInterface memberRepository;
     private MemberQueryUseCase memberQueryUseCase;
 
     @BeforeEach

@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.time.controller.dto.CreateReservationTimeWebRequest;
 import roomescape.time.controller.dto.ReservationTimeWebResponse;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.service.converter.ReservationTimeConverter;
 import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
 import roomescape.time.service.usecase.ReservationTimeCommandUseCase;
@@ -31,6 +30,6 @@ public class ReservationTimeService {
     }
 
     public void delete(final Long id) {
-        reservationTimeCommandUseCase.delete(ReservationTimeId.from(id));
+        reservationTimeCommandUseCase.delete(id);
     }
 }

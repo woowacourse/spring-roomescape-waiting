@@ -22,19 +22,15 @@ import roomescape.common.utils.ExecuteResult;
 import roomescape.common.utils.JdbcUtils;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberId;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 
 import static java.util.Map.Entry;
 import static java.util.Map.entry;
@@ -47,26 +43,26 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private final RowMapper<Reservation> reservationMapper = (resultSet, rowNum) -> {
         ReservationTime time = ReservationTime.withId(
-                ReservationTimeId.from(resultSet.getLong("time_id")),
+                resultSet.getLong("time_id"),
                 resultSet.getObject("start_at", LocalTime.class)
         );
 
         Theme theme = Theme.withId(
-                ThemeId.from(resultSet.getLong("theme_id")),
+                resultSet.getLong("theme_id"),
                 ThemeName.from(resultSet.getString("theme_name")),
                 ThemeDescription.from(resultSet.getString("description")),
                 ThemeThumbnail.from(resultSet.getString("thumbnail"))
         );
 
         Member member = Member.withId(
-                MemberId.from(resultSet.getLong("member_id")),
+                resultSet.getLong("member_id"),
                 MemberName.from(resultSet.getString("member_name")),
                 MemberEmail.from(resultSet.getString("email")),
                 Role.from(resultSet.getString("role"))
         );
 
         return Reservation.withId(
-                ReservationId.from(resultSet.getLong("id")),
+                resultSet.getLong("id"),
                 member,
                 ReservationDate.from(resultSet.getObject("date", LocalDate.class)),
                 time,
@@ -75,19 +71,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     };
 
     @Override
-    public boolean existsByParams(final ReservationTimeId timeId) {
+    public boolean existsByParams(final Long timeId) {
         final String sql = """
                 select exists 
                     (select 1 from reservation where time_id = ?)
                 """;
 
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId.getValue()));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId));
     }
 
     @Override
     public boolean existsByParams(final ReservationDate date,
-                                  final ReservationTimeId timeId,
-                                  final ThemeId themeId) {
+                                  final Long timeId,
+                                  final Long themeId) {
         final String sql = """
                 select exists 
                     (select 1 from reservation where date = ? and time_id = ? and theme_id = ?)
@@ -98,15 +94,15 @@ public class JdbcReservationRepository implements ReservationRepository {
                         sql,
                         Boolean.class,
                         date.getValue(),
-                        timeId.getValue(),
-                        themeId.getValue()
+                        timeId,
+                        themeId
                 )
         );
 
     }
 
     @Override
-    public Optional<Reservation> findById(final ReservationId id) {
+    public Optional<Reservation> findById(final Long id) {
         final String sql = """
                 select
                     r.id,
@@ -131,11 +127,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                 where r.id = ?
                 """;
 
-        return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationMapper, id.getValue());
+        return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationMapper, id);
     }
 
     @Override
-    public List<Reservation> findByParams(MemberId memberId, ThemeId themeId, ReservationDate from,
+    public List<Reservation> findByParams(Long memberId, Long themeId, ReservationDate from,
                                           ReservationDate to) {
         final String sql = """
                 select
@@ -164,8 +160,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(
                         sql,
                         reservationMapper,
-                        memberId.getValue(),
-                        themeId.getValue(),
+                        memberId,
+                        themeId,
                         from.getValue(),
                         to.getValue()
                 ).stream()
@@ -173,7 +169,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
+    public List<Long> findTimeIdByParams(final ReservationDate date, final Long themeId) {
         final String sql = """
                 select
                     r.time_id
@@ -190,14 +186,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                         sql,
                         (rs, rowNum) -> rs.getLong("time_id"),
                         date.getValue(),
-                        themeId.getValue()
+                        themeId
                 ).stream()
-                .map(ReservationTimeId::from)
                 .toList();
     }
 
     @Override
-    public List<Reservation> findAllByMemberId(final MemberId memberId) {
+    public List<Reservation> findAllByMemberId(final Long memberId) {
         final String sql = """
                 select
                     r.id,
@@ -222,7 +217,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 where r.member_id = ?
                 """;
 
-        return jdbcTemplate.query(sql, reservationMapper, memberId.getValue()).stream()
+        return jdbcTemplate.query(sql, reservationMapper, memberId).stream()
                 .toList();
     }
 
@@ -263,10 +258,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             final PreparedStatement preparedStatement = connection.prepareStatement(sql,
                     Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setLong(1, reservation.getMember().getId().getValue());
+            preparedStatement.setLong(1, reservation.getMember().getId());
             preparedStatement.setDate(2, Date.valueOf(reservation.getDate().getValue()));
-            preparedStatement.setLong(3, reservation.getTime().getId().getValue());
-            preparedStatement.setLong(4, reservation.getTheme().getId().getValue());
+            preparedStatement.setLong(3, reservation.getTime().getId());
+            preparedStatement.setLong(4, reservation.getTheme().getId());
 
             return preparedStatement;
         }, keyHolder);
@@ -274,7 +269,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         final long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
 
         return Reservation.withId(
-                ReservationId.from(generatedId),
+                generatedId,
                 reservation.getMember(),
                 reservation.getDate(),
                 reservation.getTime(),
@@ -283,9 +278,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(final ReservationId id) {
+    public void deleteById(final Long id) {
         final String sql = "delete from reservation where id = ?";
-        ExecuteResult result = ExecuteResult.of(jdbcTemplate.update(sql, id.getValue()));
+        ExecuteResult result = ExecuteResult.of(jdbcTemplate.update(sql, id));
 
         if (result == ExecuteResult.FAIL) {
             throw new NotFoundException("삭제할 예약을 찾을 수 없습니다.");
@@ -338,7 +333,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private RowMapper<Entry<Theme, Integer>> getThemesToBookedCountRowMapper() {
         return (rs, rowNum) -> {
             Theme theme = Theme.withId(
-                    ThemeId.from(rs.getLong("id")),
+                    rs.getLong("id"),
                     ThemeName.from(rs.getString("name")),
                     ThemeDescription.from(rs.getString("description")),
                     ThemeThumbnail.from(rs.getString("thumbnail"))

@@ -21,7 +21,7 @@ public class ThemeConverter {
 
     public static ThemeWebResponse toDto(final Theme theme) {
         return new ThemeWebResponse(
-                theme.getId().getValue(),
+                theme.getId(),
                 theme.getName().getValue(),
                 theme.getDescription().getValue(),
                 theme.getThumbnail().getValue());

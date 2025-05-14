@@ -4,35 +4,30 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberId;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.FakeMemberRepository;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.member.service.usecase.MemberQueryUseCase;
 import roomescape.reservation.repository.FakeReservationRepository;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.repository.FakeThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.theme.service.usecase.ThemeQueryUseCase;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
 
@@ -50,7 +45,7 @@ class ReservationCommandUseCaseTest {
     private ReservationRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
-    private MemberRepository memberRepository;
+    private MemberRepositoryInterface memberRepository;
 
     @BeforeEach
     void setUp() {

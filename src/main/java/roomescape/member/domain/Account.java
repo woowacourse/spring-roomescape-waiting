@@ -1,8 +1,9 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.Embedded;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -11,7 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.common.utils.Validator;
@@ -24,8 +24,9 @@ import roomescape.common.utils.Validator;
 @EqualsAndHashCode(of = "member")
 public class Account {
 
-    @EmbeddedId
-    private AccountId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "member_id")
@@ -34,9 +35,17 @@ public class Account {
     @Embedded
     private Password password;
 
-    public static Account of(final Member member, final Password password) {
+    private static Account of(final Long id, final Member member, final Password password) {
         validate(member, password);
-        return new Account(null, member, password);
+        return new Account(id, member, password);
+    }
+
+    public static Account withId(final Long id, final Member member, final Password password) {
+        return of(id, member, password);
+    }
+
+    public static Account withoutId(final Member member, final Password password) {
+        return of(null, member, password);
     }
 
     public static void validate(final Member member, final Password password) {

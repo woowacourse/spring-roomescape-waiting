@@ -15,7 +15,6 @@ import roomescape.common.utils.ExecuteResult;
 import roomescape.common.utils.JdbcUtils;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 
@@ -27,7 +26,7 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     private final RowMapper<Theme> themeMapper = (resultSet, rowNum) ->
             Theme.withId(
-                    ThemeId.from(resultSet.getLong("id")),
+                    resultSet.getLong("id"),
                     ThemeName.from(resultSet.getString("name")),
                     ThemeDescription.from(resultSet.getString("description")),
                     ThemeThumbnail.from(resultSet.getString("thumbnail"))
@@ -44,12 +43,12 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(final ThemeId id) {
+    public Optional<Theme> findById(final Long id) {
         final String sql = """
                 select id, name, description, thumbnail from theme where id = ?
                 """;
 
-        return JdbcUtils.queryForOptional(jdbcTemplate, sql, themeMapper, id.getValue());
+        return JdbcUtils.queryForOptional(jdbcTemplate, sql, themeMapper, id);
     }
 
     @Override
@@ -71,7 +70,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         final long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
 
         return Theme.withId(
-                ThemeId.from(generatedId),
+                generatedId,
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnail()
@@ -79,10 +78,10 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public void deleteById(final ThemeId id) {
+    public void deleteById(final Long id) {
         final String sql = "delete from theme where id = ?";
 
-        ExecuteResult result = ExecuteResult.of(jdbcTemplate.update(sql, id.getValue()));
+        ExecuteResult result = ExecuteResult.of(jdbcTemplate.update(sql, id));
 
         if (result == ExecuteResult.FAIL) {
             throw new NotFoundException("삭제할 테마를 찾을 수 없습니다.");

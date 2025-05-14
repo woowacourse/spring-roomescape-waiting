@@ -3,7 +3,6 @@ package roomescape.time.service.usecase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.member.domain.Member;
@@ -22,12 +21,10 @@ import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -65,7 +62,7 @@ class ReservationTimeCommandUseCaseTest {
         final ReservationTime reservationTime = reservationTimeCommandUseCase.create(request);
 
         // then
-        assertThat(reservationTime.getValue()).isEqualTo(LocalTime.of(12, 30));
+        assertThat(reservationTime.getTime()).isEqualTo(LocalTime.of(12, 30));
         assertThat(reservationTimeRepository.findById(reservationTime.getId()))
                 .isPresent();
     }
@@ -130,7 +127,7 @@ class ReservationTimeCommandUseCaseTest {
     void existsTime() {
         // given
         final ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.withoutId(LocalTime.of(23, 30)));
-        final CreateReservationTimeServiceRequest sameTimeRequest = new CreateReservationTimeServiceRequest(savedTime.getValue());
+        final CreateReservationTimeServiceRequest sameTimeRequest = new CreateReservationTimeServiceRequest(savedTime.getTime());
 
         // when & then
         assertThatThrownBy(() -> reservationTimeCommandUseCase.create(sameTimeRequest))

@@ -11,7 +11,6 @@ import roomescape.member.controller.dto.LoginRequest;
 import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberId;
 import roomescape.member.repository.AccountRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberConverter;
@@ -30,7 +29,7 @@ public class MemberQueryUseCase {
         return accountRepository.findByMemberId(member.getId());
     }
 
-    public Member get(MemberId id) {
+    public Member get(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new AuthenticationException("등록된 회원이 아닙니다.", ErrorCode.MEMBER_NOT_FOUND));
     }

@@ -3,9 +3,7 @@ package roomescape.time.service.usecase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
 
@@ -38,7 +36,7 @@ class ReservationTimeQueryUseCaseTest {
         final ReservationTime reservationTime = reservationTimeQueryUseCase.get(id);
 
         // then
-        assertThat(reservationTime.getValue()).isEqualTo(savedTime.getValue());
+        assertThat(reservationTime.getTime()).isEqualTo(savedTime.getTime());
     }
 
     @Test
@@ -46,7 +44,7 @@ class ReservationTimeQueryUseCaseTest {
     void getAllReservationTimes() {
         // given
         ReservationTime target = reservationTimeRepository.save(
-                ReservationTime.withoutId(savedTime.getValue().plusMinutes(15)));
+                ReservationTime.withoutId(savedTime.getTime().plusMinutes(15)));
 
         // when
         final List<ReservationTime> times = reservationTimeQueryUseCase.getAll();

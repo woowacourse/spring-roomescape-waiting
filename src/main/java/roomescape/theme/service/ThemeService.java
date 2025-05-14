@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.controller.dto.CreateThemeWebRequest;
 import roomescape.theme.controller.dto.ThemeWebResponse;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.service.converter.ThemeConverter;
 import roomescape.theme.service.usecase.ThemeCommandUseCase;
 import roomescape.theme.service.usecase.ThemeQueryUseCase;
@@ -41,6 +40,6 @@ public class ThemeService {
     }
 
     public void delete(final Long id) {
-        themeCommandUseCase.delete(ThemeId.from(id));
+        themeCommandUseCase.delete(id);
     }
 }

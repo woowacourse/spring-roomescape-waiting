@@ -14,8 +14,8 @@ public class ReservationTimeConverter {
 
     public static ReservationTimeWebResponse toDto(final ReservationTime reservationTime) {
         return new ReservationTimeWebResponse(
-                reservationTime.getId().getValue(),
-                reservationTime.getValue());
+                reservationTime.getId(),
+                reservationTime.getTime());
     }
 
     public static List<ReservationTimeWebResponse> toDto(final List<ReservationTime> reservationTimes) {

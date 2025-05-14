@@ -29,7 +29,7 @@ public class ReservationConverter {
 
     public static ReservationWebResponse toDto(final Reservation reservation) {
         return new ReservationWebResponse(
-                reservation.getId().getValue(),
+                reservation.getId(),
                 MemberConverter.toDto(reservation.getMember()),
                 reservation.getDate().getValue(),
                 ReservationTimeConverter.toDto(reservation.getTime()),

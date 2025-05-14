@@ -10,32 +10,29 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.common.utils.JdbcUtils;
 import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberId;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 
-@Repository
 @RequiredArgsConstructor
-public class JdbcMemberRepository implements MemberRepository {
+public class JdbcMemberRepository implements MemberRepositoryInterface {
 
     private final JdbcTemplate jdbcTemplate;
 
     private final RowMapper<Member> memberRowMapper = (resultSet, rowNum) -> Member.withId(
-            MemberId.from(resultSet.getLong("id")),
+            resultSet.getLong("id"),
             MemberName.from(resultSet.getString("name")),
             MemberEmail.from(resultSet.getString("email")),
             Role.from(resultSet.getString("role"))
     );
 
-    private final RowMapper<Account> accountRowMapper = (resultSet, rowNum) -> Account.of(
+    private final RowMapper<Account> accountRowMapper = (resultSet, rowNum) -> Account.withoutId(
             Member.withId(
-                    MemberId.from(resultSet.getLong("id")),
+                    resultSet.getLong("id"),
                     MemberName.from(resultSet.getString("name")),
                     MemberEmail.from(resultSet.getString("email")),
                     Role.from(resultSet.getString("role"))
@@ -54,14 +51,14 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findById(MemberId id) {
+    public Optional<Member> findById(Long id) {
         final String sql = """
                 SELECT id, name, email, role
                 FROM member
                 WHERE id = ?
                 """;
 
-        return JdbcUtils.queryForOptional(jdbcTemplate, sql, memberRowMapper, id.getValue());
+        return JdbcUtils.queryForOptional(jdbcTemplate, sql, memberRowMapper, id);
     }
 
     @Override
@@ -107,7 +104,7 @@ public class JdbcMemberRepository implements MemberRepository {
         final long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
 
         return Member.withId(
-                MemberId.from(generatedId),
+                generatedId,
                 member.getName(),
                 member.getEmail(),
                 member.getRole()

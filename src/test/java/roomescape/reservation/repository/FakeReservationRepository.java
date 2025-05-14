@@ -3,21 +3,15 @@ package roomescape.reservation.repository;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import roomescape.common.exception.NotFoundException;
-import roomescape.member.domain.MemberId;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
-import roomescape.theme.repository.ThemeRepository;
-import roomescape.time.domain.ReservationTimeId;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -25,13 +19,13 @@ public class FakeReservationRepository implements ReservationRepository {
     private final AtomicLong index = new AtomicLong(1L);
 
     @Override
-    public boolean existsByParams(ReservationTimeId timeId) {
+    public boolean existsByParams(Long timeId) {
         return reservations.stream()
                 .anyMatch(reservation -> Objects.equals(reservation.getTime().getId(), timeId));
     }
 
     @Override
-    public boolean existsByParams(ReservationDate date, ReservationTimeId timeId, ThemeId themeId) {
+    public boolean existsByParams(ReservationDate date, Long timeId, Long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> Objects.equals(reservation.getDate(), date)
                         && Objects.equals(reservation.getTime().getId(), timeId)
@@ -39,14 +33,14 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(ReservationId id) {
+    public Optional<Reservation> findById(Long id) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getId(), id))
                 .findFirst();
     }
 
     @Override
-    public List<Reservation> findByParams(MemberId memberId, ThemeId themeId, ReservationDate from,
+    public List<Reservation> findByParams(Long memberId, Long themeId, ReservationDate from,
                                           ReservationDate to) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getMember().getId(), memberId)
@@ -58,7 +52,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationTimeId> findTimeIdByParams(ReservationDate date, ThemeId themeId) {
+    public List<Long> findTimeIdByParams(ReservationDate date, Long themeId) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getDate(), date)
                         && Objects.equals(reservation.getTheme().getId(), themeId))
@@ -67,7 +61,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByMemberId(MemberId memberId) {
+    public List<Reservation> findAllByMemberId(Long memberId) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getMember().getId(), memberId))
                 .toList();
@@ -81,7 +75,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         Reservation saved = Reservation.withId(
-                ReservationId.from(index.getAndIncrement()),
+                index.getAndIncrement(),
                 reservation.getMember(),
                 reservation.getDate(),
                 reservation.getTime(),
@@ -92,7 +86,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(ReservationId id) {
+    public void deleteById(Long id) {
         Reservation targetReservation = reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getId(), id))
                 .findFirst()

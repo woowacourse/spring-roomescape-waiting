@@ -5,20 +5,17 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.member.auth.vo.MemberInfo;
-import roomescape.member.domain.MemberId;
 import roomescape.reservation.controller.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.controller.dto.CreateReservationByAdminWebRequest;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
 import roomescape.reservation.controller.dto.ReservationSearchWebRequest;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.service.converter.ReservationConverter;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
 import roomescape.reservation.service.usecase.ReservationCommandUseCase;
 import roomescape.reservation.service.usecase.ReservationQueryUseCase;
-import roomescape.theme.domain.ThemeId;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +31,13 @@ public class ReservationService {
 
     public List<ReservationWebResponse> getAll(Long memberId) {
         return ReservationConverter.toDto(
-                reservationQueryUseCase.getAllByMemberId(MemberId.from(memberId)));
+                reservationQueryUseCase.getAllByMemberId(memberId));
     }
 
     public List<AvailableReservationTimeWebResponse> getAvailable(final LocalDate date, final Long id) {
         final AvailableReservationTimeServiceRequest serviceRequest = new AvailableReservationTimeServiceRequest(
                 date,
-                ThemeId.from(id));
+                id);
 
         return reservationQueryUseCase.getTimesWithAvailability(serviceRequest).stream()
                 .map(ReservationConverter::toWebDto)
@@ -69,13 +66,13 @@ public class ReservationService {
     }
 
     public void delete(final Long id) {
-        reservationCommandUseCase.delete(ReservationId.from(id));
+        reservationCommandUseCase.delete(id);
     }
 
     public List<ReservationWebResponse> search(ReservationSearchWebRequest reservationSearchWebRequest) {
         return reservationQueryUseCase.search(
-                        MemberId.from(reservationSearchWebRequest.memberId()),
-                        ThemeId.from(reservationSearchWebRequest.themeId()),
+                        reservationSearchWebRequest.memberId(),
+                        reservationSearchWebRequest.themeId(),
                         ReservationDate.from(reservationSearchWebRequest.from()),
                         ReservationDate.from(reservationSearchWebRequest.to()))
                 .stream()

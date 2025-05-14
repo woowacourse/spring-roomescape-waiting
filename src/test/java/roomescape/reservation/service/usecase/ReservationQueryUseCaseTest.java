@@ -11,7 +11,7 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.FakeMemberRepository;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.repository.FakeReservationRepository;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceResponse;
@@ -43,7 +43,7 @@ class ReservationQueryUseCaseTest {
 
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
-    private MemberRepository memberRepository;
+    private MemberRepositoryInterface memberRepository;
 
     private ReservationTime reservationTime;
 
@@ -154,7 +154,7 @@ class ReservationQueryUseCaseTest {
                     .map(AvailableReservationTimeServiceResponse::startAt)
                     .findFirst()
                     .orElseThrow()
-            ).isEqualTo(booked.getValue());
+            ).isEqualTo(booked.getTime());
 
         });
     }

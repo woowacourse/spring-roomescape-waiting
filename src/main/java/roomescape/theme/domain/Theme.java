@@ -3,6 +3,9 @@ package roomescape.theme.domain;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -19,8 +22,9 @@ import roomescape.common.utils.Validator;
 @EqualsAndHashCode(of = "id")
 public class Theme {
 
-    @EmbeddedId
-    private ThemeId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Embedded
     private ThemeName name;
@@ -31,33 +35,39 @@ public class Theme {
     @Embedded
     private ThemeThumbnail thumbnail;
 
-    private static Theme of(final ThemeId id,
-                            final ThemeName name,
-                            final ThemeDescription description,
-                            final ThemeThumbnail thumbnail) {
-        validate(id, name, description, thumbnail);
+    private static Theme of(
+            final Long id,
+            final ThemeName name,
+            final ThemeDescription description,
+            final ThemeThumbnail thumbnail
+    ) {
+        validate(name, description, thumbnail);
         return new Theme(id, name, description, thumbnail);
     }
 
-    public static Theme withId(final ThemeId id,
-                               final ThemeName name,
-                               final ThemeDescription description,
-                               final ThemeThumbnail thumbnail) {
+    public static Theme withId(
+            final Long id,
+            final ThemeName name,
+            final ThemeDescription description,
+            final ThemeThumbnail thumbnail
+    ) {
         return of(id, name, description, thumbnail);
     }
 
-    public static Theme withoutId(final ThemeName name,
-                                  final ThemeDescription description,
-                                  final ThemeThumbnail thumbnail) {
-        return of(ThemeId.unassigned(), name, description, thumbnail);
+    public static Theme withoutId(
+            final ThemeName name,
+            final ThemeDescription description,
+            final ThemeThumbnail thumbnail
+    ) {
+        return of(null, name, description, thumbnail);
     }
 
-    private static void validate(final ThemeId id,
-                                 final ThemeName name,
-                                 final ThemeDescription description,
-                                 final ThemeThumbnail thumbnail) {
+    private static void validate(
+            final ThemeName name,
+            final ThemeDescription description,
+            final ThemeThumbnail thumbnail
+    ) {
         Validator.of(Theme.class)
-                .notNullField(Fields.id, id)
                 .notNullField(Fields.name, name)
                 .notNullField(Fields.description, description)
                 .notNullField(Fields.thumbnail, thumbnail);

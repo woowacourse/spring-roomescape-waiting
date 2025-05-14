@@ -7,7 +7,6 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.service.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.service.usecase.ReservationQueryUseCase;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
@@ -21,7 +20,7 @@ public class ThemeQueryUseCase {
         return themeRepository.findAll();
     }
 
-    public Theme get(final ThemeId id) {
+    public Theme get(final Long id) {
         return themeRepository.findById(id)
                 .orElseThrow();
     }

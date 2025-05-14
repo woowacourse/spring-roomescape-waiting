@@ -6,7 +6,6 @@ import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ErrorCode;
 import roomescape.reservation.service.usecase.ReservationQueryUseCase;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.converter.ReservationTimeConverter;
 import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
@@ -27,7 +26,7 @@ public class ReservationTimeCommandUseCase {
                 ReservationTimeConverter.toDomain(createReservationTimeServiceRequest));
     }
 
-    public void delete(final ReservationTimeId id) {
+    public void delete(final Long id) {
         if (reservationQueryUseCase.existsByTimeId(id)) {
             throw new ConflictException("예약에서 참조 중인 시간은 삭제할 수 없습니다.", ErrorCode.CONFLICT_RESERVATION_TIME);
         }

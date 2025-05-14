@@ -10,7 +10,6 @@ import roomescape.member.controller.dto.SignupRequest;
 import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberId;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
@@ -26,7 +25,7 @@ public class MemberService {
 
     public MemberInfo create(SignupRequest signupRequest) {
         return memberCommandUseCase.create(
-                Account.of(
+                Account.withoutId(
                         Member.withoutId(
                                 MemberName.from(signupRequest.name()),
                                 MemberEmail.from(signupRequest.email()),
@@ -41,7 +40,7 @@ public class MemberService {
         return memberQueryUseCase.getAccount(loginRequest);
     }
 
-    public Member get(MemberId id) {
+    public Member get(Long id) {
         return memberQueryUseCase.get(id);
     }
 

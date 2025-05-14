@@ -16,7 +16,6 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.common.utils.ExecuteResult;
 import roomescape.common.utils.JdbcUtils;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 
 @Repository
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     private final JdbcTemplate jdbcTemplate;
 
     private final RowMapper<ReservationTime> reservationTimeMapper = (resultSet, rowNum) -> ReservationTime.withId(
-            ReservationTimeId.from(resultSet.getLong("id")),
+            resultSet.getLong("id"),
             resultSet.getObject("start_at", LocalTime.class)
     );
 
@@ -40,9 +39,9 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> findById(final ReservationTimeId id) {
+    public Optional<ReservationTime> findById(final Long id) {
         final String sql = "select id, start_at from reservation_time where id = ?";
-        return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationTimeMapper, id.getValue());
+        return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationTimeMapper, id);
     }
 
     @Override
@@ -60,20 +59,20 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
         jdbcTemplate.update(connection -> {
             final PreparedStatement preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-            preparedStatement.setTime(1, Time.valueOf(reservationTime.getValue()));
+            preparedStatement.setTime(1, Time.valueOf(reservationTime.getTime()));
 
             return preparedStatement;
         }, keyHolder);
 
         final long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
 
-        return ReservationTime.withId(ReservationTimeId.from(generatedId), reservationTime.getValue());
+        return ReservationTime.withId(generatedId, reservationTime.getTime());
     }
 
     @Override
-    public void deleteById(final ReservationTimeId id) {
+    public void deleteById(final Long id) {
         final String sql = "delete from reservation_time where id = ?";
-        ExecuteResult result = ExecuteResult.of(jdbcTemplate.update(sql, id.getValue()));
+        ExecuteResult result = ExecuteResult.of(jdbcTemplate.update(sql, id));
 
         if (result == ExecuteResult.FAIL) {
             throw new NotFoundException("삭제할 시간을 찾을 수 없습니다.");

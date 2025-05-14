@@ -9,7 +9,7 @@ public class MemberConverter {
 
     public static MemberInfo toDto(Member member) {
         return new MemberInfo(
-                member.getId().getValue(),
+                member.getId(),
                 member.getName().getValue(),
                 member.getEmail().getValue(),
                 member.getRole());

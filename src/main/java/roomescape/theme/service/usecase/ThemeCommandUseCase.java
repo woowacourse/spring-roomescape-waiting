@@ -3,7 +3,6 @@ package roomescape.theme.service.usecase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.converter.ThemeConverter;
 import roomescape.theme.service.dto.CreateThemeServiceRequest;
@@ -18,7 +17,7 @@ public class ThemeCommandUseCase {
         return themeRepository.save(ThemeConverter.toDomain(createThemeServiceRequest));
     }
 
-    public void delete(final ThemeId id) {
+    public void delete(final Long id) {
         themeRepository.deleteById(id);
     }
 }

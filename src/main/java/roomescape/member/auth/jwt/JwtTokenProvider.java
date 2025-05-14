@@ -20,7 +20,7 @@ public class JwtTokenProvider {
     public String generateToken(Account account) {
         Member member = account.getMember();
         return  Jwts.builder()
-                .setSubject(member.getId().getValue().toString())
+                .setSubject(member.getId().toString())
                 .claim("name", member.getName().getValue())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY_IN_MILLISECONDS))
