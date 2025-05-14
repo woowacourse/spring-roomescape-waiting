@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import roomescape.application.reservation.dto.CreateReservationParam;
 import roomescape.application.reservation.dto.ReservationResult;
 import roomescape.application.reservation.dto.ReservationSearchParam;
+import roomescape.application.reservation.dto.ReservationWithStatusResult;
 import roomescape.application.support.exception.NotFoundEntityException;
 import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Member;
