@@ -9,7 +9,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.entity.Member;
-import roomescape.exception.UnauthorizedException;
+import roomescape.exception.custom.UnauthorizedException;
 
 @Component
 public class JwtTokenProvider {

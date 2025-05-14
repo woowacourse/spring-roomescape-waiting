@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
-import roomescape.entity.Role;
+import roomescape.global.Role;
 import roomescape.entity.Theme;
 import roomescape.dto.request.CreateThemeRequest;
 import roomescape.dto.response.ThemeResponse;

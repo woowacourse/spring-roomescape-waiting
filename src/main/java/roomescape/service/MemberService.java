@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.SignupRequest;
 import roomescape.entity.Member;
-import roomescape.exception.InvalidMemberException;
+import roomescape.exception.custom.InvalidMemberException;
 import roomescape.repository.MemberRepository;
 
 @Service

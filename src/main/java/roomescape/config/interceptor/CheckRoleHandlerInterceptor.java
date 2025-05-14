@@ -9,8 +9,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.annotation.CheckRole;
 import roomescape.entity.LoginMember;
-import roomescape.entity.Role;
-import roomescape.exception.ForbiddenException;
+import roomescape.global.Role;
+import roomescape.exception.custom.ForbiddenException;
 import roomescape.jwt.JwtExtractor;
 import roomescape.service.AuthService;
 

@@ -1,4 +1,4 @@
-package roomescape.global;
+package roomescape.exception;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -10,9 +10,8 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import roomescape.exception.ForbiddenException;
-import roomescape.exception.UnauthorizedException;
-import roomescape.global.dto.ErrorResponse;
+import roomescape.exception.custom.ForbiddenException;
+import roomescape.exception.custom.UnauthorizedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {

@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
 import roomescape.entity.LoginMember;
 import roomescape.entity.Member;
-import roomescape.entity.Role;
+import roomescape.global.Role;
 import roomescape.jwt.JwtTokenProvider;
 
 @Service

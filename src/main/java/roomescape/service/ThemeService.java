@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import roomescape.dto.request.CreateThemeRequest;
 import roomescape.entity.Reservation;
 import roomescape.entity.Theme;
-import roomescape.entity.ThemeRanking;
-import roomescape.exception.InvalidThemeException;
+import roomescape.domain.ThemeRanking;
+import roomescape.exception.custom.InvalidThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 

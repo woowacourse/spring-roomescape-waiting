@@ -2,7 +2,7 @@ package roomescape.entity;
 
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.InvalidReservationException;
+import roomescape.exception.custom.InvalidReservationException;
 
 public class ReservationSlot {
 

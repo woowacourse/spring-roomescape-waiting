@@ -1,4 +1,4 @@
-package roomescape.entity;
+package roomescape.global;
 
 public enum Role {
     USER,

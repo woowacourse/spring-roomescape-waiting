@@ -7,7 +7,7 @@ import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationSlots;
 import roomescape.entity.ReservationTime;
-import roomescape.exception.InvalidReservationTimeException;
+import roomescape.exception.custom.InvalidReservationTimeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 

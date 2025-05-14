@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
 import roomescape.entity.Member;
-import roomescape.entity.Role;
+import roomescape.global.Role;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.service.MemberService;

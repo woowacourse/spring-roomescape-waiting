@@ -3,7 +3,7 @@ package roomescape.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import roomescape.entity.Member;
-import roomescape.entity.Role;
+import roomescape.global.Role;
 
 public record SignupRequest(
         @NotBlank(message = "이름은 비어있을 수 없습니다.") String name,

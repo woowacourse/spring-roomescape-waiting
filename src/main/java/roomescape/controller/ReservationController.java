@@ -15,7 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
 import roomescape.entity.LoginMember;
 import roomescape.entity.Reservation;
-import roomescape.entity.Role;
+import roomescape.global.Role;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;

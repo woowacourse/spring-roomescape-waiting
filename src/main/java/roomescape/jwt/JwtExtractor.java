@@ -2,7 +2,7 @@ package roomescape.jwt;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import roomescape.exception.UnauthorizedException;
+import roomescape.exception.custom.UnauthorizedException;
 
 public class JwtExtractor {
 

@@ -17,7 +17,7 @@ import roomescape.annotation.CheckRole;
 import roomescape.entity.ReservationSlot;
 import roomescape.entity.ReservationSlots;
 import roomescape.entity.ReservationTime;
-import roomescape.entity.Role;
+import roomescape.global.Role;
 import roomescape.dto.request.AvailableTimeRequest;
 import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
