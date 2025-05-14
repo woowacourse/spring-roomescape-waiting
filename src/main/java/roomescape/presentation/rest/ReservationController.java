@@ -14,13 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.application.ReservationService;
-import roomescape.domain.Reservation;
 import roomescape.domain.User;
 import roomescape.domain.repository.ReservationSearchFilter;
 import roomescape.presentation.Authenticated;
 import roomescape.presentation.request.CreateReservationRequest;
 import roomescape.presentation.response.ReservationResponse;
-import roomescape.presentation.response.UserReservationResponse;
 
 @Controller
 @RequestMapping("/reservations")
@@ -40,13 +38,6 @@ public class ReservationController {
         var reservation = service.reserve(user, request.date(), request.timeId(), request.themeId());
         var response = ReservationResponse.from(reservation);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.id())).body(response);
-    }
-
-    @GetMapping("/mine")
-    public ResponseEntity<List<UserReservationResponse>> getAllReservationsByUser(@Authenticated final User user) {
-        var reservations = service.findAllReservationsByUser(user);
-        var response = UserReservationResponse.from(reservations);
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping

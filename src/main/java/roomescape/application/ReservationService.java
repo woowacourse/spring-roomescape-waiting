@@ -39,10 +39,6 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public List<Reservation> findAllReservationsByUser(final User user) {
-        return reservationRepository.findByUserId(user.id());
-    }
-
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
         return reservationRepository.findAll(ReservationSpecifications.byFilter(filter));
     }

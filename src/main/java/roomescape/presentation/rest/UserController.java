@@ -1,13 +1,18 @@
 package roomescape.presentation.rest;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import roomescape.application.UserService;
+import roomescape.domain.User;
+import roomescape.presentation.Authenticated;
 import roomescape.presentation.request.SignupRequest;
+import roomescape.presentation.response.UserReservationResponse;
 import roomescape.presentation.response.UserResponse;
 
 @Controller
@@ -26,4 +31,12 @@ public class UserController {
         var response = UserResponse.from(user);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/reservations")
+    public ResponseEntity<List<UserReservationResponse>> getAllReservationsByUser(@Authenticated final User user) {
+        var reservations = userService.getReservations(user.id());
+        var response = UserReservationResponse.from(reservations);
+        return ResponseEntity.ok(response);
+    }
+
 }

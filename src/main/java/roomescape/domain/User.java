@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.util.Set;
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -33,7 +33,7 @@ public class User {
     private String email;
     private String password;
     @OneToMany(mappedBy = "user")
-    private Set<Reservation> reservations;
+    private List<Reservation> reservations;
 
     public User(final Long id, final String name, final UserRole role, final String email, final String password) {
         validateNameLength(name);
@@ -51,14 +51,6 @@ public class User {
 
     public static User createUser(final String name, final String email, final String password) {
         return new User(null, name, UserRole.USER, email, password);
-    }
-
-    public User withId(final long id) {
-        if (this.id == null) {
-            this.id = id;
-            return this;
-        }
-        throw new IllegalStateException("사용자 ID는 재할당할 수 없습니다. 현재 ID: " + this.id);
     }
 
     public boolean matchesPassword(final String passwordToCompare) {

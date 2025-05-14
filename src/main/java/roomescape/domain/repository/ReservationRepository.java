@@ -9,8 +9,6 @@ import roomescape.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
-    List<Reservation> findByUserId(long id);
-
     List<Reservation> findByTimeSlotId(long id);
 
     List<Reservation> findByThemeId(long id);

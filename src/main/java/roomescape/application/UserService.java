@@ -2,6 +2,7 @@ package roomescape.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.User;
 import roomescape.domain.repository.UserRepository;
 
@@ -27,6 +28,12 @@ public class UserService {
     public User getById(final long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. id : " + id));
+    }
+
+    public List<Reservation> getReservations(long id) {
+        User user = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. id : " + id));
+        return user.reservations();
     }
 
     public List<User> findAllUsers() {

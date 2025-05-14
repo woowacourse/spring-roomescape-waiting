@@ -11,7 +11,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query(""" 
             SELECT t.id, t.name, t.description, t.thumbnail
                                FROM Theme t
-                               JOIN t.reservations r
+                               JOIN Reservation r
                                WHERE r.date BETWEEN :startDate AND :endDate
                                GROUP BY t.id, t.name, t.description, t.thumbnail
                                ORDER BY COUNT(r.id) DESC

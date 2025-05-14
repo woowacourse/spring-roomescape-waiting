@@ -4,8 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -27,8 +25,6 @@ public class Theme {
     private String name;
     private String description;
     private String thumbnail;
-    @OneToMany(mappedBy = "theme")
-    private Set<Reservation> reservations;
 
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);
@@ -44,14 +40,6 @@ public class Theme {
     }
 
     protected Theme() {
-    }
-
-    public Theme withId(final long id) {
-        if (this.id == null) {
-            this.id = id;
-            return this;
-        }
-        throw new IllegalStateException("테마 ID는 재할당할 수 없습니다. 현재 ID: " + this.id);
     }
 
     private void validateNameLength(final String name) {
