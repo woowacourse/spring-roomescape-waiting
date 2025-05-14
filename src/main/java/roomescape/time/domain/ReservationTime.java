@@ -11,6 +11,7 @@ import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.BaseEntity;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
+import roomescape.reservation.domain.ReservationId;
 
 import java.time.LocalTime;
 
@@ -30,14 +31,14 @@ public class ReservationTime extends BaseEntity {
         this.startAt = startAt;
     }
 
-    private ReservationTime(final Long id, final LocalTime startAt) {
-        super(id);
+    private ReservationTime(final ReservationTimeId id, final LocalTime startAt) {
+        super(id.getValue());
         validate(startAt);
         this.startAt = startAt;
     }
 
     public static ReservationTime withId(final ReservationTimeId id, final LocalTime startAt) {
-        return new ReservationTime(id.getValue(), startAt);
+        return new ReservationTime(id, startAt);
     }
 
     public static ReservationTime withoutId(final LocalTime startAt) {

@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
+import roomescape.common.exception.NotFoundException;
 import roomescape.theme.application.dto.CreateThemeServiceRequest;
 import roomescape.theme.application.service.ThemeCommandServiceImpl;
 import roomescape.theme.domain.Theme;
@@ -106,13 +107,12 @@ class ThemeCommandServiceImplTest {
     @DisplayName("저장되지 않은 테마를 삭제할 수 없다")
     void cannotDelete() {
         // given
-        final ThemeId unassigned = ThemeId.from(null);
+        final ThemeId unassigned = ThemeId.from(12345L);
 
         // when
         // then
         assertThatThrownBy(() -> themeCommandService.delete(unassigned))
-                .hasCauseInstanceOf(IllegalStateException.class)
-                .isInstanceOf(InvalidDataAccessApiUsageException.class)
-                .hasMessage("식별자가 할당되지 않았습니다.");
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("[THEME] not found. params={ThemeId=ThemeId(12345)}");
     }
 }

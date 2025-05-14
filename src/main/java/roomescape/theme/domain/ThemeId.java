@@ -10,7 +10,7 @@ public class ThemeId extends DomainId {
         super(value);
     }
 
-    protected ThemeId() { //todo. 플레그 남기는 방법
+    protected ThemeId() {
         this(null);
     }
 

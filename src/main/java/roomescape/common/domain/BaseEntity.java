@@ -19,8 +19,8 @@ public abstract class BaseEntity {
     protected Long id;
 
     protected BaseEntity(final Long id) {
-        requireAssigned();
         this.id = id;
+        requireAssigned();
     }
 
     private void requireAssigned() {

@@ -21,14 +21,6 @@ class DomainIdTest {
     }
 
     @Test
-    @DisplayName("할당되지 않은 ID는 null이어도 예외가 발생하지 않는다")
-    void validateNullUnassignedId() {
-        // when
-        // then
-        assertDoesNotThrow(() -> new TestDomainId(null));
-    }
-
-    @Test
     @DisplayName("할당된 ID는 값을 조회할 수 있다")
     void getValueFromAssignedId() {
         // given
@@ -37,19 +29,6 @@ class DomainIdTest {
         // when
         // then
         assertThat(domainId.getValue()).isEqualTo(1L);
-    }
-
-    @Test
-    @DisplayName("할당되지 않은 ID는 값을 조회할 수 없다")
-    void getValueFromUnassignedId() {
-        // given
-        final TestDomainId domainId = new TestDomainId(null);
-
-        // when
-        // then
-        assertThatThrownBy(domainId::getValue)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("식별자가 할당되지 않았습니다.");
     }
 
     // DomainId를 테스트하기 위한 구체 클래스

@@ -40,11 +40,11 @@ public class Theme extends BaseEntity {
             column = @Column(name = Fields.thumbnail))
     private ThemeThumbnail thumbnail;
 
-    private Theme(final Long id,
+    private Theme(final ThemeId id,
                   final ThemeName name,
                   final ThemeDescription description,
                   final ThemeThumbnail thumbnail) {
-        super(id);
+        super(id.getValue());
         validate(name, description, thumbnail);
         this.name = name;
         this.description = description;
@@ -64,7 +64,7 @@ public class Theme extends BaseEntity {
                                final ThemeName name,
                                final ThemeDescription description,
                                final ThemeThumbnail thumbnail) {
-        return new Theme(id.getValue(), name, description, thumbnail);
+        return new Theme(id, name, description, thumbnail);
     }
 
     public static Theme withoutId(final ThemeName name,

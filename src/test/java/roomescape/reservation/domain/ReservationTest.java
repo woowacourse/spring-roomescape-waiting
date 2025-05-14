@@ -8,10 +8,12 @@ import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
+import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
 import roomescape.user.domain.User;
+import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRole;
 
@@ -27,12 +29,14 @@ class ReservationTest {
     @Test
     @DisplayName("과거 날짜와 시간에 대한 예약 생성은 불가능하다.")
     void validatePast() {
-        final Theme theme = Theme.withoutId(
+        final Theme savedTheme = Theme.withId(
+                ThemeId.from(1234L),
                 ThemeName.from("공포"),
                 ThemeDescription.from("지구별 방탈출 최고"),
                 ThemeThumbnail.from("www.making.com"));
 
-        final User user = User.withoutId(
+        final User savedUser = User.withId(
+                UserId.from(1234L),
                 UserName.from("강산"),
                 Email.from("email@email.com"),
                 Password.fromEncoded("1234"),
@@ -43,16 +47,16 @@ class ReservationTest {
         final LocalTime nowTime = now.toLocalTime();
 
         final Reservation minusDay = Reservation.withoutId(
-                user.getId(),
+                savedUser.getId(),
                 ReservationDate.from(nowDate.minusDays(1L)),
                 ReservationTime.withoutId(nowTime),
-                theme);
+                savedTheme);
 
         final Reservation minusTime = Reservation.withoutId(
-                user.getId(),
+                savedUser.getId(),
                 ReservationDate.from(nowDate),
                 ReservationTime.withoutId(nowTime.minusMinutes(1L)),
-                theme);
+                savedTheme);
 
         assertAll(() -> {
 

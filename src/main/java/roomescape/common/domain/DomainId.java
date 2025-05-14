@@ -2,6 +2,7 @@ package roomescape.common.domain;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
@@ -11,6 +12,7 @@ import roomescape.common.validate.Validator;
 @FieldNameConstants
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @MappedSuperclass
+@EqualsAndHashCode
 public abstract class DomainId {
 
     private Long value;
@@ -25,7 +27,6 @@ public abstract class DomainId {
 
         Validator.of(DomainId.class)
                 .validateNotNull(Fields.value, value, DomainTerm.DOMAIN_ID.label());
-
     }
 
     @Override
