@@ -1,5 +1,7 @@
 package roomescape.acceptance;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.Date;
@@ -8,7 +10,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class ReservationAcceptanceTest {
     void setUp() {
         this.email = "email@gmail.com";
         jdbcTemplate.update("INSERT INTO member"
-                        + " (name, email,password, role) VALUES (?, ?, ?, ?)"
+                            + " (name, email,password, role) VALUES (?, ?, ?, ?)"
                 , "히로", email, "password", Role.ADMIN.name());
     }
 
@@ -190,7 +191,7 @@ class ReservationAcceptanceTest {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
                     new String[]{"id"});
             ps.setDate(1, Date.valueOf(tomorrow));
             ps.setLong(2, timeId);

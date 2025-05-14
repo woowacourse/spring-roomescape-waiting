@@ -1,59 +1,38 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+
+import java.time.LocalDate;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.common.exception.DuplicatedException;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.response.ReservationResponseDto;
-import roomescape.fake.FakeMemberDao;
-import roomescape.fake.FakeReservationDao;
-import roomescape.fake.FakeReservationTimeDao;
-import roomescape.fake.FakeThemeDao;
-import roomescape.dto.LoginMember;
-import roomescape.model.Member;
-import roomescape.model.ReservationTime;
 import roomescape.model.Role;
-import roomescape.model.Theme;
 
-@Import(JdbcTemplate.class)
+@Slf4j
+@SpringBootTest
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
-    private final ReservationService reservationService;
-    private final ReservationTimeDao reservationTimeDao;
-    private final FakeThemeDao themeDao;
-    private final FakeMemberDao memberDao;
-    private final LoginMember loginMember;
+    @Autowired
+    ReservationService reservationService;
 
-    public ReservationServiceTest() {
-        this.reservationTimeDao = new FakeReservationTimeDao();
-        this.themeDao = new FakeThemeDao();
-        this.memberDao = new FakeMemberDao();
-        this.reservationService = new ReservationService(
-                new FakeReservationDao(),
-                reservationTimeDao,
-                themeDao,
-                memberDao
-        );
-        Long savedId = memberDao.add(new Member("히로", "example@gmail.com", "password", Role.ADMIN));
-        this.loginMember = new LoginMember(savedId, "히로", "example@gmail.com", Role.ADMIN);
-    }
+    private LoginMember loginMember;
 
     @BeforeEach
     void setUp() {
-        reservationTimeDao.saveTime(new ReservationTime(LocalTime.of(20, 0)));
-
-        themeDao.saveTheme(new Theme("공포", "무서워요", "image-url"));
-        memberDao.add(new Member("히로", "example@gmail.com", "password", Role.ADMIN));
+        this.loginMember = new LoginMember(1L, "히로", "example@gmail.com", Role.ADMIN);
     }
 
     @DisplayName("예약을 정상적으로 저장한다.")
@@ -89,7 +68,7 @@ class ReservationServiceTest {
         reservationService.cancelReservation(saved.id());
 
         // then
-        List<ReservationResponseDto> reservations = reservationService.getAllReservations(null);
+        List<ReservationResponseDto> reservations = reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
     }
 

@@ -3,21 +3,21 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
-import roomescape.dao.MemberDao;
 import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.dto.response.TokenResponseDto;
 import roomescape.model.Member;
+import roomescape.repository.MemberRepository;
 
 @Service
 public class AuthService {
 
     private final JwtProvider jwtProvider;
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
-    public AuthService(JwtProvider jwtProvider, MemberDao memberDao) {
+    public AuthService(final JwtProvider jwtProvider, final MemberRepository memberRepository) {
         this.jwtProvider = jwtProvider;
-        this.memberDao = memberDao;
+        this.memberRepository = memberRepository;
     }
 
     public void login(final LoginRequestDto loginRequestDto) {
@@ -46,7 +46,7 @@ public class AuthService {
     }
 
     private Member findMemberByEmail(final String email) {
-        return memberDao.findByEmail(email)
+        return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
     }
 

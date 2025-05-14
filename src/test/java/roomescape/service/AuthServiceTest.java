@@ -2,29 +2,37 @@ package roomescape.service;
 
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.request.LoginRequestDto;
-import roomescape.fake.FakeMemberDao;
-import roomescape.model.Member;
-import roomescape.model.Role;
+import roomescape.repository.MemberRepository;
 
+@SpringBootTest
 public class AuthServiceTest {
-    private final FakeMemberDao fakeUserDao = new FakeMemberDao();
-    private final AuthService authService = new AuthService(null, fakeUserDao);
+
+    @Autowired
+    JwtProvider jwtProvider;
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
+    AuthService authService;
 
     private String email;
     private String password;
 
     @BeforeEach
     void setUp() {
-        this.email = "john@example.com";
+        this.email = "example@gmail.com";
         this.password = "password";
-        fakeUserDao.add(new Member("John", this.email, this.password, Role.fromValue("ADMIN")));
     }
 
     @Test

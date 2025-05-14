@@ -33,12 +33,12 @@ public class Reservation {
     private Member member;
 
     public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member, LocalDate today) {
-        validateReservationDateInFuture(today);
-
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
+
+        validateReservationDateInFuture(today);
     }
 
     private void validateReservationDateInFuture(LocalDate today) {

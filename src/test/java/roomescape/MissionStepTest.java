@@ -1,5 +1,8 @@
 package roomescape;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.Connection;
@@ -9,8 +12,6 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,12 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dao.ReservationTimeJdbcDao;
-import roomescape.dao.ThemeJdbcDao;
 import roomescape.dto.response.ReservationResponseDto;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.JwtProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -34,10 +35,10 @@ public class MissionStepTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ReservationTimeJdbcDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ThemeJdbcDao themeDao;
+    private ThemeRepository themeRepository;
 
     private String email;
 
@@ -46,12 +47,12 @@ public class MissionStepTest {
 
     @BeforeEach
     void beforeEachTest() {
-        reservationTimeDao.saveTime(new ReservationTime(LocalTime.of(10, 10)));
-        themeDao.saveTheme(new Theme("공포", "무서워요", "image"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 10)));
+        themeRepository.save(new Theme("공포", "무서워요", "image"));
 
         this.email = "email@gmail.com";
         jdbcTemplate.update("INSERT INTO member"
-                        + " (name, email,password, role) VALUES (?, ?, ?, ?)"
+                            + " (name, email,password, role) VALUES (?, ?, ?, ?)"
                 , "히로", email, "password", Role.ADMIN.name());
     }
 
@@ -136,7 +137,7 @@ public class MissionStepTest {
     @Test
     void 오단계() {
         jdbcTemplate.update(
-                "INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
                 String.valueOf(LocalDate.now().plusDays(1)), "1", "1", "1");
 
         List<ReservationResponseDto> reservations = RestAssured.given().log().all()

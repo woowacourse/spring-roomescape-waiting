@@ -80,7 +80,7 @@ public class ReservationJdbcDao implements ReservationDao {
 
     @Override
     public Long saveReservation(Reservation reservation) {
-        String sql = "INSERT INTO reservation (date, time_id, theme_id, member_id) values (?,?,?,?)";
+        String sql = "INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) values (?,?,?,?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 

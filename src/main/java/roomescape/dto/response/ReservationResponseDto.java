@@ -13,6 +13,7 @@ public record ReservationResponseDto(
         ReservationTimeResponseDto time,
         ThemeResponseDto theme
 ) {
+
     public static ReservationResponseDto from(Reservation reservationInfo) {
         ReservationTime timeInfo = reservationInfo.getReservationTime();
         Theme themeInfo = reservationInfo.getTheme();

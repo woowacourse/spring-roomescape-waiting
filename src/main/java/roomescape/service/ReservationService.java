@@ -1,13 +1,10 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
@@ -19,21 +16,27 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
-    private final MemberDao memberDao;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao,
-                              MemberDao memberDao) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
-        this.memberDao = memberDao;
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository,
+                              final MemberRepository memberRepository) {
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
     public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
@@ -41,34 +44,48 @@ public class ReservationService {
         Reservation reservation = createReservation(reservationRegisterDto, loginMember);
         assertReservationIsNotDuplicated(reservation);
 
-        Long reservationId = reservationDao.saveReservation(reservation);
-
+        Reservation savedReservation = reservationRepository.save(reservation);
         ReservationTime time = reservation.getReservationTime();
         Theme theme = reservation.getTheme();
         return new ReservationResponseDto(
-                reservationId,
-                new MemberResponseDto(reservation.getMember()),
-                reservation.getDate(),
+                savedReservation.getId(),
+                new MemberResponseDto(savedReservation.getMember()),
+                savedReservation.getDate(),
                 new ReservationTimeResponseDto(time.getId(), time.getStartAt()),
                 new ThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail())
         );
     }
 
-    public List<ReservationResponseDto> getAllReservations(final ReservationSearchDto reservationSearchDto) {
-        return reservationDao.findAll(reservationSearchDto).stream()
+    public List<ReservationResponseDto> getAllReservations() {
+        return reservationRepository.findAll().stream()
+                .map(ReservationResponseDto::from)
+                .toList();
+    }
+
+    public List<ReservationResponseDto> searchReservations(final ReservationSearchDto reservationSearchDto) {
+        Long themeId = reservationSearchDto.themeId();
+        Long memberId = reservationSearchDto.memberId();
+        LocalDate startDate = reservationSearchDto.startDate();
+        LocalDate endDate = reservationSearchDto.endDate();
+
+        return reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(
+                        themeId,
+                        memberId,
+                        startDate,
+                        endDate).stream()
                 .map(ReservationResponseDto::from)
                 .toList();
     }
 
     public void cancelReservation(Long id) {
-        reservationDao.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 
     private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
-        ReservationTime foundTime = reservationTimeDao.findById(reservationRegisterDto.timeId())
+        ReservationTime foundTime = reservationTimeRepository.findById(reservationRegisterDto.timeId())
                 .orElseThrow(() -> new NotFoundException("id 에 해당하는 예약 시각이 존재하지 않습니다."));
 
-        Theme foundTheme = themeDao.findById(reservationRegisterDto.themeId())
+        Theme foundTheme = themeRepository.findById(reservationRegisterDto.themeId())
                 .orElseThrow(() -> new NotFoundException("id 에 해당하는 테마가 존재하지 않습니다."));
 
         Member member = findMemberById(loginMember.id());
@@ -76,14 +93,14 @@ public class ReservationService {
     }
 
     private void assertReservationIsNotDuplicated(Reservation reservation) {
-        reservationDao.findByDateAndTime(reservation)
+        reservationRepository.findByDateAndReservationTime(reservation.getDate(), reservation.getReservationTime())
                 .ifPresent(foundReservation -> {
                     throw new DuplicatedException("이미 예약이 존재합니다.");
                 });
     }
 
     private Member findMemberById(final Long id) {
-        return memberDao.findById(id)
+        return memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자에 대한 예약 요청입니다."));
     }
 }

@@ -2,7 +2,6 @@ package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -19,14 +18,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.model.Member;
 import roomescape.model.Role;
 import roomescape.service.JwtProvider;
-import roomescape.service.ReservationAdminService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationAdminAcceptanceTest {
-
-    @Autowired
-    ReservationAdminService reservationAdminService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -41,7 +36,7 @@ class ReservationAdminAcceptanceTest {
         String email = "example@gmail.com";
         Member member = new Member("히로", email, "password", Role.ADMIN);
 
-        insertNewRMemberWithJdbcTemplate(member);
+        // insertNewRMemberWithJdbcTemplate(member);
 
         this.token = jwtProvider.createToken(email);
     }
@@ -84,24 +79,6 @@ class ReservationAdminAcceptanceTest {
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201);
-    }
-
-    private Long insertNewReservationWithJdbcTemplate(final Long timeId, final Long themeId, LocalDate date) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO reservation (name, date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?, ?)",
-                    new String[]{"id"});
-            ps.setString(1, "히로");
-            ps.setDate(2, Date.valueOf(date));
-            ps.setLong(3, timeId);
-            ps.setLong(4, themeId);
-            ps.setLong(5, 1L);
-            return ps;
-        }, keyHolder);
-
-        return keyHolder.getKey().longValue();
     }
 
     private Long insertNewRMemberWithJdbcTemplate(final Member member) {

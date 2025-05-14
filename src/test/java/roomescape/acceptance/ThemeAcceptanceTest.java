@@ -1,6 +1,8 @@
 package roomescape.acceptance;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.Date;
@@ -9,7 +11,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,7 +133,8 @@ class ThemeAcceptanceTest {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO reservation (date, time_id, theme_id) VALUES (?, ?, ?)", new String[]{"id"});
+                    "INSERT INTO reservation (date, reservation_time_id, theme_id) VALUES (?, ?, ?)",
+                    new String[]{"id"});
             ps.setDate(1, Date.valueOf(tomorrow));
             ps.setLong(2, timeId);
             ps.setLong(3, themeId);
