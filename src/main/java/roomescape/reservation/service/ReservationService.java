@@ -44,11 +44,6 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public Reservation getById(final Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + id));
-    }
-
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
