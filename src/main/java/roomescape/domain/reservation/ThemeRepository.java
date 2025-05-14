@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
-                SELECT t.id, t.name, t.description, t.thumbnail
+                SELECT t
                 FROM Theme t
                 LEFT JOIN Reservation r
                     ON t.id = r.theme.id AND r.date BETWEEN :startDate AND :endDate
