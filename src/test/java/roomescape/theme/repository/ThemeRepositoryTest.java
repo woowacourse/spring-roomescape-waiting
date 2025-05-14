@@ -33,10 +33,10 @@ class ThemeRepositoryTest {
     void 아이디를_기준으로_테마조회() {
         // given
         final Theme theme = new Theme("테마1", "설명1", "썸네일1");
-        Theme savedTheme = themeRepository.save(theme);
+        final Theme savedTheme = themeRepository.save(theme);
 
         // when
-        Theme foundTheme = themeRepository.findById(savedTheme.getId()).orElseThrow();
+        final Theme foundTheme = themeRepository.findById(savedTheme.getId()).orElseThrow();
 
         // then
         assertThat(foundTheme.getId()).isEqualTo(savedTheme.getId());
@@ -47,7 +47,7 @@ class ThemeRepositoryTest {
     void 아이디를_기준으로_테마삭제() {
         // given
         final Theme theme = new Theme("테마1", "설명1", "썸네일1");
-        Theme savedTheme = themeRepository.save(theme);
+        final Theme savedTheme = themeRepository.save(theme);
 
         // when
         themeRepository.deleteById(theme.getId());
