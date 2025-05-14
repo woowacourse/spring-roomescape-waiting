@@ -8,7 +8,7 @@ import roomescape.domain.Reservation;
 public class ReservationSpecification {
     public static Specification<Reservation> memberIdEqual(Optional<Long> memberId) {
         return (root, query, cb) -> {
-            if (memberId == null) {
+            if (memberId.isEmpty()) {
                 return null;
             }
             return cb.equal(root.get("member").get("id"), memberId.get());
