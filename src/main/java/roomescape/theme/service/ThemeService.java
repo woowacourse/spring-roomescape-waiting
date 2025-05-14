@@ -1,12 +1,15 @@
 package roomescape.theme.service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.CreateThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
@@ -44,11 +47,23 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findPopularThemes() {
-        final LocalDate from = LocalDate.now().minusDays(7);
-        final LocalDate to = LocalDate.now().minusDays(1);
-        final List<Theme> popularThemes = themeRepository.findPopularThemes(from, to, 10);
-        return popularThemes.stream()
+        final int POPULAR_THEME_LIMIT = 10;
+        final LocalDate SEVEN_DAYS_AGO = LocalDate.now().minusDays(7);
+        final LocalDate ONE_DAY_AGO = LocalDate.now().minusDays(1);
+
+        final List<Theme> themes = reservationRepository.findByDateBetween(SEVEN_DAYS_AGO, ONE_DAY_AGO).stream()
+                .map(Reservation::getTheme)
+                .toList();
+        final Map<Theme, Integer> themeCount = new HashMap<>();
+        for (Theme theme : themes) {
+            themeCount.putIfAbsent(theme, 0);
+            themeCount.computeIfPresent(theme, (t, count) -> count + 1);
+        }
+        return themeCount.entrySet().stream()
+                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+                .map(Map.Entry::getKey)
                 .map(ThemeResponse::new)
+                .limit(POPULAR_THEME_LIMIT)
                 .toList();
     }
 }

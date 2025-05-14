@@ -1,10 +1,13 @@
 package roomescape.theme.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.List;
+import java.util.Objects;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 public final class Theme {
@@ -15,6 +18,8 @@ public final class Theme {
     private ThemeName name;
     private ThemeDescription description;
     private ThemeThumbnail thumbnail;
+    @OneToMany(mappedBy = "theme")
+    private List<Reservation> reservations;
 
     public Theme(final Long id, final ThemeName name,
                  final ThemeDescription description, final ThemeThumbnail thumbnail
@@ -34,7 +39,6 @@ public final class Theme {
     }
 
     public Theme() {
-
     }
 
     public Long getId() {
@@ -55,5 +59,23 @@ public final class Theme {
 
     public String getThumbnail() {
         return thumbnail.getThumbnail();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final Theme theme = (Theme) o;
+        return Objects.equals(id, theme.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
