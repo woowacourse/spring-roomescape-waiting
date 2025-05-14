@@ -44,7 +44,7 @@ public class ReservationTimeService {
 
     public List<AvailableReservationTimeResponseDto> findAvailableReservationTimes(LocalDate date, Long themeId) {
         List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> availableReservationsByDate = reservationRepository.findByDateAndTheme(date, themeId);
+        List<Reservation> availableReservationsByDate = reservationRepository.findByDateAndThemeId(date, themeId);
 
         List<ReservationTime> availableReservationTimes = availableReservationsByDate.stream()
                 .map(Reservation::getTime)
@@ -52,8 +52,8 @@ public class ReservationTimeService {
 
         return allReservationTimes.stream()
                 .map(reservationTime -> new AvailableReservationTimeResponseDto(
-                        reservationTime.id(),
-                        reservationTime.startAt(),
+                        reservationTime.getId(),
+                        reservationTime.getStartAt(),
                         availableReservationTimes.contains(reservationTime)
                 ))
                 .toList();
@@ -64,9 +64,10 @@ public class ReservationTimeService {
             throw new IllegalStateException("[ERROR] 이 시간의 예약이 이미 존재합니다. id : " + id);
         }
 
-        int deletedReservationCount = reservationTimeRepository.deleteById(id);
-        if (deletedReservationCount == 0) {
-            throw new NotFoundException("[ERROR] 등록된 예약 시간 번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+        if(!reservationTimeRepository.existsById(id)){
+            throw new NotFoundException("[ERROR] 등록된 시간만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
+
+        reservationTimeRepository.deleteById(id);
     }
 }

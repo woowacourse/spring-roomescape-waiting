@@ -12,10 +12,6 @@ import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationCreateDto;
 
 import java.time.LocalDate;
@@ -44,8 +40,8 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + dto.timeId()));
 
-        validateDuplicate(dto.date(), reservationTime.startAt(), dto.themeId());
-        Reservation.validateReservableTime(dto.date(), reservationTime.startAt());
+        validateDuplicate(dto.date(), reservationTime.getStartAt(), dto.themeId());
+        Reservation.validateReservableTime(dto.date(), reservationTime.getStartAt());
 
         Theme theme = themeRepository.findById(dto.themeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + dto.themeId()));
@@ -75,17 +71,16 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from, LocalDate to) {
-        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByPeriodAndMemberAndTheme(themeId, memberId, from, to);
+        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(themeId, memberId, from, to);
         return reservationsByPeriodAndMemberAndTheme.stream()
                 .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(), reservation.getTheme()))
                 .toList();
     }
 
     public void deleteReservation(Long id) {
-        int deletedReservationCount = reservationRepository.deleteById(id);
-
-        if (deletedReservationCount == 0) {
+        if(!reservationRepository.existsById(id)){
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
+        reservationRepository.deleteById(id);
     }
 }

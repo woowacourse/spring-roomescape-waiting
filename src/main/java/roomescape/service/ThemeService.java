@@ -47,12 +47,11 @@ public class ThemeService {
             throw new IllegalStateException("[ERROR] 이 테마는 이미 예약이 존재합니다. id : " + id);
         }
 
-        //TODO: 반환 값 안맞음
-        int deletedThemeCount = themeRepository.deleteById(id);
-
-        if (deletedThemeCount == 0) {
+        if(!themeRepository.existsById(id)){
             throw new NotFoundException("[ERROR] 등록된 테마만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
+
+        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponseDto> findPopularThemes() {
