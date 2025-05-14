@@ -57,10 +57,6 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponseDto> getAvailableTimes(String date, Long themeId) {
         LocalDate parsedDate = LocalDate.parse(date);
 
-        // 1. 이 날짜와 테마에 해당하는 예약을 가져온다.
-        // 2. reservation time 을 다 가져옴
-        // 3. 1번에 존재한다 만약에 2번이 -> 그럼 제외
-
         List<Reservation> reservations = reservationRepository.findByTheme_IdAndDate(themeId, parsedDate);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
@@ -77,12 +73,12 @@ public class ReservationTimeService {
                         true))
                 .toList();
 
-        List<AvailableReservationTime> availableReservationTimes = reservationTimes.stream()
+        List<AvailableReservationTime> availableReservationTimes = new java.util.ArrayList<>(reservationTimes.stream()
                 .map(reservationTime -> new AvailableReservationTime(
                         reservationTime.getId(),
                         reservationTime.getStartAt(),
                         false))
-                .toList();
+                .toList());
 
         availableReservationTimes.addAll(nonAvailableReservationTimes);
 

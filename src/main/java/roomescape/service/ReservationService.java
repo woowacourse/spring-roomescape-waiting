@@ -8,6 +8,7 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
+import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
@@ -102,5 +103,13 @@ public class ReservationService {
     private Member findMemberById(final Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자에 대한 예약 요청입니다."));
+    }
+
+    public List<MemberReservationResponseDto> getReservationsOfMember(final LoginMember loginMember) {
+        List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
+
+        return reservations.stream()
+                .map(MemberReservationResponseDto::new)
+                .toList();
     }
 }

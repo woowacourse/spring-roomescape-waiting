@@ -10,6 +10,7 @@ import roomescape.model.ReservationTime;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
     Optional<Reservation> findByDateAndReservationTime(LocalDate date, ReservationTime time);
 
     List<Reservation> findByTheme_IdAndMember_IdAndDateBetween(
@@ -19,4 +20,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate dateBefore);
 
     List<Reservation> findByTheme_IdAndDate(final Long theme_id, final LocalDate date);
+
+    List<Reservation> findByMember_Id(Long id);
 }

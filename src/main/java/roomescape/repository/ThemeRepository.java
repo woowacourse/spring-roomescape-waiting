@@ -29,6 +29,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             """)
     List<Theme> findTopReservedThemesSince(
             @Param("startDate") LocalDate startDate,
-            @Param("startDate") LocalDate endDate,
+            @Param("endDate") LocalDate endDate,
             @Param("size") int size);
 }
