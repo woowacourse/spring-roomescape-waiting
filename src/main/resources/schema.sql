@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS members
+CREATE TABLE IF NOT EXISTS member
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     name     VARCHAR(255) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS members
     UNIQUE (email)
 );
 
-CREATE TABLE IF NOT EXISTS reservation_times
+CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     start_at VARCHAR(255) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS reservation_times
     UNIQUE (start_at)
 );
 
-CREATE TABLE IF NOT EXISTS themes
+CREATE TABLE IF NOT EXISTS theme
 (
     id          BIGINT       NOT NULL AUTO_INCREMENT,
     name        VARCHAR(255) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS themes
     UNIQUE (name)
 );
 
-CREATE TABLE IF NOT EXISTS reservations
+CREATE TABLE IF NOT EXISTS reservation
 (
     id        BIGINT       NOT NULL AUTO_INCREMENT,
     member_id BIGINT       NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS reservations
     time_id   BIGINT       NOT NULL,
     theme_id  BIGINT       NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_times (id),
-    FOREIGN KEY (theme_id) REFERENCES themes (id),
-    FOREIGN KEY (member_id) REFERENCES members (id)
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (member_id) REFERENCES member (id)
 );

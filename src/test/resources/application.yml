@@ -14,8 +14,18 @@ spring:
   # DB initialization
   sql:
     init:
-      mode: embedded
+      mode: always
       schema-locations: classpath:schema.sql
+
+  # JPA settings
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+#    defer-datasource-initialization: true
 
 security:
   jwt:
