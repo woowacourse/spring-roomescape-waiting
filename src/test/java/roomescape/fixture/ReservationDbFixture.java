@@ -28,7 +28,7 @@ public class ReservationDbFixture {
     public Reservation 예약_유저1_내일_10시(Theme theme) {
         Reservation reservation = Reservation.reserve(
                 memberDbFixture.유저1_생성(),
-                ReservationDateTime.load(
+                new ReservationDateTime(
                         ReservationDateFixture.예약날짜_내일,
                         reservationTimeDbFixture.열시()
                 ),
@@ -40,7 +40,7 @@ public class ReservationDbFixture {
     public Reservation 예약_유저2_내일_11시(Theme theme) {
         Reservation reservation = Reservation.reserve(
                 memberDbFixture.유저2_생성(),
-                ReservationDateTime.load(
+                new ReservationDateTime(
                         ReservationDateFixture.예약날짜_내일,
                         reservationTimeDbFixture.열한시()
                 ),
@@ -52,7 +52,7 @@ public class ReservationDbFixture {
     public Reservation 예약_유저1_내일_10시_공포() {
         Reservation reservation = Reservation.reserve(
                 memberDbFixture.유저1_생성(),
-                ReservationDateTime.load(
+                new ReservationDateTime(
                         ReservationDateFixture.예약날짜_내일,
                         reservationTimeDbFixture.열시()
                 ),
@@ -64,7 +64,7 @@ public class ReservationDbFixture {
     public Reservation 예약_유저2_내일_11시_공포() {
         Reservation reservation = Reservation.reserve(
                 memberDbFixture.유저2_생성(),
-                ReservationDateTime.load(
+                new ReservationDateTime(
                         ReservationDateFixture.예약날짜_내일,
                         reservationTimeDbFixture.열한시()
                 ),
@@ -76,7 +76,7 @@ public class ReservationDbFixture {
     public Reservation 예약_유저1(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         Reservation reservation = Reservation.reserve(
                 memberDbFixture.유저1_생성(),
-                ReservationDateTime.load(
+                new ReservationDateTime(
                         reservationDate,
                         reservationTime
                 ),
@@ -88,7 +88,7 @@ public class ReservationDbFixture {
     public Reservation 예약_유저1_내일_11시_공포() {
         Reservation reservation = Reservation.reserve(
                 memberDbFixture.유저1_생성(),
-                ReservationDateTime.load(
+                new ReservationDateTime(
                         ReservationDateFixture.예약날짜_내일,
                         reservationTimeDbFixture.열한시()
                 ),

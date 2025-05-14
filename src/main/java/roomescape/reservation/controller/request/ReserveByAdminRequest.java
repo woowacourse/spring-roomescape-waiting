@@ -1,4 +1,4 @@
-package roomescape.admin.controller.request;
+package roomescape.reservation.controller.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;

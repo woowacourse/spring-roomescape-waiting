@@ -27,8 +27,4 @@ public class ReservationTime {
     public static ReservationTime open(LocalTime time) {
         return new ReservationTime(null, time);
     }
-
-    public static ReservationTime load(Long id, LocalTime time) {
-        return new ReservationTime(id, time);
-    }
 }

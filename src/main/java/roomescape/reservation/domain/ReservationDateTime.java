@@ -23,17 +23,13 @@ public class ReservationDateTime {
     @ManyToOne
     private ReservationTime reservationTime;
 
-    private ReservationDateTime(ReservationDate reservationDate, ReservationTime reservationTime) {
+    public ReservationDateTime(ReservationDate reservationDate, ReservationTime reservationTime) {
         this.reservationDate = reservationDate;
         this.reservationTime = reservationTime;
     }
 
     public static ReservationDateTime create(ReservationDate reservationDate, ReservationTime reservationTime) {
         validatePast(reservationDate, reservationTime);
-        return new ReservationDateTime(reservationDate, reservationTime);
-    }
-
-    public static ReservationDateTime load(ReservationDate reservationDate, ReservationTime reservationTime) {
         return new ReservationDateTime(reservationDate, reservationTime);
     }
 

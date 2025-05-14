@@ -1,7 +1,7 @@
 package roomescape.reservation.service.command;
 
 import java.time.LocalDate;
-import roomescape.admin.controller.request.ReserveByAdminRequest;
+import roomescape.reservation.controller.request.ReserveByAdminRequest;
 import roomescape.reservation.controller.request.ReserveByUserRequest;
 
 public record ReserveCommand(

@@ -83,18 +83,21 @@ class ApiTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
+                .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.size()", is(0));
@@ -142,7 +145,8 @@ class ApiTest {
     @Test
     void 방탈출_예약_목록을_응답한다() {
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.size()", is(0));

@@ -41,8 +41,4 @@ public class Member {
     public static Member signUpAdmin(String name, String email, Password password) {
         return new Member(null, name, Role.ADMIN, email, password);
     }
-
-    public static Member load(Long id, String name, Role role, String email, Password password) {
-        return new Member(id, name, role, email, password);
-    }
 }

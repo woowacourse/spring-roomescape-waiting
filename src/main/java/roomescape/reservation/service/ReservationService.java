@@ -28,7 +28,7 @@ public class ReservationService {
     private final ThemeService themeService;
     private final MemberService memberService;
 
-    public List<ReservationResponse> getAllReservations() {
+    private List<ReservationResponse> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
 
         return ReservationResponse.from(reservations);

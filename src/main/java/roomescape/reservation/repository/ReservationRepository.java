@@ -46,7 +46,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Long> findReservedTimeIdsByDateAndTheme(@Param(value = "date") LocalDate date,
                                                  @Param(value = "themeId") Long themeId);
 
-    // TODO 페치를 사용하는 것으로 인한 성능 저하
+    // TODO 페치를 사용하는 것으로 인한 성능 저하 처리 방법
 
     @Query("""
                 SELECT r FROM Reservation r

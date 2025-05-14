@@ -1,6 +1,7 @@
 package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.fixture.MemberDbFixture.RAW_PASSWORD;
 
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.MemberDbFixture;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.controller.request.SignUpRequest;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.domain.Member;
@@ -35,6 +37,20 @@ class MemberServiceTest {
         assertThat(response.id()).isNotNull();
         assertThat(response.name()).isEqualTo("유저1");
         assertThat(response.email()).isEqualTo("user1@email.com");
+    }
+
+    @Test
+    void 이미_가입된_이메일이면_예외를_던진다() {
+        memberDbFixture.유저1_생성();
+
+        SignUpRequest request = new SignUpRequest(
+                "user1@email.com",
+                "1234",
+                "유저1"
+        );
+
+        assertThatThrownBy(() -> memberService.signUp(request))
+                .isInstanceOf(InvalidArgumentException.class);
     }
 
     @Test

@@ -30,8 +30,4 @@ public class Theme {
     public static Theme create(String name, String description, String thumbnail) {
         return new Theme(null, name, description, thumbnail);
     }
-
-    public static Theme load(Long id, String name, String description, String thumbnail) {
-        return new Theme(id, name, description, thumbnail);
-    }
 }

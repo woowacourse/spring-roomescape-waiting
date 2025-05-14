@@ -105,7 +105,7 @@ class ReservationServiceTest {
     void 예약을_모두_조회한다() {
         Reservation reservation = reservationDbFixture.예약_유저1_내일_10시_공포();
 
-        List<ReservationResponse> responses = reservationService.getAllReservations();
+        List<ReservationResponse> responses = reservationService.getFilteredReservations(null, null, null, null);
         ReservationResponse response = responses.get(0);
 
         assertThat(response.id()).isNotNull();
@@ -120,7 +120,7 @@ class ReservationServiceTest {
 
         reservationService.deleteById(reservation.getId());
 
-        assertThat(reservationService.getAllReservations()).hasSize(0);
+        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
     }
 
     @Test
@@ -177,6 +177,10 @@ class ReservationServiceTest {
         // 일치하는 결과가 없는 필터 조합
         softly.assertThat(reservationService.getFilteredReservations(theme.getId(), member2.getId(), today, today))
                 .isEmpty();
+
+        // 모든 결과 조회
+        softly.assertThat(reservationService.getFilteredReservations(null, null, null, null))
+                .hasSize(3);
 
         softly.assertAll();
     }
