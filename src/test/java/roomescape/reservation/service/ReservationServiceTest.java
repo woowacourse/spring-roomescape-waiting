@@ -60,7 +60,7 @@ class ReservationServiceTest {
         Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
 
         LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(time));
+        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
 
@@ -90,7 +90,7 @@ class ReservationServiceTest {
         Long themeId = savedTheme.getId();
 
         LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(time));
+        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
         Long timeId = savedTime.getId();
         Member savedMember = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
@@ -122,7 +122,7 @@ class ReservationServiceTest {
         Long themeId = savedTheme.getId();
 
         LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(time));
+        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
         Long timeId = savedTime.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
@@ -148,7 +148,7 @@ class ReservationServiceTest {
         LocalDate date = now.toLocalDate();
         LocalTime pastTime = now.toLocalTime().minusMinutes(1);
 
-        ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(pastTime));
+        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(pastTime));
         Long timeId = savedTime.getId();
 
         ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
@@ -181,7 +181,7 @@ class ReservationServiceTest {
         LocalDate date = now.toLocalDate().plusDays(1);
 
         LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(time));
+        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
         Long timeId = savedTime.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
@@ -200,7 +200,7 @@ class ReservationServiceTest {
         Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
 
         LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(time));
+        ReservationTime savedTime = reservationTimeDao.save(new ReservationTime(time));
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
 
@@ -230,8 +230,8 @@ class ReservationServiceTest {
         LocalDate date = nextDay();
         LocalTime time1 = LocalTime.of(8, 0);
         LocalTime time2 = LocalTime.of(9, 0);
-        ReservationTime reservationTime1 = reservationTimeDao.save(ReservationTime.withoutId(time1));
-        ReservationTime reservationTime2 = reservationTimeDao.save(ReservationTime.withoutId(time2));
+        ReservationTime reservationTime1 = reservationTimeDao.save(new ReservationTime(time1));
+        ReservationTime reservationTime2 = reservationTimeDao.save(new ReservationTime(time2));
         Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);

@@ -11,6 +11,6 @@ public record ReservationTimeRequest(
 ) {
 
     public ReservationTime toEntity() {
-        return ReservationTime.withoutId(startAt);
+        return new ReservationTime(startAt);
     }
 }

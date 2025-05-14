@@ -117,7 +117,7 @@ class ThemeServiceTest {
         Long themeId = savedTheme.getId();
 
         LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.withoutId(time));
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
 
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
@@ -135,7 +135,7 @@ class ThemeServiceTest {
     void test7() {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(LocalTime.of(10, 0)));
+                new ReservationTime(LocalTime.of(10, 0)));
         LocalDate date = LocalDateTime.now().toLocalDate();
         Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 

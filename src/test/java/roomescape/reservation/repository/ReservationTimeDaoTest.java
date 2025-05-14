@@ -82,7 +82,7 @@ class ReservationTimeDaoTest {
         void test1() {
             // given
             LocalTime now = LocalTime.now();
-            ReservationTime time = ReservationTime.withoutId(now);
+            ReservationTime time = new ReservationTime(now);
 
             // when
             ReservationTime saved = reservationTimeRepository.save(time);
