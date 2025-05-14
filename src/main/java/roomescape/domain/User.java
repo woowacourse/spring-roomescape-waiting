@@ -12,6 +12,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import roomescape.exception.custom.BusinessRuleViolationException;
+import roomescape.exception.custom.InvalidInputException;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
@@ -62,8 +64,12 @@ public class User {
     }
 
     private void validateNameLength(final String name) {
-        if (name.isBlank() || name.length() > NAME_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("이름은 공백이거나 %d자를 넘길 수 없습니다.", NAME_MAX_LENGTH));
+        if (name.isBlank()) {
+            throw new InvalidInputException("이름은 공백일 수 없습니다.");
+        }
+
+        if (name.length() > NAME_MAX_LENGTH) {
+            throw new BusinessRuleViolationException(String.format("이름은 %d자를 넘길 수 없습니다.", NAME_MAX_LENGTH));
         }
     }
 
@@ -71,12 +77,16 @@ public class User {
         if (email.matches(VALID_EMAIL_FORMAT)) {
             return;
         }
-        throw new IllegalArgumentException("잘못된 형식의 이메일입니다 : " + email);
+        throw new InvalidInputException("잘못된 형식의 이메일입니다 : " + email);
     }
 
     private void validatePasswordLength(final String password) {
-        if (password.isBlank() || password.length() > PASSWORD_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("비밀번호는 공백이거나 %d자를 넘길 수 없습니다.", PASSWORD_MAX_LENGTH));
+        if (password.isBlank()) {
+            throw new InvalidInputException("비밀번호는 공백일 수 없습니다.");
+        }
+
+        if (password.length() > PASSWORD_MAX_LENGTH) {
+            throw new BusinessRuleViolationException(String.format("비밀번호는 %d자를 넘길 수 없습니다.", PASSWORD_MAX_LENGTH));
         }
     }
 }

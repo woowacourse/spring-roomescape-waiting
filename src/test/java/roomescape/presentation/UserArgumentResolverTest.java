@@ -18,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import roomescape.application.AuthenticationService;
-import roomescape.application.AuthorizationException;
 import roomescape.domain.User;
 import roomescape.domain.UserRole;
 
@@ -32,8 +31,8 @@ class UserArgumentResolverTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new TestController())
-            .setCustomArgumentResolvers(new UserArgumentResolver(authenticationService))
-            .build();
+                .setCustomArgumentResolvers(new UserArgumentResolver(authenticationService))
+                .build();
     }
 
     @Test
@@ -44,33 +43,34 @@ class UserArgumentResolverTest {
         Mockito.when(authenticationService.getUserByToken("validToken")).thenReturn(user);
 
         mockMvc.perform(get("/authenticatedUser").cookie(cookie))
-            .andExpect(status().isOk())
-            .andExpect(content().json("""
-                {
-                  "id": 1,
-                  "name": "유저1",
-                  "role": "USER",
-                  "email": "email@email.com",
-                  "password": "password"
-                }
-                """)
-            );
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        {
+                          "id": 1,
+                          "name": "유저1",
+                          "role": "USER",
+                          "email": "email@email.com",
+                          "password": "password"
+                        }
+                        """)
+                );
     }
 
     @Test
     @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 토큰이 없으면 예외가 발생한다.")
     void bindUserWhenRequestWithoutToken() {
         assertThatThrownBy(() -> mockMvc.perform(get("/authenticatedUser")))
-            .hasCauseInstanceOf(AuthorizationException.class);
+                .hasCauseInstanceOf(AuthorizationException.class);
     }
 
     @Test
     @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 유효하지 않은 토큰이 있으면 예외가 발생한다.")
     void bindUserWhenRequestWithInvalidToken() {
         var invalidTokenCookie = AuthenticationTokenCookie.forResponse("invalidToken");
-        Mockito.when(authenticationService.getUserByToken("invalidToken")).thenThrow(new AuthorizationException("invalid token"));
+        Mockito.when(authenticationService.getUserByToken("invalidToken"))
+                .thenThrow(new AuthorizationException("invalid token"));
         assertThatThrownBy(() -> mockMvc.perform(get("/authenticatedUser").cookie(invalidTokenCookie)))
-            .hasCauseInstanceOf(AuthorizationException.class);
+                .hasCauseInstanceOf(AuthorizationException.class);
     }
 
     @Controller
@@ -79,22 +79,22 @@ class UserArgumentResolverTest {
         @GetMapping("/authenticatedUser")
         public ResponseEntity<UserResponseForTest> test(@Authenticated User user) {
             var response = new UserResponseForTest(
-                user.id(),
-                user.name(),
-                user.role(),
-                user.email(),
-                user.password()
+                    user.id(),
+                    user.name(),
+                    user.role(),
+                    user.email(),
+                    user.password()
             );
             return ResponseEntity.ok(response);
         }
     }
 
     private record UserResponseForTest(
-        long id,
-        String name,
-        UserRole role,
-        String email,
-        String password
+            long id,
+            String name,
+            UserRole role,
+            String email,
+            String password
     ) {
 
     }

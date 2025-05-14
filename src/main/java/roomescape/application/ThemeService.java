@@ -7,6 +7,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.exception.custom.InUseException;
 
 @Service
 public class ThemeService {
@@ -35,7 +36,7 @@ public class ThemeService {
     public void removeById(final long id) {
         List<Reservation> reservations = reservationRepository.findByThemeId(id);
         if (!reservations.isEmpty()) {
-            throw new IllegalStateException("삭제하려는 테마를 사용하는 예약이 있습니다.");
+            throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
         }
         themeRepository.deleteById(id);
     }

@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import roomescape.exception.custom.BusinessRuleViolationException;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
@@ -44,13 +45,13 @@ public class Theme {
 
     private void validateNameLength(final String name) {
         if (name.length() > NAME_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("이름은 %d자를 넘길 수 없습니다.", NAME_MAX_LENGTH));
+            throw new BusinessRuleViolationException(String.format("이름은 %d자를 넘길 수 없습니다.", NAME_MAX_LENGTH));
         }
     }
 
     private void validateDescriptionLength(final String description) {
         if (description.length() > DESCRIPTION_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("설명은 %d자를 넘길 수 없습니다.", DESCRIPTION_MAX_LENGTH));
+            throw new BusinessRuleViolationException(String.format("설명은 %d자를 넘길 수 없습니다.", DESCRIPTION_MAX_LENGTH));
         }
     }
 }

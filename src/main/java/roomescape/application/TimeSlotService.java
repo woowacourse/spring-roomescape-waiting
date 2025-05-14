@@ -9,6 +9,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.TimeSlotRepository;
+import roomescape.exception.custom.InUseException;
 
 @Service
 public class TimeSlotService {
@@ -36,7 +37,7 @@ public class TimeSlotService {
     public void removeById(final long id) {
         List<Reservation> reservations = reservationRepository.findByTimeSlotId(id);
         if (!reservations.isEmpty()) {
-            throw new IllegalStateException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
+            throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
         }
         timeSlotRepository.deleteById(id);
     }

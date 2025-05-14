@@ -11,6 +11,8 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationSearchFilter;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.domain.repository.TimeSlotRepository;
+import roomescape.exception.custom.AlreadyExistedException;
+import roomescape.exception.custom.NotFoundException;
 import roomescape.infrastructure.ReservationSpecifications;
 
 @Service
@@ -49,18 +51,18 @@ public class ReservationService {
 
     private TimeSlot getTimeSlotById(final long timeId) {
         return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 타임 슬롯입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 타임 슬롯입니다."));
     }
 
     private Theme getThemeById(final long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         var reservation = reservationRepository.findByDateAndTimeSlotIdAndThemeId(date, timeSlot.id(), theme.id());
         if (reservation.isPresent()) {
-            throw new IllegalArgumentException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
+            throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
     }
 }

@@ -25,11 +25,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import roomescape.application.AuthorizationException;
 import roomescape.exception.custom.AlreadyExistedException;
 import roomescape.exception.custom.AuthenticationException;
+import roomescape.exception.custom.AuthorizationException;
 import roomescape.exception.custom.BusinessRuleViolationException;
 import roomescape.exception.custom.InUseException;
+import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 
 @RestControllerAdvice
@@ -95,6 +96,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(code = UNAUTHORIZED)
     public ProblemDetail handleAuthentication(final AuthenticationException ex) {
         return createProblemDetail(UNAUTHORIZED, "인증에 실패했습니다.", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidInputException.class)
+    @ResponseStatus(code = BAD_REQUEST)
+    public ProblemDetail handleInvalidInput(final InvalidInputException ex) {
+        return createProblemDetail(BAD_REQUEST, "올바르지 못한 입력입니다.", ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
