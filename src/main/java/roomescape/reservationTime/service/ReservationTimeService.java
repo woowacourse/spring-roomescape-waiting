@@ -75,10 +75,10 @@ public class ReservationTimeService {
     ) {
         return reservationDao.findAll().stream()
                 .filter(reservation -> reservation.getDate().equals(availableReservationTimeRequest.date())
-                        && reservation.getThemeId().equals(availableReservationTimeRequest.themeId())
+                        && reservation.getTheme().getId().equals(availableReservationTimeRequest.themeId())
                 ).map(reservation -> new ReservationTime(
-                        reservation.getTimeId(),
-                        reservation.getTimeStartAt())
+                        reservation.getTime().getId(),
+                        reservation.getTime().getStartAt())
                 )
                 .toList();
     }

@@ -156,7 +156,7 @@ public class ReservationDaoImpl implements ReservationDao {
     @Override
     public Reservation add(final Reservation reservation) {
         Map<String, Object> parameters = new HashMap<>(5);
-        parameters.put("name", reservation.getMemberName());
+        parameters.put("name", reservation.getMember().getName());
         parameters.put("date", reservation.getDate());
         parameters.put("time_id", reservation.getTime().getId());
         parameters.put("theme_id", reservation.getTheme().getId());
