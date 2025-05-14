@@ -1,22 +1,19 @@
 package roomescape.integration.fixture;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThemeThumbnail;
+import roomescape.repository.ThemeRepository;
 
 @Component
 public class ThemeDbFixture {
-    private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public ThemeDbFixture(final JdbcTemplate jdbcTemplate) {
-        simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("theme")
-                .usingGeneratedKeyColumns("id");
+    private ThemeRepository themeRepository;
+
+    public ThemeDbFixture(final ThemeRepository themeRepository) {
+        this.themeRepository = themeRepository;
     }
 
     public Theme 공포() {
@@ -36,17 +33,11 @@ public class ThemeDbFixture {
             final String description,
             final String thumbnail
     ) {
-        Long id = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue("name", name)
-                .addValue("description", description)
-                .addValue("thumbnail", thumbnail)
-        ).longValue();
-
-        return new Theme(
-                id,
+        return themeRepository.save(new Theme(
+                null,
                 new ThemeName(name),
                 new ThemeDescription(description),
                 new ThemeThumbnail(thumbnail)
-        );
+        ));
     }
 }

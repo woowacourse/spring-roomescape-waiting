@@ -21,6 +21,7 @@ public class LoginService {
     }
 
     public Member login(final LoginRequest request) {
+        System.out.println(request.email());
         Member member = memberRepository.findByEmail(new MemberEmail(request.email()))
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 멤버입니다."));
         MemberPassword rawPassword = new MemberPassword(request.password());

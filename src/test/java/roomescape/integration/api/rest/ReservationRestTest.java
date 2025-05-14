@@ -1,6 +1,7 @@
 package roomescape.integration.api.rest;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static roomescape.common.Constant.FIXED_CLOCK;
 
 import io.restassured.RestAssured;
@@ -66,6 +67,7 @@ class ReservationRestTest extends RestAssuredTestBase {
     void 예약_목록을_조회한다() {
         예약을_생성한다();
         RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
                 .cookie("JSESSIONID", restLoginMember.sessionId())
                 .when().get("/reservations")
                 .then().log().all()
@@ -103,7 +105,7 @@ class ReservationRestTest extends RestAssuredTestBase {
     void 예약을_삭제한다() {
         예약을_생성한다();
         RestAssured.given().log().all()
-                .cookie("JSESSIONID", generateLoginMember().sessionId())
+                .cookie("JSESSIONID", restLoginMember.sessionId())
                 .when().delete("/reservations/{id}", 1)
                 .then().log().all()
                 .statusCode(204);

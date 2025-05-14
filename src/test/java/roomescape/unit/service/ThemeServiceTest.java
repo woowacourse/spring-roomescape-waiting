@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.ClockConfig;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberEncodedPassword;
@@ -23,22 +28,48 @@ import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThemeThumbnail;
 import roomescape.domain.time.ReservationTime;
+import roomescape.integration.fixture.MemberDbFixture;
+import roomescape.integration.fixture.ReservationDateFixture;
+import roomescape.integration.fixture.ReservationDbFixture;
+import roomescape.integration.fixture.ReservationTimeDbFixture;
+import roomescape.integration.fixture.ThemeDbFixture;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.ThemeService;
 import roomescape.service.request.CreateThemeRequest;
 import roomescape.service.response.ThemeResponse;
-import roomescape.unit.fake.FakeReservationRepository;
-import roomescape.unit.fake.FakeReservationTimeRepository;
-import roomescape.unit.fake.FakeThemeRepository;
 
+@Transactional
+@SpringBootTest
+@Import(ClockConfig.class)
 class ThemeServiceTest {
 
-    private final ThemeRepository themeRepository = new FakeThemeRepository();
-    private final ReservationRepository reservationRepository = new FakeReservationRepository();
-    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
-    private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository, FIXED_CLOCK);
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeService themeService;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeDbFixture themeDbFixture;
+
+    @Autowired
+    private ReservationDbFixture reservationDbFixture;
+    @Autowired
+    private MemberDbFixture memberDbFixture;
+    @Autowired
+    private ReservationTimeDbFixture reservationTimeDbFixture;
 
     @Test
     void 테마를_생성할_수_있다() {
@@ -84,29 +115,36 @@ class ThemeServiceTest {
     @Test
     void 예약이_있는_테마는_삭제할_수_없다() {
         // given
-        ThemeResponse saved = themeService.createTheme(new CreateThemeRequest("공포", "무섭다", "thumb.jpg"));
-        ReservationTime time = reservationTimeRepository.save(LocalTime.of(10, 0));
-        Reservation reservation = reservationRepository.save(
-                new Member(
-                        1L,
-                        new MemberName("한스"),
-                        new MemberEmail("leehyeonsu4888@gmail.com"),
-                        new MemberEncodedPassword("dsa"),
-                        MemberRole.MEMBER
-                ),
-                new ReservationDateTime(
-                        new ReservationDate(LocalDate.of(2025, 5, 5)), time, FIXED_CLOCK
-                ),
-                new Theme(
-                        1L,
+        Theme theme = themeRepository.save(new Theme(
+                        null,
                         new ThemeName("공포"),
                         new ThemeDescription("공포입니다."),
                         new ThemeThumbnail("썸네일")
                 )
         );
+        ReservationTime time = reservationTimeRepository.save(
+                new ReservationTime(null, LocalTime.of(10, 0)));
+        ReservationDateTime reservationDateTime = new ReservationDateTime(
+                new ReservationDate(LocalDate.of(2025, 5, 5)), time, FIXED_CLOCK
+        );
+        Member member = memberRepository.save(new Member(
+                null,
+                new MemberName("한스"),
+                new MemberEmail("leehyeonsu4888@gmail.com"),
+                new MemberEncodedPassword("dsa"),
+                MemberRole.MEMBER
+        ));
+
+        Reservation reservation = reservationRepository.save(new Reservation(
+                null,
+                member,
+                reservationDateTime.getReservationDate(),
+                reservationDateTime.getReservationTime(),
+                theme
+        ));
 
         // when & then
-        assertThatThrownBy(() -> themeService.deleteThemeById(saved.id()))
+        assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -118,10 +156,15 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 최근_일주일_인기_테마를_조회할_수_있다() {
+    void 최근_일주일_인기_테마를_조회할_수_있다() {  // ?? 이거 예약 없이 getWeeklyPopularThemes가 돌아가었던 건가?? 나머지는 다 고쳐놨는디 이거는 한번 같이 봐야할듯! - 머피
         // given
-        themeService.createTheme(new CreateThemeRequest("공포", "무섭다", "thumb.jpg"));
-        themeService.createTheme(new CreateThemeRequest("로맨스", "달달하다", "love.jpg"));
+        Theme 공포 = themeDbFixture.공포();
+        Theme 로맨스 = themeDbFixture.로맨스();
+        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
+        ReservationDate 예약날짜_7일전 = ReservationDateFixture.예약날짜_7일전;
+        Reservation 공포_예약 = reservationDbFixture.예약_생성(예약날짜_7일전, reservationTime, 공포, 한스);
+        Reservation 로맨스_예약 = reservationDbFixture.예약_생성(예약날짜_7일전, reservationTime, 로맨스, 한스);
 
         // when
         List<ThemeResponse> result = themeService.getWeeklyPopularThemes();

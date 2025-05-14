@@ -24,8 +24,6 @@ class MemberRepositoryTest extends RepositoryBaseTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    private static final String COUNT_MEMBER_BY_ID = "SELECT COUNT(*) FROM member WHERE id = ?";
-
     @Test
     void 멤버를_저장한다() {
         // given
@@ -35,10 +33,10 @@ class MemberRepositoryTest extends RepositoryBaseTest {
         MemberRole role = MemberRole.MEMBER;
 
         // when
-        Member saved = memberRepository.save(email, name, password, role);
+        Member saved = memberRepository.save(new Member(null, name, email, password, role));
 
         // then
-        assertThat(getMemberCountById(saved.getId())).isEqualTo(1);
+        assertThat(getMemberCount()).isEqualTo(1);
     }
 
     @Test
@@ -113,7 +111,7 @@ class MemberRepositoryTest extends RepositoryBaseTest {
         });
     }
 
-    private long getMemberCountById(Long id) {
-        return jdbcTemplate.queryForObject(COUNT_MEMBER_BY_ID, Long.class, id);
+    private long getMemberCount() {
+        return memberRepository.count();
     }
 }

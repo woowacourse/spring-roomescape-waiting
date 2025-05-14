@@ -5,9 +5,17 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.common.RestAssuredTestBase;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberEmail;
+import roomescape.domain.member.MemberEncodedPassword;
+import roomescape.domain.member.MemberName;
+import roomescape.domain.member.MemberRole;
 import roomescape.integration.api.RestLoginMember;
 import roomescape.integration.fixture.MemberDbFixture;
 
@@ -16,10 +24,20 @@ class LoginRestTest extends RestAssuredTestBase {
     @Autowired
     private MemberDbFixture memberDbFixture;
 
+    @Autowired
+    private DataSource dataSource;
+
     @Test
     void 로그인을_한다() {
         // given
-         memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        Member member = memberRepository.save(new Member(
+                null,
+                new MemberName("홍길동"),
+                new MemberEmail("leehyeonsu4888@gmail.com"),
+                new MemberEncodedPassword(encoder.encode("gustn111!!")),
+                MemberRole.MEMBER
+        ));
 
         // when & then
         RestAssured.given().log().all()

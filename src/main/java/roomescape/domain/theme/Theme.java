@@ -31,7 +31,7 @@ public class Theme {
             final ThemeDescription description,
             final ThemeThumbnail thumbnail
     ) {
-        this.id = Objects.requireNonNull(id, "id는 null일 수 없습니다.");
+        this.id = id;
         this.name = Objects.requireNonNull(name, "name은 null일 수 없습니다.");
         this.description = Objects.requireNonNull(description, "description은 null일 수 없습니다.");
         this.thumbnail = Objects.requireNonNull(thumbnail, "thumbnail은 null일 수 없습니다.");

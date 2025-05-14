@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -13,6 +14,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationSpecifications;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.request.AdminCreateReservationRequest;
@@ -109,12 +111,12 @@ public class ReservationService {
             final LocalDate fromDate,
             final LocalDate toDate
     ) {
-//        List<Reservation> allWithCondition = reservationRepository.findAllWithCondition(
-//                memberId,
-//                themeId,
-//                fromDate,
-//                toDate
-//        );
-        return null;
+        final Specification<Reservation> spec = Specification
+                .where(ReservationSpecifications.hasMemberId(memberId))
+                .and(ReservationSpecifications.hasThemeId(themeId))
+                .and(ReservationSpecifications.dateAfterOrEqual(fromDate))
+                .and(ReservationSpecifications.dateBeforeOrEqual(toDate));
+
+        return ReservationResponse.from(reservationRepository.findAll(spec));
     }
 }

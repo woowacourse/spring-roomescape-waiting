@@ -6,12 +6,11 @@ import static roomescape.common.Constant.FIXED_CLOCK;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import roomescape.common.RepositoryBaseTest;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.ReservationDate;
@@ -45,26 +44,25 @@ class ThemeRepositoryTest extends RepositoryBaseTest {
     @Autowired
     private MemberDbFixture memberDbFixture;
 
-    private static final String SELECT_THEME_BY_ID = "SELECT * FROM theme WHERE id = ?";
-    private static final String COUNT_THEME_BY_ID = "SELECT COUNT(*) FROM theme WHERE id = ?";
-
     @Test
     void 테마를_저장한다() {
         // given
         Theme saved = themeRepository.save(
-                new ThemeName("공포"),
-                new ThemeDescription("무섭다"),
-                new ThemeThumbnail("thumb.jpg")
+                new Theme(
+                        null,
+                        new ThemeName("공포"),
+                        new ThemeDescription("무섭다"),
+                        new ThemeThumbnail("thumb.jpg")
+                )
         );
 
         // when
-        Map<String, Object> row = jdbcTemplate.queryForMap(SELECT_THEME_BY_ID, saved.getId());
-
+        Theme theme = themeRepository.findById(saved.getId()).get();
         // then
         assertSoftly(softly -> {
-            softly.assertThat(row.get("name")).isEqualTo("공포");
-            softly.assertThat(row.get("description")).isEqualTo("무섭다");
-            softly.assertThat(row.get("thumbnail")).isEqualTo("thumb.jpg");
+            softly.assertThat(theme.getName().name()).isEqualTo("공포");
+            softly.assertThat(theme.getDescription().description()).isEqualTo("무섭다");
+            softly.assertThat(theme.getThumbnail().thumbnail()).isEqualTo("thumb.jpg");
         });
     }
 
@@ -119,15 +117,18 @@ class ThemeRepositoryTest extends RepositoryBaseTest {
     void 테마를_삭제할_수_있다() {
         // given
         Theme saved = themeRepository.save(
-                new ThemeName("공포"),
-                new ThemeDescription("무섭다"),
-                new ThemeThumbnail("thumb.jpg")
+                new Theme(
+                        null,
+                        new ThemeName("공포"),
+                        new ThemeDescription("무섭다"),
+                        new ThemeThumbnail("thumb.jpg")
+                )
         );
         // when
         themeRepository.deleteById(saved.getId());
 
         // then
-        Long count = jdbcTemplate.queryForObject(COUNT_THEME_BY_ID, Long.class, saved.getId());
+        Long count = themeRepository.count();
         assertThat(count).isEqualTo(0);
     }
 
@@ -147,17 +148,17 @@ class ThemeRepositoryTest extends RepositoryBaseTest {
 
         // when
         DateRange range = DateRange.createLastWeekRange(FIXED_CLOCK);
-        List<Theme> popularThemes = themeRepository.findPopularThemeDuringAWeek(10, range);
+        List<Theme> popularThemes = themeRepository.findPopularThemeDuringAWeek(range.getStartDate(),
+                range.getEndDate(), PageRequest.of(0, 10));
 
         // then
         assertSoftly(softly -> {
             softly.assertThat(popularThemes).hasSize(10);
             softly.assertThat(popularThemes)
-                    .extracting(Theme::getId)
-                    .containsExactlyElementsOf(
-                            LongStream.rangeClosed(1, 10)
-                                    .boxed()
-                                    .toList()
+                    .extracting(theme -> theme.getName().name())
+                    .containsExactly(
+                            "테마0", "테마1", "테마2", "테마3", "테마4",
+                            "테마5", "테마6", "테마7", "테마8", "테마9"
                     );
         });
     }

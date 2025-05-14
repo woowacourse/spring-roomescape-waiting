@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.ClockConfig;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberEncodedPassword;
@@ -22,25 +27,33 @@ import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThemeThumbnail;
 import roomescape.domain.time.ReservationTime;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.request.AvailableReservationTimeRequest;
 import roomescape.service.request.CreateReservationTimeRequest;
 import roomescape.service.response.AvailableReservationTimeResponse;
 import roomescape.service.response.ReservationTimeResponse;
-import roomescape.unit.fake.FakeReservationRepository;
-import roomescape.unit.fake.FakeReservationTimeRepository;
 
+@Transactional
+@SpringBootTest
+@Import(ClockConfig.class)
 class ReservationTimeServiceTest {
 
-    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
-    private final ReservationRepository reservationRepository = new FakeReservationRepository();
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
-    private final ReservationTimeService service = new ReservationTimeService(
-            reservationTimeRepository,
-            reservationRepository
-    );
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationTimeService service;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @Test
     void 예약시간을_생성할_수_있다() {
@@ -53,7 +66,6 @@ class ReservationTimeServiceTest {
 
         // then
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(response.id()).isEqualTo(1L);
         softly.assertThat(response.startAt()).isEqualTo(startAt);
         softly.assertAll();
     }
@@ -62,7 +74,7 @@ class ReservationTimeServiceTest {
     void 중복된_예약시간은_생성할_수_없다() {
         // given
         LocalTime startAt = LocalTime.of(10, 0);
-        reservationTimeRepository.save(startAt);
+        reservationTimeRepository.save(new ReservationTime(null, startAt));
         CreateReservationTimeRequest request = new CreateReservationTimeRequest(startAt);
 
         // when & then
@@ -73,8 +85,8 @@ class ReservationTimeServiceTest {
     @Test
     void 모든_예약시간을_조회할_수_있다() {
         // given
-        reservationTimeRepository.save(LocalTime.of(10, 0));
-        reservationTimeRepository.save(LocalTime.of(11, 0));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(11, 0)));
 
         // when
         List<ReservationTimeResponse> result = service.findAllReservationTimes();
@@ -86,7 +98,7 @@ class ReservationTimeServiceTest {
     @Test
     void 예약이_없는_시간은_삭제할_수_있다() {
         // given
-        ReservationTime time = reservationTimeRepository.save(LocalTime.of(10, 0));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
         // when
         service.deleteReservationTimeById(time.getId());
@@ -98,25 +110,30 @@ class ReservationTimeServiceTest {
     @Test
     void 예약이_존재하는_시간은_삭제할_수_없다() {
         // given
-        ReservationTime time = reservationTimeRepository.save(LocalTime.of(10, 0));
-        Reservation reservation = reservationRepository.save(
-                new Member(
-                        1L,
-                        new MemberName("한스"),
-                        new MemberEmail("leehyeonsu4888@gmail.com"),
-                        new MemberEncodedPassword("dsa"),
-                        MemberRole.MEMBER
-                ),
-                new ReservationDateTime(
-                        new ReservationDate(LocalDate.of(2025, 5, 5)), time, FIXED_CLOCK
-                ),
-                new Theme(
-                        1L,
-                        new ThemeName("공포"),
-                        new ThemeDescription("공포입니다."),
-                        new ThemeThumbnail("썸네일")
-                )
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        ReservationDateTime reservationDateTime = new ReservationDateTime(
+                new ReservationDate(LocalDate.of(2025, 5, 5)), time, FIXED_CLOCK
         );
+        Member member = memberRepository.save(new Member(
+                null,
+                new MemberName("한스"),
+                new MemberEmail("leehyeonsu4888@gmail.com"),
+                new MemberEncodedPassword("dsa"),
+                MemberRole.MEMBER
+        ));
+        Theme theme = themeRepository.save(new Theme(
+                null,
+                new ThemeName("공포"),
+                new ThemeDescription("공포입니다."),
+                new ThemeThumbnail("썸네일")
+        ));
+        Reservation reservation = reservationRepository.save(new Reservation(
+                null,
+                member,
+                reservationDateTime.getReservationDate(),
+                reservationDateTime.getReservationTime(),
+                theme
+        ));
 
         // when & then
         assertThatThrownBy(() -> service.deleteReservationTimeById(time.getId()))
@@ -133,13 +150,13 @@ class ReservationTimeServiceTest {
     @Test
     void 예약시간을_ID로_조회할_수_있다() {
         // given
-        ReservationTime time = reservationTimeRepository.save(LocalTime.of(10, 0));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
         // when
-        ReservationTime found = service.getReservationTime(1L);
+        ReservationTime found = service.getReservationTime(time.getId());
 
         // then
-        assertThat(found.getId()).isEqualTo(1L);
+        assertThat(found.getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
     @Test
@@ -152,8 +169,8 @@ class ReservationTimeServiceTest {
     @Test
     void 예약가능한_시간들을_조회할_수_있다() {
         // given
-        reservationTimeRepository.save(LocalTime.of(10, 0));
-        reservationTimeRepository.save(LocalTime.of(11, 0));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(11, 0)));
 
         // when
         List<AvailableReservationTimeResponse> result = service.findAvailableReservationTimes(
@@ -161,7 +178,6 @@ class ReservationTimeServiceTest {
 
         // then
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.get(0).id()).isEqualTo(1L);
             softly.assertThat(result.get(0).startAt()).isEqualTo(LocalTime.of(10, 0));
             softly.assertThat(result.get(0).isReserved()).isFalse();
         });

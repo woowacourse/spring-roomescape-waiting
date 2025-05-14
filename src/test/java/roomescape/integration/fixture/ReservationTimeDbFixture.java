@@ -1,20 +1,17 @@
 package roomescape.integration.fixture;
 
 import java.time.LocalTime;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import roomescape.domain.time.ReservationTime;
+import roomescape.repository.ReservationTimeRepository;
 
 @Component
 public class ReservationTimeDbFixture {
-    private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public ReservationTimeDbFixture(final JdbcTemplate jdbcTemplate) {
-        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("reservation_time")
-                .usingGeneratedKeyColumns("id");
+    private ReservationTimeRepository reservationTimeRepository;
+
+    public ReservationTimeDbFixture(final ReservationTimeRepository reservationTimeRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public ReservationTime 예약시간_10시() {
@@ -26,8 +23,6 @@ public class ReservationTimeDbFixture {
     }
 
     public ReservationTime 예약시간(final LocalTime startAt) {
-        Long id = simpleJdbcInsert.executeAndReturnKey(new MapSqlParameterSource()
-                .addValue("start_at", startAt)).longValue();
-        return new ReservationTime(id, startAt);
+        return reservationTimeRepository.save(new ReservationTime(null, startAt));
     }
 }

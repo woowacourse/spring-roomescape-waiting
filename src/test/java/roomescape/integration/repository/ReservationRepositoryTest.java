@@ -1,14 +1,15 @@
 package roomescape.integration.repository;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.common.Constant.FIXED_CLOCK;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import roomescape.common.RepositoryBaseTest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberName;
@@ -24,11 +25,9 @@ import roomescape.integration.fixture.ReservationDbFixture;
 import roomescape.integration.fixture.ReservationTimeDbFixture;
 import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationSpecifications;
 
 class ReservationRepositoryTest extends RepositoryBaseTest {
-
-    private static final String SELECT_RESERVATION_BY_ID = "SELECT * FROM reservation WHERE id = ?";
-    private static final String COUNT_RESERVATION_BY_ID = "SELECT COUNT(*) FROM reservation WHERE id = ?";
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -56,16 +55,17 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         Member member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
 
         // when
-        Reservation saved = reservationRepository.save(member, dateTime, theme);
+        Reservation saved = reservationRepository.save(
+                new Reservation(null, member, dateTime.getReservationDate(), dateTime.getReservationTime(), theme));
 
         // then
-        Map<String, Object> row = jdbcTemplate.queryForMap(SELECT_RESERVATION_BY_ID, saved.getId());
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(row.get("member_id")).isEqualTo(member.getId());
-        softly.assertThat(row.get("date")).isEqualTo(date.getDate().toString());
-        softly.assertThat(row.get("time_id")).isEqualTo(time.getId());
-        softly.assertThat(row.get("theme_id")).isEqualTo(theme.getId());
-        softly.assertAll();
+        Reservation found = reservationRepository.findById(saved.getId()).get();
+        assertSoftly(softly -> {
+            softly.assertThat(found.getDate()).isEqualTo(date.date().toString());
+            softly.assertThat(found.getReservationTime().getId()).isEqualTo(time.getId());
+            softly.assertThat(found.getTheme().getId()).isEqualTo(theme.getId());
+            softly.assertAll();
+        });
     }
 
     @Test
@@ -89,12 +89,11 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         List<Reservation> reservations = reservationRepository.findAll();
 
         // then
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(2);
             softly.assertThat(reservations).hasSize(2);
             softly.assertThat(reservations).anySatisfy(row -> {
                 SoftAssertions nested = new SoftAssertions();
-                nested.assertThat(row.getId()).isEqualTo(1L);
                 nested.assertThat(row.getDate()).isEqualTo(예약1.getDate());
                 nested.assertThat(row.getTimeId()).isEqualTo(예약1.getTimeId());
                 nested.assertThat(row.getTheme().getId()).isEqualTo(예약1.getTheme().getId());
@@ -135,7 +134,7 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         reservationRepository.deleteById(예약.getId());
 
         // then
-        Long count = jdbcTemplate.queryForObject(COUNT_RESERVATION_BY_ID, Long.class, 예약.getId());
+        Long count = reservationRepository.count();
         assertThat(count).isZero();
     }
 
@@ -148,7 +147,7 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         reservationDbFixture.예약_생성(date, time, themeDbFixture.공포(), member);
 
         // when
-        boolean exists = reservationRepository.existSameDateTime(date, time.getId());
+        boolean exists = reservationRepository.existsByReservationDateAndReservationTime_Id(date, time.getId());
 
         // then
         assertThat(exists).isTrue();
@@ -161,7 +160,7 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         ReservationTime time = reservationTimeDbFixture.예약시간_10시();
 
         // when
-        boolean exists = reservationRepository.existSameDateTime(date, time.getId());
+        boolean exists = reservationRepository.existsByReservationDateAndReservationTime_Id(date, time.getId());
 
         // then
         assertThat(exists).isFalse();
@@ -177,7 +176,7 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         );
 
         // when
-        boolean exists = reservationRepository.existReservationByTimeId(time.getId());
+        boolean exists = reservationRepository.existsByReservationTime_Id(time.getId());
 
         // then
         assertThat(exists).isTrue();
@@ -189,7 +188,7 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
         ReservationTime time = reservationTimeDbFixture.예약시간_10시();
 
         // when
-        boolean exists = reservationRepository.existReservationByTimeId(time.getId());
+        boolean exists = reservationRepository.existsByReservationTime_Id(time.getId());
 
         // then
         assertThat(exists).isFalse();
@@ -221,5 +220,114 @@ class ReservationRepositoryTest extends RepositoryBaseTest {
 
         // then
         assertThat(exists).isFalse();
+    }
+
+
+    @Test
+    void 시작일을_조건으로_예약을_조회한다() {
+        // given
+        ReservationTime 열시 = reservationTimeDbFixture.예약시간_10시();
+        Theme 공포 = themeDbFixture.공포();
+        Theme 로맨스 = themeDbFixture.로맨스();
+        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        ReservationDate 예약날짜_7일전 = ReservationDateFixture.예약날짜_7일전;
+        ReservationDate 예약날짜_오늘 = ReservationDateFixture.예약날짜_오늘;
+        Reservation 예약_7일전 = reservationDbFixture.예약_생성(예약날짜_7일전, 열시, 공포, 한스);
+        Reservation 예약_오늘 = reservationDbFixture.예약_생성(예약날짜_오늘, 열시, 로맨스, 한스);
+
+        // when
+        Specification<Reservation> spec = Specification
+                .where(ReservationSpecifications.hasMemberId(null)
+                        .and(ReservationSpecifications.hasThemeId(null))
+                        .and(ReservationSpecifications.dateAfterOrEqual(예약_오늘.getDate()))
+                        .and(ReservationSpecifications.dateBeforeOrEqual(null)));
+
+        List<Reservation> allReservations = reservationRepository.findAll(spec);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(allReservations).hasSize(1);
+            Reservation reservation = allReservations.getFirst();
+            softly.assertThat(reservation.getId()).isEqualTo(예약_오늘.getId());
+        });
+    }
+
+    @Test
+    void 종료일을_조건으로_예약을_조회한다() {
+        // given
+        ReservationTime 열시 = reservationTimeDbFixture.예약시간_10시();
+        Theme 공포 = themeDbFixture.공포();
+        Theme 로맨스 = themeDbFixture.로맨스();
+        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        ReservationDate 예약날짜_7일전 = ReservationDateFixture.예약날짜_7일전;
+        ReservationDate 예약날짜_오늘 = ReservationDateFixture.예약날짜_오늘;
+        Reservation 예약_7일전 = reservationDbFixture.예약_생성(예약날짜_7일전, 열시, 공포, 한스);
+        Reservation 예약_오늘 = reservationDbFixture.예약_생성(예약날짜_오늘, 열시, 로맨스, 한스);
+
+        // when
+        Specification<Reservation> spec = Specification
+                .where(ReservationSpecifications.hasMemberId(null)
+                        .and(ReservationSpecifications.hasThemeId(null))
+                        .and(ReservationSpecifications.dateAfterOrEqual(예약_7일전.getDate()))
+                        .and(ReservationSpecifications.dateBeforeOrEqual(null)));
+
+        List<Reservation> allReservations = reservationRepository.findAll(spec);
+
+        // then
+        assertThat(allReservations).hasSize(2);
+    }
+
+    @Test
+    void 테마를_조건으로_예약을_조회한다() {
+        // given
+        ReservationTime 열시 = reservationTimeDbFixture.예약시간_10시();
+        Theme 공포 = themeDbFixture.공포();
+        Theme 로맨스 = themeDbFixture.로맨스();
+        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        ReservationDate 예약날짜_7일전 = ReservationDateFixture.예약날짜_7일전;
+        ReservationDate 예약날짜_오늘 = ReservationDateFixture.예약날짜_오늘;
+        Reservation 예약_7일전 = reservationDbFixture.예약_생성(예약날짜_7일전, 열시, 공포, 한스);
+        Reservation 예약_오늘 = reservationDbFixture.예약_생성(예약날짜_오늘, 열시, 로맨스, 한스);
+
+        // when
+        Specification<Reservation> spec = Specification
+                .where(ReservationSpecifications.hasMemberId(null)
+                        .and(ReservationSpecifications.hasThemeId(공포.getId()))
+                        .and(ReservationSpecifications.dateAfterOrEqual(null))
+                        .and(ReservationSpecifications.dateBeforeOrEqual(null)));
+
+        List<Reservation> allReservations = reservationRepository.findAll(spec);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(allReservations).hasSize(1);
+            Reservation reservation = allReservations.getFirst();
+            softly.assertThat(reservation.getId()).isEqualTo(예약_7일전.getId());
+        });
+    }
+
+    @Test
+    void 예약자를_조건으로_예약을_조회한다() {
+        // given
+        ReservationTime 열시 = reservationTimeDbFixture.예약시간_10시();
+        Theme 공포 = themeDbFixture.공포();
+        Theme 로맨스 = themeDbFixture.로맨스();
+        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        ReservationDate 예약날짜_7일전 = ReservationDateFixture.예약날짜_7일전;
+        ReservationDate 예약날짜_오늘 = ReservationDateFixture.예약날짜_오늘;
+        Reservation 예약_7일전 = reservationDbFixture.예약_생성(예약날짜_7일전, 열시, 공포, 한스);
+        Reservation 예약_오늘 = reservationDbFixture.예약_생성(예약날짜_오늘, 열시, 로맨스, 한스);
+
+        // when
+        Specification<Reservation> spec = Specification
+                .where(ReservationSpecifications.hasMemberId(한스.getId())
+                        .and(ReservationSpecifications.hasThemeId(null))
+                        .and(ReservationSpecifications.dateAfterOrEqual(null))
+                        .and(ReservationSpecifications.dateBeforeOrEqual(null)));
+
+        List<Reservation> allReservations = reservationRepository.findAll(spec);
+
+        // then
+        assertThat(allReservations).hasSize(2);
     }
 }

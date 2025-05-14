@@ -3,6 +3,7 @@ package roomescape.common;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,25 +43,33 @@ public class RestAssuredTestBase {
         DBInitializer.truncate(jdbcTemplate);
     }
 
-    protected RestLoginMember generateLoginMember() {
+    @AfterEach
+    void truncateAfter() {
+        DBInitializer.truncate(jdbcTemplate);
+    }
+
+
+    public RestLoginMember generateLoginMember() {
         return generateLogin(MemberRole.MEMBER);
     }
 
-    protected RestLoginMember generateLoginAdmin() {
+    public RestLoginMember generateLoginAdmin() {
         return generateLogin(MemberRole.ADMIN);
     }
 
     private RestLoginMember generateLogin(final MemberRole memberRole) {
         PasswordEncoder encoder = new BCryptPasswordEncoder();
-        Member member = memberRepository.save(
-                new MemberEmail("leenyeonsu4888@gmail.com"),
+        Member member = memberRepository.save(new Member(
+                null,
                 new MemberName("홍길동"),
+                new MemberEmail("leehyeonsu4888@gmail.com"),
                 new MemberEncodedPassword(encoder.encode("gustn111!!")),
                 memberRole
-        );
+        ));
+
         Map<String, Object> request = Map.of(
                 "password", "gustn111!!",
-                "email", "leenyeonsu4888@gmail.com"
+                "email", "leehyeonsu4888@gmail.com"
         );
         String sessionId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

@@ -21,7 +21,7 @@ public class ReservationTime {
     private LocalTime startAt;
 
     public ReservationTime(final Long id, final LocalTime time) {
-        this.id = Objects.requireNonNull(id, "id는 null일 수 없습니다.");
+        this.id = id;
         this.startAt = Objects.requireNonNull(time, "startAt은 null일 수 없습니다.");
     }
 
