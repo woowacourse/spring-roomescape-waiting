@@ -55,11 +55,4 @@ class ThemeRepositoryTest {
         // then
         assertThat(themeRepository.findById(savedTheme.getId())).isEmpty();
     }
-
-    // TODO: 최근 일주일동안 가장 인기있는 테마 10개 조회
-    @Test
-    void 최근_일주일동안_가장인기있는_테마_10개_조회() {
-
-    }
-
 }

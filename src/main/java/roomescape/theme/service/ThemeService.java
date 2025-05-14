@@ -1,10 +1,13 @@
 package roomescape.theme.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -16,6 +19,7 @@ public class ThemeService {
     private static final int POPULAR_THEME_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     public Theme save(final String name, final String description, final String thumbnail) {
         if (themeRepository.existsByName(name)) {
@@ -44,6 +48,14 @@ public class ThemeService {
     }
 
     public List<Theme> findPopularThemes() {
-        return themeRepository.findTop10ThemesByReservationCountWithin7Days(POPULAR_THEME_DAYS, POPULAR_THEME_LIMIT);
+        final LocalDate sevenDaysAgo = LocalDate.now().minusDays(POPULAR_THEME_DAYS);
+        final LocalDate today = LocalDate.now();
+        final PageRequest pageRequest = PageRequest.of(0, POPULAR_THEME_LIMIT);
+
+        return reservationRepository.findTop10ThemesByReservationCountWithin7Days(
+                sevenDaysAgo,
+                today,
+                pageRequest
+        );
     }
 }
