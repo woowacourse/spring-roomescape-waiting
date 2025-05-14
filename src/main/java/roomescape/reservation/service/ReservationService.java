@@ -1,5 +1,17 @@
 package roomescape.reservation.service;
 
+import org.springframework.stereotype.Service;
+import roomescape.common.exception.AlreadyInUseException;
+import roomescape.common.exception.EntityNotFoundException;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.dto.*;
+import roomescape.reservation.repository.ReservationDao;
+import roomescape.reservation.repository.ReservationTimeDao;
+import roomescape.reservation.repository.ThemeRepository;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -9,38 +21,21 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
-
-import roomescape.common.exception.AlreadyInUseException;
-import roomescape.common.exception.EntityNotFoundException;
-import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.BookedReservationTimeResponse;
-import roomescape.reservation.dto.FilteringReservationRequest;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationTimeResponse;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
-import roomescape.reservation.repository.ThemeDao;
-
 @Service
 public class ReservationService {
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
 
     public ReservationService(
             final ReservationDao reservationDao,
             final ReservationTimeDao reservationTimeDao,
-            final ThemeDao themeDao
+            final ThemeRepository themeRepository
     ) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
+        this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> getAll() {
@@ -92,7 +87,7 @@ public class ReservationService {
 
     private Theme getTheme(final ReservationRequest request) {
         Long themeId = request.themeId();
-        return themeDao.findById(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new EntityNotFoundException("theme not found id =" + themeId));
     }
 

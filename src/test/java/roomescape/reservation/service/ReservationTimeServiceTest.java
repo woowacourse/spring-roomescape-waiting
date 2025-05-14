@@ -1,13 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
@@ -28,11 +19,17 @@ import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationDao;
 import roomescape.reservation.repository.ReservationTimeDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class, MemberDao.class,
+@Import({ReservationDao.class, ReservationTimeDao.class, ThemeRepository.class, MemberDao.class,
         ReservationTimeService.class})
 class ReservationTimeServiceTest {
 
@@ -41,7 +38,7 @@ class ReservationTimeServiceTest {
     @Autowired
     private ReservationTimeDao reservationTimeDao;
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
     @Autowired
     private MemberDao memberDao;
     @Autowired
@@ -123,7 +120,7 @@ class ReservationTimeServiceTest {
     @Test
     void test6() {
         // given
-        Theme theme = themeDao.save(new Theme("테마1", "테마1", "www.m.com"));
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.m.com"));
         ReservationTime reservationTime = reservationTimeDao.save(new ReservationTime(LocalTime.of(8, 0)));
         Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 

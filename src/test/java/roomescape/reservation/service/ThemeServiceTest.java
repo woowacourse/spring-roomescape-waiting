@@ -1,20 +1,11 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
@@ -27,11 +18,19 @@ import roomescape.reservation.dto.ThemeRequest;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.repository.ReservationDao;
 import roomescape.reservation.repository.ReservationTimeDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class, MemberDao.class,
+@Import({ReservationDao.class, ReservationTimeDao.class, ThemeRepository.class, MemberDao.class,
         ThemeService.class})
 class ThemeServiceTest {
 
@@ -40,7 +39,7 @@ class ThemeServiceTest {
     @Autowired
     private ReservationTimeDao reservationTimeRepository;
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
     @Autowired
     private MemberDao memberDao;
     @Autowired
@@ -50,8 +49,8 @@ class ThemeServiceTest {
     @Test
     void test1() {
         // given
-        themeDao.save(new Theme("테마1", "테마1", "www.m.com"));
-        themeDao.save(new Theme("테마2", "테마2", "www.m.com"));
+        themeRepository.save(new Theme("테마1", "테마1", "www.m.com"));
+        themeRepository.save(new Theme("테마2", "테마2", "www.m.com"));
 
         // when
         List<ThemeResponse> responses = themeService.getAll();
@@ -98,7 +97,7 @@ class ThemeServiceTest {
         themeService.delete(themeId);
 
         // then
-        assertThat(themeDao.findAll()).isEmpty();
+        assertThat(themeRepository.findAll()).isEmpty();
     }
 
     @DisplayName("없는 테마를 삭제할 수 없다")
@@ -113,7 +112,7 @@ class ThemeServiceTest {
     @Test
     void test6() {
         // given
-        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
 
         LocalTime time = LocalTime.of(8, 0);
@@ -139,9 +138,9 @@ class ThemeServiceTest {
         LocalDate date = LocalDateTime.now().toLocalDate();
         Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
-        Theme theme1 = themeDao.save(new Theme("테마1", "테마1", "www.m.com"));
-        Theme theme2 = themeDao.save(new Theme("테마2", "테마2", "www.m.com"));
-        Theme theme3 = themeDao.save(new Theme("테마3", "테마3", "www.m.com"));
+        Theme theme1 = themeRepository.save(new Theme("테마1", "테마1", "www.m.com"));
+        Theme theme2 = themeRepository.save(new Theme("테마2", "테마2", "www.m.com"));
+        Theme theme3 = themeRepository.save(new Theme("테마3", "테마3", "www.m.com"));
         reservationDao.save(new Reservation(member, date.minusDays(1), reservationTime, theme1));
         reservationDao.save(new Reservation(member, date.minusDays(2), reservationTime, theme1));
         reservationDao.save(new Reservation(member, date.minusDays(3), reservationTime, theme1));

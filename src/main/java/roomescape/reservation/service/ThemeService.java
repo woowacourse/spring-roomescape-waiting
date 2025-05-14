@@ -1,17 +1,15 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import roomescape.common.exception.AlreadyInUseException;
-import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.ThemeRequest;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ThemeService {
@@ -19,23 +17,23 @@ public class ThemeService {
     private static final int START_DATE_OFFSET = 8;
     private static final int END_DATE_OFFSET = 1;
 
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
     private final ReservationDao reservationDao;
 
-    public ThemeService(final ThemeDao themeDao, final ReservationDao reservationDao) {
-        this.themeDao = themeDao;
+    public ThemeService(final ThemeRepository themeRepository, final ReservationDao reservationDao) {
+        this.themeRepository = themeRepository;
         this.reservationDao = reservationDao;
     }
 
     public List<ThemeResponse> getAll() {
-        return themeDao.findAll()
+        return themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public ThemeResponse create(final ThemeRequest request) {
-        Theme theme = themeDao.save(request.toEntity());
+        Theme theme = themeRepository.save(request.toEntity());
         return ThemeResponse.from(theme);
     }
 
@@ -43,13 +41,7 @@ public class ThemeService {
         if (reservationDao.existsByThemeId(id)) {
             throw new AlreadyInUseException("Theme with id " + id + " is already in use");
         }
-
-        int updatedRow = themeDao.deleteById(id);
-
-        if (updatedRow == 0) {
-            throw new EntityNotFoundException("Theme with id " + id + " not found");
-        }
-
+        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponse> getPopularThemes() {
@@ -59,7 +51,7 @@ public class ThemeService {
         LocalDate endDate = now.minusDays(END_DATE_OFFSET);
         int popularThemeCount = 10;
 
-        return themeDao.findThemeRankingByReservation(startDate, endDate, popularThemeCount)
+        return themeRepository.findTopByDateAndCount(startDate, endDate, popularThemeCount)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
