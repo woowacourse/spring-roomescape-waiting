@@ -16,11 +16,6 @@
 | POST        | /members                      | PUBLIC        | 201 CREATED      | 회원 추가                                                                      |
 | DELETE      | /members/{id}                 | ADMIN, MEMBER | 204 NO_CONTENT   | id(PK)에 해당하는 회원 삭제                                                         |
 | GET         | /members                      | ADMIN         | 200 OK           | 모든 회원 목록 조회 (id(PK), 이름만)                                                  |
-| POST        | /reservations                 | ADMIN, MEMBER | 201 CREATED      | 예약 추가                                                                      |
-| DELETE      | /reservations/{id}            | ADMIN, MEMBER | 204 NO_CONTENT   | id(PK)에 해당하는 예약 삭제                                                         |
-| GET         | /reservations                 | ADMIN         | 200 OK           | 모든 회원의 전체 예약 목록 조회                                                         |
-| GET         | /admin/reservations           | ADMIN         | 200 OK           | 조건부 예약 목록 조회 (회원 id, 테마 id, 시작 기간, 끝 기간으로 필터링)                             |
-| GET         | /reservations/available-times | PUBLIC        | 200 OK           | 조건부 예약 가능한 시간 목록 조회(예약 날짜, 테마 id)                                          |
 | POST        | /times                        | ADMIN         | 201 CREATED      | 예약 시간 추가                                                                   |
 | DELETE      | /times/{id}                   | ADMIN         | 204 NO_CONTENT   | id(PK)에 해당하는 예약 시간 삭제                                                      |
 | GET         | /times                        | PUBLIC        | 200 OK           | 모든 예약 시간 목록 조회                                                             |
@@ -28,6 +23,14 @@
 | DELETE      | /themes/{id}                  | ADMIN         | 204 NO_CONTENT   | id(PK)에 해당하는 테마 삭제                                                         |
 | GET         | /themes                       | PUBLIC        | 200 OK           | 모든 테마 목록 조회                                                                |
 | GET         | /themes/popular-list          | PUBLIC        | 200 OK           | 인기 테마 목록 조회                                                                |
+| POST        | /admin/reservations           | ADMIN         | 201 CREATED      | 관리자의 예약 추가                                                                 |
+| POST        | /reservations                 | ADMIN, MEMBER | 201 CREATED      | 일반 회원의 예약 추가                                                               |
+| DELETE      | /reservations/{id}            | ADMIN, MEMBER | 204 NO_CONTENT   | id(PK)에 해당하는 예약 삭제                                                         |
+| GET         | /admin/reservations           | ADMIN         | 200 OK           | 모든 회원의 전체 예약 목록 조회                                                         |
+| GET         | /reservations-mine            | ADMIN, MEMBER | 200 OK           | 내 예약 목록 조회                                                                 |
+| GET         | /admin/reservations/filtered  | ADMIN         | 200 OK           | 조건부 예약 목록 조회 (회원 id, 테마 id, 시작 기간, 끝 기간으로 필터링)                             |
+| GET         | /reservations/available-times | PUBLIC        | 200 OK           | 조건부 예약 가능한 시간 목록 조회(예약 날짜, 테마 id)                                          |
+| GET         | /statuses                     | ADMIN, MEMBER | 200 OK           | 모든 예약 상태 목록 조회                                                             |
 
 ## ✅ View API
 
