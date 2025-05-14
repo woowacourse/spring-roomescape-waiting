@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.reservation.ReservationRequest;
@@ -44,7 +45,7 @@ public class ReservationChecker {
         Member member = memberRepository.findById(dto.memberId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 회원을 찾을 수 없습니다."));
 
-        return dto.createWithoutId(reservationTime, theme, member);
+        return dto.createWithoutId(reservationTime, theme, member, ReservationStatus.RESERVED);
     }
 
     private void validateRequestDateTime(LocalDateTime requestDateTime) {

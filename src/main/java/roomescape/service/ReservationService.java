@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.UserReservationRequest;
@@ -13,16 +14,19 @@ import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationSpecification;
+import roomescape.util.JwtTokenProvider;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationChecker reservationChecker;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker, JwtTokenProvider jwtTokenProvider) {
         this.reservationRepository = reservationRepository;
         this.reservationChecker = reservationChecker;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public ReservationResponse createUserReservation(UserReservationRequest dto, Member member) {
@@ -66,5 +70,13 @@ public class ReservationService {
         }
 
         reservationRepository.deleteById(id);
+    }
+
+    public List<MemberReservationResponse> findAllMemberReservations(String token) {
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+        return reservations.stream()
+                .map(MemberReservationResponse::from)
+                .toList();
     }
 }

@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS reservation
     member_id BIGINT,
     time_id BIGINT,
     theme_id BIGINT,
+    status ENUM('RESERVED'),
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

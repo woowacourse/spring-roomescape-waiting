@@ -25,4 +25,10 @@ public class UserPageController {
     public String reservationPage() {
         return "reservation";
     }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        //TODO - 로그인 못하면 /login 페이지로 redirect
+        return "reservation-mine";
+    }
 }

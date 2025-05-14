@@ -6,6 +6,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -21,7 +22,7 @@ public record ReservationRequest(
         @PositiveOrZero(message = "[ERROR] id는 양수여야 합니다.") Long memberId
 ) {
 
-    public Reservation createWithoutId(ReservationTime reservationTime, Theme theme, Member member) {
-        return new Reservation(null, member, date, reservationTime, theme);
+    public Reservation createWithoutId(ReservationTime reservationTime, Theme theme, Member member, ReservationStatus status) {
+        return new Reservation(null, member, date, reservationTime, theme, status);
     }
 }
