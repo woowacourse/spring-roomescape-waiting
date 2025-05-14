@@ -39,12 +39,11 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) other;
-        return Objects.equals(id, theme.id)
-                && Objects.equals(name, theme.name);
+        return Objects.equals(id, theme.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id);
     }
 }
