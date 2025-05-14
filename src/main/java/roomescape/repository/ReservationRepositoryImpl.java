@@ -31,7 +31,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(final long id) {
+    public Optional<Reservation> findById(final long id) { // TODO : Legacy 코드 삭제
         String sql = joinReservationAndTime("WHERE r.id = ?");
         final List<Reservation> reservations = template.query(sql, reservationRowMapper(), id);
         if (reservations.isEmpty()) {
@@ -41,25 +41,24 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByDate(final LocalDate date) {
+    public List<Reservation> findByDate(final LocalDate date) { // TODO : Legacy 코드 삭제
         String sql = joinReservationAndTime("WHERE r.date = ?");
         return template.query(sql, reservationRowMapper(), date.toString());
     }
 
     @Override
-    public List<Reservation> findAll() {
+    public List<Reservation> findAll() { // TODO : Legacy 코드 삭제
         String sql = joinReservationAndTime("");
         return template.query(sql, reservationRowMapper());
     }
 
     @Override
     public List<ReservationV2> findAllReservationsV2() {
-        String sql = joinReservationV2AndRelatedTables("");
-        return template.query(sql, reservationV2RowMapper());
+        return reservationJpaRepository.findAll();
     }
 
     @Override
-    public Reservation save(final Reservation reservation) {
+    public Reservation save(final Reservation reservation) { // TODO : Legacy 코드 삭제
         String sql = "insert into reservation (name, date, time_id, theme_id) values (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         template.update(connection -> {
@@ -77,19 +76,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     public ReservationV2 saveWithMember(final ReservationV2 reservation) {
-        String sql = "insert into reservation_v2 (member_id,date, time_id, theme_id) values (? ,?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        template.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setLong(1, reservation.getMemberId());
-            ps.setString(2, reservation.getDate().toString());
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
-            return ps;
-        }, keyHolder);
-
-        long id = keyHolder.getKey().longValue();
-        return reservation.toEntity(id);
+        return reservationJpaRepository.save(reservation);
     }
 
     @Override
@@ -192,10 +179,10 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
             return new ReservationV2(
                     rs.getLong("reservation_id"),
-                    rs.getString("date"),
+                    member,
+                    rs.getDate("date").toLocalDate(),
                     reservationTime,
-                    reservationTheme,
-                    member
+                    reservationTheme
             );
         };
     }
