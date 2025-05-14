@@ -28,4 +28,6 @@ public interface ReservationRepository {
     List<ReservationV2> findByMemberIdAndThemeIdAndDateFromAndDateTo(final long memberId, final long themeId, final LocalDate dateFrom, final LocalDate dateTo);
 
     boolean existByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId);
+
+    List<ReservationV2> findByMemberId(Long memberId);
 }

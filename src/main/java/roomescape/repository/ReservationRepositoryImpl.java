@@ -134,6 +134,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         return reservationJpaRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
+    @Override
+    public List<ReservationV2> findByMemberId(Long memberId) {
+        return reservationJpaRepository.findByMemberId(memberId);
+    }
+
     private RowMapper<Reservation> reservationRowMapper() {
         return (rs, rowNum) -> {
             ReservationTime reservationTime = new ReservationTime(

@@ -10,18 +10,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.dto.MemberRegisterRequest;
 import roomescape.dto.MemberRegisterResponse;
 import roomescape.dto.MemberResponse;
+import roomescape.dto.MyPageReservationResponse;
 import roomescape.service.MemberService;
+import roomescape.service.ReservationServiceV2;
 
 @Controller
 public class MemberController {
 
     private final MemberService memberService;
+    private final ReservationServiceV2 reservationService;
 
-    public MemberController(final MemberService memberService) {
+    public MemberController(final MemberService memberService, ReservationServiceV2 reservationService) {
         this.memberService = memberService;
+        this.reservationService = reservationService;
     }
 
-    @GetMapping("signup")
+    @GetMapping("/signup")
     public String signUpPage() {
         return "signup";
     }
@@ -34,5 +38,11 @@ public class MemberController {
     @GetMapping("/members")
     public ResponseEntity<List<MemberResponse>> getAllMembers() {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getAllMembers());
+    }
+
+    @GetMapping("/members/reservations")
+    public ResponseEntity<List<MyPageReservationResponse>> getMyReservations(Long memberId) {
+        List<MyPageReservationResponse> reservations = reservationService.getReservationsByMemberId(memberId);
+        return ResponseEntity.ok(reservations);
     }
 }

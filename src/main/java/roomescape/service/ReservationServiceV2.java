@@ -9,6 +9,7 @@ import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationV2;
 import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.MyPageReservationResponse;
 import roomescape.dto.ReservationRequestV2;
 import roomescape.dto.ReservationResponse;
 import roomescape.repository.MemberRepository;
@@ -89,5 +90,14 @@ public class ReservationServiceV2 {
         if (reservationRepository.existByDateAndTimeIdAndThemeId(localDate, timeId, themeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약 입니다.");
         }
+    }
+
+    public List<MyPageReservationResponse> getReservationsByMemberId(Long memberId) {
+        final Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 사용자 입니다."));
+        List<ReservationV2> myReservations = reservationRepository.findByMemberId(member.getId());
+        return myReservations.stream()
+                .map(MyPageReservationResponse::from)
+                .toList();
     }
 }
