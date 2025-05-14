@@ -9,42 +9,38 @@ import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.InvalidTimeException;
 import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ReservationExceptionMessage;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
-import roomescape.reservation.dao.ReservationDao;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.admin.AdminReservationRequest;
 import roomescape.reservation.dto.admin.AdminReservationSearchRequest;
 import roomescape.reservation.dto.user.UserReservationRequest;
-import roomescape.reservationTime.dao.ReservationTimeDao;
 import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
-import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
-    private final MemberDao memberDao;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository timeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
-    public ReservationService(
-            ReservationDao reservationDao,
-            ReservationTimeDao reservationTimeDao,
-            ThemeDao themeDao,
-            MemberDao memberDao
-    ) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
-        this.memberDao = memberDao;
+    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository timeRepository,
+                              ThemeRepository themeRepository, MemberRepository memberRepository) {
+        this.reservationRepository = reservationRepository;
+        this.timeRepository = timeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationDao.findAll().stream()
+        return reservationRepository.findAll().stream()
                 .map(reservation -> new ReservationResponse(
                         reservation.getId(),
                         reservation.getMember(),
@@ -56,7 +52,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllByMemberId(final Long memberId) {
-        return reservationDao.findAllByMemberId(memberId).stream()
+        return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(reservation -> new ReservationResponse(
                         reservation.getId(),
                         reservation.getMember(),
@@ -75,7 +71,7 @@ public class ReservationService {
         LocalDate dateFrom = adminReservationSearchRequest.dateFrom();
         LocalDate dateTo = adminReservationSearchRequest.dateTo();
 
-        return reservationDao.findAllByMemberAndThemeAndDate(memberId, themeId, dateFrom, dateTo)
+        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
                 .stream().map(reservation -> new ReservationResponse(
                         reservation.getId(),
                         reservation.getMember(),
@@ -99,7 +95,7 @@ public class ReservationService {
                 reservationTimeResult,
                 themeResult
         );
-        Reservation savedReservation = reservationDao.add(newReservation);
+        Reservation savedReservation = reservationRepository.save(newReservation);
 
         return new ReservationResponse(
                 savedReservation.getId(),
@@ -123,7 +119,7 @@ public class ReservationService {
                 reservationTimeResult,
                 themeResult
         );
-        Reservation savedReservation = reservationDao.add(newReservation);
+        Reservation savedReservation = reservationRepository.save(newReservation);
 
         return new ReservationResponse(
                 savedReservation.getId(),
@@ -145,7 +141,8 @@ public class ReservationService {
             final LocalDate reservationDate,
             final ReservationTime reservationTimeResult
     ) {
-        boolean isDuplicate = reservationDao.existsByDateAndTimeId(reservationDate, reservationTimeResult.getId());
+        boolean isDuplicate = reservationRepository.existsByDateAndTimeId(reservationDate,
+                reservationTimeResult.getId());
 
         if (isDuplicate) {
             throw new DuplicateException(ReservationExceptionMessage.DUPLICATE_RESERVATION.getMessage());
@@ -154,26 +151,26 @@ public class ReservationService {
 
     public void deleteById(final Long id) {
         searchReservation(id);
-        reservationDao.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 
     private Reservation searchReservation(final Long id) {
-        return reservationDao.findById(id)
+        return reservationRepository.findById(id)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_RESERVATION_ID.getMessage()));
     }
 
     private Member searchMember(Long memberId) {
-        return memberDao.findById(memberId)
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_MEMBER_ID.getMessage()));
     }
 
     private ReservationTime searchReservationTime(final Long timeId) {
-        return reservationTimeDao.findById(timeId)
+        return timeRepository.findById(timeId)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_TIME_ID.getMessage()));
     }
 
     private Theme searchTheme(final Long themeId) {
-        return themeDao.findById(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_THEME_ID.getMessage()));
     }
 }
