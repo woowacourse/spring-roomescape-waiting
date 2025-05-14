@@ -41,8 +41,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservations(ReservationCondition cond) {
-        List<Reservation> filteredReservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
-                cond.themeId(), cond.memberId(), cond.dateFrom(), cond.dateTo());
+        List<Reservation> filteredReservations = reservationRepository.findByCondition(cond);
         return filteredReservations.stream()
                 .map(ReservationResponse::toDto)
                 .toList();

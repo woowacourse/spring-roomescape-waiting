@@ -3,11 +3,13 @@ package roomescape.infrastructure;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
+import roomescape.dto.request.ReservationCondition;
 
 @Repository
 public class ReservationRepositoryAdaptor implements ReservationRepository {
@@ -59,9 +61,12 @@ public class ReservationRepositoryAdaptor implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
-                                                                    LocalDate dateTo) {
-        return jpaReservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
+    public List<Reservation> findByCondition(ReservationCondition condition) {
+        Specification<Reservation> spec = Specification.where(
+                        ReservationSpecification.themeIdEqual(condition.themeId()))
+                .and(ReservationSpecification.memberIdEqual(condition.memberId())
+                        .and(ReservationSpecification.dateBetween(condition.dateFrom(), condition.dateTo())));
+        return jpaReservationRepository.findAll(spec);
     }
 
     @Override

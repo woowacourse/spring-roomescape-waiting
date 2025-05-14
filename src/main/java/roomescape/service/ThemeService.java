@@ -18,6 +18,7 @@ import roomescape.exception.ExistedThemeException;
 @Service
 public class ThemeService {
 
+    public static final int TOP_THEMES_COUNT = 10;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -69,7 +70,7 @@ public class ThemeService {
                 .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()))
                 .entrySet().stream()
                 .sorted(Entry.<Theme, Long>comparingByValue().reversed())
-                .limit(10)
+                .limit(TOP_THEMES_COUNT)
                 .map(Entry::getKey)
                 .toList();
 
