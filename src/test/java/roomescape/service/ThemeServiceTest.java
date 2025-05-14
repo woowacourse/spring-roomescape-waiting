@@ -1,41 +1,56 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import roomescape.TestFixture;
 import roomescape.domain.*;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundThemeException;
-import roomescape.fake.FakeReservationRepository;
-import roomescape.fake.FakeThemeRepository;
-import roomescape.persistence.query.CreateReservationQuery;
 import roomescape.service.param.CreateThemeParam;
 import roomescape.service.result.ThemeResult;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.TestFixture.DEFAULT_DATE;
 
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 class ThemeServiceTest {
 
-    private final ReservationRepository reservationRepository = new FakeReservationRepository();
-    private final ThemeRepository themeRepository = new FakeThemeRepository();
-    private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+    @Autowired
+    private ThemeService themeService;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void 테마를_전체_조회할_수_있다() {
         //given
-        themeRepository.create(new Theme("test1", "description1", "thumbnail1"));
-        themeRepository.create(new Theme("test2", "description2", "thumbnail2"));
+        Theme theme1 = themeRepository.save(TestFixture.createThemeByName("theme1"));
+        Theme theme2 = themeRepository.save(TestFixture.createThemeByName("theme2"));
 
         //when
         List<ThemeResult> themeResults = themeService.findAll();
 
         //then
         assertThat(themeResults).isEqualTo(List.of(
-                new ThemeResult(1L, "test1", "description1", "thumbnail1"),
-                new ThemeResult(2L, "test2", "description2", "thumbnail2")
+                ThemeResult.from(theme1),
+                ThemeResult.from(theme2)
         ));
     }
 
@@ -45,23 +60,23 @@ class ThemeServiceTest {
         CreateThemeParam createThemeParam = new CreateThemeParam("test1", "description1", "thumbnail1");
 
         //when
-        Long id = themeService.create(createThemeParam);
+        ThemeResult themeResult = themeService.create(createThemeParam);
 
         //then
-        assertThat(themeRepository.findById(id))
-                .hasValue(new Theme(1L, "test1", "description1", "thumbnail1"));
+        assertThat(themeRepository.findById(themeResult.id()))
+                .hasValue(new Theme(themeResult.id(), themeResult.name(), themeResult.description(), themeResult.thumbnail()));
     }
 
     @Test
     void id값으로_테마를_찾을_수_있다() {
         //given
-        themeRepository.create(new Theme("test1", "description1", "thumbnail1"));
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
 
         //when
-        ThemeResult themeResult = themeService.findById(1L);
+        ThemeResult themeResult = themeService.findById(theme.getId());
 
         //then
-        assertThat(themeResult).isEqualTo(new ThemeResult(1L, "test1", "description1", "thumbnail1"));
+        assertThat(themeResult).isEqualTo(ThemeResult.from(theme));
     }
 
     @Test
@@ -75,28 +90,27 @@ class ThemeServiceTest {
     @Test
     void id값으로_테마를_삭제할_수_있다() {
         //given
-        themeRepository.create(new Theme("test1", "description1", "thumbnail1"));
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
 
         //when
-        themeService.deleteById(1L);
+        themeService.deleteById(theme.getId());
 
         //then
-        assertThat(themeRepository.findById(1L)).isEmpty();
+        assertThat(themeRepository.findById(theme.getId())).isEmpty();
     }
 
     @Test
     void id값으로_테마를_삭제할떄_예약에서_id가_사용중이라면_예외를_발생시킨다() {
         //given
-        themeRepository.create(new Theme("test1", "description1", "thumbnail1"));
-        reservationRepository.create(new CreateReservationQuery(new Member(1L, "test1", MemberRole.USER, "email", "password"),
-                LocalDate.of(2025, 5, 1),
-                new ReservationTime(1L, LocalTime.of(12, 0)),
-                new Theme(1L, "test1", "description1", "thumbnail1")));
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+        ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
+        Member member = memberRepository.save(TestFixture.createDefaultMember());
+        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme);
+        reservationRepository.save(reservation);
 
         //when & then
-        assertThatThrownBy(() -> themeService.deleteById(1L))
+        assertThatThrownBy(() -> themeService.deleteById(theme.getId()))
                 .isInstanceOf(DeletionNotAllowedException.class)
                 .hasMessage("해당 테마에 예약이 존재합니다.");
     }
-
 }
