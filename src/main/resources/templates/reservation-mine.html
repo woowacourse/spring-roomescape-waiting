@@ -11,8 +11,8 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="/admin">
-        <img src="/image/admin-logo.png" alt="LOGO" style="height: 40px;">
+    <a class="navbar-brand" href="/">
+        <img src="https://avatars.githubusercontent.com/u/141792611?s=200&v=4" alt="LOGO" style="height: 40px;">
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,13 +22,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                <a class="nav-link" href="/admin/reservation">Reservation</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/admin/theme">Theme</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/admin/time">Time</a>
+                <a class="nav-link" href="/">Reservation</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/login">Login</a>
@@ -50,9 +44,24 @@
 </nav>
 
 <div class="content-container">
-    <h2 class="content-container-title">방탈출 어드민</h2>
+    <h2 class="content-container-title">내 예약</h2>
+    <div class="table-container"/>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>테마</th>
+            <th>날짜</th>
+            <th>시간</th>
+            <th>상태</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+    </table>
 </div>
 
 <script src="/js/user-scripts.js"></script>
+<script src="/js/reservation-mine.js"></script>
 </body>
 </html>

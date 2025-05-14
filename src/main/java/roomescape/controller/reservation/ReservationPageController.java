@@ -17,6 +17,5 @@ public class ReservationPageController {
     public String myPage() {
         return "reservation-mine";
     }
-
 }
 

@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,6 +30,7 @@ public class Reservation {
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255) default 'RESERVATION'")
     private ReservationStatus reservationStatus;
 
     @PrePersist
