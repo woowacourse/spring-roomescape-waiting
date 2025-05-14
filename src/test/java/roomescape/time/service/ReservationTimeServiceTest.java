@@ -58,7 +58,7 @@ class ReservationTimeServiceTest {
 
         assertThatThrownBy(() -> reservationTimeService.open(request))
                 .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("[ERROR] 이미 존재하는 예약 시간입니다.");
+                .hasMessage("이미 존재하는 예약 시간입니다.");
     }
 
     @Test
@@ -83,7 +83,7 @@ class ReservationTimeServiceTest {
     void 존재하지_않는_예약시간을_삭제할_수_없다() {
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("[ERROR] 예약 시간을 찾을 수 없습니다.");
+                .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
 
     @Test
@@ -92,7 +92,7 @@ class ReservationTimeServiceTest {
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(reservation.getReservationTime().getId()))
                 .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
+                .hasMessage("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     @Test

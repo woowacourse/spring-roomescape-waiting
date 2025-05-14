@@ -52,7 +52,7 @@ public class ThemeService {
         LocalDate from = to.minusDays(7);
 
         return themeRepository.findAll().stream()
-                .sorted((t1, t2) -> Integer.compare(
+                .sorted((t1, t2) -> Long.compare(
                         reservationRepository.countReservationByThemeIdAndDuration(from, to, t1.getId()),
                         reservationRepository.countReservationByThemeIdAndDuration(from, to, t2.getId())
                 ))

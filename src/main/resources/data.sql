@@ -6,11 +6,11 @@ TRUNCATE TABLE reservation_time;
 SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO member (name, role, email, password)
-VALUES ("admin", "ADMIN", "admin@email.com", "1234");
+VALUES ("admin", "ADMIN", "admin@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
 INSERT INTO member (name, role, email, password)
-VALUES ("유저1", "USER", "user1@email.com", "1234");
+VALUES ("유저1", "USER", "user1@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
 INSERT INTO member (name, role, email, password)
-VALUES ("유저2", "USER", "user2@email.com", "1234");
+VALUES ("유저2", "USER", "user2@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
 
 -- reservation_time
 INSERT INTO reservation_time (start_at)

@@ -36,7 +36,8 @@ public class MemberService {
     }
 
     public Member getMember(String email, String password) {
-        return memberRepository.findByEmailAndPassword(email, password)
+        String encryptPassword = passwordEncryptor.encrypt(password);
+        return memberRepository.findByEmailAndPassword_Password(email, encryptPassword)
                 .orElseThrow(() -> new InvalidArgumentException("[ERROR] 가입되지 않은 회원입니다."));
     }
 

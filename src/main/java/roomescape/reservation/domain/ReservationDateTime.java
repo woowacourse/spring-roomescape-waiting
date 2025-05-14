@@ -2,6 +2,7 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -15,6 +16,8 @@ public class ReservationDateTime {
 
     @Embedded
     private ReservationDate reservationDate;
+
+    @JoinColumn(name = "time_id")
     @ManyToOne
     private ReservationTime reservationTime;
 

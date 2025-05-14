@@ -52,7 +52,7 @@ public class ReservationService {
     }
 
     private void isAlreadyReservedTime(LocalDate date, Long timeId) {
-        if (reservationRepository.existsSameDateTime(date, timeId)) {
+        if (reservationRepository.existsByDateAndTimeId(date, timeId)) {
             throw new InvalidArgumentException("[ERROR] 이미 예약이 존재하는 시간입니다.");
         }
     }
