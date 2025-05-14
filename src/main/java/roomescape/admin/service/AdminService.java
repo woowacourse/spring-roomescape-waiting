@@ -36,8 +36,9 @@ public class AdminService {
         final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 회원 데이터가 존재하지 않습니다. id = " + memberId));
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);
+        final Reservation savedReservation = reservationRepository.save(reservation);
 
-        return reservationRepository.save(reservation);
+        return savedReservation.getId();
     }
 
     public Reservation getById(final Long id) {
@@ -47,13 +48,18 @@ public class AdminService {
 
     public List<Reservation> findByInFromTo(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                             final LocalDate dateTo) {
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new DataNotFoundException("해당 회원 데이터가 존재하지 않습니다. id = " + memberId));
 
-        final List<Reservation> searchedReservations = reservationRepository.findByInFromTo(
-                themeId,
-                memberId,
-                dateFrom,
-                dateTo
-        );
+        final List<Reservation> searchedReservations = reservationRepository
+                .findByThemeAndMemberAndDateBetween(
+                        theme,
+                        member,
+                        dateFrom,
+                        dateTo
+                );
 
         return searchedReservations;
     }
