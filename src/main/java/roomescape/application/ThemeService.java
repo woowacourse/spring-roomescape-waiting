@@ -1,5 +1,7 @@
 package roomescape.application;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.repository.ReservationRepository;
@@ -14,7 +16,9 @@ import java.util.NoSuchElementException;
 @Service
 public class ThemeService {
 
-    private static final int POPULAR_THEME_COUNTS = 10;
+    private static final int START_DATE_INTERVAL = 7;
+    private static final int END_DATE_INTERVAL = 1;
+    private static final int POPULAR_COUNT = 10;
 
     private final CurrentTimeService currentTimeService;
     private final ThemeRepository themeRepository;
@@ -40,10 +44,10 @@ public class ThemeService {
     }
 
     public void deleteThemeById(Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        Theme theme = findThemeById(id);
+        if (reservationRepository.existsByTheme(theme)) {
             throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
-        Theme theme = findThemeById(id);
         themeRepository.deleteById(theme.getId());
     }
 
@@ -54,7 +58,10 @@ public class ThemeService {
 
     public List<ThemeResponse> getPopularThemes() {
         LocalDate now = currentTimeService.now().toLocalDate();
-        List<Theme> themes = themeRepository.findPopularThemeDuringAWeek(POPULAR_THEME_COUNTS, now);
+        LocalDate dateFrom = now.minusDays(START_DATE_INTERVAL);
+        LocalDate dateTo = now.plusDays(END_DATE_INTERVAL);
+        Pageable pageable = PageRequest.of(0, POPULAR_COUNT);
+        List<Theme> themes = themeRepository.findRecentPopularThemes(dateFrom, dateTo, pageable);
         return ThemeResponse.from(themes);
     }
 }

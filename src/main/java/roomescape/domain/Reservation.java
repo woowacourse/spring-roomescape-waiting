@@ -24,30 +24,30 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private LocalDate reservationDate;
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime reservationTime;
+    private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
     public static Reservation create(
             Member member,
-            LocalDate reservationDate,
-            ReservationTime reservationTime,
+            LocalDate date,
+            ReservationTime time,
             Theme theme
     ) {
-        return new Reservation(null, member, reservationDate, reservationTime, theme);
+        return new Reservation(null, member, date, time, theme);
     }
 
     public static Reservation create(
             Long id,
             Member member,
-            LocalDate reservationDate,
-            ReservationTime reservationTime,
+            LocalDate date,
+            ReservationTime time,
             Theme theme
     ) {
-        return new Reservation(id, member, reservationDate, reservationTime, theme);
+        return new Reservation(id, member, date, time, theme);
     }
 }

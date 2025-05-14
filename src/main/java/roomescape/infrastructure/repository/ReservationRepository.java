@@ -1,30 +1,32 @@
 package roomescape.infrastructure.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationDate;
-import roomescape.domain.ReservationDateTime;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     List<Reservation> findAll();
 
-    Reservation save(Member member, ReservationDateTime reservationDateTime, Theme theme);
+    Reservation save(Reservation reservation);
 
     void deleteById(Long id);
 
     Optional<Reservation> findById(Long id);
 
-    boolean existsByDateTimeAndTheme(ReservationDate reservationDate, Long timeId, Long themeId);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTime(ReservationTime time);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByTheme(Theme theme);
 
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+    @Query("SELECT r FROM Reservation r WHERE r.theme =:theme AND r.member =:member AND (r.date BETWEEN :dateFrom AND :dateTo)")
+    List<Reservation> findAllByThemeAndMemberAndDate(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo);
 }

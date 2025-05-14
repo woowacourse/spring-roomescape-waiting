@@ -1,8 +1,9 @@
 package roomescape.presentation.dto.response;
 
+import roomescape.domain.Reservation;
+
 import java.time.LocalDate;
 import java.util.List;
-import roomescape.domain.Reservation;
 
 public record ReservationResponse(
         Long id,
@@ -16,7 +17,7 @@ public record ReservationResponse(
                 reservation.getId(),
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getReservationTime()),
+                ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
         );
     }

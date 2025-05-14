@@ -1,27 +1,33 @@
 package roomescape.application;
 
-import java.time.LocalTime;
-import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.request.AvailableReservationTimeRequest;
 import roomescape.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.presentation.dto.response.ReservationTimeResponse;
-import roomescape.domain.ReservationTime;
+
+import java.time.LocalTime;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ReservationTimeServiceImpl implements ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
 
     public ReservationTimeServiceImpl(ReservationTimeRepository reservationTimeRepository,
-                                      ReservationRepository reservationRepository) {
+                                      ReservationRepository reservationRepository,
+                                      ThemeRepository themeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.themeRepository = themeRepository;
     }
 
     @Override
@@ -47,11 +53,10 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
 
     @Override
     public void deleteReservationTimeById(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        ReservationTime reservationTime = findReservationTimeById(id);
+        if (reservationRepository.existsByTime(reservationTime)) {
             throw new IllegalArgumentException("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
-
-        ReservationTime reservationTime = findReservationTimeById(id);
         reservationTimeRepository.deleteById(reservationTime.getId());
     }
 
@@ -64,6 +69,9 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
     @Override
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
-        return reservationTimeRepository.findAllAvailableReservationTimes(request.date(), request.themeId());
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
+
+        return reservationTimeRepository.findAllAvailableReservationTimes(request.date(), theme);
     }
 }

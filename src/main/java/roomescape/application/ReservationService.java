@@ -48,13 +48,15 @@ public class ReservationService {
         ReservationDate reservationDate = new ReservationDate(request.date());
         Long timeId = request.timeId();
         Long themeId = request.themeId();
+        ReservationTime time = reservationTimeService.findReservationTimeById(themeId);
+        Theme theme = themeService.findThemeById(themeId);
 
-        validateExistsReservation(reservationDate, timeId, themeId);
+        validateExistsReservation(reservationDate, time, theme);
 
         Member member = memberService.findMemberByEmail(loginMember.email());
         ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
-        Theme theme = themeService.findThemeById(themeId);
-        Reservation created = reservationRepository.save(member, reservationDateTime, theme);
+        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
+        Reservation created = reservationRepository.save(reservation);
 
         return ReservationResponse.from(created);
     }
@@ -63,13 +65,15 @@ public class ReservationService {
         ReservationDate reservationDate = new ReservationDate(request.date());
         Long timeId = request.timeId();
         Long themeId = request.themeId();
+        ReservationTime time = reservationTimeService.findReservationTimeById(themeId);
+        Theme theme = themeService.findThemeById(themeId);
 
-        validateExistsReservation(reservationDate, timeId, themeId);
+        validateExistsReservation(reservationDate, time, theme);
 
         Member member = memberService.findMemberById(request.memberId());
         ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
-        Theme theme = themeService.findThemeById(themeId);
-        Reservation created = reservationRepository.save(member, reservationDateTime, theme);
+        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
+        Reservation created = reservationRepository.save(reservation);
 
         return ReservationResponse.from(created);
     }
@@ -79,8 +83,8 @@ public class ReservationService {
         return ReservationDateTime.create(reservationDate, reservationTime, currentTimeService.now());
     }
 
-    private void validateExistsReservation(ReservationDate reservationDate, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateTimeAndTheme(reservationDate, timeId, themeId)) {
+    private void validateExistsReservation(ReservationDate reservationDate, ReservationTime time, Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(reservationDate.getDate(), time, theme)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
     }
@@ -101,7 +105,9 @@ public class ReservationService {
             LocalDate dateFrom,
             LocalDate dateTo
     ) {
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
+        Theme theme = themeService.findThemeById(themeId);
+        Member member = memberService.findMemberById(memberId);
+        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDate(theme, member, dateFrom, dateTo);
 
         return ReservationResponse.from(reservations);
     }
