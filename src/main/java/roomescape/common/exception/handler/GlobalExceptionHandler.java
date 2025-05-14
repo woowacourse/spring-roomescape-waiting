@@ -14,31 +14,13 @@ import roomescape.member.exception.NameException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NameException.class)
-    public ResponseEntity<ExceptionResponse> handleName(final NameException exception, final HttpServletRequest request) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(
-                HttpStatus.BAD_REQUEST.value(), "[ERROR] " + exception.getMessage(), request.getRequestURI()
-        );
-
-        return ResponseEntity.badRequest().body(exceptionResponse);
-    }
-
-    @ExceptionHandler(EmailException.class)
-    public ResponseEntity<ExceptionResponse> handleName(final EmailException exception, final HttpServletRequest request) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(
-                HttpStatus.BAD_REQUEST.value(), "[ERROR] " + exception.getMessage(), request.getRequestURI()
-        );
-
-        return ResponseEntity.badRequest().body(exceptionResponse);
-    }
-
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ExceptionResponse> handleNullPointer(final BusinessException exception, final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(), "[ERROR] " + exception.getMessage(), request.getRequestURI()
+                HttpStatus.BAD_REQUEST.value(), "[ERROR] " + exception.getMessage(), request.getRequestURI()
         );
 
-        return ResponseEntity.internalServerError().body(exceptionResponse);
+        return ResponseEntity.badRequest().body(exceptionResponse);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
