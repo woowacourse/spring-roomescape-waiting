@@ -1,7 +1,9 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.dto.theme.ThemeCreateRequest;
@@ -14,6 +16,8 @@ import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
+
+    public static final int POPULAR_THEME_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
@@ -51,13 +55,12 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findPopularThemes() {
-        //TODO : 해결하기^^
-//        LocalDate end = LocalDate.now();
-//        LocalDate start = end.minusDays(7);
-//        List<Theme> mostReservedThemes = themeRepository.findMostReservedByDateRange(start, end);
-//        return mostReservedThemes.stream()
-//                .map(ThemeResponse::from)
-//                .toList();
-        return List.of();
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusDays(7);
+
+        List<Theme> themes = themeRepository.findTopThemes(start, end, PageRequest.of(0, POPULAR_THEME_LIMIT));
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 }
