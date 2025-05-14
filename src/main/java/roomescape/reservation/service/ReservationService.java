@@ -43,7 +43,7 @@ public class ReservationService {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
 
-        if (reservationRepository.existSameDateTime(reservationDate, timeId)) {
+        if (reservationRepository.existsByReservationDateAndTimeId(reservationDate, timeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
 
@@ -51,7 +51,8 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.getTheme(request.themeId());
-        Reservation created = reservationRepository.save(member, reservationDateTime, theme);
+        Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
+                .getDate(), reservationTime, theme, member));
 
         return ReservationResponse.from(created);
     }
@@ -60,7 +61,7 @@ public class ReservationService {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
 
-        if (reservationRepository.existSameDateTime(reservationDate, timeId)) {
+        if (reservationRepository.existsByReservationDateAndTimeId(reservationDate, timeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
 
@@ -68,7 +69,8 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.getTheme(request.themeId());
-        Reservation created = reservationRepository.save(member, reservationDateTime, theme);
+        Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
+                .getDate(), reservationTime, theme, member));
 
         return ReservationResponse.from(created);
 
@@ -81,7 +83,7 @@ public class ReservationService {
 
     public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate start, LocalDate end) {
         return ReservationResponse.from(
-                reservationRepository.searchReservations(
+                reservationRepository.findByFilter(
                         memberId, themeId, start, end
                 )
         );

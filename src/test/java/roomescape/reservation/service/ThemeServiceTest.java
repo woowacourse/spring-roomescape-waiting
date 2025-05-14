@@ -31,7 +31,7 @@ public class ThemeServiceTest {
     void 테마를_삭제한다() {
 
         Theme theme = new Theme(1L, "공포", "공포 테마", "공포.jpg");
-        when(reservationRepository.existReservationByThemeId(1L)).thenReturn(false);
+        when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         themeService.deleteById(1L);
         assertThat(themeService.getAll()).isEmpty();
@@ -40,7 +40,7 @@ public class ThemeServiceTest {
     @Test
     void 이미_해당_테마의_예약이_존재한다면_삭제할_수_없다() {
         Theme theme = new Theme(1L, "공포", "공포 테마", "공포.jpg");
-        when(reservationRepository.existReservationByThemeId(1L)).thenReturn(true);
+        when(reservationRepository.existsByThemeId(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> themeService.deleteById(1L))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -48,7 +48,7 @@ public class ThemeServiceTest {
 
     @Test
     void 존재하지_않는_테마를_삭제할_수_없다() {
-        when(reservationRepository.existReservationByThemeId(3L)).thenReturn(false);
+        when(reservationRepository.existsByThemeId(3L)).thenReturn(false);
         when(themeRepository.findById(3L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> themeService.deleteById(3L))
                 .isInstanceOf(NoSuchElementException.class);

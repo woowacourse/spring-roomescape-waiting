@@ -1,5 +1,6 @@
 package roomescape.time.domain;
 
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,6 +8,7 @@ import jakarta.persistence.Id;
 import java.time.LocalTime;
 
 @Entity
+@Embeddable
 public class ReservationTime {
 
     @Id

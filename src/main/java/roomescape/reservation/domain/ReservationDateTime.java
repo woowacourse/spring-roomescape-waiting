@@ -1,15 +1,21 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import roomescape.reservation.domain.exception.PastReservationException;
 import roomescape.time.domain.ReservationTime;
 
+@Embeddable
 public class ReservationDateTime {
 
-    private final ReservationDate reservationDate;
-    private final ReservationTime reservationTime;
+    private ReservationDate reservationDate;
+    private ReservationTime reservationTime;
+
+    public ReservationDateTime() {
+
+    }
 
     public ReservationDateTime(ReservationDate reservationDate, ReservationTime reservationTime) {
         validatePast(reservationDate, reservationTime);
