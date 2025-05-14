@@ -32,17 +32,17 @@ VALUES ('컨저링', '실화 기반의 공포가 현실이 된다, 악령이 도
 
 -- 2 -> 1 -> 3
 
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 2, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES (DATEADD('DAY', -4, CURRENT_DATE), 2, 2, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 2, 2, 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 2, 1, 'CONFIRMATION');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -4, CURRENT_DATE), 2, 2, 1, 'CONFIRMATION');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 2, 2, 2, 'CONFIRMATION');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 3, 1, 2);
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 1, 3);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 3, 1, 2, 'CONFIRMATION');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 1, 3, 'CONFIRMATION');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 3, 3);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 3, 3, 'CONFIRMATION');

@@ -9,19 +9,19 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.application.dto.MemberResponse;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
+import roomescape.reservation.application.dto.MyReservation;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.application.dto.ReservationTimeResponse;
 import roomescape.theme.application.dto.ThemeResponse;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 class ReservationServiceTest {
 
     @Autowired
@@ -97,5 +97,17 @@ class ReservationServiceTest {
         // then
         assertThat(reservationService.findReservationByThemeIdAndMemberIdInDuration(
                 themeId, memberId, start, end)).hasSize(2);
+    }
+
+    @Test
+    void 멤버id로_예약기록을_조회한다() {
+        // given
+        final long memberId = 1L;
+
+        // when
+        final List<MyReservation> responses = reservationService.findByMemberId(memberId);
+
+        // then
+        assertThat(responses).hasSize(2);
     }
 }

@@ -1,6 +1,7 @@
 package roomescape.reservation;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -140,5 +141,25 @@ public class MemberReservationApiTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409);
+    }
+
+    @Test
+    void 사용자가_본인의_예약을_조회한다() {
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .contentType(ContentType.JSON)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2));
+    }
+
+    @Test
+    void 로그인을_안한상태로_본인의_예약을_조회하면_401를_반환한다() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(401);
     }
 }
