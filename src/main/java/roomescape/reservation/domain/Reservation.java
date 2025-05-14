@@ -1,11 +1,20 @@
 package roomescape.reservation.domain;
 
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import roomescape.error.ReservationException;
 import roomescape.member.domain.Member;
@@ -13,22 +22,34 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Getter
+@Entity
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
 
-    private final Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NonNull
-    private final LocalDate date;
+    @Column(nullable = false)
+    private LocalDate date;
 
     @NonNull
-    private final ReservationTime time;
+    @JoinColumn(nullable = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private ReservationTime time;
 
     @NonNull
-    private final Theme theme;
+    @JoinColumn(nullable = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Theme theme;
 
     @NonNull
-    private final Member member;
+    @JoinColumn(nullable = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Member member;
+
 
     public Reservation(@NonNull final LocalDate date,
                        @NonNull final ReservationTime reservationTime,

@@ -2,19 +2,28 @@ package roomescape.reservationtime.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 
-public interface ReservationTimeRepository {
+public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    ReservationTime save(final ReservationTime reservationTime);
-
-    List<ReservationTime> findAll();
-
-    int deleteById(final Long id);
-
-    List<AvailableReservationTimeResponse> findAllAvailable(final LocalDate date, final Long themeId);
-
-    Optional<ReservationTime> findById(final Long id);
+    @Query("""
+            select
+              new roomescape.reservationtime.dto.AvailableReservationTimeResponse(
+                rt.id, rt.startAt, (r.id is not null) as alreadyBooked
+              )
+            from ReservationTime rt
+            left join Reservation r
+              on rt.id = r.time.id
+              and r.date = :date
+              and r.theme.id = :themeId
+            order by rt.startAt
+            """)
+    List<AvailableReservationTimeResponse> findAllAvailable(
+            @Param("date") final LocalDate date,
+            @Param("themeId") final Long themeId
+    );
 }

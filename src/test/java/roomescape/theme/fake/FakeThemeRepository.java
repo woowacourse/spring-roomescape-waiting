@@ -41,7 +41,7 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public int deleteById(Long id) {
+    public void deleteById(Long id) {
         boolean isDeleted = data.removeIf(theme -> theme.getId().equals(id));
         if (isDeleted) {
             return 1;

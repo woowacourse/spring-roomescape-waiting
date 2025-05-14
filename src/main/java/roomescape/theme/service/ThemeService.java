@@ -1,9 +1,9 @@
 package roomescape.theme.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.error.NotFoundException;
 import roomescape.error.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -32,18 +32,24 @@ public class ThemeService {
     }
 
     public List<PopularThemeResponse> findAllPopular() {
-        return themeRepository.findAllPopular();
+        final LocalDate startDate = java.time.LocalDate.now().minusDays(7);
+        final LocalDate endDate = LocalDate.now().minusDays(1);
+        return themeRepository.findAllPopular(startDate, endDate)
+                .stream()
+                .map(PopularThemeResponse::new)
+                .toList();
     }
 
     public void delete(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByThemeId((id))) {
             throw new ReservationException("해당 테마로 예약된 건이 존재합니다.");
         }
 
-        final int deletedCount = themeRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new NotFoundException("존재하지 않는 테마입니다. id=" + id);
-        }
+        /*final int deletedCount = */
+        themeRepository.deleteById(id);
+//        if (deletedCount == 0) {
+//            throw new NotFoundException("존재하지 않는 테마입니다. id=" + id);
+//        }
     }
 }
 

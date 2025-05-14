@@ -1,24 +1,42 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 @Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
-    private final Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NonNull
-    private final String name;
+    @Column(nullable = false)
+    private String name;
 
     @NonNull
-    private final String email;
+    @Column(nullable = false)
+    private String email;
 
     @NonNull
-    private final String password;
+    @Column(nullable = false)
+    private String password;
 
     @NonNull
-    private final MemberRole role;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
 
     public Member(final Long id, @NonNull final String name, @NonNull final String email,
                   @NonNull final String password,

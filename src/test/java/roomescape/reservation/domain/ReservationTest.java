@@ -70,7 +70,6 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(11, 0));
         Theme theme = new Theme("test", "test", "test");
         Member member = new Member(1L, "member", "member@naver.com", "1234", MemberRole.MEMBER.name());
-
         // when
         // then
         SoftAssertions.assertSoftly(softly -> {

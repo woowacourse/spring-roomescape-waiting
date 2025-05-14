@@ -1,19 +1,21 @@
 package roomescape.theme.repository;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.PopularThemeResponse;
 
-public interface ThemeRepository {
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    Theme save(final Theme theme);
-
-    List<Theme> findAll();
-
-    List<PopularThemeResponse> findAllPopular();
-
-    int deleteById(final Long id);
-
-    Optional<Theme> findById(final Long id);
+    @Query("""
+            SELECT t FROM Theme t
+            JOIN Reservation r ON r.theme.id = t.id
+            WHERE r.date BETWEEN :startDate AND :endDate
+            GROUP BY t
+            ORDER BY COUNT(r) DESC
+            LIMIT 10
+            """)
+    List<Theme> findAllPopular(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
