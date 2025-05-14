@@ -106,7 +106,7 @@ class ThemeCommandServiceImplTest {
     @DisplayName("저장되지 않은 테마를 삭제할 수 없다")
     void cannotDelete() {
         // given
-        final ThemeId unassigned = ThemeId.unassigned();
+        final ThemeId unassigned = ThemeId.from(null);
 
         // when
         // then

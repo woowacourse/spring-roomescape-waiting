@@ -10,8 +10,6 @@ import roomescape.common.jdbc.JdbcUtils;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
@@ -37,7 +35,7 @@ import static java.util.Map.entry;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcTemplateReservationRepository implements ReservationRepository {
+public class JdbcTemplateReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -63,7 +61,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
         );
     };
 
-    @Override
     public boolean existsByParams(final ReservationId id) {
         final String sql = """
                 select exists 
@@ -74,7 +71,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
                 jdbcTemplate.queryForObject(sql, Boolean.class, id.getValue()));
     }
 
-    @Override
     public boolean existsByParams(final ReservationTimeId timeId) {
         final String sql = """
                 select exists 
@@ -85,7 +81,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
                 jdbcTemplate.queryForObject(sql, Boolean.class, timeId.getValue()));
     }
 
-    @Override
     public boolean existsByParams(final ReservationDate date,
                                   final ReservationTimeId timeId,
                                   final ThemeId themeId) {
@@ -99,7 +94,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
 
     }
 
-    @Override
     public Optional<Reservation> findById(final ReservationId id) {
         final String sql = """
                 select
@@ -123,7 +117,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
         return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationMapper, id.getValue());
     }
 
-    @Override
     public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
         final String sql = """
                 select
@@ -146,7 +139,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
                 .toList();
     }
 
-    @Override
     public List<Reservation> findAll() {
         final String sql = """
                 select
@@ -170,7 +162,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
                 .toList();
     }
 
-    @Override
     public List<Reservation> findAllByUserId(final UserId userId) {
         final String sql = """
                 select
@@ -195,7 +186,6 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
                 .toList();
     }
 
-    @Override
     public Reservation save(final Reservation reservation) {
         final String sql = "insert into reservations (user_id, date, time_id, theme_id) values (?, ?, ?, ?)";
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -220,13 +210,11 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
                 reservation.getTheme());
     }
 
-    @Override
     public void deleteById(final ReservationId id) {
         final String sql = "delete from reservations where id = ?";
         jdbcTemplate.update(sql, id.getValue());
     }
 
-    @Override
     public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate,
                                                                                  final ReservationDate endDate,
                                                                                  final int count) {
@@ -274,29 +262,28 @@ public class JdbcTemplateReservationRepository implements ReservationRepository 
                 ));
     }
 
-    @Override
     public List<Reservation> findAllByParams(final UserId userId,
                                              final ThemeId themeId,
                                              final ReservationDate dateFrom,
                                              final ReservationDate dateTo) {
         final StringBuilder sql = new StringBuilder("""
-            select
-                r.id,
-                r.user_id,
-                r.date,
-                rt.id as time_id,
-                rt.start_at as start_at,
-                t.id as theme_id,
-                t.name as theme_name,
-                t.description as description,
-                t.thumbnail as thumbnail
-            from reservations r
-            join reservation_times rt
-                on r.time_id = rt.id
-            join themes t
-                on r.theme_id = t.id
-            where 1=1
-            """);
+                select
+                    r.id,
+                    r.user_id,
+                    r.date,
+                    rt.id as time_id,
+                    rt.start_at as start_at,
+                    t.id as theme_id,
+                    t.name as theme_name,
+                    t.description as description,
+                    t.thumbnail as thumbnail
+                from reservations r
+                join reservation_times rt
+                    on r.time_id = rt.id
+                join themes t
+                    on r.theme_id = t.id
+                where 1=1
+                """);
         final List<Object> params = new ArrayList<>();
 
         if (userId != null) {

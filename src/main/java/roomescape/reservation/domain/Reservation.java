@@ -1,11 +1,17 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
+import roomescape.common.domain.BaseEntity;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.exception.PastDateReservationException;
@@ -17,25 +23,55 @@ import roomescape.user.domain.UserId;
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-@EqualsAndHashCode(of = "id")
 @ToString
-public class Reservation {
+@Entity
+@Table(name = "reservations")
+public class Reservation extends BaseEntity {
 
-    private final ReservationId id;
-    private final UserId userId;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Embedded
+    @AttributeOverride(
+            name = UserId.Fields.value,
+            column = @Column(name = Fields.userId))
+    private UserId userId;
 
-    private static Reservation of(final ReservationId id,
-                                  final UserId userId,
-                                  final ReservationDate date,
-                                  final ReservationTime time,
-                                  final Theme theme) {
-        validate(id, userId, date, time, theme);
-        return new Reservation(id, userId, date, time, theme);
+    @Embedded
+    @AttributeOverride(
+            name = ReservationDate.Fields.value,
+            column = @Column(name = Fields.date))
+    private ReservationDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
+
+    public Reservation(final UserId userId,
+                       final ReservationDate date,
+                       final ReservationTime time,
+                       final Theme theme
+    ) {
+        validate(userId, date, time, theme);
+        this.userId = userId;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+    }
+
+    public Reservation(final Long id,
+                       final UserId userId,
+                       final ReservationDate date,
+                       final ReservationTime time,
+                       final Theme theme
+    ) {
+        super(id);
+        validate(userId, date, time, theme);
+        this.userId = userId;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
 
     public static Reservation withId(final ReservationId id,
@@ -43,25 +79,22 @@ public class Reservation {
                                      final ReservationDate date,
                                      final ReservationTime time,
                                      final Theme theme) {
-        id.requireAssigned();
-        return of(id, userId, date, time, theme);
+        return new Reservation(id.getValue(), userId, date, time, theme);
     }
 
     public static Reservation withoutId(final UserId userId,
                                         final ReservationDate date,
                                         final ReservationTime time,
                                         final Theme theme) {
-        return of(ReservationId.unassigned(), userId, date, time, theme);
+        return new Reservation(userId, date, time, theme);
     }
 
-    private static void validate(final ReservationId id,
-                                 final UserId userId,
-                                 final ReservationDate date,
-                                 final ReservationTime time,
-                                 final Theme theme) {
-
+    private static void validate(
+            final UserId userId,
+            final ReservationDate date,
+            final ReservationTime time,
+            final Theme theme) {
         Validator.of(Reservation.class)
-                .validateNotNull(Fields.id, id, DomainTerm.RESERVATION_ID.label())
                 .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label())
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
                 .validateNotNull(Fields.time, time, DomainTerm.RESERVATION_TIME.label())
@@ -80,5 +113,9 @@ public class Reservation {
         if (time.isBefore(now.toLocalTime())) {
             throw new PastTimeReservationException(time, now);
         }
+    }
+
+    public ReservationId getId() {
+        return ReservationId.from(id);
     }
 }

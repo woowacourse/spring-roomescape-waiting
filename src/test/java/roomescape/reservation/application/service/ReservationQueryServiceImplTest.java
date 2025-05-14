@@ -1,6 +1,5 @@
 package roomescape.reservation.application.service;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,23 +135,23 @@ class ReservationQueryServiceImplTest {
         // when
         final List<AvailableReservationTimeServiceResponse> timesWithAvailability = reservationQueryService.getTimesWithAvailability(
                 new AvailableReservationTimeServiceRequest(date, theme.getId()));
-
+        System.out.println(timesWithAvailability);
         // then
-        SoftAssertions.assertSoftly(softAssertions -> {
+        assertAll(
+                () -> {
+                    assertThat(timesWithAvailability)
+                            .hasSize(2);
 
-            softAssertions.assertThat(timesWithAvailability)
-                    .hasSize(2);
-
-            softAssertions.assertThat(timesWithAvailability.stream()
+                    assertThat(timesWithAvailability.stream()
                             .filter(a -> a.bookedStatus().isBooked()))
-                    .hasSize(1);
+                            .hasSize(1);
 
-            softAssertions.assertThat(timesWithAvailability.stream()
-                    .filter(a -> a.bookedStatus().isBooked())
-                    .map(AvailableReservationTimeServiceResponse::time)
-                    .findFirst()
-                    .orElseThrow()
-            ).isEqualTo(booked);
-        });
+                    assertThat(timesWithAvailability.stream()
+                            .filter(a -> a.bookedStatus().isBooked())
+                            .map(AvailableReservationTimeServiceResponse::time)
+                            .findFirst()
+                            .orElseThrow()
+                    ).isEqualTo(booked);
+                });
     }
 }

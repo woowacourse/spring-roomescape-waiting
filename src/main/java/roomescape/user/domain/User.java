@@ -73,7 +73,6 @@ public class User extends BaseEntity {
                               final Email email,
                               final Password password,
                               final UserRole role) {
-        id.requireAssigned();
         return new User(id.getValue(), name, email, password, role);
     }
 

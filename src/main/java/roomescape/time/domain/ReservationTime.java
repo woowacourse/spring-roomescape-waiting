@@ -37,7 +37,6 @@ public class ReservationTime extends BaseEntity {
     }
 
     public static ReservationTime withId(final ReservationTimeId id, final LocalTime startAt) {
-        id.requireAssigned();
         return new ReservationTime(id.getValue(), startAt);
     }
 
