@@ -63,7 +63,7 @@ class ReservationServiceTest {
             // when
             ReservationResponse result = reservationService.createReservation(REQUEST);
             // then
-            Reservation savedReservation = reservationDao.findById(3L);
+            Reservation savedReservation = reservationDao.findById(3L).orElseThrow();
             assertAll(
                     () -> assertThat(result.id()).isEqualTo(3L),
                     () -> assertThat(result.member().name()).isEqualTo(MEMBER.getName()),

@@ -56,7 +56,11 @@ public class ReservationService {
             final LocalDate dateFrom,
             final LocalDate dateTo
     ) {
-        final List<Reservation> reservations = reservationRepository.findAll(memberId, themeId, dateFrom, dateTo);
+        final List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+                memberId,
+                themeId,
+                dateFrom,
+                dateTo);
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -87,7 +91,7 @@ public class ReservationService {
                 .orElseThrow(() -> new BadRequestException("테마가 존재하지 않습니다."));
         final ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new BadRequestException("예약 시간이 존재하지 않습니다."));
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, time.getId(), theme.getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())) {
             throw new BadRequestException("해당 시간에 이미 예약이 존재합니다.");
         }
         return Reservation.register(member, date, time, theme);

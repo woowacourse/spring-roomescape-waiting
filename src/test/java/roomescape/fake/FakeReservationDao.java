@@ -3,6 +3,7 @@ package roomescape.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 
@@ -19,12 +20,52 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
+    public <S extends Reservation> Iterable<S> saveAll(final Iterable<S> entities) {
+        return null;
+    }
+
+    @Override
+    public boolean existsById(final Long aLong) {
+        return false;
+    }
+
+    @Override
     public List<Reservation> findAll() {
         return reservations;
     }
 
     @Override
-    public List<Reservation> findAll(
+    public Iterable<Reservation> findAllById(final Iterable<Long> longs) {
+        return null;
+    }
+
+    @Override
+    public long count() {
+        return 0;
+    }
+
+    @Override
+    public void delete(final Reservation entity) {
+
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends Long> longs) {
+
+    }
+
+    @Override
+    public void deleteAll(final Iterable<? extends Reservation> entities) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
+    }
+
+    @Override
+    public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
             final Long memberId,
             final Long themeId,
             final LocalDate fromDate,
@@ -34,25 +75,30 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(final long id) {
-        Reservation reservation = findById(id);
+    public List<Reservation> findByDateBetween(final LocalDate from, final LocalDate to) {
+        return List.of();
+    }
+
+    @Override
+    public void deleteById(final Long id) {
+        Reservation reservation = findById(id).orElseThrow();
         reservations.remove(reservation);
     }
 
     @Override
-    public boolean existsByTimeId(final long timeId) {
+    public boolean existsByTimeId(final Long timeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.getTime().getId() == timeId);
     }
 
     @Override
-    public boolean existsByThemeId(Long themeId) {
+    public boolean existsByThemeId(final Long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.getTheme().getId() == themeId);
     }
 
     @Override
-    public boolean existsByDateAndTimeAndTheme(final LocalDate date, final long timeId, final long themeId) {
+    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId) {
         return reservations.stream()
                 .anyMatch(reservation ->
                         reservation.getTheme().getId() == themeId
@@ -60,10 +106,10 @@ public class FakeReservationDao implements ReservationRepository {
                                 && reservation.getTime().getId() == timeId);
     }
 
-    public Reservation findById(final long id) {
+    @Override
+    public Optional<Reservation> findById(final Long id) {
         return reservations.stream()
                 .filter(reservation -> reservation.getId() == id)
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
     }
 }
