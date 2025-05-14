@@ -1,16 +1,36 @@
 package roomescape.domain.reservationmember;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 
+@Entity
 public class ReservationMember {
 
-    private final Reservation reservation;
-    private final Member member;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public ReservationMember(Reservation reservation, Member member) {
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private Reservation reservation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
+
+    public ReservationMember() {
+
+    }
+
+    public ReservationMember(Long id, Reservation reservation, Member member) {
+        this.id = id;
         this.reservation = reservation;
         this.member = member;
     }
@@ -37,5 +57,13 @@ public class ReservationMember {
 
     public String getStatus() {
         return reservation.getReservationStatus();
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public long getMemberId() {
+        return member.getId();
     }
 }

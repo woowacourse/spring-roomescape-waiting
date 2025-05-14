@@ -1,11 +1,10 @@
 package roomescape.repository.reservationmember;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationmember.ReservationMemberIds;
+import roomescape.domain.reservationmember.ReservationMember;
 
 @Repository
 public class ReservationMemberRepositoryImpl implements ReservationMemberRepository {
@@ -18,8 +17,8 @@ public class ReservationMemberRepositoryImpl implements ReservationMemberReposit
 
     @Override
     public long add(Reservation reservation, Member member) {
-        ReservationMemberIds reservationMemberIds = new ReservationMemberIds(null, reservation.getId(), member.getId());
-        return jpaReservationMemberRepository.save(reservationMemberIds).getId();
+        ReservationMember reservationMember = new ReservationMember(null, reservation, member);
+        return jpaReservationMemberRepository.save(reservationMember).getId();
     }
 
     @Override
@@ -28,17 +27,12 @@ public class ReservationMemberRepositoryImpl implements ReservationMemberReposit
     }
 
     @Override
-    public List<ReservationMemberIds> findAllByMemberId(Long memberId) {
+    public List<ReservationMember> findAllByMemberId(Long memberId) {
         return jpaReservationMemberRepository.findAllByMemberId(memberId);
     }
 
     @Override
-    public List<ReservationMemberIds> findAll() {
+    public List<ReservationMember> findAll() {
         return jpaReservationMemberRepository.findAll();
-    }
-
-    @Override
-    public Optional<ReservationMemberIds> findByReservationId(long id) {
-        return jpaReservationMemberRepository.findById(id);
     }
 }

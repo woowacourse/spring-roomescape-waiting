@@ -1,17 +1,13 @@
 package roomescape.service.reservationmember;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationmember.ReservationMember;
-import roomescape.domain.reservationmember.ReservationMemberIds;
 import roomescape.dto.reservation.AddReservationDto;
-import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.reservationmember.ReservationMemberRepository;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
@@ -39,59 +35,28 @@ public class ReservationMemberService {
     }
 
     public List<ReservationMember> allReservations() {
-        List<ReservationMemberIds> reservationMembers = reservationMemberRepository.findAll();
-        return reservationMembers.stream()
-                .map(reservationMemberIds -> {
-                    Reservation reservation = reservationService.getReservationById(
-                            reservationMemberIds.getReservationId());
-                    Member member = memberService.getMemberById(reservationMemberIds.getMemberId());
-                    return new ReservationMember(reservation, member);
-                })
-                .toList();
+        return reservationMemberRepository.findAll();
     }
 
     @Transactional
     public void deleteReservation(long id) {
-        ReservationMemberIds reservationMemberIds = reservationMemberRepository.findByReservationId(id)
-                .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약입니다"));
-
         reservationMemberRepository.deleteById(id);
-
-        long reservationId = reservationMemberIds.getReservationId();
-        reservationService.deleteReservation(reservationId);
     }
 
     public List<ReservationMember> searchReservations(Long themeId, Long memberId, LocalDate dateFrom,
                                                       LocalDate dateTo) {
-        Member member = memberService.getMemberById(memberId);
+        List<ReservationMember> reservationMembers = reservationMemberRepository.findAllByMemberId(memberId);
 
-        List<ReservationMemberIds> memberIds = reservationMemberRepository.findAllByMemberId(memberId);
-        List<Long> reservationIds = memberIds.stream()
-                .map(ReservationMemberIds::getReservationId)
-                .toList();
+        reservationMembers.removeIf(reservationMember ->
+                reservationService.searchReservation(
+                        reservationMember.getReservationId(), themeId, dateFrom, dateTo
+                ).isPresent()
+        );
 
-        List<Reservation> searchResultReservations = new ArrayList<>();
-        for (long reservationId : reservationIds) {
-            Optional<Reservation> reservation = reservationService.searchReservation(reservationId, themeId, dateFrom,
-                    dateTo);
-            reservation.ifPresent(searchResultReservations::add);
-        }
-
-        return searchResultReservations.stream()
-                .map((reservation) -> new ReservationMember(reservation, member))
-                .toList();
+        return reservationMembers;
     }
 
     public List<ReservationMember> memberReservations(long memberId) {
-        Member member= memberService.getMemberById(memberId);
-        List<ReservationMemberIds> reservationMemberIds = reservationMemberRepository.findAllByMemberId(memberId);
-
-        List<Reservation> reservations = reservationMemberIds.stream()
-                .map(ids -> reservationService.getReservationById(ids.getReservationId()))
-                .toList();
-
-        return reservations.stream()
-                .map(reservation -> new ReservationMember(reservation,member))
-                .toList();
+        return reservationMemberRepository.findAllByMemberId(memberId);
     }
 }

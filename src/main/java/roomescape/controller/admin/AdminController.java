@@ -37,13 +37,13 @@ public class AdminController {
                 newReservationDto.timeId(),
                 newReservationDto.themeId());
 
-        long addedReservationId = reservationMemberService.addReservation(addReservationDto,
+        long id = reservationMemberService.addReservation(addReservationDto,
                 newReservationDto.memberId());
-        Reservation reservation = reservationService.getReservationById(addedReservationId);
+        Reservation reservation = reservationService.getReservationById(id);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation.getId(),
                 reservation.getName(), reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
-        return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
+        return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponseDto);
     }
 
     @DeleteMapping("/reservations/{id}")

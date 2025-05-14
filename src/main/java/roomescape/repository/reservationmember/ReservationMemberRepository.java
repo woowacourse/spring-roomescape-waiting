@@ -1,10 +1,9 @@
 package roomescape.repository.reservationmember;
 
 import java.util.List;
-import java.util.Optional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationmember.ReservationMemberIds;
+import roomescape.domain.reservationmember.ReservationMember;
 
 public interface ReservationMemberRepository {
 
@@ -12,9 +11,7 @@ public interface ReservationMemberRepository {
 
     void deleteById(long id);
 
-    List<ReservationMemberIds> findAllByMemberId(Long memberId);
+    List<ReservationMember> findAllByMemberId(Long memberId);
 
-    List<ReservationMemberIds> findAll();
-
-    Optional<ReservationMemberIds> findByReservationId(long reservationId);
+    List<ReservationMember> findAll();
 }

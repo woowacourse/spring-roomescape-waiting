@@ -64,7 +64,7 @@ public class ReservationController {
         }
 
         List<ReservationMemberResponseDto> reservationDtos = reservationMembers.stream()
-                .map((reservationMember) -> new ReservationMemberResponseDto(reservationMember.getReservationId(),
+                .map((reservationMember) -> new ReservationMemberResponseDto(reservationMember.getId(),
                         reservationMember.getName(),
                         reservationMember.getThemeName(),
                         reservationMember.getDate(),
@@ -80,7 +80,7 @@ public class ReservationController {
         long addedReservationId = reservationMemberService.addReservation(newReservationDto, userInfo.id());
         Reservation reservation = reservationService.getReservationById(addedReservationId);
 
-        ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation.getId(),
+        ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
                 reservation.getName(), reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
         return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
     }
@@ -118,7 +118,8 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(@AuthenticationPrincipal UserInfo userInfo) {
+    public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(
+            @AuthenticationPrincipal UserInfo userInfo) {
         List<ReservationMember> reservationMembers = reservationMemberService.memberReservations(userInfo.id());
         List<MyReservationMemberResponseDto> reservationDtos = reservationMembers.stream()
                 .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getReservationId(),
