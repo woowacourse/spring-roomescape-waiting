@@ -2,6 +2,8 @@ package roomescape.service;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,8 +18,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DEFAULT_DATE;
 
@@ -40,6 +41,8 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationService reservationService;
 
     @Test
     void 예약_시간을_생성할_수_있다() {
@@ -120,5 +123,20 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.deleteById(reservationTime.getId()))
                 .isInstanceOf(DeletionNotAllowedException.class)
                 .hasMessage("해당 예약 시간에 예약이 존재합니다.");
+    }
+
+    @ParameterizedTest
+    @CsvSource({"12:00", "22:00"})
+    void 예약_시간은_12시_부터_22시_까지_가능하다_성공(LocalTime time) {
+        assertThatCode(() -> reservationTimeService.create(new CreateReservationTimeParam(time)))
+                .doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"11:59", "22:01"})
+    void 예약_시간은_12시_부터_22시_까지_가능하다_실패(LocalTime time) {
+        assertThatThrownBy(() -> reservationTimeService.create(new CreateReservationTimeParam(time)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("해당 시간은 예약 가능 시간이 아닙니다.");
     }
 }
