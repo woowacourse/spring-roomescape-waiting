@@ -3,6 +3,7 @@ package roomescape.service.reservation;
 import java.util.List;
 import roomescape.domain.Member;
 import roomescape.dto.admin.AdminReservationRequest;
+import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.search.SearchConditions;
@@ -18,4 +19,6 @@ public interface ReservationService {
     ReservationResponse createByAdmin(AdminReservationRequest adminReservationRequest);
 
     List<ReservationResponse> getReservationsByConditions(SearchConditions searchConditions);
+
+    List<MemberReservationResponse> getReservationByMember(Member member);
 }

@@ -1,5 +1,6 @@
 package roomescape.service.reservation;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.admin.AdminReservationRequest;
+import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.search.SearchConditions;
@@ -85,7 +87,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<ReservationResponse> getReservationsByConditions(SearchConditions searchConditions) {
+    public List<ReservationResponse> getReservationsByConditions(@Valid SearchConditions searchConditions) {
 
         List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
                 searchConditions.themeId(),
@@ -95,6 +97,14 @@ public class ReservationServiceImpl implements ReservationService {
         );
         return reservations.stream().
                 map(reservation -> ReservationResponse.from(reservation))
+                .toList();
+    }
+
+    @Override
+    public List<MemberReservationResponse> getReservationByMember(Member member) {
+        return reservationRepository.findAllByMember(member)
+                .stream()
+                .map(MemberReservationResponse::from)
                 .toList();
     }
 }

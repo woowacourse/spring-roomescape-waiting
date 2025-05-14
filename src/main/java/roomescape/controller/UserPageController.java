@@ -24,4 +24,9 @@ public class UserPageController {
     public String getSignupPage() {
         return "signup";
     }
+
+    @GetMapping("/reservation-mine")
+    public String getReservationsMine() {
+        return "reservation-mine";
+    }
 }
