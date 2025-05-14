@@ -19,10 +19,7 @@ public class ThemeService {
 
     public ThemeCreateResponse createTheme(ThemeCreateRequest request) {
         Theme newTheme = request.toEntity();
-        themeRepository.findByName(newTheme.getName())
-                .ifPresent(theme -> {
-                    throw new ConflictException("이미 존재하는 테마 이름입니다.");
-                });
+        validateDuplicateThemeName(newTheme);
         Theme saved = themeRepository.save(newTheme);
         return ThemeCreateResponse.from(saved);
     }
@@ -45,5 +42,11 @@ public class ThemeService {
 
     public void deleteTheme(Long id) {
         themeRepository.deleteById(id);
+    }
+
+    private void validateDuplicateThemeName(Theme theme) {
+        if (themeRepository.existsByName(theme.getName())) {
+            throw new ConflictException("이미 존재하는 테마 이름입니다.");
+        }
     }
 }

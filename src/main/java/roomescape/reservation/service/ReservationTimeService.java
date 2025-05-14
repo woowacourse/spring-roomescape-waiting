@@ -49,22 +49,26 @@ public class ReservationTimeService {
     }
 
     public void deleteTime(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
-            throw new BadRequestException("해당 시간에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
-        }
+        validateExistReservedReservation(id);
         reservationTimeRepository.deleteById(id);
     }
 
-    private void validateOperatingTime(ReservationTime entity) {
-        if (!entity.isAvailable()) {
+    private void validateOperatingTime(ReservationTime reservationTime) {
+        if (!reservationTime.isAvailable()) {
             throw new BadRequestException("운영 시간 이외의 날짜는 예약할 수 없습니다.");
         }
     }
 
-    private void validateDuplicated(ReservationTime entity) {
+    private void validateDuplicated(ReservationTime reservationTime) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
-        if (times.stream().anyMatch(time -> time.isDuplicatedWith(entity))) {
+        if (times.stream().anyMatch(time -> time.isDuplicatedWith(reservationTime))) {
             throw new ConflictException("러닝 타임이 겹치는 시간이 존재합니다.");
+        }
+    }
+
+    private void validateExistReservedReservation(Long timeId) {
+        if (reservationRepository.existsByTimeId(timeId)) {
+            throw new BadRequestException("해당 시간에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
         }
     }
 }

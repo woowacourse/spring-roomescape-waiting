@@ -19,9 +19,7 @@ public class AuthService {
     public String login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadRequestException("이메일 또는 비밀번호가 일치하지 않습니다."));
-
         validatePasswordCorrect(request, member);
-
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
         return jwtUtil.createToken(loginMember);
     }

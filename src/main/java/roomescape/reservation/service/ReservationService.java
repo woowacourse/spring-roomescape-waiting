@@ -45,8 +45,8 @@ public class ReservationService {
         validateDateTime(newReservation);
         validateDuplicated(newReservation);
 
-        Reservation saved = reservationRepository.save(newReservation);
-        return ReservationCreateResponse.from(saved, theme);
+        Reservation reservation = reservationRepository.save(newReservation);
+        return ReservationCreateResponse.from(reservation);
     }
 
     public ReservationAdminCreateResponse createReservationByAdmin(ReservationAdminCreateRequest request) {
@@ -62,34 +62,21 @@ public class ReservationService {
         validateDuplicated(newReservation);
 
         Reservation reservation = reservationRepository.save(newReservation);
-        return ReservationAdminCreateResponse.from(reservation, theme);
+        return ReservationAdminCreateResponse.from(reservation);
     }
 
     public List<ReservationReadResponse> getAllReservations() {
         return reservationRepository.findAll().stream()
-                .map(reservation -> {
-                    Theme theme = themeRepository.findById(reservation.getTheme().getId())
-                            .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
-                    Member member = memberRepository.findById(reservation.getMember().getId())
-                            .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
-                    return ReservationReadResponse.from(reservation, member, theme);
-                })
+                .map(ReservationReadResponse::from)
                 .toList();
     }
 
     public List<ReservationReadFilteredResponse> getFilteredReservations(ReservationReadFilteredRequest request) {
-        Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
         List<Reservation> reservations = reservationRepository.findAllFiltered(
                 request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
         );
-
         return reservations.stream()
-                .map(reservation -> {
-                    Theme theme = themeRepository.findById(reservation.getTheme().getId())
-                            .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-                    return ReservationReadFilteredResponse.from(reservation, member, theme);
-                })
+                .map(ReservationReadFilteredResponse::from)
                 .toList();
     }
 
