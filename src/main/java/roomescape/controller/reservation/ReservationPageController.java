@@ -12,5 +12,11 @@ public class ReservationPageController {
     public String mainPage() {
         return "reservation";
     }
+
+    @GetMapping("/mine")
+    public String myPage() {
+        return "reservation-mine";
+    }
+
 }
 
