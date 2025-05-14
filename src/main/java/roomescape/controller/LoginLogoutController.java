@@ -27,7 +27,7 @@ public class LoginLogoutController {
     @PostMapping("/login")
     public void userLogin(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         String jwtToken = memberService.createToken(loginRequest);
-        Cookie cookie = CookieManager.createJwtCookie(jwtToken);
+        Cookie cookie = CookieManager.createJwtLoginCookie(jwtToken);
         httpServletResponse.addCookie(cookie);
         httpServletResponse.setStatus(200);
     }

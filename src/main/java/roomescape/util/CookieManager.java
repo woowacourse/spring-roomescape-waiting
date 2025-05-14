@@ -19,7 +19,7 @@ public class CookieManager {
         return null;
     }
 
-    public static Cookie createJwtCookie(String token) {
+    public static Cookie createJwtLoginCookie(String token) {
         Cookie cookie = new Cookie(TOKEN_COOKIE_NAME, token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
