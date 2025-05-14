@@ -24,15 +24,14 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    public Long save(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new DataExistException("해당 시간에 이미 예약된 테마입니다.");
-        }
-
+    public Reservation save(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
         final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
+            throw new DataExistException("해당 시간에 이미 예약된 테마입니다.");
+        }
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);
 
         return reservationRepository.save(reservation);
@@ -57,15 +56,17 @@ public class ReservationService {
     public List<AvailableReservationTime> findAvailableReservationTimes(final LocalDate date, final Long themeId) {
         final List<AvailableReservationTime> availableReservationTimes = new ArrayList<>();
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        final Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
 
         for (ReservationTime reservationTime : reservationTimes) {
             availableReservationTimes.add(new AvailableReservationTime(
                     reservationTime.getId(),
                     reservationTime.getStartAt(),
-                    reservationRepository.existsByDateAndStartAtAndThemeId(
+                    reservationRepository.existsByDateAndTimeAndTheme(
                             date,
-                            reservationTime.getStartAt(),
-                            themeId
+                            reservationTime,
+                            theme
                     ))
             );
         }

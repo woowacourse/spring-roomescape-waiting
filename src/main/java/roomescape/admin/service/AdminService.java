@@ -26,14 +26,13 @@ public class AdminService {
 
 
     public Long saveByAdmin(final LocalDate date, final Long themeId, final Long timeId, final Long memberId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
             throw new DataExistException("해당 시간에 이미 예약된 테마입니다.");
         }
-
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
-        final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
         final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new DataNotFoundException("해당 회원 데이터가 존재하지 않습니다. id = " + memberId));
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);

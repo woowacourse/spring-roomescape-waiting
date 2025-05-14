@@ -1,23 +1,39 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import roomescape.common.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
 @Getter
-@EqualsAndHashCode(of = {"id"})
 @ToString
+@NoArgsConstructor
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    private Member member;
+    private LocalDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
 
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme) {
@@ -32,7 +48,10 @@ public class Reservation {
     }
 
     public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme);
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
 
     private void validateDate(final LocalDate date) {

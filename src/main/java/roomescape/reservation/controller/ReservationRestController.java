@@ -32,14 +32,13 @@ public class ReservationRestController {
             @RequestBody final CreateReservationRequest createReservationRequest,
             final Member member
     ) {
-        final Long id = reservationService.save(
+        final Reservation savedReservation = reservationService.save(
                 member,
                 createReservationRequest.date(),
                 createReservationRequest.timeId(),
                 createReservationRequest.themeId()
         );
-        final Reservation found = reservationService.getById(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(CreateReservationResponse.from(found));
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreateReservationResponse.from(savedReservation));
     }
 
     @DeleteMapping("/{id}")
