@@ -10,8 +10,8 @@ import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ReservationTimeExceptionMessage;
 import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservationTime.dao.ReservationTimeDao;
 import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.reservationTime.dto.admin.ReservationTimeRequest;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.reservationTime.dto.user.AvailableReservationTimeRequest;
@@ -21,22 +21,19 @@ import roomescape.theme.dao.ThemeDao;
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeDao reservationTimeDao;
+    private final ReservationTimeRepository timeRepository;
     private final ReservationDao reservationDao;
     private final ThemeDao themeDao;
 
-    public ReservationTimeService(
-            ReservationTimeDao reservationTimeDao,
-            ReservationDao reservationDao,
-            ThemeDao themeDao
-    ) {
-        this.reservationTimeDao = reservationTimeDao;
+    public ReservationTimeService(ReservationTimeRepository timeRepository, ReservationDao reservationDao,
+                                  ThemeDao themeDao) {
+        this.timeRepository = timeRepository;
         this.reservationDao = reservationDao;
         this.themeDao = themeDao;
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimeDao.findAll().stream()
+        return timeRepository.findAll().stream()
                 .map(reservationTime -> new ReservationTimeResponse(
                         reservationTime.getId(),
                         reservationTime.getStartAt())
@@ -51,7 +48,7 @@ public class ReservationTimeService {
         List<ReservationTime> reservedTimes = findReservedTimes(availableReservationTimeRequest);
         Set<Long> reservedIds = findReservedTimeIds(reservedTimes);
 
-        List<ReservationTime> availableReservationTimes = reservationTimeDao.findAll();
+        List<ReservationTime> availableReservationTimes = timeRepository.findAll();
         return availableReservationTimes.stream()
                 .map(reservationTime -> new AvailableReservationTimeResponse(
                         reservationTime.getId(),
@@ -93,12 +90,12 @@ public class ReservationTimeService {
         validateDuplicate(reservationTimeRequest);
 
         ReservationTime newReservationTime = new ReservationTime(reservationTimeRequest.startAt());
-        ReservationTime savedReservationTime = reservationTimeDao.add(newReservationTime);
+        ReservationTime savedReservationTime = timeRepository.save(newReservationTime);
         return new ReservationTimeResponse(savedReservationTime.getId(), savedReservationTime.getStartAt());
     }
 
     private void validateDuplicate(final ReservationTimeRequest reservationTimeRequest) {
-        boolean isDuplicate = reservationTimeDao.existsByStartAt(reservationTimeRequest.startAt());
+        boolean isDuplicate = timeRepository.existsByStartAt(reservationTimeRequest.startAt());
 
         if (isDuplicate) {
             throw new DuplicateException(ReservationTimeExceptionMessage.DUPLICATE_TIME.getMessage());
@@ -108,17 +105,17 @@ public class ReservationTimeService {
     public void deleteById(final Long id) {
         searchReservationTimeId(id);
         validateUnoccupiedTime(id);
-        reservationTimeDao.deleteById(id);
+        timeRepository.deleteById(id);
     }
 
     private void searchReservationTimeId(final Long id) {
-        reservationTimeDao.findById(id)
+        timeRepository.findById(id)
                 .orElseThrow(
                         () -> new InvalidIdException(IdExceptionMessage.INVALID_TIME_ID.getMessage()));
     }
 
     private void validateUnoccupiedTime(final Long id) {
-        boolean isOccupiedTimeId = reservationTimeDao.existsByReservationTimeId(id);
+        boolean isOccupiedTimeId = timeRepository.existsById(id);
 
         if (isOccupiedTimeId) {
             throw new ForeignKeyException(ReservationTimeExceptionMessage.RESERVED_TIME.getMessage());

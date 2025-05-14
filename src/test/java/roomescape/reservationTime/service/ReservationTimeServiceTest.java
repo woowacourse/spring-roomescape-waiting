@@ -21,9 +21,8 @@ import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dao.ReservationDaoImpl;
-import roomescape.reservationTime.dao.ReservationTimeDao;
-import roomescape.reservationTime.dao.ReservationTimeDaoImpl;
 import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.reservationTime.dto.admin.ReservationTimeRequest;
 import roomescape.reservationTime.dto.user.AvailableReservationTimeRequest;
 import roomescape.theme.dao.ThemeDao;
@@ -32,7 +31,7 @@ import roomescape.theme.dao.ThemeDaoImpl;
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
 
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository timeRepository;
     private ThemeDao themeDao;
     private ReservationDao reservationDao;
 
@@ -40,21 +39,21 @@ class ReservationTimeServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeDao = mock(ReservationTimeDaoImpl.class);
+        timeRepository = mock(ReservationTimeRepository.class);
         themeDao = mock(ThemeDaoImpl.class);
         reservationDao = mock(ReservationDaoImpl.class);
 
-        reservationTimeService = new ReservationTimeService(reservationTimeDao, reservationDao, themeDao);
+        reservationTimeService = new ReservationTimeService(timeRepository, reservationDao, themeDao);
     }
 
     @DisplayName("시간 내역을 조회하는 기능을 구현한다")
     @Test
     void findAll() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
-        when(reservationTimeDao.findAll()).thenReturn(List.of(reservationTime));
+        when(timeRepository.findAll()).thenReturn(List.of(reservationTime));
 
         assertThat(reservationTimeService.findAll()).hasSize(1);
-        verify(reservationTimeDao, times(1)).findAll();
+        verify(timeRepository, times(1)).findAll();
     }
 
     @DisplayName("시간 내역을 날짜와 테마로 조회 시, 테마 아이다가 존재하지 않는 경우 예외를 발생시킨다")
@@ -72,7 +71,7 @@ class ReservationTimeServiceTest {
     @DisplayName("시간 내역을 추가 시 중복되는 시간인 경우 예외를 발생시킨다")
     @Test
     void exception_add_duplicate_timeId() {
-        when(reservationTimeDao.existsByStartAt(LocalTime.of(11, 0))).thenReturn(true);
+        when(timeRepository.existsByStartAt(LocalTime.of(11, 0))).thenReturn(true);
 
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(11, 0));
         assertThatThrownBy(() -> reservationTimeService.add(reservationTimeRequest))
@@ -82,7 +81,7 @@ class ReservationTimeServiceTest {
     @DisplayName("시간 내역을 삭제 시 존재하지 않는 시간 아이디인 경우 예외를 발생시킨다")
     @Test
     void exception_delete_invalid_timeId() {
-        when(reservationTimeDao.findById(1L)).thenReturn(Optional.empty());
+        when(timeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(InvalidIdException.class);
@@ -92,8 +91,8 @@ class ReservationTimeServiceTest {
     @Test
     void exception_delete_occupied_timeId() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
-        when(reservationTimeDao.findById(1L)).thenReturn(Optional.of(reservationTime));
-        when(reservationTimeDao.existsByReservationTimeId(1L)).thenReturn(true);
+        when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
+        when(timeRepository.existsById(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(ForeignKeyException.class);
