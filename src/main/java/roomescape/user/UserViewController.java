@@ -17,12 +17,17 @@ public class UserViewController {
     }
 
     @GetMapping("/login")
-    public String login(){
+    public String login() {
         return "login";
     }
 
     @GetMapping("/signup")
-    public String signup(){
+    public String signup() {
         return "signup";
+    }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMine() {
+        return "reservation-mine";
     }
 }
