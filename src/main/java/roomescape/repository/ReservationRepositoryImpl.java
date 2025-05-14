@@ -146,7 +146,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         return (rs, rowNum) -> {
             ReservationTime reservationTime = new ReservationTime(
                     rs.getLong("time_id"),
-                    rs.getString("time_value")
+                    rs.getTime("time_value").toLocalTime()
             );
 
             ReservationTheme reservationTheme = new ReservationTheme(
@@ -170,7 +170,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
             // ReservationTime 생성
             ReservationTime reservationTime = new ReservationTime(
                     rs.getLong("time_id"),
-                    rs.getString("time_value")
+                    rs.getTime("time_value").toLocalTime()
             );
 
             // ReservationTheme 생성

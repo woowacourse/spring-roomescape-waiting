@@ -40,7 +40,7 @@ public class ReservationTimeService {
 
     private void validateUniqueReservationTime(final ReservationTime reservationTime) {
         final LocalTime startAt = reservationTime.getStartAt();
-        if (reservationTimeRepository.existsByStartAt(startAt.toString())) {
+        if (reservationTimeRepository.existsByStartAt(startAt)) {
             throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약 시간 입니다.");
         }
     }

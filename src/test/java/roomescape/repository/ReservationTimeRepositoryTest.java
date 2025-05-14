@@ -64,7 +64,7 @@ class ReservationTimeRepositoryTest {
     @Test
     void save() {
         //given
-        ReservationTime reservationTime = ReservationTime.parse("16:30");
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(16, 30));
 
         //when
         ReservationTime saved = timeRepository.save(reservationTime);
@@ -95,12 +95,12 @@ class ReservationTimeRepositoryTest {
     @Test
     void existByStartAt() {
         //given
-        final String startAt = "16:30";
-        ReservationTime reservationTime = ReservationTime.parse(startAt);
+        LocalTime startAt = LocalTime.of(16, 30);
+        ReservationTime reservationTime = new ReservationTime(startAt);
         timeRepository.save(reservationTime);
 
         //when
-        final boolean expected = timeRepository.existsByStartAt(startAt);
+        final boolean expected = timeRepository.existsByStartAt(LocalTime.of(16,30));
 
         //then
         assertThat(expected).isTrue();

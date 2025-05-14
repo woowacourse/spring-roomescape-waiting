@@ -28,7 +28,7 @@ public class ReservationV3 {
 
     @ManyToOne
     @JoinColumn(name = "time_id")
-    private ReservationTimeV2 time;
+    private ReservationTime time;
 
     @ManyToOne
     @JoinColumn(name = "theme_id")
