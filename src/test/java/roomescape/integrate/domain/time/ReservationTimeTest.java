@@ -1,4 +1,4 @@
-package roomescape.integrate.domain.reservation;
+package roomescape.integrate.domain.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,23 +18,25 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.dto.reservationtime.AddReservationTimeDto;
 import roomescape.integrate.fixture.RequestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-class AvailableReservationTimeTest {
+class ReservationTimeTest {
 
     private final RequestFixture requestFixture = new RequestFixture();
     private String todayDateString;
+    private Map<String, String> cookies;
 
     @BeforeEach
     void setup() {
         todayDateString = LocalDate.now().plusDays(1).toString();
 
         requestFixture.reqeustSignup("투다", "reservation-add@email.com", "password");
-        Map<String, String> cookies = requestFixture.requestLogin("reservation-add@email.com", "password");
+        cookies = requestFixture.requestLogin("reservation-add@email.com", "password");
         requestFixture.requestAddTime(LocalTime.now().plusHours(1).toString());
         requestFixture.requestAddTime(LocalTime.now().plusHours(2).toString());
         long timeId = requestFixture.requestAddTime(LocalTime.now().plusHours(3).toString());
@@ -54,5 +56,18 @@ class AvailableReservationTimeTest {
         List<Boolean> alreadyBooked = response.jsonPath().getList("alreadyBooked", Boolean.class);
         List<Boolean> booleans = List.of(false, false, true);
         assertThat(alreadyBooked).containsAnyElementsOf(booleans);
+    }
+
+    @Test
+    void 예약_시간을_추가할_수_있다() {
+        Map<String, LocalTime> params = Map.of("startAt", LocalTime.now());
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .body(params)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract().response();
     }
 }
