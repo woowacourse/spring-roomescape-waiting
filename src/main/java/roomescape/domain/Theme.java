@@ -1,6 +1,18 @@
 package roomescape.domain;
 
-public record Theme(Long id, String name, String description, String thumbnail) {
+import jakarta.persistence.*;
+
+@Entity
+public record Theme(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id,
+    @Column(unique = true, nullable = false)
+    String name,
+    @Column(nullable = false)
+    String description,
+    @Column(nullable = false)
+    String thumbnail) {
 
     public Theme {
         validateName(name);
