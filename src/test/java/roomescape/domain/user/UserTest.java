@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.InvalidInputException;
 
 class UserTest {
 
@@ -20,7 +22,7 @@ class UserTest {
                 UserRole.USER,
                 "email@email.com",
                 "password")
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @ParameterizedTest
@@ -33,7 +35,7 @@ class UserTest {
                 UserRole.USER,
                 invalidEmail,
                 "password")
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(InvalidInputException.class);
     }
 
     @Test
@@ -45,7 +47,7 @@ class UserTest {
                 UserRole.USER,
                 "email@email.com",
                 "가".repeat(31))
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @Test

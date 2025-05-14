@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import roomescape.application.AuthenticationService;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRole;
+import roomescape.exception.AuthenticationException;
+import roomescape.exception.AuthorizationException;
 import roomescape.presentation.auth.Authenticated;
 import roomescape.presentation.auth.AuthenticationTokenCookie;
 import roomescape.presentation.auth.UserArgumentResolver;
@@ -63,7 +65,7 @@ class UserArgumentResolverTest {
     @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 토큰이 없으면 예외가 발생한다.")
     void bindUserWhenRequestWithoutToken() {
         assertThatThrownBy(() -> mockMvc.perform(get("/authenticatedUser")))
-                .hasCauseInstanceOf(AuthorizationException.class);
+                .hasCauseInstanceOf(AuthenticationException.class);
     }
 
     @Test

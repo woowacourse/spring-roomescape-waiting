@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BusinessRuleViolationException;
 
 class ThemeTest {
 
@@ -15,7 +16,7 @@ class ThemeTest {
                 "가".repeat(11),
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @Test
@@ -26,6 +27,6 @@ class ThemeTest {
                 "레벨2 탈출",
                 "가".repeat(51),
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(BusinessRuleViolationException.class);
     }
 }

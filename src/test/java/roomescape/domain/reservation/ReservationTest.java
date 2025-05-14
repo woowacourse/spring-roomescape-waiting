@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.DateUtils;
 import roomescape.domain.timeslot.TimeSlot;
+import roomescape.exception.BusinessRuleViolationException;
 
 class ReservationTest {
 
@@ -26,7 +27,7 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(() -> Reservation.reserveNewly(name, yesterday, timeSlot, theme))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @Test
