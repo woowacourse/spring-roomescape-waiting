@@ -1,18 +1,20 @@
 package roomescape.user.domain;
 
+import jakarta.persistence.Embeddable;
 import roomescape.common.domain.DomainId;
 
+@Embeddable
 public class UserId extends DomainId {
 
-    protected UserId(final Long value, final boolean assigned) {
-        super(value, assigned);
+    protected UserId() {
+        super();
     }
 
-    public static UserId unassigned() {
-        return new UserId(null, false);
+    protected UserId(final Long value) {
+        super(value);
     }
 
     public static UserId from(final Long id) {
-        return new UserId(id, true);
+        return new UserId(id);
     }
 }

@@ -4,15 +4,11 @@ import roomescape.common.domain.DomainId;
 
 public class ReservationTimeId extends DomainId {
 
-    private ReservationTimeId(final Long value, final boolean assigned) {
-        super(value, assigned);
-    }
-
-    public static ReservationTimeId unassigned() {
-        return new ReservationTimeId(null, false);
+    private ReservationTimeId(final Long value) {
+        super(value);
     }
 
     public static ReservationTimeId from(final Long id) {
-        return new ReservationTimeId(id, true);
+        return new ReservationTimeId(id);
     }
 }

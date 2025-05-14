@@ -6,19 +6,15 @@ import roomescape.common.domain.DomainId;
 @Embeddable
 public class ThemeId extends DomainId {
 
-    private ThemeId(final Long value, final boolean assigned) {
-        super(value, assigned);
+    private ThemeId(final Long value) {
+        super(value);
     }
 
     protected ThemeId() { //todo. 플레그 남기는 방법
-        this(null, true);
-    }
-
-    public static ThemeId unassigned() {
-        return new ThemeId(null, false);
+        this(null);
     }
 
     public static ThemeId from(final Long id) {
-        return new ThemeId(id, true);
+        return new ThemeId(id);
     }
 }

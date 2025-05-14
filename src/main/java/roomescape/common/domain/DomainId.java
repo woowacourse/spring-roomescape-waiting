@@ -1,71 +1,35 @@
 package roomescape.common.domain;
 
+import jakarta.persistence.MappedSuperclass;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.validate.Validator;
 
-import java.util.Objects;
-
+@Getter
 @FieldNameConstants
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@MappedSuperclass
 public abstract class DomainId {
 
-    private final Long value;
-    @Getter
-    private final boolean assigned;
+    private Long value;
 
-    protected DomainId(final Long value, final boolean assigned) {
-        validate(value, assigned);
+    protected DomainId(final Long value) {
+        validate(value);
 
         this.value = value;
-        this.assigned = assigned;
     }
 
-    private void validate(final Long value,
-                          final boolean assigned) {
-        if (assigned) {
-            Validator.of(DomainId.class)
-                    .validateNotNull(Fields.value, value, DomainTerm.DOMAIN_ID.label());
-        }
-    }
+    private void validate(final Long value) {
 
-    public Long getValue() {
-        requireAssigned();
-        return value;
-    }
+        Validator.of(DomainId.class)
+                .validateNotNull(Fields.value, value, DomainTerm.DOMAIN_ID.label());
 
-    public void requireAssigned() {
-        if (isAssigned()) {
-            return;
-        }
-        throw new IllegalStateException("식별자가 할당되지 않았습니다.");
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final DomainId other = (DomainId) o;
-
-        if (this.value == null || other.value == null) {
-            return false;
-        }
-
-        return this.assigned == other.assigned && this.value.equals(other.value);
-    }
-
-    @Override
-    public int hashCode() {
-        if (value == null) {
-            return System.identityHashCode(this);
-        }
-        return Objects.hash(value, assigned);
     }
 
     @Override
     public String toString() {
-        if (assigned) {
-            return getClass().getSimpleName() + "(" + value + ")";
-        }
-        return getClass().getSimpleName() + "(unassigned)";
+        return getClass().getSimpleName() + "(" + value + ")";
     }
 }
