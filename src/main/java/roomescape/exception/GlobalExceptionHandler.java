@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(UnableCreateMemberException.class)
+    public ProblemDetail handleUnableCreateMemberException(UnableCreateMemberException e) {
+        log.error("예외 발생: ", e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.error("예외 발생: ", e);

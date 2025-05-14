@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
+import roomescape.exception.UnableCreateMemberException;
 import roomescape.persistence.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.exception.NotFoundMemberException;
@@ -41,8 +42,10 @@ public class MemberService {
                 registerMemberParam.email(),
                 registerMemberParam.password()
         );
-
-        // TODO: 이메일 중복 체크
+        memberRepository.findByEmail(registerMemberParam.email())
+                .ifPresent(m -> {
+                    throw new UnableCreateMemberException("이미 존재하는 이메일입니다.");
+                });
 
         Member savedMember = memberRepository.save(member);
         return MemberResult.from(savedMember);
