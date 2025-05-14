@@ -19,8 +19,9 @@ public class ReservationTime {
     private static final LocalTime RESERVATION_END_TIME = LocalTime.of(22, 0);
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalTime startAt;
 
     public ReservationTime(Long id, LocalTime startAt) {
