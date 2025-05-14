@@ -1,7 +1,7 @@
 package roomescape.fake;
 
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
+import roomescape.persistence.JpaThemeRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FakeThemeRepository implements ThemeRepository {
+public class FakeThemeRepository implements JpaThemeRepository {
 
     private List<Theme> themes = new ArrayList<>();
     private Long id = 0L;

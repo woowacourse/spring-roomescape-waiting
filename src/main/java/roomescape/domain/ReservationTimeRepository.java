@@ -1,9 +1,15 @@
 package roomescape.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
 
-@Repository
-public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
+public interface ReservationTimeRepository {
 
+    ReservationTime save(ReservationTime reservationTime);
+
+    Optional<ReservationTime> findById(Long reservationTimeId);
+
+    List<ReservationTime> findAll();
+
+    void deleteById(Long reservationTimeId);
 }

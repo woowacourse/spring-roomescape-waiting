@@ -14,20 +14,20 @@ import java.util.List;
 @Service
 public class ReservationService {
 
-    private final ReservationTimeRepository reservationTImeRepository;
     private final ReservationRepository reservationRepository;
-    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationService(ReservationTimeRepository reservationTImeRepository, ReservationRepository reservationRepository, ThemeRepository themeRepository,  MemberRepository memberRepository) {
-        this.reservationTImeRepository = reservationTImeRepository;
+    public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository, final ThemeRepository themeRepository, final ReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
-        this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public ReservationResult create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
-        ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId()).orElseThrow(
+        ReservationTime reservationTime = reservationTimeRepository.findById(createReservationParam.timeId()).orElseThrow(
                 () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
         Theme theme = themeRepository.findById(createReservationParam.themeId()).orElseThrow(
                 () -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));

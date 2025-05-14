@@ -1,14 +1,19 @@
 package roomescape.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+public interface ReservationRepository {
+
+    List<Reservation> findAll();
+
+    Reservation save(Reservation reservation);
+
+    void deleteById(Long reservationId);
+
+    Optional<Reservation> findById(Long reservationId);
 
     List<Reservation> findByMemberId(Long memberId);
 
@@ -20,17 +25,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByThemeIdAndDate(Long themeId, LocalDate reservationDate);
 
-    @Query("""
-        SELECT r
-        FROM Reservation r
-        JOIN r.time t
-        JOIN r.theme tm
-        JOIN r.member m
-        WHERE (:memberId IS NULL OR r.member.id = :memberId)
-        AND (:themeId IS NULL OR r.theme.id = :themeId)
-        AND (:dateFrom IS NULL OR r.date >= :dateFrom)
-        AND (:dateTo IS NULL OR r.date <= :dateTo)
-        ORDER BY r.id
-    """)
-    List<Reservation> findReservationsInConditions(final Long memberId, final Long themeId, final LocalDate dateFrom, final LocalDate dateTo);
+    List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 }

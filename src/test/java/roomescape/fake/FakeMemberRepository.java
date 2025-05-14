@@ -1,12 +1,12 @@
 package roomescape.fake;
 
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.persistence.JpaMemberRepository;
 import roomescape.persistence.query.CreateMemberQuery;
 
 import java.util.*;
 
-public class FakeMemberRepository implements MemberRepository {
+public class FakeMemberRepository implements JpaMemberRepository {
 
     private Long id = 0L;
     List<Member> members = new ArrayList<>();

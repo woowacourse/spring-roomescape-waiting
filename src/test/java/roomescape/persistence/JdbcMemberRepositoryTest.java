@@ -7,7 +7,6 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.sql.init.DatabaseInitializationSettings;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.persistence.query.CreateMemberQuery;
 
@@ -27,7 +26,7 @@ class JdbcMemberRepositoryTest {
             .build();
 
     private final JdbcTemplate jdbcTemplate = new JdbcTemplate(TEST_DATASOURCE);
-    private final MemberRepository memberRepository = new JdbcMemberRepository(jdbcTemplate);
+    private final JpaMemberRepository memberRepository = new JdbcMemberRepository(jdbcTemplate);
 
     @BeforeEach
     void setUp() {

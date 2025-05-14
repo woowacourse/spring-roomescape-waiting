@@ -1,7 +1,7 @@
 package roomescape.fake;
 
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.persistence.JpaReservationTimeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FakeReservationTimeRepository implements ReservationTimeRepository {
+public class FakeReservationTimeRepository implements JpaReservationTimeRepository {
 
     private List<ReservationTime> reservationTimes = new ArrayList<>();
     private Long id = 0L;
