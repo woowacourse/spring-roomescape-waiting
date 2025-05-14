@@ -45,12 +45,21 @@ public class Reservation {
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(id, member, date, time, theme, ReservationStatus.RESERVE);
+    }
+
+    public Reservation(Long id,
+                       Member member,
+                       LocalDate date,
+                       ReservationTime time,
+                       Theme theme,
+                       ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.RESERVE;
+        this.status = status;
     }
 
     protected Reservation() {
