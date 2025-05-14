@@ -3,9 +3,11 @@ package roomescape.business.model.vo;
 import static roomescape.exception.ErrorCode.USER_NAME_CONTAINS_NUMBER;
 import static roomescape.exception.ErrorCode.USER_NAME_LENGTH_TOO_LONG;
 
+import jakarta.persistence.Column;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
 public record UserName(
+        @Column(name = "user_name")
         String value
 ) {
     private static final int MAX_LENGTH = 10;

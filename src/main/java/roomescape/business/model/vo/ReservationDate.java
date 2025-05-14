@@ -3,11 +3,13 @@ package roomescape.business.model.vo;
 import static roomescape.exception.ErrorCode.RESERVATION_DATE_PAST;
 import static roomescape.exception.ErrorCode.RESERVATION_DATE_TOO_FAR_IN_FUTURE;
 
+import jakarta.persistence.Column;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
 public record ReservationDate(
+        @Column(name = "reservation_date")
         LocalDate value
 ) {
     private static final int INTERVAL_FROM_NOW = 7;

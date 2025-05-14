@@ -1,7 +1,9 @@
 package roomescape.business.model.vo;
 
+import jakarta.persistence.Embeddable;
 import java.util.UUID;
 
+@Embeddable
 public record Id(
         String id
 ) {

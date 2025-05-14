@@ -1,9 +1,11 @@
 package roomescape.business.model.vo;
 
+import jakarta.persistence.Column;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
 public record ThemeName(
+        @Column(name = "theme_name")
         String value
 ) {
     private static final int MAX_LENGTH = 20;

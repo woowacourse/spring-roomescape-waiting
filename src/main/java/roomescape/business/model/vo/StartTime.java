@@ -2,10 +2,12 @@ package roomescape.business.model.vo;
 
 import static roomescape.exception.ErrorCode.START_TIME_INVALID;
 
+import jakarta.persistence.Column;
 import java.time.LocalTime;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
 public record StartTime(
+        @Column(name = "start_time")
         LocalTime value
 ) {
     private static final LocalTime START_TIME = LocalTime.of(10, 0);
