@@ -21,7 +21,7 @@ import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -36,7 +36,7 @@ import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberDao.class,
+@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberRepository.class,
         ReservationService.class})
 class ReservationServiceTest {
 
@@ -49,7 +49,7 @@ class ReservationServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Autowired
     private ReservationService reservationService;
 
@@ -62,7 +62,7 @@ class ReservationServiceTest {
         LocalTime time = LocalTime.of(8, 0);
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
 
         LocalDate date = LocalDate.of(2024, 4, 29);
         reservationDao.save(new Reservation(savedMember, date, savedTime, savedTheme));
@@ -92,7 +92,7 @@ class ReservationServiceTest {
         LocalTime time = LocalTime.of(8, 0);
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Long timeId = savedTime.getId();
-        Member savedMember = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
+        Member savedMember = memberRepository.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
         LocalDate date = nextDay();
 
@@ -125,7 +125,7 @@ class ReservationServiceTest {
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Long timeId = savedTime.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
         LocalDate date = nextDay();
 
         ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
@@ -143,7 +143,7 @@ class ReservationServiceTest {
         Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
 
         LocalDate date = now.toLocalDate();
         LocalTime pastTime = now.toLocalTime().minusMinutes(1);
@@ -164,7 +164,7 @@ class ReservationServiceTest {
         Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
 
         LocalDate date = nextDay();
 
@@ -184,7 +184,7 @@ class ReservationServiceTest {
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Long timeId = savedTime.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
 
         Long notExistId = 1000L;
         ReservationRequest requestDto = new ReservationRequest(date, timeId, notExistId);
@@ -202,7 +202,7 @@ class ReservationServiceTest {
         LocalTime time = LocalTime.of(8, 0);
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
 
         LocalDate date = nextDay();
         Reservation savedReservation = reservationDao.save(
@@ -235,7 +235,7 @@ class ReservationServiceTest {
         Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
         reservationDao.save(new Reservation(savedMember, date, reservationTime1, savedTheme));
 
         // when

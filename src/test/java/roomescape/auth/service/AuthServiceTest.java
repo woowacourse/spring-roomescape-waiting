@@ -17,17 +17,17 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.LoginFailException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 import roomescape.utils.JdbcTemplateUtils;
 
 @JdbcTest
-@Import({MemberDao.class, JwtTokenHandler.class, AuthService.class})
+@Import({MemberRepository.class, JwtTokenHandler.class, AuthService.class})
 class AuthServiceTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Autowired
     private JwtTokenHandler jwtTokenHandler;
     @Autowired
@@ -43,7 +43,7 @@ class AuthServiceTest {
     void login() {
         String email = "if@woowa.com";
         String password = "12341234";
-        Member member = memberDao.save(new Member("이프", email, password, Role.ADMIN));
+        Member member = memberRepository.save(new Member("이프", email, password, Role.ADMIN));
         LoginRequest loginRequest = new LoginRequest(email, password);
 
         LoginResponse loginResponse = authService.login(loginRequest);
@@ -68,7 +68,7 @@ class AuthServiceTest {
     void findMemberById() {
         String email = "if@woowa.com";
         String password = "12341234";
-        Member member = memberDao.save(new Member("이프", email, password, Role.ADMIN));
+        Member member = memberRepository.save(new Member("이프", email, password, Role.ADMIN));
 
         assertThat(authService.findById(member.getId())).isEqualTo(member);
     }

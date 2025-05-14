@@ -20,7 +20,7 @@ import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -32,7 +32,7 @@ import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberDao.class,
+@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberRepository.class,
         ReservationTimeService.class})
 class ReservationTimeServiceTest {
 
@@ -43,7 +43,7 @@ class ReservationTimeServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Autowired
     private ReservationTimeService reservationTimeService;
 
@@ -125,7 +125,7 @@ class ReservationTimeServiceTest {
         // given
         Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.m.com"));
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(8, 0)));
-        Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
+        Member member = memberRepository.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
         reservationDao.save(new Reservation(member, LocalDate.now(), reservationTime, theme));
         Long timeId = reservationTime.getId();

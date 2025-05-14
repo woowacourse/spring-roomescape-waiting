@@ -15,18 +15,20 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.utils.JdbcTemplateUtils;
 
 @JdbcTest
-@Import(MemberDao.class)
-class MemberDaoTest {
+@Import(MemberRepository.class)
+class MemberRepositoryTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @AfterEach
     void tearDown() {
@@ -38,7 +40,7 @@ class MemberDaoTest {
     void saveMember() {
         Member member = new Member("이프", "if@posty.com", "12345678", Role.MEMBER);
 
-        Member insertedMember = memberDao.save(member);
+        Member insertedMember = memberRepository.save(member);
 
         assertAll(
                 () -> assertThat(insertedMember.getId()).isNotZero(),
@@ -54,9 +56,9 @@ class MemberDaoTest {
         String email = "if@posty.com";
         String password = "12345678";
         Member member = new Member("이프", email, password, Role.MEMBER);
-        memberDao.save(member);
+        memberRepository.save(member);
 
-        Member findMember = memberDao.findByEmailAndPassword(email, password).get();
+        Member findMember = memberRepository.findByEmailAndPassword(new Email(email), new Password(password)).get();
 
         assertAll(
                 () -> assertThat(findMember.getEmail()).isEqualTo(email),
@@ -71,9 +73,11 @@ class MemberDaoTest {
         String email = "if@posty.com";
         String password = "12345678";
         Member member = new Member("이프", email, password, Role.MEMBER);
-        memberDao.save(member);
+        memberRepository.save(member);
 
-        Optional<Member> findMember = memberDao.findByEmailAndPassword(unmatchedEmail, unmatchedPassword);
+        Optional<Member> findMember = memberRepository.findByEmailAndPassword(
+                new Email(unmatchedEmail), new Password(unmatchedPassword)
+        );
 
         assertThat(findMember).isEmpty();
     }

@@ -19,7 +19,7 @@ import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -31,7 +31,7 @@ import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberDao.class,
+@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberRepository.class,
         ThemeService.class})
 class ThemeServiceTest {
 
@@ -42,7 +42,7 @@ class ThemeServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Autowired
     private ThemeService themeService;
 
@@ -120,7 +120,7 @@ class ThemeServiceTest {
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
 
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberDao.save(member);
+        Member savedMember = memberRepository.save(member);
 
         LocalDate date = LocalDate.of(2024, 4, 29);
         reservationDao.save(new Reservation(savedMember, date, savedTime, savedTheme));
@@ -137,7 +137,7 @@ class ThemeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(
                 new ReservationTime(LocalTime.of(10, 0)));
         LocalDate date = LocalDateTime.now().toLocalDate();
-        Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
+        Member member = memberRepository.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
         Theme theme1 = themeRepository.save(new Theme("테마1", "테마1", "www.m.com"));
         Theme theme2 = themeRepository.save(new Theme("테마2", "테마2", "www.m.com"));

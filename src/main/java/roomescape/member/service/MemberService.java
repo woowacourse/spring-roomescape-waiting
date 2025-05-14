@@ -6,28 +6,30 @@ import org.springframework.stereotype.Service;
 
 import jakarta.validation.Valid;
 import roomescape.common.exception.EntityNotFoundException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.MemberCreateRequest;
 import roomescape.member.dto.MemberResponse;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 
 @Service
 public class MemberService {
 
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
-    public MemberService(final MemberDao memberDao) {
-        this.memberDao = memberDao;
+    public MemberService(final MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     public Member findMemberByEmailAndPassword(final String email, final String password) {
-        return memberDao.findByEmailAndPassword(email, password)
+        return memberRepository.findByEmailAndPassword(new Email(email), new Password(password))
                 .orElseThrow(() -> new EntityNotFoundException("이메일 또는 패스워드가 잘못 되었습니다."));
     }
 
     public List<MemberResponse> findAll() {
-        return memberDao.findAll()
+        return memberRepository.findAll()
                 .stream()
                 .map(MemberResponse::fromEntity)
                 .toList();
@@ -40,6 +42,6 @@ public class MemberService {
                 request.password(),
                 Role.MEMBER
         );
-        memberDao.save(member);
+        memberRepository.save(member);
     }
 }

@@ -17,17 +17,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 import roomescape.utils.JdbcTemplateUtils;
 
 @JdbcTest
-@Import({MemberDao.class, MemberService.class})
+@Import({MemberRepository.class, MemberService.class})
 class MemberServiceTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Autowired
     private MemberService memberService;
 
@@ -41,7 +41,7 @@ class MemberServiceTest {
     void findMemberByEmailAndPassword() {
         String email = "if@posty.com";
         String password = "12345678";
-        memberDao.save(new Member("이프", email, password, Role.MEMBER));
+        memberRepository.save(new Member("이프", email, password, Role.MEMBER));
 
         Member findMember = memberService.findMemberByEmailAndPassword(email, password);
 
@@ -57,7 +57,7 @@ class MemberServiceTest {
     void findMemberByUnmatchedEmailAndPassword(String unmatchedEmail, String unmatchedPassword) {
         String email = "if@posty.com";
         String password = "12345678";
-        memberDao.save(new Member("이프", email, password, Role.MEMBER));
+        memberRepository.save(new Member("이프", email, password, Role.MEMBER));
 
         assertThatThrownBy(() -> memberService.findMemberByEmailAndPassword(unmatchedEmail, unmatchedPassword))
                 .isInstanceOf(EntityNotFoundException.class);
