@@ -40,17 +40,17 @@ public class Reservation {
     }
 
     public Reservation(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
-                       final Member member) {
+                       final Member member, final Status status) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = Status.CONFIRMATION;
+        this.status = status;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member, final Status status) {
+        this(null, date, time, theme, member, status);
     }
 
     public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
