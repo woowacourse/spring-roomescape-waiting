@@ -1,13 +1,20 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Theme {
 
-    private static final long EMPTY_ID = 0L;
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    protected Theme() {}
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         this.id = id;
@@ -17,8 +24,8 @@ public class Theme {
         validateTheme();
     }
 
-    public static Theme withoutId(final String name, final String description, final String thumbnail) {
-        return new Theme(EMPTY_ID, name, description, thumbnail);
+    public Theme(final String name, final String description, final String thumbnail) {
+        this(null, name, description, thumbnail);
     }
 
     private Theme(final Builder builder) {
@@ -33,10 +40,6 @@ public class Theme {
         if (name == null || description == null || thumbnail == null) {
             throw new IllegalArgumentException("Theme field cannot be null");
         }
-    }
-
-    public boolean existId() {
-        return id != EMPTY_ID;
     }
 
     public Long getId() {
@@ -57,7 +60,7 @@ public class Theme {
 
     public static class Builder {
 
-        private Long id = EMPTY_ID;
+        private Long id;
         private String name;
         private String description;
         private String thumbnail;

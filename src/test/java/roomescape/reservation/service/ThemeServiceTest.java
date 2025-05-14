@@ -50,8 +50,8 @@ class ThemeServiceTest {
     @Test
     void test1() {
         // given
-        themeDao.save(Theme.withoutId("테마1", "테마1", "www.m.com"));
-        themeDao.save(Theme.withoutId("테마2", "테마2", "www.m.com"));
+        themeDao.save(new Theme("테마1", "테마1", "www.m.com"));
+        themeDao.save(new Theme("테마2", "테마2", "www.m.com"));
 
         // when
         List<ThemeResponse> responses = themeService.getAll();
@@ -113,7 +113,7 @@ class ThemeServiceTest {
     @Test
     void test6() {
         // given
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
 
         LocalTime time = LocalTime.of(8, 0);
@@ -139,9 +139,9 @@ class ThemeServiceTest {
         LocalDate date = LocalDateTime.now().toLocalDate();
         Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
-        Theme theme1 = themeDao.save(Theme.withoutId("테마1", "테마1", "www.m.com"));
-        Theme theme2 = themeDao.save(Theme.withoutId("테마2", "테마2", "www.m.com"));
-        Theme theme3 = themeDao.save(Theme.withoutId("테마3", "테마3", "www.m.com"));
+        Theme theme1 = themeDao.save(new Theme("테마1", "테마1", "www.m.com"));
+        Theme theme2 = themeDao.save(new Theme("테마2", "테마2", "www.m.com"));
+        Theme theme3 = themeDao.save(new Theme("테마3", "테마3", "www.m.com"));
         reservationDao.save(Reservation.withoutId(member, date.minusDays(1), reservationTime, theme1));
         reservationDao.save(Reservation.withoutId(member, date.minusDays(2), reservationTime, theme1));
         reservationDao.save(Reservation.withoutId(member, date.minusDays(3), reservationTime, theme1));

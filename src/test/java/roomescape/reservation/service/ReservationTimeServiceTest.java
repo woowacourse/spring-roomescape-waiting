@@ -123,7 +123,7 @@ class ReservationTimeServiceTest {
     @Test
     void test6() {
         // given
-        Theme theme = themeDao.save(Theme.withoutId("테마1", "테마1", "www.m.com"));
+        Theme theme = themeDao.save(new Theme("테마1", "테마1", "www.m.com"));
         ReservationTime reservationTime = reservationTimeDao.save(ReservationTime.withoutId(LocalTime.of(8, 0)));
         Member member = memberDao.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 

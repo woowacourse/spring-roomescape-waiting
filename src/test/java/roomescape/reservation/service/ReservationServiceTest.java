@@ -57,7 +57,7 @@ class ReservationServiceTest {
     @Test
     void test1() {
         // given
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
 
         LocalTime time = LocalTime.of(8, 0);
         ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(time));
@@ -86,7 +86,7 @@ class ReservationServiceTest {
     @Test
     void test3() {
         // given
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
 
         LocalTime time = LocalTime.of(8, 0);
@@ -118,7 +118,7 @@ class ReservationServiceTest {
     @Test
     void test4() {
         // given
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
 
         LocalTime time = LocalTime.of(8, 0);
@@ -140,7 +140,7 @@ class ReservationServiceTest {
     @Test
     void test5() {
         // given
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
@@ -161,7 +161,7 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약 시간 ID로 저장하면 예외를 반환한다.")
     @Test
     void test6() {
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);
@@ -197,7 +197,7 @@ class ReservationServiceTest {
     @Test
     void test7() {
         // given
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
 
         LocalTime time = LocalTime.of(8, 0);
         ReservationTime savedTime = reservationTimeDao.save(ReservationTime.withoutId(time));
@@ -232,7 +232,7 @@ class ReservationServiceTest {
         LocalTime time2 = LocalTime.of(9, 0);
         ReservationTime reservationTime1 = reservationTimeDao.save(ReservationTime.withoutId(time1));
         ReservationTime reservationTime2 = reservationTimeDao.save(ReservationTime.withoutId(time2));
-        Theme savedTheme = themeDao.save(Theme.withoutId("포스티", "공포", "wwww.um.com"));
+        Theme savedTheme = themeDao.save(new Theme("포스티", "공포", "wwww.um.com"));
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberDao.save(member);

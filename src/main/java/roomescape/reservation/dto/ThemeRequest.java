@@ -11,6 +11,6 @@ public record ThemeRequest(
 ) {
 
     public Theme toEntity() {
-        return Theme.withoutId(name, description, thumbnail);
+        return new Theme(name, description, thumbnail);
     }
 }
