@@ -114,7 +114,6 @@ class ReservationServiceTest {
     @Test
     void 중복_예약은_불가능하다() {
         //given
-
         when(reservationRepository.existsByTimeIdAndThemeIdAndDate(any(Long.class), any(Long.class), any(LocalDate.class)))
                 .thenReturn(true);
         when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(member));
@@ -126,4 +125,22 @@ class ReservationServiceTest {
                 new CreateReservationRequest(LocalDate.now(), time.getId(), theme.getId()), loginMember))
                 .isInstanceOf(InvalidReservationException.class);
     }
+
+    @Test
+    void 대상_유저의_예약_전체를_조회할_수_있다() {
+        //given
+
+        Reservation reservation = new Reservation(1L, member, LocalDate.now(), time, theme, ReservationStatus.RESERVED);
+        Reservation reservation2 = new Reservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER), LocalDate.now(), time, theme, ReservationStatus.RESERVED);
+
+        when(reservationRepository.findAllByMemberId(1L))
+                .thenReturn(List.of(reservation));
+        //when
+        List<Reservation> actual = reservationService.findAllReservationByMember(1L);
+
+        //then
+        assertThat(actual).hasSize(1);
+        assertThat(actual).extracting("name").containsExactlyInAnyOrder("test");
+    }
+
 }

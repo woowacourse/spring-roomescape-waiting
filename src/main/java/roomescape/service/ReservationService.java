@@ -62,24 +62,6 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    private void validateDuplicateReservation(Reservation reservation) {
-        boolean exists = reservationRepository.existsByTimeIdAndThemeIdAndDate(
-                reservation.getReservationTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getDate()
-                );
-        if (exists) {
-            throw new InvalidReservationException("중복된 예약신청입니다");
-        }
-    }
-
-    private void validateAddReservationDateTime(Reservation reservation) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        if (reservation.isBefore(currentDateTime)) {
-            throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
-        }
-    }
-
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
@@ -99,5 +81,23 @@ public class ReservationService {
 
     public List<Reservation> findAllReservationByMember(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId);
+    }
+
+    private void validateDuplicateReservation(Reservation reservation) {
+        boolean exists = reservationRepository.existsByTimeIdAndThemeIdAndDate(
+                reservation.getReservationTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getDate()
+        );
+        if (exists) {
+            throw new InvalidReservationException("중복된 예약신청입니다");
+        }
+    }
+
+    private void validateAddReservationDateTime(Reservation reservation) {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        if (reservation.isBefore(currentDateTime)) {
+            throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
+        }
     }
 }
