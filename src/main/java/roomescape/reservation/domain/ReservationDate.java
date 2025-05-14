@@ -4,10 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class ReservationDate {
 
     @Column(name = "date")
@@ -17,7 +19,4 @@ public class ReservationDate {
         this.date = reservationDate;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
 }

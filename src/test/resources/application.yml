@@ -11,11 +11,11 @@ spring:
     init:
       data-locations: [ ]
 
-logging:
-  level:
-    org:
-      springframework:
-        jdbc: debug
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
 jwt:
   secret-key: secretsecretsecretsecretsecretsecret

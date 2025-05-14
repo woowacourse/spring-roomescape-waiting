@@ -1,10 +1,11 @@
 package roomescape.time.controller.response;
 
-import java.time.format.DateTimeFormatter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalTime;
 import java.util.List;
 import roomescape.time.domain.ReservationTime;
 
-public record ReservationTimeResponse(Long id, String startAt) {
+public record ReservationTimeResponse(Long id, @JsonFormat(pattern = "HH:mm") LocalTime startAt) {
 
     public static List<ReservationTimeResponse> from(List<ReservationTime> reservationTimes) {
         return reservationTimes.stream()
@@ -13,10 +14,9 @@ public record ReservationTimeResponse(Long id, String startAt) {
     }
 
     public static ReservationTimeResponse from(ReservationTime reservationTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return new ReservationTimeResponse(
                 reservationTime.getId(),
-                reservationTime.getStartAt().format(formatter)
+                reservationTime.getStartAt()
         );
     }
 }

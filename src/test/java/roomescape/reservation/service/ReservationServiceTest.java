@@ -15,11 +15,14 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.common.CleanUp;
 import roomescape.fixture.MemberDbFixture;
 import roomescape.fixture.ReservationDateFixture;
+import roomescape.fixture.ReservationDateTimeDbFixture;
 import roomescape.fixture.ReservationDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -45,8 +48,14 @@ class ReservationServiceTest {
     private MemberDbFixture memberDbFixture;
     @Autowired
     private ReservationRepository reservationRepository;
+
+
+    @Autowired
+    private MemberRepository memberRepository;
     @Autowired
     private CleanUp cleanUp;
+    @Autowired
+    private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
 
     @BeforeEach
     void setUp() {
@@ -171,4 +180,32 @@ class ReservationServiceTest {
 
         softly.assertAll();
     }
+
+    @Test
+    void 내_예약_목록을_조회한다() {
+        Member member1 = memberDbFixture.유저1_생성();
+        Member member2 = memberDbFixture.유저2_생성();
+
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+
+        Reservation reservation1 = reservationRepository.save(Reservation.reserve(member1, reservationDateTime, theme));
+        reservationRepository.save(Reservation.reserve(member2, reservationDateTime, theme));
+
+        List<MyReservationResponse> myReservations = reservationService.getMyReservations(member1.getId());
+
+        System.out.println(myReservations);
+
+        SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(myReservations).hasSize(1);
+        softly.assertThat(myReservations.get(0).reservationId()).isEqualTo(reservation1.getId());
+        softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
+        softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
+        softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());
+        softly.assertThat(myReservations.get(0).status()).isEqualTo(reservation1.getStatus().getMessage());
+
+        softly.assertAll();
+    }
+
 }

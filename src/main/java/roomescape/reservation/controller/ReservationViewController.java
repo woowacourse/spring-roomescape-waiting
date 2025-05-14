@@ -12,4 +12,9 @@ public class ReservationViewController {
     public String getReservation() {
         return "reservation";
     }
+
+    @GetMapping("/me")
+    public String getReservationsMine() {
+        return "reservation-mine";
+    }
 }

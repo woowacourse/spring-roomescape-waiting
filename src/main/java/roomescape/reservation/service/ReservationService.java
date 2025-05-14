@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -81,5 +82,10 @@ public class ReservationService {
         );
 
         return ReservationResponse.from(reservations);
+    }
+
+    public List<MyReservationResponse> getMyReservations(Long memberId) {
+        List<Reservation> myReservations = reservationRepository.findByMemberId(memberId);
+        return MyReservationResponse.from(myReservations);
     }
 }
