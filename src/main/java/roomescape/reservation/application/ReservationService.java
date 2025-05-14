@@ -45,7 +45,7 @@ public class ReservationService {
     public List<ReservationResponse> findAll() {
         final List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
-                .map(ReservationResponse::of)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -82,7 +82,7 @@ public class ReservationService {
         final List<Reservation> reservations = reservationRepository
                 .findByTheme_IdAndMember_IdAndDateBetween(themeId, memberId, start, end);
         return reservations.stream()
-                .map(ReservationResponse::of)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -107,7 +107,7 @@ public class ReservationService {
 
         final Reservation reservation = new Reservation(date, reservationTime, theme, member, Status.CONFIRMATION);
         final Reservation saved = reservationRepository.save(reservation);
-        return ReservationResponse.of(saved);
+        return ReservationResponse.from(saved);
     }
 
     private void validateIsBooked(final List<Reservation> sameTimeReservations, final ReservationTime reservationTime,

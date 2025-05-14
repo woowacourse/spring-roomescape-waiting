@@ -24,7 +24,7 @@ public class ReservationTimeService {
     public List<ReservationTimeResponse> findAll() {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
         return times.stream()
-                .map(ReservationTimeResponse::of)
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 
@@ -34,7 +34,7 @@ public class ReservationTimeService {
         }
         final ReservationTime reservationTime = new ReservationTime(requestDto.startAt());
         final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponse.of(savedReservationTime);
+        return ReservationTimeResponse.from(savedReservationTime);
     }
 
     public void deleteById(final Long id) {

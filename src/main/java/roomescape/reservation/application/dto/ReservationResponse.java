@@ -12,13 +12,13 @@ public record ReservationResponse(
         ThemeResponse theme,
         MemberResponse member) {
 
-    public static ReservationResponse of(final Reservation reservation) {
+    public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getDate(),
-                ReservationTimeResponse.of(reservation.getTime()),
-                ThemeResponse.of(reservation.getTheme()),
-                MemberResponse.of(reservation.getMember())
+                ReservationTimeResponse.from(reservation.getTime()),
+                ThemeResponse.from(reservation.getTheme()),
+                MemberResponse.from(reservation.getMember())
         );
     }
 }

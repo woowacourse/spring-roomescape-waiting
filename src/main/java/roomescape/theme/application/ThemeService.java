@@ -23,7 +23,7 @@ public class ThemeService {
     public List<ThemeResponse> findAll() {
         final List<Theme> themes = themeRepository.findAll();
         return themes.stream()
-                .map(ThemeResponse::of)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
@@ -33,7 +33,7 @@ public class ThemeService {
         }
         final Theme theme = new Theme(requestDto.name(), requestDto.description(), requestDto.thumbnail());
         final Theme savedTheme = themeRepository.save(theme);
-        return ThemeResponse.of(savedTheme);
+        return ThemeResponse.from(savedTheme);
     }
 
     public void deleteById(final Long id) {
@@ -46,7 +46,7 @@ public class ThemeService {
     public List<ThemeResponse> sortByRank() {
         final List<Theme> themes = themeRepository.findByRank();
         return themes.stream()
-                .map(ThemeResponse::of)
+                .map(ThemeResponse::from)
                 .toList();
     }
 }
