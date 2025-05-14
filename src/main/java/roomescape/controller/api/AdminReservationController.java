@@ -30,10 +30,10 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public ResponseEntity<List<ReservationResponseDto>> searchReservationsByPeriod(
-            @RequestParam long themeId,
-            @RequestParam long memberId,
-            @RequestParam LocalDate dateFrom,
-            @RequestParam LocalDate dateTo) {
+            @RequestParam("themeId") long themeId,
+            @RequestParam("memberId") long memberId,
+            @RequestParam("dateFrom") LocalDate dateFrom,
+            @RequestParam("dateTo") LocalDate dateTo) {
         List<ReservationResponseDto> reservationBetween = reservationService.findReservationBetween(themeId, memberId, dateFrom, dateTo);
         return ResponseEntity.ok(reservationBetween);
     }

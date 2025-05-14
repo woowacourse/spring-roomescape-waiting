@@ -1,7 +1,12 @@
 package roomescape.controller.api;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,13 +21,6 @@ import roomescape.dto.reservation.AdminReservationCreateRequestDto;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.MemberRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -56,7 +54,7 @@ class AdminReservationControllerTest {
                     .then().log().all()
                     .statusCode(201);
 
-            Member admin = new Member(1L, "가이온", "hello@woowa.com", Role.ADMIN, "password");
+            Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
             memberRepository.save(admin);
 
             LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
@@ -123,7 +121,7 @@ class AdminReservationControllerTest {
     class searchAdminReservationTest {
 
         @Autowired
-        MemberRepository memberRepository;
+        JpaMemberRepository memberRepository;
 
         String loginToken;
 
@@ -147,7 +145,7 @@ class AdminReservationControllerTest {
                     .then()
                     .statusCode(201);
 
-            Member admin = new Member(1L, "가이온", "hello@woowa.com", Role.ADMIN, "password");
+            Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
             memberRepository.save(admin);
 
             LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
