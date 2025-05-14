@@ -20,7 +20,7 @@ class ReservationTest {
         assertThatThrownBy(() -> Reservation.createUpcomingReservationWithUnassignedId(
                 TestFixture.makeMember(),
                 LocalDate.now().minusDays(1),
-                ReservationTime.of(1L, LocalTime.now().minusHours(1)),
+                ReservationTime.of( LocalTime.now().minusHours(1)),
                 theme, LocalDateTime.now())
         ).isInstanceOf(InvalidReservationException.class)
                 .hasMessageContaining("예약 시간이 현재 시간보다 이전일 수 없습니다.");

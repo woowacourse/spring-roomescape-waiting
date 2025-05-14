@@ -1,5 +1,10 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -9,33 +14,45 @@ import roomescape.reservation.exception.InvalidReservationException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
+    private LocalDate date;
+
+    @ManyToOne
+    private Member member;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
+
+    private Reservation(final Member member, final LocalDate date, final ReservationTime time,
                         final Theme theme) {
-        this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public static Reservation of(final Long id, final LocalDate date, final Member member, final ReservationTime time,
+    public Reservation() {
+    }
+
+    public static Reservation of(final LocalDate date, final Member member, final ReservationTime time,
                                  final Theme theme) {
-        return new Reservation(id, member, date, time, theme);
+        return new Reservation(member, date, time, theme);
     }
 
     public static Reservation createUpcomingReservationWithUnassignedId(final Member member, final LocalDate date,
                                                                         final ReservationTime time,
                                                                         final Theme theme, final LocalDateTime now) {
         validateDateTime(date, time.getStartAt(), now);
-        return new Reservation(null, member, date, time, theme);
+        return new Reservation(member, date, time, theme);
     }
 
     private static void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {

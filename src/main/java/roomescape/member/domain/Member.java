@@ -1,35 +1,48 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.member.exception.InvalidMemberException;
 
+@Entity
 public class Member {
 
     private static final int MAX_NAME_LENGTH = 10;
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final MemberRole memberRole;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
 
-    private Member(final Long id, final String name, final String email, final String password,
+    @Enumerated(EnumType.STRING)
+    private MemberRole memberRole;
+
+    private Member(final String name, final String email, final String password,
                    final MemberRole memberRole) {
         validate(name);
-        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.memberRole = memberRole;
     }
 
-    public static Member of(final Long id, final String name, final String email, final String password,
+    public Member() {
+    }
+
+    public static Member of(final String name, final String email, final String password,
                             final MemberRole memberRole) {
-        return new Member(id, name, email, password, memberRole);
+        return new Member(name, email, password, memberRole);
     }
 
     public static Member withUnassignedId(final String name, final String email, final String password,
                                           final MemberRole memberRole) {
-        return new Member(null, name, email, password, memberRole);
+        return new Member(name, email, password, memberRole);
     }
 
     private void validate(final String name) {

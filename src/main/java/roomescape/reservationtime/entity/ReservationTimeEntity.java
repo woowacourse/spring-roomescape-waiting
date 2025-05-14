@@ -12,6 +12,6 @@ public record ReservationTimeEntity(
     }
 
     public ReservationTime toReservationTime() {
-        return ReservationTime.of(id, startAt);
+        return ReservationTime.of(startAt);
     }
 }

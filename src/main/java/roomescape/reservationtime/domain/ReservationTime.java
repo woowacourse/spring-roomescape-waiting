@@ -1,29 +1,37 @@
 package roomescape.reservationtime.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import roomescape.reservation.domain.Reservation;
 
+@Entity
 public class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
 
-    private ReservationTime(final Long id, final LocalTime startAt) {
-        this.id = id;
+    public ReservationTime() {
+    }
+
+    private ReservationTime(final LocalTime startAt) {
         this.startAt = startAt;
     }
 
-    private ReservationTime(final Long id, final String startAt) {
-        this.id = id;
-        this.startAt = LocalTime.parse(startAt);
-    }
-
-    public static ReservationTime of(final Long id, final LocalTime startAt) {
-        return new ReservationTime(id, startAt);
+    public static ReservationTime of(final LocalTime startAt) {
+        return new ReservationTime(startAt);
     }
 
     public static ReservationTime withUnassignedId(final LocalTime startAt) {
-        return new ReservationTime(null, startAt);
+        return new ReservationTime(startAt);
     }
 
     public Long getId() {

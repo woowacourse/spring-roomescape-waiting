@@ -4,8 +4,16 @@ spring:
   h2:
     console:
       enabled: true
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
 security:
   jwt:
     token:
       secret-key: 666e6bce665167298977c8265d5078279a58490daca4702af42ea5b986b6bd8866febe253df35dec188db3011d41966e038f293da8e2521df78af0ea83c8f61f2f51e95d51becf2573a5e4f86b38b8c3ee33199907a4e0474e4077ba4af57476754316d021a7070edea19bc818d10ee0fd1def13e6d638c36c649601a5fa6585f0b9f53ab7ceb5a12a673b52d6da0d141d38c4f6be28b3d717c2b34bcdb2766117b156e3f8547f1a26bb68875d381c6bb3c35a341023f1b13b510503ece608f28f931f67dbf3bb90c1fb8190fbc0457a71a7e04f9ab71476cf284326eef2332c2ac5fa61677f9d05e449f5023c7dd0f31dc333fc1786d1e7a78187343128f22c
-      expire-length : 900000 # 15분
+      expire-length: 900000 # 15분

@@ -2,18 +2,11 @@ package roomescape.reservationtime.repository;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 
-public interface ReservationTimeRepository {
+public interface ReservationTimeRepository extends ListCrudRepository<ReservationTime,Long> {
 
-    List<ReservationTime> findAll();
-
-    ReservationTime save(ReservationTime reservationTime);
-
-    boolean deleteById(Long id);
-
-    Optional<ReservationTime> findById(Long id);
-
-    boolean checkExistsByStartAt(LocalTime time);
+    boolean existsByStartAt(LocalTime time);
 }

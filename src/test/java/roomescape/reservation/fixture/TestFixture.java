@@ -14,7 +14,7 @@ public class TestFixture {
     private static final LocalTime TIME = LocalTime.of(10, 0);
 
     public static Theme makeTheme(Long id) {
-        return Theme.of(id, "추리", "셜록 추리 게임 with Danny", "image.png");
+        return Theme.of("추리", "셜록 추리 게임 with Danny", "image.png");
     }
 
     public static LocalDateTime makeTimeAfterOneHour() {
@@ -23,11 +23,20 @@ public class TestFixture {
 
     public static Reservation makeReservation(final Long reservationId, final long reservationTimeId) {
         ReservationTime reservationTime = makeReservationTime(reservationTimeId);
-        return Reservation.of(reservationId, makeFutureDate(), makeMember(), reservationTime, makeTheme(1L));
+        return Reservation.of(makeFutureDate(), makeMember(), reservationTime, makeTheme(1L));
+    }
+
+    public static Reservation makeReservation(final LocalDate date, final ReservationTime reservationTime,
+                                              final Member member, final Theme theme) {
+        return Reservation.of(date, member, reservationTime, theme);
     }
 
     public static ReservationTime makeReservationTime(final long reservationTimeId) {
-        return ReservationTime.of(reservationTimeId, TIME);
+        return ReservationTime.of(TIME);
+    }
+
+    public static ReservationTime makeReservationTime(final LocalTime localTime) {
+        return ReservationTime.of(localTime);
     }
 
     public static LocalDate makeFutureDate() {
@@ -39,6 +48,6 @@ public class TestFixture {
     }
 
     public static Member makeMember() {
-        return Member.of(1L, "Mint", "mint@gmail.com", "password", MemberRole.USER);
+        return Member.of("Mint", "mint@gmail.com", "password", MemberRole.USER);
     }
 }

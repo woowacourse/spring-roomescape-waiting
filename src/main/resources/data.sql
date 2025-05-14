@@ -19,7 +19,7 @@ VALUES ('08:00'),
        ('16:00'),
        ('18:00');
 
-INSERT INTO member (name, email, password, role)
+INSERT INTO member (name, email, password, member_role)
 VALUES
     ('Admin', 'admin@gmail.com', 'password', 'ADMIN'),
     ('User', 'user@gmail.com', 'password', 'USER'),

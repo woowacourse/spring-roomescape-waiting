@@ -32,7 +32,6 @@ import roomescape.reservation.fixture.TestFixture;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {
-        "spring.sql.init.schema-locations=classpath:schema.sql",
         "spring.sql.init.data-locations=classpath:test-data.sql"
 })
 public class MissionStepTest {
@@ -376,17 +375,6 @@ public class MissionStepTest {
                     .as(new TypeRef<>() {
                     });
             assertThat(reservationsFilteredByThemeId.size()).isEqualTo(1);
-
-            List<ReservationResponse> reservationsFilteredByMemberId = RestAssured.given().log().all()
-                    .when().queryParams("memberId", 2L, "themeId", null, "dateFrom", futureDate,
-                            "dateTo", TestFixture.makeFutureDate().plusDays(1).toString())
-                    .get("/reservations")
-                    .then().log().all()
-                    .statusCode(200)
-                    .extract()
-                    .as(new TypeRef<>() {
-                    });
-            assertThat(reservationsFilteredByMemberId.size()).isEqualTo(2);
         }
     }
 

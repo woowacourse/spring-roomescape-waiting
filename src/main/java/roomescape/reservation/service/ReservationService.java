@@ -35,9 +35,9 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<ReservationResponse> findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
-                                                      final LocalDate dateTo) {
-        return getReservations(themeId, memberId, dateFrom, dateTo)
+    public List<ReservationResponse> findReservations(final Long themeId, final Long memberId, final LocalDate startDate,
+                                                      final LocalDate endDate) {
+        return getReservations(themeId, memberId, startDate, endDate)
                 .stream()
                 .map(reservation -> {
                     ReservationTime time = reservation.getTime();
@@ -49,14 +49,15 @@ public class ReservationService {
     }
 
     private List<Reservation> getReservations(final Long themeId, final Long memberId,
-                                              final LocalDate dateFrom, final LocalDate dateTo) {
-        return reservationRepository.findFilteredReservations(themeId, memberId, dateFrom, dateTo);
+                                                      final LocalDate startDate, final LocalDate endDate) {
+        if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
+            return reservationRepository.findAll();
+        }
+        return reservationRepository.findFilteredReservations(themeId, memberId, startDate, endDate);
     }
 
     public void delete(Long id) {
-        if (!reservationRepository.deleteById(id)) {
-            throw new ReservationNotFoundException("요청한 id와 일치하는 예약 정보가 없습니다.");
-        }
+        reservationRepository.deleteById(id);
     }
 
     public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
@@ -72,7 +73,7 @@ public class ReservationService {
     }
 
     private Member findUserByMemberId(final Long memberId) {
-        return memberRepository.findUserById(memberId)
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
     }
 

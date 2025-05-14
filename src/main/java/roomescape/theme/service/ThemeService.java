@@ -32,9 +32,7 @@ public class ThemeService {
         if (reservationRepository.existsByThemeId(id)) {
             throw new ReservationTimeInUseException("해당 테마에 대한 예약이 존재하여 삭제할 수 없습니다.");
         }
-        if (!themeRepository.deleteById(id)) {
-            throw new ThemeNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다.");
-        }
+        themeRepository.deleteById(id);
     }
 
     public ThemeResponse create(final ThemeCreateRequest request) {
@@ -44,7 +42,7 @@ public class ThemeService {
 
     public List<ThemeResponse> getPopularThemes() {
         final LocalDate date = LocalDate.now();
-        return themeRepository.findTop10PopularThemesWithinLastWeek(date).stream()
+        return themeRepository.findTop10PopularThemesWithinLastWeek(date, date.plusDays(7)).stream()
                 .map(ThemeResponse::from)
                 .toList();
     }

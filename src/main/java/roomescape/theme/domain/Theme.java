@@ -1,30 +1,39 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.theme.exception.InvalidThemeException;
 
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
+    public Theme(final String name, final String description, final String thumbnail) {
         validateNameLength(name);
         validateDescriptionLength(description);
         validateThumbnailLength(thumbnail);
-        this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    public static Theme of(final Long databaseId, final String name, final String description, final String thumbnail) {
-        return new Theme(databaseId, name, description, thumbnail);
+    public Theme() {
+    }
+
+    public static Theme of(final String name, final String description, final String thumbnail) {
+        return new Theme(name, description, thumbnail);
     }
 
     public static Theme withUnassignedId(final String name, final String description, final String thumbnail) {
-        return new Theme(null, name, description, thumbnail);
+        return new Theme(name, description, thumbnail);
     }
 
     private void validateNameLength(final String value) {
