@@ -1,4 +1,4 @@
-package roomescape.global;
+package roomescape.global.exception;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -10,8 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.global.dto.ErrorResponse;
-import roomescape.global.exception.AccessDeniedException;
-import roomescape.global.exception.AuthenticationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

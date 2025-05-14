@@ -12,7 +12,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.global.MemberArgumentResolver;
-import roomescape.global.SessionMember;
+import roomescape.global.dto.SessionMember;
 import roomescape.global.exception.AuthenticationException;
 
 class MemberArgumentResolverTest {

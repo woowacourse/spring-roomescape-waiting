@@ -1,4 +1,4 @@
-package roomescape.global;
+package roomescape.global.config;
 
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;

@@ -12,7 +12,7 @@ import roomescape.domain.member.MemberEncodedPassword;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.global.AdminOnlyInterceptor;
-import roomescape.global.SessionMember;
+import roomescape.global.dto.SessionMember;
 import roomescape.global.exception.AccessDeniedException;
 import roomescape.global.exception.AuthenticationException;
 

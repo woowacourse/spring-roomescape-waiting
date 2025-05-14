@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.MemberRole;
+import roomescape.global.dto.SessionMember;
 import roomescape.global.exception.AccessDeniedException;
 import roomescape.global.exception.AuthenticationException;
 
