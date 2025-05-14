@@ -82,15 +82,16 @@ public class ReservationMemberService {
                 .toList();
     }
 
-    public List<Reservation> memberReservations(long memberId) {
-        List<ReservationMemberIds> memberIds = reservationMemberRepository.findAllByMemberId(memberId);
-        List<Long> reservationIds = memberIds.stream()
-                .map(ReservationMemberIds::getReservationId)
+    public List<ReservationMember> memberReservations(long memberId) {
+        Member member= memberService.getMemberById(memberId);
+        List<ReservationMemberIds> reservationMemberIds = reservationMemberRepository.findAllByMemberId(memberId);
+
+        List<Reservation> reservations = reservationMemberIds.stream()
+                .map(ids -> reservationService.getReservationById(ids.getReservationId()))
                 .toList();
 
-        return reservationIds.stream()
-                .map(reservationService::getReservationById)
+        return reservations.stream()
+                .map(reservation -> new ReservationMember(reservation,member))
                 .toList();
-
     }
 }

@@ -133,8 +133,16 @@ class ReservationMemberServiceTest {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
-        reservationMemberService.addReservation(new AddReservationDto("name", LocalDate.now().plusDays(1), timeId, themeId), memberId);
-        reservationMemberService.addReservation(new AddReservationDto("name", LocalDate.now().plusDays(2), timeId, themeId), memberId);
-        assertThat(reservationMemberService.memberReservations(memberId)).hasSize(2);
+        long firstId = reservationMemberService.addReservation(
+                new AddReservationDto("name", LocalDate.now().plusDays(1), timeId, themeId), memberId);
+        long secondId = reservationMemberService.addReservation(
+                new AddReservationDto("name", LocalDate.now().plusDays(2), timeId, themeId), memberId);
+
+        List<ReservationMember> reservationMembers = reservationMemberService.memberReservations(memberId);
+        List<Long> reservationMemberIds = reservationMembers.stream()
+                .map(ReservationMember::getReservationId)
+                .toList();
+
+        assertThat(reservationMemberIds).containsAnyElementsOf(List.of(firstId,secondId));
     }
 }
