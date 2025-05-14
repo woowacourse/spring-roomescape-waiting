@@ -29,8 +29,8 @@ public class LoginInterceptor implements HandlerInterceptor {
             throw new InvalidAuthorizationException("[ERROR] 로그인이 필요합니다.");
         }
 
-        jwtTokenProvider.validateToken(token);
-        Member member = memberService.findMemberByToken(token);
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        Member member = memberService.findMemberById(memberId);
 
         if (!Role.isAdmin(member.getRole())) {
             response.setStatus(403);
