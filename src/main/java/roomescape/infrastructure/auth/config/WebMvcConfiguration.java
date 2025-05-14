@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.infrastructure.auth.intercept.AdminRequestMatcher;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipalResolver;
-import roomescape.infrastructure.auth.intercept.PrevRequestHandler;
+import roomescape.infrastructure.auth.intercept.PrevRequestInterceptor;
 import roomescape.infrastructure.auth.intercept.RequestMatcher;
 import roomescape.infrastructure.auth.jwt.JwtTokenProvider;
 
@@ -30,7 +30,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new PrevRequestHandler(jwtTokenProvider, requestMatchers()));
+        registry.addInterceptor(new PrevRequestInterceptor(jwtTokenProvider, requestMatchers()));
     }
 
     @Bean

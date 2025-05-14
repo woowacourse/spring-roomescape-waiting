@@ -8,12 +8,12 @@ import roomescape.infrastructure.auth.jwt.JwtCookieResolver;
 import roomescape.infrastructure.auth.jwt.JwtTokenProvider;
 import roomescape.infrastructure.auth.member.UserInfo;
 
-public class PrevRequestHandler implements HandlerInterceptor {
+public class PrevRequestInterceptor implements HandlerInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final List<RequestMatcher> adminRoleRequestMatcher;
 
-    public PrevRequestHandler(JwtTokenProvider jwtTokenProvider, List<RequestMatcher> adminRoleRequestMatcher) {
+    public PrevRequestInterceptor(JwtTokenProvider jwtTokenProvider, List<RequestMatcher> adminRoleRequestMatcher) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.adminRoleRequestMatcher = adminRoleRequestMatcher;
     }
