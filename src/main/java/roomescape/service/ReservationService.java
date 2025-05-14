@@ -68,10 +68,7 @@ public class ReservationService {
 
     public List<ReservationResult> findMemberReservationsById(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
-
-        return reservations.stream()
-                .map(ReservationResult::from)
-                .toList();
+        return ReservationResult.from(reservations);
     }
 
     private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {

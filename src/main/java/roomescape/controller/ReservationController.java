@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
 import roomescape.controller.request.CreateReservationRequest;
 import roomescape.controller.request.LoginMemberInfo;
-import roomescape.controller.response.MyReservationResponse;
+import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.result.ReservationResult;
@@ -53,12 +53,8 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
+    public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
         List<ReservationResult> reservationResults = reservationService.findMemberReservationsById(loginMemberInfo.id());
-        List<MyReservationResponse> responses = reservationResults.stream()
-                .map(MyReservationResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(MemberReservationResponse.from(reservationResults));
     }
 }
