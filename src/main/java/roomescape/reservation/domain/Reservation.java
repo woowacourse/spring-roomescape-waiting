@@ -6,10 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import roomescape.common.exception.ReservationException;
 import roomescape.member.domain.Member;
@@ -48,6 +46,9 @@ public class Reservation {
     }
 
     public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+        validateDate(date);
+        validateTime(time);
+        validateTheme(theme);
         this.member = member;
         this.date = date;
         this.time = time;
