@@ -1,4 +1,4 @@
-package roomescape.global;
+package roomescape.global.advice;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.response.ApiResponse;
 
 @RestControllerAdvice
@@ -24,8 +25,8 @@ public class RoomescapeExceptionHandler {
                 .body(ApiResponse.fail(NO_ELEMENTS, e.getMessage()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
+    @ExceptionHandler(InvalidArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidArgumentException(InvalidArgumentException e) {
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(ApiResponse.fail(WRONG_ARGUMENT, e.getMessage()));
