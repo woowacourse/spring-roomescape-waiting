@@ -17,7 +17,7 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
 
-    public Long save(final String name, final String description, final String thumbnail) {
+    public Theme save(final String name, final String description, final String thumbnail) {
         if (themeRepository.existsByName(name)) {
             throw new DataExistException("해당 테마명이 이미 존재합니다. name = " + name);
         }

@@ -27,14 +27,13 @@ public class ThemeRestController {
     public ResponseEntity<ThemeResponse> createTheme(
             @RequestBody final ThemeRequest themeRequest
     ) {
-        final Long id = themeService.save(
+        final Theme savedTheme = themeService.save(
                 themeRequest.name(),
                 themeRequest.description(),
                 themeRequest.thumbnail()
         );
-        final Theme found = themeService.getById(id);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ThemeResponse.from(found));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ThemeResponse.from(savedTheme));
     }
 
     @DeleteMapping({"/{id}"})
