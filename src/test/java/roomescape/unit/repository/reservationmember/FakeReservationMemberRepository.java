@@ -23,7 +23,7 @@ public class FakeReservationMemberRepository implements ReservationMemberReposit
     }
 
     @Override
-    public Optional<ReservationMemberIds> findById(long id) {
+    public Optional<ReservationMemberIds> findByReservationId(long id) {
         return reservationMemberIds.stream()
                 .filter((currentReservationMemberIds -> currentReservationMemberIds.getId() == id))
                 .findAny();

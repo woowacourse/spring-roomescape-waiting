@@ -38,7 +38,7 @@ public class ReservationMemberRepositoryImpl implements ReservationMemberReposit
     }
 
     @Override
-    public Optional<ReservationMemberIds> findById(long id) {
+    public Optional<ReservationMemberIds> findByReservationId(long id) {
         return jpaReservationMemberRepository.findById(id);
     }
 }

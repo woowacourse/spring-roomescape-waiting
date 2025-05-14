@@ -16,5 +16,5 @@ public interface ReservationMemberRepository {
 
     List<ReservationMemberIds> findAll();
 
-    Optional<ReservationMemberIds> findById(long id);
+    Optional<ReservationMemberIds> findByReservationId(long reservationId);
 }

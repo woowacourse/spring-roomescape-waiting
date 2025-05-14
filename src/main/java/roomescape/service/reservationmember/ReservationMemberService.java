@@ -52,7 +52,7 @@ public class ReservationMemberService {
 
     @Transactional
     public void deleteReservation(long id) {
-        ReservationMemberIds reservationMemberIds = reservationMemberRepository.findById(id)
+        ReservationMemberIds reservationMemberIds = reservationMemberRepository.findByReservationId(id)
                 .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약입니다"));
 
         reservationMemberRepository.deleteById(id);
