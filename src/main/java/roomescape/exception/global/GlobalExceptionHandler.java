@@ -1,4 +1,4 @@
-package roomescape.exception;
+package roomescape.exception.global;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -6,6 +6,14 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import roomescape.exception.DeletionNotAllowedException;
+import roomescape.exception.NotFoundMemberException;
+import roomescape.exception.NotFoundReservationException;
+import roomescape.exception.NotFoundReservationTimeException;
+import roomescape.exception.NotFoundThemeException;
+import roomescape.exception.UnableCreateMemberException;
+import roomescape.exception.UnableCreateReservationException;
+import roomescape.exception.UnauthorizedException;
 
 @Slf4j
 @ControllerAdvice

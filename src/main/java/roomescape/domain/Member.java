@@ -28,7 +28,7 @@ public class Member {
 
     public Member(final Long id, final String name, final MemberRole role, final String email, final String password) {
         if (name.length() < 2 || name.length() > 10) {
-            throw new UnableCreateMemberException("예약자명은 2글자에서 10글자까지만 가능합니다.");
+            throw new UnableCreateMemberException("회원 이름은 2글자에서 10글자까지만 가능합니다.");
         }
         this.id = id;
         this.name = name;

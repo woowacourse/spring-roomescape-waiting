@@ -1,11 +1,16 @@
 package roomescape.service;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
+import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.exception.NotFoundMemberException;
 import roomescape.exception.UnauthorizedException;
-import roomescape.fake.FakeMemberRepository;
-import roomescape.persistence.query.CreateMemberQuery;
+import roomescape.persistence.MemberRepository;
 import roomescape.service.param.LoginMemberParam;
 import roomescape.service.param.RegisterMemberParam;
 import roomescape.service.result.MemberResult;
@@ -13,10 +18,17 @@ import roomescape.service.result.MemberResult;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+
+@SpringBootTest
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test")
 class MemberServiceTest {
 
-    private final FakeMemberRepository memberRepository = new FakeMemberRepository();
-    private final MemberService memberService = new MemberService(memberRepository);
+    @Autowired
+    MemberRepository memberRepository;
+    @Autowired
+    MemberService memberService;
+
 
     @Test
     void 로그인_시_존재하지_않는_email로_로그인_시_예외() {
@@ -32,7 +44,7 @@ class MemberServiceTest {
     @Test
     void 로그인_시_email에_대해_password가_일치하지_않으면_예외() {
         //given
-        memberRepository.create(new CreateMemberQuery("name1", MemberRole.USER, "email1", "password1"));
+        memberRepository.save(new Member(null, "name1", MemberRole.USER, "email1", "password1"));
 
         //when & then
         assertThatThrownBy(() -> memberService.login(new LoginMemberParam("email1", "password2")))
@@ -43,7 +55,7 @@ class MemberServiceTest {
     @Test
     void email과_password로_로그인_가능() {
         //given
-        memberRepository.create(new CreateMemberQuery("name1", MemberRole.USER, "email1", "password1"));
+        memberRepository.save(new Member(null, "name1", MemberRole.USER, "email1", "password1"));
         LoginMemberParam loginMemberParam = new LoginMemberParam("email1", "password1");
 
         //when & then
@@ -59,7 +71,7 @@ class MemberServiceTest {
     @Test
     void id를_통해_멤버를_찾을_수_있다() {
         //given
-        memberRepository.create(new CreateMemberQuery("name1", MemberRole.USER, "email1", "password1"));
+        memberRepository.save(new Member(null, "name1", MemberRole.USER, "email1", "password1"));
 
         //when & then
         assertThat(memberService.findById(1L)).isEqualTo(new MemberResult(1L, "name1", MemberRole.USER, "email1"));

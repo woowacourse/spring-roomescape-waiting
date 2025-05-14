@@ -5,6 +5,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import roomescape.exception.UnauthorizedException;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 @Component
@@ -16,17 +17,17 @@ public class CookieProvider {
                 .httpOnly(true)
                 .sameSite("Strict")
                 .path("/")
-                .maxAge(24 * 60 * 60) //1일
+                .maxAge(Duration.ofDays(1))
                 .build();
     }
 
     public ResponseCookie invalidate(Cookie cookie) {
         return ResponseCookie.from("token", cookie.getValue())
-                .maxAge(0)
                 .path("/")
                 .secure(true)
                 .httpOnly(true)
                 .sameSite("Strict")
+                .maxAge(Duration.ZERO)
                 .build();
     }
 

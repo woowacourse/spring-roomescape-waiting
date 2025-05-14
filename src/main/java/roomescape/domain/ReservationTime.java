@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import roomescape.exception.UnableCreateReservationException;
 
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -22,15 +23,28 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    public ReservationTime(LocalTime startAt) {
-        this(null, startAt);
-    }
-
     public ReservationTime(Long id, LocalTime startAt) {
         if (startAt.isBefore(RESERVATION_START_TIME) || startAt.isAfter(RESERVATION_END_TIME)) {
             throw new UnableCreateReservationException("해당 시간은 예약 가능 시간이 아닙니다.");
         }
         this.id = id;
         this.startAt = startAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ReservationTime that = (ReservationTime) o;
+        return Objects.equals(getStartAt(), that.getStartAt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getStartAt());
     }
 }

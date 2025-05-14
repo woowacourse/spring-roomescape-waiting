@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtTokenProviderTest {
 
-    private static final String secretKey = "test1234test1234test1234test1234";
+    private static final String secretKey = "wpvmflgltmxkaoxmdhflajdrnahfn20250514";
     private final int validityInMilliseconds = 3600000; //1h
     private JwtTokenProvider jwtTokenProvider;
 
@@ -62,6 +62,19 @@ class JwtTokenProviderTest {
         //when & then
         assertThatThrownBy(() -> jwtTokenProvider.extractIdFromToken(token))
                 .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void 토큰의_클레임에서_아이디를_추출할_수_있다() {
+        //given
+        Long memberId = 1L;
+        String token = generateValidToken(memberId);
+
+        //when
+        Long id = jwtTokenProvider.extractIdFromToken(token);
+
+        //then
+        assertThat(id).isEqualTo(memberId);
     }
 
     private String generateValidToken(Long id) {
