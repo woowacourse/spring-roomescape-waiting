@@ -1,5 +1,10 @@
 package roomescape.business.model.entity;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -13,13 +18,23 @@ import roomescape.business.model.vo.ReservationDate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 @Getter
+@Entity
 public class Reservation {
 
+    @EmbeddedId
     private final Id id;
-    private final User user;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @ManyToOne
+    private User user;
+    @Embedded
+    private ReservationDate date;
+    @ManyToOne
+    private ReservationTime time;
+    @ManyToOne
+    private Theme theme;
+
+    public Reservation() {
+        id = Id.issue();
+    }
 
     public static Reservation create(final User user, final LocalDate date, final ReservationTime time, final Theme theme) {
         return new Reservation(Id.issue(), user, new ReservationDate(date), time, theme);
