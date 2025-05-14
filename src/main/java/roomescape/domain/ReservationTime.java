@@ -4,7 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -14,6 +17,9 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
+
+    @OneToMany(mappedBy = "time")
+    private List<Reservation> reservations = new ArrayList<>();
 
     private ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
@@ -41,6 +47,10 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 
     @Override

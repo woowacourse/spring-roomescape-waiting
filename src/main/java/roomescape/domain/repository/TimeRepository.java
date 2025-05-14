@@ -1,19 +1,17 @@
 package roomescape.domain.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
 
-public interface TimeRepository {
-    Long save(ReservationTime reservationTime);
+public interface TimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    List<ReservationTime> findAll();
+    ReservationTime save(ReservationTime reservationTime);
 
     Optional<ReservationTime> findById(Long id);
 
-    boolean deleteById(Long id);
+    List<ReservationTime> findAll();
 
-    List<TimeDataWithBookingInfo> getTimesWithBookingInfo(LocalDate date, Long themeId);
+    void deleteById(Long id);
 }
