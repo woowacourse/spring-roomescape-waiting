@@ -1,7 +1,7 @@
 package roomescape.dao;
 
 import java.util.List;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 
 public interface MemberDao {
 

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.exception.custom.NotFoundException;
 
 public class FakeMemberDao implements MemberDao {

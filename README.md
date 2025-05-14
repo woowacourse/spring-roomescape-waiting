@@ -19,9 +19,14 @@
 
 ### 1. JPA를 활용하여 데이터베이스에 접근하도록 수정
 
-- [ ] `Member`, `Theme`, `ReservationTime`을 엔티티로 변환
-- [ ] `Reservation`를 엔티티로 변환
-  - [ ] `Member`, `Theme`, `ReservationTime`와 연관관계 매핑
+- [x] `Member`, `Theme`, `ReservationTime`을 엔티티로 변환
+- [x] `Reservation`를 엔티티로 변환
+- [ ] `Member`, `Theme`, `ReservationTime`와 연관관계 매핑
+  - [ ] `Reservation` : `Member` = N : 1
+  - [ ] `Reservation` : `Theme` = N : 1
+  - [ ] `Reservation` : `ReservationTime` = N : 1
+- [ ] 테마와 시간이 같은 예약은 하나만 존재해야한다.(alreadyBooked)
+- [ ] 예약이 존재하는 시간과 테마는 삭제할 수 없다.
 
 ---
 

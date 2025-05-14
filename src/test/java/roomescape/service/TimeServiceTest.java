@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.dao.fake.FakeReservationTimeDao;
-import roomescape.domain.ReservationTime;
+import roomescape.entity.ReservationTime;
 import roomescape.dto.request.TimeRequest;
 import roomescape.exception.custom.DuplicatedException;
 

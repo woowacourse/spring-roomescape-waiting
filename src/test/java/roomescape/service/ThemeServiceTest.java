@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.dao.fake.FakeThemeDao;
-import roomescape.domain.Theme;
+import roomescape.entity.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.exception.custom.DuplicatedException;
 

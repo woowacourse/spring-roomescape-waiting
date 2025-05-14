@@ -3,7 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.dto.request.MemberRequest;
 import roomescape.exception.custom.DuplicatedException;
 

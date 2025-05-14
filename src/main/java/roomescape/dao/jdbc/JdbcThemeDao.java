@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
+import roomescape.entity.Theme;
 import roomescape.exception.custom.NotFoundException;
 
 @Repository

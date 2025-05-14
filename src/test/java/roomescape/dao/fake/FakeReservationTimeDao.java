@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.dao.ReservationTimeDao;
-import roomescape.domain.ReservationTime;
+import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.NotFoundException;
 
 public class FakeReservationTimeDao implements ReservationTimeDao {

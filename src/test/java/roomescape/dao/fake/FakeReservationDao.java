@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.dao.ReservationDao;
-import roomescape.domain.Reservation;
+import roomescape.entity.Reservation;
 
 public class FakeReservationDao implements ReservationDao {
 

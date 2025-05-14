@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
+import roomescape.entity.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.exception.custom.DuplicatedException;
 

@@ -3,7 +3,7 @@ package roomescape.dao;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.domain.ReservationTime;
+import roomescape.entity.ReservationTime;
 
 public interface ReservationTimeDao {
 

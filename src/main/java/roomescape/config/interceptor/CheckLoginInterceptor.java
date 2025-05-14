@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.exception.custom.AuthenticatedException;
 import roomescape.service.AuthService;
 
