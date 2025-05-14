@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.config.annotation.AuthMember;
+import roomescape.dto.request.LoginRequest;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.entity.Member;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationResponse;
@@ -43,6 +45,13 @@ public class ReservationController {
         @RequestParam LocalDate dateTo) {
         return reservationService.findReservationsByFilters(themeId, memberId, dateFrom, dateTo).stream()
             .map(ReservationResponse::from)
+            .toList();
+    }
+
+    @GetMapping("/mine")
+    public List<MyReservationResponse> readMyReservations(@AuthMember Member member){
+        return reservationService.findReservationsByMemberId(member).stream()
+            .map(MyReservationResponse::from)
             .toList();
     }
 

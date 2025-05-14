@@ -26,12 +26,12 @@
   - [x] `Reservation` : `Theme` = N : 1
   - [x] `Reservation` : `ReservationTime` = N : 1
 - [x] 테마와 시간이 같은 예약은 하나만 존재해야한다.(alreadyBooked)
-- [ ] 예약이 존재하는 시간과 테마는 삭제할 수 없다.
+- [x] 예약이 존재하는 시간과 테마는 삭제할 수 없다.
 
 ### 2. 내 예약 목록 조회
 
-- [ ] `/reservation-mine` 요청 시, 사용자 예약 정보를 응답 받을 수 있다.
-- [ ] 성공된 예약은 상태를 포함할 수 있다.
+- [x] `/reservation-mine` 요청 시, 사용자 예약 정보를 응답 받을 수 있다.
+- [x] 성공된 예약은 상태를 포함할 수 있다.
 
 ---
 
@@ -68,7 +68,7 @@
 |---------------------------|------|------------------|
 | `/reservation`            | GET  | 사용자 예약 페이지 보기    |
 | `/reservations`           | POST | 사용자 페이지에서 예약 추가  |
-| `/reservations-mine`      | GET  | 사용자 예약 목록 조회     |
+| `/reservations/mine`      | GET  | 사용자 예약 목록 조회     |
 | `/times/{date}/{themeId}` | GET  | 예약 가능한 상태의 시간 조회 |
 | `/members`                | POST | 사용자 회원가입 추가      |
 | `/signup`                 | GET  | 사용자 회원가입 페이지 보기  |

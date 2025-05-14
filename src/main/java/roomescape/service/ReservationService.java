@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.repository.MemberRepository;
@@ -35,6 +36,10 @@ public class ReservationService {
 
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public List<Reservation> findReservationsByMemberId(Member member) {
+        return reservationRepository.findByMemberId(member.getId());
     }
 
     public List<Reservation> findReservationsByFilters(Long themeId, Long memberId,
@@ -96,4 +101,5 @@ public class ReservationService {
     public void removeReservation(Long id) {
         reservationRepository.deleteById(id);
     }
+
 }
