@@ -10,7 +10,6 @@ import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
 import roomescape.reservation.dto.response.ReservationTimeReadResponse;
-import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -50,9 +49,7 @@ public class ReservationTimeService {
     }
 
     public void deleteTime(Long id) {
-        // TODO: exist 메서드로 변경
-        List<Reservation> reservations = reservationRepository.findAllByTimeId(id);
-        if (!reservations.isEmpty()) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new BadRequestException("해당 시간에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);
