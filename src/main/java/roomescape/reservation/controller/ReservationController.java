@@ -16,6 +16,7 @@ import roomescape.global.auth.AuthMember;
 import roomescape.global.auth.LoginMember;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationWithMemberRequest;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -66,6 +67,12 @@ public class ReservationController {
                 dateFrom,
                 dateTo
         );
+        return ResponseEntity.ok().body(responses);
+    }
+
+    @GetMapping("/me/reservations")
+    public ResponseEntity<List<MyReservationResponse>> findAllMyReservations(@AuthMember LoginMember loginMember) {
+        final List<MyReservationResponse> responses = reservationService.getMyReservations(loginMember);
         return ResponseEntity.ok().body(responses);
     }
 

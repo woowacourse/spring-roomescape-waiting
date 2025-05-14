@@ -22,7 +22,7 @@ public class CookieUtil {
         if (cookies == null) {
             throw new UnauthorizedException("인증할 수 없는 사용자입니다.");
         }
-        return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals("token"))
+        return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(TOKEN_NAME))
                 .findFirst()
                 .orElseThrow(() -> new UnauthorizedException("인증할 수 없는 사용자입니다."))
                 .getValue();

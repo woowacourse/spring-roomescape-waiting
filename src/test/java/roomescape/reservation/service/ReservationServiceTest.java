@@ -17,9 +17,11 @@ import roomescape.fake.FakeMemberDao;
 import roomescape.fake.FakeReservationDao;
 import roomescape.fake.FakeReservationTimeDao;
 import roomescape.fake.FakeThemeDao;
+import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.CreateReservationWithMemberRequest;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 
 class ReservationServiceTest {
@@ -158,5 +160,17 @@ class ReservationServiceTest {
         reservationService.cancelReservationById(1L);
         // then
         assertThat(reservationService.getReservations()).hasSize(1);
+    }
+
+    @DisplayName("나의 예약 목록을 조회할 수 있다.")
+    @Test
+    void testGetMyReservations() {
+        // given
+        LoginMember loginMember = new LoginMember(MEMBER.getId(), MEMBER.getName(), MEMBER.getEmail(),
+                MEMBER.getRole().name());
+        // when
+        List<MyReservationResponse> myReservations = reservationService.getMyReservations(loginMember);
+        // then
+        assertThat(myReservations).hasSize(2);
     }
 }

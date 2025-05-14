@@ -2,6 +2,7 @@ package roomescape.fake;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
@@ -104,6 +105,14 @@ public class FakeReservationDao implements ReservationRepository {
                         reservation.getTheme().getId() == themeId
                                 && reservation.getDate().isEqual(date)
                                 && reservation.getTime().getId() == timeId);
+    }
+
+    @Override
+    public List<Reservation> findAllByMemberIdOrderByDateDesc(final long id) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getMember().getId() == id)
+                .sorted(Comparator.comparing(Reservation::getDate).reversed())
+                .toList();
     }
 
     @Override

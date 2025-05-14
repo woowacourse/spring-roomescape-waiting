@@ -55,7 +55,6 @@ public final class Reservation {
             throw new BadRequestException("지나간 날짜와 시간은 예약 불가합니다.");
         }
         return new Reservation(null, member, date, time, theme);
-
     }
 
     public Reservation withId(final long id) {

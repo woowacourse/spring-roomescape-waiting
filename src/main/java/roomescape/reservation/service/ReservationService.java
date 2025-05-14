@@ -3,11 +3,13 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.CreateReservationWithMemberRequest;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -63,6 +65,13 @@ public class ReservationService {
                 dateTo);
         return reservations.stream()
                 .map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<MyReservationResponse> getMyReservations(final LoginMember loginMember) {
+        final List<Reservation> reservations = reservationRepository.findAllByMemberIdOrderByDateDesc(loginMember.id());
+        return reservations.stream()
+                .map(MyReservationResponse::new)
                 .toList();
     }
 

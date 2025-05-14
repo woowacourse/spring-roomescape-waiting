@@ -195,4 +195,39 @@ public class ReservationApiTest {
                     .statusCode(400);
         }
     }
+
+    @DisplayName("내 예약 조회 API 테스트")
+    @Nested
+    class MyReservationsTest {
+
+        @DisplayName("쿠키 정보가 올바르지 않을 경우 401을 반환한다.")
+        @Test
+        void testInvalidCookie() {
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .when().get("/me/reservations")
+                    .then().log().all()
+                    .statusCode(401);
+        }
+
+        @DisplayName("내 예약 조회를 성공할 경우 200을 반환한다.")
+        @Test
+        void testFindAllMyReservations() {
+            // given
+            String TOKEN = RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(new LoginRequest("aaa@gmail.com", "1234"))
+                    .when().post("/login")
+                    .then().log().all()
+                    .extract().cookie(TOKEN_COOKIE_NAME);
+            // when
+            // then
+            RestAssured.given().log().all()
+                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .when().get("/me/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", Matchers.is(3));
+        }
+    }
 }
