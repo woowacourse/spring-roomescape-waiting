@@ -1,22 +1,42 @@
 package roomescape.member.domain;
 
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.regex.Pattern;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.auth.domain.AuthRole;
 
+@Entity
+@Table(name = "members")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = {"id"})
 public class Member {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final AuthRole role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
+    private String name;
+    @Column(nullable = false, unique = true)
+    private String email;
+    @Column(nullable = false)
+    private String password;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthRole role;
 
     public Member(final Long id, final String name, final String email, final String password, final AuthRole role) {
         validateName(name);
@@ -69,10 +89,4 @@ public class Member {
     public boolean isAdmin() {
         return role == AuthRole.ADMIN;
     }
-
-    public String getRoleName() {
-        return role.getRoleName();
-    }
-
-
 }

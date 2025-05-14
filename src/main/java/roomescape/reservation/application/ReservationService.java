@@ -41,7 +41,8 @@ public class ReservationService {
 
         final Theme theme = themeQueryRepository.findById(request.themeId())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-        final Member member = memberQueryRepository.getById(memberAuthInfo.id());
+        final Member member = memberQueryRepository.findById(memberAuthInfo.id())
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
         final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
 
         final Long id = reservationCommandRepository.save(reservation);
@@ -70,7 +71,8 @@ public class ReservationService {
 
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
         final Reservation reservation = reservationQueryRepository.getById(reservationId);
-        final Member member = memberQueryRepository.getById(memberAuthInfo.id());
+        final Member member = memberQueryRepository.findById(memberAuthInfo.id())
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         if (member.isAdmin()) {
             reservationCommandRepository.deleteById(reservationId);

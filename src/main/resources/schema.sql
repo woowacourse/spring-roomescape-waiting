@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS members
     name     VARCHAR(255) NOT NULL,
     email    VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role     VARCHAR(20)  NOT NULL CHECK (role IN ('어드민', '회원')),
+    role     VARCHAR(20)  NOT NULL,
     UNIQUE (email)
 );
 

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthRole;
 import roomescape.exception.auth.AuthorizationException;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
@@ -29,7 +30,8 @@ public class MemberService {
     }
 
     public void delete(final Long id) {
-        final Member found = memberQueryRepository.getById(id);
+        final Member found = memberQueryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         if (found.getRole() == AuthRole.ADMIN) {
             throw new AuthorizationException("관리자는 삭제할 수 없습니다.");

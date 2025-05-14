@@ -46,7 +46,7 @@ public class JdbcReservationRepository implements ReservationCommandRepository, 
                             rs.getString("member_name"),
                             rs.getString("member_email"),
                             rs.getString("member_password"),
-                            AuthRole.from(rs.getString("member_role"))
+                            AuthRole.valueOf(rs.getString("member_role"))
                     )
             );
 

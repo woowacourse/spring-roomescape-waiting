@@ -9,7 +9,5 @@ public interface MemberQueryRepository {
 
     Optional<Member> findById(Long id);
 
-    Member getById(Long id);
-
     List<Member> findAll();
 }

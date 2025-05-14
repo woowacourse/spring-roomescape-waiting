@@ -8,7 +8,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
@@ -41,7 +40,7 @@ public class JwtTokenProvider implements AuthTokenProvider {
                 .claims(claims)
                 .issuedAt(now)
                 .expiration(validity)
-                .claim("role", role.getRoleName())
+                .claim("role", role.name())
                 .signWith(secretKey)
                 .compact();
     }
@@ -85,7 +84,7 @@ public class JwtTokenProvider implements AuthTokenProvider {
                 .getPayload()
                 .get("role", String.class);
 
-        return AuthRole.from(role);
+        return AuthRole.valueOf(role);
     }
 
     public boolean validateToken(final String token) {
