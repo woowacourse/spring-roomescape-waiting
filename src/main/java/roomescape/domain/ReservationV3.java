@@ -22,7 +22,7 @@ public class ReservationV3 {
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private MemberV2 member;
+    private Member member;
 
     private LocalDate date;
 

@@ -14,7 +14,8 @@ public class ReservationTimeService {
     public static final int DELETE_FAILED_COUNT = 0;
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository) {
+    public ReservationTimeService(
+            final ReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 

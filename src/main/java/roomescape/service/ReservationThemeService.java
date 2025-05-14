@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTheme;
 import roomescape.dto.ReservationThemeRequest;
@@ -13,7 +14,8 @@ public class ReservationThemeService {
     public static final int DELETE_FAILED_COUNT = 0;
     private final ReservationThemeRepository reservationThemeRepository;
 
-    public ReservationThemeService(final ReservationThemeRepository reservationThemeRepository) {
+    public ReservationThemeService(
+            final ReservationThemeRepository reservationThemeRepository) {
         this.reservationThemeRepository = reservationThemeRepository;
     }
 

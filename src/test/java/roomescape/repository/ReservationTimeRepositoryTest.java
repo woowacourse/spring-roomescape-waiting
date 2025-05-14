@@ -28,7 +28,7 @@ class ReservationTimeRepositoryTest {
     @BeforeEach
     void setUp() {
 
-        timeRepository = new ReservationTimeRepositoryImpl(template);
+        timeRepository = new ReservationTimeRepositoryImpl(null,template);
         template.execute("DELETE FROM reservation");
         template.execute("DELETE FROM reservation_time");
         template.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");

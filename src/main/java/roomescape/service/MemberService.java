@@ -22,8 +22,12 @@ public class MemberService {
     public MemberRegisterResponse addMember(final MemberRegisterRequest request) {
         validateDuplicateEmail(request.email());
         validateDuplicateName(request.name());
-        final Member newMember = Member.createWithOutIdAndSession(request.email(), MemberRole.USER, encode(request.password()),
-                request.name());
+        final Member newMember = Member.builder()
+                .email(request.email())
+                .name(request.name())
+                .password(request.password())
+                .role(MemberRole.USER)
+                .build();
         return MemberRegisterResponse.from(memberRepository.save(newMember));
     }
 

@@ -9,13 +9,16 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
+import roomescape.repository.jpa.ReservationTimeJpaRepository;
 
 @Repository
 public class ReservationTimeRepositoryImpl implements ReservationTimeRepository {
 
+    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
     private final JdbcTemplate template;
 
-    public ReservationTimeRepositoryImpl(final JdbcTemplate template) {
+    public ReservationTimeRepositoryImpl(final ReservationTimeJpaRepository reservationTimeJpaRepository, final JdbcTemplate template) {
+        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
         this.template = template;
     }
 

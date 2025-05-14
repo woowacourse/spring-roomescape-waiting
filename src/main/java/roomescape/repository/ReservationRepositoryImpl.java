@@ -16,14 +16,18 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationV2;
+import roomescape.repository.jpa.ReservationJpaRepository;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
 
     private final JdbcTemplate template;
+    private final ReservationJpaRepository reservationJpaRepository;
 
-    public ReservationRepositoryImpl(final JdbcTemplate template) {
+    public ReservationRepositoryImpl(final JdbcTemplate template,
+                                     final ReservationJpaRepository reservationJpaRepository) {
         this.template = template;
+        this.reservationJpaRepository = reservationJpaRepository;
     }
 
     @Override
@@ -179,12 +183,12 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
             Member member = new Member(
                     rs.getLong("member_id"),
-                    MemberRole.fromName(rs.getString("member_role")),
                     rs.getString("member_email"),
                     rs.getString("member_password"),
                     rs.getString("member_name"),
-                    rs.getString("member_session_id")
-            );
+                    rs.getString("member_session_id"),
+                    MemberRole.fromName(rs.getString("member_role"))
+                    );
 
             return new ReservationV2(
                     rs.getLong("reservation_id"),

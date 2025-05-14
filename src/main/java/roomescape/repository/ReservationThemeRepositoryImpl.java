@@ -9,14 +9,18 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTheme;
+import roomescape.repository.jpa.ReservationThemeJpaRepository;
 
 @Repository
 public class ReservationThemeRepositoryImpl implements ReservationThemeRepository {
 
     private final JdbcTemplate template;
+    private final ReservationThemeJpaRepository reservationThemeJpaRepository;
 
-    public ReservationThemeRepositoryImpl(final JdbcTemplate template) {
+    public ReservationThemeRepositoryImpl(final JdbcTemplate template,
+                                          final ReservationThemeJpaRepository reservationThemeJpaRepository) {
         this.template = template;
+        this.reservationThemeJpaRepository = reservationThemeJpaRepository;
     }
 
     @Override

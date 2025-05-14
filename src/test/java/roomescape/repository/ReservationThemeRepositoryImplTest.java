@@ -24,7 +24,7 @@ class ReservationThemeRepositoryImplTest {
 
     @BeforeEach
     void setUp() {
-        repository = new ReservationThemeRepositoryImpl(template);
+        repository = new ReservationThemeRepositoryImpl(template, null);
     }
 
 

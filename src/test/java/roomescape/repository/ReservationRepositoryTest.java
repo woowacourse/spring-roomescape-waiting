@@ -27,7 +27,7 @@ class ReservationRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new ReservationRepositoryImpl(template);
+        repository = new ReservationRepositoryImpl(template, null);
         template.execute("DELETE FROM reservation");
         template.execute("DELETE FROM reservation_time");
         template.execute("DELETE FROM reservation_theme");
