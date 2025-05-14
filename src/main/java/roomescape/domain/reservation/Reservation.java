@@ -1,10 +1,13 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,6 +27,16 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne
     private Theme theme;
+
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus reservationStatus;
+
+    @PrePersist
+    public void prePersist() {
+        if (reservationStatus == null) {
+            this.reservationStatus = ReservationStatus.RESERVATION;
+        }
+    }
 
     public Reservation() {
 
@@ -94,5 +107,9 @@ public class Reservation {
 
     public String getThemeName() {
         return theme.getName();
+    }
+
+    public String getReservationStatus() {
+        return reservationStatus.getStatus();
     }
 }

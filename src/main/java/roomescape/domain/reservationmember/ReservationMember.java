@@ -34,4 +34,8 @@ public class ReservationMember {
     public String getName() {
         return member.getName();
     }
+
+    public String getStatus() {
+        return reservation.getReservationStatus();
+    }
 }

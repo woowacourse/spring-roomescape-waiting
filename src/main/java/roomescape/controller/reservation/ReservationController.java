@@ -21,6 +21,7 @@ import roomescape.domain.reservationmember.ReservationMember;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
+import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
 import roomescape.dto.reservationmember.ReservationMemberResponseDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
@@ -114,5 +115,19 @@ public class ReservationController {
                         theme.getName(), theme.getThumbnail()))
                 .toList();
         return ResponseEntity.ok(themeResponseDtos);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(@AuthenticationPrincipal UserInfo userInfo) {
+        List<ReservationMember> reservationMembers = reservationMemberService.memberReservations(userInfo.id());
+        List<MyReservationMemberResponseDto> reservationDtos = reservationMembers.stream()
+                .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getReservationId(),
+                        reservationMember.getName(),
+                        reservationMember.getThemeName(),
+                        reservationMember.getDate(),
+                        reservationMember.getStartAt(),
+                        reservationMember.getStatus()))
+                .toList();
+        return ResponseEntity.ok(reservationDtos);
     }
 }

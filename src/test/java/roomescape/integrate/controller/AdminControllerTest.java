@@ -144,7 +144,7 @@ class AdminControllerTest {
 
         String token = header.split("token=")[1];
 
-        AdminReservationAddDto adminReservationAddDto = new AdminReservationAddDto(LocalDate.now(), 1L, 1L, 1L);
+        AdminReservationAddDto adminReservationAddDto = new AdminReservationAddDto(LocalDate.now().plusDays(1L), 1L, 1L, 1L);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
