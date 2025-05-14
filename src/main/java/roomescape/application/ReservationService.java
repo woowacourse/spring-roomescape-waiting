@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.ReservationDto;
+import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.application.dto.UserReservationCreateDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
@@ -70,6 +72,21 @@ public class ReservationService {
     public List<ReservationDto> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
         return ReservationDto.from(reservations);
+    }
+
+    public List<ReservationWaitingDto> getReservationsByMember(Long memberId) {
+        Member member = memberService.getMemberById(memberId).toEntity();
+        List<Reservation> memberReservations = reservationRepository.findByMember(member);
+        return memberReservations.stream()
+                .map(reservation -> new ReservationWaitingDto(
+                                reservation.getId(),
+                                reservation.getTheme().getName(),
+                                reservation.getDate(),
+                                reservation.getTime().getStartAt(),
+                                ReservationStatus.name(reservation.getWaiting().getStatus())
+                        )
+                )
+                .toList();
     }
 
     public List<ReservationDto> searchReservationsWith(ReservationSearchFilter reservationSearchFilter) {

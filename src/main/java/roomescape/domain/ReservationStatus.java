@@ -1,5 +1,15 @@
 package roomescape.domain;
 
 public enum ReservationStatus {
-    RESERVED, WAITING
+    RESERVED, WAITING;
+
+    public static String name(ReservationStatus status) {
+        if (status == RESERVED) {
+            return "예약";
+        }
+        if (status == WAITING) {
+            return "대기";
+        }
+        throw new IllegalStateException("상태가 존재하지 않습니다.");
+    }
 }

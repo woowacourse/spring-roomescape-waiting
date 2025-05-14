@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.ReservationDto;
+import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.application.dto.UserReservationCreateDto;
 import roomescape.infrastructure.AuthenticatedMemberId;
 
@@ -30,6 +31,11 @@ public class ReservationController {
     @GetMapping
     public List<ReservationDto> getAllReservations() {
         return service.getAllReservations();
+    }
+
+    @GetMapping("/member")
+    public List<ReservationWaitingDto> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
+        return service.getReservationsByMember(memberIdDto.id());
     }
 
     @PostMapping

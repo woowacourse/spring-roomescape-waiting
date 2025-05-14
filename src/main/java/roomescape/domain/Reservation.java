@@ -95,4 +95,8 @@ public class Reservation {
     public ReservationTime getTime() {
         return time;
     }
+
+    public Waiting getWaiting() {
+        return waiting;
+    }
 }

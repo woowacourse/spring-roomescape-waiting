@@ -3,6 +3,7 @@ package roomescape.domain.repository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -11,7 +12,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAll();
 
-    void deleteById(Long id);
+    List<Reservation> findByMember(Member member);
 
     List<Reservation> findByThemeIdAndMemberIdAndDateGreaterThanEqualAndDateLessThanEqual(
             long themeId,
@@ -19,4 +20,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate dateFrom,
             LocalDate dateTo
     );
+
+    void deleteById(Long id);
 }
