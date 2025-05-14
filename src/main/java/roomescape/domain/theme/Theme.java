@@ -1,7 +1,9 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Entity;
 import java.util.Objects;
 
+@Entity
 public class Theme {
     private final Long id;
     private final ThemeName name;
