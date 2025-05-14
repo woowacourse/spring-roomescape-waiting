@@ -14,10 +14,10 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate reservationDate;
+    private LocalDate date;
 
     @ManyToOne
-    private ReservationTime reservationTime;
+    private ReservationTime time;
     @ManyToOne
     private Member member;
     @ManyToOne
@@ -28,14 +28,14 @@ public class Reservation {
             Long id,
             Member member,
             Theme theme,
-            LocalDate reservationDate,
-            ReservationTime reservationTime
+            LocalDate date,
+            ReservationTime time
     ) {
         this.id = id;
         this.member = member;
         this.theme = theme;
-        this.reservationDate = reservationDate;
-        this.reservationTime = reservationTime;
+        this.date = date;
+        this.time = time;
     }
 
     public Reservation() {
@@ -51,20 +51,26 @@ public class Reservation {
     }
 
     public static Reservation assignId(Long id, Reservation reservation) {
-        return new Reservation(id, reservation.getMember(), reservation.getTheme(), reservation.getReservationDate(),
-                reservation.getReservationTime());
+        return new Reservation(id, reservation.getMember(), reservation.getTheme(), reservation.getDate(),
+                reservation.getTime());
     }
 
     public boolean isPast() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate, reservationTime.getStartAt());
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         return reservationDateTime.isBefore(now);
     }
 
     public boolean isDuplicated(Reservation other) {
-        return this.reservationDate.equals(other.reservationDate)
-               && this.reservationTime.equals(other.reservationTime)
+        return this.date.equals(other.date)
+               && this.time.equals(other.time)
                && this.theme.equals(other.theme);
+    }
+
+    public boolean isAlreadyBookedTime(LocalDate date, Long themeId, Long timeId) {
+        return this.date.equals(date)
+               && this.theme.getId().equals(themeId)
+                && this.time.getId().equals(timeId);
     }
 
     public Long getId() {
@@ -79,11 +85,11 @@ public class Reservation {
         return theme;
     }
 
-    public LocalDate getReservationDate() {
-        return reservationDate;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 }

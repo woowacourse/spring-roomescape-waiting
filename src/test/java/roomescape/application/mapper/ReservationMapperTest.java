@@ -36,8 +36,8 @@ class ReservationMapperTest {
         assertAll(
                 () -> assertThat(reservation.getId()).isNull(),
                 () -> assertThat(reservation.getMember()).isEqualTo(MEMBER1_ADMIN),
-                () -> assertThat(reservation.getReservationDate()).isEqualTo(reservationDate),
-                () -> assertThat(reservation.getReservationTime()).isEqualTo(reservationTime)
+                () -> assertThat(reservation.getDate()).isEqualTo(reservationDate),
+                () -> assertThat(reservation.getTime()).isEqualTo(reservationTime)
         );
     }
 

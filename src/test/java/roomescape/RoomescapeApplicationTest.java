@@ -116,7 +116,7 @@ class RoomescapeApplicationTest {
                 JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
                 JdbcHelper.insertReservation(jdbcTemplate, RESERVATION_1);
 
-                String date = RESERVATION_1.getReservationDate().toString();
+                String date = RESERVATION_1.getDate().toString();
 
                 List<TimeDataWithBookingInfo> timesData = RestAssured.given().log().all()
                         .when().get(String.format("/times/booking-status?date=%s&themeId=%d", date, THEME_1.getId()))

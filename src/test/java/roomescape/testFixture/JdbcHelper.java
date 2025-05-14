@@ -37,8 +37,8 @@ public class JdbcHelper {
     public static void insertReservation(JdbcTemplate template, Reservation reservation) {
         template.update("INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 reservation.getMember().getId(),
-                reservation.getReservationDate(),
-                reservation.getReservationTime().getId(),
+                reservation.getDate(),
+                reservation.getTime().getId(),
                 reservation.getTheme().getId()
         );
     }

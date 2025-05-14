@@ -16,8 +16,8 @@ public record ReservationDto(
                 reservation.getId(),
                 MemberDto.from(reservation.getMember()),
                 ThemeDto.from(reservation.getTheme()),
-                reservation.getReservationDate(),
-                TimeDto.from(reservation.getReservationTime())
+                reservation.getDate(),
+                TimeDto.from(reservation.getTime())
         );
     }
 
