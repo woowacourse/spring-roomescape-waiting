@@ -20,4 +20,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     List<Theme> findRankBetweenDate(@Param("startDate") LocalDate startDate,
                                     @Param("endDate") LocalDate endDate,
                                     @Param("limit") int limit);
+
+    boolean existsByName(@Param("name") String name);
 }

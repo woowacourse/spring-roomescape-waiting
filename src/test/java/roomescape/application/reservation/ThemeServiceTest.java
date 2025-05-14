@@ -1,6 +1,7 @@
 package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -62,6 +63,19 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
                     assertThat(theme.getDescription()).isEqualTo("재밌는 방");
                     assertThat(theme.getThumbnail()).isEqualTo("image.png");
                 });
+    }
+
+    @Test
+    void 같은_이름의_테마를_생성할_경우_예외가_발생한다() {
+        // given
+        themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
+        CreateThemeParam param = new CreateThemeParam("테마1", "재밌는 방", "image.png");
+
+        // when
+        // then
+        assertThatCode(() -> themeService.create(param))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessage("이미 같은 이름의 테마가 존재합니다.");
     }
 
     @Test
