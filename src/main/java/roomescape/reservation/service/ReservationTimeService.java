@@ -16,9 +16,8 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public Long save(final LocalTime startAt) {
-        final List<ReservationTime> foundReservationTimes = reservationTimeRepository.findAllByStartAt(startAt);
-        if (!foundReservationTimes.isEmpty()) {
+    public ReservationTime save(final LocalTime startAt) {
+        if (reservationTimeRepository.existsByStartAt(startAt)) {
             throw new DataExistException("해당 예약 시간이 이미 존재합니다. startAt = " + startAt);
         }
 

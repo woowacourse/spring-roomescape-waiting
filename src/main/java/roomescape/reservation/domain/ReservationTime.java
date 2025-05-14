@@ -1,19 +1,28 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import roomescape.common.exception.ReservationException;
 
 @Getter
-@EqualsAndHashCode(of = {"id"})
+@NoArgsConstructor
+@Entity
 public class ReservationTime {
 
     private static final LocalTime OPEN_TIME = LocalTime.of(10, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(22, 0);
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
 
     public ReservationTime(final Long id, final LocalTime startAt) {
         validateStartAt(startAt);
