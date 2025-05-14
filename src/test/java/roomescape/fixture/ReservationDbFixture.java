@@ -25,12 +25,48 @@ public class ReservationDbFixture {
         this.reservationRepository = reservationRepository;
     }
 
+    public Reservation 예약_유저1_내일_10시(Theme theme) {
+        Reservation reservation = Reservation.reserve(
+                memberDbFixture.유저1_생성(),
+                ReservationDateTime.load(
+                        ReservationDateFixture.예약날짜_내일,
+                        reservationTimeDbFixture.열시()
+                ),
+                theme
+        );
+        return reservationRepository.save(reservation);
+    }
+
+    public Reservation 예약_유저2_내일_11시(Theme theme) {
+        Reservation reservation = Reservation.reserve(
+                memberDbFixture.유저2_생성(),
+                ReservationDateTime.load(
+                        ReservationDateFixture.예약날짜_내일,
+                        reservationTimeDbFixture.열한시()
+                ),
+                theme
+        );
+        return reservationRepository.save(reservation);
+    }
+
     public Reservation 예약_유저1_내일_10시_공포() {
         Reservation reservation = Reservation.reserve(
                 memberDbFixture.유저1_생성(),
                 ReservationDateTime.load(
                         ReservationDateFixture.예약날짜_내일,
                         reservationTimeDbFixture.열시()
+                ),
+                themeDbFixture.공포()
+        );
+        return reservationRepository.save(reservation);
+    }
+
+    public Reservation 예약_유저2_내일_11시_공포() {
+        Reservation reservation = Reservation.reserve(
+                memberDbFixture.유저2_생성(),
+                ReservationDateTime.load(
+                        ReservationDateFixture.예약날짜_내일,
+                        reservationTimeDbFixture.열한시()
                 ),
                 themeDbFixture.공포()
         );

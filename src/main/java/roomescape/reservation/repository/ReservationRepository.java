@@ -46,6 +46,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Long> findReservedTimeIdsByDateAndTheme(@Param(value = "date") LocalDate date,
                                                  @Param(value = "themeId") Long themeId);
 
-    @Query("select count(*) from Reservation r")
-    List<Reservation> findFilteredReservations(Long themeId, Long memberId, LocalDate from, LocalDate to);
+    @Query("""
+                SELECT r FROM Reservation r
+                JOIN fetch r.reservationDatetime.reservationTime t
+                JOIN fetch r.theme th
+                JOIN fetch r.reserver m
+                WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+                  AND (:memberId IS NULL OR r.reserver.id = :memberId)
+                  AND (:fromDate IS NULL OR r.reservationDatetime.reservationDate.date >= :fromDate)
+                  AND (:toDate IS NULL OR r.reservationDatetime.reservationDate.date <= :toDate)
+            """)
+    List<Reservation> findFilteredReservations(
+            @Param("themeId") Long themeId,
+            @Param("memberId") Long memberId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
 }

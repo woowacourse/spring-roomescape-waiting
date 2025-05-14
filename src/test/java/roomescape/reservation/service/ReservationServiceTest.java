@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
@@ -39,6 +43,8 @@ class ReservationServiceTest {
     private ReservationDbFixture reservationDbFixture;
     @Autowired
     private MemberDbFixture memberDbFixture;
+    @Autowired
+    private ReservationRepository reservationRepository;
     @Autowired
     private CleanUp cleanUp;
 
@@ -113,5 +119,56 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteById(1L))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("[ERROR] 예약을 찾을 수 없습니다.");
+    }
+
+    @Test
+    void 예약_목록을_필터링해서_조회한다() {
+        final LocalDate today = LocalDate.now();
+        final LocalDate tomorrow = today.plusDays(1);
+
+        Theme theme = themeDbFixture.공포();
+        Member member1 = memberDbFixture.유저1_생성();
+        Member member2 = memberDbFixture.유저2_생성();
+        ReservationDate reservationDate = ReservationDateFixture.예약날짜_내일;
+        ReservationTime 열시 = reservationTimeDbFixture.열시();
+        ReservationTime 열한시 = reservationTimeDbFixture.열한시();
+
+        Reservation reservation1 = Reservation.reserve(
+                member1, ReservationDateTime.create(reservationDate, 열시), theme
+        );
+        Reservation reservation2 = Reservation.reserve(
+                member1, ReservationDateTime.create(reservationDate, 열한시), theme
+        );
+        Reservation reservation3 = Reservation.reserve(
+                member2, ReservationDateTime.create(reservationDate, 열시), theme
+        );
+
+        reservationRepository.saveAll(List.of(reservation1, reservation2, reservation3));
+        // when & then
+        // 공포 필터링
+
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(
+                        reservationService.getFilteredReservations(theme.getId(), null, null, null))
+                .hasSize(3);
+        // 사용자1 필터링
+        softly.assertThat(reservationService.getFilteredReservations(null, member1.getId(), null, null))
+                .hasSize(2);
+        // 오늘 필터링
+        softly.assertThat(reservationService.getFilteredReservations(null, null, today, today))
+                .isEmpty();
+        // 공포 테마 & 내일 필터링
+        softly.assertThat(
+                        reservationService.getFilteredReservations(theme.getId(), null, tomorrow, tomorrow))
+                .hasSize(3);
+        // 모든 필터 조합
+        softly.assertThat(
+                        reservationService.getFilteredReservations(theme.getId(), member2.getId(), tomorrow, tomorrow))
+                .hasSize(1);
+        // 일치하는 결과가 없는 필터 조합
+        softly.assertThat(reservationService.getFilteredReservations(theme.getId(), member2.getId(), today, today))
+                .isEmpty();
+
+        softly.assertAll();
     }
 }

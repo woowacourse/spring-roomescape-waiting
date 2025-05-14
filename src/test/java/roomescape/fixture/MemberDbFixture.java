@@ -21,6 +21,12 @@ public class MemberDbFixture {
         return memberRepository.save(member);
     }
 
+    public Member 유저2_생성() {
+        Password password = Password.encrypt(RAW_PASSWORD, passwordEncryptor);
+        Member member = Member.signUpUser("유저2", "user2@email.com", password);
+        return memberRepository.save(member);
+    }
+
     public Member 관리자_생성() {
         Password password = Password.encrypt(RAW_PASSWORD, passwordEncryptor);
         Member member = Member.signUpAdmin("관리자", "admin@email.com", password);

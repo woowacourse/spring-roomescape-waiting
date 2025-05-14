@@ -6,11 +6,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.reservation.domain.exception.PastReservationException;
 import roomescape.time.domain.ReservationTime;
 
 @Embeddable
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationDateTime {
 
@@ -42,13 +44,5 @@ public class ReservationDateTime {
         if (reservationDateTime.isBefore(now)) {
             throw new PastReservationException();
         }
-    }
-
-    public ReservationDate getReservationDate() {
-        return reservationDate;
-    }
-
-    public ReservationTime getReservationTime() {
-        return reservationTime;
     }
 }
