@@ -32,17 +32,19 @@ public class ThemeService {
     }
 
     public ThemeResponse createTheme(final ThemeRequest request) {
-        Theme theme = Theme.createWithoutId(request.name(), request.description(), request.thumbnail());
-        Long id = themeRepository.save(theme);
+        Theme theme = themeRepository.save(
+            Theme.createWithoutId(request.name(), request.description(), request.thumbnail()));
 
-        return ThemeResponse.from(theme.assignId(id));
+        return ThemeResponse.from(theme);
     }
 
     public void deleteThemeById(final Long id) {
         validateExistIdToDelete(id);
-        
-        boolean isDeleted = themeRepository.deleteById(id);
-        validateIsExistsReservationTimeId(isDeleted);
+
+        themeRepository.findById(id)
+            .orElseThrow(() -> new ThemeException("존재하지 않는 테마입니다."));
+
+        themeRepository.deleteById(id);
     }
 
     private void validateExistIdToDelete(final Long id) {
@@ -51,16 +53,10 @@ public class ThemeService {
         }
     }
 
-    private void validateIsExistsReservationTimeId(boolean isDeleted) {
-        if (!isDeleted) {
-            throw new ThemeException("존재하지 않는 테마입니다.");
-        }
-    }
-
     public List<ThemeResponse> getThemes() {
         return themeRepository.findAll().stream()
-                .map(ThemeResponse::from)
-                .toList();
+            .map(ThemeResponse::from)
+            .toList();
     }
 
     public List<PopularThemeResponse> getPopularThemes() {
@@ -70,7 +66,7 @@ public class ThemeService {
         LocalDate end = now.minusDays(POPULAR_THEME_RANGE_END_SUBTRACT);
 
         return themeRepository.findPopularThemes(start, end, POPULAR_THEME_COUNT).stream()
-                .map(theme -> new PopularThemeResponse(theme.getName(), theme.getDescription(), theme.getThumbnail()))
-                .toList();
+            .map(theme -> new PopularThemeResponse(theme.getName(), theme.getDescription(), theme.getThumbnail()))
+            .toList();
     }
 }

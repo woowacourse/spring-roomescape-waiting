@@ -1,16 +1,17 @@
 package roomescape.member.domain;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MemberRepository {
 
-    Long save(Member member);
+    Member save(Member member);
 
-    Member findById(Long id);
+    Optional<Member> findById(Long id);
 
-    Member findByEmail(String email);
+    Optional<Member> findByEmail(Email email);
 
-    boolean isExistsByEmail(String email);
+    boolean existsByEmail(Email email);
 
     List<Member> findAll();
 }

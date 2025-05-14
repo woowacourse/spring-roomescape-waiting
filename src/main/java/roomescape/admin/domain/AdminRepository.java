@@ -1,10 +1,12 @@
 package roomescape.admin.domain;
 
-public interface AdminRepository {
+import java.util.Optional;
 
-    Admin findById(Long id);
+public interface AdminRepository  {
 
-    Admin findByEmail(String email);
+    Optional<Admin> findById(Long id);
 
-    boolean isExistsByEmail(String email);
+    Optional<Admin> findByEmail(String email);
+
+    boolean existsByEmail(String email);
 }

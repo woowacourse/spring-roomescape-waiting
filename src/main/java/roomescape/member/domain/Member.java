@@ -1,13 +1,28 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.common.exception.BusinessException;
 
+@Entity
 public class Member {
 
-    private final Long id;
-    private final Name name;
-    private final Email email;
-    private final Password password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private Name name;
+    @Embedded
+    private Email email;
+    @Embedded
+    private Password password;
+
+    public Member() {
+    }
 
     private Member(final Long id, final Name name, final Email email, final Password password) {
         this.id = id;

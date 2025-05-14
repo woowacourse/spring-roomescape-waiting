@@ -1,13 +1,23 @@
 package roomescape.reservationTime.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.common.exception.BusinessException;
 
+@Entity
 public class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
+
+    public ReservationTime() {
+    }
 
     private ReservationTime(final Long id, final LocalTime startAt) {
         validateIsNonNull(startAt);
@@ -35,10 +45,6 @@ public class ReservationTime {
         if (id == null) {
             throw new BusinessException("시간 id는 null 일 수 없습니다.");
         }
-    }
-
-    public ReservationTime assignId(final Long id) {
-        return createWithId(id, startAt);
     }
 
     public boolean isBefore(final LocalTime time) {

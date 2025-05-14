@@ -1,14 +1,24 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.common.exception.BusinessException;
 
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
+
+    public Theme() {
+    }
 
     private Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateIsNonNull(name);
@@ -50,10 +60,6 @@ public class Theme {
         if (id == null) {
             throw new BusinessException("테마 id는 null 일 수 없습니다.");
         }
-    }
-
-    public Theme assignId(final Long id) {
-        return createWithId(id, name, description, thumbnail);
     }
 
     public Long getId() {

@@ -2,6 +2,8 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.BusinessException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.exception.EmailException;
@@ -18,12 +20,13 @@ public class MemberService {
     }
 
     public MemberResponse save(final MemberRequest request) {
-        boolean emailExist = memberRepository.isExistsByEmail(request.email());
+        boolean emailExist = memberRepository.existsByEmail(new Email(request.email()));
         validateEmailExists(emailExist);
 
-        Long id = memberRepository.save(Member.createWithoutId(request.name(), request.email(), request.password()));
+        Member member = memberRepository.save(
+            Member.createWithoutId(request.name(), request.email(), request.password()));
 
-        return new MemberResponse(id, request.name());
+        return new MemberResponse(member.getId(), member.getName());
     }
 
     private static void validateEmailExists(boolean emailExist) {
@@ -33,15 +36,17 @@ public class MemberService {
     }
 
     public Member findByEmail(final String email) {
-        return memberRepository.findByEmail(email);
+        return memberRepository.findByEmail(new Email(email))
+            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
     }
 
     public boolean isExistsByEmail(final String email) {
-        return memberRepository.isExistsByEmail(email);
+        return memberRepository.existsByEmail(new Email(email));
     }
 
     public Member findById(final Long id) {
-        return memberRepository.findById(id);
+        return memberRepository.findById(id)
+            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
     }
 
     public List<MemberResponse> findAll() {

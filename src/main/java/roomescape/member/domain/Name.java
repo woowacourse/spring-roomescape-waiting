@@ -1,17 +1,15 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.member.exception.NameException;
 
-public class Name {
+@Embeddable
+public record Name(String name) {
 
-    private final String name;
-
-    public Name(String name) {
+    public Name {
         validateNameIsNonEmpty(name);
         validateNameLength(name);
-
-        this.name = name;
     }
 
     private void validateNameIsNonEmpty(final String name) {

@@ -1,14 +1,15 @@
 package roomescape.reservationTime.domain;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationTimeRepository {
 
-    Long save(ReservationTime reservationTime);
+    ReservationTime save(ReservationTime reservationTime);
 
-    boolean deleteById(Long id);
+    Optional<ReservationTime> findById(Long id);
 
-    ReservationTime findById(Long id);
+    void deleteById(Long id);
 
     List<ReservationTime> findAll();
 }

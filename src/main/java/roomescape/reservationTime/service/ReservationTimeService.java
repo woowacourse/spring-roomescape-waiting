@@ -25,47 +25,43 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse createReservationTime(final ReservationTimeRequest request) {
-        ReservationTime reservationTime = ReservationTime.createWithoutId(request.startAt());
-        Long id = reservationTimeRepository.save(reservationTime);
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(request.startAt()));
 
-        return ReservationTimeResponse.from(reservationTime.assignId(id));
+        return ReservationTimeResponse.from(reservationTime);
     }
 
     public void deleteReservationTimeById(final Long id) {
         validateExistIdToDelete(id);
 
-        boolean isDeleted = reservationTimeRepository.deleteById(id);
-        validateIsExistsReservationTimeId(isDeleted);
+        reservationTimeRepository.findById(id)
+            .orElseThrow(() -> new ReservationTimeException("존재하지 않는 예약 시간입니다."));
+        reservationTimeRepository.deleteById(id);
     }
 
     private void validateExistIdToDelete(final Long id) {
-        if (reservationRepository.existByReservationTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new ReservationTimeException("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
-        }
-    }
-
-    private void validateIsExistsReservationTimeId(boolean isDeleted) {
-        if (!isDeleted) {
-            throw new ReservationTimeException("존재하지 않는 예약 시간입니다.");
         }
     }
 
     public List<ReservationTimeResponse> getReservationTimes() {
         return reservationTimeRepository.findAll().stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
+            .map(ReservationTimeResponse::from)
+            .toList();
     }
 
     public List<TimeConditionResponse> getTimesWithCondition(final TimeConditionRequest request) {
         List<Reservation> reservations = reservationRepository.findBy(request.date(), request.themeId());
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
+
         return times.stream()
-                .map(time -> {
-                    boolean hasTime = reservations.stream()
-                            .anyMatch(reservation -> reservation.isSameTime(time));
-                    return new TimeConditionResponse(time.getId(), time.getStartAt(), hasTime);
-                })
-                .toList();
+            .map(time -> {
+                boolean hasTime = reservations.stream()
+                    .anyMatch(reservation -> reservation.isSameTime(time));
+                return new TimeConditionResponse(time.getId(), time.getStartAt(), hasTime);
+            })
+            .toList();
     }
 }

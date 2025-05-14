@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.auth.login.presentation.dto.SearchCondition;
+import roomescape.common.exception.BusinessException;
 import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -15,9 +16,11 @@ import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
+import roomescape.reservationTime.exception.ReservationTimeException;
 import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
+import roomescape.theme.exception.ThemeException;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @Service
@@ -44,27 +47,34 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
-        ReservationTime time = reservationTimeRepository.findById(request.timeId());
-        Theme theme = themeRepository.findById(request.themeId());
-        Member member = memberRepository.findById(memberId);
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new ReservationTimeException("예약 시간을 찾을 수 없습니다."));
+        Theme theme = themeRepository.findById(request.themeId())
+            .orElseThrow(() -> new ThemeException("테마를 찾을 수 없습니다."));
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
 
-        validateExistDuplicateReservation(request, time);
+        List<Reservation> reservations = reservationRepository.findBy(request.themeId(), request.date());
+        validateExistDuplicateReservation(reservations, time);
 
         Reservation reservation = Reservation.createWithoutId(request.date(), time, theme, member);
         validateCanReserveDateTime(reservation, dateTime.now());
-        Long id = reservationRepository.save(reservation);
+        reservation = reservationRepository.save(reservation);
 
-        return ReservationResponse.from(reservation.assignId(id));
+        return ReservationResponse.from(reservation);
     }
 
-    private void validateExistDuplicateReservation(final ReservationRequest request, final ReservationTime time) {
-        if (reservationRepository.existBy(request.themeId(), request.date(), time.getStartAt())) {
+    private void validateExistDuplicateReservation(final List<Reservation> reservations, final ReservationTime time) {
+        boolean isBooked = reservations.stream()
+            .anyMatch(reservation -> reservation.isSameTime(time));
+
+        if (isBooked) {
             throw new ReservationException("이미 예약이 존재합니다.");
         }
     }
 
     private void validateCanReserveDateTime(final Reservation reservation, final LocalDateTime now) {
-        if (reservation.isCanReserveDateTime(now)) {
+        if (reservation.isCannotReserveDateTime(now)) {
             throw new ReservationException("예약할 수 없는 날짜와 시간입니다.");
         }
     }
@@ -76,14 +86,10 @@ public class ReservationService {
     }
 
     public void deleteReservationById(final Long id) {
-        boolean isDeleted = reservationRepository.deleteById(id);
-        validateExistIdToDelete(isDeleted);
-    }
+        reservationRepository.findById(id)
+            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
 
-    private void validateExistIdToDelete(boolean isDeleted) {
-        if (!isDeleted) {
-            throw new IllegalArgumentException("존재하지 않는 예약입니다.");
-        }
+        reservationRepository.deleteById(id);
     }
 
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {

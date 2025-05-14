@@ -1,11 +1,22 @@
 package roomescape.admin.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Admin {
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
+
+    public Admin() {
+    }
 
     public Admin(Long id, String name, String email, String password) {
         this.id = id;

@@ -12,10 +12,9 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 
 @Repository
-public class JdbcThemeRepository implements ThemeRepository {
+public class JdbcThemeRepository {
 
     private static RowMapper<Theme> ROW_MAPPER = (resultSet, rowNum) -> Theme.createWithId(
             resultSet.getLong("id"),
@@ -34,7 +33,6 @@ public class JdbcThemeRepository implements ThemeRepository {
                 .usingGeneratedKeyColumns("id");
     }
 
-    @Override
     public Long save(final Theme theme) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", theme.getName());
@@ -43,7 +41,6 @@ public class JdbcThemeRepository implements ThemeRepository {
         return simpleJdbcInsert.executeAndReturnKey(params).longValue();
     }
 
-    @Override
     public List<Theme> findPopularThemes(final LocalDate start, final LocalDate end, final int popularCount) {
         String sql = """
                 SELECT
@@ -68,14 +65,12 @@ public class JdbcThemeRepository implements ThemeRepository {
         return namedParameterJdbcTemplate.query(sql, param, ROW_MAPPER);
     }
 
-    @Override
     public List<Theme> findAll() {
         String sql = "SELECT * FROM theme";
 
         return namedParameterJdbcTemplate.query(sql, ROW_MAPPER);
     }
 
-    @Override
     public boolean deleteById(final Long id) {
         String sql = "DELETE FROM theme where id = :id";
 
@@ -86,7 +81,6 @@ public class JdbcThemeRepository implements ThemeRepository {
         return count != 0;
     }
 
-    @Override
     public Theme findById(final Long id) {
         String sql = "SELECT * FROM theme WHERE id = :id";
 

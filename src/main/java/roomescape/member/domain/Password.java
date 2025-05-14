@@ -1,15 +1,14 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.member.exception.PasswordException;
 
-public class Password {
+@Embeddable
+public record Password(String password) {
 
-    private final String password;
-
-    public Password(String password) {
+    public Password {
         validatePasswordIsNonEmpty(password);
-        this.password = password;
     }
 
     private void validatePasswordIsNonEmpty(final String password) {

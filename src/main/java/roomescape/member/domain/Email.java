@@ -1,19 +1,17 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.member.exception.EmailException;
 
-public class Email {
+@Embeddable
+public record Email(String email) {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
-    private final String email;
-
-    public Email(String email) {
+    public Email {
         validateEmailIsNonBlank(email);
         validateEmailFormat(email);
-
-        this.email = email;
     }
 
     private void validateEmailIsNonBlank(final String email) {
