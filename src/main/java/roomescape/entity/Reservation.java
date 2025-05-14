@@ -1,6 +1,8 @@
 package roomescape.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -8,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import roomescape.global.ReservationStatus;
 
 @Entity
 public class Reservation {
@@ -26,19 +29,32 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus status;
+
     public Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id,
+                       Member member,
+                       LocalDate date,
+                       ReservationTime time,
+                       Theme theme,
+                       ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(Member member,
+                       LocalDate date,
+                       ReservationTime time,
+                       Theme theme,
+                       ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
 
@@ -77,5 +93,9 @@ public class Reservation {
 
     public String getThemeName() {
         return theme.getName();
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }

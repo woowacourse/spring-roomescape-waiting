@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
+import roomescape.dto.request.CreateReservationRequest;
+import roomescape.dto.response.MyReservationResponse;
+import roomescape.dto.response.ReservationResponse;
 import roomescape.entity.LoginMember;
 import roomescape.entity.Reservation;
 import roomescape.global.Role;
-import roomescape.dto.request.CreateReservationRequest;
-import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -38,6 +39,15 @@ public class ReservationController {
                 .map(ReservationResponse::from)
                 .toList();
 
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/mine")
+    @CheckRole({Role.USER, Role.ADMIN})
+    public ResponseEntity<List<MyReservationResponse>> getMyReservation(LoginMember loginMember) {
+        List<Reservation> reservations = reservationService.findAllReservationByMember(loginMember.getId());
+        List<MyReservationResponse> responses = reservations.stream()
+                .map(MyReservationResponse::from).toList();
         return ResponseEntity.ok(responses);
     }
 

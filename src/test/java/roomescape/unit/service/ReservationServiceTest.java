@@ -19,6 +19,7 @@ import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
 import roomescape.exception.custom.InvalidReservationException;
+import roomescape.global.ReservationStatus;
 import roomescape.global.Role;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -69,8 +70,8 @@ class ReservationServiceTest {
     void 예약_전체를_조회할_수_있다() {
         //given
 
-        Reservation reservation = new Reservation(1L, member, LocalDate.now(), time, theme);
-        Reservation reservation2 = new Reservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER), LocalDate.now(), time, theme);
+        Reservation reservation = new Reservation(1L, member, LocalDate.now(), time, theme, ReservationStatus.RESERVED);
+        Reservation reservation2 = new Reservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER), LocalDate.now(), time, theme, ReservationStatus.RESERVED);
 
         when(reservationRepository.findAll())
                 .thenReturn(List.of(reservation, reservation2));
@@ -86,7 +87,7 @@ class ReservationServiceTest {
     void 예약을_추가한다() {
         //given
         when(reservationRepository.save(any(Reservation.class)))
-                    .thenReturn(new Reservation(1L, member, LocalDate.now().plusDays(1), time, theme));
+                    .thenReturn(new Reservation(1L, member, LocalDate.now().plusDays(1), time, theme, ReservationStatus.RESERVED));
 
         CreateReservationRequest request = new CreateReservationRequest(LocalDate.now().plusDays(1), time.getId(), theme.getId());
         when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(member));

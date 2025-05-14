@@ -10,6 +10,7 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.global.ReservationStatus;
 import roomescape.global.Role;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +26,7 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now());
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
 
-        Reservation reservation = new Reservation(member, yesterday, reservationTime, theme);
+        Reservation reservation = new Reservation(member, yesterday, reservationTime, theme, ReservationStatus.RESERVED);
 
         //when
         boolean actual = reservation.isBefore(LocalDateTime.now());
@@ -42,7 +43,7 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusMinutes(10));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
 
-        Reservation reservation = new Reservation(member, today, reservationTime, theme);
+        Reservation reservation = new Reservation(member, today, reservationTime, theme, ReservationStatus.RESERVED);
 
         //when
         boolean actual = reservation.isBefore(LocalDateTime.now());

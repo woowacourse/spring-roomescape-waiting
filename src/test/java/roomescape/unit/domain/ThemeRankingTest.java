@@ -9,6 +9,7 @@ import roomescape.domain.ThemeRanking;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.global.ReservationStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,14 +24,14 @@ class ThemeRankingTest {
 
         List<Reservation> reservations = new ArrayList<>();
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA, ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA, ReservationStatus.RESERVED));
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeC));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeC, ReservationStatus.RESERVED));
 
         ThemeRanking ranking = new ThemeRanking(reservations);
 
@@ -49,7 +50,7 @@ class ThemeRankingTest {
         for (int i = 1; i <= 11; i++) {
             Theme theme = new Theme("T" + i, "T" + i, "T" + i);
             for (int j = 0; j < i; j++) {
-                reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), theme));
+                reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), theme, ReservationStatus.RESERVED));
             }
         }
 

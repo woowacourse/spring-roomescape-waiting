@@ -25,6 +25,7 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.global.ReservationStatus;
 import roomescape.global.Role;
 import roomescape.jwt.JwtTokenProvider;
 import roomescape.repository.MemberRepository;
@@ -140,22 +141,28 @@ class ReservationIntegrateTest {
 
         Reservation reservation1 = new Reservation(member, LocalDate.now().minusDays(1),
                 new ReservationTime(reservationTime.getId(), afterTime),
-                new Theme(theme_1.getId(), "테마 명1", "description", "thumbnail"));
+                new Theme(theme_1.getId(), "테마 명1", "description", "thumbnail")
+                , ReservationStatus.RESERVED);
         Reservation reservation2 = new Reservation(member, LocalDate.now().minusDays(2),
                 new ReservationTime(reservationTime.getId(), afterTime),
-                new Theme(theme_1.getId(), "테마 명1", "description", "thumbnail"));
+                new Theme(theme_1.getId(), "테마 명1", "description", "thumbnail")
+                , ReservationStatus.RESERVED);
         Reservation reservation3 = new Reservation(member, LocalDate.now().minusDays(3),
                 new ReservationTime(reservationTime.getId(), afterTime),
-                new Theme(theme_1.getId(), "테마 명1", "description", "thumbnail"));
+                new Theme(theme_1.getId(), "테마 명1", "description", "thumbnail")
+                , ReservationStatus.RESERVED);
         Reservation reservation4 = new Reservation(member, LocalDate.now().minusDays(4),
                 new ReservationTime(reservationTime.getId(), afterTime),
-                new Theme(theme_2.getId(), "테마 명2", "description", "thumbnail"));
+                new Theme(theme_2.getId(), "테마 명2", "description", "thumbnail")
+                , ReservationStatus.RESERVED);
         Reservation reservation5 = new Reservation(member, LocalDate.now().minusDays(5),
                 new ReservationTime(reservationTime.getId(), afterTime),
-                new Theme(theme_2.getId(), "테마 명2", "description", "thumbnail"));
+                new Theme(theme_2.getId(), "테마 명2", "description", "thumbnail")
+                , ReservationStatus.RESERVED);
         Reservation reservation6 = new Reservation(member, LocalDate.now().minusDays(6),
                 new ReservationTime(reservationTime.getId(), afterTime),
-                new Theme(theme_3.getId(), "테마 명3", "description", "thumbnail"));
+                new Theme(theme_3.getId(), "테마 명3", "description", "thumbnail")
+                , ReservationStatus.RESERVED);
 
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);

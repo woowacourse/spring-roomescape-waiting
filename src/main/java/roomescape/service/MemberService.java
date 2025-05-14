@@ -21,7 +21,7 @@ public class MemberService {
         if (memberRepository.existsByEmail(request.email())) {
             throw new InvalidMemberException("동일한 이메일로 추가할 수 없습니다.");
         }
-        return memberRepository.save(request.toMember()); //TODO: save로직으로 수정
+        return memberRepository.save(request.toMember());
     }
 
     public List<Member> findAll() {

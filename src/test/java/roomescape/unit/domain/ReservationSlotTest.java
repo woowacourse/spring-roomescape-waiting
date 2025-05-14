@@ -10,6 +10,7 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.global.ReservationStatus;
 import roomescape.global.Role;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +29,7 @@ public class ReservationSlotTest {
         ReservationTime reservationTime1 = new ReservationTime(1L, firstTime);
         ReservationTime reservationTime2 = new ReservationTime(2L, secondTime);
 
-        Reservation reservation1 = new Reservation(1L, beforeAddMember, today, reservationTime1, theme);
+        Reservation reservation1 = new Reservation(1L, beforeAddMember, today, reservationTime1, theme, ReservationStatus.RESERVED);
 
         List<ReservationTime> times = List.of(reservationTime1, reservationTime2);
         List<Reservation > alreadyReservedReservation = List.of(reservation1);

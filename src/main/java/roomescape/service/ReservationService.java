@@ -15,6 +15,7 @@ import roomescape.exception.custom.InvalidMemberException;
 import roomescape.exception.custom.InvalidReservationException;
 import roomescape.exception.custom.InvalidReservationTimeException;
 import roomescape.exception.custom.InvalidThemeException;
+import roomescape.global.ReservationStatus;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -54,7 +55,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마입니다."));
 
-        Reservation reservation = new Reservation(member, date, reservationTime, theme);
+        Reservation reservation = new Reservation(member, date, reservationTime, theme, ReservationStatus.RESERVED);
 
         validateDuplicateReservation(reservation);
         validateAddReservationDateTime(reservation);
@@ -94,5 +95,9 @@ public class ReservationService {
 
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    public List<Reservation> findAllReservationByMember(final Long memberId) {
+        return reservationRepository.findAllByMemberId(memberId);
     }
 }
