@@ -12,8 +12,6 @@ import roomescape.global.exception.InvalidArgumentException;
 @AllArgsConstructor
 public class Password {
 
-    // TODO 불변으로 처리할 수 없을까?
-
     private static final int PASSWORD_MAX_LENGTH = 25;
     private String password;
 
@@ -31,10 +29,4 @@ public class Password {
             throw new InvalidArgumentException("비밀번호는 공백이거나 25자 이상일 수 없습니다.");
         }
     }
-
-    public boolean matches(String rawPassword, PasswordEncryptor passwordEncoder) {
-        String encryptPassword = passwordEncoder.encrypt(rawPassword);
-        return password.equals(encryptPassword);
-    }
-
 }

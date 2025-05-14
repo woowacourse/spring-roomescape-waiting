@@ -11,12 +11,10 @@ import roomescape.reservation.domain.Reservation;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    // TODO EXISTS를 사용해서 최적화하기
-
     @Query("""
             select exists
                 (select r from Reservation r
-                 where r.reservationDatetime.reservationDate.date = :date and r.reservationDatetime.reservationTime.id = :timeId)
+                where r.reservationDatetime.reservationDate.date = :date and r.reservationDatetime.reservationTime.id = :timeId)
             """)
     boolean existsByDateAndTimeId(@Param(value = "date") LocalDate date, @Param(value = "timeId") Long timeId);
 
@@ -43,7 +41,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select r.reservationDatetime.reservationTime.id
             from Reservation r
-            where r.reservationDatetime.reservationDate.date = :date and r.theme.id = :themeId""")
+            where r.reservationDatetime.reservationDate.date = :date and r.theme.id = :themeId
+            """)
     List<Long> findReservedTimeIdsByDateAndTheme(@Param(value = "date") LocalDate date,
                                                  @Param(value = "themeId") Long themeId);
 
