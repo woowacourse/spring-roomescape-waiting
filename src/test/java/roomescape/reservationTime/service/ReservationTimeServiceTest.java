@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.common.KeyHolderManager;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.service.ReservationService;
@@ -36,7 +35,6 @@ import roomescape.user.repository.UserRepository;
         ReservationTimeService.class,
         ReservationService.class,
         ReservationTimeTestDataConfig.class,
-        KeyHolderManager.class
 })
 class ReservationTimeServiceTest {
 

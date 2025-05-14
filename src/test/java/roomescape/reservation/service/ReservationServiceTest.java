@@ -58,7 +58,7 @@ class ReservationServiceTest {
 
     private Reservation createReservation(int plusDays, ReservationTime time) {
         LocalDate date = LocalDate.now().plusDays(plusDays);
-        return Reservation.of(date, time, savedTheme, savedUser);
+        return ReservationFixture.createByBookedStatus(date, time, savedTheme, savedUser);
     }
 
     private ReservationRequestDto createRequestDto(int plusDays, Long timeId, Long themeId) {
