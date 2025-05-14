@@ -26,12 +26,12 @@ VALUES ('테마10', '테마10입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6e
 INSERT INTO theme(name, description, thumbnail)
 VALUES ('테마11', '테마11입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO member (name, email, password)
-VALUES ('사용자1', 'aaa@gmail.com', '1234');
-INSERT INTO member(name, email, password)
-VALUES ('사용자2', 'bbb@gmail.com', '1234');
-INSERT INTO member(name, email, password)
-VALUES ('사용자3', 'ccc@gmail.com', '1234');
+INSERT INTO member (name, email, password, role)
+VALUES ('사용자1', 'aaa@gmail.com', '1234', 'USER');
+INSERT INTO member(name, email, password, role)
+VALUES ('사용자2', 'bbb@gmail.com', '1234', 'USER');
+INSERT INTO member(name, email, password, role)
+VALUES ('사용자3', 'ccc@gmail.com', '1234', 'USER');
 INSERT INTO member(name, email, password, role)
 VALUES ('어드민', 'admin@gmail.com', '1234', 'ADMIN');
 
