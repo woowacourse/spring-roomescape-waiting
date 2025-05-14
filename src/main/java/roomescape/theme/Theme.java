@@ -18,12 +18,12 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    private String name;
+    private String description;
+    private String thumbnail;
 
     public Theme() {
-        this(null, null, null, null);
+        id = null;
     }
 
     public Theme(final String name, final String description, final String thumbnail) {

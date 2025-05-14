@@ -3,7 +3,7 @@ package roomescape.reservation;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
@@ -25,6 +25,7 @@ import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
 
 @Service
+@AllArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -32,15 +33,6 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    @Autowired
-    public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository, final MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
-    }
 
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
         validateDuplicateDateTimeAndTheme(request.date(), request.timeId(), request.themeId());

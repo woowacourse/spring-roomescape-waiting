@@ -1,15 +1,13 @@
 package roomescape.auth;
 
 import io.jsonwebtoken.Claims;
+import lombok.AllArgsConstructor;
 import roomescape.member.MemberRole;
 
+@AllArgsConstructor
 public class TokenBody {
 
     private final Claims claims;
-
-    public TokenBody(final Claims claims) {
-        this.claims = claims;
-    }
 
     public String email() {
         return claims.getSubject();

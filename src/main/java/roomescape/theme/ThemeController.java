@@ -3,7 +3,7 @@ package roomescape.theme;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,16 +18,10 @@ import roomescape.theme.dto.ThemeResponse;
 
 @RestController
 @RequestMapping("/themes")
+@AllArgsConstructor
 public class ThemeController {
 
     private final ThemeService themeService;
-
-    public ThemeController(
-            @Autowired final ThemeService themeService
-    ) {
-        this.themeService = themeService;
-    }
-
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(

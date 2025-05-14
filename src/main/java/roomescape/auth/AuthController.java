@@ -1,7 +1,7 @@
 package roomescape.auth;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +14,12 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.LoginResponse;
 
 @RestController
+@AllArgsConstructor
 public class AuthController {
 
     private static final String TOKEN_NAME = "token";
 
     private final AuthService authService;
-
-    @Autowired
-    public AuthController(
-            final AuthService authService
-    ) {
-        this.authService = authService;
-    }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(
