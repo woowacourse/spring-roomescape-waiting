@@ -1,4 +1,4 @@
-package roomescape.entity;
+package roomescape.domain;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -7,7 +7,6 @@ import java.util.Map;
 import roomescape.entity.Reservation;
 import roomescape.entity.Theme;
 
-// TODO: repo JPA 적용 후, 제거
 public class ThemeRanking {
 
     private static final int RANKING_SIZE = 10;

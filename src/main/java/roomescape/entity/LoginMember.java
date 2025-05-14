@@ -1,6 +1,7 @@
 package roomescape.entity;
 
-import roomescape.exception.InvalidMemberException;
+import roomescape.exception.custom.InvalidMemberException;
+import roomescape.global.Role;
 
 public class LoginMember {
     private final Long id;
