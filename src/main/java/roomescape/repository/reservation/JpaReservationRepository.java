@@ -4,12 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-@Repository
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
     boolean existsByTimeId(Long id);
