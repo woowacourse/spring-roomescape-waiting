@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.service.ReservationRepository;
-import roomescape.time.controller.request.AvailableReservationTimeRequest;
 import roomescape.time.controller.request.ReservationTimeCreateRequest;
-import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
@@ -24,9 +23,8 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse create(ReservationTimeCreateRequest request) {
-
         LocalTime startAt = request.startAt();
-        if (reservationTimeRepository.existByStartAt(startAt)) {
+        if (reservationTimeRepository.existsByStartAt(startAt)) {
             throw new IllegalArgumentException("[ERROR] 이미 존재하는 시간입니다.");
         }
 
@@ -56,8 +54,8 @@ public class ReservationTimeService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
-    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
-            AvailableReservationTimeRequest request) {
-        return reservationTimeRepository.findAllAvailableReservationTimes(request.date(), request.themeId());
-    }
+//    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
+//            AvailableReservationTimeRequest request) {
+//        return reservationTimeRepository.findAllAvailableReservationTimes(request.date(), request.themeId());
+//    }
 }

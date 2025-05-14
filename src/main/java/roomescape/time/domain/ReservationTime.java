@@ -1,27 +1,30 @@
 package roomescape.time.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
-import roomescape.time.domain.exception.ReservationTimeNullException;
 
+@Entity
 public class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private LocalTime startAt;
+
+    public ReservationTime() {
+
+    }
 
     public ReservationTime(Long id, LocalTime time) {
-        validateNull(time);
         this.id = id;
         this.startAt = time;
     }
 
     public static ReservationTime create(LocalTime time) {
         return new ReservationTime(null, time);
-    }
-
-    private void validateNull(LocalTime startAt) {
-        if (startAt == null) {
-            throw new ReservationTimeNullException("[ERROR] 시간은 비어있을 수 없습니다.");
-        }
     }
 
     public Long getId() {
