@@ -6,7 +6,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +20,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.reservationTime.ReservationTimeTestDataConfig;
 import roomescape.reservationTime.domain.dto.ReservationTimeRequestDto;
 import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
+import roomescape.reservationTime.fixture.ReservationTimeFixture;
+import roomescape.reservationTime.repository.ReservationTimeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = {
         ReservationTimeTestDataConfig.class})
@@ -31,6 +32,8 @@ public class ReservationTimeControllerTest {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private ReservationTimeTestDataConfig reservationTimeTestDataConfig;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
     @LocalServerPort
     int port;
@@ -38,11 +41,6 @@ public class ReservationTimeControllerTest {
     @BeforeEach
     void restAssuredSetUp() {
         RestAssured.port = port;
-    }
-
-    @AfterAll
-    static void afterAll() {
-
     }
 
     @Nested
@@ -53,7 +51,7 @@ public class ReservationTimeControllerTest {
         @Test
         void findAll_success_whenDataExists() {
             // given 
-            jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "15:40");
+            reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(15, 40)));
 
             // when & then
             List<ReservationTimeResponseDto> resDtos = RestAssured.given().log().all()
@@ -108,7 +106,7 @@ public class ReservationTimeControllerTest {
         void add_failure_whenDuplicateInput() {
             // given
             LocalTime dummyTime = LocalTime.of(11, 22);
-            jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", dummyTime.toString());
+            reservationTimeRepository.save(ReservationTimeFixture.create(dummyTime));
 
             // when
             ReservationTimeRequestDto dto = new ReservationTimeRequestDto(dummyTime);
