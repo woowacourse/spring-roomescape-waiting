@@ -35,12 +35,12 @@ public class ReservationService {
 
 
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
-        validateDuplicateDateTimeAndTheme(request.date(), request.timeId(), request.themeId());
-        validatePastDateTime(request.date(), request.timeId());
-
         final ReservationTime reservationTime = getReservationTimeById(request.timeId());
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberByEmail(loginMember.email());
+
+        validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
+        validatePastDateTime(request.date(), reservationTime);
 
         final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
@@ -48,12 +48,12 @@ public class ReservationService {
     }
 
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
-        validateDuplicateDateTimeAndTheme(request.date(), request.timeId(), request.themeId());
-        validatePastDateTime(request.date(), request.timeId());
-
         final ReservationTime reservationTime = getReservationTimeById(request.timeId());
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberById(request.memberId());
+
+        validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
+        validatePastDateTime(request.date(), reservationTime);
 
         final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
@@ -61,7 +61,9 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> readAll() {
-        return reservationRepository.findAll().stream().map(ReservationResponse::from).toList();
+        return reservationRepository.findAll().stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public List<ReservationResponse> readAllByMemberAndThemeAndDateRange(final AdminFilterReservationRequest request) {
@@ -84,30 +86,25 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private void validatePastDateTime(final LocalDate date, final Long reservationTimeId) {
+    private void validatePastDateTime(final LocalDate date, ReservationTime reservationTime) {
         final LocalDate today = LocalDate.now();
         final LocalDate reservationDate = date;
         if (reservationDate.isBefore(today)) {
             throw new ReservationPastDateException();
         }
         if (reservationDate.isEqual(today)) {
-            validatePastTime(reservationTimeId);
+            validatePastTime(reservationTime);
         }
     }
 
-    private void validatePastTime(final Long reservationTimeId) {
-        final ReservationTime reservationTime = getReservationTimeById(reservationTimeId);
+    private void validatePastTime(final ReservationTime reservationTime) {
         if (reservationTime.isBefore(LocalTime.now())) {
             throw new ReservationPastTimeException();
         }
     }
 
-    private void validateDuplicateDateTimeAndTheme(final LocalDate date, final Long reservationTimeId,
-                                                   final Long themeId) {
-
-        final ReservationTime reservationTime = getReservationTimeById(reservationTimeId);
-        final Theme theme = getThemeById(themeId);
-
+    private void validateDuplicateDateTimeAndTheme(final LocalDate date, final ReservationTime reservationTime,
+                                                   final Theme theme) {
         if (reservationRepository.existsByReservationTimeAndDateAndTheme(reservationTime, date, theme)) {
             throw new ReservationConflictException();
         }

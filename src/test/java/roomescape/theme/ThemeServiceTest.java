@@ -8,9 +8,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import java.time.LocalDate;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,8 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.FakeReservationRepository;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -28,17 +26,12 @@ class ThemeServiceTest {
 
     private final ThemeRepository themeRepository;
     private final ThemeService themeService;
-    private final FakeReservationRepository fakeReservationRepository;
+    private final ReservationRepository reservationRepository;
 
     public ThemeServiceTest() {
         themeRepository = mock(ThemeRepository.class);
-        fakeReservationRepository = new FakeReservationRepository();
-        themeService = new ThemeService(themeRepository, fakeReservationRepository);
-    }
-
-    @BeforeEach
-    void setUp() {
-        fakeReservationRepository.clear();
+        reservationRepository = mock(ReservationRepository.class);
+        themeService = new ThemeService(themeRepository, reservationRepository);
     }
 
     @Nested
@@ -50,15 +43,16 @@ class ThemeServiceTest {
         void create() {
             // given
             final ThemeRequest themeRequest = new ThemeRequest("로키", "로키로키", "http://www.google.com");
-            final ThemeResponse expect = new ThemeResponse(1L, "로키", "로키로키", "http://www.google.com");
-            given(themeRepository.save(any()))
-                    .willReturn(new Theme(1L, "로키", "로키로키", "http://www.google.com"));
+            final Theme theme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
+            final Theme savedTheme = new Theme(1L, theme.getName(), theme.getDescription(), theme.getThumbnail());
+            given(themeRepository.save(theme))
+                    .willReturn(savedTheme);
 
             // when
             final ThemeResponse actual = themeService.create(themeRequest);
 
             // then
-            assertThat(actual).isEqualTo(expect);
+            assertThat(actual).isEqualTo(ThemeResponse.from(savedTheme));
         }
     }
 
@@ -131,15 +125,18 @@ class ThemeServiceTest {
         @Test
         void deleteById1() {
             // given
-            given(themeRepository.existsById(any()))
-                    .willReturn(true);
             final Long id = 1L;
+            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
+            given(themeRepository.findById(id))
+                    .willReturn(Optional.of(theme));
+            given(reservationRepository.existsByTheme(theme))
+                    .willReturn(false);
 
             // when
             themeService.deleteById(id);
 
             // then
-            then(themeRepository).should().deleteById(id);
+            then(themeRepository).should().delete(theme);
         }
 
         @DisplayName("주어진 id에 해당하는 테마가 존재하지 않는다면 예외가 발생한다.")
@@ -147,6 +144,11 @@ class ThemeServiceTest {
         void deleteById2() {
             // given
             final Long id = 1L;
+            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
+            given(themeRepository.findById(id))
+                    .willReturn(Optional.empty());
+            given(reservationRepository.existsByTheme(theme))
+                    .willReturn(true);
 
             // when & then
             assertThatThrownBy(() -> {
@@ -159,9 +161,11 @@ class ThemeServiceTest {
         void deleteById3() {
             // given
             final Long id = 1L;
-            given(themeRepository.existsById(1L))
+            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
+            given(themeRepository.findById(id))
+                    .willReturn(Optional.of(theme));
+            given(reservationRepository.existsByTheme(theme))
                     .willReturn(true);
-            fakeReservationRepository.save(new Reservation(LocalDate.of(2026, 12, 1)), 1L, id, 1L);
 
             // when & then
             assertThatThrownBy(() -> {

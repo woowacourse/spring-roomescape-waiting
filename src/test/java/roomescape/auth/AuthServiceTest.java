@@ -2,27 +2,33 @@ package roomescape.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.exception.custom.reason.auth.AuthNotExistsEmailException;
 import roomescape.exception.custom.reason.auth.AuthNotValidPasswordException;
-import roomescape.member.FakeMemberRepository;
 import roomescape.member.Member;
+import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
 
+@ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
 
     private final AuthService authService;
-    private final FakeMemberRepository fakeMemberRepository;
+    private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
 
     public AuthServiceTest() {
-        fakeMemberRepository = new FakeMemberRepository();
+        memberRepository = mock(MemberRepository.class);
         jwtProvider = new JwtProvider();
-        authService = new AuthService(fakeMemberRepository, jwtProvider);
+        authService = new AuthService(memberRepository, jwtProvider);
     }
 
     @Nested
@@ -33,7 +39,8 @@ public class AuthServiceTest {
         void generateToken() {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "pw1234");
-            fakeMemberRepository.saveMember(new Member("admin@email.com", "pw1234", "부기", MemberRole.MEMBER));
+            given(memberRepository.findByEmail(request.email()))
+                    .willReturn(Optional.of(new Member(1L, request.email(), request.password(), "부기", MemberRole.MEMBER)));
 
             // when
             final String actual = authService.generateToken(request);
@@ -59,7 +66,8 @@ public class AuthServiceTest {
         void generateToken2() {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "not matches password");
-            fakeMemberRepository.saveMember(new Member("admin@email.com", "pw1234", "부기", MemberRole.MEMBER));
+            given(memberRepository.findByEmail(request.email()))
+                    .willReturn(Optional.of(new Member(1L, request.email(), "pw1234", "부기", MemberRole.MEMBER)));
 
             // when & then
             assertThatThrownBy(() -> {
