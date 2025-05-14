@@ -15,6 +15,7 @@ import roomescape.dto.auth.LoginRequestDto;
 import roomescape.dto.reservation.AdminReservationCreateRequestDto;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.MemberRepository;
 
 import java.time.LocalDate;
@@ -31,7 +32,7 @@ class AdminReservationControllerTest {
     class AdminAddReservationTest {
 
         @Autowired
-        MemberRepository memberRepository;
+        JpaMemberRepository memberRepository;
 
         String loginToken;
 

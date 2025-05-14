@@ -8,6 +8,6 @@ import java.time.LocalTime;
 public record ReservationTimeResponseDto(long id, @JsonFormat(pattern = "HH:mm") LocalTime startAt) {
 
     public static ReservationTimeResponseDto from(ReservationTime reservationTime) {
-        return new ReservationTimeResponseDto(reservationTime.id(), reservationTime.startAt());
+        return new ReservationTimeResponseDto(reservationTime.getId(), reservationTime.getStartAt());
     }
 }

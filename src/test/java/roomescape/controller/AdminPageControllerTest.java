@@ -11,6 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.dto.auth.LoginRequestDto;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.MemberRepository;
 
 import java.util.Map;
@@ -20,14 +21,14 @@ import java.util.Map;
 class AdminPageControllerTest {
 
     @Autowired
-    MemberRepository memberRepository;
+    JpaMemberRepository memberRepository;
     String adminToken;
     String userToken;
 
     @BeforeEach
     void setUp() {
-        memberRepository.save(new Member(1L, "가이온", "hello@woowa.com", Role.USER, "password"));
-        memberRepository.save(new Member(2L, "가이온1", "hello1@woowa.com", Role.ADMIN, "password"));
+        memberRepository.save(new Member(null, "가이온", "hello@woowa.com", Role.USER, "password"));
+        memberRepository.save(new Member(null, "가이온1", "hello1@woowa.com", Role.ADMIN, "password"));
 
         LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
         Map<String, String> cookies = RestAssured.given().log().all()
@@ -62,7 +63,7 @@ class AdminPageControllerTest {
         RestAssured.given().cookie("token", userToken).log().all()
                 .when().get("/admin/reservation")
                 .then().log().all()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @DisplayName("Time Page 유저토큰인 경우 테스트")
@@ -71,7 +72,7 @@ class AdminPageControllerTest {
         RestAssured.given().cookie("token", userToken).log().all()
                 .when().get("/admin/time")
                 .then().log().all()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @DisplayName("admin 토큰 테스트")

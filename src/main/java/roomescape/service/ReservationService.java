@@ -15,7 +15,6 @@ import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.ReservationCreateDto;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -40,7 +39,7 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + dto.timeId()));
 
-        validateDuplicate(dto.date(), reservationTime.getStartAt(), dto.themeId());
+        validateDuplicate(dto.date(), dto.timeId(), dto.themeId());
         Reservation.validateReservableTime(dto.date(), reservationTime.getStartAt());
 
         Theme theme = themeRepository.findById(dto.themeId())
@@ -55,8 +54,8 @@ public class ReservationService {
         return ReservationResponseDto.of(newReservation, newReservation.getTime(), theme);
     }
 
-    private void validateDuplicate(LocalDate date, LocalTime time, long themeId) {
-        List<Reservation> reservations = reservationRepository.findByDateTimeAndThemeId(date, time, themeId);
+    private void validateDuplicate(LocalDate date, long timeId, long themeId) {
+        List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (!reservations.isEmpty()) {
             throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 다른 예약 일정을 선택해주세요.");
         }
@@ -71,7 +70,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from, LocalDate to) {
-        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(themeId, memberId, from, to);
+        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(from, to, themeId, memberId);
         return reservationsByPeriodAndMemberAndTheme.stream()
                 .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(), reservation.getTheme()))
                 .toList();
