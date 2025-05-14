@@ -1,19 +1,31 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.regex.Pattern;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.common.exception.MemberException;
 
 @Getter
+@NoArgsConstructor
+@Entity
 public class Member {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
         validateName(name);
@@ -27,7 +39,14 @@ public class Member {
         this.role = role;
     }
 
-    public Member(Long id, String name, String email, Role role) {
+    public Member(String name, String email, String password, Role role) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    public Member(final Long id, final String name, final String email, final Role role) {
         this.id = id;
         this.name = name;
         this.email = email;
