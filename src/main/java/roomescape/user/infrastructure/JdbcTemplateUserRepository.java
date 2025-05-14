@@ -12,7 +12,6 @@ import roomescape.common.jdbc.JdbcUtils;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
-import roomescape.user.domain.UserRepository;
 import roomescape.user.domain.UserRole;
 
 import java.sql.PreparedStatement;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcTemplateUserRepository implements UserRepository {
+public class JdbcTemplateUserRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -36,7 +35,6 @@ public class JdbcTemplateUserRepository implements UserRepository {
                     UserRole.valueOf(resultSet.getString("role"))
             );
 
-    @Override
     public Optional<User> findById(final UserId id) {
         final String sql = """
                 SELECT id, name, email, password, role
@@ -46,7 +44,6 @@ public class JdbcTemplateUserRepository implements UserRepository {
         return JdbcUtils.queryForOptional(jdbcTemplate, sql, userRowMapper, id.getValue());
     }
 
-    @Override
     public Optional<User> findByEmail(final Email email) {
         final String sql = """
                 SELECT id, name, email, password, role
@@ -56,13 +53,11 @@ public class JdbcTemplateUserRepository implements UserRepository {
         return JdbcUtils.queryForOptional(jdbcTemplate, sql, userRowMapper, email.getValue());
     }
 
-    @Override
     public List<User> findAll() {
         final String sql = "SELECT id, name, email, password, role FROM users";
         return jdbcTemplate.query(sql, userRowMapper);
     }
 
-    @Override
     public List<User> findAllByIds(final List<UserId> ids) {
         if (ids.isEmpty()) {
             return List.of();
@@ -85,7 +80,6 @@ public class JdbcTemplateUserRepository implements UserRepository {
         return jdbcTemplate.query(sql, userRowMapper, idValues);
     }
 
-    @Override
     public User save(final User user) {
         final String sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
         final KeyHolder keyHolder = new GeneratedKeyHolder();

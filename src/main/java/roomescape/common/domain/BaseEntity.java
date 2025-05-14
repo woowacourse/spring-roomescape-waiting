@@ -6,7 +6,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
+@FieldNameConstants
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @MappedSuperclass

@@ -1,9 +1,11 @@
 package roomescape.auth.sign.password;
 
+import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
@@ -12,11 +14,13 @@ import roomescape.common.validate.Validator;
 @Getter
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@FieldNameConstants(level = AccessLevel.PRIVATE)
+@FieldNameConstants
+@Embeddable
 public class Password {
 
-    private final String encodedValue;
+    private String encodedValue;
 
     public static Password fromRaw(final String rawPassword, final PasswordEncoder encoder) {
         validate(rawPassword);

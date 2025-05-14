@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.jwt.manager.JwtManager;
+import roomescape.auth.session.Session;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
 import roomescape.reservation.domain.Reservation;
@@ -78,9 +79,9 @@ public class MissionStepTest {
                         UserRole.ADMIN));
 
         final Claims claims = Jwts.claims()
-                .add(User.Fields.id, user.getId().getValue())
-                .add(User.Fields.name, user.getName().getValue())
-                .add(User.Fields.role, user.getRole().name())
+                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.name, user.getName().getValue())
+                .add(Session.Fields.role, user.getRole().name())
                 .build();
 
         RestAssured.given().log().all()
@@ -102,9 +103,9 @@ public class MissionStepTest {
                         UserRole.ADMIN));
 
         final Claims claims = Jwts.claims()
-                .add(User.Fields.id, user.getId().getValue())
-                .add(User.Fields.name, user.getName().getValue())
-                .add(User.Fields.role, user.getRole().name())
+                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.name, user.getName().getValue())
+                .add(Session.Fields.role, user.getRole().name())
                 .build();
 
         RestAssured.given().log().all()
@@ -153,9 +154,9 @@ public class MissionStepTest {
         );
 
         final Claims claims = Jwts.claims()
-                .add(User.Fields.id, user.getId().getValue())
-                .add(User.Fields.name, user.getName().getValue())
-                .add(User.Fields.role, user.getRole().name())
+                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.name, user.getName().getValue())
+                .add(Session.Fields.role, user.getRole().name())
                 .build();
 
         // when
@@ -234,9 +235,9 @@ public class MissionStepTest {
                 ));
 
         final Claims claims = Jwts.claims()
-                .add(User.Fields.id, user.getId().getValue())
-                .add(User.Fields.name, user.getName().getValue())
-                .add(User.Fields.role, user.getRole().name())
+                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.name, user.getName().getValue())
+                .add(Session.Fields.role, user.getRole().name())
                 .build();
 
         // when
@@ -284,9 +285,9 @@ public class MissionStepTest {
         );
 
         final Claims claims = Jwts.claims()
-                .add(User.Fields.id, user.getId().getValue())
-                .add(User.Fields.name, user.getName().getValue())
-                .add(User.Fields.role, user.getRole().name())
+                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.name, user.getName().getValue())
+                .add(Session.Fields.role, user.getRole().name())
                 .build();
 
         // when

@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.auth.jwt.domain.Jwt;
 import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.jwt.generator.JwtGenerator;
-import roomescape.user.domain.User;
+import roomescape.auth.session.Session;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -40,9 +40,9 @@ class JwtParserImplTest {
         final Instant expiration = now.plusMillis(type.getPeriodInMillis());
 
         final Claims claims = Jwts.claims()
-                .add(User.Fields.id, "1")
-                .add(User.Fields.name, "강산")
-                .add(User.Fields.role, "ADMIN")
+                .add(Session.Fields.id, "1")
+                .add(Session.Fields.name, "강산")
+                .add(Session.Fields.role, "ADMIN")
                 .build();
         final Jwt jwt = jwtGenerator.execute(
                 claims,
@@ -54,9 +54,9 @@ class JwtParserImplTest {
         final Claims parsedClaims = jwtParser.execute(jwt, secretKey);
 
         // then
-        assertThat(parsedClaims.get(User.Fields.id)).isEqualTo(claims.get(User.Fields.id));
-        assertThat(parsedClaims.get(User.Fields.name)).isEqualTo(claims.get(User.Fields.name));
-        assertThat(parsedClaims.get(User.Fields.role)).isEqualTo(claims.get(User.Fields.role));
+        assertThat(parsedClaims.get(Session.Fields.id)).isEqualTo(claims.get(Session.Fields.id));
+        assertThat(parsedClaims.get(Session.Fields.name)).isEqualTo(claims.get(Session.Fields.name));
+        assertThat(parsedClaims.get(Session.Fields.role)).isEqualTo(claims.get(Session.Fields.role));
     }
 
     @Test
@@ -72,9 +72,9 @@ class JwtParserImplTest {
 
         final Jwt jwt = jwtGenerator.execute(
                 Jwts.claims()
-                        .add(User.Fields.id, "1")
-                        .add(User.Fields.name, "강산")
-                        .add(User.Fields.role, "ADMIN")
+                        .add(Session.Fields.id, "1")
+                        .add(Session.Fields.name, "강산")
+                        .add(Session.Fields.role, "ADMIN")
                         .build(),
                 now,
                 expiration,
@@ -96,9 +96,9 @@ class JwtParserImplTest {
 
         final Jwt jwt = jwtGenerator.execute(
                 Jwts.claims()
-                        .add(User.Fields.id, "1")
-                        .add(User.Fields.name, "강산")
-                        .add(User.Fields.role, "ADMIN")
+                        .add(Session.Fields.id, "1")
+                        .add(Session.Fields.name, "강산")
+                        .add(Session.Fields.role, "ADMIN")
                         .build(),
                 now,
                 expiration,
