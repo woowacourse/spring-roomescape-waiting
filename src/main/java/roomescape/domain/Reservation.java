@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,13 +34,16 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+
     public static Reservation create(
             Member member,
             LocalDate date,
             ReservationTime time,
             Theme theme
     ) {
-        return new Reservation(null, member, date, time, theme);
+        return new Reservation(null, member, date, time, theme, ReservationStatus.NOT_RESERVED);
     }
 
     public static Reservation create(
@@ -48,6 +53,6 @@ public class Reservation {
             ReservationTime time,
             Theme theme
     ) {
-        return new Reservation(id, member, date, time, theme);
+        return new Reservation(id, member, date, time, theme, ReservationStatus.RESERVED);
     }
 }

@@ -15,8 +15,8 @@
   - [x] `Member` - `Role` : 일대다, 주인은 멤버
 
 ### 2단계 - 내 예약 목록 조회 기능
-- [ ] 내 예약 목록 조회 기능
-- [ ] 새로운 DTO 생성
+- [x] 내 예약 목록 조회 기능
+- [x] 새로운 DTO 생성
   - request
     ```
     GET /reservations-mine HTTP/1.1

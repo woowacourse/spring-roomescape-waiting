@@ -29,4 +29,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT r FROM Reservation r WHERE r.theme =:theme AND r.member =:member AND (r.date BETWEEN :dateFrom AND :dateTo)")
     List<Reservation> findAllByThemeAndMemberAndDate(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo);
+
+    List<Reservation> findAllByMember(Member member);
 }
