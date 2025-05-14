@@ -27,9 +27,9 @@ class TokenLoginApiControllerTest extends BaseTest {
     void setUp() {
         RestAssured.port = port;
         member = new HashMap<>();
-        memberService.save(new SignUpRequest("매트", "matt.kakao", "1234"));
+        memberService.save(new SignUpRequest("매트", "matt@kakao.com", "1234"));
         member.put("name", "matt");
-        member.put("email", "matt.kakao");
+        member.put("email", "matt@kakao.com");
         member.put("password", "1234");
     }
 

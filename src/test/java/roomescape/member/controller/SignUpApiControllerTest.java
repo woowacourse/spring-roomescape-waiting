@@ -27,7 +27,7 @@ class SignUpApiControllerTest extends BaseTest {
         RestAssured.port = port;
         member = new HashMap<>();
         member.put("name", "matt");
-        member.put("email", "matt.kakao");
+        member.put("email", "matt@kakao.com");
         member.put("password", "1234");
     }
 
@@ -45,7 +45,7 @@ class SignUpApiControllerTest extends BaseTest {
     @Test
     @DisplayName("이름이 공백이면 회원 가입에 실패한다.")
     void nameNullSignUpTest() {
-        Map <String, String> failMap = new HashMap<>(
+        Map<String, String> failMap = new HashMap<>(
                 Map.of(
                         "name", "", "email", "matt.kakao", "password", "1234"
                 )
@@ -62,7 +62,7 @@ class SignUpApiControllerTest extends BaseTest {
     @Test
     @DisplayName("이메일이 공백이면 회원 가입에 실패한다.")
     void emailNullSignUpTest() {
-        Map <String, String> failMap = new HashMap<>(
+        Map<String, String> failMap = new HashMap<>(
                 Map.of(
                         "name", "matt", "email", "", "password", "1234"
                 )
@@ -79,7 +79,7 @@ class SignUpApiControllerTest extends BaseTest {
     @Test
     @DisplayName("비밀번호가 공백이면 회원 가입에 실패한다.")
     void passwordNullSignUpTest() {
-        Map <String, String> failMap = new HashMap<>(
+        Map<String, String> failMap = new HashMap<>(
                 Map.of(
                         "name", "matt", "email", "matt.kakao", "password", ""
                 )
