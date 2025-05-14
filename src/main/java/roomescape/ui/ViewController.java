@@ -31,6 +31,11 @@ public class ViewController {
         return "reservation";
     }
 
+    @GetMapping("/reservation-mine")
+    public String getMyReservationsPage() {
+        return "reservation-mine";
+    }
+
     @GetMapping("/")
     public String getHomePage() {
         return "index";
