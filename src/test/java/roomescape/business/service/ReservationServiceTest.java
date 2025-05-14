@@ -20,6 +20,7 @@ import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
 @DataJpaTest
@@ -43,9 +44,9 @@ public class ReservationServiceTest {
                                   final ReservationRepository reservationRepository) {
 
         this.reservationService = new ReservationService(reservationRepository,
-                                                         memberRepository,
+                memberRepository,
                 reservationTimeRepository,
-                                                         themeRepository);
+                themeRepository);
         this.reservationRepository = reservationRepository;
     }
 
@@ -195,5 +196,21 @@ public class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.deleteById(notExistId))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("member id를 통해 내 예약 목록을 조회한다")
+    void findByMemberId() {
+        //given
+        final Long memberId = 100L;
+
+        //when
+        final List<ReservationMineResponse> reservationMineResponses = reservationService.findByMemberId(memberId);
+
+        //then
+        assertAll(
+                () -> assertThat(reservationMineResponses).hasSize(3),
+                () -> assertThat(reservationMineResponses.get(0).status()).isEqualTo("예약")
+        );
     }
 }

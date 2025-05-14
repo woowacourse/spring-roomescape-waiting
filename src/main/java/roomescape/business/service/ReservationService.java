@@ -16,6 +16,7 @@ import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
 @Service
@@ -105,5 +106,12 @@ public class ReservationService {
             throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(id));
         }
         reservationRepository.deleteById(id);
+    }
+
+    public List<ReservationMineResponse> findByMemberId(final Long memberId) {
+        return reservationRepository.findByMemberId(memberId)
+                .stream()
+                .map(ReservationMineResponse::from)
+                .toList();
     }
 }

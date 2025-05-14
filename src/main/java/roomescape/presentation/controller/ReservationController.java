@@ -16,11 +16,12 @@ import roomescape.business.service.ReservationTimeService;
 import roomescape.business.service.ReservationService;
 import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
 
 @RestController
-@RequestMapping("/reservations")
+@RequestMapping
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -31,7 +32,7 @@ public class ReservationController {
         this.reservationTimeService = reservationTimeService;
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createByLoginMember(
             @RequestBody final ReservationRequest reservationRequest,
             final LoginMember loginMember
@@ -46,14 +47,14 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
-    @GetMapping
+    @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> readAll() {
         final List<ReservationResponse> reservationResponses = reservationService.findAll();
 
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/reservations/filter")
     public ResponseEntity<List<ReservationResponse>> readFilter(
             @RequestParam(required = false) final Long memberId,
             @RequestParam(required = false) final Long themeId,
@@ -67,7 +68,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
         reservationService.deleteById(id);
 
@@ -84,5 +85,13 @@ public class ReservationController {
                 reservationTimeService.findAvailableTimes(date, themeId);
 
         return ResponseEntity.ok(availableTimeResponses);
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<ReservationMineResponse>> readMine(final LoginMember loginMember) {
+        final List<ReservationMineResponse> reservationMineResponses =
+                reservationService.findByMemberId(loginMember.id());
+
+        return ResponseEntity.ok(reservationMineResponses);
     }
 }
