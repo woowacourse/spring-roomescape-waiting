@@ -7,25 +7,25 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationAvailability;
 import roomescape.time.dto.TimeAvailabilityResponse;
-import roomescape.time.repository.ReservationAvailabilityRepository;
+import roomescape.time.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationAvailabilityService {
 
-    private final ReservationAvailabilityRepository reservationAvailabilityRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationAvailabilityService(final ReservationAvailabilityRepository reservationAvailabilityRepository,
+    public ReservationAvailabilityService(final ReservationTimeRepository reservationTimeRepository,
                                           final ThemeRepository themeRepository) {
-        this.reservationAvailabilityRepository = reservationAvailabilityRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
     }
 
     public List<TimeAvailabilityResponse> getAllTimeAvailability(final LocalDate date, final long themeId) {
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
-        final List<ReservationAvailability> reservationAvailabilities = reservationAvailabilityRepository.
-                findAllByDateAndTheme(date, theme);
+        final List<ReservationAvailability> reservationAvailabilities = reservationTimeRepository.
+                findAllReservationAvailability(date, theme.getId());
         return reservationAvailabilities.stream()
                 .map(reservationAvailability -> new TimeAvailabilityResponse(
                         reservationAvailability.getTimeId(),
