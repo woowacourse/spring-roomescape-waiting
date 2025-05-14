@@ -1,22 +1,20 @@
 package roomescape.reservation.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.reservation.entity.Reservation;
-import roomescape.reservation.entity.ReservationTime;
 import roomescape.theme.entity.Theme;
 
 public record ReservationAdminCreateResponse(
         LocalDate date,
-        ReservationTime time,
-        Theme theme
+        LocalTime startAt,
+        String theme
 ) {
-
     public static ReservationAdminCreateResponse from(Reservation reservation, Theme theme) {
         return new ReservationAdminCreateResponse(
                 reservation.getDate(),
-                reservation.getTime(),
-                theme
+                reservation.getTime().getStartAt(),
+                theme.getName()
         );
     }
-
 }

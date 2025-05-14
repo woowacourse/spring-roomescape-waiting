@@ -1,25 +1,25 @@
 package roomescape.reservation.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.member.entity.Member;
 import roomescape.reservation.entity.Reservation;
-import roomescape.reservation.entity.ReservationTime;
 import roomescape.theme.entity.Theme;
 
 public record ReservationReadResponse(
         Long id,
         LocalDate date,
-        ReservationTime time,
-        Member member,
-        Theme theme
+        LocalTime startAt,
+        String memberName,
+        String themeName
 ) {
     public static ReservationReadResponse from(Reservation reservation, Member member, Theme theme) {
         return new ReservationReadResponse(
                 reservation.getId(),
                 reservation.getDate(),
-                reservation.getTime(),
-                member,
-                theme
+                reservation.getTime().getStartAt(),
+                member.getName(),
+                theme.getName()
         );
     }
 }
