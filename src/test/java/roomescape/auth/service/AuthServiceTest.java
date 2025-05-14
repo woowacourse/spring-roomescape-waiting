@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberDbFixture.RAW_PASSWORD;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ class AuthServiceTest {
     @Test
     void 로그인한다() {
         Member user = memberDbFixture.유저1_생성();
-        LoginRequest request = new LoginRequest(user.getEmail(), user.getPassword());
+        LoginRequest request = new LoginRequest(user.getEmail(), RAW_PASSWORD);
 
         String accessToken = authService.login(request);
 
@@ -47,7 +48,7 @@ class AuthServiceTest {
     @Test
     void 관리자인지_확인한다__관리자면_true() {
         Member admin = memberDbFixture.관리자_생성();
-        String token = authService.login(new LoginRequest(admin.getEmail(), admin.getPassword()));
+        String token = authService.login(new LoginRequest(admin.getEmail(), RAW_PASSWORD));
 
         boolean isAdmin = authService.isAdmin(token);
 
@@ -57,7 +58,7 @@ class AuthServiceTest {
     @Test
     void 관리자인지_확인한다__관리자가_아니면_false() {
         Member user = memberDbFixture.유저1_생성();
-        String token = authService.login(new LoginRequest(user.getEmail(), user.getPassword()));
+        String token = authService.login(new LoginRequest(user.getEmail(), RAW_PASSWORD));
 
         boolean isAdmin = authService.isAdmin(token);
 
@@ -67,7 +68,7 @@ class AuthServiceTest {
     @Test
     void 토큰에서_회원_ID를_추출한다() {
         Member user = memberDbFixture.유저1_생성();
-        String token = authService.login(new LoginRequest(user.getEmail(), user.getPassword()));
+        String token = authService.login(new LoginRequest(user.getEmail(), RAW_PASSWORD));
 
         Long memberId = authService.getMemberId(token);
 

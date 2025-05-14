@@ -7,12 +7,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.service.out.ThemeRepository;
 
-@Repository
-public class ThemeJdbcRepository implements ThemeRepository {
+public class ThemeJdbcRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -20,7 +17,6 @@ public class ThemeJdbcRepository implements ThemeRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
     public Theme save(Theme theme) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
@@ -36,13 +32,13 @@ public class ThemeJdbcRepository implements ThemeRepository {
         return Theme.load(id, theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 
-    @Override
+
     public void deleteById(Long id) {
         String sql = "delete from theme where id = ?";
         jdbcTemplate.update(sql, id);
     }
 
-    @Override
+
     public List<Theme> findAll() {
         String sql = "select * from theme";
         return jdbcTemplate.query(sql, (resultSet, rowNum) ->
@@ -54,7 +50,6 @@ public class ThemeJdbcRepository implements ThemeRepository {
                 ));
     }
 
-    @Override
     public Optional<Theme> findById(Long id) {
         String sql = "select * from theme where id = ?";
         return jdbcTemplate.query(sql, (resultSet, rowNum) ->
@@ -68,7 +63,6 @@ public class ThemeJdbcRepository implements ThemeRepository {
                 .findFirst();
     }
 
-    @Override
     public List<Theme> findPopularThemeDuringAWeek(int limit, LocalDate now) {
         String sql = """
                 SELECT

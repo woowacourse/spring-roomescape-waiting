@@ -4,11 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.service.out.ReservationRepository;
+import roomescape.global.exception.InvalidArgumentException;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.service.out.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
@@ -22,8 +23,8 @@ public class ThemeService {
     }
 
     public void deleteById(Long id) {
-        if (reservationRepository.existReservationByThemeId(id)) {
-            throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
+        if (reservationRepository.existsByTheme_Id(id)) {
+            throw new InvalidArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
         Theme theme = getTheme(id);
         themeRepository.deleteById(theme.getId());

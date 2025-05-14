@@ -2,7 +2,7 @@ package roomescape.fixture;
 
 import org.springframework.stereotype.Component;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.service.out.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 
 @Component
 public class ThemeDbFixture {

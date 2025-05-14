@@ -4,13 +4,14 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.service.out.ReservationRepository;
+import roomescape.global.exception.InvalidArgumentException;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.controller.request.AvailableReservationTimeRequest;
 import roomescape.time.controller.request.ReservationTimeCreateRequest;
 import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.service.out.ReservationTimeRepository;
+import roomescape.time.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
@@ -35,8 +36,8 @@ public class ReservationTimeService {
     }
 
     private void isAlreadyOpened(LocalTime startAt) {
-        if (reservationTimeRepository.existByStartAt(startAt)) {
-            throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약 시간입니다.");
+        if (reservationTimeRepository.existsByStartAt(startAt)) {
+            throw new InvalidArgumentException("이미 존재하는 예약 시간입니다.");
         }
     }
 
@@ -47,8 +48,8 @@ public class ReservationTimeService {
     }
 
     public void deleteById(Long id) {
-        if (reservationRepository.existReservationByTimeId(id)) {
-            throw new IllegalArgumentException("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
+        if (reservationRepository.existsByReservationDatetime_ReservationTime_Id(id)) {
+            throw new InvalidArgumentException("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
 
         ReservationTime reservationTime = getReservationTime(id);
@@ -57,7 +58,7 @@ public class ReservationTimeService {
 
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("예약 시간을 찾을 수 없습니다."));
     }
 
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(

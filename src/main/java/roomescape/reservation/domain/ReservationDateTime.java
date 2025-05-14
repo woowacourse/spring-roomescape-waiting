@@ -1,13 +1,22 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import roomescape.reservation.domain.exception.PastReservationException;
 import roomescape.time.domain.ReservationTime;
 
+@Embeddable
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationDateTime {
 
-    private final ReservationDate reservationDate;
-    private final ReservationTime reservationTime;
+    @Embedded
+    private ReservationDate reservationDate;
+    @ManyToOne
+    private ReservationTime reservationTime;
 
     private ReservationDateTime(ReservationDate reservationDate, ReservationTime reservationTime) {
         this.reservationDate = reservationDate;

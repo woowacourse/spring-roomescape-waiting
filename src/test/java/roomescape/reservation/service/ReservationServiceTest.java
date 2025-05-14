@@ -17,6 +17,7 @@ import roomescape.fixture.ReservationDateFixture;
 import roomescape.fixture.ReservationDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
@@ -81,7 +82,7 @@ class ReservationServiceTest {
         );
 
         assertThatThrownBy(() -> reservationService.reserve(command))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("[ERROR] 이미 예약이 존재하는 시간입니다.");
     }
 

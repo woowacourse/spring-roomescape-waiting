@@ -1,6 +1,7 @@
 package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberDbFixture.RAW_PASSWORD;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ class MemberServiceTest {
     void 유저를_이메일과_비밀번호로_조회한다() {
         Member 유저1 = memberDbFixture.유저1_생성();
 
-        Member member = memberService.getMember(유저1.getEmail(), 유저1.getPassword());
+        Member member = memberService.getMember(유저1.getEmail(), RAW_PASSWORD);
 
         assertThat(member.getId()).isEqualTo(유저1.getId());
         assertThat(member.getName()).isEqualTo(유저1.getName());

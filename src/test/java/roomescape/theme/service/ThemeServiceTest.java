@@ -16,6 +16,7 @@ import roomescape.fixture.ReservationDateFixture;
 import roomescape.fixture.ReservationDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.controller.request.ThemeCreateRequest;
@@ -81,7 +82,7 @@ class ThemeServiceTest {
         Reservation reservation = reservationDbFixture.예약_유저1_내일_10시_공포();
 
         assertThatThrownBy(() -> themeService.deleteById(reservation.getTheme().getId()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
     }
 

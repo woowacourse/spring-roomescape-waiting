@@ -5,14 +5,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
-import roomescape.reservation.service.out.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.service.ReservationTimeService;
@@ -52,7 +53,7 @@ public class ReservationService {
 
     private void isAlreadyReservedTime(LocalDate date, Long timeId) {
         if (reservationRepository.existsSameDateTime(date, timeId)) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약이 존재하는 시간입니다.");
+            throw new InvalidArgumentException("[ERROR] 이미 예약이 존재하는 시간입니다.");
         }
     }
 

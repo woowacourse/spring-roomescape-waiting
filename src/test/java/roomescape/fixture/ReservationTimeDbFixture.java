@@ -3,7 +3,7 @@ package roomescape.fixture;
 import java.time.LocalTime;
 import org.springframework.stereotype.Component;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.service.out.ReservationTimeRepository;
+import roomescape.time.repository.ReservationTimeRepository;
 
 @Component
 public class ReservationTimeDbFixture {

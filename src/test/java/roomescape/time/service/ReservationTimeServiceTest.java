@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.common.CleanUp;
 import roomescape.fixture.ReservationDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.time.controller.request.AvailableReservationTimeRequest;
 import roomescape.time.controller.request.ReservationTimeCreateRequest;
@@ -56,7 +57,7 @@ class ReservationTimeServiceTest {
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(reservationTime.getStartAt());
 
         assertThatThrownBy(() -> reservationTimeService.open(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("[ERROR] 이미 존재하는 예약 시간입니다.");
     }
 
@@ -90,7 +91,7 @@ class ReservationTimeServiceTest {
         Reservation reservation = reservationDbFixture.예약_유저1_내일_10시_공포();
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(reservation.getReservationTime().getId()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
     }
 
