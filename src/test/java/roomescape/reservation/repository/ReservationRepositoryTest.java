@@ -192,4 +192,26 @@ class ReservationRepositoryTest {
         assertThat(popularThemes).containsExactly(theme2);
     }
 
+    @Test
+    void 멤버_기준으로_예약_조회() {
+        // given
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(20, 0));
+        reservationTimeRepository.save(reservationTime);
+        final Theme theme = new Theme("name", "description", "thumbnail");
+        themeRepository.save(theme);
+        final Member member = new Member("name", "email", "password", Role.USER);
+        memberRepository.save(member);
+
+        final Reservation reservation1 = new Reservation(member, LocalDate.of(2025, 12, 25), reservationTime, theme);
+        final Reservation reservation2 = new Reservation(member, LocalDate.of(2025, 12, 26), reservationTime, theme);
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
+
+        // when
+        final List<Reservation> reservations = reservationRepository.findByMember(member);
+
+        // then
+        assertThat(reservations).containsExactlyInAnyOrder(reservation1, reservation2);
+    }
+
 }

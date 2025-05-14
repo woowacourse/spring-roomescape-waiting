@@ -251,6 +251,34 @@ class ReservationServiceTest {
                 .isInstanceOf(DataExistException.class);
     }
 
+    @Test
+    void 멤버_기준으로_예약_정보_가져오기() {
+        // given
+        final Member member = new Member("이스트", "email@email.com", "1234", Role.ADMIN);
+        final Member savedMember = memberRepository.save(member);
+        final LocalTime time = LocalTime.parse("20:00");
+        final LocalDate date = LocalDate.parse("2025-11-28");
+        final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+        final String themeName = "공포";
+        final String description = "무섭다";
+        final String thumbnail = "귀신사진";
+        final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
+        reservationRepository.save(
+                new Reservation(
+                        savedMember,
+                        date,
+                        savedTime,
+                        savedTheme
+                )
+        );
+
+        // when
+        final List<Reservation> reservations = reservationService.findByMember(savedMember);
+
+        // then
+        assertThat(reservations.size()).isEqualTo(1);
+    }
+
     @TestConfiguration
     static class TestConfig {
         @Bean

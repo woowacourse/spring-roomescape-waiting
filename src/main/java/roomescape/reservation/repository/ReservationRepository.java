@@ -14,7 +14,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findAll();
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    boolean existsByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme);
 
     List<Reservation> findByThemeAndMemberAndDateBetween(final Theme theme, final Member member,
                                                          final LocalDate dateFrom,
@@ -29,4 +29,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
             """)
     List<Theme> findTop10ThemesByReservationCountWithin7Days(final LocalDate dateFrom, final LocalDate dateTo,
                                                              final PageRequest pageRequest);
+
+    List<Reservation> findByMember(final Member member);
 }

@@ -68,4 +68,8 @@ public class ReservationService {
 
         return availableReservationTimes;
     }
+
+    public List<Reservation> findByMember(final Member member) {
+        return reservationRepository.findByMember(member);
+    }
 }

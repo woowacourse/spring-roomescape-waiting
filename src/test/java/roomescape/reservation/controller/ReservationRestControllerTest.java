@@ -147,6 +147,30 @@ class ReservationRestControllerTest {
     }
 
     @Test
+    void 멤버가_예약한_정보를_조회한다() {
+        //given
+        final String payload = "wooga@gmail.com";
+        final String token = jwtTokenProvider.createToken(payload);
+        final Map<String, String> params = createReservationRequestJsonMap("2026-04-15", "1", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", is(1));
+    }
+
+    @Test
     void 컨트롤러는_JdbcTemplate_타입의_필드를_갖고_있지_않다() {
         boolean isJdbcTemplateInjected = false;
 

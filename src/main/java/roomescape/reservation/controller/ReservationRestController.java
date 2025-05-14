@@ -18,6 +18,7 @@ import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationResponse;
+import roomescape.reservation.dto.ReservationMineResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -71,5 +72,15 @@ public class ReservationRestController {
                         ))
                         .toList()
         );
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
+        final List<Reservation> reservations = reservationService.findByMember(member);
+        final List<ReservationMineResponse> reservationMineResponses = reservations.stream()
+                .map(ReservationMineResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(reservationMineResponses);
     }
 }

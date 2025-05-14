@@ -11,6 +11,11 @@ public class HomeController {
         return "/reservation";
     }
 
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        return "/reservation-mine";
+    }
+
     @GetMapping
     public String home() {
         return "/index";
