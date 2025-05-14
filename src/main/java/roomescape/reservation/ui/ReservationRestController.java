@@ -32,13 +32,24 @@ public class ReservationRestController {
 
     private final ReservationService reservationService;
 
-    @PostMapping("/reservations")
-    @RequiresRole(authRoles = {ADMIN, MEMBER})
+    @PostMapping("/admin/reservations")
+    @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<ReservationResponse> create(
-            @RequestBody @Valid final CreateReservationRequest request,
+            @RequestBody @Valid final CreateReservationRequest request
+    ) {
+        final ReservationResponse response = reservationService.create(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PostMapping("/reservations")
+    @RequiresRole(authRoles = {MEMBER, ADMIN})
+    public ResponseEntity<ReservationResponse> create(
+            @RequestBody @Valid final CreateReservationRequest.ForMember request,
             final MemberAuthInfo memberAuthInfo
     ) {
-        final ReservationResponse response = reservationService.create(request, memberAuthInfo);
+        final ReservationResponse response = reservationService.create(request, memberAuthInfo.id());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -55,7 +66,7 @@ public class ReservationRestController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/reservations")
+    @GetMapping("/admin/reservations")
     @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<List<ReservationResponse>> findAll() {
         final List<ReservationResponse> reservationResponses = reservationService.findAll();
@@ -63,7 +74,7 @@ public class ReservationRestController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @GetMapping("/reservations/filtered")
+    @GetMapping("/admin/reservations/filtered")
     @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<List<ReservationResponse>> findAllByFilter(
             @ModelAttribute @Valid final ReservationsByfilterRequest request
@@ -80,5 +91,12 @@ public class ReservationRestController {
                 reservationService.findAvailableReservationTimes(request);
 
         return ResponseEntity.ok(availableReservationTimes);
+    }
+
+    @GetMapping("/reservations-mine")
+    @RequiresRole(authRoles = {ADMIN, MEMBER})
+    public ResponseEntity<List<ReservationResponse.ForMember>> myReservations(final MemberAuthInfo memberAuthInfo) {
+        return ResponseEntity.ok()
+                .body(reservationService.findReservationsByMemberId(memberAuthInfo.id()));
     }
 }

@@ -25,4 +25,9 @@ public class PublicController {
     public String login() {
         return "login";
     }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMine() {
+        return "reservation-mine";
+    }
 }

@@ -28,4 +28,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     );
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
+
+    List<Reservation> findAllByMemberId(Long memberId);
 }

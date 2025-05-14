@@ -61,4 +61,9 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     ) {
         return jpaReservationRepository.findAllByDateAndThemeId(date, themeId);
     }
+
+    @Override
+    public List<Reservation> findAllByMemberId(final Long memberId) {
+        return jpaReservationRepository.findAllByMemberId(memberId);
+    }
 }

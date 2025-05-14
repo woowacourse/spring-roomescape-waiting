@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -15,6 +16,7 @@ import roomescape.member.domain.MemberQueryRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
@@ -35,15 +37,16 @@ public class ReservationService {
     private final ThemeQueryRepository themeQueryRepository;
     private final MemberQueryRepository memberQueryRepository;
 
-    public ReservationResponse create(final CreateReservationRequest request, final MemberAuthInfo memberAuthInfo) {
-        final ReservationTime reservationTime = getReservationTime(request);
-        validateNoDuplicateReservation(request);
+    public ReservationResponse create(final CreateReservationRequest request) {
+        final ReservationTime reservationTime = getReservationTime(request.date(), request.timeId());
+        validateNoDuplicateReservation(request.date(), request.timeId(), request.themeId());
 
         final Theme theme = themeQueryRepository.findById(request.themeId())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-        final Member member = memberQueryRepository.findById(memberAuthInfo.id())
+        final Member member = memberQueryRepository.findById(request.memberId())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
+        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
+                request.status());
 
         final Long id = reservationCommandRepository.save(reservation);
         final Reservation found = reservationQueryRepository.findById(id)
@@ -52,20 +55,42 @@ public class ReservationService {
         return ReservationResponse.from(found);
     }
 
-    private ReservationTime getReservationTime(final CreateReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeQueryRepository.findById(request.timeId())
+    public ReservationResponse create(
+            final CreateReservationRequest.ForMember request,
+            final Long memberId
+    ) {
+        final ReservationTime reservationTime = getReservationTime(request.date(), request.timeId());
+        validateNoDuplicateReservation(request.date(), request.timeId(), request.themeId());
+
+        final Theme theme = themeQueryRepository.findById(request.themeId())
+                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
+        final Member member = memberQueryRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+        // TODO: 예약 대기 기능 추가 후 분기 처리
+        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
+                ReservationStatus.CONFIRMED);
+
+        final Long id = reservationCommandRepository.save(reservation);
+        final Reservation found = reservationQueryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+
+        return ReservationResponse.from(found);
+    }
+
+
+    private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
+        final ReservationTime reservationTime = reservationTimeQueryRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
         final LocalDateTime now = LocalDateTime.now();
-        final LocalDateTime reservationDateTime = LocalDateTime.of(request.date(), reservationTime.getStartAt());
+        final LocalDateTime reservationDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         if (reservationDateTime.isBefore(now)) {
             throw new IllegalArgumentException("예약 시간은 현재 시간보다 이후여야 합니다.");
         }
         return reservationTime;
     }
 
-    private void validateNoDuplicateReservation(final CreateReservationRequest request) {
-        if (reservationQueryRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId())) {
+    private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {
+        if (reservationQueryRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
         }
     }
@@ -127,6 +152,12 @@ public class ReservationService {
                                 bookedTimes.contains(reservationTime.getStartAt())
                         )
                 )
+                .toList();
+    }
+
+    public List<ReservationResponse.ForMember> findReservationsByMemberId(final Long memberId) {
+        return reservationQueryRepository.findAllByMemberId(memberId).stream()
+                .map(ReservationResponse.ForMember::from)
                 .toList();
     }
 }

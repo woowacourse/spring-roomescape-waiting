@@ -16,4 +16,6 @@ public interface ReservationQueryRepository {
                                                               LocalDate dateTo);
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
+
+    List<Reservation> findAllByMemberId(Long memberId);
 }
