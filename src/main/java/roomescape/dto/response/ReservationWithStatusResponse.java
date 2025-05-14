@@ -11,8 +11,8 @@ public record ReservationWithStatusResponse(
         String themeName,
         String status
 ) {
-    public static ReservationWithStatusResponse toDto(Reservation reservation) {
-        ReservationTimeResponse dto = ReservationTimeResponse.toDto(reservation.getReservationTime());
+    public static ReservationWithStatusResponse from(Reservation reservation) {
+        ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getReservationTime());
         return new ReservationWithStatusResponse(reservation.getId(), reservation.getMember().getName(),
                 reservation.getDate(),
                 dto,

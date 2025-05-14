@@ -21,7 +21,7 @@ public class MemberService {
     public List<MemberResponse> findAllMembers() {
         return memberRepository.findAll()
                 .stream()
-                .map(MemberResponse::toDto)
+                .map(MemberResponse::from)
                 .toList();
     }
 
@@ -31,6 +31,6 @@ public class MemberService {
             throw new DuplicatedEmailException();
         }
         Member savedMember = memberRepository.save(memberRequest.toMember());
-        return MemberResponse.toDto(savedMember);
+        return MemberResponse.from(savedMember);
     }
 }

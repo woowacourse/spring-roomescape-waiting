@@ -43,7 +43,7 @@ public class ReservationService {
     public List<ReservationResponse> findReservations(ReservationCondition cond) {
         List<Reservation> filteredReservations = reservationRepository.findByCondition(cond);
         return filteredReservations.stream()
-                .map(ReservationResponse::toDto)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -56,7 +56,7 @@ public class ReservationService {
         reservation.validateDateTime();
         validateDuplicate(date, reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponse.toDto(savedReservation);
+        return ReservationResponse.from(savedReservation);
     }
 
     private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
@@ -72,7 +72,7 @@ public class ReservationService {
 
     public List<ReservationWithStatusResponse> findReservationByMemberId(Long memberId) {
         return reservationRepository.findByMemberId(memberId).stream()
-                .map(ReservationWithStatusResponse::toDto)
+                .map(ReservationWithStatusResponse::from)
                 .toList();
     }
 }

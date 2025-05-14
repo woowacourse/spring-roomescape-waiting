@@ -18,8 +18,8 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
-import roomescape.dto.response.AvailableTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.TimeWithBookedResponse;
 import roomescape.exception.ExistedReservationException;
 import roomescape.service.ReservationTimeService;
 import roomescape.unit.fake.FakeReservationRepository;
@@ -117,7 +117,7 @@ class ReservationTimeServiceTest {
                 Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), savedTime, theme)
         );
         // when
-        List<AvailableTimeResponse> filteredTimes = reservationTimeService.findTimesByDateAndThemeIdWithBooked(
+        List<TimeWithBookedResponse> filteredTimes = reservationTimeService.findTimesByDateAndThemeIdWithBooked(
                 LocalDate.of(2025, 1, 1), 1L);
         // then
         assertThat(filteredTimes).hasSize(1);

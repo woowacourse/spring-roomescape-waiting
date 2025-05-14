@@ -10,8 +10,8 @@ public record ReservationResponse(
         ReservationTimeResponse time,
         String themeName
 ) {
-    public static ReservationResponse toDto(Reservation reservation) {
-        ReservationTimeResponse dto = ReservationTimeResponse.toDto(reservation.getReservationTime());
+    public static ReservationResponse from(Reservation reservation) {
+        ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getReservationTime());
         return new ReservationResponse(reservation.getId(), reservation.getMember().getName(), reservation.getDate(),
                 dto,
                 reservation.getTheme().getName());

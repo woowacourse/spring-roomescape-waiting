@@ -23,8 +23,8 @@ import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
-import roomescape.dto.response.AvailableTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.TimeWithBookedResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -110,11 +110,11 @@ public class ReservationTimeApiTest {
         reservationRepository.save(
                 Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), reservationTime1, theme));
         // when
-        List<AvailableTimeResponse> response = RestAssured.given().log().all()
+        List<TimeWithBookedResponse> response = RestAssured.given().log().all()
                 .when().get("/api/times/theme/1?date=2025-01-01")
                 .then().log().all()
                 .statusCode(200)
-                .extract().jsonPath().getList(".", AvailableTimeResponse.class);
+                .extract().jsonPath().getList(".", TimeWithBookedResponse.class);
         // then
         SoftAssertions soft = new SoftAssertions();
         soft.assertThat(response).hasSize(2);
