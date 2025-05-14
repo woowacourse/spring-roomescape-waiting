@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.ReservationSearchCondition;
@@ -31,7 +30,8 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final CurrentDateTime currentDateTime;
 
-    public ReservationService(final ReservationRepository reservationRepository, final ReservationTimeRepository reservationTimeRepository,
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository, final MemberRepository memberRepository,
                               final CurrentDateTime dateTimeGenerator) {
         this.reservationRepository = reservationRepository;
@@ -43,25 +43,52 @@ public class ReservationService {
 
     public ReservationInfo createReservation(final ReservationCreateCommand command) {
         final Reservation reservation = makeReservation(command);
-        if (reservation.isBefore(currentDateTime.getDateTime())) {
-            throw new IllegalArgumentException("지나간 날짜와 시간은 예약 불가합니다.");
-        }
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId())) {
-            throw new IllegalArgumentException("해당 시간에 이미 예약이 존재합니다.");
-        }
         final Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationInfo(savedReservation);
     }
 
-    public List<ReservationInfo> getReservations() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationInfo::new)
-                .toList();
+    private Reservation makeReservation(final ReservationCreateCommand command) {
+        final ReservationTime reservationTime = findReservationTime(command.timeId());
+        validatePastDateTime(command.date(), reservationTime);
+        validateDuplicateReservation(command);
+        final Member member = findMember(command.memberId());
+        final Theme theme = findTheme(command.themeId());
+        return command.convertToReservation(member, reservationTime, theme);
     }
 
-    public List<ReservationInfo> findReservationsByMemberId(final Long id) {
-        return reservationRepository.findAllByMemberId(id)
-                .stream()
+    private void validatePastDateTime(final LocalDate date, final ReservationTime reservationTime) {
+        final boolean isBefore = date.isBefore(currentDateTime.getDate()) ||
+                date.isEqual(currentDateTime.getDate()) &&
+                reservationTime.isBefore(currentDateTime.getTime());
+        if (isBefore) {
+            throw new IllegalArgumentException("지나간 날짜와 시간은 예약 불가합니다.");
+        }
+    }
+
+    private void validateDuplicateReservation(ReservationCreateCommand command) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(command.date(), command.timeId(),
+                command.themeId())) {
+            throw new IllegalArgumentException("해당 시간에 이미 예약이 존재합니다.");
+        }
+    }
+
+    private Member findMember(final long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
+    }
+
+    private ReservationTime findReservationTime(final long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
+    }
+
+    private Theme findTheme(final long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
+    }
+
+    public List<ReservationInfo> getReservations() {
+        return reservationRepository.findAll().stream()
                 .map(ReservationInfo::new)
                 .toList();
     }
@@ -97,29 +124,14 @@ public class ReservationService {
         return reservation -> reservation.isBetween(fromDate, toDate);
     }
 
+    public List<ReservationInfo> findReservationsByMemberId(final Long id) {
+        return reservationRepository.findAllByMemberId(id)
+                .stream()
+                .map(ReservationInfo::new)
+                .toList();
+    }
+
     public void cancelReservationById(final long id) {
         reservationRepository.deleteById(id);
-    }
-
-    private Reservation makeReservation(final ReservationCreateCommand request) {
-        final Member member = findMember(request.memberId());
-        final ReservationTime reservationTime = findReservationTime(request.timeId());
-        final Theme theme = findTheme(request.themeId());
-        return request.convertToReservation(member, reservationTime, theme);
-    }
-
-    private Member findMember(final long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
-    }
-
-    private ReservationTime findReservationTime(final long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
-    }
-
-    private Theme findTheme(final long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
     }
 }

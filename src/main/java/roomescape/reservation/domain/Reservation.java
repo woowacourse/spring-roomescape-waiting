@@ -39,7 +39,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.valueOf("RESERVED");
+        this.status = ReservationStatus.RESERVED;
     }
 
     public Reservation() {
