@@ -15,12 +15,13 @@ public class FakeThemeDao implements ThemeRepository {
     @Override
     public boolean existsByName(final ThemeName name) {
         return themes.stream()
-                .anyMatch(theme -> theme.getName().equals(name.getName()));
+                .anyMatch(theme -> theme.getName().getValue().equals(name.getValue()));
     }
 
     @Override
     public Theme save(final Theme theme) {
-        Theme savedTheme = new Theme(index++, theme.getName(), theme.getDescription(), theme.getThumbnail());
+        Theme savedTheme = new Theme(index++, theme.getName().getValue(), theme.getDescription().getValue(),
+                theme.getThumbnail().getValue());
         themes.add(savedTheme);
         return savedTheme;
     }

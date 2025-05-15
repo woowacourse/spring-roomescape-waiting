@@ -25,7 +25,7 @@ public class ThemeService {
 
     public ThemeResponse createTheme(final CreateThemeRequest createThemeRequest) {
         Theme theme = createThemeRequest.convertToTheme();
-        if (themeRepository.existsByName(theme.getThemeName())) {
+        if (themeRepository.existsByName(theme.getName())) {
             throw new IllegalArgumentException("해당 이름의 테마는 이미 존재합니다.");
         }
         final Theme savedTheme = themeRepository.save(theme);

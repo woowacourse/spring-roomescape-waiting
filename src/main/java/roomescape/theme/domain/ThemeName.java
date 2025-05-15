@@ -23,7 +23,7 @@ public final class ThemeName {
         }
     }
 
-    public String getName() {
+    public String getValue() {
         return name;
     }
 

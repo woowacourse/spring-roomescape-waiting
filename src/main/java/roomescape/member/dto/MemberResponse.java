@@ -9,6 +9,6 @@ public record MemberResponse(
 ) {
 
     public MemberResponse(final Member member) {
-        this(member.getId(), member.getEmail(), member.getName());
+        this(member.getId(), member.getEmail().getValue(), member.getName().getValue());
     }
 }

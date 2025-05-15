@@ -54,9 +54,9 @@ class ThemeServiceTest {
                 () -> assertThat(result.name()).isEqualTo(request.name()),
                 () -> assertThat(result.description()).isEqualTo(request.description()),
                 () -> assertThat(result.thumbnail()).isEqualTo(request.thumbnail()),
-                () -> assertThat(saved.getName()).isEqualTo(request.name()),
-                () -> assertThat(saved.getDescription()).isEqualTo(request.description()),
-                () -> assertThat(saved.getThumbnail()).isEqualTo(request.thumbnail())
+                () -> assertThat(saved.getName().getValue()).isEqualTo(request.name()),
+                () -> assertThat(saved.getDescription().getValue()).isEqualTo(request.description()),
+                () -> assertThat(saved.getThumbnail().getValue()).isEqualTo(request.thumbnail())
         );
     }
 

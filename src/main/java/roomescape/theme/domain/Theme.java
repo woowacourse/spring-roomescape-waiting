@@ -40,20 +40,16 @@ public final class Theme {
         return id;
     }
 
-    public String getName() {
-        return name.getName();
-    }
-
-    public ThemeName getThemeName() {
+    public ThemeName getName() {
         return name;
     }
 
-    public String getDescription() {
-        return description.getDescription();
+    public ThemeDescription getDescription() {
+        return description;
     }
 
-    public String getThumbnail() {
-        return thumbnail.getThumbnail();
+    public ThemeThumbnail getThumbnail() {
+        return thumbnail;
     }
 
     @Override

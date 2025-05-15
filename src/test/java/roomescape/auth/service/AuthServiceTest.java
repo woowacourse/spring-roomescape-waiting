@@ -44,7 +44,7 @@ class AuthServiceTest {
         @Test
         void testCreateToken() {
             // when
-            TokenResponse token = authService.createToken(new LoginRequest(USER_EMAIL.getEmail(), USER_PASSWORD));
+            TokenResponse token = authService.createToken(new LoginRequest(USER_EMAIL.getValue(), USER_PASSWORD));
             // then
             long id = jwtTokenProvider.getId(token.accessToken());
             assertThat(Long.valueOf(id)).isEqualTo(USER_ID);
@@ -66,7 +66,7 @@ class AuthServiceTest {
         @Test
         void testInvalidPassword() {
             // given
-            LoginRequest request = new LoginRequest(USER_EMAIL.getEmail(), "4321");
+            LoginRequest request = new LoginRequest(USER_EMAIL.getValue(), "4321");
             // when
             // then
             assertThatThrownBy(() -> authService.createToken(request))
@@ -87,7 +87,7 @@ class AuthServiceTest {
             // when
             LoginMember response = authService.checkMember(token);
             // then
-            assertThat(response.name()).isEqualTo(USER_NAME.getName());
+            assertThat(response.name()).isEqualTo(USER_NAME.getValue());
         }
 
         @DisplayName("올바르지 않은 ID일 경우 예외가 발생한다.")
@@ -125,7 +125,7 @@ class AuthServiceTest {
             // when
             LoginMember response = authService.checkAdminMember(token);
             // then
-            assertThat(response.name()).isEqualTo(ADMIN_NAME.getName());
+            assertThat(response.name()).isEqualTo(ADMIN_NAME.getValue());
         }
 
         @DisplayName("올바르지 않은 ID일 경우 예외가 발생한다.")

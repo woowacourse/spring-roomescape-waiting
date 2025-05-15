@@ -68,22 +68,23 @@ class ReservationServiceTest {
             Reservation savedReservation = reservationDao.findById(3L).orElseThrow();
             assertAll(
                     () -> assertThat(result.id()).isEqualTo(3L),
-                    () -> assertThat(result.member().name()).isEqualTo(MEMBER.getName()),
+                    () -> assertThat(result.member().name()).isEqualTo(MEMBER.getName().getValue()),
                     () -> assertThat(result.date()).isEqualTo(REQUEST.date()),
                     () -> assertThat(result.time().startAt()).isEqualTo(TIME.getStartAt()),
                     () -> assertThat(result.time().id()).isEqualTo(REQUEST.timeId()),
 
                     () -> assertThat(result.theme().id()).isEqualTo(THEME.getId()),
-                    () -> assertThat(result.theme().name()).isEqualTo(THEME.getName()),
-                    () -> assertThat(result.theme().description()).isEqualTo(THEME.getDescription()),
-                    () -> assertThat(result.theme().thumbnail()).isEqualTo(THEME.getThumbnail()),
+                    () -> assertThat(result.theme().name()).isEqualTo(THEME.getName().getValue()),
+                    () -> assertThat(result.theme().description()).isEqualTo(THEME.getDescription().getValue()),
+                    () -> assertThat(result.theme().thumbnail()).isEqualTo(THEME.getThumbnail().getValue()),
 
                     () -> assertThat(savedReservation.getDate()).isEqualTo(REQUEST.date()),
                     () -> assertThat(savedReservation.getTime().getStartAt()).isEqualTo(TIME.getStartAt()),
                     () -> assertThat(savedReservation.getTime().getId()).isEqualTo(REQUEST.timeId()),
 
                     () -> assertThat(savedReservation.getTheme().getId()).isEqualTo(THEME.getId()),
-                    () -> assertThat(savedReservation.getTheme().getName()).isEqualTo(THEME.getName()),
+                    () -> assertThat(savedReservation.getTheme().getName().getValue()).isEqualTo(
+                            THEME.getName().getValue()),
                     () -> assertThat(savedReservation.getTheme().getDescription()).isEqualTo(THEME.getDescription()),
                     () -> assertThat(savedReservation.getTheme().getThumbnail()).isEqualTo(THEME.getThumbnail())
             );
@@ -166,7 +167,8 @@ class ReservationServiceTest {
     @Test
     void testGetMyReservations() {
         // given
-        LoginMember loginMember = new LoginMember(MEMBER.getId(), MEMBER.getName(), MEMBER.getEmail(),
+        LoginMember loginMember = new LoginMember(MEMBER.getId(), MEMBER.getName().getValue(),
+                MEMBER.getEmail().getValue(),
                 MEMBER.getRole().name());
         // when
         List<MyReservationResponse> myReservations = reservationService.getMyReservations(loginMember);
