@@ -87,7 +87,10 @@ public class ReservationService {
 
     private void validateDuplicateReservation(ReservationRequest request) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-            request.date(), request.timeId(), request.themeId())) {
+                request.date(),
+                request.timeId(),
+                request.themeId()
+        )) {
             throw new DuplicatedException("reservation");
         }
     }
