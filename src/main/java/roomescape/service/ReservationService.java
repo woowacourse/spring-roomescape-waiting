@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.request.CreateReservationRequest;
-import roomescape.entity.LoginMember;
+import roomescape.dto.request.LoginMemberRequest;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -39,8 +39,8 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
-    public Reservation addReservation(CreateReservationRequest request, LoginMember loginMember) {
-        return createReservation(loginMember.getId(), request.themeId(), request.date(), request.timeId());
+    public Reservation addReservation(CreateReservationRequest request, LoginMemberRequest loginMemberRequest) {
+        return createReservation(loginMemberRequest.id(), request.themeId(), request.date(), request.timeId());
     }
 
     public Reservation addReservationByAdmin(AdminCreateReservationRequest request) {

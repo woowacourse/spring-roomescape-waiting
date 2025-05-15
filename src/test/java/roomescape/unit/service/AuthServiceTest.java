@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.entity.LoginMember;
+import roomescape.dto.request.LoginMemberRequest;
 import roomescape.global.Role;
 import roomescape.jwt.JwtTokenProvider;
 import roomescape.service.AuthService;
@@ -39,13 +39,13 @@ class AuthServiceTest {
         when(claims.get("role", String.class)).thenReturn("USER");
 
         // when
-        LoginMember loginMember = authService.getLoginMemberByToken(token);
+        LoginMemberRequest loginMemberRequest = authService.getLoginMemberByToken(token);
 
         //then
         assertAll(() -> {
-            assertThat(loginMember.getId()).isEqualTo(1L);
-            assertThat(loginMember.getName()).isEqualTo("Hula");
-            assertThat(loginMember.getRole()).isEqualTo(Role.USER);
+            assertThat(loginMemberRequest.id()).isEqualTo(1L);
+            assertThat(loginMemberRequest.name()).isEqualTo("Hula");
+            assertThat(loginMemberRequest.role()).isEqualTo(Role.USER);
         });
     }
 }

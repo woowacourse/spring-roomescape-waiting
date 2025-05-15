@@ -7,7 +7,8 @@ import roomescape.entity.ReservationTime;
 
 public record CreateReservationTimeRequest(
         @JsonFormat(pattern = "HH:mm")
-        @NotNull(message = "시간은 비어있을 수 없습니다.") LocalTime startAt
+        @NotNull(message = "시간은 비어있을 수 없습니다.")
+        LocalTime startAt
 ) {
 
     public ReservationTime toReservationTime() {

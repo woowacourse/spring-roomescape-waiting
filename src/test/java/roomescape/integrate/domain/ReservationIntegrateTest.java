@@ -19,9 +19,9 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.dto.request.CreateThemeRequest;
+import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.entity.LoginMember;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -112,8 +112,8 @@ class ReservationIntegrateTest {
         CreateReservationRequest reservationRequest = new CreateReservationRequest(
                 tomorrow, reservationTime.getId(), theme.getId());
 
-        LoginMember loginMember = authService.getLoginMemberByToken(token);
-        Reservation reservation = reservationService.addReservation(reservationRequest, loginMember);
+        LoginMemberRequest loginMemberRequest = authService.getLoginMemberByToken(token);
+        Reservation reservation = reservationService.addReservation(reservationRequest, loginMemberRequest);
 
         // when & then
         RestAssured.given().log().all()

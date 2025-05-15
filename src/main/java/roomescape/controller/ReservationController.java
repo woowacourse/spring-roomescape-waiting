@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
 import roomescape.dto.request.CreateReservationRequest;
+import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.entity.LoginMember;
 import roomescape.entity.Reservation;
 import roomescape.global.Role;
 import roomescape.service.ReservationService;
@@ -44,8 +44,8 @@ public class ReservationController {
 
     @GetMapping("/mine")
     @CheckRole({Role.USER, Role.ADMIN})
-    public ResponseEntity<List<MyReservationResponse>> getMyReservation(LoginMember loginMember) {
-        List<Reservation> reservations = reservationService.findAllReservationByMember(loginMember.getId());
+    public ResponseEntity<List<MyReservationResponse>> getMyReservation(LoginMemberRequest loginMemberRequest) {
+        List<Reservation> reservations = reservationService.findAllReservationByMember(loginMemberRequest.id());
         List<MyReservationResponse> responses = reservations.stream()
                 .map(MyReservationResponse::from).toList();
         return ResponseEntity.ok(responses);
@@ -55,9 +55,9 @@ public class ReservationController {
     @CheckRole(value = {Role.ADMIN, Role.USER})
     public ResponseEntity<ReservationResponse> addReservations(
             @RequestBody @Valid CreateReservationRequest request,
-            LoginMember loginMember
+            LoginMemberRequest loginMemberRequest
     ) {
-        Reservation reservation = reservationService.addReservation(request, loginMember);
+        Reservation reservation = reservationService.addReservation(request, loginMemberRequest);
         ReservationResponse response = ReservationResponse.from(reservation);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()

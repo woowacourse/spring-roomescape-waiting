@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.annotation.CheckRole;
-import roomescape.entity.LoginMember;
-import roomescape.global.Role;
+import roomescape.dto.request.LoginMemberRequest;
 import roomescape.exception.custom.ForbiddenException;
+import roomescape.global.Role;
 import roomescape.jwt.JwtExtractor;
 import roomescape.service.AuthService;
 
@@ -35,13 +35,13 @@ public class CheckRoleHandlerInterceptor implements HandlerInterceptor {
         }
 
         String token = JwtExtractor.extractFromRequest(request);
-        LoginMember loginMember = authService.getLoginMemberByToken(token);
-        if (loginMember == null) {
+        LoginMemberRequest loginMemberRequest = authService.getLoginMemberByToken(token);
+        if (loginMemberRequest == null) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "로그인이 필요한 서비스입니다.");
             return false;
         }
         Role[] roles = checkRole.value();
-        if (Arrays.stream(roles).noneMatch(role -> role == loginMember.getRole())) {
+        if (Arrays.stream(roles).noneMatch(role -> role == loginMemberRequest.role())) {
             throw new ForbiddenException("접근 불가한 페이지입니다.");
         }
         return true;

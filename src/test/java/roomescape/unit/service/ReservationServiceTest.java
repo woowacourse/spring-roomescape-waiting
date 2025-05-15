@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dto.request.CreateReservationRequest;
-import roomescape.entity.LoginMember;
+import roomescape.dto.request.LoginMemberRequest;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -54,14 +54,14 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     private Member member;
-    private LoginMember loginMember;
+    private LoginMemberRequest loginMemberRequest;
     private ReservationTime time;
     private Theme theme;
 
     @BeforeEach
     void setup() {
         member = new Member(1L, "test", "test@email.com", "1234", Role.USER);
-        loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
+        loginMemberRequest = new LoginMemberRequest(member.getId(), member.getName(), member.getRole());
         time = new ReservationTime(1L, LocalTime.of(10, 0));
         theme = new Theme(1L, "name", "description", "thumbnail");
     }
@@ -94,7 +94,7 @@ class ReservationServiceTest {
         when(reservationTimeRepository.findById(any(Long.class))).thenReturn(Optional.of(time));
         when(themeRepository.findById(any(Long.class))).thenReturn(Optional.of(theme));
         //when
-        Reservation actual = reservationService.addReservation(request, loginMember);
+        Reservation actual = reservationService.addReservation(request, loginMemberRequest);
 
         //then
         assertThat(actual.getReservationTime().getId()).isEqualTo(time.getId());
@@ -122,7 +122,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.addReservation(
-                new CreateReservationRequest(LocalDate.now(), time.getId(), theme.getId()), loginMember))
+                new CreateReservationRequest(LocalDate.now(), time.getId(), theme.getId()), loginMemberRequest))
                 .isInstanceOf(InvalidReservationException.class);
     }
 
