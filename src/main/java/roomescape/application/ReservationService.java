@@ -1,5 +1,6 @@
 package roomescape.application;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.dto.ReservationSearchFilter;
 import roomescape.exception.NotFoundException;
 
 @Service
@@ -97,13 +97,18 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationDto> searchReservationsWith(ReservationSearchFilter reservationSearchFilter) {
+    public List<ReservationDto> searchReservationsWith(
+            Long themeId,
+            Long memberId,
+            LocalDate dateFrom,
+            LocalDate dateTo
+    ) {
         List<Reservation> reservations = reservationRepository
-                .findByThemeIdAndMemberIdAndDateGreaterThanEqualAndDateLessThanEqual(
-                        reservationSearchFilter.themeId(),
-                        reservationSearchFilter.memberId(),
-                        reservationSearchFilter.dateFrom(),
-                        reservationSearchFilter.dateTo()
+                .findByMemberAndThemeAndDateRange(
+                        memberId,
+                        themeId,
+                        dateFrom,
+                        dateTo
                 );
         return ReservationDto.from(reservations);
     }
