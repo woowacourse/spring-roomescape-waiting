@@ -13,6 +13,8 @@
 - [x] `GET /reservations/times`  
   날짜와 테마에 따른 예약 가능 여부를 포함한 시간 목록 조회
 
+- [x] `GET /reservations/mine`  
+  현재 사용자 예약한 예약 목록 조회
 
 - [x] `POST /reservations`  
   예약 생성

@@ -19,6 +19,7 @@ import roomescape.reservation.application.ReservationFacade;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
+import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
 import roomescape.user.domain.UserRole;
 
 import java.net.URI;

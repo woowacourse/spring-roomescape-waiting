@@ -1,5 +1,6 @@
-package roomescape.reservation.ui;
+package roomescape.reservation.ui.dto;
 
+import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.ThemeId;
 import roomescape.user.domain.UserId;
