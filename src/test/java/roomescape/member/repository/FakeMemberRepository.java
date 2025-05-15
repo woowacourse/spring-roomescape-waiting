@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.AlreadyExistException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 
@@ -24,7 +24,7 @@ public class FakeMemberRepository implements MemberRepository {
     @Override
     public Member save(Member member) {
         if (existsByEmail(member.getEmail())) {
-            throw new ConflictException("이미 존재하는 이메일입니다.");
+            throw new AlreadyExistException("이미 존재하는 이메일입니다.");
         }
 
         Member saved = Member.withId(
