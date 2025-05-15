@@ -10,7 +10,7 @@ public record BookedReservationTimeResponse(
         boolean alreadyBooked
 ) {
     public static BookedReservationTimeResponse from(ReservableReservationTimeDto dto) {
-        return new BookedReservationTimeResponse(dto.id().value(), dto.startTime().value(), dto.available());
+        return new BookedReservationTimeResponse(dto.id().value(), dto.startTime().value(), !dto.available());
     }
 
     public static List<BookedReservationTimeResponse> from(List<ReservableReservationTimeDto> dtos) {
