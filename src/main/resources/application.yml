@@ -22,9 +22,11 @@ spring:
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
+
   sql:
     init:
-      mode: never
+      mode: always
+      data-locations: classpath:data.sql
 
 security:
   jwt:
