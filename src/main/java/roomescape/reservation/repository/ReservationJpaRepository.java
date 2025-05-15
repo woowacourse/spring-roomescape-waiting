@@ -28,4 +28,6 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    List<Reservation> findAllByMemberId(Long memberId);
 }

@@ -22,6 +22,7 @@ import roomescape.member.role.Role;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.controller.response.ReservationTimeResponse;
@@ -53,7 +54,7 @@ public class ReservationServiceTest {
         ReservationTime savedReservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme savedTheme = new Theme(1L, "test", "test", "test");
         Reservation savedReservation = new Reservation(1L, 예약날짜_내일.getDate(), savedReservationTime, savedTheme,
-                savedMember);
+                savedMember, ReservationStatus.예약);
         when(reservationRepository.existsByReservationDateAndReservationTimeId(any(), any())).thenReturn(false);
         when(memberService.findById(any(Long.class))).thenReturn(savedMember);
         when(reservationTimeService.getReservationTime(any(Long.class))).thenReturn(savedReservationTime);
@@ -68,7 +69,7 @@ public class ReservationServiceTest {
 
         ReservationResponse response = reservationService.create(1L, reservationRequest);
         assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo(MATT.getName());
+        assertThat(response.member().getName()).isEqualTo(MATT.getName());
         assertThat(response.date()).isEqualTo(예약날짜_내일.getDate());
         assertThat(response.time()).isEqualTo(
                 new ReservationTimeResponse(savedReservationTime.getId(),

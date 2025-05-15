@@ -10,11 +10,13 @@ import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.user.controller.dto.ReservationRequest;
+import roomescape.user.controller.dto.response.MemberReservationResponse;
 
 @Service
 public class ReservationService {
@@ -52,7 +54,7 @@ public class ReservationService {
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.getTheme(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member));
+                .getDate(), reservationTime, theme, member, ReservationStatus.예약));
 
         return ReservationResponse.from(created);
     }
@@ -70,7 +72,7 @@ public class ReservationService {
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.getTheme(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member));
+                .getDate(), reservationTime, theme, member, ReservationStatus.예약));
 
         return ReservationResponse.from(created);
 
@@ -92,5 +94,11 @@ public class ReservationService {
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다."));
+    }
+
+    public List<MemberReservationResponse> findAllByMemberId(Long id) {
+        return reservationRepository.findAllByMemberId(id).stream()
+                .map(MemberReservationResponse::from)
+                .toList();
     }
 }

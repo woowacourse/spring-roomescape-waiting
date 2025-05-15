@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.BaseTest;
 import roomescape.member.controller.request.TokenLoginCreateRequest;
 import roomescape.member.domain.Email;
@@ -26,12 +27,14 @@ import roomescape.member.service.AuthService;
 import roomescape.member.service.MemberRepository;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.service.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
+@Sql("/test-data.sql")
 public class ReservationTest extends BaseTest {
 
     @LocalServerPort
@@ -106,7 +109,7 @@ public class ReservationTest extends BaseTest {
 
         RestAssured.given().log().all()
                 .cookie("token", token)
-                .when().delete("/reservations/1")
+                .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
@@ -180,7 +183,7 @@ public class ReservationTest extends BaseTest {
 
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member));
+                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.예약));
 
         List<ReservationResponse> response = RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -204,7 +207,7 @@ public class ReservationTest extends BaseTest {
 
         RestAssured.given().log().all()
                 .cookie("token", token)
-                .when().delete("/reservations/1")
+                .when().delete("admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -235,5 +238,24 @@ public class ReservationTest extends BaseTest {
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @Test
+    void 멤버의_예약목록을_가져온다() {
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("admin/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
     }
 }

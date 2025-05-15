@@ -18,6 +18,7 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.service.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.service.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -50,8 +51,10 @@ class ReservationJpaRepositoryTest {
                 ReservationTime.create(LocalTime.of(10, 0))
         );
         Theme theme = themeRepository.save(new Theme("공포", "ss", "ss"));
-        reservationRepository.save(Reservation.create(예약날짜_내일.getDate(), time, theme, member));
-        reservationRepository.save(Reservation.create(LocalDate.of(2002, 5, 1), time, theme, member));
+        reservationRepository.save(
+                Reservation.create(예약날짜_내일.getDate(), time, theme, member, ReservationStatus.예약));
+        reservationRepository.save(
+                Reservation.create(LocalDate.of(2002, 5, 1), time, theme, member, ReservationStatus.예약));
     }
 
     @Test

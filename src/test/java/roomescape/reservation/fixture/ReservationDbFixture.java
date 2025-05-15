@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -36,7 +37,7 @@ public class ReservationDbFixture {
 
         ).longValue();
 
-        return new Reservation(id, date, reservationTime, theme, MATT);
+        return new Reservation(id, date, reservationTime, theme, MATT, ReservationStatus.예약);
     }
 
     public Reservation 예약_생성_한스(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
@@ -54,7 +55,7 @@ public class ReservationDbFixture {
                 .addValue("user_id", MATT.getId())
         ).longValue();
 
-        return new Reservation(id, date, reservationTime, theme, MATT);
+        return new Reservation(id, date, reservationTime, theme, MATT, ReservationStatus.예약);
     }
 
 

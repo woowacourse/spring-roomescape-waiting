@@ -1,6 +1,6 @@
 -- 사용자
 INSERT INTO member (id, name, email, password, role)
-VALUES (1, '매트', 'matt@kakao.com', '1234', 'ADMIN');
+VALUES (1, '매트', 'matt2@kakao.com', '1234', 'ADMIN');
 
 -- 시간
 INSERT INTO reservation_time (id, start_at)
@@ -18,8 +18,8 @@ INSERT INTO theme (id, name, description, thumbnail)
 VALUES (2, '지하 감옥', '깊은 감옥에서 탈출하라!', 'https://truthfoundation.or.kr/media/images/68.width-1200.jpg');
 
 -- 예약: 오래된 데이터 (2025-04-11 ~ 2025-04-20)
-INSERT INTO reservation (id, reservation_date, reservation_time_id, theme_id, member_id)
-VALUES (1, '2025-04-20', 2, 1, 1);
+INSERT INTO reservation (id, reservation_date, reservation_time_id, theme_id, member_id, reservation_status)
+VALUES (1, '2025-04-20', 2, 1, 1, '예약');
 INSERT INTO reservation (id, reservation_date, reservation_time_id, theme_id, member_id)
 VALUES (2, '2025-04-19', 3, 2, 1);
 INSERT INTO reservation (id, reservation_date, reservation_time_id, theme_id, member_id)

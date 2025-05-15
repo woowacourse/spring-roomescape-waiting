@@ -6,16 +6,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.resolver.LoginMember;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.user.controller.dto.ReservationRequest;
+import roomescape.user.controller.dto.response.MemberReservationResponse;
 
 @RestController
-@RequestMapping("/reservations")
 public class UserReservationApiController {
 
     private final ReservationService reservationService;
@@ -24,7 +23,7 @@ public class UserReservationApiController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(
             @LoginMember MemberResponse memberResponse,
             @RequestBody ReservationRequest request
@@ -33,10 +32,19 @@ public class UserReservationApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
+    @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
         List<ReservationResponse> responses = reservationService.getAll();
 
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
+            @LoginMember MemberResponse memberResponse
+    ) {
+        System.out.println("Asd");
+        List<MemberReservationResponse> allByMemberId = reservationService.findAllByMemberId(memberResponse.id());
+        return ResponseEntity.ok().body(allByMemberId);
     }
 }
