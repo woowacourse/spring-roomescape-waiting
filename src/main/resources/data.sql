@@ -1,5 +1,8 @@
-INSERT INTO member(name, email, password, role) VALUES('일반', 'a', 'a', 'NORMAL');
-INSERT INTO member(name, email, password, role) VALUES('관리자', 'ad', 'ad', 'ADMIN');
+INSERT INTO member(name, email, password, role) VALUES('normal1', 'normal1@normal.com', 'password', 'NORMAL');
+INSERT INTO member(name, email, password, role) VALUES('normal2', 'normal2@normal.com', 'password', 'NORMAL');
+INSERT INTO member(name, email, password, role) VALUES('normal3', 'normal3@normal.com', 'password', 'NORMAL');
+INSERT INTO member(name, email, password, role) VALUES('normal4', 'normal4@normal.com', 'password', 'NORMAL');
+INSERT INTO member(name, email, password, role) VALUES('admin', 'admin@admin.com', 'admin', 'ADMIN');
 
 INSERT INTO reservation_time (start_at) VALUES ('10:00');
 INSERT INTO reservation_time (start_at) VALUES ('14:00');
