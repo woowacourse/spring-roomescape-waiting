@@ -6,18 +6,18 @@ import roomescape.common.exception.LoginException;
 import roomescape.common.util.DateTime;
 import roomescape.common.util.JwtTokenContainer;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRepository;
 import roomescape.member.dto.request.LoginMember;
 import roomescape.member.dto.request.LoginRequest;
-import roomescape.member.infrastructure.JpaMemberRepository;
 
 @Service
 public class LoginService {
 
     private final JwtTokenContainer jwtTokenContainer;
-    private final JpaMemberRepository memberRepository;
+    private final MemberRepository memberRepository;
     private final DateTime dateTime;
 
-    public LoginService(JwtTokenContainer jwtTokenContainer, JpaMemberRepository memberRepository, DateTime dateTime) {
+    public LoginService(JwtTokenContainer jwtTokenContainer, MemberRepository memberRepository, DateTime dateTime) {
         this.jwtTokenContainer = jwtTokenContainer;
         this.memberRepository = memberRepository;
         this.dateTime = dateTime;
