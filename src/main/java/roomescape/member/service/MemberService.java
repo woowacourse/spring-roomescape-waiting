@@ -1,9 +1,11 @@
 package roomescape.member.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.member.controller.request.SignUpRequest;
+import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
@@ -41,5 +43,11 @@ public class MemberService {
             return member.get();
         }
         throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
+    }
+
+    public List<MemberResponse> findAll() {
+        return memberRepository.findAll().stream()
+                .map(MemberResponse::from)
+                .toList();
     }
 }

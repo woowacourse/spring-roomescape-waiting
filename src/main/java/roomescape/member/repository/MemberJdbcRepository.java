@@ -84,4 +84,9 @@ public class MemberJdbcRepository implements MemberRepository {
         return jdbcTemplate.query(sql, memberRowMapper, name.getName())
                 .stream().findFirst();
     }
+
+    @Override
+    public List<Member> findAll() {
+        return List.of();
+    }
 }

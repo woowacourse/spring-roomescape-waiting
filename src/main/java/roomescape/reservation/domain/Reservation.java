@@ -15,7 +15,7 @@ import roomescape.time.domain.ReservationTime;
 public class Reservation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private ReservationDate reservationDate;
 
@@ -70,7 +70,7 @@ public class Reservation {
     public ReservationTime getReservationTime() {
         return reservationTime;
     }
-    
+
     public Theme getTheme() {
         return theme;
     }

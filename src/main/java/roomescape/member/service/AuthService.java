@@ -41,7 +41,7 @@ public class AuthService {
         String payload = jwtTokenProvider.getPayload(token);
         Optional<Member> member = memberRepository.findByEmail(new Email(payload));
         if (member.isPresent()) {
-            return new MemberResponse(member.get().getName(), member.get().getRole());
+            return MemberResponse.from(member.get());
         }
         throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
     }
