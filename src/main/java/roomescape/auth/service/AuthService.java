@@ -33,32 +33,4 @@ public class AuthService {
         return memberDao.findByEmailAndPassword(email, password)
                 .orElseThrow(InvalidCredentialsException::new);
     }
-
-    public Member checkAuthenticationStatus(Cookie[] cookies) {
-        String accessToken = extractTokenFromCookie(cookies);
-        return findMemberWithAccessToken(accessToken);
-    }
-
-    private Member findMemberWithAccessToken(String accessToken) {
-        String email = jwtTokenProvider.getPayload(accessToken);
-        return memberDao.findByEmail(email)
-                .orElseThrow(MemberNotExistException::new);
-    }
-
-    private String extractTokenFromCookie(Cookie[] cookies) {
-        if (cookies == null) {
-            throw new UnauthorizedException();
-        }
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(AuthConstant.COOKIE_KEY_OF_ACCESS_TOKEN)) {
-                return cookie.getValue();
-            }
-        }
-        throw new UnauthorizedException();
-    }
-
-    public boolean isAdminRequest(Cookie[] cookies) {
-        Member member = checkAuthenticationStatus(cookies);
-        return member.isAdmin();
-    }
 }
