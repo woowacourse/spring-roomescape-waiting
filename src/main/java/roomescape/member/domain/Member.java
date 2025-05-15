@@ -21,7 +21,6 @@ public class Member {
     private String name;
 
     @NotBlank
-//    @Column(unique = true)
     private String email;
 
     @NotBlank
