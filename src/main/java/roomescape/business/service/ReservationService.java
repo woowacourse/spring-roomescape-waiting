@@ -64,4 +64,10 @@ public class ReservationService {
         }
         reservationRepository.deleteById(id);
     }
+
+    public List<ReservationDto> getMyReservations(final String userIdValue) {
+        Id userId = Id.create(userIdValue);
+        List<Reservation> myReservations = reservationRepository.findAllWithFilter(null, userId, null, null);
+        return ReservationDto.fromEntities(myReservations);
+    }
 }

@@ -21,6 +21,7 @@ import roomescape.business.model.vo.UserRole;
 import roomescape.business.service.ReservationService;
 import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
+import roomescape.presentation.dto.response.ReservationMineResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
 
 @RestController
@@ -56,6 +57,14 @@ public class ReservationApiController {
     ) {
         List<ReservationDto> reservationDtos = reservationService.getAll(themeId, userId, dateFrom, dateTo);
         List<ReservationResponse> responses = ReservationResponse.from(reservationDtos);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/reservations/mine")
+    @AuthRequired
+    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(LoginInfo loginInfo){
+        List<ReservationDto> myReservations = reservationService.getMyReservations(loginInfo.id());
+        List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservations);
         return ResponseEntity.ok(responses);
     }
 

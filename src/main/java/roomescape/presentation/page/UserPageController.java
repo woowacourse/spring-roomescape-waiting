@@ -18,4 +18,8 @@ public class UserPageController {
     public String getReservationPage() {
         return "reservation";
     }
+
+    @GetMapping("/reservation/mine")
+    @AuthRequired
+    public String getMyReservationPage() {return "reservation-mine";}
 }
