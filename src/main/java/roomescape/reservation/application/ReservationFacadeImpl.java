@@ -66,7 +66,9 @@ public class ReservationFacadeImpl implements ReservationFacade {
     @Override
     public List<ReservationResponse> getAllByUserId(final Long userId) {
         final User user = userQueryService.getById(UserId.from(userId));
-        return ReservationResponse.from(reservationQueryService.getAllByUserId(UserId.from(userId)), user);
+        return ReservationResponse.from(
+                reservationQueryService.getAllByUserId(
+                        UserId.from(userId)), user);
     }
 
     @Override

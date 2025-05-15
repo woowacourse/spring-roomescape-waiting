@@ -154,4 +154,80 @@ class ReservationQueryServiceImplTest {
                     ).isEqualTo(booked);
                 });
     }
+
+    @Test
+    @DisplayName("유저 아이디로 예약을 조회할 수 있다")
+    void getReservationWithUserId() {
+        // given
+        final User me = userRepository.save(
+                User.withoutId(
+                        UserName.from("강산"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("password"),
+                        UserRole.NORMAL
+                )
+        );
+
+        final User notMe = userRepository.save(
+                User.withoutId(
+                        UserName.from("강산"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("password"),
+                        UserRole.NORMAL
+                )
+        );
+
+        final ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.withoutId(
+                        LocalTime.of(10, 0)));
+
+        final Theme theme1 = themeRepository.save(
+                Theme.withoutId(ThemeName.from("공포1"),
+                        ThemeDescription.from("지구별 방탈출 최고1"),
+                        ThemeThumbnail.from("www.making.com")));
+
+        final Theme theme2 = themeRepository.save(
+                Theme.withoutId(ThemeName.from("공포2"),
+                        ThemeDescription.from("지구별 방탈출 최고2"),
+                        ThemeThumbnail.from("www.making.com")));
+
+        final Theme theme3 = themeRepository.save(
+                Theme.withoutId(ThemeName.from("공포3"),
+                        ThemeDescription.from("지구별 방탈출 최고3"),
+                        ThemeThumbnail.from("www.making.com")));
+
+        final Reservation reservation1 = reservationRepository.save(
+                Reservation.withoutId(
+                        me.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(1)),
+                        time,
+                        theme1
+                )
+        );
+
+        final Reservation reservation2 = reservationRepository.save(
+                Reservation.withoutId(
+                        notMe.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(1)),
+                        time,
+                        theme2
+                )
+        );
+
+        final Reservation reservation3 = reservationRepository.save(
+                Reservation.withoutId(
+                        me.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(1)),
+                        time,
+                        theme3
+                )
+        );
+
+        // when
+        final List<Reservation> reservations = reservationQueryService.getAllByUserId(me.getId());
+
+        // then
+        assertThat(reservations).hasSize(2);
+        assertThat(reservations).contains(reservation1, reservation3);
+    }
 }
