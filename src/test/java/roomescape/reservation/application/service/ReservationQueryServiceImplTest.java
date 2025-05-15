@@ -20,6 +20,7 @@ import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.user.domain.User;
+import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
 import roomescape.user.domain.UserRole;
@@ -153,5 +154,54 @@ class ReservationQueryServiceImplTest {
                             .orElseThrow()
                     ).isEqualTo(booked);
                 });
+    }
+
+    @Test
+    @DisplayName("유저 Id가 같은 모든 예약을 조회할 수 있다")
+    void getAllByUserId() {
+        //given
+        final User user = userRepository.save(
+                User.withoutId(
+                        UserName.from("강산"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("1234"),
+                        UserRole.NORMAL));
+
+        final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
+
+        final ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.withoutId(
+                        LocalTime.of(10, 0)));
+
+        final Theme theme1 = themeRepository.save(
+                Theme.withoutId(ThemeName.from("공포1"),
+                        ThemeDescription.from("지구별 방탈출 최고1"),
+                        ThemeThumbnail.from("www.making.com")));
+
+        final Theme theme2 = themeRepository.save(
+                Theme.withoutId(ThemeName.from("공포2"),
+                        ThemeDescription.from("지구별 방탈출 최고2"),
+                        ThemeThumbnail.from("www.making.com")));
+
+        UserId userId = user.getId();
+        final Reservation reservation1 = reservationRepository.save(Reservation.withoutId(
+                userId,
+                date,
+                time,
+                theme1));
+
+        final Reservation reservation2 = reservationRepository.save(Reservation.withoutId(
+                userId,
+                date,
+                time,
+                theme2));
+
+        //when
+        List<Reservation> reservations = reservationQueryService.getAllByUserId(userId);
+        //then
+        assertThat(reservations.size()).isEqualTo(2);
+        assertThat(reservations.getFirst().getUserId()).isEqualTo(userId);
+        assertThat(reservations.getLast().getUserId()).isEqualTo(userId);
+
     }
 }
