@@ -27,7 +27,6 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    // TODO: 호출 순서 변경
     private Reservation(
             Long id,
             Member member,

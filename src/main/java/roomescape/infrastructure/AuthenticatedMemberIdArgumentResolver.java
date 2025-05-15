@@ -21,10 +21,12 @@ public class AuthenticatedMemberIdArgumentResolver implements HandlerMethodArgum
         return parameter.hasParameterAnnotation(AuthenticatedMemberId.class);
     }
 
-    // TODO: 줄바꿈
     @Override
-    public MemberIdDto resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                       NativeWebRequest webRequest, WebDataBinderFactory binderFactory
+    public MemberIdDto resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         return authenticatedMemberIdExtractor.extract(request);

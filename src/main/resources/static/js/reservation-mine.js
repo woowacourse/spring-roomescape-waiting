@@ -15,10 +15,6 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        /*
-        TODO: [2단계] 내 예약 목록 조회 기능
-              response 명세에 맞춰 값 설정
-         */
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
