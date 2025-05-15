@@ -22,7 +22,7 @@ class ReservationTest {
         // given
         LocalDate today = LocalDate.now();
         LocalTime later = LocalTime.now().plusMinutes(5);
-        ReservationTime rt = new ReservationTime(1L, later);
+        ReservationTime rt = ReservationTime.from(later);
         Reservation reservation = Reservation.booked(today, rt, defaultTheme, defaultMember);
 
         // when
@@ -34,7 +34,7 @@ class ReservationTest {
     void id_필드를_제외한_필드가_null이면_예외처리() {
         // given
         LocalDate localDate = LocalDate.of(2999, 1, 1);
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(11, 0));
+        ReservationTime reservationTime = ReservationTime.from(LocalTime.of(11, 0));
         Theme theme = Theme.of("test", "test", "test");
         Member member = new Member(1L, "member", "member@naver.com", "1234", MemberRole.MEMBER.name());
         // when

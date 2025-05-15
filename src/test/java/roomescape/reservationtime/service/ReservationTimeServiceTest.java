@@ -37,8 +37,8 @@ class ReservationTimeServiceTest {
     void setUp() {
         service = new ReservationTimeService(reservationTimeRepository, reservationRepository);
         reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(null, t1),
-                new ReservationTime(null, t2)
+                ReservationTime.from(t1),
+                ReservationTime.from(t2)
         ));
     }
 

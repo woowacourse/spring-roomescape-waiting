@@ -123,7 +123,7 @@ class MissionStepTest {
         LocalDate now = LocalDate.now();
         LocalDate localDate = now.plusDays(1);
         params.put("date", localDate.toString());
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
         themeRepository.save(Theme.of("name", "desc", "thumb"));
         params.put("timeId", "1");
         params.put("themeId", "1");
@@ -188,7 +188,7 @@ class MissionStepTest {
     @Test
     void 오단계_예약_조회() {
         // given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
         themeRepository.save(Theme.of("name", "desc", "thumb"));
 
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
@@ -219,7 +219,7 @@ class MissionStepTest {
     @Test
     void 육단계_예약_삭제() {
         // given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
         themeRepository.save(Theme.of("name", "desc", "thumb"));
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
 
@@ -258,7 +258,7 @@ class MissionStepTest {
 
     @Test
     void 칠단계_예약_시간_삭제() {
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
 
         RestAssured.given().log().all()
                 .when().get("/times")
@@ -275,7 +275,7 @@ class MissionStepTest {
     @Test
     void 팔단계_예약_조회() {
         // given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
+        reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
         themeRepository.save(Theme.of("name", "desc", "thumb"));
 
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");

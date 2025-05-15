@@ -18,7 +18,7 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
 
     public ReservationTimeResponse saveTime(final ReservationTimeRequest request) {
-        final ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(request.startAt()));
+        final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.from(request.startAt()));
         return new ReservationTimeResponse(reservationTime);
     }
 

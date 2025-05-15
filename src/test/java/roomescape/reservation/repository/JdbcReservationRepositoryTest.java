@@ -51,8 +51,8 @@ class JdbcReservationRepositoryTest {
     @BeforeEach
     void setUp() {
         date = LocalDate.of(2025, 7, 1);
-        time1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        time2 = new ReservationTime(2L, LocalTime.of(11, 0));
+        time1 = ReservationTime.from(LocalTime.of(10, 0));
+        time2 = ReservationTime.from(LocalTime.of(11, 0));
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
         theme2 = Theme.of("테마2", "설명2", "썸네일2");
         member1 = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
@@ -143,7 +143,7 @@ class JdbcReservationRepositoryTest {
         // given
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteLater = LocalTime.now().plusMinutes(1);
-        ReservationTime futureTime = new ReservationTime(1L, oneMinuteLater);
+        ReservationTime futureTime = ReservationTime.from(oneMinuteLater);
 
         reservationTimeRepository.save(time1);
         themeRepository.save(theme1);
@@ -163,7 +163,7 @@ class JdbcReservationRepositoryTest {
         Member defaultMember = new Member(1L, "member", "member@naver.com", "1234", MemberRole.MEMBER.name());
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);
-        ReservationTime pastTime = new ReservationTime(1L, oneMinuteBefore);
+        ReservationTime pastTime = ReservationTime.from(oneMinuteBefore);
         final Reservation booked = Reservation.booked(today, pastTime, defaultTheme, defaultMember);
         // when
 

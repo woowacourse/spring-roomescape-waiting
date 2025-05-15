@@ -7,14 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 @Getter
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationTime {
 
@@ -26,8 +25,15 @@ public class ReservationTime {
     @Column(nullable = false)
     private LocalTime startAt;
 
-    public ReservationTime(@NonNull final LocalTime startAt) {
-        this.id = null;
+    @Builder
+    private ReservationTime(final Long id, @NonNull final LocalTime startAt) {
+        this.id = id;
         this.startAt = startAt;
+    }
+
+    public static ReservationTime from(final LocalTime startAt) {
+        return builder()
+                .startAt(startAt)
+                .build();
     }
 }
