@@ -50,8 +50,10 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeService service;
+
     @Autowired
     private MemberRepository memberRepository;
+
     @Autowired
     private ThemeRepository themeRepository;
 

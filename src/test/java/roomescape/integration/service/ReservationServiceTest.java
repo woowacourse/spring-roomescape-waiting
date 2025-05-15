@@ -36,7 +36,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationCreateRequest;
 import roomescape.service.response.MyReservationResponse;
@@ -65,16 +64,18 @@ class ReservationServiceTest {
     private ReservationService service;
 
     private final LocalTime time = LocalTime.of(10, 0);
+
     @Autowired
     private ReservationDbFixture reservationDbFixture;
+
     @Autowired
     private MemberDbFixture memberDbFixture;
+
     @Autowired
     private ReservationTimeDbFixture reservationTimeDbFixture;
+
     @Autowired
     private ThemeDbFixture themeDbFixture;
-    @Autowired
-    private MemberService memberService;
 
     @Test
     void 모든_예약을_조회한다() {

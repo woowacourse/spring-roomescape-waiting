@@ -65,8 +65,10 @@ class ThemeServiceTest {
 
     @Autowired
     private ReservationDbFixture reservationDbFixture;
+
     @Autowired
     private MemberDbFixture memberDbFixture;
+
     @Autowired
     private ReservationTimeDbFixture reservationTimeDbFixture;
 
