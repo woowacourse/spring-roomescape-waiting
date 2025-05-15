@@ -1,4 +1,4 @@
-package roomescape.member.dto;
+package roomescape.member.dto.response;
 
 import roomescape.member.domain.Member;
 

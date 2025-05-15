@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import roomescape.reservation.dto.ThemeRequest;
-import roomescape.reservation.dto.ThemeResponse;
+import roomescape.reservation.dto.request.ThemeRequest;
+import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.service.ThemeService;
 
 @RequestMapping("/themes")

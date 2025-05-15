@@ -10,8 +10,8 @@ import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
-import roomescape.member.dto.MemberCreateRequest;
-import roomescape.member.dto.MemberResponse;
+import roomescape.member.dto.request.MemberCreateRequest;
+import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 
 @Service

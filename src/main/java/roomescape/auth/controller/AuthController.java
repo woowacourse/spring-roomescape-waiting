@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import roomescape.auth.dto.LoginCheckResponse;
+import roomescape.auth.dto.response.CheckLoginResponse;
 import roomescape.auth.dto.LoginMember;
-import roomescape.auth.dto.LoginRequest;
-import roomescape.auth.dto.LoginResponse;
+import roomescape.auth.dto.request.LoginRequest;
+import roomescape.auth.dto.response.LoginResponse;
 import roomescape.auth.service.AuthService;
 
 @RestController
@@ -40,12 +40,12 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<LoginCheckResponse> checkLogin(final LoginMember member) {
+    public ResponseEntity<CheckLoginResponse> checkLogin(final LoginMember member) {
         if (member == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginCheckResponse("unauthorized"));
+                    .body(new CheckLoginResponse("unauthorized"));
         }
-        return ResponseEntity.ok(new LoginCheckResponse(member.name()));
+        return ResponseEntity.ok(new CheckLoginResponse(member.name()));
     }
 
     @PostMapping("/logout")

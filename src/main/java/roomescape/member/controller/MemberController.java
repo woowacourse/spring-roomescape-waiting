@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import roomescape.member.dto.MemberCreateRequest;
-import roomescape.member.dto.MemberResponse;
+import roomescape.member.dto.request.MemberCreateRequest;
+import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.service.MemberService;
 
 @RestController

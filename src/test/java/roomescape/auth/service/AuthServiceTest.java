@@ -11,8 +11,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import roomescape.auth.dto.LoginRequest;
-import roomescape.auth.dto.LoginResponse;
+import roomescape.auth.dto.request.LoginRequest;
+import roomescape.auth.dto.response.LoginResponse;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.LoginFailException;
 import roomescape.member.domain.Member;
