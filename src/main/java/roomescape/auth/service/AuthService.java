@@ -2,6 +2,7 @@ package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
 
+import roomescape.auth.dto.LoginMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.LoginResponse;
 import roomescape.common.exception.EntityNotFoundException;
@@ -34,5 +35,9 @@ public class AuthService {
     public Member findById(final Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자 입니다."));
+    }
+
+    public LoginMember findLoginMemberById(final Long id) {
+        return LoginMember.of(findById(id));
     }
 }

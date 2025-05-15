@@ -11,17 +11,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.BookedReservationTimeResponse;
-import roomescape.reservation.dto.FilteringReservationRequest;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationTimeResponse;
+import roomescape.reservation.dto.*;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -32,15 +30,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository
+            final ThemeRepository themeRepository,
+            final MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
     public List<ReservationResponse> getAll() {
@@ -51,7 +52,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse create(final ReservationRequest request, final Member member) {
+    public ReservationResponse create(final ReservationRequest request, final LoginMember member) {
         if (isAlreadyBooked(request)) {
             throw new AlreadyInUseException("reservation is already in use");
         }
@@ -83,10 +84,11 @@ public class ReservationService {
         );
     }
 
-    private Reservation getReservation(final ReservationRequest request, final Member member) {
+    private Reservation getReservation(final ReservationRequest request, final LoginMember loginMember) {
         ReservationTime reservationTime = gerReservationTime(request);
         Theme theme = getTheme(request);
-
+        Member member = memberRepository.findById(loginMember.id())
+                .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
         return new Reservation(member, request.date(), reservationTime, theme);
     }
 

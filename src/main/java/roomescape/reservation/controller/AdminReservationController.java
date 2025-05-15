@@ -1,21 +1,20 @@
 package roomescape.reservation.controller;
 
-import java.net.URI;
-
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.validation.Valid;
 import roomescape.auth.annotation.RequiredAdmin;
+import roomescape.auth.dto.LoginMember;
 import roomescape.auth.service.AuthService;
-import roomescape.member.domain.Member;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+
+import java.net.URI;
 
 @RequestMapping("/admin/reservations")
 @RestController
@@ -34,7 +33,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> create(
             @Valid @RequestBody final AdminReservationRequest request
     ) {
-        Member member = authService.findById(request.memberId());
+        LoginMember member = authService.findLoginMemberById(request.memberId());
         ReservationRequest reservationRequest =
                 new ReservationRequest(request.date(), request.timeId(), request.themeId());
         ReservationResponse response = reservationService.create(reservationRequest, member);
