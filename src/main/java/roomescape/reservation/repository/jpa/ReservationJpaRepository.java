@@ -2,12 +2,9 @@ package roomescape.reservation.repository.jpa;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import roomescape.reservation.domain.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import roomescape.reservation.domain.Reservation;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>,
         JpaSpecificationExecutor<Reservation> {
@@ -20,7 +17,5 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
-    List<Reservation> findAllByMemberId(Long id);
-
-    List<Reservation> findAll(Specification<Reservation> spec);
+    List<Reservation> findAllByMemberId(long id);
 }

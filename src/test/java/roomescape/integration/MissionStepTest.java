@@ -40,7 +40,7 @@ public class MissionStepTest {
     @DisplayName("1단계: 홈페이지에 접근할 수 있다.")
     @Test
     void testHomePage() {
-        String token = getAdminToken();
+        final String token = getAdminToken();
         RestAssured.given().log().all().header("Cookie", "token=" + token)
                 .when().get("/admin")
                 .then().log().all()
@@ -50,7 +50,7 @@ public class MissionStepTest {
     @DisplayName("2단계: 예약을 조회할 수 있다.")
     @Test
     void testGetReservationPage() {
-        String token = getAdminToken();
+        final String token = getAdminToken();
         RestAssured.given().log().all().header("Cookie", "token=" + token)
                 .when().get("/admin/reservation")
                 .then().log().all()
@@ -66,7 +66,7 @@ public class MissionStepTest {
     @DisplayName("4단계: 데이터베이스를 적용할 수 있다.")
     @Test
     void testDatabaseConnection() {
-        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+        try (final Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.getCatalog()).isEqualTo("DATABASE");
             assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
@@ -78,7 +78,7 @@ public class MissionStepTest {
     @DisplayName("7단계: 시간 관리 기능을 사용할 수 있다.")
     @Test
     void testTimeAPIs() {
-        Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put("startAt", "10:00");
 
         RestAssured.given().log().all()
@@ -103,9 +103,9 @@ public class MissionStepTest {
     @DisplayName("8단계: 예약을 추가하고 취소할 수 있다.")
     @Test
     void testCreateDeleteReservation() {
-        String token = getAdminToken();
+        final String token = getAdminToken();
 
-        Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put("startAt", "10:00");
 
         RestAssured.given().log().all()
@@ -115,7 +115,7 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(CREATED.value());
 
-        Map<String, String> themeParams = new HashMap<>();
+        final Map<String, String> themeParams = new HashMap<>();
         themeParams.put("name", "우테코방탈출");
         themeParams.put("description", "우테코방탈출출출");
         themeParams.put("thumbnail", "우테코방탈출");
@@ -127,8 +127,8 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(CREATED.value());
 
-        Map<String, Object> reservation = new HashMap<>();
-        String date = LocalDate.now().plusDays(1).toString();
+        final Map<String, Object> reservation = new HashMap<>();
+        final String date = LocalDate.now().plusDays(1).toString();
         reservation.put("date", date);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
@@ -174,15 +174,15 @@ public class MissionStepTest {
     }
 
     private String getAdminToken() {
-        Map<String, String> loginParams = new HashMap<>();
+        final Map<String, String> loginParams = new HashMap<>();
         loginParams.put("email", "admin@gmail.com");
         loginParams.put("password", "qwer!");
-        String token = RestAssured.given().log().all()
+
+        return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(loginParams)
                 .when().post("/login")
                 .then().log().all()
                 .extract().cookie("token");
-        return token;
     }
 }

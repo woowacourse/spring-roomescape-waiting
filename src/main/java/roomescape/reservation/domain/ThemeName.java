@@ -18,7 +18,7 @@ public class ThemeName {
     public ThemeName() {
     }
 
-    private void validateName(String name) {
+    private void validateName(final String name) {
         if (name == null || name.isBlank() || name.length() > MAX_LENGTH) {
             throw new IllegalArgumentException("테마 이름은 최소 1글자, 최대 20글자여야합니다.");
         }

@@ -2,7 +2,7 @@ package roomescape.member.service;
 
 public interface TokenProvider {
 
-    String createToken(String payload);
+    String createToken(final String payload);
 
-    String parsePayload(String token);
+    String parsePayload(final String token);
 }

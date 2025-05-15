@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 
@@ -24,7 +23,7 @@ public class Reservation {
     private LocalDate date;
     @ManyToOne
     private ReservationTime time;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Theme theme;
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
@@ -68,16 +67,6 @@ public class Reservation {
         if (time == null) {
             throw new IllegalArgumentException("시간을 입력해야 합니다.");
         }
-    }
-
-    public boolean isBefore(final LocalDateTime other) {
-        if (date.isBefore(other.toLocalDate())) {
-            return true;
-        }
-        if (date.equals(other.toLocalDate())) {
-            return time.isBefore(other.toLocalTime());
-        }
-        return false;
     }
 
     public boolean isSameTime(final ReservationTime other) {

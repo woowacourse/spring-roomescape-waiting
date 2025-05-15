@@ -8,11 +8,11 @@ import roomescape.reservation.repository.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
 
-    List<Reservation> reservations = new ArrayList<>();
-    Long index = 1L;
+    private final List<Reservation> reservations = new ArrayList<>();
+    private Long index = 1L;
 
     public Reservation save(final Reservation reservation) {
-        Reservation newReservation = new Reservation(index++, reservation.getMember(), reservation.getDate(),
+        final Reservation newReservation = new Reservation(index++, reservation.getMember(), reservation.getDate(),
                 reservation.getTime(), reservation.getTheme());
         reservations.add(newReservation);
         return newReservation;
@@ -25,7 +25,7 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public void deleteById(final long id) {
-        Reservation reservation = findById(id);
+        final Reservation reservation = findById(id);
         reservations.remove(reservation);
     }
 
@@ -44,7 +44,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByThemeId(Long themeId) {
+    public boolean existsByThemeId(final long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.getTheme().getId() == themeId);
     }

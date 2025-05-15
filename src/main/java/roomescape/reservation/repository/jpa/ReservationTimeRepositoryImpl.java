@@ -12,7 +12,7 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
 
     private final ReservationTimeJpaRepository reservationTimeJpaRepository;
 
-    public ReservationTimeRepositoryImpl(ReservationTimeJpaRepository reservationTimeJpaRepository) {
+    public ReservationTimeRepositoryImpl(final ReservationTimeJpaRepository reservationTimeJpaRepository) {
         this.reservationTimeJpaRepository = reservationTimeJpaRepository;
     }
 
@@ -37,7 +37,7 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public void deleteById(long id) {
+    public void deleteById(final long id) {
         reservationTimeJpaRepository.deleteById(id);
     }
 }

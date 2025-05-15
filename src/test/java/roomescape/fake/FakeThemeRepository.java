@@ -10,8 +10,8 @@ import roomescape.reservation.repository.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
 
-    List<Theme> themes = new ArrayList<>();
-    Long index = 1L;
+    private final List<Theme> themes = new ArrayList<>();
+    private Long index = 1L;
 
     public boolean existsByName(final ThemeName name) {
         return themes.stream()
@@ -19,7 +19,7 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     public Theme save(final Theme theme) {
-        Theme savedTheme = new Theme(index++, theme.getName(), theme.getDescription(), theme.getThumbnail());
+        final Theme savedTheme = new Theme(index++, theme.getName(), theme.getDescription(), theme.getThumbnail());
         themes.add(savedTheme);
         return savedTheme;
     }
@@ -29,19 +29,19 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     public Optional<Theme> findById(final long id) {
-        Theme result = themes.stream()
+        final Theme result = themes.stream()
                 .filter(theme -> theme.getId() == id)
                 .findAny()
                 .orElse(null);
         return Optional.ofNullable(result);
     }
 
-    public void deleteById(long id) {
-        Theme theme = findById(id).orElseThrow();
+    public void deleteById(final long id) {
+        final Theme theme = findById(id).orElseThrow();
         themes.remove(theme);
     }
 
-    public List<Theme> findPopularThemes(LocalDate from, LocalDate to, int count) {
+    public List<Theme> findPopularThemes(final LocalDate from, final LocalDate to, final int count) {
         return null;
     }
 }

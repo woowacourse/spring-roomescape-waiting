@@ -11,7 +11,8 @@ public class ThemeDescription {
     private String description;
 
     public ThemeDescription(final String description) {
-        if (description == null || description.isBlank() || description.length() < MIN_LENGTH || description.length() > MAX_LENGTH) {
+        if (description == null || description.isBlank() || description.length() < MIN_LENGTH
+                || description.length() > MAX_LENGTH) {
             throw new IllegalArgumentException("테마 소개는 최소 5글자, 최대 200글자여야합니다.");
         }
         this.description = description;

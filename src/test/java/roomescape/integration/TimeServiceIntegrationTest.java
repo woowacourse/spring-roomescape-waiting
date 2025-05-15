@@ -27,16 +27,16 @@ import roomescape.reservation.service.dto.ReservationTimeInfo;
 public class TimeServiceIntegrationTest {
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    ReservationTimeService reservationTimeService;
+    private ReservationTimeService reservationTimeService;
 
     @DisplayName("이미 존재하는 예약시간을 추가하면 예외가 발생한다")
     @Test
     void should_ThrowException_WhenCreateDuplicatedTime() {
         // given
-        ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(10, 0));
+        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(10, 0));
         // when
         // then
         assertThatThrownBy(() -> reservationTimeService.createReservationTime(request))
@@ -48,12 +48,12 @@ public class TimeServiceIntegrationTest {
     @Test
     void createReservationTime() {
         // given
-        LocalTime time = LocalTime.of(17, 0);
-        ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(time);
+        final LocalTime time = LocalTime.of(17, 0);
+        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(time);
         // when
-        ReservationTimeInfo result = reservationTimeService.createReservationTime(request);
+        final ReservationTimeInfo result = reservationTimeService.createReservationTime(request);
         // then
-        ReservationTime savedTime = reservationTimeRepository.findById(result.id()).get();
+        final ReservationTime savedTime = reservationTimeRepository.findById(result.id()).get();
         assertAll(
                 () -> assertThat(result.id()).isEqualTo(4L),
                 () -> assertThat(result.startAt()).isEqualTo(time),
@@ -66,7 +66,7 @@ public class TimeServiceIntegrationTest {
     @Test
     void getReservationTimes() {
         // when
-        List<ReservationTimeInfo> result = reservationTimeService.getReservationTimes();
+        final List<ReservationTimeInfo> result = reservationTimeService.getReservationTimes();
         // then
         assertThat(result).hasSize(3);
     }
@@ -87,7 +87,7 @@ public class TimeServiceIntegrationTest {
         // when
         reservationTimeService.deleteReservationTimeById(3L);
         // then
-        List<ReservationTime> times = reservationTimeRepository.findAll();
+        final List<ReservationTime> times = reservationTimeRepository.findAll();
         assertThat(times).hasSize(2);
     }
 
@@ -95,8 +95,8 @@ public class TimeServiceIntegrationTest {
     @Test
     void findAvailableTimes() {
         // when
-        LocalDate date = LocalDate.of(2025, 4, 24);
-        List<AvailableTimeInfo> result = reservationTimeService.findAvailableTimes(date, 7L);
+        final LocalDate date = LocalDate.of(2025, 4, 24);
+        final List<AvailableTimeInfo> result = reservationTimeService.findAvailableTimes(date, 7L);
         // then
         assertAll(
                 () -> assertThat(result).hasSize(3),

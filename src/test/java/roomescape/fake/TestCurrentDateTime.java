@@ -6,13 +6,14 @@ import java.time.LocalTime;
 import roomescape.CurrentDateTime;
 
 public class TestCurrentDateTime implements CurrentDateTime {
+
     private LocalDateTime now;
 
-    public TestCurrentDateTime(LocalDateTime now) {
+    public TestCurrentDateTime(final LocalDateTime now) {
         this.now = now;
     }
 
-    public void changeDateTime(LocalDateTime now) {
+    public void changeDateTime(final LocalDateTime now) {
         this.now = now;
     }
 
@@ -24,10 +25,5 @@ public class TestCurrentDateTime implements CurrentDateTime {
     @Override
     public LocalTime getTime() {
         return now.toLocalTime();
-    }
-
-    @Override
-    public LocalDateTime getDateTime() {
-        return now;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtProvider implements TokenProvider {
+
     private static final SignatureAlgorithm SIGN_ALGORITHM = SignatureAlgorithm.HS256;
 
     @Value("${security.jwt.token.secret_key}")

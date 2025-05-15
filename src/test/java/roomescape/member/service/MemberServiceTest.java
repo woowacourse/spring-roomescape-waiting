@@ -14,12 +14,11 @@ import roomescape.member.service.dto.MemberInfo;
 
 class MemberServiceTest {
 
-    MemberRepository memberRepository;
-    MemberService memberService;
+    private MemberService memberService;
 
     @BeforeEach
     void init() {
-        memberRepository = new FakeMemberRepository();
+        final MemberRepository memberRepository = new FakeMemberRepository();
         memberService = new MemberService(memberRepository);
         memberRepository.save(new Member(null, "레오", "레오@gmail.com", "qwer!", MemberRole.ADMIN));
         memberRepository.save(new Member(null, "몽이", "몽이@gmail.com", "ㅂㅈㄷㄱ!", MemberRole.ADMIN));
@@ -29,7 +28,7 @@ class MemberServiceTest {
     @Test
     void findAll() {
         // when
-        List<MemberInfo> result = memberService.findAll();
+        final List<MemberInfo> result = memberService.findAll();
 
         // then
         assertThat(result).hasSize(2);

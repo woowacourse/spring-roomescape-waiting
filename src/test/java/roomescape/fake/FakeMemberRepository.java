@@ -8,23 +8,23 @@ import roomescape.member.repository.MemberRepository;
 
 public class FakeMemberRepository implements MemberRepository {
 
-    List<Member> members = new ArrayList<>();
-    Long index = 1L;
+    private final List<Member> members = new ArrayList<>();
+    private Long index = 1L;
 
-    public Optional<Member> findByEmailAndPassword(String email, String password) {
+    public Optional<Member> findByEmailAndPassword(final String email, final String password) {
         return members.stream()
                 .filter(member -> member.getEmail().equals(email))
                 .filter(member -> member.getPassword().equals(password))
                 .findAny();
     }
 
-    public Optional<Member> findById(long memberId) {
+    public Optional<Member> findById(final long id) {
         return members.stream()
-                .filter(member -> member.getId() == memberId)
+                .filter(member -> member.getId() == id)
                 .findAny();
     }
 
-    public Member save(Member member) {
+    public Member save(final Member member) {
         Member newMember = new Member(index++, member.getName(), member.getEmail(), member.getPassword(),
                 member.getRole());
         members.add(newMember);

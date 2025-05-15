@@ -24,14 +24,14 @@ public class ReservationTime {
     public ReservationTime() {
     }
 
+    public ReservationTime(final LocalTime startAt) {
+        this(null, startAt);
+    }
+
     private void validateStartAt(final LocalTime startAt) {
         if (startAt == null) {
             throw new IllegalArgumentException("시간을 입력해야 합니다.");
         }
-    }
-
-    public ReservationTime(final LocalTime startAt) {
-        this(null, startAt);
     }
 
     public Long getId() {

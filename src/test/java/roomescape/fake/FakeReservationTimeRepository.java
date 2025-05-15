@@ -9,11 +9,11 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
 
-    List<ReservationTime> times = new ArrayList<>();
-    Long index = 1L;
+    private final List<ReservationTime> times = new ArrayList<>();
+    private Long index = 1L;
 
     public ReservationTime save(final ReservationTime reservationTime) {
-        ReservationTime newReservationTime = new ReservationTime(index++, reservationTime.getStartAt());
+        final ReservationTime newReservationTime = new ReservationTime(index++, reservationTime.getStartAt());
         times.add(newReservationTime);
         return newReservationTime;
     }
@@ -23,7 +23,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     public Optional<ReservationTime> findById(final long id) {
-        ReservationTime reservationTime = times.stream()
+        final ReservationTime reservationTime = times.stream()
                 .filter(time -> time.getId() == id)
                 .findFirst()
                 .orElse(null);
@@ -36,7 +36,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     public void deleteById(final long id) {
-        ReservationTime reservationTime = findById(id).orElseThrow();
+        final ReservationTime reservationTime = findById(id).orElseThrow();
         times.remove(reservationTime);
     }
 }

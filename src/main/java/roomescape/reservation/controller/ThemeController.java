@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.controller.dto.ThemeCreateRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
+import roomescape.reservation.service.ThemeService;
 import roomescape.reservation.service.dto.ThemeCreateCommand;
 import roomescape.reservation.service.dto.ThemeInfo;
-import roomescape.reservation.service.ThemeService;
 
 @RestController
 @RequestMapping("/themes")
@@ -29,16 +29,16 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@RequestBody @Valid final ThemeCreateRequest request) {
-        ThemeCreateCommand command = request.toCommand();
+        final ThemeCreateCommand command = request.toCommand();
         final ThemeInfo themeInfo = themeService.createTheme(command);
-        URI uri = URI.create("/themes/" + themeInfo.id());
+        final URI uri = URI.create("/themes/" + themeInfo.id());
         return ResponseEntity.created(uri).body(new ThemeResponse(themeInfo));
     }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> findAll() {
         final List<ThemeInfo> themeInfos = themeService.findAll();
-        List<ThemeResponse> responses = mapThemeInfoToThemeResponse(themeInfos);
+        final List<ThemeResponse> responses = mapThemeInfoToThemeResponse(themeInfos);
         return ResponseEntity.ok().body(responses);
     }
 
@@ -50,8 +50,8 @@ public class ThemeController {
 
     @GetMapping("/popular-themes")
     public ResponseEntity<List<ThemeResponse>> findPopularThemes() {
-        List<ThemeInfo> themeInfos = themeService.findPopularThemes();
-        List<ThemeResponse> responses = mapThemeInfoToThemeResponse(themeInfos);
+        final List<ThemeInfo> themeInfos = themeService.findPopularThemes();
+        final List<ThemeResponse> responses = mapThemeInfoToThemeResponse(themeInfos);
         return ResponseEntity.ok().body(responses);
     }
 

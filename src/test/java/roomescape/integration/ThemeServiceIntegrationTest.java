@@ -15,12 +15,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.fake.TestCurrentDateTime;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.dto.ThemeCreateCommand;
-import roomescape.reservation.service.dto.ThemeInfo;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.dto.ThemeCreateCommand;
+import roomescape.reservation.service.dto.ThemeInfo;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -28,16 +28,16 @@ import roomescape.reservation.service.ThemeService;
 public class ThemeServiceIntegrationTest {
 
     @Autowired
-    ThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    ReservationRepository reservationRepository;
-    ThemeService themeService;
-    TestCurrentDateTime currentDateTime;
+    private ReservationRepository reservationRepository;
+    private ThemeService themeService;
+    private TestCurrentDateTime currentDateTime;
 
     @BeforeEach
     void init() {
-        LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
+        final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
         currentDateTime = new TestCurrentDateTime(now);
         themeService = new ThemeService(themeRepository, reservationRepository, currentDateTime);
     }
@@ -46,11 +46,11 @@ public class ThemeServiceIntegrationTest {
     @Test
     void createTheme() {
         // given
-        ThemeCreateCommand request = new ThemeCreateCommand("우테코방탈출", "우테코를 탈출해라", "www.naver.com");
+        final ThemeCreateCommand request = new ThemeCreateCommand("우테코방탈출", "우테코를 탈출해라", "www.naver.com");
         // when
-        ThemeInfo result = themeService.createTheme(request);
+        final ThemeInfo result = themeService.createTheme(request);
         // then
-        Theme savedTheme = themeRepository.findById(result.id()).get();
+        final Theme savedTheme = themeRepository.findById(result.id()).get();
         assertAll(
                 () -> assertThat(result.id()).isNotNull(),
                 () -> assertThat(result.name()).isEqualTo(request.name()),
@@ -67,7 +67,7 @@ public class ThemeServiceIntegrationTest {
     @Test
     void should_ThrowException_WhenDuplicateThemeName() {
         // given
-        ThemeCreateCommand request = new ThemeCreateCommand("테마1", "우테코를 탈출해라", "www.naver.com");
+        final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "우테코를 탈출해라", "www.naver.com");
         // when
         // then
         assertThatThrownBy(() -> themeService.createTheme(request))
@@ -79,7 +79,7 @@ public class ThemeServiceIntegrationTest {
     @Test
     void findAll() {
         // when
-        List<ThemeInfo> result = themeService.findAll();
+        final List<ThemeInfo> result = themeService.findAll();
         // then
         assertThat(result).hasSize(11);
     }
@@ -90,7 +90,7 @@ public class ThemeServiceIntegrationTest {
         // when
         themeService.deleteThemeById(10L);
         // then
-        List<ThemeInfo> responses = themeService.findAll();
+        final List<ThemeInfo> responses = themeService.findAll();
         assertThat(responses).hasSize(10);
     }
 
@@ -108,7 +108,7 @@ public class ThemeServiceIntegrationTest {
     @Test
     void findPopularThemes() {
         // when
-        List<ThemeInfo> result = themeService.findPopularThemes();
+        final List<ThemeInfo> result = themeService.findPopularThemes();
         // then
         assertThat(result).hasSize(10);
         assertThat(result.getFirst().name()).isEqualTo("테마11");
@@ -121,7 +121,7 @@ public class ThemeServiceIntegrationTest {
         // given
         currentDateTime.changeDateTime(LocalDateTime.of(2025, 4, 12, 10, 0));
         // when
-        List<ThemeInfo> result = themeService.findPopularThemes();
+        final List<ThemeInfo> result = themeService.findPopularThemes();
         // then
         assertThat(result).isEmpty();
     }

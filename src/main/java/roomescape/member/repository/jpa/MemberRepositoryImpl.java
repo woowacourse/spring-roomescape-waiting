@@ -16,17 +16,17 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findByEmailAndPassword(String email, String password) {
+    public Optional<Member> findByEmailAndPassword(final String email, final String password) {
         return memberJpaRepository.findByEmailAndPassword(email, password);
     }
 
     @Override
-    public Optional<Member> findById(long memberId) {
-        return memberJpaRepository.findById(memberId);
+    public Optional<Member> findById(final long id) {
+        return memberJpaRepository.findById(id);
     }
 
     @Override
-    public Member save(Member member) {
+    public Member save(final Member member) {
         return memberJpaRepository.save(member);
     }
 

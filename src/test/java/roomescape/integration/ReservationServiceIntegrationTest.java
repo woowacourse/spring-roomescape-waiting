@@ -19,13 +19,13 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.service.dto.ReservationCreateCommand;
-import roomescape.reservation.service.dto.ReservationInfo;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationCreateCommand;
+import roomescape.reservation.service.dto.ReservationInfo;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -33,23 +33,23 @@ import roomescape.reservation.service.ReservationService;
 public class ReservationServiceIntegrationTest {
 
     @Autowired
-    ReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    ThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    MemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
-    ReservationService reservationService;
-    TestCurrentDateTime currentDateTime;
+    private ReservationService reservationService;
+    private TestCurrentDateTime currentDateTime;
 
     @BeforeEach
     void init() {
-        LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
+        final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
         currentDateTime = new TestCurrentDateTime(now);
         reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
                 themeRepository,
@@ -61,10 +61,10 @@ public class ReservationServiceIntegrationTest {
     @Test
     void createReservation() {
         // given
-        LocalDate date = currentDateTime.getDate().plusDays(1);
-        ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 1L);
+        final LocalDate date = currentDateTime.getDate().plusDays(1);
+        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 1L);
         // when
-        ReservationInfo result = reservationService.createReservation(request);
+        final ReservationInfo result = reservationService.createReservation(request);
         // then
         assertAll(
                 () -> assertThat(result.id()).isNotNull(),
@@ -79,7 +79,7 @@ public class ReservationServiceIntegrationTest {
     @Test
     void should_ThrowException_WhenDuplicateReservation() {
         // given
-        ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 1L, 11L);
+        final ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 1L, 11L);
         reservationService.createReservation(request);
         // when
         // then
@@ -92,10 +92,10 @@ public class ReservationServiceIntegrationTest {
     @Test
     void shouldNot_ThrowException_WhenThemeIsDifferent() {
         // given
-        LocalDate date = LocalDate.of(2025, 5, 5);
-        ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 11L);
+        final LocalDate date = LocalDate.of(2025, 5, 5);
+        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 11L);
         reservationService.createReservation(request);
-        ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 1L, 10L);
+        final ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 1L, 10L);
         // when
         // then
         assertThatCode(() -> reservationService.createReservation(request2))
@@ -106,8 +106,8 @@ public class ReservationServiceIntegrationTest {
     @Test
     void should_ThrowException_WhenNotFuture() {
         // given
-        LocalDate date = currentDateTime.getDate().minusDays(1);
-        ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 3L);
+        final LocalDate date = currentDateTime.getDate().minusDays(1);
+        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 3L);
         // when
         // then
         assertThatThrownBy(() -> reservationService.createReservation(request))
@@ -119,7 +119,7 @@ public class ReservationServiceIntegrationTest {
     @Test
     void getReservations() {
         // when
-        List<ReservationInfo> result = reservationService.getReservations();
+        final List<ReservationInfo> result = reservationService.getReservations();
         // then
         assertThat(result).hasSize(13);
     }
@@ -130,7 +130,7 @@ public class ReservationServiceIntegrationTest {
         // when
         reservationService.cancelReservationById(1L);
         // then
-        List<Reservation> reservations = reservationRepository.findAll();
+        final List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).hasSize(12);
     }
 }

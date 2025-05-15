@@ -21,28 +21,28 @@ import org.springframework.test.web.servlet.MockMvc;
 public class AdminRoleInterceptorMockMvcTest {
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @DisplayName("권한이 없는 멤버가 어드민 페이지에 접근하면 403으로 응답한다")
     @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time"})
     @ParameterizedTest
-    void should_Response403_WhenNotAdminMemberAccessAdminPage(String uri) throws Exception {
+    void should_Response403_WhenNotAdminMemberAccessAdminPage(final String uri) throws Exception {
         // when
         // then
-        Cookie cookie = new Cookie("token", getUserToken());
+        final Cookie cookie = new Cookie("token", getUserToken());
         mockMvc.perform(get(uri)
-                        .contentType("application/json")
-                        .cookie(cookie)
-                ).andExpect(status().isForbidden());
+                .contentType("application/json")
+                .cookie(cookie)
+        ).andExpect(status().isForbidden());
     }
 
     @DisplayName("관리자는 어드민 페이지에 접근할 수 있다")
     @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time"})
     @ParameterizedTest
-    void can_Access_WhenAdminAccessAdminPage(String uri) throws Exception {
+    void can_Access_WhenAdminAccessAdminPage(final String uri) throws Exception {
         // when
         // then
-        Cookie cookie = new Cookie("token", getAdminToken());
+        final Cookie cookie = new Cookie("token", getAdminToken());
         mockMvc.perform(get(uri)
                 .contentType("application/json")
                 .cookie(cookie)

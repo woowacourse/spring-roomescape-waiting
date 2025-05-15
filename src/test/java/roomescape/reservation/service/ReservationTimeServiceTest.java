@@ -9,31 +9,31 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.fake.FakeReservationRepository;
+import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.AvailableTimeInfo;
 import roomescape.reservation.service.dto.ReservationTimeCreateCommand;
 import roomescape.reservation.service.dto.ReservationTimeInfo;
-import roomescape.fake.FakeReservationRepository;
-import roomescape.fake.FakeReservationTimeRepository;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
 
 class ReservationTimeServiceTest {
 
-    ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
-    ReservationRepository reservationRepository = new FakeReservationRepository();
-    ReservationTimeService reservationTimeService = new ReservationTimeService(reservationTimeRepository,
+    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    private final ReservationRepository reservationRepository = new FakeReservationRepository();
+    private final ReservationTimeService reservationTimeService = new ReservationTimeService(reservationTimeRepository,
             reservationRepository);
 
     @DisplayName("이미 존재하는 시간을 저장할 경우 예외가 발생한다")
     @Test
     void should_ThrowException_WhenCreateDuplicateTime() {
         // given
-        ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
+        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
         reservationTimeService.createReservationTime(request);
         // when
         // then
@@ -46,12 +46,12 @@ class ReservationTimeServiceTest {
     @Test
     void create() {
         // given
-        LocalTime time = LocalTime.of(11, 0);
-        ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(time);
+        final LocalTime time = LocalTime.of(11, 0);
+        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(time);
         // when
-        ReservationTimeInfo result = reservationTimeService.createReservationTime(request);
+        final ReservationTimeInfo result = reservationTimeService.createReservationTime(request);
         // then
-        ReservationTime savedTime = reservationTimeRepository.findById(1L).get();
+        final ReservationTime savedTime = reservationTimeRepository.findById(1L).get();
         assertAll(
                 () -> assertThat(result.id()).isEqualTo(1L),
                 () -> assertThat(result.startAt()).isEqualTo(time),
@@ -64,12 +64,12 @@ class ReservationTimeServiceTest {
     @Test
     void findAll() {
         // given
-        ReservationTimeCreateCommand request1 = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
-        ReservationTimeCreateCommand request2 = new ReservationTimeCreateCommand(LocalTime.of(12, 0));
+        final ReservationTimeCreateCommand request1 = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
+        final ReservationTimeCreateCommand request2 = new ReservationTimeCreateCommand(LocalTime.of(12, 0));
         reservationTimeService.createReservationTime(request1);
         reservationTimeService.createReservationTime(request2);
         // when
-        List<ReservationTimeInfo> result = reservationTimeService.getReservationTimes();
+        final List<ReservationTimeInfo> result = reservationTimeService.getReservationTimes();
         // then
         assertThat(result).hasSize(2);
     }
@@ -78,7 +78,7 @@ class ReservationTimeServiceTest {
     @Test
     void delete() {
         // given
-        ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
+        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
         reservationTimeService.createReservationTime(request);
         // when
         reservationTimeService.deleteReservationTimeById(1L);
@@ -90,11 +90,11 @@ class ReservationTimeServiceTest {
     @Test
     void should_ThrowException_WhenDeleteTimeWithinReservation() {
         // given
-        ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
-        ReservationTimeInfo response = reservationTimeService.createReservationTime(request);
-        ReservationTime time = new ReservationTime(response.id(), response.startAt());
-        Theme theme = new Theme(1L, "우테코방탈출", "탈출탈출탈출", "abcdefg");
-        Member member = new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN);
+        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(11, 0));
+        final ReservationTimeInfo response = reservationTimeService.createReservationTime(request);
+        final ReservationTime time = new ReservationTime(response.id(), response.startAt());
+        final Theme theme = new Theme(1L, "우테코방탈출", "탈출탈출탈출", "abcdefg");
+        final Member member = new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN);
         reservationRepository.save(new Reservation(null, member, LocalDate.now().plusDays(1), time, theme));
         // when
         // then
@@ -107,14 +107,14 @@ class ReservationTimeServiceTest {
     @Test
     void findAvailableTimes() {
         // given
-        ReservationTime savedTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        ReservationTime savedTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 0)));
-        Theme theme = new Theme(1L, "우테코 탈출", "우테코 방탈출", "wwwwww");
-        Member member = new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN);
-        LocalDate date = LocalDate.of(2025, 5, 1);
+        final ReservationTime savedTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        final ReservationTime savedTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 0)));
+        final Theme theme = new Theme(1L, "우테코 탈출", "우테코 방탈출", "wwwwww");
+        final Member member = new Member(null, "레오", "admin@gmail.com", "qwer!", MemberRole.ADMIN);
+        final LocalDate date = LocalDate.of(2025, 5, 1);
         reservationRepository.save(new Reservation(1L, member, date, savedTime1, theme));
         // when
-        List<AvailableTimeInfo> result = reservationTimeService.findAvailableTimes(date, theme.getId());
+        final List<AvailableTimeInfo> result = reservationTimeService.findAvailableTimes(date, theme.getId());
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),

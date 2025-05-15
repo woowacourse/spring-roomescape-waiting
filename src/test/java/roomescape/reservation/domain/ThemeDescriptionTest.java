@@ -11,6 +11,14 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class ThemeDescriptionTest {
 
+    private static Stream<Arguments> testValidateDescription() {
+        return Stream.of(
+                Arguments.arguments(" "),
+                Arguments.arguments("aaaa"),
+                Arguments.arguments("a".repeat(201))
+        );
+    }
+
     @DisplayName("테마 소개는 최소 5글자, 최대 200글자가 아니면 예외가 발생한다.")
     @ParameterizedTest
     @MethodSource
@@ -21,13 +29,5 @@ class ThemeDescriptionTest {
         assertThatThrownBy(() -> new ThemeDescription(description))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("테마 소개는 최소 5글자, 최대 200글자여야합니다.");
-    }
-
-    private static Stream<Arguments> testValidateDescription() {
-        return Stream.of(
-                Arguments.arguments(" "),
-                Arguments.arguments("aaaa"),
-                Arguments.arguments("a".repeat(201))
-        );
     }
 }

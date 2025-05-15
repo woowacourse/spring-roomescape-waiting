@@ -151,7 +151,7 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(LocalDateTime.now(), status.value(), status.getReasonPhrase(), e.getMessage(), path);
     }
 
-    private String extractPath(HttpServletRequest request) {
+    private String extractPath(final HttpServletRequest request) {
         String path = request.getServletPath();
         if (request.getQueryString() != null) {
             path += "?" + request.getQueryString();

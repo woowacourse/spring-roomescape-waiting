@@ -8,7 +8,7 @@ public interface MemberRepository {
 
     Optional<Member> findByEmailAndPassword(String email, String password);
 
-    Optional<Member> findById(long memberId);
+    Optional<Member> findById(long id);
 
     Member save(Member member);
 

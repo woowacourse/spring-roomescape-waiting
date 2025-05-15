@@ -3,20 +3,20 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.service.dto.ReservationSearchCondition;
-import roomescape.reservation.service.dto.ReservationCreateCommand;
-import roomescape.reservation.service.dto.ReservationInfo;
-import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.service.dto.ReservationCreateCommand;
+import roomescape.reservation.service.dto.ReservationInfo;
+import roomescape.reservation.service.dto.ReservationSearchCondition;
 
 @Service
 public class ReservationService {
@@ -59,13 +59,13 @@ public class ReservationService {
     private void validatePastDateTime(final LocalDate date, final ReservationTime reservationTime) {
         final boolean isBefore = date.isBefore(currentDateTime.getDate()) ||
                 date.isEqual(currentDateTime.getDate()) &&
-                reservationTime.isBefore(currentDateTime.getTime());
+                        reservationTime.isBefore(currentDateTime.getTime());
         if (isBefore) {
             throw new IllegalArgumentException("지나간 날짜와 시간은 예약 불가합니다.");
         }
     }
 
-    private void validateDuplicateReservation(ReservationCreateCommand command) {
+    private void validateDuplicateReservation(final ReservationCreateCommand command) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(command.date(), command.timeId(),
                 command.themeId())) {
             throw new IllegalArgumentException("해당 시간에 이미 예약이 존재합니다.");
@@ -93,9 +93,9 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationInfo> getReservations(ReservationSearchCondition condition) {
-        LocalDate fromDate = Optional.ofNullable(condition.fromDate()).orElse(MINIMUM_SEARCH_DATE);
-        LocalDate toDate = Optional.ofNullable(condition.toDate()).orElse(MAXIMUM_SEARCH_DATE);
+    public List<ReservationInfo> getReservations(final ReservationSearchCondition condition) {
+        final LocalDate fromDate = Optional.ofNullable(condition.fromDate()).orElse(MINIMUM_SEARCH_DATE);
+        final LocalDate toDate = Optional.ofNullable(condition.toDate()).orElse(MAXIMUM_SEARCH_DATE);
         return reservationRepository.findAllByCondition(condition.memberId(), condition.themeId(), fromDate, toDate)
                 .stream()
                 .map(ReservationInfo::new)

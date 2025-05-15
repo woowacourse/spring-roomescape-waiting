@@ -12,11 +12,11 @@ class ReservationTimeTest {
     @Test
     void testIsBefore() {
         // given
-        LocalTime time = LocalTime.of(10, 0);
-        ReservationTime reservationTime = new ReservationTime(1L, time);
+        final LocalTime time = LocalTime.of(10, 0);
+        final ReservationTime reservationTime = new ReservationTime(1L, time);
         // when
         // then
-        LocalTime afterTime = time.plusMinutes(1);
+        final LocalTime afterTime = time.plusMinutes(1);
         assertThat(reservationTime.isBefore(afterTime)).isTrue();
         assertThat(reservationTime.isBefore(time)).isTrue();
     }

@@ -36,36 +36,38 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid final ReservationCreateRequest request,
-            LoginMemberInfo loginMemberInfo
+            final LoginMemberInfo loginMemberInfo
     ) {
-        ReservationCreateCommand reservationCreateCommand = request.convertToCreateCommand(loginMemberInfo.id());
+        final ReservationCreateCommand reservationCreateCommand = request.convertToCreateCommand(loginMemberInfo.id());
         final ReservationInfo reservationInfo = reservationService.createReservation(reservationCreateCommand);
-        URI uri = URI.create("/reservations/" + reservationInfo.id());
-        ReservationResponse response = new ReservationResponse(reservationInfo);
+        final URI uri = URI.create("/reservations/" + reservationInfo.id());
+        final ReservationResponse response = new ReservationResponse(reservationInfo);
         return ResponseEntity.created(uri).body(response);
     }
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> create(@RequestBody @Valid final AdminReservationCreateRequest request) {
         final ReservationInfo reservationInfo = reservationService.createReservation(request.convertToCreateCommand());
-        URI uri = URI.create("/reservations/" + reservationInfo.id());
-        ReservationResponse response = new ReservationResponse(reservationInfo);
+        final URI uri = URI.create("/reservations/" + reservationInfo.id());
+        final ReservationResponse response = new ReservationResponse(reservationInfo);
         return ResponseEntity.created(uri).body(response);
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAll(@ModelAttribute ReservationSearchConditionRequest request) {
-        ReservationSearchCondition condition = request.toCondition();
+    public ResponseEntity<List<ReservationResponse>> findAll(
+            @ModelAttribute final ReservationSearchConditionRequest request) {
+        final ReservationSearchCondition condition = request.toCondition();
         final List<ReservationInfo> reservationInfos = reservationService.getReservations(condition);
-        List<ReservationResponse> responses = reservationInfos.stream()
+        final List<ReservationResponse> responses = reservationInfos.stream()
                 .map(ReservationResponse::new)
                 .toList();
         return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MemberReservationResponse>> findAllMine(LoginMemberInfo loginMemberInfo) {
-        final List<ReservationInfo> reservationInfos = reservationService.findReservationsByMemberId(loginMemberInfo.id());
+    public ResponseEntity<List<MemberReservationResponse>> findAllMine(final LoginMemberInfo loginMemberInfo) {
+        final List<ReservationInfo> reservationInfos = reservationService.findReservationsByMemberId(
+                loginMemberInfo.id());
         final List<MemberReservationResponse> responses = reservationInfos.stream()
                 .map(MemberReservationResponse::new)
                 .toList();

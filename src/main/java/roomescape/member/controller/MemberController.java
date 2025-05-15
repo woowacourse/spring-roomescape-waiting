@@ -22,15 +22,15 @@ public class MemberController {
     private final AuthService authService;
     private final MemberService memberService;
 
-    public MemberController(final AuthService authService, MemberService memberService) {
+    public MemberController(final AuthService authService, final MemberService memberService) {
         this.authService = authService;
         this.memberService = memberService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody MemberLoginCommand request) {
-        String token = authService.tokenLogin(request);
-        ResponseCookie cookie = ResponseCookie.from("token", token)
+    public ResponseEntity<Void> login(@RequestBody final MemberLoginCommand request) {
+        final String token = authService.tokenLogin(request);
+        final ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
                 .path("/")
                 .maxAge(LOGIN_COOKIE_MAX_AGE)
@@ -39,13 +39,13 @@ public class MemberController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<LoginMemberCheckResponse> getLoginMember(LoginMemberInfo loginMemberInfo) {
+    public ResponseEntity<LoginMemberCheckResponse> getLoginMember(final LoginMemberInfo loginMemberInfo) {
         return ResponseEntity.ok().body(new LoginMemberCheckResponse(loginMemberInfo.name()));
     }
 
     @GetMapping("/members")
     public ResponseEntity<List<MemberResponse>> getMembers() {
-        List<MemberResponse> responses = memberService.findAll()
+        final List<MemberResponse> responses = memberService.findAll()
                 .stream()
                 .map(MemberResponse::new)
                 .toList();
