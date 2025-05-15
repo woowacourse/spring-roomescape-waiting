@@ -24,22 +24,36 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        // token이 존재하고 token의 role 이 ADMIN
+        String token = extractTokenFromCookie(request);
+
+        if (token == null) {
+            throw new NotFoundCookieException();
+        }
+
+        if (!jwtTokenProvider.validateToken(token)) {
+            throw new ForbiddenException("유효하지 않는 토큰입니다.");
+        }
+
+        Claims claims = jwtTokenProvider.getClaims(token);
+        String roleStr = (String) claims.get("role");
+        Role role = Role.valueOf(roleStr);
+
+        if (!role.equals(Role.ROLE_ADMIN)) {
+            throw new ForbiddenException();
+        }
+        return true;
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (TOKEN_NAME_FILED.equals(cookie.getName())) {
-                    Claims claims = jwtTokenProvider.getClaims(cookie.getValue());
-                    String roleStr = (String) claims.get("role");
-                    Role role = Role.valueOf(roleStr);
-                    boolean equals = role.equals(Role.ROLE_ADMIN);
-                    if (!equals) {
-                        throw new ForbiddenException();
-                    }
-                    return true;
-                }
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (TOKEN_NAME_FILED.equals(cookie.getName())) {
+                return cookie.getValue();
             }
         }
-        throw new NotFoundCookieException();
+        return null;
     }
 }

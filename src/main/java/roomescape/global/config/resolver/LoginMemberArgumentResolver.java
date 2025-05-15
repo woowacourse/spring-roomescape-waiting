@@ -9,7 +9,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.global.auth.JwtTokenProvider;
-import roomescape.global.auth.exception.NotFoundCookieException;
 import roomescape.global.auth.service.AuthService;
 import roomescape.user.domain.User;
 
@@ -32,22 +31,29 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     @Override
-    public User resolveArgument(MethodParameter methodParameter, ModelAndViewContainer mavContainer,
-                                NativeWebRequest nativeWebRequest, WebDataBinderFactory binderFactory)
-            throws Exception {
+    public User resolveArgument(MethodParameter methodParameter,
+                                ModelAndViewContainer mavContainer,
+                                NativeWebRequest nativeWebRequest,
+                                WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) nativeWebRequest.getNativeRequest();
 
+        String token = extractTokenFromCookie(request);
+
+        String payload = jwtTokenProvider.getPayload(token);
+        return authService.findMember(payload);
+    }
+
+
+    private String extractTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (TOKEN_NAME_FIELD.equals(cookie.getName())) {
-                    String token = cookie.getValue();
-                    String payload = jwtTokenProvider.getPayload(token);
-                    return authService.findMember(payload);
-                }
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (TOKEN_NAME_FIELD.equals(cookie.getName())) {
+                return cookie.getValue();
             }
         }
-
-        throw new NotFoundCookieException();
+        return null;
     }
 }
