@@ -1,5 +1,6 @@
 package roomescape.auth.web.resolver;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -25,17 +26,28 @@ public class AuthenticatedMemberArgumentResolver implements HandlerMethodArgumen
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter,
-                                  ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest,
-                                  WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        String token = cookieProvider.extractTokenFromCookie(request.getCookies());
+        Cookie[] cookies = getCookies(request);
+
+        String token = cookieProvider.extractTokenFromCookie(cookies);
 
         if (token == null || token.isBlank()) {
             throw new TokenNotFoundException("토큰이 존재하지 않습니다.");
         }
 
         return authService.getMemberId(token);
+    }
+
+    private static Cookie[] getCookies(HttpServletRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException();
+        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new TokenNotFoundException("토큰이 존재하지 않습니다.");
+        }
+        return cookies;
     }
 }
