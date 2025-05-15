@@ -56,14 +56,9 @@ public class TimeService {
                         new TimeDataWithBookingInfo(
                                 time.getId(),
                                 time.getStartAt(),
-                                time.getReservations().stream()
-                                        .anyMatch(reservation -> reservation.isAlreadyBookedTime(
-                                                        date,
-                                                        themeId,
-                                                        time.getId()
-                                                )
-                                        )
+                                time.hasReservationOn(date, themeId)
                         )
-                ).toList();
+                )
+                .toList();
     }
 }

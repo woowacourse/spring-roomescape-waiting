@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,11 @@ public class ReservationTime {
 
     public static ReservationTime assignId(Long id, ReservationTime reservationTime) {
         return new ReservationTime(id, reservationTime.startAt);
+    }
+
+    public boolean hasReservationOn(LocalDate date, Long themeId) {
+        return reservations.stream()
+                .anyMatch(reservation -> reservation.isAlreadyBookedTime(date, themeId, this.id));
     }
 
     public Long getId() {
