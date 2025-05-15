@@ -9,6 +9,7 @@ import roomescape.reservation.controller.dto.AvailableReservationTimeWebResponse
 import roomescape.reservation.controller.dto.CreateReservationByAdminWebRequest;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
 import roomescape.reservation.controller.dto.ReservationSearchWebRequest;
+import roomescape.reservation.controller.dto.ReservationStatus;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.domain.ReservationDate;
@@ -37,7 +38,7 @@ public class ReservationService {
                         reservation.getTheme().getName().getValue(),
                         reservation.getDate().getValue(),
                         reservation.getTime().getStartAt(),
-                        "예약"
+                        ReservationStatus.CONFIRM.getStatus()
                 ))
                 .toList();
     }
