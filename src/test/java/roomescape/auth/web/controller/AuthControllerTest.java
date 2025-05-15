@@ -7,6 +7,9 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookie;
 import io.restassured.response.Response;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,27 +18,34 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.ReservationTestFixture;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.web.controller.dto.LoginRequest;
+import roomescape.member.model.Member;
+import roomescape.member.model.MemberRepository;
+import roomescape.member.model.Role;
 import roomescape.support.IntegrationTestSupport;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 class AuthControllerTest extends IntegrationTestSupport {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    String name = "웨이드";
+    String email = "wade@naver.com";
+    String password = "1234";
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("INSERT INTO member (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)",
-                2L, "웨이드", "user@example.com", "userPassword", "USER");
+        Member member = ReservationTestFixture.createUser(name, email, password);
+        memberRepository.save(member);
     }
 
     @DisplayName("로그인 성공시 쿠키를 반환한다")
     @Test
     void login() {
         //given
-        LoginRequest request = new LoginRequest("user@example.com", "userPassword");
+        LoginRequest request = new LoginRequest(email, password);
 
         //when
         Response response = RestAssured.given().log().all()
@@ -55,13 +65,13 @@ class AuthControllerTest extends IntegrationTestSupport {
     @Test
     void loginCheck() {
         //given
-        LoginRequest request = new LoginRequest("user@example.com", "userPassword");
+        LoginRequest request = new LoginRequest(email, password);
 
-        String authCookie = RestAssured.given()
+        String authCookie = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .post("/login")
-                .then()
+                .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .cookie(AUTH_COOKIE_KEY);
@@ -77,14 +87,14 @@ class AuthControllerTest extends IntegrationTestSupport {
 
         //then
         assertThat(result).isNotNull();
-        assertThat(result.email()).isEqualTo("user@example.com");
+        assertThat(result.email()).isEqualTo(email);
     }
 
     @DisplayName("로그아웃 시 쿠키가 만료된다")
     @Test
     void logout() {
         //given
-        LoginRequest request = new LoginRequest("user@example.com", "userPassword");
+        LoginRequest request = new LoginRequest(email, password);
 
         String authCookie = RestAssured.given()
                 .contentType(ContentType.JSON)
