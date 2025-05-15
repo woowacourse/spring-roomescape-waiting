@@ -10,7 +10,8 @@ public record MyReservationResponse(
     String theme,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
     @JsonFormat(pattern = "HH:mm") LocalTime time,
-    String status) {
+    String status
+) {
 
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(

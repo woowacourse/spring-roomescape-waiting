@@ -11,7 +11,8 @@ public record ReservationResponse(
     MemberResponse member,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
     ReservationTime time,
-    Theme theme) {
+    Theme theme
+) {
 
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
@@ -19,6 +20,7 @@ public record ReservationResponse(
             MemberResponse.from(reservation.getMember()),
             reservation.getDate(),
             reservation.getTime(),
-            reservation.getTheme());
+            reservation.getTheme()
+        );
     }
 }

@@ -26,7 +26,8 @@ public class AdminReservationController {
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse createReservation(
         @AuthMember Member member,
-        @RequestBody ReservationRequest request) {
+        @RequestBody ReservationRequest request
+    ) {
         return ReservationResponse.from(reservationService.addReservation(request));
     }
 }

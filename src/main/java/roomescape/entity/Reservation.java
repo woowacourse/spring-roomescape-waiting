@@ -33,7 +33,12 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(
+            Member member,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    ) {
         this.member = member;
         this.date = date;
         this.time = time;

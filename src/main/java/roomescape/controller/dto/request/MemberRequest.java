@@ -5,8 +5,8 @@ import roomescape.exception.custom.InvalidInputException;
 public record MemberRequest(
     String name,
     String email,
-    String password) {
-
+    String password
+) {
     public MemberRequest {
         validateNull(name, email, password);
         validateLengthOfString(name, email, password);

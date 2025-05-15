@@ -25,9 +25,12 @@ public class ReservationService {
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
 
-    public ReservationService(JpaReservationRepository reservationRepository,
-        JpaMemberRepository memberRepository,
-        JpaReservationTimeRepository reservationTimeRepository, JpaThemeRepository themeRepository) {
+    public ReservationService(
+            JpaReservationRepository reservationRepository,
+            JpaMemberRepository memberRepository,
+            JpaReservationTimeRepository reservationTimeRepository,
+            JpaThemeRepository themeRepository
+    ) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;

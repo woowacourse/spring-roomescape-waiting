@@ -33,8 +33,10 @@ public class TimeController {
     }
 
     @GetMapping("/{date}/{themeId}")
-    public List<TimeResponse> readReservationTimesWithBooked(@PathVariable LocalDate date,
-        @PathVariable Long themeId) {
+    public List<TimeResponse> readReservationTimesWithBooked(
+            @PathVariable LocalDate date,
+            @PathVariable Long themeId
+    ) {
         return timeService.findAllTimesWithBooked(date, themeId).stream()
             .map(TimeResponse::from)
             .toList();

@@ -41,7 +41,8 @@ public class ReservationController {
         @RequestParam Long memberId,
         @RequestParam Long themeId,
         @RequestParam LocalDate dateFrom,
-        @RequestParam LocalDate dateTo) {
+        @RequestParam LocalDate dateTo
+    ) {
         return reservationService.findReservationsByFilters(themeId, memberId, dateFrom, dateTo)
             .stream()
             .map(ReservationResponse::from)

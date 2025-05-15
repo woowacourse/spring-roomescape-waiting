@@ -8,7 +8,8 @@ public record ReservationRequest(
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
     Long timeId,
     Long themeId,
-    Long memberId) {
+    Long memberId
+) {
 
     public ReservationRequest {
         validateNull(date, timeId, themeId);

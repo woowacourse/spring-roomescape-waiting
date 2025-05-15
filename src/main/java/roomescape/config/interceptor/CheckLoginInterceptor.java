@@ -18,8 +18,11 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-        Object handler) {
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler
+    ) {
         String token = extractTokenFromCookie(request.getCookies());
         Member member = authService.findMemberByToken(token);
 

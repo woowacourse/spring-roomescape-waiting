@@ -6,7 +6,8 @@ public record ThemeResponse(
     Long id,
     String name,
     String description,
-    String thumbnail) {
+    String thumbnail
+) {
 
     public static ThemeResponse from(Theme theme) {
         return new ThemeResponse(

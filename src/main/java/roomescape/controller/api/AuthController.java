@@ -23,8 +23,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> createToken(@RequestBody LoginRequest request,
-        HttpServletResponse response) {
+    public ResponseEntity<Void> createToken(
+            @RequestBody LoginRequest request,
+            HttpServletResponse response
+    ) {
         String token = authService.createToken(request);
 
         Cookie cookie = new Cookie("token", token);

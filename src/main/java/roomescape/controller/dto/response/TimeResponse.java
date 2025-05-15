@@ -13,6 +13,7 @@ public record TimeResponse(
         return new TimeResponse(
             reservationTime.getId(),
             reservationTime.getStartAt(),
-            reservationTime.getAlreadyBooked());
+            reservationTime.getAlreadyBooked()
+        );
     }
 }
