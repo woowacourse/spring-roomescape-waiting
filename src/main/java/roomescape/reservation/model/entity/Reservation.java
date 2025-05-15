@@ -31,9 +31,11 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
     private ReservationTheme theme;
 
     private Long memberId;
@@ -46,6 +48,10 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.memberId = memberId;
+    }
+
+    public LocalDateTime getReservationDateTime() {
+        return LocalDateTime.of(date, time.getStartAt());
     }
 
     public static Reservation createFutureReservation(ReservationDetails details) {

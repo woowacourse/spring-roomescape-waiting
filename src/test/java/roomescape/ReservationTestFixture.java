@@ -48,4 +48,35 @@ public class ReservationTestFixture {
             .memberId(member.getId())
             .build();
     }
+
+    public static Reservation createReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme theme, Long id) {
+        return Reservation.builder()
+            .date(date)
+            .time(getReservationTimeFixture())
+            .theme(getReservationThemeFixture())
+            .memberId(id)
+            .build();
+    }
+
+    public static Reservation createReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme) {
+        return Reservation.builder()
+            .date(date)
+            .time(getReservationTimeFixture())
+            .theme(getReservationThemeFixture())
+            .build();
+    }
+
+    public static ReservationTime createTime(LocalTime time) {
+        return ReservationTime.builder()
+            .startAt(time)
+            .build();
+    }
+
+    public static ReservationTheme createTheme(String themeName, String description, String thumbnail) {
+        return ReservationTheme.builder()
+            .name(themeName)
+            .description(description)
+            .thumbnail(thumbnail)
+            .build();
+    }
 }

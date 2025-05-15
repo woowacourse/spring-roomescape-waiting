@@ -84,6 +84,11 @@ public class ReservationDbRepository implements ReservationRepository {
             .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약이 존재하지 않습니다."));
     }
 
+    @Override
+    public List<Reservation> findAllByMemberId(Long memberId) {
+        return reservationJpaRepository.findAllByMemberId(memberId);
+    }
+
     private List<ReservationWithMember> findAllByIds(List<Long> reservationIds) {
         return reservationJpaRepository.findAllWithMemberByIds(reservationIds);
     }

@@ -2,19 +2,28 @@ package roomescape.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.ReservationTestFixture;
+import roomescape.member.model.Member;
+import roomescape.member.model.Role;
 import roomescape.reservation.application.UserReservationService;
 import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
+import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.ReservationTheme;
+import roomescape.reservation.model.entity.ReservationTime;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.global.exception.BusinessRuleViolationException;
+import roomescape.reservation.model.repository.dto.ReservationWithMember;
 import roomescape.support.IntegrationTestSupport;
 
 class UserReservationServiceTest extends IntegrationTestSupport {
@@ -25,36 +34,51 @@ class UserReservationServiceTest extends IntegrationTestSupport {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)", "이름", "설명", "썸네일");
-        jdbcTemplate.update("INSERT INTO member (name, email, password, role) VALUES (?,?,?,?);",
-                "어드민", "admin@naver.com", "1234", "ADMIN");
+        ReservationTime reservationTime = ReservationTime.builder()
+            .startAt(LocalTime.parse("10:00"))
+            .build();
+
+        ReservationTheme theme = ReservationTheme.builder()
+            .name("이름")
+            .description("설명")
+            .thumbnail("썸네일")
+            .build();
+
+        Member member = Member.builder()
+            .name("어드민")
+            .email("admin@naver.com")
+            .password("1234")
+            .role(Role.ADMIN)
+            .build();
+        entityManager.persist(reservationTime);
+        entityManager.persist(theme);
+        entityManager.persist(member);
     }
 
     @DisplayName("요청된 예약 정보로 예약을 진행할 수 있다")
     @Test
     void createFutureReservation() {
         // given
-        String name = "웨이드";
         LocalDate date = LocalDate.now().plusDays(20);
         Long timeId = 1L;
         Long themeId = 1L;
-        CreateReservationServiceRequest request = new CreateReservationServiceRequest(name, 1L, date, timeId, themeId);
+        Long memberId = 1L;
+        CreateReservationServiceRequest request = new CreateReservationServiceRequest(memberId, date, timeId, themeId);
 
         // when
-        userReservationService.create(request);
+        ReservationServiceResponse response = userReservationService.create(request);
 
         // then
-        List<Reservation> reservations = reservationRepository.getAllWithMember();
+        List<ReservationWithMember> reservations = reservationRepository.getAllWithMember();
         assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(1);
-            softly.assertThat(reservations.getFirst().getName()).isEqualTo(name);
-            softly.assertThat(reservations.getFirst().getDate()).isEqualTo(date);
+            softly.assertThat(reservations.getFirst().memberId()).isEqualTo(response.id());
+            softly.assertThat(reservations.getFirst().date()).isEqualTo(response.date());
         });
     }
 
@@ -66,7 +90,8 @@ class UserReservationServiceTest extends IntegrationTestSupport {
         LocalDate date = LocalDate.now().minusDays(10);
         Long timeId = 1L;
         Long themeId = 1L;
-        CreateReservationServiceRequest request = new CreateReservationServiceRequest(name, 1L, date, timeId, themeId);
+        Long memberId = 1L;
+        CreateReservationServiceRequest request = new CreateReservationServiceRequest( memberId, date, timeId, themeId);
 
         // when & then
         Assertions.assertThatThrownBy(() -> userReservationService.create(request))
@@ -77,15 +102,17 @@ class UserReservationServiceTest extends IntegrationTestSupport {
     @Test
     void duplicationException() {
         // given
-        String name = "웨이드";
         LocalDate date = LocalDate.now().minusDays(10);
-        Long timeId = 1L;
-        Long themeId = 1L;
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", name, date,
-                timeId, themeId);
-        String anotherName = "검프";
+        ReservationTime reservationTime = ReservationTestFixture.getReservationTimeFixture();
+        ReservationTheme reservationTheme = ReservationTestFixture.getReservationThemeFixture();
+        Reservation reservation = ReservationTestFixture.createReservation(date, reservationTime, reservationTheme);
+
+        entityManager.persist(reservationTime);
+        entityManager.persist(reservationTheme);
+        entityManager.persist(reservation);
         Long memberId = 1L;
-        CreateReservationServiceRequest request = new CreateReservationServiceRequest(anotherName, memberId, date, timeId, themeId);
+        CreateReservationServiceRequest request = new CreateReservationServiceRequest(
+            memberId, date, reservationTime.getId(), reservationTheme.getId());
 
         // when & then
         Assertions.assertThatThrownBy(() -> userReservationService.create(request))

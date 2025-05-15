@@ -29,4 +29,6 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
 
     Reservation getById(Long id);
+
+    List<Reservation> findAllByMemberId(Long memberId);
 }
