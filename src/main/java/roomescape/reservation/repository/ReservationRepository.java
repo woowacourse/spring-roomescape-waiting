@@ -9,14 +9,14 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate fromDate,
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId, LocalDate fromDate,
                                                                 LocalDate toDate);
 
     List<Reservation> findByDateBetween(LocalDate from, LocalDate to);
 
-    boolean existsByTimeId(Long id);
+    boolean existsByTimeId(long id);
 
-    boolean existsByThemeId(Long id);
+    boolean existsByThemeId(long id);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 

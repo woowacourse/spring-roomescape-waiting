@@ -86,7 +86,7 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     }
 
     @Override
-    public List<ReservationAvailability> findAllReservationAvailability(final LocalDate date, final Long themeId) {
+    public List<ReservationAvailability> findAllReservationAvailability(final LocalDate date, final long themeId) {
         return List.of();
     }
 }

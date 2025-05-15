@@ -26,6 +26,6 @@ public interface ReservationTimeRepository extends CrudRepository<ReservationTim
             """, nativeQuery = true)
     List<ReservationAvailability> findAllReservationAvailability(
             @Param("date") LocalDate date,
-            @Param("themeId") Long themeId
+            @Param("themeId") long themeId
     );
 }

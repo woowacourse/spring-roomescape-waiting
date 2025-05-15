@@ -5,17 +5,17 @@ import java.time.LocalTime;
 
 public final class ReservationAvailability {
 
-    private Long timeId;
+    private long timeId;
     private LocalTime startAt;
     private boolean isBooked;
 
-    public ReservationAvailability(final Long timeId, final Time startAt, final boolean isBooked) {
+    public ReservationAvailability(final long timeId, final Time startAt, final boolean isBooked) {
         this.timeId = timeId;
         this.startAt = startAt.toLocalTime();
         this.isBooked = isBooked;
     }
 
-    public Long getTimeId() {
+    public long getTimeId() {
         return timeId;
     }
 

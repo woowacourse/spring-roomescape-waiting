@@ -68,8 +68,8 @@ public class FakeReservationDao implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
-            final Long memberId,
-            final Long themeId,
+            final long memberId,
+            final long themeId,
             final LocalDate fromDate,
             final LocalDate toDate
     ) {
@@ -88,13 +88,13 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByTimeId(final Long timeId) {
+    public boolean existsByTimeId(final long timeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.getTime().getId() == timeId);
     }
 
     @Override
-    public boolean existsByThemeId(final Long themeId) {
+    public boolean existsByThemeId(final long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.getTheme().getId() == themeId);
     }
