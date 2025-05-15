@@ -61,28 +61,6 @@ public class JdbcThemeDao implements ThemeDao {
     }
 
     @Override
-    public List<Theme> findMostReservedThemesBetweenLimit(LocalDate startDate, LocalDate endDate, int limitCount) {
-        String sql = """
-                SELECT
-                  t.id,
-                  t.name,
-                  t.description,
-                  t.thumbnail
-                FROM
-                  reservation as r
-                  INNER JOIN theme as t ON r.theme_id = t.id
-                WHERE
-                   r.date >= ? AND r.date < ?
-                GROUP BY
-                  theme_id
-                ORDER BY
-                  COUNT(theme_id) DESC
-                LIMIT ?;
-            """;
-        return jdbcTemplate.query(sql, mapResultsToTheme(), startDate, endDate, limitCount);
-    }
-
-    @Override
     public int deleteById(Long id) {
         try {
             String sql = "DELETE FROM theme WHERE id = ?";

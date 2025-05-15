@@ -127,6 +127,12 @@ public class JdbcReservationDao implements ReservationDao {
     }
 
     @Override
+    public List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate) {
+        String sql = "SELECT * FROM reservation WHERE date BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, mapResultsToReservation(), startDate, endDate);
+    }
+
+    @Override
     public int deleteById(Long id) {
         String sql = "DELETE FROM reservation WHERE id = ?";
         return jdbcTemplate.update(sql, id);

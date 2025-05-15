@@ -1,7 +1,6 @@
 package roomescape.reservation.dao.reservation;
 
 import org.springframework.stereotype.Repository;
-import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
 
 import java.time.LocalDate;
@@ -39,6 +38,11 @@ public class ReservationDaoImpl implements ReservationDao {
     @Override
     public List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
         return jpaReservationDao.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, startDate, endDate);
+    }
+
+    @Override
+    public List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate) {
+        return jpaReservationDao.findByDateBetween(startDate, endDate);
     }
 
     @Override

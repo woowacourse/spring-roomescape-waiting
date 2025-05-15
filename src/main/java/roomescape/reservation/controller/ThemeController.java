@@ -37,11 +37,6 @@ public class ThemeController {
         return themeService.findAllThemes();
     }
 
-    @GetMapping("/popular")
-    public List<Theme> readMostReservedThemes() {
-        return themeService.findMostReservedThemes();
-    }
-
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteThemeById(@PathVariable("id") Long id) {

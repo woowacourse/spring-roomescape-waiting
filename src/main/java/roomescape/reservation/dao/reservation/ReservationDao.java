@@ -18,6 +18,8 @@ public interface ReservationDao {
 
     List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
 
+    List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate);
+
     int deleteById(Long id);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);

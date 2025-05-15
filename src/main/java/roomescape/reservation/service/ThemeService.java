@@ -27,11 +27,6 @@ public class ThemeService {
         return themeDao.findAll();
     }
 
-    public List<Theme> findMostReservedThemes() {
-        LocalDate today = LocalDate.now(ZoneId.of(GlobalConstant.TIME_ZONE));
-        return themeDao.findMostReservedThemesBetweenLimit(today.minusDays(TOP_RANK_PERIOD_DAYS), today, TOP_RANK_THRESHOLD);
-    }
-
     public Theme createTheme(ThemeCreateRequest request) {
         validateDuplicateName(request);
         Theme theme = new Theme(null, request.name(), request.description(), request.thumbnail());

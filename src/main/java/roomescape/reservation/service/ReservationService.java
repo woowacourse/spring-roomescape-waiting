@@ -22,7 +22,11 @@ import roomescape.reservation.exception.NotCorrectDateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -116,5 +120,29 @@ public class ReservationService {
         if (reservationDao.deleteById(id) == 0) {
             throw new InvalidInputException("존재하지 않는 예약 id이다.");
         }
+    }
+
+    public List<Theme> findMostReservedThemes() {
+        LocalDate today = LocalDate.now(ZoneId.of(GlobalConstant.TIME_ZONE));
+        List<Reservation> reservations = reservationDao.findByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today);
+        Map<Theme, Long> themeCounts = calculateThemeCounts(reservations);
+        return parseMostReservedThemes(themeCounts);
+    }
+
+    private Map<Theme, Long> calculateThemeCounts(List<Reservation> reservations) {
+        Map<Theme, Long> themeCounts = new HashMap<>();
+        for (Reservation reservation : reservations) {
+            Theme theme = reservation.getTheme();
+            themeCounts.put(theme, themeCounts.getOrDefault(theme, 0L) + 1);
+        }
+        return themeCounts;
+    }
+
+    private List<Theme> parseMostReservedThemes(Map<Theme, Long> themeCounts) {
+        return themeCounts.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(TOP_RANK_THRESHOLD)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 }

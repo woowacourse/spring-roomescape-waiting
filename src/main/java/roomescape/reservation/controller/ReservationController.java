@@ -16,6 +16,7 @@ import roomescape.member.dto.response.MemberGetResponse;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.response.MyReservationGetResponse;
 import roomescape.reservation.dto.response.ReservationGetResponse;
+import roomescape.reservation.model.Theme;
 import roomescape.reservation.service.ReservationService;
 
 import java.util.List;
@@ -59,5 +60,10 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable("id") Long id) {
         reservationService.deleteReservationById(id);
+    }
+
+    @GetMapping("/popular-themes")
+    public List<Theme> readMostReservedThemes() {
+        return reservationService.findMostReservedThemes();
     }
 }

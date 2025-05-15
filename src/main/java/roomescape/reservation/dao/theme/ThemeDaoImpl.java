@@ -32,11 +32,6 @@ public class ThemeDaoImpl implements ThemeDao {
     }
 
     @Override
-    public List<Theme> findMostReservedThemesBetweenLimit(LocalDate startDate, LocalDate endDate, int limitCount) {
-        return jpaThemeDao.findMostReservedThemesBetweenLimit(startDate, endDate, limitCount);
-    }
-
-    @Override
     public int deleteById(Long id) {
         int deleteCount = jpaThemeDao.countById(id);
         if (deleteCount == 0) {

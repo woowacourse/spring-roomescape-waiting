@@ -14,8 +14,6 @@ public interface ThemeDao {
 
     Optional<Theme> findById(Long id);
 
-    List<Theme> findMostReservedThemesBetweenLimit(LocalDate startDate, LocalDate endDate, int limitCount);
-
     int deleteById(Long id);
 
     boolean existsByName(String name);
