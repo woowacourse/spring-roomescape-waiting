@@ -23,7 +23,8 @@ import roomescape.repository.fake.FakeMemberRepository;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class AuthControllerTest {
 
-    private static final MemberRepository memberRepository = new FakeMemberRepository();
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private AuthorizationProvider authorizationProvider;
@@ -96,7 +97,12 @@ class AuthControllerTest {
     static class TestConfig {
         @Bean
         public MemberService memberService() {
-            return new MemberService(memberRepository);
+            return new MemberService(memberRepository());
+        }
+
+        @Bean
+        public MemberRepository memberRepository() {
+            return new FakeMemberRepository();
         }
     }
 }

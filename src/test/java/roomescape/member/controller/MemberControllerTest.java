@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.restassured.RestAssured;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,8 @@ import roomescape.repository.fake.FakeMemberRepository;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class MemberControllerTest {
-    private static final MemberRepository memberRepository = new FakeMemberRepository();
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void getMembersTest() {
@@ -41,6 +43,8 @@ class MemberControllerTest {
             .statusCode(200)
             .extract().body().jsonPath().getList(".", MemberNameSelectResponse.class);
 
+        System.out.println("expected = " + expected);
+        System.out.println("responses = " + responses);
         assertThat(responses).containsExactlyInAnyOrderElementsOf(expected);
     }
 
@@ -60,7 +64,12 @@ class MemberControllerTest {
     static class TestConfig {
         @Bean
         public MemberService memberService() {
-            return new MemberService(memberRepository);
+            return new MemberService(memberRepository());
+        }
+
+        @Bean
+        public MemberRepository memberRepository() {
+            return new FakeMemberRepository();
         }
     }
 }
