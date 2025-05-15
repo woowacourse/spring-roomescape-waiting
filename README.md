@@ -14,6 +14,7 @@
 * http://localhost:8080/reservation: 사용자가 예약을 할 수 있는 페이지
 * http://localhost:8080/signup: 사용자가 회원가입을 할 수 있는 페이지
 * http://localhost:8080/login: 사용자가 로그인을 할 수 있는 페이지
+* http://localhost:8080/reservation-mine: 자신의 예약을 확인 할 수 있는 페이지
 
 ## 요구사항 분석
 

@@ -50,7 +50,7 @@ public class TimeController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteReservationTime(@PathVariable Long id) {
+    public void deleteReservationTime(@PathVariable("id") Long id) {
         timeService.removeReservationTime(id);
     }
 }
