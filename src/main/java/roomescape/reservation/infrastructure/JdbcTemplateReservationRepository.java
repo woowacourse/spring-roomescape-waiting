@@ -2,19 +2,15 @@ package roomescape.reservation.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.common.jdbc.JdbcUtils;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
+import roomescape.reservation.infrastructure.mapper.BookedThemeRowMapper;
+import roomescape.reservation.infrastructure.mapper.ReservationRowMapper;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
-import roomescape.theme.domain.ThemeName;
-import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.ArrayList;
@@ -25,35 +21,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Map.Entry;
-import static java.util.Map.entry;
 
 @Repository
 @RequiredArgsConstructor
 public class JdbcTemplateReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
-
-    private final RowMapper<Reservation> reservationMapper = (resultSet, rowNum) -> {
-        ReservationTime time = ReservationTime.withId(
-                ReservationTimeId.from(resultSet.getLong("time_id")),
-                resultSet.getTime("start_at").toLocalTime()
-        );
-
-        Theme theme = Theme.withId(
-                ThemeId.from(resultSet.getLong("theme_id")),
-                ThemeName.from(resultSet.getString("theme_name")),
-                ThemeDescription.from(resultSet.getString("description")),
-                ThemeThumbnail.from(resultSet.getString("thumbnail"))
-        );
-
-        return Reservation.withId(
-                ReservationId.from(resultSet.getLong("id")),
-                UserId.from(resultSet.getLong("user_id")),
-                ReservationDate.from(resultSet.getDate("date").toLocalDate()),
-                time,
-                theme
-        );
-    };
 
     public Optional<Reservation> findById(final ReservationId id) {
         final String sql = """
@@ -75,7 +48,7 @@ public class JdbcTemplateReservationRepository {
                 where r.id = ?
                 """;
 
-        return JdbcUtils.queryForOptional(jdbcTemplate, sql, reservationMapper, id.getValue());
+        return JdbcUtils.queryForOptional(jdbcTemplate, sql, ReservationRowMapper.INSTANCE, id.getValue());
     }
 
     public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate,
@@ -103,16 +76,7 @@ public class JdbcTemplateReservationRepository {
 
         return jdbcTemplate.query(
                         sql,
-                        (rs, rowNum) -> {
-                            final Theme theme = Theme.withId(
-                                    ThemeId.from(rs.getLong("id")),
-                                    ThemeName.from(rs.getString("name")),
-                                    ThemeDescription.from(rs.getString("description")),
-                                    ThemeThumbnail.from(rs.getString("thumbnail"))
-                            );
-                            final int bookedCount = rs.getInt("booked_count");
-                            return entry(theme, bookedCount);
-                        },
+                        BookedThemeRowMapper.INSTANCE,
                         startDate.getValue(),
                         endDate.getValue(),
                         count)
@@ -166,6 +130,6 @@ public class JdbcTemplateReservationRepository {
             params.add(dateTo.getValue());
         }
 
-        return jdbcTemplate.query(sql.toString(), reservationMapper, params.toArray());
+        return jdbcTemplate.query(sql.toString(), ReservationRowMapper.INSTANCE, params.toArray());
     }
 }
