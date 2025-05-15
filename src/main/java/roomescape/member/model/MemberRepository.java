@@ -10,4 +10,6 @@ public interface MemberRepository {
     List<Member> getAll();
 
     Member getById(Long id);
+
+    void save(Member member);
 }

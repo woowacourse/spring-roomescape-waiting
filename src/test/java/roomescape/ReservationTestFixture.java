@@ -3,6 +3,7 @@ package roomescape;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.member.model.Member;
+import roomescape.member.model.Role;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
@@ -23,11 +24,12 @@ public class ReservationTestFixture {
             .build();
     }
 
-    public static Member getMemberFixture() {
+    public static Member getUserFixture() {
         return Member.builder()
             .name("웨이드")
             .email("wade@naver.com")
             .password("1234")
+            .role(Role.USER)
             .build();
     }
 
@@ -40,11 +42,12 @@ public class ReservationTestFixture {
             .build();
     }
 
-    public static Reservation getReservationFixture(LocalDate date, Member member) {
+    public static Reservation getReservationFixture(LocalDate date, Member member,
+        ReservationTime time, ReservationTheme theme) {
         return Reservation.builder()
             .date(date)
-            .time(getReservationTimeFixture())
-            .theme(getReservationThemeFixture())
+            .time(time)
+            .theme(theme)
             .memberId(member.getId())
             .build();
     }
@@ -61,8 +64,8 @@ public class ReservationTestFixture {
     public static Reservation createReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme) {
         return Reservation.builder()
             .date(date)
-            .time(getReservationTimeFixture())
-            .theme(getReservationThemeFixture())
+            .time(reservationTime)
+            .theme(reservationTheme)
             .build();
     }
 
@@ -77,6 +80,15 @@ public class ReservationTestFixture {
             .name(themeName)
             .description(description)
             .thumbnail(thumbnail)
+            .build();
+    }
+
+    public static Member createUser(String name, String email, String password) {
+        return Member.builder()
+            .name(name)
+            .email(email)
+            .password(password)
+            .role(Role.USER)
             .build();
     }
 }
