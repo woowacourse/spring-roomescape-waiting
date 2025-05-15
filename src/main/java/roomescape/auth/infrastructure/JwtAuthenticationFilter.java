@@ -42,11 +42,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             memberId = Long.valueOf(subject);
             request.setAttribute(MEMBER_ID_ATTRIBUTE, memberId);
         } catch (JwtException e) {
-            log.info("토큰을 추출하는 과정에서 문제가 발생했습니다.", e);
+            log.debug("토큰을 추출하는 과정에서 문제가 발생했습니다.", e);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증에 실패했습니다.");
             return;
         } catch (NumberFormatException e) {
-            log.info("memberId의 형식이 올바르지 않습니다 memberId = {}", memberId, e);
+            log.debug("memberId의 형식이 올바르지 않습니다 memberId = {}", memberId, e);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 요청입니다.");
             return;
         }

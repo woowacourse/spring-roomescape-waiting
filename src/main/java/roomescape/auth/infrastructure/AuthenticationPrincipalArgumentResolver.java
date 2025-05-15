@@ -3,7 +3,6 @@ package roomescape.auth.infrastructure;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -17,7 +16,6 @@ import roomescape.exception.UnauthorizedException;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthService authService;
@@ -38,8 +36,7 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
         try {
             return authService.extractMemberByRequest(request);
         } catch (IllegalArgumentException | NotFoundException e) {
-            log.error(e.getMessage());
-            throw new UnauthorizedException("인증에 실패했습니다.");
+            throw new UnauthorizedException("인증에 실패했습니다.", e);
         }
     }
 }

@@ -14,13 +14,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import javax.crypto.SecretKey;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import roomescape.exception.TokenCreationException;
 import roomescape.exception.UnauthorizedException;
 
 @Component
-@Slf4j
 public class JwtTokenProvider implements TokenProvider {
 
     private final SecretKey key;
@@ -46,7 +44,6 @@ public class JwtTokenProvider implements TokenProvider {
                     .signWith(key)
                     .compact();
         } catch (IllegalArgumentException | JwtException e) {
-            log.error("JWT 토큰 생성 실패", e);
             throw new TokenCreationException("토큰 생성 중 오류가 발생했습니다.");
         }
     }

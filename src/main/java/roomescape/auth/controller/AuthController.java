@@ -29,18 +29,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public void login(@RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
-        log.info("로그인 시작");
+        log.debug("로그인 시작");
         final String token = authService.createToken(request);
-        log.info("토큰 생성 완료");
+        log.debug("토큰 생성 완료");
 
         final ResponseCookie cookie = ResponseCookie.from(COOKIE_TOKEN, token)
                 .httpOnly(true)
                 .path("/")
                 .build();
-        log.info("쿠키 생성 완료");
+        log.debug("쿠키 생성 완료");
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        log.info("로그인 성공");
+        log.debug("로그인 성공");
     }
 
     @PostMapping("/logout")
