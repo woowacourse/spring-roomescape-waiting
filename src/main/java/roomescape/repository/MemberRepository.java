@@ -1,12 +1,18 @@
 package roomescape.repository;
 
+import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.Member;
 
-public interface MemberRepository extends ListCrudRepository<Member, Long> {
+public interface MemberRepository {
 
-    boolean existsByEmail(String email);
+    Member save(Member member);
+
+    List<Member> findAll();
+
+    Optional<Member> findById(Long id);
 
     Optional<Member> findByEmailAndPassword(String email, String password);
+
+    boolean existsByEmail(String email);
 }
