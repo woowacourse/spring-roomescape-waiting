@@ -6,7 +6,7 @@ spring:
   datasource:
     url: jdbc:h2:mem:database
   messages:
-    basename: reservationStatus        # → src/main/resources/messages*.properties 읽음
+    basename: reservationStatus
     encoding: UTF-8
     fallback-to-system-locale: false
 

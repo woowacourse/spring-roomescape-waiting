@@ -3,7 +3,6 @@ package roomescape.reservation.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import roomescape.reservation.domain.Reservation;
 
@@ -15,8 +14,7 @@ public record MyReservationResponse(
         String status
 ) {
 
-    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("reservationStatus",
-            Locale.getDefault());
+    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("reservationStatus");
 
     public MyReservationResponse(final Reservation reservation) {
         this(
