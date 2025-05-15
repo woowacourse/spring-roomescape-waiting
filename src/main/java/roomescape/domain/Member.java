@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +15,8 @@ import java.util.Objects;
 
 @Entity
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Member {
 
     @Id
@@ -33,10 +34,6 @@ public class Member {
 
     public static Member create(String name, Role role, String email, String password) {
         return new Member(null, name, role, email, password);
-    }
-
-    public static Member create(Long id, String name, Role role, String email, String password) {
-        return new Member(id, name, role, email, password);
     }
 
     public boolean isIncorrectPassword(String password) {

@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,8 +17,8 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Reservation {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,15 +45,5 @@ public class Reservation {
             Theme theme
     ) {
         return new Reservation(null, member, date, time, theme, ReservationStatus.NOT_RESERVED);
-    }
-
-    public static Reservation create(
-            Long id,
-            Member member,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-        return new Reservation(id, member, date, time, theme, ReservationStatus.RESERVED);
     }
 }

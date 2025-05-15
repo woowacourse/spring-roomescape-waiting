@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +14,8 @@ import java.util.Objects;
 
 @Entity
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationTime {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +24,6 @@ public class ReservationTime {
 
     public static ReservationTime create(LocalTime time) {
         return new ReservationTime(null, time);
-    }
-
-    public static ReservationTime create(Long id, LocalTime time) {
-        return new ReservationTime(id, time);
     }
 
     @Override
