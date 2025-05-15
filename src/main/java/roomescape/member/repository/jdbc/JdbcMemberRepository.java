@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -13,6 +14,7 @@ import roomescape.member.domain.MemberRole;
 import roomescape.member.repository.MemberRepository;
 
 @Repository
+@ConditionalOnProperty(name = "repository.strategy", havingValue = "jdbc")
 public class JdbcMemberRepository implements MemberRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;

@@ -15,6 +15,9 @@ public class CookieTokenAuthorizationHandler extends TokenAuthorizationHandler {
     @Override
     public String getToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
         return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(TOKEN_NAME))
             .map(Cookie::getValue)
             .findFirst()
