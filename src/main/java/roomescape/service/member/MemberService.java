@@ -3,6 +3,7 @@ package roomescape.service.member;
 import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.dto.member.LoginRequestDto;
 import roomescape.dto.member.SignupRequestDto;
@@ -38,6 +39,7 @@ public class MemberService {
         return jwtTokenProvider.createToken(member);
     }
 
+    @Transactional
     public long signup(SignupRequestDto signupRequestDto) {
         boolean isDuplicateUserExist = memberRepository.existByUsername(signupRequestDto.email());
         if (isDuplicateUserExist) {
