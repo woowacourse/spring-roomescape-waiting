@@ -20,8 +20,8 @@ public final class BookedStatus {
 
     private int sequence;
 
-    public static BookedStatus from(final int value) {
-        return new BookedStatus(value);
+    public static BookedStatus from(final int sequence) {
+        return new BookedStatus(sequence);
     }
 
     public static BookedStatus from(final boolean value) {
