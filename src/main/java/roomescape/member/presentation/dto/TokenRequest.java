@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 public class TokenRequest {
     @Email
     private final String email;
+
     @NotBlank
     private final String password;
 
