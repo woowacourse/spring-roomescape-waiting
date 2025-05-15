@@ -58,7 +58,6 @@ public class Reservation {
         this.theme = theme;
         this.member = member;
         this.status = status;
-        this.member.addReservation(this);
     }
 
     private void validateIsNonNull(final Object object) {
