@@ -3,7 +3,6 @@ package roomescape.reservation.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -29,8 +28,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "GROUP BY t " +
             "ORDER BY COUNT(r) DESC " +
             "LIMIT :limit")
-    List<Theme> findThemesWithReservationCount(@Param("startDate") ReservationDate startDate,
-                                               @Param("endDate") ReservationDate endDate,
+    List<Theme> findThemesWithReservationCount(ReservationDate startDate,
+                                               ReservationDate endDate,
                                                int limit);
 
 }
