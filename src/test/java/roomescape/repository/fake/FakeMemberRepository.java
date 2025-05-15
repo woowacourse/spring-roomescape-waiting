@@ -1,5 +1,6 @@
 package roomescape.repository.fake;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,12 +9,8 @@ import roomescape.member.repository.MemberRepository;
 
 public class FakeMemberRepository implements MemberRepository {
 
-    private final Map<Long, Member> data;
+    private final Map<Long, Member> data = new HashMap<>();
     private Long autoIncrementId = 1L;
-
-    public FakeMemberRepository(Map<Long, Member> data) {
-        this.data = data;
-    }
 
     @Override
     public Member save(Member member) {

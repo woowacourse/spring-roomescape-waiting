@@ -1,9 +1,6 @@
 package roomescape.auth.controller;
 
 import io.restassured.RestAssured;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +14,7 @@ import roomescape.auth.infrastructure.AuthorizationPrincipal;
 import roomescape.auth.infrastructure.provider.AuthorizationProvider;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.member.fixture.MemberFixture;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 import roomescape.repository.fake.FakeMemberRepository;
@@ -25,30 +23,19 @@ import roomescape.repository.fake.FakeMemberRepository;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class AuthControllerTest {
 
-    private static final Map<Long, Member> memberData = new HashMap<>();
-    private static final MemberRepository memberRepository = new FakeMemberRepository(memberData);
+    private static final MemberRepository memberRepository = new FakeMemberRepository();
+
     @Autowired
     private AuthorizationProvider authorizationProvider;
-
-    @AfterEach
-    void tearDown() {
-        memberData.clear();
-    }
 
     @Test
     void login() {
         // given
-        Member member = new Member(
-            1L,
-            "testUser",
-            "testEmail@naver.com",
-            MemberRole.USER,
-            "testPassword"
-        );
+        Member member = MemberFixture.createMember(MemberRole.USER);
 
-        memberData.put(member.getId(), member);
+        Member savedMember = memberRepository.save(member);
 
-        LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
+        LoginRequest request = new LoginRequest(savedMember.getEmail(), savedMember.getPassword());
 
         // when
         RestAssured.given().log().all()
@@ -63,16 +50,11 @@ class AuthControllerTest {
     @Test
     void loginCheck() {
         // given
-        Member member = new Member(
-            1L,
-            "testUser",
-            "testEmail@naver.com",
-            MemberRole.USER,
-            "testPassword"
-        );
+        Member member = MemberFixture.createMember(MemberRole.USER);
 
-        memberData.put(member.getId(), member);
-        AuthorizationPrincipal principal = getAuthorizationPrincipal(member);
+        Member savedMember = memberRepository.save(member);
+
+        AuthorizationPrincipal principal = getAuthorizationPrincipal(savedMember);
 
         // when
         RestAssured.given().log().all()
@@ -85,16 +67,11 @@ class AuthControllerTest {
     @Test
     void logout() {
         // given
-        Member member = new Member(
-            1L,
-            "testUser",
-            "testEmail@naver.com",
-            MemberRole.USER,
-            "testPassword"
-        );
+        Member member = MemberFixture.createMember(MemberRole.USER);
 
-        memberData.put(member.getId(), member);
-        AuthorizationPrincipal principal = getAuthorizationPrincipal(member);
+        Member savedMember = memberRepository.save(member);
+
+        AuthorizationPrincipal principal = getAuthorizationPrincipal(savedMember);
 
         // when
         RestAssured.given().log().all()

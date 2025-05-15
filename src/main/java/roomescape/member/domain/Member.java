@@ -46,6 +46,14 @@ public class Member {
         this.password = password;
     }
 
+    public Member(String name, String email, MemberRole role, String password) {
+        validate(name, email, role, password);
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.password = password;
+    }
+
     public static Member generateWithPrimaryKey(Member member, Long newPrimaryKey) {
         return new Member(newPrimaryKey, member.name, member.email, member.role, member.password);
     }
