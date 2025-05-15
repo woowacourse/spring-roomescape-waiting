@@ -1,13 +1,10 @@
-package roomescape.handler;
+package roomescape.exception;
 
 import java.time.LocalDateTime;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import roomescape.exception.CustomException;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.ErrorResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {

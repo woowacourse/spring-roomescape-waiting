@@ -2,10 +2,10 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.dto.request.MemberRequest;
+import roomescape.controller.dto.request.MemberRequest;
 import roomescape.entity.Member;
 import roomescape.exception.custom.DuplicatedException;
-import roomescape.repository.jpa.JpaMemberRepository;
+import roomescape.repository.JpaMemberRepository;
 
 @Service
 public class MemberService {

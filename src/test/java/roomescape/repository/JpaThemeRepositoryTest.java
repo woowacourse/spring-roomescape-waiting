@@ -1,4 +1,4 @@
-package roomescape.repository.jpa;
+package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,58 +18,56 @@ import roomescape.entity.Theme;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class JpaReservationTimeRepositoryTest {
+class JpaThemeRepositoryTest {
 
     @Autowired
     private EntityManager em;
     @Autowired
-    private JpaReservationTimeRepository jpaReservationTimeRepository;
-    @Autowired
     private JpaThemeRepository jpaThemeRepository;
+    @Autowired
+    private JpaReservationTimeRepository jpaReservationTimeRepository;
     @Autowired
     private JpaReservationRepository jpaReservationRepository;
     @Autowired
     private JpaMemberRepository jpaMemberRepository;
 
     @Test
-    @DisplayName("주어진 시간과 테마의 예약 시간과 현재 예약 여부를 함께 조회한다")
-    void findAllTimesWithBooked() {
+    @DisplayName("일주일 동안의 인기 테마를 검색할 수 있다.")
+    void findTopReservedThemesInPeriodWithLimit() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
         Theme theme = new Theme("이름", "설명", "썸네일");
-        ReservationTime time = new ReservationTime(LocalTime.of(10, 0), false);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0), null);
         LocalDate date = LocalDate.of(2025, 4, 28);
 
         Reservation reservation = new Reservation(member, date, time, theme);
 
-        jpaMemberRepository.save(member);
         jpaThemeRepository.save(theme);
+        jpaMemberRepository.save(member);
         jpaReservationTimeRepository.save(time);
         jpaReservationRepository.save(reservation);
 
         em.flush();
         em.clear();
 
-        List<ReservationTime> times = jpaReservationTimeRepository.findAllTimesWithBooked(date, 1L);
+        List<Theme> themes = jpaThemeRepository.findTop10ByDateBetween(date.minusDays(7), date);
 
-        assertThat(times.getFirst().getAlreadyBooked()).isTrue();
+        assertThat(themes.getLast().getId()).isEqualTo(1);
     }
 
-
     @Test
-    @DisplayName("해당 시간이 있다면 true를 반환한다.")
-    void existTimeByStartAt() {
-        LocalTime time = LocalTime.of(10, 0);
+    @DisplayName("해당 시간이 없다면 true를 반환한다.")
+    void existThemeByName() {
+        Theme theme = new Theme("이름", "설명", "썸네일");
+        jpaThemeRepository.save(theme);
 
-        jpaReservationTimeRepository.save(new ReservationTime(time, false));
-
-        assertThat(jpaReservationTimeRepository.existsByStartAt(time)).isTrue();
+        assertThat(jpaThemeRepository.existsByName(theme.getName())).isTrue();
     }
 
     @Test
     @DisplayName("해당 시간이 없다면 false를 반환한다.")
-    void notExistTimeByStartAt() {
-        LocalTime time = LocalTime.of(11, 0);
+    void notExistThemeByName() {
+        Theme theme = new Theme("이름", "설명", "썸네일");
 
-        assertThat(jpaReservationTimeRepository.existsByStartAt(time)).isFalse();
+        assertThat(jpaThemeRepository.existsByName(theme.getName())).isFalse();
     }
 }

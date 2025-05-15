@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dto.request.MemberRequest;
+import roomescape.controller.dto.request.MemberRequest;
 import roomescape.exception.custom.InvalidInputException;
 
 class MemberRequestTest {

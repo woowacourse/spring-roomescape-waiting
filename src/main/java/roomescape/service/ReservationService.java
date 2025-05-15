@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.dto.request.ReservationRequest;
+import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -12,10 +12,10 @@ import roomescape.entity.Theme;
 import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
-import roomescape.repository.jpa.JpaMemberRepository;
-import roomescape.repository.jpa.JpaReservationRepository;
-import roomescape.repository.jpa.JpaReservationTimeRepository;
-import roomescape.repository.jpa.JpaThemeRepository;
+import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.JpaReservationRepository;
+import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.repository.JpaThemeRepository;
 
 @Service
 public class ReservationService {

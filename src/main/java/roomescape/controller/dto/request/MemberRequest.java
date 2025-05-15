@@ -1,4 +1,4 @@
-package roomescape.dto.request;
+package roomescape.controller.dto.request;
 
 import roomescape.exception.custom.InvalidInputException;
 
