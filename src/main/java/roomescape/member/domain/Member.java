@@ -30,10 +30,6 @@ public final class Member {
         this.role = role;
     }
 
-    public Member(final long id, final String name, final String email, final String password, final String role) {
-        this(id, new MemberName(name), new MemberEmail(email), password, Role.of(role));
-    }
-
     public Member() {
 
     }
@@ -66,20 +62,12 @@ public final class Member {
         return id;
     }
 
-    public MemberName getMemberName() {
+    public MemberName getName() {
         return name;
     }
 
-    public MemberEmail getMemberEmail() {
+    public MemberEmail getEmail() {
         return email;
-    }
-
-    public String getName() {
-        return name.getName();
-    }
-
-    public String getEmail() {
-        return email.getEmail();
     }
 
     public String getPassword() {

@@ -11,12 +11,12 @@ import roomescape.member.repository.MemberRepository;
 public class FakeMemberDao implements MemberRepository {
 
     private final List<Member> members = new ArrayList<>();
-    private int index = 0;
+    private long index = 0;
 
     @Override
     public Member save(final Member member) {
         Member savedMember = new Member(++index, member.getName(), member.getEmail(), member.getPassword(),
-                member.getRole().name());
+                member.getRole());
         members.add(savedMember);
         return savedMember;
     }
@@ -81,19 +81,19 @@ public class FakeMemberDao implements MemberRepository {
     @Override
     public Optional<Member> findByEmailAndPassword(final MemberEmail email, final String password) {
         return members.stream()
-                .filter(member -> member.getMemberEmail().equals(email) && member.getPassword().equals(password))
+                .filter(member -> member.getEmail().equals(email) && member.getPassword().equals(password))
                 .findFirst();
     }
 
     @Override
     public boolean existsByEmail(final MemberEmail email) {
         return members.stream()
-                .anyMatch(member -> member.getMemberEmail().equals(email));
+                .anyMatch(member -> member.getEmail().equals(email));
     }
 
     @Override
     public boolean existsByName(final MemberName name) {
         return members.stream()
-                .anyMatch(member -> member.getMemberName().equals(name));
+                .anyMatch(member -> member.getName().equals(name));
     }
 }
