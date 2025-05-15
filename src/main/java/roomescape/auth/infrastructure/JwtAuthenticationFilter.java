@@ -3,11 +3,9 @@ package roomescape.auth.infrastructure;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,10 +17,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String TOKEN_COOKIE_NAME = "token";
     private static final String MEMBER_ID_ATTRIBUTE = "memberId";
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CookieManager cookieManager;
 
     @Override
     protected void doFilterInternal(
@@ -30,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final HttpServletResponse response,
             final FilterChain filterChain
     ) throws ServletException, IOException {
-        final String token = extractTokenFromCookies(request.getCookies());
+        final String token = cookieManager.extractLoginToken(request.getCookies());
         if (!StringUtils.hasText(token)) {
             filterChain.doFilter(request, response);
             return;
@@ -52,16 +50,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String extractTokenFromCookies(final Cookie[] cookies) {
-        if (cookies == null) {
-            return null;
-        }
-        return Arrays.stream(cookies)
-                .filter(c -> TOKEN_COOKIE_NAME.equals(c.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
     }
 }
