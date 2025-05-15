@@ -32,6 +32,16 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("인증되지 않은 사용자의 예약 페이지 접근 테스트")
+    void unauthorizedReservationTest() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/reservation")
+                .then().log().all()
+                .statusCode(401); // 또는 리다이렉션 코드 302
+    }
+
+    @Test
     @DisplayName("로그인 페이지 테스트")
     void loginTest() {
         RestAssured.given().log().all()
