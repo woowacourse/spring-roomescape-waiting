@@ -59,7 +59,7 @@ public class ReservationTimeServiceTest {
     void findReservationTimeByDateAndThemeIdWithIsBooked() {
         // Given
         // When
-        List<ReservationTimeWithIsBookedGetResponse> responses = reservationTimeService.findReservationTimeByDateAndThemeIdWithIsBooked(LocalDate.of(2025, 5, 1), 1L);
+        List<ReservationTimeWithIsBookedGetResponse> responses = reservationTimeService.findReservationTimeByDateAndThemeIdWithIsBooked(LocalDate.of(2025, 5, 11), 1L);
 
         // Then
         assertAll(() -> {

@@ -92,11 +92,11 @@ public class ReservationServiceTest {
         assertAll(() -> {
             assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, null, null)).hasSize(10);
             assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, null, null)).hasSize(10);
-            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(12);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, null, LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 13))).hasSize(12);
             assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, null, null)).hasSize(5);
-            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
-            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(6);
-            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(3);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, null, LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 13))).hasSize(6);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(null, 1L, LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 13))).hasSize(6);
+            assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 13))).hasSize(3);
         });
     }
     
