@@ -15,7 +15,7 @@ public record ReservationWaitingResponse(
 ) {
     public static ReservationWaitingResponse from(ReservationWaitingDto reservationWaiting) {
         return new ReservationWaitingResponse(
-                reservationWaiting.reservationid(),
+                reservationWaiting.reservationId(),
                 reservationWaiting.theme(),
                 reservationWaiting.date(),
                 reservationWaiting.time(),

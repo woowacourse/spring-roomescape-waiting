@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record ReservationWaitingDto(
-        long reservationid,
+        long reservationId,
         String theme,
         LocalDate date,
         LocalTime time,
