@@ -15,14 +15,14 @@ public record ReservationResponse(
 
     public static ReservationResponse from(final Reservation reservation) {
         ReservationTimeResponse reservationTimeResponse = ReservationTimeResponse.from(
-                reservation.getReservationTime()
+                reservation.getTime()
         );
         ThemeResponse themeResponse = ThemeResponse.from(reservation.getTheme());
         MemberResponse memberResponse = MemberResponse.fromEntity(reservation.getMember());
 
         return new ReservationResponse(reservation.getId(),
                 memberResponse,
-                reservation.getReservationDate(),
+                reservation.getDate(),
                 reservationTimeResponse,
                 themeResponse
         );

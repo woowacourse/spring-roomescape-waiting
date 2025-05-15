@@ -1,7 +1,6 @@
 package roomescape.reservation.domain;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -16,14 +15,14 @@ import roomescape.member.domain.Member;
 @Entity
 public class Reservation {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne @JoinColumn(name = "member_id", nullable = false)
     private Member member;
     @Column(nullable = false)
-    private LocalDate reservationDate;
+    private LocalDate date;
     @ManyToOne @JoinColumn(name = "time_id", nullable = false)
-    private ReservationTime reservationTime;
+    private ReservationTime time;
     @ManyToOne @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
@@ -33,51 +32,39 @@ public class Reservation {
     public Reservation(
             final Long id,
             final Member member,
-            final LocalDate reservationDate,
-            final ReservationTime reservationTime,
+            final LocalDate date,
+            final ReservationTime time,
             final Theme theme
     ) {
         this.id = id;
         this.member = member;
-        this.reservationDate = reservationDate;
-        this.reservationTime = reservationTime;
+        this.date = date;
+        this.time = time;
         this.theme = theme;
     }
 
-    public Reservation(Member member, LocalDate reservationDate, ReservationTime reservationTime, Theme theme) {
-        this(null, member, reservationDate, reservationTime, theme);
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme);
     }
 
     public Long getId() {
         return id;
     }
 
-    public Long getReservationTimeId() {
-        return reservationTime.getId();
-    }
-
     public Member getMember() {
         return member;
     }
 
-    public LocalDate getReservationDate() {
-        return reservationDate;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
-    }
-
-    public LocalTime getReservationStartTime() {
-        return reservationTime.getStartAt();
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
     }
 
     @Override
