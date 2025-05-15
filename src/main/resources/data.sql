@@ -1,7 +1,7 @@
-INSERT INTO users (id, name, email, password, role)
-VALUES (1, 'admin', 'admin@email.com', 'a(단방향) 해시 처리 완료', 'ADMIN'),
-       (2, 'normal1', 'normal1@email.com', 'a(단방향) 해시 처리 완료', 'NORMAL'),
-       (3, 'normal2', 'normal2@email.com', 'a(단방향) 해시 처리 완료', 'NORMAL');
+INSERT INTO users (name, email, password, role)
+VALUES ('admin', 'admin@email.com', 'a(단방향) 해시 처리 완료', 'ADMIN'),
+       ('normal1', 'normal1@email.com', 'a(단방향) 해시 처리 완료', 'NORMAL'),
+       ('normal2', 'normal2@email.com', 'a(단방향) 해시 처리 완료', 'NORMAL');
 
 INSERT INTO reservation_times (start_at)
 VALUES ('10:00'),
