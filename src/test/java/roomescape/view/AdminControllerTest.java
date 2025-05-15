@@ -32,6 +32,31 @@ class AdminControllerTest {
     }
 
     @Test
+    @DisplayName("인증되지 않은 사용자의 어드민 페이지 테스트")
+    void unauthenticatedUserCannotAccessAdminPage() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/admin")
+                .then().log().all()
+                .statusCode(401);
+    }
+
+    @Test
+    @DisplayName("일반 사용자의 어드민 페이지 테스트")
+    void regularUserCannotAccessAdminPage() {
+        // given
+        final Map<String, String> cookies = memberFixture.loginUser();
+
+        // when - then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .when().get("/admin")
+                .then().log().all()
+                .statusCode(403);
+    }
+
+    @Test
     @DisplayName("예약 페이지 테스트")
     void reservationPageTest() {
         // given
