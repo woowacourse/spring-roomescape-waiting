@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +18,17 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
+import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
+import roomescape.model.Member;
+import roomescape.model.Reservation;
+import roomescape.model.ReservationTime;
 import roomescape.model.Role;
+import roomescape.model.Theme;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @Slf4j
 @SpringBootTest
@@ -28,7 +38,18 @@ class ReservationServiceTest {
     @Autowired
     ReservationService reservationService;
 
+    @Autowired
+    ReservationRepository reservationRepository;
+
+    @Autowired
+    ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
+
     private LoginMember loginMember;
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +68,7 @@ class ReservationServiceTest {
         );
 
         // when
-        ReservationResponseDto response = reservationService.saveReservation(request, loginMember);
+        ReservationResponseDto response = this.reservationService.saveReservation(request, this.loginMember);
 
         // then
         assertAll(
@@ -62,13 +83,13 @@ class ReservationServiceTest {
         // given
         ReservationRegisterDto request = new ReservationRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
-        ReservationResponseDto saved = reservationService.saveReservation(request, loginMember);
+        ReservationResponseDto saved = this.reservationService.saveReservation(request, this.loginMember);
 
         // when
-        reservationService.cancelReservation(saved.id());
+        this.reservationService.cancelReservation(saved.id());
 
         // then
-        List<ReservationResponseDto> reservations = reservationService.getAllReservations();
+        List<ReservationResponseDto> reservations = this.reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
     }
 
@@ -78,13 +99,13 @@ class ReservationServiceTest {
         // given
         ReservationRegisterDto request = new ReservationRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
-        reservationService.saveReservation(request, loginMember);
+        this.reservationService.saveReservation(request, this.loginMember);
         ReservationRegisterDto savedRequest = new ReservationRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
 
         // when && then
         assertThatThrownBy(
-                () -> reservationService.saveReservation(savedRequest, loginMember))
+                () -> this.reservationService.saveReservation(savedRequest, this.loginMember))
                 .isInstanceOf(DuplicatedException.class);
     }
 
@@ -96,7 +117,41 @@ class ReservationServiceTest {
                 LocalDate.now().toString(), 1L, 1L);
         // when && then
         assertThatThrownBy(
-                () -> reservationService.saveReservation(request, loginMember))
+                () -> this.reservationService.saveReservation(request, this.loginMember))
                 .isInstanceOf(IllegalStateException.class);
+
+    }
+
+    @DisplayName("사용자가 예약한 예약 내역을 모두 가져온다")
+    @Test
+    void test6() {
+        //given
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
+        ReservationTime savedReservationTime = this.reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마", "공포", "image");
+        Theme savedTheme = this.themeRepository.save(theme);
+
+        Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
+        Member savedMember = this.memberRepository.save(member);
+
+        Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
+                savedMember, LocalDate.now());
+        Reservation savedReservation = this.reservationRepository.save(reservation);
+
+        LoginMember loginMember = new LoginMember(savedMember);
+
+        //when
+        List<MemberReservationResponseDto> response = this.reservationService.getReservationsOfMember(
+                loginMember);
+
+        List<MemberReservationResponseDto> comparedResponse = List.of(
+                new MemberReservationResponseDto(savedReservation));
+
+        //then
+        assertAll(
+                () -> assertThat(response).hasSize(1),
+                () -> assertThat(response).isEqualTo(comparedResponse)
+        );
     }
 }

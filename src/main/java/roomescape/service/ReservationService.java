@@ -30,10 +30,10 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository,
+                              MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -63,7 +63,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponseDto> searchReservations(final ReservationSearchDto reservationSearchDto) {
+    public List<ReservationResponseDto> searchReservations(ReservationSearchDto reservationSearchDto) {
         Long themeId = reservationSearchDto.themeId();
         Long memberId = reservationSearchDto.memberId();
         LocalDate startDate = reservationSearchDto.startDate();
@@ -80,6 +80,14 @@ public class ReservationService {
 
     public void cancelReservation(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
+        List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
+
+        return reservations.stream()
+                .map(MemberReservationResponseDto::new)
+                .toList();
     }
 
     private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
@@ -100,16 +108,8 @@ public class ReservationService {
                 });
     }
 
-    private Member findMemberById(final Long id) {
+    private Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자에 대한 예약 요청입니다."));
-    }
-
-    public List<MemberReservationResponseDto> getReservationsOfMember(final LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
-
-        return reservations.stream()
-                .map(MemberReservationResponseDto::new)
-                .toList();
     }
 }
