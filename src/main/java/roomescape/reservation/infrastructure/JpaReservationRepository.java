@@ -7,6 +7,8 @@ import roomescape.reservation.domain.Reservation;
 
 public interface JpaReservationRepository extends CrudRepository<Reservation, Long> {
 
+    List<Reservation> findByMemberId(Long memberId);
+
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate from, LocalDate to);

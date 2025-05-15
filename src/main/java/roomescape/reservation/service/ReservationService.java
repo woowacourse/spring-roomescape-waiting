@@ -3,12 +3,14 @@ package roomescape.reservation.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.SearchCondition;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.presentation.dto.MemberResponse;
+import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
@@ -108,6 +110,14 @@ public class ReservationService {
                     reservation.getTheme().getDescription(), reservation.getTheme().getThumbnail()),
                 new MemberResponse(reservation.getMember().getId(), reservation.getMember().getName())
             ))
+            .toList();
+    }
+
+    public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
+        List<Reservation> reservations = reservationRepository.findByMemberId(loginMemberInfo.id());
+
+        return reservations.stream()
+            .map(MyReservationResponse::from)
             .toList();
     }
 }
