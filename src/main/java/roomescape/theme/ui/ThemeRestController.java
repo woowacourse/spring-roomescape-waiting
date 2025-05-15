@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.RequiresRole;
-import roomescape.theme.applcation.ThemeService;
+import roomescape.theme.application.ThemeService;
 import roomescape.theme.ui.dto.CreateThemeRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
