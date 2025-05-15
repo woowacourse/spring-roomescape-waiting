@@ -34,7 +34,8 @@ public class ReservationCommandUseCase {
             throw new ConflictException("추가하려는 예약이 이미 존재합니다.");
         }
 
-        final ReservationTime reservationTime = reservationTimeQueryUseCase.get(createReservationServiceRequest.timeId());
+        final ReservationTime reservationTime = reservationTimeQueryUseCase.get(
+                createReservationServiceRequest.timeId());
 
         final Theme theme = themeQueryUseCase.get(createReservationServiceRequest.themeId());
 

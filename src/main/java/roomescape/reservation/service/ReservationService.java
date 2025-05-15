@@ -10,6 +10,7 @@ import roomescape.reservation.controller.dto.CreateReservationByAdminWebRequest;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
 import roomescape.reservation.controller.dto.ReservationSearchWebRequest;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
+import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.service.converter.ReservationConverter;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
@@ -29,9 +30,16 @@ public class ReservationService {
                 reservationQueryUseCase.getAll());
     }
 
-    public List<ReservationWebResponse> getAll(Long memberId) {
-        return ReservationConverter.toDto(
-                reservationQueryUseCase.getAllByMemberId(memberId));
+    public List<ReservationWithStatusResponse> getByMemberId(Long memberId) {
+        return reservationQueryUseCase.getByMemberId(memberId).stream()
+                .map(reservation -> new ReservationWithStatusResponse(
+                        reservation.getId(),
+                        reservation.getTheme().getName().getValue(),
+                        reservation.getDate().getValue(),
+                        reservation.getTime().getStartAt(),
+                        "예약"
+                ))
+                .toList();
     }
 
     public List<AvailableReservationTimeWebResponse> getAvailable(final LocalDate date, final Long id) {

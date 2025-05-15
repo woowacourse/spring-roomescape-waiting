@@ -23,10 +23,8 @@ public class MemberQueryUseCase {
     private final AccountRepository accountRepository;
 
     public Account getAccount(LoginRequest loginRequest) {
-        final Member member = memberRepository.findByEmail(MemberEmail.from(loginRequest.email())
-        ).orElseThrow(() -> new NotFoundException("등록된 이메일이 존재하지 않습니다."));
-
-        return accountRepository.findByMemberId(member.getId());
+        return accountRepository.findAccountByMemberEmail(MemberEmail.from(loginRequest.email()))
+                .orElseThrow(() -> new NotFoundException("등록된 이메일이 존재하지 않습니다."));
     }
 
     public Member get(Long id) {

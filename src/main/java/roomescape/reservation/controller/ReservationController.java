@@ -24,6 +24,7 @@ import roomescape.reservation.controller.dto.CreateReservationByAdminWebRequest;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
 import roomescape.reservation.controller.dto.ReservationSearchWebRequest;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
+import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RequiredArgsConstructor
@@ -42,8 +43,8 @@ public class ReservationController {
     }
 
     @GetMapping(BASE_PATH + "/mine")
-    public List<ReservationWebResponse> getAll(@LoginMember MemberInfo memberInfo) {
-        return reservationService.getAll(memberInfo.id());
+    public List<ReservationWithStatusResponse> getAll(@LoginMember MemberInfo memberInfo) {
+        return reservationService.getByMemberId(memberInfo.id());
     }
 
     @GetMapping(BASE_PATH + "/times")
@@ -57,7 +58,8 @@ public class ReservationController {
     public ResponseEntity<ReservationWebResponse> create(
             @RequestBody final CreateReservationWebRequest createReservationWebRequest,
             @LoginMember MemberInfo memberInfo) {
-        final ReservationWebResponse reservationWebResponse = reservationService.create(createReservationWebRequest, memberInfo);
+        final ReservationWebResponse reservationWebResponse = reservationService.create(createReservationWebRequest,
+                memberInfo);
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationWebResponse.id()));
         return ResponseEntity.created(location)
                 .body(reservationWebResponse);
@@ -66,7 +68,8 @@ public class ReservationController {
     @PostMapping("/admin" + BASE_PATH)
     public ResponseEntity<ReservationWebResponse> createReservationByAdmin(
             @RequestBody final CreateReservationByAdminWebRequest createReservationByAdminWebRequest) {
-        final ReservationWebResponse reservationWebResponse = reservationService.create(createReservationByAdminWebRequest);
+        final ReservationWebResponse reservationWebResponse = reservationService.create(
+                createReservationByAdminWebRequest);
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationWebResponse.id()));
         return ResponseEntity.created(location)
                 .body(reservationWebResponse);

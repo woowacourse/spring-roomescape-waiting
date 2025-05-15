@@ -1,17 +1,20 @@
 package roomescape.member.repository;
 
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 
-public interface MemberRepository {
+@Repository
+public interface JpaMemberRepository extends MemberRepository, JpaRepository<Member, Long> {
 
+    @Override
     boolean existsByEmail(MemberEmail email);
 
+    @Override
     Member save(Member member);
 
-    Optional<Member> findById(Long id);
-
+    @Override
     List<Member> findAll();
 }

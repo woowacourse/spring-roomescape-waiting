@@ -1,15 +1,12 @@
 package roomescape.reservation.repository;
 
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
+import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 
-@Repository
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository {
 
     boolean existsByTimeId(Long timeId);
 
@@ -22,14 +19,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByMemberId(Long memberId);
 
-    @Query("SELECT t FROM Theme t " +
-            "LEFT JOIN Reservation r ON r.theme.id = t.id " +
-            "WHERE r.date BETWEEN :startDate AND :endDate " +
-            "GROUP BY t " +
-            "ORDER BY COUNT(r) DESC " +
-            "LIMIT :limit")
-    List<Theme> findThemesWithReservationCount(ReservationDate startDate,
-                                               ReservationDate endDate,
-                                               int limit);
+    List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit);
 
+    Reservation save(Reservation reservation);
+
+    List<Reservation> findAll();
+
+    void deleteById(Long id);
+
+    Optional<Reservation> findById(Long id);
 }

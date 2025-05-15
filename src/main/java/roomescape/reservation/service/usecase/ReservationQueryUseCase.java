@@ -26,7 +26,7 @@ public class ReservationQueryUseCase {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> getAllByMemberId(final Long memberId) {
+    public List<Reservation> getByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId);
     }
 
