@@ -35,7 +35,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("예약 추가 테스트")
-    void createReservationTest() {
+    void createUserReservationTest() {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 40)));
 
@@ -50,12 +50,12 @@ public class ReservationServiceTest {
         );
 
         // when - then
-        assertThatCode(() -> reservationService.createReservation(adminReservationRequest)).doesNotThrowAnyException();
+        assertThatCode(() -> reservationService.createAdminReservation(adminReservationRequest)).doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("예약 추가 시 예약 시간이 조회되지 않으면 예외가 발생한다")
-    void createReservationExceptionTest() {
+    void createUserReservationExceptionTest() {
         // given
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
@@ -68,7 +68,7 @@ public class ReservationServiceTest {
         );
 
         // when - then
-        assertThatThrownBy(() -> reservationService.createReservation(adminReservationRequest))
+        assertThatThrownBy(() -> reservationService.createAdminReservation(adminReservationRequest))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("예약 시간 정보를 찾을 수 없습니다.");
     }
@@ -87,7 +87,7 @@ public class ReservationServiceTest {
         );
 
         // when - then
-        assertThatThrownBy(() -> reservationService.createReservation(adminReservationRequest))
+        assertThatThrownBy(() -> reservationService.createAdminReservation(adminReservationRequest))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("테마 정보를 찾을 수 없습니다.");
     }
@@ -107,7 +107,7 @@ public class ReservationServiceTest {
                 reservationTime.getId(),
                 2L
         );
-        reservationService.createReservation(adminReservationRequest);
+        reservationService.createAdminReservation(adminReservationRequest);
 
         // when - then
         assertThat(reservationService.getReservations(null, null, null, null).size()).isEqualTo(1);
@@ -128,7 +128,7 @@ public class ReservationServiceTest {
                 reservationTime.getId(),
                 2L
         );
-        reservationService.createReservation(adminReservationRequest);
+        reservationService.createAdminReservation(adminReservationRequest);
 
         // when - then
         assertAll(
@@ -152,7 +152,7 @@ public class ReservationServiceTest {
                 reservationTime.getId(),
                 2L
         );
-        ReservationResponse reservation = reservationService.createReservation(adminReservationRequest);
+        ReservationResponse reservation = reservationService.createAdminReservation(adminReservationRequest);
 
         // when
         reservationService.deleteReservation(reservation.getId());

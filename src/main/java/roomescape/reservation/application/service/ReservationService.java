@@ -39,33 +39,34 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse createReservation(final ReservationRequest reservationRequest, final Long memberId) {
-        ReservationTime reservationTime = getReservationTime(reservationRequest.getTimeId());
-        Theme theme = getTheme(reservationRequest.getThemeId());
-        final LocalDate date = reservationRequest.getDate();
-        validateReservationDateTime(date, reservationTime);
-
+    public ReservationResponse createUserReservation(final ReservationRequest reservationRequest, final Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
 
-        final Reservation reservation = new Reservation(
-                member,
-                theme,
-                date,
-                reservationTime
+        return createReservation(
+                reservationRequest.getTimeId(),
+                reservationRequest.getThemeId(),
+                reservationRequest.getDate(),
+                member
         );
-
-        return new ReservationResponse(reservationRepository.save(reservation));
     }
 
     @Transactional
-    public ReservationResponse createReservation(final AdminReservationRequest adminReservationRequest) {
-        ReservationTime reservationTime = getReservationTime(adminReservationRequest.getTimeId());
-        Theme theme = getTheme(adminReservationRequest.getThemeId());
-        final LocalDate date = adminReservationRequest.getDate();
-        validateReservationDateTime(date, reservationTime);
-
+    public ReservationResponse createAdminReservation(final AdminReservationRequest adminReservationRequest) {
         Member member = findMemberById(adminReservationRequest.getMemberId());
+
+        return createReservation(
+                adminReservationRequest.getTimeId(),
+                adminReservationRequest.getThemeId(),
+                adminReservationRequest.getDate(),
+                member
+        );
+    }
+
+    private ReservationResponse createReservation(Long timeId, Long themeId, LocalDate date, Member member) {
+        ReservationTime reservationTime = getReservationTime(timeId);
+        Theme theme = getTheme(themeId);
+        validateReservationDateTime(date, reservationTime);
 
         final Reservation reservation = new Reservation(
                 member,

@@ -28,7 +28,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             final @RequestBody @Valid AdminReservationRequest adminReservationRequest
     ) {
-        ReservationResponse reservation = reservationService.createReservation(adminReservationRequest);
+        ReservationResponse reservation = reservationService.createAdminReservation(adminReservationRequest);
 
         return ResponseEntity.created(createUri(reservation.getId()))
                 .body(reservation);

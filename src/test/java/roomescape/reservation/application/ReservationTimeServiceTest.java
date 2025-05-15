@@ -95,7 +95,7 @@ public class ReservationTimeServiceTest {
                 reservationTime.getId(),
                 2L
         );
-        reservationService.createReservation(adminReservationRequest);
+        reservationService.createAdminReservation(adminReservationRequest);
 
         // when
         List<AvailableReservationTimeResponse> reservationTimes = reservationTimeService.getReservationTimes(
@@ -142,7 +142,7 @@ public class ReservationTimeServiceTest {
                 reservationTime.getId(),
                 2L
         );
-        reservationService.createReservation(adminReservationRequest);
+        reservationService.createAdminReservation(adminReservationRequest);
 
         // when - then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(reservationTime.getId()))

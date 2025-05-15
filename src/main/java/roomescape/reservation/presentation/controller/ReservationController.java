@@ -37,7 +37,7 @@ public class ReservationController {
             final @RequestBody @Valid ReservationRequest reservationRequest,
             final Long memberId
     ) {
-        ReservationResponse reservation = reservationService.createReservation(reservationRequest, memberId);
+        ReservationResponse reservation = reservationService.createUserReservation(reservationRequest, memberId);
 
         return ResponseEntity.created(createUri(reservation.getId()))
                 .body(reservation);
