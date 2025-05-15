@@ -66,8 +66,8 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndVisitDateBetween(
             reservationSearchConditionRequest.getThemeId(),
             reservationSearchConditionRequest.getMemberId(),
-            reservationSearchConditionRequest.getDateFrom().toString(),
-            reservationSearchConditionRequest.getDateTo().toString()
+            reservationSearchConditionRequest.getDateFrom(),
+            reservationSearchConditionRequest.getDateTo()
         );
 
         return reservations.stream()

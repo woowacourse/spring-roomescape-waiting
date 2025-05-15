@@ -1,5 +1,6 @@
 package roomescape.reservation.repository.jdbc;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,8 +97,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberAndThemeAndVisitDateBetween(Long themeId, Long memberId, String dateFrom,
-                                                                     String dateTo) {
+    public List<Reservation> findByMemberAndThemeAndVisitDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
+                                                                     LocalDate dateTo) {
         String query = """
             SELECT
                 r.id as reservation_id,

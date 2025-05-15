@@ -40,14 +40,14 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     public List<Reservation> findByMemberAndThemeAndVisitDateBetween(
         Long themeId,
         Long memberId,
-        String dateFrom,
-        String dateTo
+        LocalDate dateFrom,
+        LocalDate dateTo
     ) {
         return jpaReservationRepository.findByMemberAndThemeAndVisitDateBetween(
             themeId,
             memberId,
-            LocalDate.parse(dateFrom),
-            LocalDate.parse(dateTo)
+            dateFrom,
+            dateTo
         );
     }
 }
