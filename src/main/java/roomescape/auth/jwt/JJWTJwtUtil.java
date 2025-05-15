@@ -1,15 +1,9 @@
 package roomescape.auth.jwt;
 
-import static roomescape.exception.SecurityErrorCode.TOKEN_EXPIRED;
-import static roomescape.exception.SecurityErrorCode.TOKEN_INVALID;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.auth.AuthToken;
@@ -17,6 +11,13 @@ import roomescape.auth.LoginInfo;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.UserRole;
 import roomescape.exception.auth.AuthenticationException;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+import static roomescape.exception.SecurityErrorCode.TOKEN_EXPIRED;
+import static roomescape.exception.SecurityErrorCode.TOKEN_INVALID;
 
 @Component
 public class JJWTJwtUtil implements JwtUtil {

@@ -1,11 +1,12 @@
 package roomescape.business.model.vo;
 
-import static roomescape.exception.ErrorCode.START_TIME_INVALID;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.time.LocalTime;
 import roomescape.exception.business.InvalidCreateArgumentException;
+
+import java.time.LocalTime;
+
+import static roomescape.exception.ErrorCode.START_TIME_INVALID;
 
 @Embeddable
 public record StartTime(

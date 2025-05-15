@@ -1,13 +1,14 @@
 package roomescape.infrastructure;
 
-import java.util.List;
-import java.util.Optional;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Email;
 import roomescape.business.model.vo.Id;
+
+import java.util.List;
+import java.util.Optional;
 
 @Primary
 @Repository

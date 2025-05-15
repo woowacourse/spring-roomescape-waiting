@@ -1,15 +1,14 @@
 package roomescape.infrastructure;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.ReservationDate;
-import roomescape.business.model.vo.StartTime;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public interface JpaThemeDao extends JpaRepository<Theme, Id> {
 

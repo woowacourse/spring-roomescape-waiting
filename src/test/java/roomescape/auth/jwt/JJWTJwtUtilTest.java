@@ -1,21 +1,19 @@
 package roomescape.auth.jwt;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
-import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.AuthToken;
 import roomescape.auth.LoginInfo;
-import roomescape.auth.jwt.JJWTJwtUtil;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.UserRole;
 import roomescape.exception.auth.AuthenticationException;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+
+import static org.assertj.core.api.Assertions.*;
 
 class JJWTJwtUtilTest {
 

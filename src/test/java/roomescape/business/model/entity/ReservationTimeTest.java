@@ -1,13 +1,13 @@
 package roomescape.business.model.entity;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
-import java.time.LocalTime;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import roomescape.business.model.entity.ReservationTime;
 import roomescape.exception.business.InvalidCreateArgumentException;
+
+import java.time.LocalTime;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class ReservationTimeTest {
 

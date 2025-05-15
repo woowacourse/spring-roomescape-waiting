@@ -1,17 +1,8 @@
 package roomescape.infrastructure;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Reservation;
@@ -24,6 +15,14 @@ import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
 import roomescape.test_util.JpaTestUtil;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 @Import({JpaReservationRepository.class, JpaTestUtil.class, JpaReservationTimeRepository.class, JpaThemeRepository.class, JpaUserRepository.class})
@@ -93,7 +92,7 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
     }
 
     @Test
@@ -118,7 +117,7 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
     }
 
     @Test
@@ -193,7 +192,7 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId2, reservationId3);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId2, reservationId3);
     }
 
     @Test
@@ -218,7 +217,7 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId2, reservationId3);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId2, reservationId3);
     }
 
     @Test
@@ -243,7 +242,7 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(r->r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
     }
 
     @Test

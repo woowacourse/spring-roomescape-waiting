@@ -1,11 +1,11 @@
 package roomescape.presentation.dto.response;
 
+import roomescape.business.dto.ReservationDto;
+import roomescape.business.model.vo.ReservationStatus;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.business.dto.ReservationDto;
-import roomescape.business.dto.ReservationTimeDto;
-import roomescape.business.model.vo.ReservationStatus;
 
 public record ReservationMineResponse(
         String id,

@@ -1,11 +1,9 @@
 package roomescape.business.model.entity;
 
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -13,6 +11,8 @@ import lombok.Getter;
 import lombok.ToString;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
+
+import java.time.LocalDate;
 
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

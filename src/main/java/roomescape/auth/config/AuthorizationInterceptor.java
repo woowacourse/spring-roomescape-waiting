@@ -1,11 +1,7 @@
 package roomescape.auth.config;
 
-import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.List;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.AuthToken;
@@ -14,6 +10,11 @@ import roomescape.auth.Role;
 import roomescape.auth.jwt.JwtUtil;
 import roomescape.business.model.vo.UserRole;
 import roomescape.exception.auth.AuthenticationException;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
 
 public class AuthorizationInterceptor implements HandlerInterceptor {
 

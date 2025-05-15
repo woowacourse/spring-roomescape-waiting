@@ -1,9 +1,10 @@
 package roomescape.business.dto;
 
-import java.util.List;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.StartTime;
+
+import java.util.List;
 
 public record ReservationTimeDto(
         Id id,

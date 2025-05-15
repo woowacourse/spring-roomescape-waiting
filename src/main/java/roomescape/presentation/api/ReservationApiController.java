@@ -1,9 +1,6 @@
 package roomescape.presentation.api;
 
 import jakarta.validation.Valid;
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +20,10 @@ import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
 import roomescape.presentation.dto.response.ReservationMineResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
+
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,7 +63,7 @@ public class ReservationApiController {
 
     @GetMapping("/reservations/mine")
     @AuthRequired
-    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(LoginInfo loginInfo){
+    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(LoginInfo loginInfo) {
         List<ReservationDto> myReservations = reservationService.getMyReservations(loginInfo.id());
         List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservations);
         return ResponseEntity.ok(responses);

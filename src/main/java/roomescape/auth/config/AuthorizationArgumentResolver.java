@@ -1,7 +1,5 @@
 package roomescape.auth.config;
 
-import static roomescape.exception.SecurityErrorCode.AUTHORITY_NOT_EXIST;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -10,6 +8,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.LoginInfo;
 import roomescape.exception.auth.AuthorizationException;
+
+import static roomescape.exception.SecurityErrorCode.AUTHORITY_NOT_EXIST;
 
 public class AuthorizationArgumentResolver implements HandlerMethodArgumentResolver {
 
