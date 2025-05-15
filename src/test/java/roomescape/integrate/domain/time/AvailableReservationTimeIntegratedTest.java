@@ -18,14 +18,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.dto.reservationtime.AddReservationTimeDto;
 import roomescape.integrate.fixture.RequestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-class ReservationTimeTest {
+class AvailableReservationTimeIntegratedTest {
 
     private final RequestFixture requestFixture = new RequestFixture();
     private String todayDateString;
@@ -56,18 +55,5 @@ class ReservationTimeTest {
         List<Boolean> alreadyBooked = response.jsonPath().getList("alreadyBooked", Boolean.class);
         List<Boolean> booleans = List.of(false, false, true);
         assertThat(alreadyBooked).containsAnyElementsOf(booleans);
-    }
-
-    @Test
-    void 예약_시간을_추가할_수_있다() {
-        Map<String, LocalTime> params = Map.of("startAt", LocalTime.now());
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(cookies)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().response();
     }
 }
