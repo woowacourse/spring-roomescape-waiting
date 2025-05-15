@@ -1,18 +1,19 @@
-package roomescape.reservation.dao;
+package roomescape.reservation.dao.theme;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.dao.DataAccessException;
+import java.util.Optional;
+
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.exception.AssociatedReservationExistsException;
-import roomescape.reservation.exception.ThemeNotExistException;
 
 @Repository
 public class JdbcThemeDao implements ThemeDao {
@@ -28,7 +29,7 @@ public class JdbcThemeDao implements ThemeDao {
     }
 
     @Override
-    public Theme add(Theme theme) {
+    public Theme save(Theme theme) {
         Map<String, Object> param = new HashMap<>();
         param.put("name", theme.getName());
         param.put("description", theme.getDescription());
@@ -49,18 +50,18 @@ public class JdbcThemeDao implements ThemeDao {
     }
 
     @Override
-    public Theme findById(Long id) {
+    public Optional<Theme> findById(Long id) {
         String whereClause = " WHERE id = ?";
         String sql = generateFindAllQuery() + whereClause;
         try {
-            return jdbcTemplate.queryForObject(sql, mapResultsToTheme(), id);
-        } catch (DataAccessException exception) {
-            throw new ThemeNotExistException();
+            return Optional.of(jdbcTemplate.queryForObject(sql, mapResultsToTheme(), id));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
         }
     }
 
     @Override
-    public List<Theme> findMostReservedThemesInPeriodWithLimit(LocalDate startDate, LocalDate endDate, int limitCount) {
+    public List<Theme> findMostReservedThemesBetweenLimit(LocalDate startDate, LocalDate endDate, int limitCount) {
         String sql = """
                 SELECT
                   t.id,
@@ -92,7 +93,7 @@ public class JdbcThemeDao implements ThemeDao {
     }
 
     @Override
-    public boolean existByName(String name) {
+    public boolean existsByName(String name) {
         String sql = "SELECT EXISTS(SELECT id FROM theme WHERE name = ?)";
         return jdbcTemplate.queryForObject(sql, Boolean.class, name);
     }

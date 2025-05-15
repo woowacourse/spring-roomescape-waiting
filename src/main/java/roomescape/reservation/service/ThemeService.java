@@ -5,7 +5,7 @@ import java.time.ZoneId;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.constant.GlobalConstant;
-import roomescape.reservation.dao.ThemeDao;
+import roomescape.reservation.dao.theme.ThemeDao;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.dto.request.ThemeCreateRequest;
 import roomescape.reservation.exception.DuplicateThemeException;
@@ -29,17 +29,17 @@ public class ThemeService {
 
     public List<Theme> findMostReservedThemes() {
         LocalDate today = LocalDate.now(ZoneId.of(GlobalConstant.TIME_ZONE));
-        return themeDao.findMostReservedThemesInPeriodWithLimit(today.minusDays(TOP_RANK_PERIOD_DAYS), today, TOP_RANK_THRESHOLD);
+        return themeDao.findMostReservedThemesBetweenLimit(today.minusDays(TOP_RANK_PERIOD_DAYS), today, TOP_RANK_THRESHOLD);
     }
 
     public Theme createTheme(ThemeCreateRequest request) {
         validateDuplicateName(request);
         Theme theme = new Theme(null, request.name(), request.description(), request.thumbnail());
-        return themeDao.add(theme);
+        return themeDao.save(theme);
     }
 
     private void validateDuplicateName(ThemeCreateRequest themeCreateRequest) {
-        if (themeDao.existByName(themeCreateRequest.name())) {
+        if (themeDao.existsByName(themeCreateRequest.name())) {
             throw new DuplicateThemeException();
         }
     }
