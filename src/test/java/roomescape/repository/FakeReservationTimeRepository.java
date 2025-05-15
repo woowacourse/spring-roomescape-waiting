@@ -23,7 +23,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> save(ReservationTime reservationTime) {
+    public ReservationTime save(ReservationTime reservationTime) {
         long count = reservationTimes.stream()
                 .filter(rt -> rt.getStartAt().equals(reservationTime.getStartAt()))
                 .count();
@@ -33,7 +33,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
 
         ReservationTime newReservationTime = new ReservationTime(reservationTimeId.getAndIncrement(), reservationTime.getStartAt());
         reservationTimes.add(newReservationTime);
-        return findById(newReservationTime.getId());
+        return newReservationTime;
     }
 
     @Override
@@ -42,14 +42,14 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> findById(long id) {
+    public Optional<ReservationTime> findById(Long id) {
         return reservationTimes.stream()
                 .filter(reservationTime -> Objects.equals(reservationTime.getId(), id))
                 .findFirst();
     }
 
     @Override
-    public int deleteById(long id) {
+    public void deleteById(Long id) {
         ReservationTime deleteReservation = reservationTimes.stream()
                 .filter(reservationTime -> Objects.equals(reservationTime.getId(), id))
                 .findFirst().orElse(new ReservationTime(null, LocalTime.now()));
@@ -64,13 +64,6 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
                     .filter(reservationTime -> Objects.equals(reservationTime.getId(), id))
                     .count();
             reservationTimes.remove(deleteReservation);
-            return affectedRows;
         }
-
-        return 0;
-    }
-
-    public void addReservation(Reservation reservation) {
-        reservations.add(reservation);
     }
 }
