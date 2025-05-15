@@ -1,7 +1,5 @@
 package roomescape.reservation.infrastructure.db;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
@@ -11,7 +9,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.ReservationTestFixture;
 import roomescape.member.model.Member;
 import roomescape.reservation.infrastructure.db.dao.ReservationJpaRepository;
@@ -49,7 +46,8 @@ class ReservationJpaRepositoryTest extends RepositoryTestSupport {
 
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(reservationsWithMember).hasSize(2);
-            softAssertions.assertThat(reservationsWithMember.getFirst().memberId()).isEqualTo(member.getId());
+            softAssertions.assertThat(reservationsWithMember.getFirst().memberId())
+                .isEqualTo(member.getId());
         });
     }
 
@@ -73,10 +71,10 @@ class ReservationJpaRepositoryTest extends RepositoryTestSupport {
         Optional<ReservationWithMember> reservationWithMember = reservationJpaRepository.findWithMemberById(
             reservation1.getId());
         SoftAssertions.assertSoftly(softAssertions -> {
-            softAssertions.assertThat(reservationWithMember.get().id()).isEqualTo(reservation1.getId());
-            softAssertions.assertThat(reservationWithMember.get().memberId()).isEqualTo(member.getId());
+            softAssertions.assertThat(reservationWithMember.get().id())
+                .isEqualTo(reservation1.getId());
+            softAssertions.assertThat(reservationWithMember.get().memberId())
+                .isEqualTo(member.getId());
         });
     }
-
-
 }
