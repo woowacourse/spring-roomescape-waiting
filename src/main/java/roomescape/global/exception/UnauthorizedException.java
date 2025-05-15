@@ -3,6 +3,6 @@ package roomescape.global.exception;
 public class UnauthorizedException extends RuntimeException {
 
     public UnauthorizedException() {
-        super("로그인되지 않은 상태이다.");
+        super("로그인 해주세요.");
     }
 }
