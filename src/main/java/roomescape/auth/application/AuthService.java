@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.infrastructure.TokenService;
+import roomescape.global.exception.AuthenticationException;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
-import roomescape.global.exception.AuthenticationException;
 
 @Service
 @RequiredArgsConstructor

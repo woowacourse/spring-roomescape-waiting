@@ -27,7 +27,7 @@ public class MemberDbRepository implements MemberRepository {
     @Override
     public Member getById(Long id) {
         return memberJpaRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("해당 id로 찾을 수 있는 멤버가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 id로 찾을 수 있는 멤버가 없습니다."));
     }
 
     @Override

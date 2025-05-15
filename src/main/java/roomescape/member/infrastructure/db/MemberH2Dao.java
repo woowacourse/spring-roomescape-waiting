@@ -61,7 +61,8 @@ public class MemberH2Dao implements MemberDao {
                             WHERE id = :memberId
                         )
                 """;
-        Integer result = namedParameterJdbcTemplate.queryForObject(existsQuery, Map.of("memberId", memberId), Integer.class);
+        Integer result = namedParameterJdbcTemplate.queryForObject(existsQuery, Map.of("memberId", memberId),
+                Integer.class);
         return result != null && result == 1;
     }
 }

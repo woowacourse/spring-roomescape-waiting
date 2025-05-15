@@ -3,7 +3,6 @@ package roomescape.reservation.controller.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.member.model.Member;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 
 //TODO : 요구사항이 변경된다면, memberId까지 반환

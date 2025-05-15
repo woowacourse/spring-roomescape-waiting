@@ -27,6 +27,6 @@ public class ReservationSpecification {
 
     public static Specification<Reservation> betweenDate(LocalDate from, LocalDate to) {
         return (root, query, criteriaBuilder) ->
-            criteriaBuilder.between(root.get("date"), from, to);
+                criteriaBuilder.between(root.get("date"), from, to);
     }
 }

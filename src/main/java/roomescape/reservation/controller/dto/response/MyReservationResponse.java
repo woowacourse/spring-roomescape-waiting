@@ -7,20 +7,20 @@ import roomescape.reservation.application.dto.response.MyReservationServiceRespo
 import roomescape.reservation.model.vo.ReservationStatus;
 
 public record MyReservationResponse(
-    Long reservationId,
-    String theme,
-    LocalDate date,
-    @JsonFormat(pattern = "HH:mm") LocalTime time,
-    ReservationStatus status
+        Long reservationId,
+        String theme,
+        LocalDate date,
+        @JsonFormat(pattern = "HH:mm") LocalTime time,
+        ReservationStatus status
 ) {
 
     public static MyReservationResponse from(MyReservationServiceResponse response) {
         return new MyReservationResponse(
-            response.reservationId(),
-            response.themeName(),
-            response.date(),
-            response.time(),
-            response.status()
+                response.reservationId(),
+                response.themeName(),
+                response.date(),
+                response.time(),
+                response.status()
         );
     }
 }

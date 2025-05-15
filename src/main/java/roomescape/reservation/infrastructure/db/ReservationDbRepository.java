@@ -59,16 +59,17 @@ public class ReservationDbRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationWithMember> getSearchReservationsWithMember(Long themeId, Long memberId, LocalDate from, LocalDate to) {
+    public List<ReservationWithMember> getSearchReservationsWithMember(Long themeId, Long memberId, LocalDate from,
+            LocalDate to) {
         Specification<Reservation> spec = Specification.where(
-            ReservationSpecification.memberIdEquals(memberId))
-            .and(ReservationSpecification.themeIdEquals(themeId))
-            .and(ReservationSpecification.betweenDate(from, to));
+                        ReservationSpecification.memberIdEquals(memberId))
+                .and(ReservationSpecification.themeIdEquals(themeId))
+                .and(ReservationSpecification.betweenDate(from, to));
 
         List<Reservation> reservations = reservationJpaRepository.findAll(spec);
         List<Long> reservationIds = reservations.stream()
-            .map(reservation -> reservation.getId())
-            .toList();
+                .map(reservation -> reservation.getId())
+                .toList();
 
         return findAllByIds(reservationIds);
     }
@@ -81,7 +82,7 @@ public class ReservationDbRepository implements ReservationRepository {
     @Override
     public Reservation getById(Long id) {
         return findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약이 존재하지 않습니다."));
     }
 
     @Override

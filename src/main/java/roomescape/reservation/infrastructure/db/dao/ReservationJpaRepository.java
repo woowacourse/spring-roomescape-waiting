@@ -11,7 +11,7 @@ import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.repository.dto.ReservationWithMember;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>,
-    JpaSpecificationExecutor<Reservation> {
+        JpaSpecificationExecutor<Reservation> {
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
@@ -21,65 +21,65 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
 
     // TODO : QueryDSL로 로직 개선하기
     @Query("""
-        SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
-              r.id,
-              r.date, 
-              rt.id , 
-              rt.startAt, 
-              th.id, 
-              th.name, 
-              th.description, 
-              th.thumbnail, 
-              m.id, 
-              m.name, 
-              m.email)
-        FROM Reservation r
-        JOIN r.time rt
-        JOIN r.theme th
-        JOIN Member m ON r.memberId = m.id
-        """)
+            SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
+                  r.id,
+                  r.date, 
+                  rt.id , 
+                  rt.startAt, 
+                  th.id, 
+                  th.name, 
+                  th.description, 
+                  th.thumbnail, 
+                  m.id, 
+                  m.name, 
+                  m.email)
+            FROM Reservation r
+            JOIN r.time rt
+            JOIN r.theme th
+            JOIN Member m ON r.memberId = m.id
+            """)
     List<ReservationWithMember> findAllWithMember();
 
     @Query("""
-        SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
-              r.id,
-              r.date, 
-              rt.id , 
-              rt.startAt, 
-              th.id, 
-              th.name, 
-              th.description, 
-              th.thumbnail, 
-              m.id, 
-              m.name, 
-              m.email)
-        FROM Reservation r
-        JOIN r.time rt
-        JOIN r.theme th
-        JOIN Member m ON r.memberId = m.id
-        WHERE r.id = :reservationId
-        """)
+            SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
+                  r.id,
+                  r.date, 
+                  rt.id , 
+                  rt.startAt, 
+                  th.id, 
+                  th.name, 
+                  th.description, 
+                  th.thumbnail, 
+                  m.id, 
+                  m.name, 
+                  m.email)
+            FROM Reservation r
+            JOIN r.time rt
+            JOIN r.theme th
+            JOIN Member m ON r.memberId = m.id
+            WHERE r.id = :reservationId
+            """)
     Optional<ReservationWithMember> findWithMemberById(@Param("reservationId") Long reservationId);
 
     @Query("""
-        SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
-              r.id,
-              r.date, 
-              rt.id , 
-              rt.startAt, 
-              th.id, 
-              th.name, 
-              th.description, 
-              th.thumbnail, 
-              m.id, 
-              m.name, 
-              m.email)
-        FROM Reservation r
-        JOIN r.time rt
-        JOIN r.theme th
-        JOIN Member m ON r.memberId = m.id
-        WHERE r.id IN (:reservationIds)
-        """)
+            SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
+                  r.id,
+                  r.date, 
+                  rt.id , 
+                  rt.startAt, 
+                  th.id, 
+                  th.name, 
+                  th.description, 
+                  th.thumbnail, 
+                  m.id, 
+                  m.name, 
+                  m.email)
+            FROM Reservation r
+            JOIN r.time rt
+            JOIN r.theme th
+            JOIN Member m ON r.memberId = m.id
+            WHERE r.id IN (:reservationIds)
+            """)
     List<ReservationWithMember> findAllWithMemberByIds(@Param("reservationIds") List<Long> reservationIds);
 
     List<Reservation> findAllByMemberId(Long memberId);

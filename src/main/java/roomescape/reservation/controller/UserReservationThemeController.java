@@ -31,7 +31,8 @@ public class UserReservationThemeController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/populars")
-    public List<ReservationThemeResponse> getPopularThemes(@RequestParam(value = "limit", defaultValue = "10") int limit) {
+    public List<ReservationThemeResponse> getPopularThemes(
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<ReservationThemeServiceResponse> responses = userReservationThemeService.getPopularThemes(limit);
         return responses.stream()
                 .map(ReservationThemeResponse::from)

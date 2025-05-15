@@ -9,8 +9,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.infrastructure.TokenService;
 import roomescape.auth.web.support.AuthorizationExtractor;
-import roomescape.member.model.Role;
 import roomescape.global.exception.AuthorizationException;
+import roomescape.member.model.Role;
 
 @Component
 @RequiredArgsConstructor

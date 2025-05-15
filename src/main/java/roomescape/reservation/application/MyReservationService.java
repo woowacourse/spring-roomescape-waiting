@@ -15,18 +15,16 @@ public class MyReservationService {
 
     private final ReservationRepository reservationRepository;
 
-    public List <MyReservationServiceResponse> getAllByMemberId(Long memberId) {
+    public List<MyReservationServiceResponse> getAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         return reservations.stream()
-            .map(reservation -> buildMyReservationServiceResponse(reservation))
-            .toList();
+                .map(this::buildMyReservationServiceResponse)
+                .toList();
     }
 
-    private static MyReservationServiceResponse buildMyReservationServiceResponse(
-        Reservation reservation
-    ) {
+    private MyReservationServiceResponse buildMyReservationServiceResponse(Reservation reservation) {
         ReservationStatus reservationStatus = ReservationStatus.getStatus(
-            reservation.getReservationDateTime(), LocalDateTime.now()
+                reservation.getReservationDateTime(), LocalDateTime.now()
         );
         return MyReservationServiceResponse.from(reservation, reservationStatus);
     }

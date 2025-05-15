@@ -30,7 +30,8 @@ public class UserReservationController {
     ) {
         Long memberId = authenticatedMember.id();
         String memberName = authenticatedMember.name();
-        ReservationServiceResponse response = userReservationService.create(request.toServiceRequest(memberName, memberId));
+        ReservationServiceResponse response = userReservationService.create(
+                request.toServiceRequest(memberName, memberId));
         return ReservationResponse.from(response);
     }
 }

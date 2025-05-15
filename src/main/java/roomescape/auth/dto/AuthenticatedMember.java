@@ -10,5 +10,6 @@ public record AuthenticatedMember(
         String name,
         Role role
 ) {
+
 }
 

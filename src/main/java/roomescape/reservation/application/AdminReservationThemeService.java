@@ -2,13 +2,13 @@ package roomescape.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.reservation.application.dto.request.CreateReservationThemeServiceRequest;
 import roomescape.reservation.application.dto.response.ReservationThemeServiceResponse;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.service.ReservationThemeValidator;
-import roomescape.global.exception.BusinessRuleViolationException;
 
 @Service
 @RequiredArgsConstructor

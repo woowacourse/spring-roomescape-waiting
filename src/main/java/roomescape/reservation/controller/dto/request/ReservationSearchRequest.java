@@ -9,6 +9,7 @@ public record ReservationSearchRequest(
         LocalDate dateFrom,
         LocalDate dateTo
 ) {
+
     public ReservationSearchServiceRequest toServiceRequest() {
         return new ReservationSearchServiceRequest(themeId, memberId, dateFrom, dateTo);
     }
