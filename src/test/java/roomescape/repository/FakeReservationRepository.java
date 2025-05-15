@@ -9,8 +9,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.repository.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
 

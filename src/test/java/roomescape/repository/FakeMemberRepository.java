@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.dao.DuplicateKeyException;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
 
 public class FakeMemberRepository implements MemberRepository {
 

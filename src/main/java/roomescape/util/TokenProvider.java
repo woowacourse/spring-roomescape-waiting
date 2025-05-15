@@ -1,6 +1,6 @@
 package roomescape.util;
 
-import roomescape.domain.Member;
+import roomescape.member.domain.Member;
 
 public interface TokenProvider {
 

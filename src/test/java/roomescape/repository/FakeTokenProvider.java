@@ -1,6 +1,6 @@
 package roomescape.repository;
 
-import roomescape.domain.Member;
+import roomescape.member.domain.Member;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.util.TokenProvider;
 

@@ -1,7 +1,7 @@
 package roomescape.fixture;
 
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 
 public class LoginMemberFixture {
 

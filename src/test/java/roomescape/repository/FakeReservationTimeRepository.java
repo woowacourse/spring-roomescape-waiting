@@ -8,8 +8,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
 

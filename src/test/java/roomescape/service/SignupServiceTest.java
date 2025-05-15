@@ -2,10 +2,11 @@ package roomescape.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dto.member.RegistrationRequest;
+import roomescape.auth.service.SignupService;
+import roomescape.auth.dto.RegistrationRequest;
 import roomescape.exception.DuplicateContentException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
-import roomescape.repository.MemberRepository;
+import roomescape.member.repository.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

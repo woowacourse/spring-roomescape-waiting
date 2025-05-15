@@ -11,8 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
+import roomescape.reservation.domain.Reservation;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
 

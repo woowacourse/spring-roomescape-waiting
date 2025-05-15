@@ -4,6 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

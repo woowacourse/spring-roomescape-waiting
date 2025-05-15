@@ -1,8 +1,8 @@
 package roomescape.fixture;
 
 import java.util.List;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.repository.FakeMemberRepository;
 
 public class FakeMemberRepositoryFixture {

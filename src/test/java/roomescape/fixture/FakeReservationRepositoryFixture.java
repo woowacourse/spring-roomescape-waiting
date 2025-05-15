@@ -3,12 +3,12 @@ package roomescape.fixture;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Theme;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.member.domain.Role;
+import roomescape.theme.domain.Theme;
 import roomescape.repository.FakeReservationRepository;
 
 public class FakeReservationRepositoryFixture {

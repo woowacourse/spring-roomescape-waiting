@@ -13,9 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.Member;
-import roomescape.dto.member.LoginRequest;
-import roomescape.dto.time.ReservationTimeCreateRequest;
+import roomescape.member.domain.Member;
+import roomescape.auth.dto.LoginRequest;
+import roomescape.reservationtime.dto.ReservationTimeCreateRequest;
 import roomescape.fixture.LoginMemberFixture;
 
 import static org.hamcrest.Matchers.is;

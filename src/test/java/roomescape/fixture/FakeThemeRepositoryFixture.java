@@ -1,7 +1,7 @@
 package roomescape.fixture;
 
 import java.util.List;
-import roomescape.domain.Theme;
+import roomescape.theme.domain.Theme;
 import roomescape.repository.FakeThemeRepository;
 
 public class FakeThemeRepositoryFixture {
