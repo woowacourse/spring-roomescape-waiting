@@ -62,7 +62,7 @@ class ThemeServiceTest {
     @Test
     void 테마가_삭제된다() {
         // given
-        final Theme theme = new Theme("테마3", "설명3", "썸네일3");
+        final Theme theme = Theme.of("테마3", "설명3", "썸네일3");
         final Theme savedTheme = themeRepository.save(theme);
         assertThat(savedTheme.getId()).isEqualTo(3L);
 

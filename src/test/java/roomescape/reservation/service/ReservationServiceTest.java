@@ -69,8 +69,8 @@ class ReservationServiceTest {
         time1 = new ReservationTime(LocalTime.of(14, 0));
         time2 = new ReservationTime(LocalTime.of(13, 0));
 
-        theme1 = new Theme("테마1", "설명1", "썸네일1");
-        theme2 = new Theme("테마2", "설명2", "썸네일2");
+        theme1 = Theme.of("테마1", "설명1", "썸네일1");
+        theme2 = Theme.of("테마2", "설명2", "썸네일2");
 
         member = new Member("member", "member@naver.com", "1234");
 

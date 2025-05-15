@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,9 +17,12 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.error.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
 @Sql("/data.sql")
@@ -27,17 +31,43 @@ class JdbcReservationRepositoryTest {
     @Autowired
     private ReservationRepository repository;
 
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    private LocalDate date;
+    private ReservationTime time1;
+    private ReservationTime time2;
+    private Theme theme1;
+    private Theme theme2;
+    private Member member1;
+    private Member member2;
+
+    @BeforeEach
+    void setUp() {
+        date = LocalDate.of(2025, 7, 1);
+        time1 = new ReservationTime(1L, LocalTime.of(10, 0));
+        time2 = new ReservationTime(2L, LocalTime.of(11, 0));
+        theme1 = Theme.of("테마1", "설명1", "썸네일1");
+        theme2 = Theme.of("테마2", "설명2", "썸네일2");
+        member1 = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
+        member2 = new Member(2L, "유저2", "user2@naver.com", "pwd", MemberRole.MEMBER.name());
+    }
+
     @Test
     void 모든_예약_조회() {
         // given
-        LocalDate date = LocalDate.of(2025, 7, 1);
-        ReservationTime time1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(2L, LocalTime.of(11, 0));
-        Theme theme1 = new Theme(1L, "테마1", "설명1", "썸네일1");
-        Theme theme2 = new Theme(2L, "테마2", "설명2", "썸네일2");
-        Member member1 = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
-        Member member2 = new Member(2L, "유저2", "user2@naver.com", "pwd", MemberRole.MEMBER.name());
-
+        reservationTimeRepository.save(time1);
+        reservationTimeRepository.save(time2);
+        themeRepository.save(theme1);
+        themeRepository.save(theme2);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
         Reservation reservation1 = Reservation.booked(date, time1, theme1, member1);
         Reservation reservation2 = Reservation.booked(date, time2, theme2, member2);
         repository.save(reservation1);
@@ -53,16 +83,17 @@ class JdbcReservationRepositoryTest {
     @Test
     void 특정_날짜로_예약_조회() {
         // given
+        reservationTimeRepository.save(time1);
+        themeRepository.save(theme1);
+        memberRepository.save(member1);
+
         LocalDate date1 = LocalDate.of(2999, 7, 1);
         LocalDate date2 = LocalDate.of(2999, 7, 2);
         LocalDate date3 = LocalDate.of(2999, 7, 3);
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "테마1", "설명1", "썸네일1");
-        Member member = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
 
-        repository.save(Reservation.booked(date1, time, theme, member));
-        repository.save(Reservation.booked(date2, time, theme, member));
-        repository.save(Reservation.booked(date3, time, theme, member));
+        repository.save(Reservation.booked(date1, time1, theme1, member1));
+        repository.save(Reservation.booked(date2, time1, theme1, member1));
+        repository.save(Reservation.booked(date3, time1, theme1, member1));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, null, date2, null);
@@ -83,16 +114,17 @@ class JdbcReservationRepositoryTest {
         LocalDate date3 = LocalDate.of(2999, 7, 3);
         LocalDate date4 = LocalDate.of(2999, 7, 4);
         LocalDate date5 = LocalDate.of(2999, 7, 5);
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "테마1", "설명1", "썸네일1");
-        Member member1 = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
-        Member member2 = new Member(2L, "유저2", "user2@naver.com", "pwd", MemberRole.MEMBER.name());
 
-        repository.save(Reservation.booked(date1, time, theme, member1));
-        repository.save(Reservation.booked(date2, time, theme, member1));
-        repository.save(Reservation.booked(date3, time, theme, member1));
-        repository.save(Reservation.booked(date4, time, theme, member2));
-        repository.save(Reservation.booked(date5, time, theme, member2));
+        reservationTimeRepository.save(time1);
+        themeRepository.save(theme1);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        repository.save(Reservation.booked(date1, time1, theme1, member1));
+        repository.save(Reservation.booked(date2, time1, theme1, member1));
+        repository.save(Reservation.booked(date3, time1, theme1, member1));
+        repository.save(Reservation.booked(date4, time1, theme1, member2));
+        repository.save(Reservation.booked(date5, time1, theme1, member2));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, member1.getId(), null, null);
@@ -109,12 +141,16 @@ class JdbcReservationRepositoryTest {
     @Test
     void 예약_시간이_현재_이후면_객체가_정상_생성된다() {
         // given
-        Theme defaultTheme = new Theme(1L, "테마", "설명", "썸네일");
-        Member defaultMember = new Member(1L, "member", "member@naver.com", "1234", MemberRole.MEMBER.name());
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteLater = LocalTime.now().plusMinutes(1);
         ReservationTime futureTime = new ReservationTime(1L, oneMinuteLater);
-        final Reservation booked = Reservation.booked(today, futureTime, defaultTheme, defaultMember);
+
+        reservationTimeRepository.save(time1);
+        themeRepository.save(theme1);
+        memberRepository.save(member1);
+        reservationTimeRepository.save(futureTime);
+        final Reservation booked = Reservation.booked(today, futureTime, theme1, member1);
+
         // when
         // then
         assertThatCode(() -> repository.save(booked)).doesNotThrowAnyException();
@@ -123,7 +159,7 @@ class JdbcReservationRepositoryTest {
     @Test
     void 예약_시간이_현재_이전이면_ReservationException이_발생한다() {
         // given
-        Theme defaultTheme = new Theme(1L, "테마", "설명", "썸네일");
+        Theme defaultTheme = Theme.of("테마", "설명", "썸네일");
         Member defaultMember = new Member(1L, "member", "member@naver.com", "1234", MemberRole.MEMBER.name());
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);

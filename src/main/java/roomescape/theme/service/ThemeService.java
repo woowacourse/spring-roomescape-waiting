@@ -20,7 +20,7 @@ public class ThemeService {
     private final ReservationRepository reservationRepository;
 
     public ThemeResponse saveTheme(final ThemeRequest request) {
-        final Theme theme = themeRepository.save(new Theme(request.name(), request.description(), request.thumbnail()));
+        final Theme theme = themeRepository.save(Theme.of(request.name(), request.description(), request.thumbnail()));
         return new ThemeResponse(theme);
     }
 

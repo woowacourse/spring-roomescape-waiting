@@ -124,7 +124,7 @@ class MissionStepTest {
         LocalDate localDate = now.plusDays(1);
         params.put("date", localDate.toString());
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
-        themeRepository.save(new Theme("name", "desc", "thumb"));
+        themeRepository.save(Theme.of("name", "desc", "thumb"));
         params.put("timeId", "1");
         params.put("themeId", "1");
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
@@ -189,7 +189,7 @@ class MissionStepTest {
     void 오단계_예약_조회() {
         // given
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
-        themeRepository.save(new Theme("name", "desc", "thumb"));
+        themeRepository.save(Theme.of("name", "desc", "thumb"));
 
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()
@@ -220,7 +220,7 @@ class MissionStepTest {
     void 육단계_예약_삭제() {
         // given
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
-        themeRepository.save(new Theme("name", "desc", "thumb"));
+        themeRepository.save(Theme.of("name", "desc", "thumb"));
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
 
         String token = RestAssured.given().log().all()
@@ -276,7 +276,7 @@ class MissionStepTest {
     void 팔단계_예약_조회() {
         // given
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 00)));
-        themeRepository.save(new Theme("name", "desc", "thumb"));
+        themeRepository.save(Theme.of("name", "desc", "thumb"));
 
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()

@@ -74,7 +74,12 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation booked(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+    public static Reservation booked(
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final Theme theme,
+            final Member member
+    ) {
         return builder()
                 .id(null)
                 .date(date)
