@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.infrastructure.db.ReservationTimeDbRepository;
-import roomescape.reservation.infrastructure.db.dao.ReservationTimeH2Dao;
 import roomescape.reservation.model.entity.ReservationTime;
 import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.support.JdbcTestSupport;

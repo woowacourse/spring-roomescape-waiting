@@ -9,5 +9,5 @@ public interface MemberRepository {
 
     List<Member> getAll();
 
-    boolean existsById(Long memberId);
+    Member getById(Long id);
 }

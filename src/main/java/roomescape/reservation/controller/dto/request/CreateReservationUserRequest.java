@@ -14,6 +14,6 @@ public record CreateReservationUserRequest(
 ) {
 
     public CreateReservationServiceRequest toServiceRequest(String memberName, Long memberId) {
-        return new CreateReservationServiceRequest(memberName, memberId, date, timeId, themeId);
+        return new CreateReservationServiceRequest(memberId, date, timeId, themeId);
     }
 }

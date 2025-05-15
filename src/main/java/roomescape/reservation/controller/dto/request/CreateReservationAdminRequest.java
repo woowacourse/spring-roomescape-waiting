@@ -12,12 +12,10 @@ public record CreateReservationAdminRequest(
         @NotNull(message = "시간을 필수로 입력해야 합니다.")
         Long timeId,
         @NotNull(message = "테마를 필수로 입력해야 합니다.")
-        Long themeId,
-        @NotNull(message = "사용자 이름을 필수로 입력해야 합니다.")
-        String memberName
+        Long themeId
 ) {
 
     public CreateReservationServiceRequest toServiceRequest() {
-        return new CreateReservationServiceRequest(memberName, memberId, date, timeId, themeId);
+        return new CreateReservationServiceRequest(memberId, date, timeId, themeId);
     }
 }

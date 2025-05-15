@@ -28,8 +28,8 @@ INSERT INTO member (name, email, password, role)
 VALUES ('어드민', 'admin@naver.com', '1234', 'ADMIN');
 
 -- reservation 테이블 초기 데이터
-INSERT INTO reservation (name, date, time_id, theme_id, member_id)
-VALUES ('웨이드', '2025-05-01', 1, 2, 1),
-       ('모코', '2025-05-01', 2, 1, 2),
-       ('리사', '2025-05-02', 3, 3, 3),
-       ('검프', '2025-05-02', 1, 3, 4);
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES ('2025-05-01', 1, 2, 1),
+       ('2025-05-01', 2, 1, 2),
+       ('2025-05-02', 3, 3, 3),
+       ('2025-05-02', 1, 3, 4);

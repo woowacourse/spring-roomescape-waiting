@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.infrastructure.db.ReservationDbRepository;
-import roomescape.reservation.infrastructure.db.dao.ReservationH2Dao;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.support.JdbcTestSupport;
@@ -39,7 +38,7 @@ class ReservationDbRepositoryTest extends JdbcTestSupport {
                 LocalDate.now().plusDays(20), "1", "1");
 
         // when & then
-        assertThatThrownBy(() -> reservationDbRepository.getById(2L))
+        assertThatThrownBy(() -> reservationDbRepository.getWithMemberById(2L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -53,7 +52,7 @@ class ReservationDbRepositoryTest extends JdbcTestSupport {
                 date, "1", "1");
 
         // when
-        Reservation reservation = reservationDbRepository.getById(1L);
+        Reservation reservation = reservationDbRepository.getWithMemberById(1L);
 
         // then
         assertThat(reservation.getName()).isEqualTo(name);

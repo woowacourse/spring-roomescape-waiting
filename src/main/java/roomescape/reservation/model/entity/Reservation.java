@@ -28,9 +28,6 @@ public class Reservation {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,19 +39,13 @@ public class Reservation {
     private Long memberId;
 
     @Builder
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, ReservationTheme theme,
+    public Reservation(Long id, LocalDate date, ReservationTime time, ReservationTheme theme,
             Long memberId) {
-        validateNotBlank(name, date);
         this.id = id;
-        this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.memberId = memberId;
-    }
-
-    public Reservation(String name, LocalDate date, ReservationTime time, ReservationTheme theme) {
-        this(null, name, date, time, theme, null);
     }
 
     public static Reservation createFutureReservation(ReservationDetails details) {
@@ -66,25 +57,6 @@ public class Reservation {
     private static void validateFutureTime(LocalDateTime requestedDateTime) {
         if (requestedDateTime.isBefore(LocalDateTime.now())) {
             throw new InvalidReservationTimeException("예약시간이 과거시간이 될 수 없습니다. 미래시간으로 입력해주세요.");
-        }
-    }
-
-    public Reservation assignId(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("할당할 id는 null이 될 수 없습니다.");
-        }
-        return new Reservation(id, name, date, time, theme, memberId);
-    }
-
-    private void validateNotBlank(String name, LocalDate date) {
-        if (name == null) {
-            throw new IllegalArgumentException("예약자명은 null이 될 수 없습니다.");
-        }
-        if (name.isBlank()) {
-            throw new IllegalArgumentException("예약자명은 비어 있을 수 없습니다.");
-        }
-        if (date == null) {
-            throw new IllegalArgumentException("날짜는 null이 될 수 없습니다.");
         }
     }
 
