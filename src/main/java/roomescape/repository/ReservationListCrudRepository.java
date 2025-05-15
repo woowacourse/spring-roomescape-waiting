@@ -3,21 +3,13 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.Reservation;
 
-public interface ReservationRepository {
-
-    Reservation save(Reservation reservation);
-
-    List<Reservation> findAll();
-
-    List<Reservation> findAllByMemberId(Long memberId);
+public interface ReservationListCrudRepository extends ListCrudRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
-
-    List<Reservation> findByMemberIdAndThemeIdAndDateRange(Long memberId, Long themeId, LocalDate from, LocalDate to);
-
-    Optional<Reservation> findById(Long id);
 
     Optional<Reservation> findByTimeId(Long id);
 
@@ -25,5 +17,5 @@ public interface ReservationRepository {
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    void deleteById(Long id);
+    List<Reservation> findAllByMemberId(Long memberId);
 }
