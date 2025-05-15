@@ -95,19 +95,27 @@ public class ReservationService {
         }
     }
 
+    public void delete(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
+        final Member member = memberQueryRepository.findById(memberAuthInfo.id())
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+
+        if (!member.isAdmin()) {
+            throw new AuthorizationException("삭제할 권한이 없습니다.");
+        }
+
+        reservationQueryRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+        reservationCommandRepository.deleteById(reservationId);
+    }
+
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
         final Reservation reservation = reservationQueryRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
         final Member member = memberQueryRepository.findById(memberAuthInfo.id())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
-        if (member.isAdmin()) {
-            reservationCommandRepository.deleteById(reservationId);
-            return;
-        }
-
         if (!Objects.equals(reservation.getMember(), member)) {
-            throw new AuthorizationException("삭제할 권한이 없습니다.");
+            throw new AuthorizationException("본인이 아니면 삭제할 수 없습니다.");
         }
 
         reservationCommandRepository.deleteById(reservationId);

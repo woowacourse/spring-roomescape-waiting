@@ -17,6 +17,7 @@ import roomescape.auth.domain.RequiresRole;
 import roomescape.member.application.MemberService;
 import roomescape.member.domain.Member;
 import roomescape.member.ui.dto.CreateMemberRequest;
+import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
 
 @RestController
@@ -27,13 +28,13 @@ public class MemberRestController {
     private final MemberService memberService;
 
     @PostMapping
-    public ResponseEntity<Void> create(
+    public ResponseEntity<MemberResponse.IdName> create(
             @RequestBody @Valid final CreateMemberRequest request
     ) {
-        memberService.create(request);
+        final MemberResponse.IdName response = memberService.create(request);
         
         return ResponseEntity.status(HttpStatus.CREATED)
-                .build();
+                .body(response);
     }
 
     @DeleteMapping("/{id}")

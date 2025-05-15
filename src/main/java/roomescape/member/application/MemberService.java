@@ -10,6 +10,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
 import roomescape.member.ui.dto.CreateMemberRequest;
+import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
 
 @Service
@@ -19,14 +20,18 @@ public class MemberService {
     private final MemberCommandRepository memberCommandRepository;
     private final MemberQueryRepository memberQueryRepository;
 
-    public void create(final CreateMemberRequest request) {
+    public MemberResponse.IdName create(final CreateMemberRequest request) {
         final Member member = new Member(
                 request.name(),
                 request.email(),
                 request.password(),
                 AuthRole.MEMBER
         );
-        memberCommandRepository.save(member);
+
+        final Long id = memberCommandRepository.save(member);
+        final Member found = memberQueryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+        return new MemberResponse.IdName(found.getId(), found.getName());
     }
 
     public void delete(final Long id) {
