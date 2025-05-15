@@ -27,7 +27,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.BookedReservationTimeResponse;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.dto.ThemeResponse;
@@ -96,10 +96,11 @@ class ReservationServiceTest {
 
         LocalDate date = nextDay();
 
-        ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
+        ReservationCreateRequest requestDto =
+                new ReservationCreateRequest(date, timeId, themeId, LoginMember.of(savedMember));
 
         // when
-        ReservationResponse result = reservationService.create(requestDto, LoginMember.of(savedMember));
+        ReservationResponse result = reservationService.create(requestDto);
 
         // then
         SoftAssertions softAssertions = new SoftAssertions();
@@ -128,11 +129,12 @@ class ReservationServiceTest {
         Member savedMember = memberRepository.save(member);
         LocalDate date = nextDay();
 
-        ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
-        reservationService.create(requestDto, LoginMember.of(savedMember));
+        ReservationCreateRequest requestDto =
+                new ReservationCreateRequest(date, timeId, themeId, LoginMember.of(savedMember));
+        reservationService.create(requestDto);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
+        assertThatThrownBy(() -> reservationService.create(requestDto))
                 .isInstanceOf(AlreadyInUseException.class);
     }
 
@@ -151,10 +153,11 @@ class ReservationServiceTest {
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(pastTime));
         Long timeId = savedTime.getId();
 
-        ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
+        ReservationCreateRequest requestDto =
+                new ReservationCreateRequest(date, timeId, themeId, LoginMember.of(savedMember));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
+        assertThatThrownBy(() -> reservationService.create(requestDto))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -169,9 +172,10 @@ class ReservationServiceTest {
         LocalDate date = nextDay();
 
         Long notExistId = 1000L;
-        ReservationRequest requestDto = new ReservationRequest(date, notExistId, themeId);
+        ReservationCreateRequest requestDto =
+                new ReservationCreateRequest(date, notExistId, themeId, LoginMember.of(savedMember));
 
-        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
+        assertThatThrownBy(() -> reservationService.create(requestDto))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -187,9 +191,10 @@ class ReservationServiceTest {
         Member savedMember = memberRepository.save(member);
 
         Long notExistId = 1000L;
-        ReservationRequest requestDto = new ReservationRequest(date, timeId, notExistId);
+        ReservationCreateRequest requestDto =
+                new ReservationCreateRequest(date, timeId, notExistId, LoginMember.of(savedMember));
 
-        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
+        assertThatThrownBy(() -> reservationService.create(requestDto))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

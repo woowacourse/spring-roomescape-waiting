@@ -20,6 +20,7 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.BookedReservationTimeResponse;
 import roomescape.reservation.dto.FilteringReservationRequest;
 import roomescape.reservation.dto.MyReservationsResponse;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
@@ -56,7 +57,8 @@ public class ReservationController {
             @Valid @RequestBody final ReservationRequest request,
             final LoginMember loginMember
     ) {
-        ReservationResponse response = reservationService.create(request, loginMember);
+        ReservationCreateRequest createRequest = ReservationCreateRequest.from(request, loginMember);
+        ReservationResponse response = reservationService.create(createRequest);
 
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);

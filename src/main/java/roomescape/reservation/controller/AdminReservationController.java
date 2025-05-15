@@ -13,7 +13,7 @@ import roomescape.auth.annotation.RequiredAdmin;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.service.AuthService;
 import roomescape.reservation.dto.AdminReservationRequest;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -35,9 +35,9 @@ public class AdminReservationController {
             @Valid @RequestBody final AdminReservationRequest request
     ) {
         LoginMember member = authService.findLoginMemberById(request.memberId());
-        ReservationRequest reservationRequest =
-                new ReservationRequest(request.date(), request.timeId(), request.themeId());
-        ReservationResponse response = reservationService.create(reservationRequest, member);
+        ReservationCreateRequest reservationCreateRequest =
+                new ReservationCreateRequest(request.date(), request.timeId(), request.themeId(), member);
+        ReservationResponse response = reservationService.create(reservationCreateRequest);
 
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);

@@ -22,7 +22,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.BookedReservationTimeResponse;
 import roomescape.reservation.dto.FilteringReservationRequest;
 import roomescape.reservation.dto.MyReservationsResponse;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -64,12 +64,12 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse create(final ReservationRequest request, final LoginMember member) {
+    public ReservationResponse create(final ReservationCreateRequest request) {
         if (isAlreadyBooked(request)) {
             throw new AlreadyInUseException("reservation is already in use");
         }
 
-        Reservation reservation = getReservation(request, member);
+        Reservation reservation = getReservation(request, request.loginMember());
         LocalDateTime now = LocalDateTime.now();
         validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
 
@@ -90,13 +90,13 @@ public class ReservationService {
                 .toList();
     }
 
-    private boolean isAlreadyBooked(final ReservationRequest request) {
+    private boolean isAlreadyBooked(final ReservationCreateRequest request) {
         return reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(), request.timeId(), request.themeId()
         );
     }
 
-    private Reservation getReservation(final ReservationRequest request, final LoginMember loginMember) {
+    private Reservation getReservation(final ReservationCreateRequest request, final LoginMember loginMember) {
         ReservationTime reservationTime = gerReservationTime(request);
         Theme theme = getTheme(request);
         Member member = memberRepository.findById(loginMember.id())
@@ -104,13 +104,13 @@ public class ReservationService {
         return new Reservation(member, request.date(), reservationTime, theme);
     }
 
-    private Theme getTheme(final ReservationRequest request) {
+    private Theme getTheme(final ReservationCreateRequest request) {
         Long themeId = request.themeId();
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new EntityNotFoundException("theme not found id =" + themeId));
     }
 
-    private ReservationTime gerReservationTime(final ReservationRequest request) {
+    private ReservationTime gerReservationTime(final ReservationCreateRequest request) {
         Long timeId = request.timeId();
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new EntityNotFoundException("reservationsTime not found id =" + timeId));
