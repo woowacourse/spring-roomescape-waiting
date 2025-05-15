@@ -3,7 +3,6 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.dto.theme.ThemeCreateRequest;
@@ -58,7 +57,7 @@ public class ThemeService {
         LocalDate end = LocalDate.now();
         LocalDate start = end.minusDays(7);
 
-        List<Theme> themes = themeRepository.findTopThemes(start, end, PageRequest.of(0, POPULAR_THEME_LIMIT));
+        List<Theme> themes = themeRepository.findTopThemes(start, end, POPULAR_THEME_LIMIT);
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();

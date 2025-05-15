@@ -26,7 +26,7 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> save(Theme theme) {
+    public Theme save(Theme theme) {
         long count = themes.stream()
                 .filter(t -> t.getName().equals(theme.getName()) && t.getDescription().equals(theme.getDescription()) && t.getThumbnail().equals(theme.getThumbnail()))
                 .count();
@@ -36,7 +36,7 @@ public class FakeThemeRepository implements ThemeRepository {
 
         Theme newTheme = new Theme(themeId.getAndIncrement(), theme.getName(), theme.getDescription(), theme.getThumbnail());
         themes.add(newTheme);
-        return findById(newTheme.getId());
+        return newTheme;
     }
 
     @Override
@@ -45,27 +45,27 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(long id) {
+    public Optional<Theme> findById(Long id) {
         return themes.stream()
                 .filter(theme -> Objects.equals(theme.getId(), id))
                 .findFirst();
     }
 
     @Override
-    public List<Theme> findMostReservedByDateRange(LocalDate start, LocalDate end) {
+    public List<Theme> findTopThemes(LocalDate from, LocalDate to, int limit) {
         Map<Theme, Long> themeCounts = reservations.stream()
-                .filter(r -> r.getDate().isAfter(start.minusDays(1)) && r.getDate().isBefore(end))
+                .filter(r -> r.getDate().isAfter(from.minusDays(1)) && r.getDate().isBefore(to))
                 .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()));
 
         return themeCounts.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .limit(10)
+                .limit(limit)
                 .map(Map.Entry::getKey)
                 .toList();
     }
 
     @Override
-    public int deleteById(long id) {
+    public void deleteById(Long id) {
         Theme deleteTheme = themes.stream()
                 .filter(theme -> Objects.equals(theme.getId(), id))
                 .findFirst()
@@ -81,13 +81,6 @@ public class FakeThemeRepository implements ThemeRepository {
                     .filter(theme -> Objects.equals(theme.getId(), id))
                     .count();
             themes.remove(deleteTheme);
-            return affectedRows;
         }
-
-        return 0;
-    }
-
-    public void addReservation(Reservation reservation) {
-        reservations.add(reservation);
     }
 }
