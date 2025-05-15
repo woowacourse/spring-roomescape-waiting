@@ -24,8 +24,7 @@ public class AdminService {
         this.userService = userService;
     }
 
-    public ReservationResponseDto createReservation(AdminReservationRequestDto adminReservationRequestDto,
-                                                    User admin) {
+    public ReservationResponseDto createReservation(AdminReservationRequestDto adminReservationRequestDto) {
         User member = getUser(adminReservationRequestDto.memberId());
         ReservationRequestDto reservationRequestDto = convertAdminReservationRequestDtoToReservationRequestDto(
                 adminReservationRequestDto);
@@ -40,8 +39,7 @@ public class AdminService {
         return member;
     }
 
-    public List<ReservationResponseDto> searchReservations(SearchReservationRequestDto searchReservationRequestDto,
-                                                           User admin) {
+    public List<ReservationResponseDto> searchReservations(SearchReservationRequestDto searchReservationRequestDto) {
         return reservationService.findReservationsByUserAndThemeAndFromAndTo(searchReservationRequestDto);
     }
 

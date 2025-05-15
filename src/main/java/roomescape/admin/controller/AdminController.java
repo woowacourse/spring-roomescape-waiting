@@ -25,21 +25,14 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponseDto> createReservation(
-            @RequestBody AdminReservationRequestDto adminReservationRequestDto,
-            User admin) {
-        ReservationResponseDto reservationResponseDto = adminService.createReservation(
-                adminReservationRequestDto, admin);
+    public ResponseEntity<ReservationResponseDto> createReservation(@RequestBody AdminReservationRequestDto requestDto) {
+        ReservationResponseDto reservationResponseDto = adminService.createReservation(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponseDto);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ReservationResponseDto>> searchReservations(
-            SearchReservationRequestDto searchReservationRequestDto,
-            User admin) {
-        List<ReservationResponseDto> reservationResponseDtos = adminService.searchReservations(
-                searchReservationRequestDto,
-                admin);
+    public ResponseEntity<List<ReservationResponseDto>> searchReservations(SearchReservationRequestDto requestDto) {
+        List<ReservationResponseDto> reservationResponseDtos = adminService.searchReservations(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(reservationResponseDtos);
     }
 }
