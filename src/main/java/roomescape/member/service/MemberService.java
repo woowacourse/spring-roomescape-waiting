@@ -13,7 +13,7 @@ import roomescape.member.repository.MemberRepository;
 
 @RequiredArgsConstructor
 @Service
-public class MemberService {
+public class MemberService implements MemberQueryService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncryptor passwordEncryptor;

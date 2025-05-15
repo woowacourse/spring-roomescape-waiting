@@ -46,17 +46,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Long> findReservedTimeIdsByDateAndTheme(@Param(value = "date") LocalDate date,
                                                  @Param(value = "themeId") Long themeId);
 
-    // TODO 페치를 사용하는 것으로 인한 성능 저하 처리 방법
-
     @Query("""
-                SELECT r FROM Reservation r
-                JOIN fetch r.reservationDatetime.reservationTime t
-                JOIN fetch r.theme th
-                JOIN fetch r.reserver m
-                WHERE (:themeId IS NULL OR r.theme.id = :themeId)
-                  AND (:memberId IS NULL OR r.reserver.id = :memberId)
-                  AND (:fromDate IS NULL OR r.reservationDatetime.reservationDate.date >= :fromDate)
-                  AND (:toDate IS NULL OR r.reservationDatetime.reservationDate.date <= :toDate)
+                select r from Reservation r
+                join fetch r.reservationDatetime.reservationTime t
+                join fetch r.theme th
+                join fetch r.reserver m
+                where (:themeId is null or r.theme.id = :themeId)
+                  and (:memberId is null or r.reserver.id = :memberId)
+                  and (:fromDate is null or r.reservationDatetime.reservationDate.date >= :fromDate)
+                  and (:toDate is null or r.reservationDatetime.reservationDate.date <= :toDate)
             """)
     List<Reservation> findFilteredReservations(
             @Param("themeId") Long themeId,
@@ -66,12 +64,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN FETCH r.reserver
-            JOIN FETCH r.reservationDatetime.reservationTime
-            JOIN FETCH r.theme
-            WHERE r.reserver.id = :memberId
+            select r
+            from Reservation r
+            join fetch r.reserver
+            join fetch r.reservationDatetime.reservationTime
+            join fetch r.theme
+            where r.reserver.id = :memberId
             """)
     List<Reservation> findByMemberId(@Param("memberId") Long memberId);
 }
