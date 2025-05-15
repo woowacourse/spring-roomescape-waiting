@@ -8,7 +8,7 @@ import roomescape.domain.user.UserRole;
 
 public class DomainFixtures {
 
-    public static final User JUNK_USER = new User(1L, "포포", UserRole.USER, "popo@email.com", "password");
+    public static final User JUNK_USER = new User(1L, "라젤", UserRole.USER, "razel@email.com", "password");
     public static final TimeSlot JUNK_TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));
     public static final Theme JUNK_THEME = new Theme(
             1L,
