@@ -6,18 +6,14 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.global.exception.custom.UnauthorizedException;
-import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.auth.service.AuthService;
 
 public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final MemberRepository memberRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthService authService;
 
-    public MemberArgumentResolver(final MemberRepository memberRepository, final JwtTokenProvider jwtTokenProvider) {
-        this.memberRepository = memberRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
+    public MemberArgumentResolver(final AuthService authService) {
+        this.authService = authService;
     }
 
     @Override
@@ -31,9 +27,6 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
             throws Exception {
         final HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         final String token = CookieUtil.parseCookie(request.getCookies());
-        final long id = jwtTokenProvider.getId(token);
-        final Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new UnauthorizedException("확인할 수 없는 사용자입니다."));
-        return new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole().name());
+        return authService.checkMember(token);
     }
 }
