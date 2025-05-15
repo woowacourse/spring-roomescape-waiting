@@ -26,7 +26,13 @@ public class AuthRoleCheckInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        final RequiresRole requiresRole = handlerMethod.getMethodAnnotation(RequiresRole.class);
+        // 1. 메서드에 @RequiresRole 어노테이션이 붙어있는지 확인
+        RequiresRole requiresRole = handlerMethod.getMethodAnnotation(RequiresRole.class);
+
+        // 2. 메서드에 @RequiresRole 어노테이션이 붙어있지 않으면 클래스에 붙어있는지 확인
+        if (requiresRole == null) {
+            requiresRole = handlerMethod.getBeanType().getAnnotation(RequiresRole.class);
+        }
 
         if (requiresRole == null) {
             return true;
