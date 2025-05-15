@@ -100,4 +100,14 @@ public class ReservationServiceTest {
             assertThat(reservationService.findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(1L, 1L, LocalDate.of(2025, 5, 1), LocalDate.of(2025, 5, 3))).hasSize(3);
         });
     }
+    
+    @Test
+    void 특정_멤버의_예약을_조회할_수_있다() {
+        // Given
+        Long memberId = 1L;
+        
+        // When
+        // Then
+        assertThat(reservationService.findByMemberId(memberId)).hasSize(20);
+    }
 }
