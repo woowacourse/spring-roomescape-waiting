@@ -16,12 +16,10 @@ import roomescape.common.CleanUp;
 import roomescape.fixture.MemberDbFixture;
 import roomescape.fixture.ReservationDateFixture;
 import roomescape.fixture.ReservationDateTimeDbFixture;
-import roomescape.fixture.ReservationDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
@@ -43,15 +41,10 @@ class ReservationServiceTest {
     @Autowired
     private ThemeDbFixture themeDbFixture;
     @Autowired
-    private ReservationDbFixture reservationDbFixture;
-    @Autowired
     private MemberDbFixture memberDbFixture;
     @Autowired
     private ReservationRepository reservationRepository;
 
-
-    @Autowired
-    private MemberRepository memberRepository;
     @Autowired
     private CleanUp cleanUp;
     @Autowired
@@ -87,7 +80,13 @@ class ReservationServiceTest {
 
     @Test
     void 예약이_존재하면_예약을_생성할_수_없다() {
-        Reservation reservation = reservationDbFixture.예약_유저1_내일_10시_공포();
+        Theme theme = themeDbFixture.공포();
+        Member reserver = memberDbFixture.유저1_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Reservation reservation = Reservation.reserve(
+                reserver, reservationDateTime, theme
+        );
+        reservationRepository.save(reservation);
 
         ReserveCommand command = new ReserveCommand(
                 reservation.getDate(),
@@ -103,7 +102,11 @@ class ReservationServiceTest {
 
     @Test
     void 예약을_모두_조회한다() {
-        Reservation reservation = reservationDbFixture.예약_유저1_내일_10시_공포();
+        Member reserver = memberDbFixture.유저1_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+
+        Reservation reservation = reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
 
         List<ReservationResponse> responses = reservationService.getFilteredReservations(null, null, null, null);
         ReservationResponse response = responses.get(0);
@@ -116,7 +119,11 @@ class ReservationServiceTest {
 
     @Test
     void 예약을_삭제한다() {
-        Reservation reservation = reservationDbFixture.예약_유저1_내일_10시_공포();
+        Member reserver = memberDbFixture.유저1_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+
+        Reservation reservation = reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
 
         reservationService.deleteById(reservation.getId());
 

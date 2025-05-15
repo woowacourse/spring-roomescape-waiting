@@ -12,13 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.common.CleanUp;
+import roomescape.fixture.MemberDbFixture;
 import roomescape.fixture.ReservationDateFixture;
-import roomescape.fixture.ReservationDbFixture;
+import roomescape.fixture.ReservationDateTimeDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
@@ -28,13 +32,17 @@ import roomescape.time.domain.ReservationTime;
 class ThemeServiceTest {
 
     @Autowired
-    private ReservationDbFixture reservationDbFixture;
-    @Autowired
     private ReservationTimeDbFixture reservationTimeDbFixture;
     @Autowired
     private ThemeDbFixture themeDbFixture;
     @Autowired
     private ThemeService themeService;
+    @Autowired
+    private MemberDbFixture memberDbFixture;
+    @Autowired
+    private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
+    @Autowired
+    private ReservationRepository reservationRepository;
     @Autowired
     private CleanUp cleanUp;
 
@@ -79,7 +87,13 @@ class ThemeServiceTest {
 
     @Test
     void 이미_해당_테마의_예약이_존재한다면_삭제할_수_없다() {
-        Reservation reservation = reservationDbFixture.예약_유저1_내일_10시_공포();
+        Theme theme = themeDbFixture.공포();
+        Member reserver = memberDbFixture.유저1_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Reservation reservation = Reservation.reserve(
+                reserver, reservationDateTime, theme
+        );
+        reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> themeService.deleteById(reservation.getTheme().getId()))
                 .isInstanceOf(InvalidArgumentException.class)
@@ -99,10 +113,12 @@ class ThemeServiceTest {
         for (int i = 0; i < 20; i++) {
             themes.add(themeDbFixture.커스텀_테마("테마" + i));
         }
+        Member member = memberDbFixture.유저1_생성();
 
         for (int i = 0; i < 20; i++) {
-            addReservation(19 - i, ReservationDateFixture.예약날짜_오늘, reservationTimeDbFixture.열시(), themes.get(i));
-            addReservation(i, ReservationDateFixture.예약날짜_7일전, reservationTimeDbFixture.열시(), themes.get(i));
+            addReservation(19 - i, member, ReservationDateFixture.예약날짜_오늘, reservationTimeDbFixture.열시(),
+                    themes.get(i));
+            addReservation(i, member, ReservationDateFixture.예약날짜_7일전, reservationTimeDbFixture.열시(), themes.get(i));
         }
 
         List<ThemeResponse> popularThemes = themeService.getPopularThemes();
@@ -116,9 +132,11 @@ class ThemeServiceTest {
                 );
     }
 
-    private void addReservation(int count, ReservationDate date, ReservationTime time, Theme theme) {
+    private void addReservation(int count, Member member, ReservationDate date, ReservationTime time, Theme theme) {
         for (int i = 0; i < count; i++) {
-            reservationDbFixture.예약_유저1(date, time, theme);
+            reservationRepository.save(Reservation.reserve(
+                    member, new ReservationDateTime(date, time), theme
+            ));
         }
     }
 }
