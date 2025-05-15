@@ -21,9 +21,7 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime() {
-
-    }
+    protected ReservationTime() {}
 
     public static ReservationTime createWithoutId(final LocalTime startAt) {
         return new ReservationTime(null, startAt);

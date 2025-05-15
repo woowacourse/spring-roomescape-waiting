@@ -31,7 +31,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     private Reservation(final Long id, final Member member, final LocalDate date,
