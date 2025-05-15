@@ -1,4 +1,4 @@
-package roomescape.auth.sign.application.usecase;
+package roomescape.auth.sign.application.dto;
 
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;

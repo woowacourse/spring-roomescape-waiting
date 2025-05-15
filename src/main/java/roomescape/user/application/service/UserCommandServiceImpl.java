@@ -3,7 +3,7 @@ package roomescape.user.application.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.auth.sign.application.usecase.CreateUserRequest;
+import roomescape.auth.sign.application.dto.CreateUserRequest;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserRepository;
 
