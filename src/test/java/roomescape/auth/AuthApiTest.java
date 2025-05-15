@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.MethodMode;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.global.auth.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql("/test-member-data.sql")
 public class AuthApiTest {
 
@@ -80,6 +80,7 @@ public class AuthApiTest {
                     .body(new LoginRequest("aaa@gmail.com", "1234"))
                     .when().post("/login")
                     .then().log().all()
+                    .statusCode(200)
                     .extract().cookie(TOKEN_COOKIE_NAME);
             // when
             // then
