@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import roomescape.auth.annotation.RequiredAdmin;
 import roomescape.auth.service.JwtTokenHandler;
+import roomescape.common.AuthTokenCookieProvider;
 import roomescape.common.exception.AuthenticationException;
 import roomescape.member.domain.Role;
 
@@ -15,9 +16,11 @@ import roomescape.member.domain.Role;
 public class AdminInterceptor implements HandlerInterceptor {
 
     private final JwtTokenHandler jwtTokenHandler;
+    private final AuthTokenCookieProvider authTokenCookieProvider;
 
-    public AdminInterceptor(final JwtTokenHandler jwtTokenHandler) {
+    public AdminInterceptor(final JwtTokenHandler jwtTokenHandler, AuthTokenCookieProvider authTokenCookieProvider) {
         this.jwtTokenHandler = jwtTokenHandler;
+        this.authTokenCookieProvider = authTokenCookieProvider;
     }
 
     @Override
@@ -38,9 +41,8 @@ public class AdminInterceptor implements HandlerInterceptor {
     }
 
     private boolean hasAdminRole(final HttpServletRequest request) {
-        String token = jwtTokenHandler.extractTokenValue(request);
+        String token = authTokenCookieProvider.extractToken(request);
         Role role = jwtTokenHandler.getRole(token);
-
         if (role == Role.ADMIN) {
             return true;
         }

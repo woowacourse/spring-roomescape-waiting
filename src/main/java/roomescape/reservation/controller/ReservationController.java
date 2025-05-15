@@ -42,6 +42,7 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
+    // TODO: 네이밍? /reservations/times
     @GetMapping("/available")
     public ResponseEntity<List<BookedReservationTimeResponse>> readAvailableReservationTimes(
             @RequestParam("date") final LocalDate date,

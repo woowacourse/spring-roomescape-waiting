@@ -1,27 +1,22 @@
 package roomescape.auth.service;
 
-import java.util.Arrays;
-import java.util.Date;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import roomescape.common.exception.AuthenticationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
+import java.util.Date;
+
 @Component
 public class JwtTokenHandler {
 
-    private static final String TOKEN_NAME = "token";
     private static final String CLAIM_ROLE = "role";
 
     @Value("${security.jwt.token.secret-key}")
@@ -54,20 +49,13 @@ public class JwtTokenHandler {
                 .compact();
     }
 
-    public String extractTokenValue(final HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new AuthenticationException("쿠키가 존재하지 않습니다.");
+    public Long getSubject(String token) {
+        try {
+            Claims claims = getBodyWithValidation(token);
+            return Long.parseLong(claims.getSubject());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("잘못된 형식의 토큰입니다.");
         }
-        return Arrays.stream(cookies)
-                .filter(c -> TOKEN_NAME.equals(c.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElseThrow(() -> new AuthenticationException("토큰이 존재하지 않습니다."));
-    }
-
-    public String getMemberIdFromToken(final String token) {
-        return getBodyWithValidation(token).getSubject();
     }
 
     public Role getRole(final String token) {

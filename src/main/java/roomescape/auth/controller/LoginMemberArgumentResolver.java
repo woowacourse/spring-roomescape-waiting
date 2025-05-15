@@ -11,15 +11,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.service.AuthService;
 import roomescape.auth.service.JwtTokenHandler;
+import roomescape.common.AuthTokenCookieProvider;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final JwtTokenHandler jwtTokenHandler;
+    private final AuthTokenCookieProvider authTokenCookieProvider;
     private final AuthService authService;
 
-    public LoginMemberArgumentResolver(final JwtTokenHandler jwtTokenHandler, final AuthService authService) {
+    public LoginMemberArgumentResolver(
+            final JwtTokenHandler jwtTokenHandler,
+            final AuthTokenCookieProvider authTokenCookieProvider,
+            final AuthService authService
+    ) {
         this.jwtTokenHandler = jwtTokenHandler;
+        this.authTokenCookieProvider = authTokenCookieProvider;
         this.authService = authService;
     }
 
@@ -34,8 +41,8 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        String token = jwtTokenHandler.extractTokenValue(request);
-        final long memberId = Long.parseLong(jwtTokenHandler.getMemberIdFromToken(token));
+        String token = authTokenCookieProvider.extractToken(request);
+        final Long memberId = jwtTokenHandler.getSubject(token);
         return authService.findLoginMemberById(memberId);
     }
 }
