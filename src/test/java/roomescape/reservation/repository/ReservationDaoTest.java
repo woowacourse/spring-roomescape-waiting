@@ -27,7 +27,7 @@ import roomescape.utils.JdbcTemplateUtils;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class})
+@Import({ReservationRepository.class})
 class ReservationDaoTest {
 
     private static final Long RESERVATION_TIME_ID = 1L;
@@ -44,7 +44,7 @@ class ReservationDaoTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @AfterEach
     void tearDown() {
@@ -63,12 +63,12 @@ class ReservationDaoTest {
         Reservation reservation = new Reservation(member, now.toLocalDate(), reservationTime, theme);
 
         // when
-        Reservation result = reservationDao.save(reservation);
+        Reservation result = reservationRepository.save(reservation);
 
         // then
         assertThat(result.getMember().getName()).isEqualTo(NAME);
-        assertThat(result.getReservationDate()).isEqualTo(now.toLocalDate());
-        assertThat(result.getReservationTime().getId()).isEqualTo(RESERVATION_TIME_ID);
+        assertThat(result.getDate()).isEqualTo(now.toLocalDate());
+        assertThat(result.getTime().getId()).isEqualTo(RESERVATION_TIME_ID);
         assertThat(result.getTheme().getId()).isEqualTo(THEME_ID);
     }
 
@@ -86,13 +86,13 @@ class ReservationDaoTest {
         saveReservation(id, now.toLocalDate(), RESERVATION_TIME_ID, THEME_ID, MEMBER_ID);
 
         // when
-        Reservation result = reservationDao.findById(id).get();
+        Reservation result = reservationRepository.findById(id).get();
 
         // then
-        assertThat(result.getReservationDate()).isEqualTo(now.toLocalDate());
-        assertThat(result.getReservationTimeId()).isEqualTo(RESERVATION_TIME_ID);
-        assertThat(result.getReservationStartTime()).isEqualTo(now.toLocalTime());
-        assertThat(result.getThemeId()).isEqualTo(THEME_ID);
+        assertThat(result.getDate()).isEqualTo(now.toLocalDate());
+        assertThat(result.getTime().getId()).isEqualTo(RESERVATION_TIME_ID);
+        assertThat(result.getTime().getStartAt()).isEqualTo(now.toLocalTime());
+        assertThat(result.getTheme().getId()).isEqualTo(THEME_ID);
         assertThat(result.getMember().getId()).isEqualTo(MEMBER_ID);
     }
 
@@ -109,7 +109,7 @@ class ReservationDaoTest {
         jdbcTemplate.update(sql, date, RESERVATION_TIME_ID, THEME_ID, MEMBER_ID);
 
         // when
-        List<Reservation> result = reservationDao.findAll();
+        List<Reservation> result = reservationRepository.findAll();
 
         // then
         assertThat(result).hasSize(1);
@@ -128,7 +128,7 @@ class ReservationDaoTest {
         saveReservation(reservationId, now.toLocalDate(), RESERVATION_TIME_ID, THEME_ID, MEMBER_ID);
 
         // when
-        reservationDao.deleteById(reservationId);
+        reservationRepository.deleteById(reservationId);
 
         // then
         String sql = "select count(*) from reservation where id = ?";
@@ -154,7 +154,7 @@ class ReservationDaoTest {
 
         // when & then
         assertThat(
-                reservationDao.existsByDateAndTimeIdAndThemeId(
+                reservationRepository.existsByDateAndTimeIdAndThemeId(
                         LocalDate.of(2025, 4, day2), RESERVATION_TIME_ID, THEME_ID
                 )
         ).isEqualTo(expected);

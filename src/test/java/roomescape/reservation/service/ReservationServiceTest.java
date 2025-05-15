@@ -30,20 +30,24 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.dto.ThemeResponse;
-import roomescape.reservation.repository.ReservationDao;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberRepository.class,
-        ReservationService.class})
+@Import({ReservationRepository.class,
+        ReservationTimeRepository.class,
+        ThemeRepository.class,
+        MemberRepository.class,
+        ReservationService.class
+})
 class ReservationServiceTest {
 
     private final LocalDateTime now = LocalDateTime.now();
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -65,7 +69,7 @@ class ReservationServiceTest {
         Member savedMember = memberRepository.save(member);
 
         LocalDate date = LocalDate.of(2024, 4, 29);
-        reservationDao.save(new Reservation(savedMember, date, savedTime, savedTheme));
+        reservationRepository.save(new Reservation(savedMember, date, savedTime, savedTheme));
 
         // when
         List<ReservationResponse> response = reservationService.getAll();
@@ -205,7 +209,7 @@ class ReservationServiceTest {
         Member savedMember = memberRepository.save(member);
 
         LocalDate date = nextDay();
-        Reservation savedReservation = reservationDao.save(
+        Reservation savedReservation = reservationRepository.save(
                 new Reservation(savedMember, date, savedTime, savedTheme));
 
         Long id = savedReservation.getId();
@@ -236,7 +240,7 @@ class ReservationServiceTest {
         Long themeId = savedTheme.getId();
         Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
         Member savedMember = memberRepository.save(member);
-        reservationDao.save(new Reservation(savedMember, date, reservationTime1, savedTheme));
+        reservationRepository.save(new Reservation(savedMember, date, reservationTime1, savedTheme));
 
         // when
         List<BookedReservationTimeResponse> responses = reservationService.getAvailableTimes(date, themeId);

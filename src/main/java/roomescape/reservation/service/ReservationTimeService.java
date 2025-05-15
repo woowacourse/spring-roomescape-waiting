@@ -5,25 +5,24 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.common.exception.AlreadyInUseException;
-import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
-import roomescape.reservation.repository.ReservationDao;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
     public ReservationTimeService(
             final ReservationTimeRepository reservationTimeRepository,
-            final ReservationDao reservationDao
+            final ReservationRepository reservationRepository
     ) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<ReservationTimeResponse> getAll() {
@@ -46,7 +45,7 @@ public class ReservationTimeService {
     }
 
     public void delete(final Long id) {
-        if (reservationDao.existsByTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new AlreadyInUseException("Reservation is already in use");
         }
         reservationTimeRepository.deleteById(id);

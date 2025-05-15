@@ -11,7 +11,7 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
 
     Optional<ReservationTime> findById(Long id);
 
-    Boolean existsByStartAt(final LocalTime startAt);
+    Boolean existsByStartAt(LocalTime startAt);
 
 
 }

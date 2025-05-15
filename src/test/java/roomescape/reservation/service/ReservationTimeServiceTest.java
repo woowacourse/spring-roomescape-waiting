@@ -26,18 +26,23 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
-import roomescape.reservation.repository.ReservationDao;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberRepository.class,
-        ReservationTimeService.class})
+@Import({
+        ReservationRepository.class,
+        ReservationTimeRepository.class,
+        ThemeRepository.class,
+        MemberRepository.class,
+        ReservationTimeService.class
+})
 class ReservationTimeServiceTest {
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -49,7 +54,7 @@ class ReservationTimeServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationDao);
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
     }
 
     @DisplayName("모든 시간 정보를 가져온다.")
@@ -127,7 +132,7 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(8, 0)));
         Member member = memberRepository.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
 
-        reservationDao.save(new Reservation(member, LocalDate.now(), reservationTime, theme));
+        reservationRepository.save(new Reservation(member, LocalDate.now(), reservationTime, theme));
         Long timeId = reservationTime.getId();
 
         // when & then

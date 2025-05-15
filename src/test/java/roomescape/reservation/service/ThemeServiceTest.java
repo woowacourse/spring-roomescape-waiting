@@ -25,18 +25,23 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.ThemeRequest;
 import roomescape.reservation.dto.ThemeResponse;
-import roomescape.reservation.repository.ReservationDao;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeRepository.class, ThemeRepository.class, MemberRepository.class,
-        ThemeService.class})
+@Import({
+        ReservationRepository.class,
+        ReservationTimeRepository.class,
+        ThemeRepository.class,
+        MemberRepository.class,
+        ThemeService.class
+})
 class ThemeServiceTest {
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -123,7 +128,7 @@ class ThemeServiceTest {
         Member savedMember = memberRepository.save(member);
 
         LocalDate date = LocalDate.of(2024, 4, 29);
-        reservationDao.save(new Reservation(savedMember, date, savedTime, savedTheme));
+        reservationRepository.save(new Reservation(savedMember, date, savedTime, savedTheme));
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(themeId))
@@ -142,12 +147,12 @@ class ThemeServiceTest {
         Theme theme1 = themeRepository.save(new Theme("테마1", "테마1", "www.m.com"));
         Theme theme2 = themeRepository.save(new Theme("테마2", "테마2", "www.m.com"));
         Theme theme3 = themeRepository.save(new Theme("테마3", "테마3", "www.m.com"));
-        reservationDao.save(new Reservation(member, date.minusDays(1), reservationTime, theme1));
-        reservationDao.save(new Reservation(member, date.minusDays(2), reservationTime, theme1));
-        reservationDao.save(new Reservation(member, date.minusDays(3), reservationTime, theme1));
-        reservationDao.save(new Reservation(member, date.minusDays(4), reservationTime, theme2));
-        reservationDao.save(new Reservation(member, date.minusDays(5), reservationTime, theme2));
-        reservationDao.save(new Reservation(member, date.minusDays(6), reservationTime, theme3));
+        reservationRepository.save(new Reservation(member, date.minusDays(1), reservationTime, theme1));
+        reservationRepository.save(new Reservation(member, date.minusDays(2), reservationTime, theme1));
+        reservationRepository.save(new Reservation(member, date.minusDays(3), reservationTime, theme1));
+        reservationRepository.save(new Reservation(member, date.minusDays(4), reservationTime, theme2));
+        reservationRepository.save(new Reservation(member, date.minusDays(5), reservationTime, theme2));
+        reservationRepository.save(new Reservation(member, date.minusDays(6), reservationTime, theme3));
 
         // when
         List<ThemeResponse> responses = themeService.getPopularThemes();

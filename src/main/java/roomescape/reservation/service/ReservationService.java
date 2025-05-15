@@ -22,29 +22,29 @@ import roomescape.reservation.dto.FilteringReservationRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
-import roomescape.reservation.repository.ReservationDao;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
     public ReservationService(
-            final ReservationDao reservationDao,
+            final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository
     ) {
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> getAll() {
-        List<Reservation> reservations = reservationDao.findAll();
+        List<Reservation> reservations = reservationRepository.findAll();
 
         return reservations.stream()
                 .map(ReservationResponse::from)
@@ -58,9 +58,9 @@ public class ReservationService {
 
         Reservation reservation = getReservation(request, member);
         LocalDateTime now = LocalDateTime.now();
-        validateDateTime(now, reservation.getReservationDate(), reservation.getReservationStartTime());
+        validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
 
-        Reservation savedReservation = reservationDao.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.from(savedReservation);
     }
@@ -71,14 +71,14 @@ public class ReservationService {
         LocalDate dateFrom = request.dateFrom();
         LocalDate dateTo = request.dateTo();
 
-        return reservationDao.findByThemeIdAndMemberIdAndBetweenDate(themeId, memberId, dateFrom, dateTo)
+        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     private boolean isAlreadyBooked(final ReservationRequest request) {
-        return reservationDao.existsByDateAndTimeIdAndThemeId(
+        return reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(), request.timeId(), request.themeId()
         );
     }
@@ -111,11 +111,8 @@ public class ReservationService {
     }
 
     public void delete(final Long id) {
-        int updatedRow = reservationDao.deleteById(id);
-
-        if (updatedRow == 0) {
-            throw new EntityNotFoundException("reservation not found");
-        }
+        // TODO: 존재 여부 확인해서 EntityNotFoundException 검증
+        reservationRepository.deleteById(id);
     }
 
     public List<BookedReservationTimeResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
@@ -143,9 +140,9 @@ public class ReservationService {
     }
 
     private Set<ReservationTime> getAlreadyBookedTimes(final LocalDate date, final Long themeId) {
-        return reservationDao.findByDateAndThemeId(date, themeId)
+        return reservationRepository.findByDateAndThemeId(date, themeId)
                 .stream()
-                .map(Reservation::getReservationTime)
+                .map(Reservation::getTime)
                 .collect(Collectors.toSet());
     }
 }

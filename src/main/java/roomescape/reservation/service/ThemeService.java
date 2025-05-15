@@ -9,7 +9,7 @@ import roomescape.common.exception.AlreadyInUseException;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.ThemeRequest;
 import roomescape.reservation.dto.ThemeResponse;
-import roomescape.reservation.repository.ReservationDao;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
@@ -19,11 +19,11 @@ public class ThemeService {
     private static final int END_DATE_OFFSET = 1;
 
     private final ThemeRepository themeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationDao reservationDao) {
+    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<ThemeResponse> getAll() {
@@ -39,7 +39,7 @@ public class ThemeService {
     }
 
     public void delete(final Long id) {
-        if (reservationDao.existsByThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new AlreadyInUseException("Theme with id " + id + " is already in use");
         }
         themeRepository.deleteById(id);
