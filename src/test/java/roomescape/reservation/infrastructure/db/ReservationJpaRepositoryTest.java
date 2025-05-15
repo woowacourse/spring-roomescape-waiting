@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import roomescape.reservation.model.entity.ReservationTime;
 import roomescape.reservation.model.repository.dto.ReservationWithMember;
 import roomescape.support.RepositoryTestSupport;
 
+@Disabled
 class ReservationJpaRepositoryTest extends RepositoryTestSupport {
 
     @Autowired

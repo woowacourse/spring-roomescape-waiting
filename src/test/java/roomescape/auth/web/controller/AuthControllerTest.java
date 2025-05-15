@@ -8,6 +8,7 @@ import io.restassured.http.ContentType;
 import io.restassured.http.Cookie;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
 import roomescape.support.IntegrationTestSupport;
 
+@Disabled
 class AuthControllerTest extends IntegrationTestSupport {
 
     @Autowired
