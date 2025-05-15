@@ -42,7 +42,7 @@ values ('10:00'),
        ('12:50');
 
 -- 예약 개수 차등두기
-insert into reservation (member_id, theme_id, date, reservation_time_id, status)
+insert into reservation (member_id, theme_id, date, reservation_time_id, reservation_status)
 values
     -- theme_id = 1 (10개 예약)
     (1, 1, TIMESTAMPADD(DAY, -7, CURRENT_DATE()), 1, 'RESERVED'),

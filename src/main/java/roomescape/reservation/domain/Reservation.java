@@ -36,7 +36,7 @@ public class Reservation {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private ReservationStatus reservationStatus;
 
     public Reservation() {
     }
@@ -48,7 +48,7 @@ public class Reservation {
         this.theme = theme;
         this.date = date;
         this.reservationTime = reservationTime;
-        this.status = Status.RESERVED;
+        this.reservationStatus = ReservationStatus.RESERVED;
     }
 
     public Reservation(final Member member, final Theme theme, final LocalDate date,
@@ -76,7 +76,7 @@ public class Reservation {
         return theme;
     }
 
-    public Status getStatus() {
-        return status;
+    public ReservationStatus getStatus() {
+        return reservationStatus;
     }
 }
