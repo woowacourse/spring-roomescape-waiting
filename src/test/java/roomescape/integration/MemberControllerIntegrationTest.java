@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasItems;
@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.business.domain.Member;
-import roomescape.business.service.MemberService;
 import roomescape.persistence.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,10 +23,6 @@ class MemberControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
-
-    @Autowired
-    private MemberService memberService;
-
     @Autowired
     private MemberRepository memberRepository;
 
@@ -40,11 +35,10 @@ class MemberControllerIntegrationTest {
     @DisplayName("전체 회원 목록을 조회하면 회원 리스트를 응답한다")
     void readAll_ReturnsMemberList() {
         // given
-        final Member expectedMember1 = new Member("이름1", "USER", "이메일1", "비밀번호1");
-        final Member expectedMember2 = new Member("이름2", "USER", "이메일2", "비밀번호2");
-
-        memberRepository.save(expectedMember1);
-        memberRepository.save(expectedMember2);
+        final Member member1 = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        memberRepository.save(member1);
+        final Member member2 = new Member("이름2", "USER", "이메일2", "비밀번호2");
+        memberRepository.save(member2);
 
         // when & then
         given()

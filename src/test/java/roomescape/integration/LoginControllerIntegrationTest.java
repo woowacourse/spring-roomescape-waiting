@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -36,8 +36,9 @@ class LoginControllerIntegrationTest {
     @DisplayName("올바른 이메일과 비밀번호로 로그인하면 성공 응답을 반환한다")
     void login_WithValidCredentials_ReturnsSuccess() {
         // given
-        Member member = new Member("이름", "USER", "email@test.com", "password1234!");
+        final Member member = new Member("이름", "USER", "email@test.com", "password1234!");
         memberRepository.save(member);
+
         final LoginRequest request = new LoginRequest("email@test.com", "password1234!");
 
         // when & then
@@ -71,8 +72,9 @@ class LoginControllerIntegrationTest {
     @DisplayName("잘못된 비밀번호로 로그인하면 401 상태코드를 반환한다")
     void login_WithInvalidPassword_ReturnsBadRequest() {
         // given
-        Member member = new Member("이름", "USER", "email@test.com", "password");
+        final Member member = new Member("이름", "USER", "email@test.com", "password");
         memberRepository.save(member);
+
         final LoginRequest request = new LoginRequest("email@test.com", "notExistedPassword");
 
         // when & then
@@ -89,10 +91,10 @@ class LoginControllerIntegrationTest {
     @DisplayName("로그인 체크 시 로그인된 상태면 이름을 응답한다")
     void checkLogin_WhenLoggedIn_ReturnsTrue() {
         // given
-        Member member = new Member("이름", "USER", "email@test.com", "password");
+        final Member member = new Member("이름", "USER", "email@test.com", "password");
         memberRepository.save(member);
-        final LoginRequest request = new LoginRequest("email@test.com", "password");
 
+        final LoginRequest request = new LoginRequest("email@test.com", "password");
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
@@ -124,11 +126,11 @@ class LoginControllerIntegrationTest {
     void login_WithEmptyEmail_ReturnsBadRequest() {
         // given
         final String invalidRequest = """
-            {
-                email:'',
-                password:'password'
-            }
-        """;
+                    {
+                        email:'',
+                        password:'password'
+                    }
+                """;
 
         // when & then
         given()
@@ -145,11 +147,11 @@ class LoginControllerIntegrationTest {
     void login_WithEmptyPassword_ReturnsBadRequest() {
         // given
         final String invalidRequest = """
-            {
-                email:'email@test.com',
-                password:''
-            }
-        """;
+                    {
+                        email:'email@test.com',
+                        password:''
+                    }
+                """;
 
         // when & then
         given()

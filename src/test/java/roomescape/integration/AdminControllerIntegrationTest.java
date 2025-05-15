@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -44,31 +44,26 @@ class AdminControllerIntegrationTest {
 
     @Test
     @DisplayName("올바른 예약 정보로 요청하면 예약이 성공적으로 생성된다")
-     void createReservation_WithValidRequest_ReturnsCreatedReservation() {
+    void createReservation_WithValidRequest_ReturnsCreatedReservation() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
+        final Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                1L,
-                1L,
-                1L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
+
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, 1L, 1L, 1L);
 
         // when & then
         given()
@@ -89,29 +84,24 @@ class AdminControllerIntegrationTest {
     @DisplayName("존재하지 않는 회원 ID로 예약을 시도하면 404 상태코드를 응답한다")
     void createReservation_WithNonExistentMember_Returns404() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
+        final Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                999L,
-                1L,
-                1L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
+
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, 999L, 1L, 1L);
 
         // when & then
         given()
@@ -128,29 +118,24 @@ class AdminControllerIntegrationTest {
     @DisplayName("존재하지 않는 테마 ID로 예약을 시도하면 404 상태코드를 응답한다")
     void createReservation_WithNonExistentTheme_Returns404() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
+        final Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                1L,
-                1L,
-                999L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
+
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, 1L, 1L, 999L);
 
         // when & then
         given()
@@ -167,29 +152,24 @@ class AdminControllerIntegrationTest {
     @DisplayName("과거 날짜로 예약을 시도하면 400 상태코드를 응답한다")
     void createReservation_WithPastDate_Returns400() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
+        final Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().minusDays(1),
-                1L,
-                1L,
-                1L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
+
+        final LocalDate pastDate = LocalDate.now().minusDays(1);
+        final ReservationRequest request = new ReservationRequest(pastDate, 1L, 1L, 1L);
 
         // when & then
         given()
@@ -206,30 +186,24 @@ class AdminControllerIntegrationTest {
     @DisplayName("이미 예약된 시간에 예약을 시도하면 409 상태코드를 응답한다")
     void createReservation_WithDuplicateDateTime_Returns409() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
+        final Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                1L,
-                1L,
-                1L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
 
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, 1L, 1L, 1L);
         given()
                 .cookie("token", token)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -252,23 +226,21 @@ class AdminControllerIntegrationTest {
     @DisplayName("잘못된 형식의 요청을 보내면 400 상태코드를 응답한다")
     void createReservation_WithInvalidRequest_Returns400() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
+        final Member member = new Member("이름", "ADMIN", "이메일", "비밀번호");
         memberRepository.save(member);
 
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
-
 
         final String invalidRequest = """
                 {

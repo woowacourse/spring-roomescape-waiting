@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -54,29 +54,24 @@ class ReservationControllerIntegrationTest {
     @DisplayName("로그인한 회원이 올바른 예약 정보로 요청하면 예약이 성공적으로 생성된다")
     void createByLoginMember_WithValidRequest_ReturnsCreatedReservation() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                null,
-                1L,
-                1L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
+
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, null, 1L, 1L);
 
         // when & then
         given()
@@ -108,35 +103,34 @@ class ReservationControllerIntegrationTest {
     @DisplayName("필터 조건으로 예약을 조회하면 조건에 맞는 예약 목록이 반환된다")
     void readFilter_WithValidConditions_ReturnsFilteredReservations() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        Reservation reservation1 = new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme);
-        Reservation reservation2 = new Reservation(LocalDate.now().plusDays(2), member, reservationTime, theme);
-        Reservation reservation3 = new Reservation(LocalDate.now().plusDays(3), member, reservationTime, theme);
+        final Reservation reservation1 = new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme);
         reservationRepository.save(reservation1);
+        final Reservation reservation2 = new Reservation(LocalDate.now().plusDays(2), member, reservationTime, theme);
         reservationRepository.save(reservation2);
+        final Reservation reservation3 = new Reservation(LocalDate.now().plusDays(3), member, reservationTime, theme);
         reservationRepository.save(reservation3);
 
         final Long memberId = 1L;
         final Long themeId = 1L;
-
-        final LocalDate dateFrom = LocalDate.now();
-        final LocalDate dateTo = LocalDate.now().plusDays(2);
+        final String formattedDateFrom = LocalDate.now().toString();
+        final String formattedDateTo = LocalDate.now().plusDays(2).toString();
 
         // when & then
         given()
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .queryParam("memberId", memberId)
                 .queryParam("themeId", themeId)
-                .queryParam("dateFrom", dateFrom.toString())
-                .queryParam("dateTo", dateTo.toString())
+                .queryParam("dateFrom", formattedDateFrom)
+                .queryParam("dateTo", formattedDateTo)
                 .when()
                 .get("/reservations/filter")
                 .then()
@@ -148,30 +142,24 @@ class ReservationControllerIntegrationTest {
     @DisplayName("존재하는 예약을 삭제하면 204 상태코드를 반환한다")
     void delete_ExistingReservation_ReturnsNoContent() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                null,
-                1L,
-                1L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
 
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, null, 1L, 1L);
         final Long reservationId = given()
                 .cookie("token", token)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -196,29 +184,29 @@ class ReservationControllerIntegrationTest {
     @DisplayName("특정 날짜와 테마에 대한 가능한 예약 시간을 조회하면 200 상태코드와 함께 시간 목록이 반환된다")
     void readAvailableTimes_ReturnsAvailableTimes() {
         // given
-        ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime14_00);
 
-        ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
+        final ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
         reservationTimeRepository.save(reservationTime16_00);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        Reservation reservation14_00 = new Reservation(LocalDate.now().plusDays(1), member, reservationTime14_00,
-                theme);
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final Reservation reservation14_00 = new Reservation(futureDate, member, reservationTime14_00, theme);
         reservationRepository.save(reservation14_00);
 
-        LocalDate date = LocalDate.now().plusDays(1);
-        Long themeId = 1L;
+        final String formattedFutureDate = LocalDate.now().plusDays(1).toString();
+        final Long themeId = 1L;
 
         // when & then
         given()
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .queryParam("date", date.toString())
+                .queryParam("date", formattedFutureDate)
                 .queryParam("themeId", themeId)
                 .when()
                 .get("/available-times")
@@ -232,26 +220,24 @@ class ReservationControllerIntegrationTest {
     @DisplayName("로그인한 회원의 예약 목록을 조회하면 200 상태코드와 함께 예약 목록이 반환된다")
     void readMine_ReturnsMyReservations() {
         // given
-        ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime14_00);
 
-        ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
+        final ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
         reservationTimeRepository.save(reservationTime16_00);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member1 = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        final Member member1 = new Member("이름1", "USER", "이메일1", "비밀번호1");
         memberRepository.save(member1);
-        Member member2 = new Member("이름2", "USER", "이메일2", "비밀번호2");
+        final Member member2 = new Member("이름2", "USER", "이메일2", "비밀번호2");
         memberRepository.save(member2);
 
-        Reservation reservation14_00 = new Reservation(LocalDate.now().plusDays(1), member1, reservationTime14_00,
-                theme);
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final Reservation reservation14_00 = new Reservation(futureDate, member1, reservationTime14_00, theme);
         reservationRepository.save(reservation14_00);
-
-        Reservation reservation16_00 = new Reservation(LocalDate.now().plusDays(1), member2, reservationTime16_00,
-                theme);
+        final Reservation reservation16_00 = new Reservation(futureDate, member2, reservationTime16_00, theme);
         reservationRepository.save(reservation16_00);
 
         final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
@@ -261,6 +247,7 @@ class ReservationControllerIntegrationTest {
                 .post("/login")
                 .getCookie("token");
 
+        // when & then
         given()
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .cookie("token", token)
@@ -278,21 +265,17 @@ class ReservationControllerIntegrationTest {
     @DisplayName("로그인하지 않은 상태로 예약 생성을 시도하면 401 상태코드를 반환한다")
     void createByLoginMember_WithoutAuth_ReturnsUnauthorized() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        final Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                null,
-                1L,
-                1L
-        );
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, null, 1L, 1L);
 
         // when & then
         given()
@@ -308,15 +291,16 @@ class ReservationControllerIntegrationTest {
     @DisplayName("존재하지 않는 예약을 삭제하려고 하면 404 상태코드를 반환한다")
     void delete_NonExistingReservation_ReturnsNotFound() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        final Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
         memberRepository.save(member);
 
+        // when & then
         given()
                 .when()
                 .delete("/reservations/{id}", 999L)
@@ -328,21 +312,17 @@ class ReservationControllerIntegrationTest {
     @DisplayName("과거 날짜로 예약을 시도하면 400 상태코드를 반환한다")
     void createByLoginMember_WithPastDate_ReturnsBadRequest() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
+        final Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().minusDays(1),
-                null,
-                1L,
-                1L
-        );
+        final LocalDate pastDate = LocalDate.now().minusDays(1);
+        final ReservationRequest request = new ReservationRequest(pastDate, null, 1L, 1L);
 
         final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
         final String token = given()
@@ -366,24 +346,19 @@ class ReservationControllerIntegrationTest {
     @DisplayName("이미 예약된 시간에 예약을 시도하면 409 상태코드를 반환한다")
     void createByLoginMember_WithDuplicateDateTime_ReturnsConflict() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                null,
-                1L,
-                1L
-        );
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, null, 1L, 1L);
 
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
@@ -412,29 +387,24 @@ class ReservationControllerIntegrationTest {
     @DisplayName("존재하지 않는 테마로 예약을 시도하면 404 상태코드를 반환한다")
     void createByLoginMember_WithNonExistentTheme_ReturnsNotFound() {
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                null,
-                1L,
-                999L
-        );
-
         final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
-
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
                 .post("/login")
                 .getCookie("token");
+
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final ReservationRequest request = new ReservationRequest(futureDate, null, 1L, 999L);
 
         // when & then
         given()

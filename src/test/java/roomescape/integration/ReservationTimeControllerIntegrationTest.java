@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -129,7 +129,7 @@ class ReservationTimeControllerIntegrationTest {
     void delete_ExistingTime_ReturnsNoContent() {
         // given
         final PlayTimeRequest request = new PlayTimeRequest(LocalTime.of(14, 0));
-        
+
         final Long timeId = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
