@@ -2,6 +2,7 @@ package roomescape.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.out.TokenProvider;
 import roomescape.auth.web.controller.request.LoginRequest;
 import roomescape.auth.web.controller.response.MemberNameResponse;
@@ -22,6 +23,7 @@ public class AuthService {
         return tokenProvider.issue(member);
     }
 
+    @Transactional(readOnly = true)
     public MemberNameResponse checkLogin(Long memberId) {
         Member member = memberQueryService.getMember(memberId);
 
