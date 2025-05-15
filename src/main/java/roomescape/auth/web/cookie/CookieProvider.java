@@ -2,6 +2,7 @@ package roomescape.auth.web.cookie;
 
 import jakarta.servlet.http.Cookie;
 import org.springframework.stereotype.Component;
+import roomescape.auth.web.exception.TokenNotFoundException;
 
 @Component
 public class CookieProvider {
@@ -10,12 +11,13 @@ public class CookieProvider {
     private static final int ONE_DAY_SECONDS = 60 * 60 * 24;
 
     public String extractTokenFromCookie(Cookie[] cookies) {
+
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(TOKEN_COOKIE_NAME)) {
                 return cookie.getValue();
             }
         }
-        return "";
+        throw new TokenNotFoundException("해당 토큰 키가 존재하지 않습니다!");
     }
 
     public Cookie createTokenCookie(String accessToken) {

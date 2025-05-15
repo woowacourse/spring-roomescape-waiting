@@ -9,6 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.service.AuthService;
 import roomescape.auth.web.cookie.CookieProvider;
 import roomescape.auth.web.exception.NotAdminException;
+import roomescape.auth.web.exception.TokenNotFoundException;
 
 @RequiredArgsConstructor
 @Component
@@ -23,7 +24,7 @@ public class AdminMemberHandlerInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler
     ) {
-        Cookie[] cookies = request.getCookies();
+        Cookie[] cookies = getCookies(request);
         String token = cookieProvider.extractTokenFromCookie(cookies);
 
         boolean isAdmin = authService.isAdmin(token);
@@ -31,5 +32,13 @@ public class AdminMemberHandlerInterceptor implements HandlerInterceptor {
             throw new NotAdminException("[ERROR] 관리자 권한이 없습니다.");
         }
         return true;
+    }
+
+    private static Cookie[] getCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new TokenNotFoundException("쿠키가 존재하지 않습니다.");
+        }
+        return cookies;
     }
 }

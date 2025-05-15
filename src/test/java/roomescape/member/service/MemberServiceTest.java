@@ -4,18 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.fixture.MemberDbFixture.RAW_PASSWORD;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.CleanUp;
 import roomescape.fixture.MemberDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.controller.request.SignUpRequest;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.domain.Member;
 
-@Transactional
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class MemberServiceTest {
 
@@ -23,6 +23,14 @@ class MemberServiceTest {
     private MemberService memberService;
     @Autowired
     private MemberDbFixture memberDbFixture;
+
+    @Autowired
+    private CleanUp cleanUp;
+
+    @BeforeEach
+    void setUp() {
+        cleanUp.all();
+    }
 
     @Test
     void 유저가_가입한다() {

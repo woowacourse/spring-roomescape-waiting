@@ -44,11 +44,11 @@ class ReservationServiceTest {
     private MemberDbFixture memberDbFixture;
     @Autowired
     private ReservationRepository reservationRepository;
-
-    @Autowired
-    private CleanUp cleanUp;
     @Autowired
     private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
+    
+    @Autowired
+    private CleanUp cleanUp;
 
     @BeforeEach
     void setUp() {
