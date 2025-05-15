@@ -44,12 +44,6 @@ class ReservationServiceTest {
     @Autowired
     private MemberRepository memberRepo;
 
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
     private ReservationService service;
 
     private ReservationTime time1;
