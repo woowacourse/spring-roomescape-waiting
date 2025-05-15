@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import roomescape.exception.ExistedThemeException;
 public class ThemeService {
 
     public static final int TOP_THEMES_COUNT = 10;
+    public static final int THEME_TRACKING_PERIOD = 7;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -62,12 +64,12 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getTopThemes() {
-        LocalDate startDate = LocalDate.now().minusDays(8);
+        LocalDate startDate = LocalDate.now().minusDays(THEME_TRACKING_PERIOD);
         List<Reservation> reservations = reservationRepository.findByDateBetween(startDate,
                 LocalDate.now().minusDays(1));
 
-        List<Theme> themes = reservations.stream()
-                .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()))
+        Map<Theme, Long> themeCount = countTheme(reservations);
+        List<Theme> themes = themeCount
                 .entrySet().stream()
                 .sorted(Entry.<Theme, Long>comparingByValue().reversed())
                 .limit(TOP_THEMES_COUNT)
@@ -76,5 +78,10 @@ public class ThemeService {
 
         return themes.stream().map(theme -> new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(),
                 theme.getThumbnail())).toList();
+    }
+
+    private Map<Theme, Long> countTheme(List<Reservation> reservations) {
+        return reservations.stream()
+                .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()));
     }
 }
