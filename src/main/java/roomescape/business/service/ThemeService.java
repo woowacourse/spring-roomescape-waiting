@@ -37,7 +37,7 @@ public class ThemeService {
         return ThemeDto.fromEntities(themes);
     }
 
-    public List<ThemeDto> getPopular(int size) {
+    public List<ThemeDto> getPopular(final int size) {
         LocalDate now = LocalDate.now();
         final List<Theme> popularThemes = themeRepository.findPopularThemes(
                 now.minusDays(AGGREGATE_START_DATE_INTERVAL),

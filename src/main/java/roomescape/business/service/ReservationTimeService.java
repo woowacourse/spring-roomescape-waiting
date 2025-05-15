@@ -39,7 +39,6 @@ public class ReservationTimeService {
     }
 
     private void validateNoDuplication(final ReservationTime reservationTime) {
-        // TODO : 디미터 법칙
         boolean isExist = reservationTimeRepository.existByTime(reservationTime.startTimeValue());
         if (isExist) {
             throw new DuplicatedException(RESERVATION_TIME_ALREADY_EXIST);
@@ -66,8 +65,8 @@ public class ReservationTimeService {
         return ReservableReservationTimeDto.fromEntities(available, notAvailable);
     }
 
-    public void delete(final String themeIdValue) {
-        Id timeId = Id.create(themeIdValue);
+    public void delete(final String timeIdValue) {
+        Id timeId = Id.create(timeIdValue);
         if (reservationRepository.existByTimeId(timeId)) {
             throw new RelatedEntityExistException(RESERVED_RESERVATION_TIME);
         }

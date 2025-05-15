@@ -56,14 +56,14 @@ public class ReservationService {
         return ReservationDto.fromEntities(reservations);
     }
 
-    public void delete(final String reservationId, final String userIdValue) {
-        Id id = Id.create(reservationId);
-        final Reservation reservation = reservationRepository.findById(id)
+    public void delete(final String reservationIdValue, final String userIdValue) {
+        Id reservationId = Id.create(reservationIdValue);
+        final Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
         if (!reservation.isSameReserver(userIdValue)) {
             throw new AuthorizationException(AUTHORITY_LACK);
         }
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteById(reservationId);
     }
 
     public List<ReservationDto> getMyReservations(final String userIdValue) {
