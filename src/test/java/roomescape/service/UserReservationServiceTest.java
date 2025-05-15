@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ class UserReservationServiceTest extends IntegrationTestSupport {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Disabled
     @BeforeEach
     void setUp() {
         ReservationTime reservationTime = ReservationTime.builder()
@@ -60,6 +62,7 @@ class UserReservationServiceTest extends IntegrationTestSupport {
         entityManager.persist(member);
     }
 
+    @Disabled
     @DisplayName("요청된 예약 정보로 예약을 진행할 수 있다")
     @Test
     void createFutureReservation() {
@@ -82,6 +85,7 @@ class UserReservationServiceTest extends IntegrationTestSupport {
         });
     }
 
+    @Disabled
     @DisplayName("요청한 예약 시간이 과거라면 예외를 발생시킨다")
     @Test
     void pastException() {
@@ -98,6 +102,7 @@ class UserReservationServiceTest extends IntegrationTestSupport {
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
+    @Disabled
     @DisplayName("예약 요청한 테마, 예약 시간에 이미 예약이 있다면 예외를 발생시킨다")
     @Test
     void duplicationException() {

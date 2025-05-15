@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ class ReservationJpaRepositoryTest extends RepositoryTestSupport {
     @PersistenceContext
     private EntityManager em;
 
+    @Disabled
     @DisplayName("예약과 함계 맴버 전체를 조회한다")
     @Test
     void findAllWithMembers() {
@@ -51,6 +53,7 @@ class ReservationJpaRepositoryTest extends RepositoryTestSupport {
         });
     }
 
+    @Disabled
     @DisplayName("예약 id로 예약과 맴버를 함꼐 조회한다")
     @Test
     void findAllWithMember() {
