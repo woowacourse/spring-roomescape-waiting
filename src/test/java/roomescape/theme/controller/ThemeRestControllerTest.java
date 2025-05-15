@@ -64,4 +64,13 @@ class ThemeRestControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
+
+    @Test
+    void 인기있는_테마를_조회한다() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/themes/popular-list")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value());
+    }
 }
