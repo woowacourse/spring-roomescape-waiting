@@ -37,8 +37,8 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    private Reservation(final Member member, final LocalDate date, final ReservationTime time,
-                        final Theme theme, final ReservationStatus reservationStatus) {
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time,
+                       final Theme theme, final ReservationStatus reservationStatus) {
         this.member = member;
         this.date = date;
         this.time = time;
@@ -47,11 +47,6 @@ public class Reservation {
     }
 
     public Reservation() {
-    }
-
-    public static Reservation of(final LocalDate date, final Member member, final ReservationTime time,
-                                 final Theme theme, final ReservationStatus reservationStatus) {
-        return new Reservation(member, date, time, theme, reservationStatus);
     }
 
     public static Reservation createUpcomingReservationWithUnassignedId(final Member member, final LocalDate date,

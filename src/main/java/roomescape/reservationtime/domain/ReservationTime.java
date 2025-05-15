@@ -4,12 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class ReservationTime {
@@ -22,12 +18,13 @@ public class ReservationTime {
     public ReservationTime() {
     }
 
-    private ReservationTime(final LocalTime startAt) {
+    public ReservationTime(final Long id, final LocalTime startAt) {
+        this.id = id;
         this.startAt = startAt;
     }
 
-    public static ReservationTime of(final LocalTime startAt) {
-        return new ReservationTime(startAt);
+    private ReservationTime(final LocalTime startAt) {
+        this.startAt = startAt;
     }
 
     public static ReservationTime withUnassignedId(final LocalTime startAt) {

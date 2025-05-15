@@ -50,19 +50,21 @@ class ReservationRepositoryTest {
     @BeforeEach
     public void setup() {
         member = memberRepository.save(TestFixture.makeMember());
-        reservationTime = reservationTimeRepository.save(ReservationTime.of(LocalTime.of(10, 0)));
+        reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme(1L));
-        reservationRepository.save(Reservation.of(futureDate, member, reservationTime, theme, ReservationStatus.RESERVED));
+        reservationRepository.save(
+                new Reservation(member, futureDate, reservationTime, theme, ReservationStatus.RESERVED));
     }
 
     @Test
     void findFilteredReservations() {
         Theme theme2 = themeRepository.save(Theme.of("논리", "셜록 논리 게임 with Vector", "image.png"));
 
-        ReservationTime reservationTime2 = ReservationTime.of(LocalTime.of(11, 0));
+        ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
         reservationTime2 = reservationTimeRepository.save(reservationTime2);
 
-        Reservation reservation2 = Reservation.of(futureDate, member, reservationTime2, theme2, ReservationStatus.RESERVED);
+        Reservation reservation2 = new Reservation(member, futureDate, reservationTime2, theme2,
+                ReservationStatus.RESERVED);
         reservationRepository.save(reservation2);
 
         List<Reservation> filteredReservations = reservationRepository.findFilteredReservations(theme.getId(),
@@ -97,11 +99,15 @@ class ReservationRepositoryTest {
 
     @Test
     void findAvailableTimesByDateAndThemeId() {
-        ReservationTime reservationTime2 = reservationTimeRepository.save(ReservationTime.of(LocalTime.of(11, 0)));
-        ReservationTime reservationTime3 = reservationTimeRepository.save(ReservationTime.of(LocalTime.of(12, 0)));
+        ReservationTime reservationTime2 = reservationTimeRepository.save(
+                ReservationTime.withUnassignedId(LocalTime.of(11, 0)));
+        ReservationTime reservationTime3 = reservationTimeRepository.save(
+                ReservationTime.withUnassignedId(LocalTime.of(12, 0)));
 
-        reservationRepository.save(Reservation.of(futureDate, member, reservationTime2, theme, ReservationStatus.RESERVED));
-        reservationRepository.save(Reservation.of(futureDate, member, reservationTime3, theme, ReservationStatus.RESERVED));
+        reservationRepository.save(
+                new Reservation(member, futureDate, reservationTime2, theme, ReservationStatus.RESERVED));
+        reservationRepository.save(
+                new Reservation(member, futureDate, reservationTime3, theme, ReservationStatus.RESERVED));
 
         List<AvailableReservationTimeResponse> bookedTimesByDateAndThemeId = reservationRepository.findBookedTimesByDateAndThemeId(
                 futureDate, theme.getId());

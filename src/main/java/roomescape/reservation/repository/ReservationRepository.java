@@ -7,6 +7,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
 
@@ -27,7 +28,7 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
 
     boolean existsByThemeId(Long id);
 
-    boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long themeId, final Long timeId);
+    boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
 
     @Query("SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(rt.id, rt.startAt, "
             + "CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked) "

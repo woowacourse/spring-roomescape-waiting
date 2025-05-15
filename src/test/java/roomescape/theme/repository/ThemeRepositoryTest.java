@@ -78,7 +78,7 @@ class ThemeRepositoryTest {
         ReservationTime reservationTime2 = TestFixture.makeReservationTime(LocalTime.of(11, 0));
         reservationTimeRepository.save(reservationTime2);
 
-        LocalDate futureDate = TestFixture.makeFutureDate();
+        LocalDate futureDate = LocalDate.now();
         reservationRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(1), reservationTime, member, theme1));
 
@@ -104,7 +104,7 @@ class ThemeRepositoryTest {
         reservationRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(6), reservationTime2, member, theme11));
 
-        List<Theme> themes = themeRepository.findTop10PopularThemesWithinLastWeek(futureDate.minusDays(7), futureDate);
+        List<Theme> themes = themeRepository.findTop10PopularThemesWithinLastWeek(futureDate.minusDays(7), futureDate.minusDays(1));
 
         Assertions.assertAll(
                 () -> assertThat(themes.size()).isEqualTo(10),

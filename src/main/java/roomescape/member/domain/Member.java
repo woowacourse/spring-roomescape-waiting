@@ -23,8 +23,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
 
-    private Member(final String name, final String email, final String password,
-                   final MemberRole memberRole) {
+    public Member(final String name, final String email, final String password,
+                  final MemberRole memberRole) {
         validate(name);
         this.name = name;
         this.email = email;
@@ -33,11 +33,6 @@ public class Member {
     }
 
     public Member() {
-    }
-
-    public static Member of(final String name, final String email, final String password,
-                            final MemberRole memberRole) {
-        return new Member(name, email, password, memberRole);
     }
 
     public static Member withUnassignedId(final String name, final String email, final String password,

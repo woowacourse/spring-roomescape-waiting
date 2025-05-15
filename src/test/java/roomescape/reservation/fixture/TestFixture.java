@@ -22,33 +22,24 @@ public class TestFixture {
         return LocalDateTime.now().plusHours(1);
     }
 
-    public static Reservation makeReservation(final Long reservationId, final long reservationTimeId) {
-        ReservationTime reservationTime = makeReservationTime(reservationTimeId);
-        return Reservation.of(makeFutureDate(), makeMember(), reservationTime, makeTheme(1L), ReservationStatus.RESERVED);
-    }
-
     public static Reservation makeReservation(final LocalDate date, final ReservationTime reservationTime,
                                               final Member member, final Theme theme) {
-        return Reservation.of(date, member, reservationTime, theme, ReservationStatus.RESERVED);
+        return new Reservation(member, date, reservationTime, theme, ReservationStatus.RESERVED);
     }
 
     public static ReservationTime makeReservationTime(final long reservationTimeId) {
-        return ReservationTime.of(TIME);
+        return ReservationTime.withUnassignedId(TIME);
     }
 
     public static ReservationTime makeReservationTime(final LocalTime localTime) {
-        return ReservationTime.of(localTime);
+        return ReservationTime.withUnassignedId(localTime);
     }
 
     public static LocalDate makeFutureDate() {
         return LocalDate.now().plusDays(5);
     }
 
-    public static LocalDate makeNowDate() {
-        return LocalDate.of(2025, 5, 12);
-    }
-
     public static Member makeMember() {
-        return Member.of("Mint", "mint@gmail.com", "password", MemberRole.USER);
+        return new Member("Mint", "mint@gmail.com", "password", MemberRole.USER);
     }
 }

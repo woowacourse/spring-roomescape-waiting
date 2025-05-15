@@ -21,6 +21,6 @@ public record ReservationEntity(
     }
 
     public Reservation toReservation() {
-        return Reservation.of(date, memberEntity.toMember(), timeEntity.toReservationTime(), themeEntity.toTheme(), reservationStatus);
+        return new Reservation(memberEntity.toMember(), date, timeEntity.toReservationTime(), themeEntity.toTheme(), reservationStatus);
     }
 }

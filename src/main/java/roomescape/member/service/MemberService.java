@@ -20,7 +20,7 @@ public class MemberService {
     }
 
     public Member signup(final SignupRequest signupRequest) {
-        Member member = Member.withUnassignedId(signupRequest.name(), signupRequest.email(), signupRequest.password(),
+        Member member = new Member(signupRequest.name(), signupRequest.email(), signupRequest.password(),
                 MemberRole.USER);
         if (memberRepository.existsByEmailAndPassword(signupRequest.email(), signupRequest.password())) {
             throw new MemberDuplicatedException("이미 존재하는 회원입니다.");
