@@ -1,16 +1,15 @@
-package roomescape.service;
+package roomescape.auth.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.auth.service.LoginService;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.member.dto.MemberResponse;
 import roomescape.auth.dto.TokenResponse;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
+import roomescape.member.dto.MemberResponse;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 import roomescape.repository.FakeTokenProvider;
-import roomescape.member.repository.MemberRepository;
 import roomescape.util.TokenProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;

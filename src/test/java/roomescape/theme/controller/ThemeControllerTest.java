@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.theme.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -15,10 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.member.domain.Member;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.fixture.LoginMemberFixture;
+import roomescape.member.domain.Member;
+import roomescape.theme.dto.ThemeCreateRequest;
 
 import static org.hamcrest.Matchers.is;
 

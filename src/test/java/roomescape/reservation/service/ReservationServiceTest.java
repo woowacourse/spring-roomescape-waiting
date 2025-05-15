@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -6,11 +6,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.reservation.dto.NameResponse;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.theme.dto.ThemeResponse;
-import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.InvalidRequestException;
 import roomescape.exception.NotFoundException;
@@ -18,12 +13,15 @@ import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.fixture.FakeReservationRepositoryFixture;
 import roomescape.fixture.FakeReservationTimeRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
-import roomescape.repository.FakeTokenProvider;
 import roomescape.member.repository.MemberRepository;
+import roomescape.repository.FakeTokenProvider;
+import roomescape.reservation.dto.NameResponse;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.ReservationChecker;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;

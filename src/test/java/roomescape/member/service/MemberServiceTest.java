@@ -1,14 +1,13 @@
-package roomescape.service;
+package roomescape.member.service;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.member.domain.Member;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
-import roomescape.member.service.MemberService;
-import roomescape.repository.FakeTokenProvider;
+import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.repository.FakeTokenProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

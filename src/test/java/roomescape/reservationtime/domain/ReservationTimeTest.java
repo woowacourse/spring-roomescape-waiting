@@ -1,8 +1,7 @@
-package roomescape.domain;
+package roomescape.reservationtime.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.reservationtime.domain.ReservationTime;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

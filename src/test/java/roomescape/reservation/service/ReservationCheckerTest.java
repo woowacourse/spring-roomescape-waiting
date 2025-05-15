@@ -1,17 +1,16 @@
-package roomescape.service;
+package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationRequest;
 import roomescape.exception.NotFoundException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.fixture.FakeReservationTimeRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.service.ReservationChecker;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
 

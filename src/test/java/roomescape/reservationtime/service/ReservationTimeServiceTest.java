@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.reservationtime.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -7,21 +7,20 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.repository.FakeReservationRepository;
+import roomescape.repository.FakeReservationTimeRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.member.domain.Role;
-import roomescape.reservationtime.service.ReservationTimeService;
-import roomescape.theme.domain.Theme;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
-import roomescape.exception.NotFoundException;
-import roomescape.repository.FakeReservationRepository;
-import roomescape.repository.FakeReservationTimeRepository;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;

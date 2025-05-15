@@ -1,8 +1,7 @@
-package roomescape.service;
+package roomescape.auth.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.auth.service.SignupService;
 import roomescape.auth.dto.RegistrationRequest;
 import roomescape.exception.DuplicateContentException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
