@@ -66,7 +66,7 @@ public class ReservationController {
         );
         return ResponseEntity.badRequest().body(exceptionResponse);
     }
-
+    // TODO : URL
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@Login LoginMember loginMember) {
         List<MyReservationResponse> myReservationResponses = reservationService.getMyReservations(loginMember.id());

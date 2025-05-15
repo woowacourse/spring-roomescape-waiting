@@ -81,13 +81,16 @@ class ReservationServiceTest {
                 .thenReturn(
                         Optional.of(ReservationTime.createWithId(1L, LocalTime.of(10, 0)))
                 );
-        when(jpaThemeRepository.findById(1L)).thenReturn(Optional.of(
-                Theme.createWithId(1L, "테마", "설명", "썸넬")
-        ));
-        when(jpaMemberRepository.findById(1L)).thenReturn(Optional.of(
-                Member.createWithId(1L, "멤버", "a", "1234", Role.USER)
-        ));
-        when(dateTime.now()).thenReturn(LocalDateTime.of(2024, 9, 6, 19, 23));
+        when(jpaThemeRepository.findById(1L))
+                .thenReturn(Optional.of(
+                        Theme.createWithId(1L, "테마", "설명", "썸넬")
+                ));
+        when(jpaMemberRepository.findById(1L))
+                .thenReturn(Optional.of(
+                        Member.createWithId(1L, "멤버", "a", "1234", Role.USER)
+                ));
+        when(dateTime.now())
+                .thenReturn(LocalDateTime.of(2024, 9, 6, 19, 23));
         when(jpaReservationRepository.existsByDateAndTime_StartAtAndTheme_Id(any(LocalDate.class), any(LocalTime.class),
                 eq(1L)))
                 .thenReturn(true);
@@ -116,7 +119,8 @@ class ReservationServiceTest {
         ReservationResponse expected2 = ReservationResponse.from(reservations.get(1));
         ReservationResponse expected3 = ReservationResponse.from(reservations.get(2));
 
-        when(jpaReservationRepository.findAll()).thenReturn(reservations);
+        when(jpaReservationRepository.findAll())
+                .thenReturn(reservations);
         ReservationConditionRequest request = new ReservationConditionRequest(null, null, null, null);
 
         // when

@@ -36,7 +36,8 @@ class ReservationTimeServiceTest {
     @Test
     void can_not_delete_when_reservation_exists() {
         // given
-        Mockito.when(jpaReservationRepository.existsByTime_Id(1L)).thenReturn(true);
+        Mockito.when(jpaReservationRepository.existsByTime_Id(1L))
+                .thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(1L))

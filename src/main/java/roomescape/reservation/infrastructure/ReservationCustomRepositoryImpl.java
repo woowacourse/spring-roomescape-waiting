@@ -17,6 +17,15 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
     @Override
     public List<Reservation> findByMemberIdAndThemeIdAndDate(Long memberId, Long themeId, LocalDate from,
                                                              LocalDate to) {
+        StringBuilder query = createQuery(memberId, themeId, from, to);
+
+        TypedQuery<Reservation> typedQuery = createParameter(
+                memberId, themeId, from, to, query);
+
+        return typedQuery.getResultList();
+    }
+
+    private StringBuilder createQuery(Long memberId, Long themeId, LocalDate from, LocalDate to) {
         StringBuilder query = new StringBuilder("SELECT r FROM Reservation r WHERE 1=1");
 
         if (memberId != null) {
@@ -31,7 +40,11 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
         if (to != null) {
             query.append(" AND r.date <= :to");
         }
+        return query;
+    }
 
+    private TypedQuery<Reservation> createParameter(Long memberId, Long themeId, LocalDate from, LocalDate to,
+                                                    StringBuilder query) {
         TypedQuery<Reservation> typedQuery = em.createQuery(query.toString(), Reservation.class);
 
         if (memberId != null) {
@@ -46,7 +59,6 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
         if (to != null) {
             typedQuery.setParameter("to", to);
         }
-
-        return typedQuery.getResultList();
+        return typedQuery;
     }
 }

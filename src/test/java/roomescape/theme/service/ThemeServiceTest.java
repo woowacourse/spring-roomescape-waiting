@@ -40,7 +40,8 @@ class ThemeServiceTest {
     @Test
     void can_not_remove_exists_reservation() {
         // given
-        when(jpaReservationRepository.existsByTheme_Id(1L)).thenReturn(true);
+        when(jpaReservationRepository.existsByTheme_Id(1L))
+                .thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(1L))
@@ -56,7 +57,8 @@ class ThemeServiceTest {
                         Theme.createWithId(1L, "테스트1", "설명", "썸네일"),
                         Theme.createWithId(2L, "테스트3", "설명", "썸네일")
                 ));
-        when(dateTime.nowDate()).thenReturn(LocalDate.now());
+        when(dateTime.nowDate())
+                .thenReturn(LocalDate.now());
         List<PopularThemeResponse> popularThemes = themeService.getPopularThemes();
 
         // when & then

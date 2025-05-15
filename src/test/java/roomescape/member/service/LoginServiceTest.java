@@ -52,7 +52,8 @@ class LoginServiceTest {
     void loginAndReturnToken_test() {
         // given
         LoginRequest request = new LoginRequest("a", "a");
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        when(dateTime.now())
+                .thenReturn(LocalDateTime.now());
         when(jpaMemberRepository.findByEmailAndPassword("a", "a"))
                 .thenReturn(Optional.of(Member.createWithId(1L, "a", "a", "a", Role.USER)));
         when(jwtTokenContainer.createJwtToken(any(Member.class), any(LocalDateTime.class)))
@@ -80,7 +81,8 @@ class LoginServiceTest {
     void loginCheck_test() {
         // given
         String token = "asdasdsdsd";
-        when(jwtTokenContainer.getMemberId(token)).thenReturn(1L);
+        when(jwtTokenContainer.getMemberId(token))
+                .thenReturn(1L);
         when(jpaMemberRepository.findById(1L))
                 .thenReturn(Optional.of(Member.createWithId(1L, "코기", "a", "a", Role.ADMIN)));
         // when
