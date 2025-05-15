@@ -42,10 +42,6 @@ public final class Member {
         return new Member(null, name, email, password, Role.USER);
     }
 
-    public Member withId(final long id) {
-        return new Member(id, name, email, password, Role.USER);
-    }
-
     public boolean hasRole(final Role other) {
         return this.role == other;
     }

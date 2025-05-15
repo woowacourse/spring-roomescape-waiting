@@ -57,10 +57,6 @@ public final class Reservation {
         return new Reservation(null, member, date, time, theme);
     }
 
-    public Reservation withId(final long id) {
-        return new Reservation(id, member, date, time, theme);
-    }
-
     private void validateNotNull(final Member member, final LocalDate date, final ReservationTime time,
                                  final Theme theme) {
         if (member == null) {

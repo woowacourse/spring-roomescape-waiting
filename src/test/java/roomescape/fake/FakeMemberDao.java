@@ -15,7 +15,8 @@ public class FakeMemberDao implements MemberRepository {
 
     @Override
     public Member save(final Member member) {
-        Member savedMember = member.withId(++index);
+        Member savedMember = new Member(++index, member.getName(), member.getEmail(), member.getPassword(),
+                member.getRole().name());
         members.add(savedMember);
         return savedMember;
     }
