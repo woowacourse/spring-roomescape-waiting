@@ -3,7 +3,6 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
@@ -37,4 +36,6 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
             + "ORDER BY rt.startAt")
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(@Param("date") LocalDate date,
                                                                            @Param("themeId") Long themeId);
+
+    List<Reservation> findByMemberId(Long id);
 }

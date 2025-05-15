@@ -4,10 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -68,7 +71,7 @@ public class ReservationService {
         Member member = findUserByMemberId(memberId);
 
         Reservation newReservation = reservationRepository.save(
-                Reservation.createUpcomingReservationWithUnassignedId(member, date, time, theme, now));
+                Reservation.createUpcomingReservationWithUnassignedId(member, date, time, theme, now, ReservationStatus.RESERVED));
         return ReservationResponse.of(newReservation, time, theme, member);
     }
 
@@ -91,5 +94,12 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, themeId, timeId)) {
             throw new ReservationAlreadyExistsException("해당 시간에 이미 예약이 존재합니다.");
         }
+    }
+
+    public List<MyReservationResponse> findMyReservations(final UserInfo userInfo) {
+        return reservationRepository.findByMemberId(userInfo.id())
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 }

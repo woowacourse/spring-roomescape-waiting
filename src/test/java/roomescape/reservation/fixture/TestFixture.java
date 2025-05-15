@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -23,12 +24,12 @@ public class TestFixture {
 
     public static Reservation makeReservation(final Long reservationId, final long reservationTimeId) {
         ReservationTime reservationTime = makeReservationTime(reservationTimeId);
-        return Reservation.of(makeFutureDate(), makeMember(), reservationTime, makeTheme(1L));
+        return Reservation.of(makeFutureDate(), makeMember(), reservationTime, makeTheme(1L), ReservationStatus.RESERVED);
     }
 
     public static Reservation makeReservation(final LocalDate date, final ReservationTime reservationTime,
                                               final Member member, final Theme theme) {
-        return Reservation.of(date, member, reservationTime, theme);
+        return Reservation.of(date, member, reservationTime, theme, ReservationStatus.RESERVED);
     }
 
     public static ReservationTime makeReservationTime(final long reservationTimeId) {

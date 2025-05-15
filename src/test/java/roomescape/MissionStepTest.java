@@ -26,6 +26,8 @@ import roomescape.global.auth.dto.LoginRequest;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.SignupRequest;
 import roomescape.reservation.controller.ReservationController;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.fixture.TestFixture;
 
@@ -378,6 +380,30 @@ public class MissionStepTest {
         }
     }
 
+    @Nested
+    class WaitingTest {
+
+        private static final String USER_TOKEN = loginAndGetAuthToken(USER_EMAIL, PASSWORD);
+
+        @Test
+        void step1_findMyReservations() {
+            createReservationTime();
+            createTheme("추리");
+            createUserReservation(1L);
+
+            List<MyReservationResponse> responses = RestAssured.given().log().all()
+                    .cookie(TOKEN, USER_TOKEN)
+                    .when().get("/reservations-mine")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract()
+                    .as(new TypeRef<>() {
+                    });
+
+            assertThat(responses.size()).isEqualTo(1);
+        }
+    }
+
     private static String loginAndGetAuthToken(final String email, final String password) {
         return RestAssured.given().log().all()
                 .body(new LoginRequest(email, password))
@@ -405,6 +431,7 @@ public class MissionStepTest {
         reservation.put("date", futureDate);
         reservation.put("timeId", 1);
         reservation.put("themeId", themeId);
+        reservation.put("status", ReservationStatus.RESERVED);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

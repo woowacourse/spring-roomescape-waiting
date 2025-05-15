@@ -17,6 +17,7 @@ import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -68,4 +69,12 @@ public class ReservationController {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @RequireRole(MemberRole.USER)
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(UserInfo userInfo) {
+        List<MyReservationResponse> myReservations = reservationService.findMyReservations(userInfo);
+        return ResponseEntity.ok().body(myReservations);
+    }
+
 }
