@@ -42,7 +42,6 @@ public class UserReservationApiController {
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse
     ) {
-        System.out.println("Asd");
         List<MemberReservationResponse> allByMemberId = reservationService.findAllByMemberId(memberResponse.id());
         return ResponseEntity.ok().body(allByMemberId);
     }
