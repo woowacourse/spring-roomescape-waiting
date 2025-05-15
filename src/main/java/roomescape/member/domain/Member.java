@@ -15,7 +15,7 @@ import jakarta.persistence.Id;
 @Entity
 public class Member {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private MemberName name;
@@ -29,7 +29,6 @@ public class Member {
     protected Member() {}
 
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
-        validateNull(id, name, email, password);
         this.id = id;
         this.name = new MemberName(name);
         this.email = new Email(email);
@@ -39,12 +38,6 @@ public class Member {
 
     public Member(final String name, final String email, final String password, final Role role) {
         this(null, name, email, password, role);
-    }
-
-    private void validateNull(final Long id, final String name, final String email, final String password) {
-        if (id == null || name == null || email == null || password == null) {
-            throw new IllegalArgumentException("사용자 정보가 존재하지 않습니다.");
-        }
     }
 
     public Long getId() {
