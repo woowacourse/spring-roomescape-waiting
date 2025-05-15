@@ -1,32 +1,24 @@
 package roomescape.member.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.web.bind.annotation.GetMapping;
 import roomescape.admin.domain.dto.AdminReservationRequestDto;
-import roomescape.auth.JwtTokenProvider;
-import roomescape.auth.domain.dto.TokenResponseDto;
+import roomescape.global.auth.domain.dto.TokenResponseDto;
 import roomescape.auth.fixture.AuthFixture;
-import roomescape.auth.service.AuthService;
-import roomescape.member.domain.dto.ReservationWithBookStateDto;
+import roomescape.global.auth.service.AuthService;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationTime.ReservationTimeTestDataConfig;
 import roomescape.theme.ThemeTestDataConfig;
-import roomescape.theme.domain.Theme;
-import roomescape.user.AdminTestDataConfig;
 import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.User;
 import roomescape.user.service.UserService;

@@ -1,4 +1,4 @@
-package roomescape.auth.controller;
+package roomescape.global.auth.controller;
 
 import java.time.Duration;
 import org.slf4j.Logger;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.domain.dto.TokenRequestDto;
-import roomescape.auth.domain.dto.TokenResponseDto;
-import roomescape.auth.service.AuthService;
+import roomescape.global.auth.domain.dto.TokenRequestDto;
+import roomescape.global.auth.domain.dto.TokenResponseDto;
+import roomescape.global.auth.service.AuthService;
 import roomescape.user.domain.dto.UserResponseDto;
 
 @RestController

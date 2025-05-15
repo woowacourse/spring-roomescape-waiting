@@ -1,4 +1,4 @@
-package roomescape.auth.exception;
+package roomescape.global.auth.exception;
 
 import roomescape.global.exception.AuthorizationException;
 

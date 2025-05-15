@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import roomescape.auth.domain.dto.TokenInfoDto;
+import roomescape.global.auth.JwtTokenProvider;
+import roomescape.global.auth.domain.dto.TokenInfoDto;
 import roomescape.user.domain.Role;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

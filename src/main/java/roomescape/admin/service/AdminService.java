@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.domain.dto.AdminReservationRequestDto;
 import roomescape.admin.domain.dto.SearchReservationRequestDto;
+import roomescape.member.exception.UnauthorizedMemberException;
 import roomescape.member.exception.UnauthorizedUserRoleException;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.domain.dto.ReservationResponseDto;
@@ -34,7 +35,7 @@ public class AdminService {
     private User getUser(Long memberId) {
         User member = userService.findByIdOrThrow(memberId);
         if (!member.isMember()) {
-            throw new UnauthorizedUserRoleException();
+            throw new UnauthorizedMemberException();
         }
         return member;
     }
