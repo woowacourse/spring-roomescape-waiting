@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
+import roomescape.common.exception.PastDateException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
@@ -169,10 +170,39 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 예약_정보를_저장할_때_과거_시간이면_예외가_발생한다() {
+        // given
+        final Member member = new Member("이스트", "east@email.com", "1234", Role.ADMIN);
+        memberRepository.save(member);
+        final LocalTime time = LocalTime.parse("20:00");
+        final LocalDate date = LocalDate.parse("2024-11-28");
+        final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+
+        final String themeName = "공포";
+        final String description = "무섭다";
+        final String thumbnail = "귀신사진";
+        final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
+
+        reservationRepository.save(
+                new Reservation(
+                        member,
+                        date,
+                        savedTime,
+                        savedTheme
+                )
+        );
+
+        // when & then
+        Assertions.assertThatThrownBy(
+                        () -> reservationService.save(member, date, savedTime.getId(), savedTheme.getId()))
+                .isInstanceOf(PastDateException.class);
+    }
+
+    @Test
     void 예약_정보를_저장할_때_이미_예약된_시간이면_예외가_발생한다() {
         // given
         final Member member = new Member("이스트", "east@email.com", "1234", Role.ADMIN);
-        final Member savedMember = memberRepository.save(member);
+        memberRepository.save(member);
         final LocalTime time = LocalTime.parse("20:00");
         final LocalDate date = LocalDate.parse("2025-11-28");
         final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));

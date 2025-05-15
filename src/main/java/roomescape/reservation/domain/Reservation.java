@@ -33,18 +33,6 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
-                       final Theme theme) {
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
-        this.id = id;
-        this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-    }
-
     public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
         validateDate(date);
         validateTime(time);
@@ -58,9 +46,6 @@ public class Reservation {
     private void validateDate(final LocalDate date) {
         if (date == null) {
             throw new ReservationException("Date cannot be null");
-        }
-        if (date.isBefore(LocalDate.now())) {
-            throw new ReservationException("Date cannot be in the past");
         }
     }
 
