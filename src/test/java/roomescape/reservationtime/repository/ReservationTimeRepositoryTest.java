@@ -11,7 +11,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.fixture.ReservationTimeFixture;
 
 @DataJpaTest
-class JdbcReservationTimeRepositoryTest {
+class ReservationTimeRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository repository;
