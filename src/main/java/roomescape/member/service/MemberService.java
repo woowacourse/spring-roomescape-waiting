@@ -37,7 +37,7 @@ public class MemberService {
 
     public Member findByEmail(final String email) {
         return memberRepository.findByEmail(new Email(email))
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
     }
 
     public boolean isExistsByEmail(final String email) {
@@ -46,7 +46,7 @@ public class MemberService {
 
     public Member findById(final Long id) {
         return memberRepository.findById(id)
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
     }
 
     public List<MemberResponse> findAll() {
