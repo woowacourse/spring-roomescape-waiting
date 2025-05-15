@@ -1,0 +1,23 @@
+package roomescape.member.ui.web;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class MemberViewController {
+
+    @GetMapping("/reservation")
+    public String reservation() {
+        return "reservation";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMine() {
+        return "reservation-mine";
+    }
+}
