@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
-import roomescape.domain.reservationmember.ReservationMember;
+import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -29,7 +29,7 @@ import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
 import roomescape.service.reservation.ReservationService;
-import roomescape.service.reservationmember.ReservationMemberService;
+import roomescape.service.reserveticket.ReserveTicketService;
 
 @RestController
 @RequestMapping("/reservations")
@@ -39,12 +39,12 @@ public class ReservationController {
     private static final int THEME_RANKING_START_RANGE = 1;
 
     private final ReservationService reservationService;
-    private final ReservationMemberService reservationMemberService;
+    private final ReserveTicketService reserveTicketService;
 
     public ReservationController(ReservationService reservationService,
-                                 ReservationMemberService reservationMemberService) {
+                                 ReserveTicketService reserveTicketService) {
         this.reservationService = reservationService;
-        this.reservationMemberService = reservationMemberService;
+        this.reserveTicketService = reserveTicketService;
     }
 
     @GetMapping
@@ -52,18 +52,18 @@ public class ReservationController {
                                                                            @RequestParam(required = false) Long memberId,
                                                                            @RequestParam(required = false) LocalDate dateFrom,
                                                                            @RequestParam(required = false) LocalDate dateTo) {
-        List<ReservationMember> reservationMembers = null;
+        List<ReserveTicket> reserveTickets = null;
         boolean isFilterMode = true;
         if (themeId == null && memberId == null && dateFrom == null && dateTo == null) {
             isFilterMode = false;
-            reservationMembers = reservationMemberService.allReservations();
+            reserveTickets = reserveTicketService.allReservations();
         }
 
         if (isFilterMode) {
-            reservationMembers = reservationMemberService.searchReservations(themeId, memberId, dateFrom, dateTo);
+            reserveTickets = reserveTicketService.searchReservations(themeId, memberId, dateFrom, dateTo);
         }
 
-        List<ReservationMemberResponseDto> reservationDtos = reservationMembers.stream()
+        List<ReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
                 .map((reservationMember) -> new ReservationMemberResponseDto(reservationMember.getId(),
                         reservationMember.getName(),
                         reservationMember.getThemeName(),
@@ -77,7 +77,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponseDto> addReservations(
             @RequestBody @Valid AddReservationDto newReservationDto,
             @AuthenticationPrincipal UserInfo userInfo) {
-        long addedReservationId = reservationMemberService.addReservation(newReservationDto, userInfo.id());
+        long addedReservationId = reserveTicketService.addReservation(newReservationDto, userInfo.id());
         Reservation reservation = reservationService.getReservationById(addedReservationId);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
@@ -87,7 +87,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservations(@PathVariable Long id) {
-        reservationMemberService.deleteReservation(id);
+        reserveTicketService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -120,8 +120,8 @@ public class ReservationController {
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(
             @AuthenticationPrincipal UserInfo userInfo) {
-        List<ReservationMember> reservationMembers = reservationMemberService.memberReservations(userInfo.id());
-        List<MyReservationMemberResponseDto> reservationDtos = reservationMembers.stream()
+        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(userInfo.id());
+        List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
                 .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getReservationId(),
                         reservationMember.getName(),
                         reservationMember.getThemeName(),

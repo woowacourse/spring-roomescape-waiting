@@ -1,4 +1,4 @@
-package roomescape.domain.reservationmember;
+package roomescape.domain.reserveticket;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -13,7 +13,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 
 @Entity
-public class ReservationMember {
+public class ReserveTicket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,11 +25,11 @@ public class ReservationMember {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public ReservationMember() {
+    public ReserveTicket() {
 
     }
 
-    public ReservationMember(Long id, Reservation reservation, Member member) {
+    public ReserveTicket(Long id, Reservation reservation, Member member) {
         this.id = id;
         this.reservation = reservation;
         this.member = member;

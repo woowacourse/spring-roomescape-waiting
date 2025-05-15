@@ -1,4 +1,4 @@
-package roomescape.unit.repository.reservationmember;
+package roomescape.unit.repository.reserveticket;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,39 +7,39 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationmember.ReservationMember;
+import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.exception.reservation.InvalidReservationException;
-import roomescape.repository.reservationmember.ReservationMemberRepository;
+import roomescape.repository.reserveticket.ReserveTicketRepository;
 
-public class FakeReservationMemberRepository implements ReservationMemberRepository {
+public class FakeReserveTicketRepository implements ReserveTicketRepository {
 
     private final AtomicLong index = new AtomicLong(1L);
-    private final List<ReservationMember> reservationMembers = new ArrayList<>();
+    private final List<ReserveTicket> reserveTickets = new ArrayList<>();
 
     @Override
-    public List<ReservationMember> findAll() {
-        return Collections.unmodifiableList(reservationMembers);
+    public List<ReserveTicket> findAll() {
+        return Collections.unmodifiableList(reserveTickets);
     }
 
     @Override
     public long add(Reservation reservation, Member member) {
         long id = index.getAndIncrement();
-        reservationMembers.add(new ReservationMember(id, reservation, member));
+        reserveTickets.add(new ReserveTicket(id, reservation, member));
         return id;
     }
 
     @Override
     public void deleteById(long id) {
-        ReservationMember deleteReservationMember = reservationMembers.stream()
+        ReserveTicket deleteReserveTicket = reserveTickets.stream()
                 .filter(reservationMember -> reservationMember.getId() == id)
                 .findAny()
                 .orElseThrow(() -> new InvalidReservationException("존재하지 않는 id입니다"));
-        reservationMembers.remove(deleteReservationMember);
+        reserveTickets.remove(deleteReserveTicket);
     }
 
     @Override
-    public List<ReservationMember> findAllByMemberId(Long memberId) {
-        return reservationMembers.stream()
+    public List<ReserveTicket> findAllByMemberId(Long memberId) {
+        return reserveTickets.stream()
                 .filter(currentReservationMember -> currentReservationMember.getMemberId() == memberId)
                 .collect(Collectors.toList());
     }

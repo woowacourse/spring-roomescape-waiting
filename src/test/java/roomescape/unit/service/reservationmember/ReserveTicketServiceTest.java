@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import roomescape.domain.reservationmember.ReservationMember;
+import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.dto.member.SignupRequestDto;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AddReservationTimeDto;
@@ -19,19 +19,19 @@ import roomescape.dto.theme.AddThemeDto;
 import roomescape.infrastructure.auth.jwt.JwtTokenProvider;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
-import roomescape.service.reservationmember.ReservationMemberService;
 import roomescape.service.reservationtime.ReservationTimeService;
+import roomescape.service.reserveticket.ReserveTicketService;
 import roomescape.service.theme.ThemeService;
 import roomescape.unit.config.ServiceFixture;
 import roomescape.unit.repository.member.FakeMemberRepository;
 import roomescape.unit.repository.reservation.FakeReservationRepository;
 import roomescape.unit.repository.reservation.FakeReservationTimeRepository;
 import roomescape.unit.repository.reservation.FakeThemeRepository;
-import roomescape.unit.repository.reservationmember.FakeReservationMemberRepository;
+import roomescape.unit.repository.reserveticket.FakeReserveTicketRepository;
 
-class ReservationMemberServiceTest {
+class ReserveTicketServiceTest {
 
-    private ReservationMemberService reservationMemberService;
+    private ReserveTicketService reserveTicketService;
     private ReservationTimeService reservationTimeService;
     private ThemeService themeService;
     private MemberService memberService;
@@ -52,8 +52,8 @@ class ReservationMemberServiceTest {
         BCryptPasswordEncoder bCryptPasswordEncoder = ServiceFixture.passwordEncoder();
         memberService = new MemberService(bCryptPasswordEncoder, fakeMemberRepository, jwtTokenProvider);
 
-        FakeReservationMemberRepository reservationMemberRepository = ServiceFixture.fakeReservationMemberRepository();
-        reservationMemberService = new ReservationMemberService(memberService, reservationService,
+        FakeReserveTicketRepository reservationMemberRepository = ServiceFixture.fakeReservationMemberRepository();
+        reserveTicketService = new ReserveTicketService(memberService, reservationService,
                 reservationMemberRepository);
     }
 
@@ -67,7 +67,7 @@ class ReservationMemberServiceTest {
 
         long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
         assertThatCode(
-                () -> reservationMemberService.addReservation(addReservationDto, memberId)).doesNotThrowAnyException();
+                () -> reserveTicketService.addReservation(addReservationDto, memberId)).doesNotThrowAnyException();
     }
 
     @Test
@@ -80,7 +80,7 @@ class ReservationMemberServiceTest {
 
         long memberId = -1;
 
-        assertThatThrownBy(() -> reservationMemberService.addReservation(addReservationDto, memberId)).isInstanceOf(
+        assertThatThrownBy(() -> reserveTicketService.addReservation(addReservationDto, memberId)).isInstanceOf(
                 IllegalArgumentException.class);
     }
 
@@ -94,13 +94,13 @@ class ReservationMemberServiceTest {
                 Long.valueOf(themeId));
 
         long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
-        long reservationId = reservationMemberService.addReservation(addReservationDto, memberId);
+        long reservationId = reserveTicketService.addReservation(addReservationDto, memberId);
 
-        List<ReservationMember> reservationMembers = reservationMemberService.allReservations();
+        List<ReserveTicket> reserveTickets = reserveTicketService.allReservations();
 
         assertAll(
-                () -> assertThat(reservationMembers.get(0).getReservationId()).isEqualTo(reservationId),
-                () -> assertThat(reservationMembers.get(0).getName()).isEqualTo("test")
+                () -> assertThat(reserveTickets.get(0).getReservationId()).isEqualTo(reservationId),
+                () -> assertThat(reserveTickets.get(0).getName()).isEqualTo("test")
         );
     }
 
@@ -119,10 +119,10 @@ class ReservationMemberServiceTest {
         AddReservationDto addReservationDto = new AddReservationDto("asdf", today.plusDays(1L), timeId, themeId);
         AddReservationDto addReservationDto2 = new AddReservationDto("asdf2", today.plusDays(2L), timeId2, themeId);
 
-        reservationMemberService.addReservation(addReservationDto, memberId);
-        reservationMemberService.addReservation(addReservationDto2, memberId);
+        reserveTicketService.addReservation(addReservationDto, memberId);
+        reserveTicketService.addReservation(addReservationDto2, memberId);
 
-        List<ReservationMember> searchedReservations = reservationMemberService.searchReservations(themeId, memberId,
+        List<ReserveTicket> searchedReservations = reserveTicketService.searchReservations(themeId, memberId,
                 today, today.plusDays(1L));
 
         assertThat(searchedReservations).hasSize(1);
@@ -133,16 +133,16 @@ class ReservationMemberServiceTest {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
-        long firstId = reservationMemberService.addReservation(
+        long firstId = reserveTicketService.addReservation(
                 new AddReservationDto("name", LocalDate.now().plusDays(1), timeId, themeId), memberId);
-        long secondId = reservationMemberService.addReservation(
+        long secondId = reserveTicketService.addReservation(
                 new AddReservationDto("name", LocalDate.now().plusDays(2), timeId, themeId), memberId);
 
-        List<ReservationMember> reservationMembers = reservationMemberService.memberReservations(memberId);
-        List<Long> reservationMemberIds = reservationMembers.stream()
-                .map(ReservationMember::getReservationId)
+        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(memberId);
+        List<Long> reservationMemberIds = reserveTickets.stream()
+                .map(ReserveTicket::getReservationId)
                 .toList();
 
-        assertThat(reservationMemberIds).containsAnyElementsOf(List.of(firstId,secondId));
+        assertThat(reservationMemberIds).containsAnyElementsOf(List.of(firstId, secondId));
     }
 }

@@ -1,4 +1,4 @@
-package roomescape.repository.reservationmember.legacy;
+package roomescape.repository.reserveticket.legacy;
 
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -6,21 +6,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationmember.ReservationMember;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.reservationmember.ReservationMemberRepository;
+import roomescape.repository.reserveticket.ReserveTicketRepository;
 
-@Repository
-public class JdbcReservationMemberRepository implements ReservationMemberRepository {
+public class JdbcReserveTicketRepository implements ReserveTicketRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<ReservationMember> reservationMemberRowMapper = (rs, rowNum) -> {
+    private final RowMapper<ReserveTicket> reservationMemberRowMapper = (rs, rowNum) -> {
         // ReservationTime
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
@@ -50,19 +48,19 @@ public class JdbcReservationMemberRepository implements ReservationMemberReposit
                 Role.valueOf(rs.getString("role"))
         );
 
-        return new ReservationMember(
+        return new ReserveTicket(
                 rs.getLong("id"),
                 reservation,
                 member
         );
     };
 
-    public JdbcReservationMemberRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcReserveTicketRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public List<ReservationMember> findAll() {
+    public List<ReserveTicket> findAll() {
         String sql = """
                     SELECT rm.id,
                            r.id AS reservation_id, r.name AS reservation_name, r.date AS reservation_date,
@@ -93,12 +91,12 @@ public class JdbcReservationMemberRepository implements ReservationMemberReposit
 
     @Override
     public void deleteById(long id) {
-        ReservationMember reservationMember = findReservationMemberById(id);
+        ReserveTicket reserveTicket = findReservationMemberById(id);
 
         String deleteReservationMemberSql = "DELETE FROM reservation_member WHERE id = ?";
         jdbcTemplate.update(deleteReservationMemberSql, id);
 
-        Long reservationId = reservationMember.getReservationId();
+        Long reservationId = reserveTicket.getReservationId();
         deleteReservationById(reservationId);
     }
 
@@ -107,7 +105,7 @@ public class JdbcReservationMemberRepository implements ReservationMemberReposit
         jdbcTemplate.update(sql, reservationId);
     }
 
-    private ReservationMember findReservationMemberById(long id) {
+    private ReserveTicket findReservationMemberById(long id) {
         String findByIdSql = """
                     SELECT rm.id,
                            r.id AS reservation_id, r.name AS reservation_name, r.date AS reservation_date,
@@ -126,7 +124,7 @@ public class JdbcReservationMemberRepository implements ReservationMemberReposit
     }
 
     @Override
-    public List<ReservationMember> findAllByMemberId(Long memberId) {
+    public List<ReserveTicket> findAllByMemberId(Long memberId) {
         String sql = """
                     SELECT rm.id,
                            r.id AS reservation_id, r.name AS reservation_name, r.date AS reservation_date,
