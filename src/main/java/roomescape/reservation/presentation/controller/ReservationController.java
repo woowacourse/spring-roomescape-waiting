@@ -57,7 +57,7 @@ public class ReservationController {
     }
 
     @Auth(Role.USER)
-    @GetMapping("mine")
+    @GetMapping("/mine")
     public ResponseEntity<List<UserReservationsResponse>> getUserReservations(
             final Long memberId
     ) {
