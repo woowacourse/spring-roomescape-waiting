@@ -1,5 +1,6 @@
 package roomescape.presentation.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,7 +35,8 @@ public class ReservationTimeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationTimeResponseDto addTime(@RequestBody ReservationTimeRegisterDto reservationTimeRegisterDto) {
+    public ReservationTimeResponseDto addTime(
+            @RequestBody @Valid ReservationTimeRegisterDto reservationTimeRegisterDto) {
         return reservationTimeService.saveTime(reservationTimeRegisterDto);
     }
 

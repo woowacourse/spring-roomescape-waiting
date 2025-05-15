@@ -1,5 +1,6 @@
 package roomescape.presentation.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,19 +34,19 @@ public class ThemeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ThemeResponseDto addTheme(@RequestBody final ThemeRegisterDto themeRegisterDto) {
+    public ThemeResponseDto addTheme(@RequestBody @Valid ThemeRegisterDto themeRegisterDto) {
         return themeService.saveTheme(themeRegisterDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTheme(@PathVariable("id") final Long id) {
+    public void deleteTheme(@PathVariable("id") Long id) {
         themeService.deleteTheme(id);
     }
 
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
-    public List<ThemeResponseDto> getPopularThemes(@RequestParam final String date) {
+    public List<ThemeResponseDto> getPopularThemes(@RequestParam String date) {
         return themeService.findPopularThemes(date);
     }
 }

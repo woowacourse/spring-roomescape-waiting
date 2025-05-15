@@ -8,7 +8,7 @@
 - [x] gradle 의존성 추가
     - [x] jpa 의존성
     - [x] lombok 의존성
-    - [ ] valid 의존성
+    - [x] valid 의존성
 - [x] 엔티티 매핑
 - [x] 연관관계 매핑
 

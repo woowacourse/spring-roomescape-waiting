@@ -1,9 +1,9 @@
 package roomescape.dto;
 
-import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,22 +32,5 @@ class ReservationTimeRegisterDtoTest {
                 .hasMessageContaining("시간");
 
     }
-
-    @DisplayName("예약 시각은 null 일 수 없다.")
-    @Test
-    void test2() {
-        assertThatThrownBy(() -> new ReservationTimeRegisterDto(null))
-                .isInstanceOf(IllegalArgumentException.class);
-
-    }
-
-    @DisplayName("예약 시각은 공백일 수 없다.")
-    @Test
-    void test3() {
-        assertThatThrownBy(() -> new ReservationTimeRegisterDto(" "))
-                .isInstanceOf(IllegalArgumentException.class);
-
-    }
-
 
 }

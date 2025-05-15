@@ -1,10 +1,10 @@
 package roomescape.dto;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.time.LocalTime;
 import java.util.stream.Stream;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,42 +37,6 @@ class ReservationRegisterDtoTest {
                         new Member(1L, "히로", "example@gmail.com", "password", Role.ADMIN)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("날짜");
-
-    }
-
-    @DisplayName("예약 날짜는 null 일 수 없다.")
-    @Test
-    void test2() {
-        assertThatThrownBy(() -> new ReservationRegisterDto(
-                null, 1L, 1L))
-                .isInstanceOf(IllegalArgumentException.class);
-
-    }
-
-    @DisplayName("예약 시간은 null 일 수 없다.")
-    @Test
-    void test3() {
-        assertThatThrownBy(() -> new ReservationRegisterDto(
-                "2024-12-12", null, 1L))
-                .isInstanceOf(IllegalArgumentException.class);
-
-    }
-
-    @DisplayName("예약 시간은 null 일 수 없다.")
-    @Test
-    void test4() {
-        assertThatThrownBy(() -> new ReservationRegisterDto(
-                "2024-12-12", 1L, null))
-                .isInstanceOf(IllegalArgumentException.class);
-
-    }
-
-    @DisplayName("예약 날짜는 공백일 수 없다.")
-    @Test
-    void test6() {
-        assertThatThrownBy(() -> new ReservationRegisterDto(
-                " ", 1L, 1L))
-                .isInstanceOf(IllegalArgumentException.class);
 
     }
 

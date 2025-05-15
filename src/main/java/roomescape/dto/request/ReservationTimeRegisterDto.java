@@ -1,17 +1,13 @@
 package roomescape.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import roomescape.model.ReservationTime;
 
 public record ReservationTimeRegisterDto(
-        String startAt
+        @NotBlank String startAt
 ) {
-    public ReservationTimeRegisterDto {
-        if (startAt == null || startAt.isBlank()) {
-            throw new IllegalArgumentException("시작 시각은 null이거나 공백일 수 없습니다");
-        }
-    }
 
     public ReservationTime convertToTime() {
         try {
