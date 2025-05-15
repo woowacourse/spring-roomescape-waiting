@@ -38,6 +38,9 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
+    protected Theme() {
+    }
+
     private void validateName(String name) {
         if (name.isBlank()) {
             throw new BusinessRuleViolationException("테마 이름은 비어있을 수 없습니다.");
@@ -45,9 +48,6 @@ public class Theme {
         if (MAX_NAME_LENGTH < name.length()) {
             throw new BusinessRuleViolationException("테마 이름은 %d자 이하여야 합니다.".formatted(MAX_NAME_LENGTH));
         }
-    }
-
-    protected Theme() {
     }
 
     private void validateDescription(String description) {
