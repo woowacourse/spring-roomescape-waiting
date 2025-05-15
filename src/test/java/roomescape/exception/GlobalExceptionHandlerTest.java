@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,10 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidDateAndTimeException;
-import roomescape.exception.NotFoundException;
-import roomescape.exception.UnauthorizedException;
 
 class GlobalExceptionHandlerTest {
 
