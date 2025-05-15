@@ -12,7 +12,7 @@ import roomescape.user.domain.User;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class SignUpUseCaseImpl implements SignUpUseCase {
 
     private final PasswordEncoder passwordEncoder;
