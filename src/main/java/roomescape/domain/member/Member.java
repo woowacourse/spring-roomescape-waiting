@@ -8,9 +8,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import roomescape.domain.BusinessRuleViolationException;
 
 @Entity
 public class Member {
+
+    private static final int MAX_NAME_LENGTH = 10;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +38,8 @@ public class Member {
     }
 
     public Member(Long id, String name, Email email, String password, Role role) {
+        validateName(name);
+        validatePassword(password);
         this.id = id;
         this.name = name;
         this.email = email;
@@ -43,6 +48,21 @@ public class Member {
     }
 
     protected Member() {
+    }
+
+    private void validateName(String name) {
+        if (name.isBlank()) {
+            throw new BusinessRuleViolationException("사용자명은 비어있을 수 없습니다.");
+        }
+        if (MAX_NAME_LENGTH < name.length()) {
+            throw new BusinessRuleViolationException("사용자명은 %d자 이하여야 합니다.".formatted(MAX_NAME_LENGTH));
+        }
+    }
+
+    private void validatePassword(String password) {
+        if (password.isBlank()) {
+            throw new BusinessRuleViolationException("비밀번호는 비어있을 수 없습니다.");
+        }
     }
 
     public boolean isNotPassword(String password) {

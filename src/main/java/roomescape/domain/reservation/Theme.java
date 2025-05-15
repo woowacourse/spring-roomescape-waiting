@@ -10,6 +10,10 @@ import roomescape.domain.BusinessRuleViolationException;
 @Entity
 public class Theme {
 
+    private static final int MAX_NAME_LENGTH = 50;
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
+    private static final int MAX_THUMBNAIL_LENGTH = 200;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,21 +29,42 @@ public class Theme {
     }
 
     public Theme(Long id, String name, String description, String thumbnail) {
-        validateLength(name, 255, "name");
-        validateLength(description, 255, "description");
-        validateLength(thumbnail, 255, "thumbnail");
+        validateName(name);
+        validateDescription(description);
+        validateThumbnail(thumbnail);
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
+    private void validateName(String name) {
+        if (name.isBlank()) {
+            throw new BusinessRuleViolationException("테마 이름은 비어있을 수 없습니다.");
+        }
+        if (MAX_NAME_LENGTH < name.length()) {
+            throw new BusinessRuleViolationException("테마 이름은 %d자 이하여야 합니다.".formatted(MAX_NAME_LENGTH));
+        }
+    }
+
     protected Theme() {
     }
 
-    public void validateLength(String value, int maxLength, String fieldName) {
-        if (value.length() > maxLength) {
-            throw new BusinessRuleViolationException(fieldName + "은 " + maxLength + "자를 넘을 수 없습니다.");
+    private void validateDescription(String description) {
+        if (description.isBlank()) {
+            throw new BusinessRuleViolationException("테마 설명은 비어있을 수 없습니다.");
+        }
+        if (MAX_DESCRIPTION_LENGTH < description.length()) {
+            throw new BusinessRuleViolationException("테마 설명은 %d자 이하여야 합니다.".formatted(MAX_DESCRIPTION_LENGTH));
+        }
+    }
+
+    private void validateThumbnail(String thumbnail) {
+        if (thumbnail.isBlank()) {
+            throw new BusinessRuleViolationException("테마 썸네일은 비어있을 수 없습니다.");
+        }
+        if (MAX_THUMBNAIL_LENGTH < thumbnail.length()) {
+            throw new BusinessRuleViolationException("테마 썸네일은 %d자 이하여야 합니다.".formatted(MAX_THUMBNAIL_LENGTH));
         }
     }
 
