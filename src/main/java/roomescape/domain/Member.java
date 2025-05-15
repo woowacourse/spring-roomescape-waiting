@@ -18,7 +18,7 @@ public class Member {
     private String email;
     private String password;
 
-    public Member() {
+    protected Member() {
     }
 
     private Member(final Long id, final String name, final MemberRole role, final String email, final String password) {

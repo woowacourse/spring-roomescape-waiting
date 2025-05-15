@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
+
 @Entity
 public class Reservation {
 
@@ -26,8 +27,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation() {
-
+    protected Reservation() {
     }
 
     private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
