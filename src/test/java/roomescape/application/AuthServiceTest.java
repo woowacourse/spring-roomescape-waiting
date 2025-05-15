@@ -61,7 +61,7 @@ class AuthServiceTest extends BaseTest {
     @Test
     void 토큰으로_사용자를_찾는다() {
         Member member = memberDbFixture.한스_사용자();
-        String token = jwtTokenProvider.createToken(member.getEmail());
+        String token = jwtTokenProvider.createToken(new LoginMember(member.getId(), member.getName(), member.getRole(), member.getEmail()));
         LoginMember response = authService.findMemberByToken(token);
 
         assertThat(response.name()).isEqualTo(member.getName());

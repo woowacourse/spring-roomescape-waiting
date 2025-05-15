@@ -8,7 +8,6 @@ import roomescape.application.AuthService;
 import roomescape.application.exception.AuthException;
 import roomescape.domain.Role;
 import roomescape.infrastructure.util.JwtTokenExtractor;
-import roomescape.presentation.dto.request.LoginMember;
 
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
@@ -26,8 +25,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     ) {
         String token = JwtTokenExtractor.extract(request);
 
-        LoginMember loginMember = authService.findMemberByToken(token);
-        if (loginMember == null || loginMember.role() != Role.ADMIN) {
+        Role role = authService.findRoleByToken(token);
+        if (role != Role.ADMIN) {
             throw new AuthException("[ERROR] 권한이 필요합니다.", HttpStatus.FORBIDDEN);
         }
         return true;
