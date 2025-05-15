@@ -3,10 +3,13 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import roomescape.global.constant.GlobalConstant;
 import roomescape.member.dao.MemberDao;
-import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationTimeDao;
-import roomescape.reservation.dao.ThemeDao;
+import roomescape.member.exception.MemberNotExistException;
+import roomescape.reservation.dao.reservation.ReservationDao;
+import roomescape.reservation.dao.reservationTime.ReservationTimeDao;
+import roomescape.reservation.dao.theme.ThemeDao;
 import roomescape.member.model.Member;
+import roomescape.reservation.exception.ThemeNotExistException;
+import roomescape.reservation.exception.TimeNotExistException;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
@@ -24,6 +27,9 @@ import java.util.List;
 @Service
 public class ReservationService {
 
+    public static final int TOP_RANK_PERIOD_DAYS = 7;
+    public static final int TOP_RANK_THRESHOLD = 10;
+
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
@@ -38,7 +44,8 @@ public class ReservationService {
 
     public Reservation createReservationAfterNow(ReservationCreateRequest request, Member member) {
         LocalDate date = request.date();
-        ReservationTime time = reservationTimeDao.findById(request.timeId());
+        ReservationTime time = reservationTimeDao.findById(request.timeId())
+                .orElseThrow(TimeNotExistException::new);
         validateDateAndTime(date, time);
         return createReservation(request, member);
     }
@@ -52,7 +59,8 @@ public class ReservationService {
     }
 
     public Reservation createReservation(AdminReservationCreateRequest adminReservationCreateRequest) {
-        Member member = memberDao.findById(adminReservationCreateRequest.memberId());
+        Member member = memberDao.findById(adminReservationCreateRequest.memberId())
+                .orElseThrow(MemberNotExistException::new);
         return generateReservation(
                 adminReservationCreateRequest.date(),
                 adminReservationCreateRequest.timeId(),
@@ -70,13 +78,15 @@ public class ReservationService {
 
     private Reservation generateReservation(LocalDate date, Long timeId, Long themeId, Member member) {
         validateDuplicateReservation(date, timeId, themeId);
-        ReservationTime time = reservationTimeDao.findById(timeId);
-        Theme theme = themeDao.findById(themeId);
-        return reservationDao.add(new Reservation(null, member, date, time, theme));
+        ReservationTime time = reservationTimeDao.findById(timeId)
+                .orElseThrow(TimeNotExistException::new);
+        Theme theme = themeDao.findById(themeId)
+                .orElseThrow(ThemeNotExistException::new);
+        return reservationDao.save(new Reservation(null, member, date, time, theme));
     }
 
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {
-        if (reservationDao.existByDateTimeAndTheme(date, timeId, themeId)) {
+        if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new DuplicateReservationException();
         }
     }
@@ -87,7 +97,7 @@ public class ReservationService {
 
     public List<Reservation> findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
         validateAtLeastOneFilterProvided(memberId, themeId, startDate, endDate);
-        return reservationDao.findByMemberIdAndThemeIdAndStartDateAndEndDate(memberId, themeId, startDate, endDate);
+        return reservationDao.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, startDate, endDate);
     }
 
     private void validateAtLeastOneFilterProvided(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {

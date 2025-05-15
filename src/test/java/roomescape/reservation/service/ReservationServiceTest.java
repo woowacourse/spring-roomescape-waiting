@@ -10,7 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.member.dto.request.MemberCreateRequest;
 import roomescape.member.model.Member;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.exception.DuplicateReservationException;
@@ -23,11 +26,14 @@ public class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private MemberService memberService;
+
     @Test
     @DisplayName("예약 추가를 할 수 있다.")
     void createReservation() {
+        Member member = memberService.createUser(new MemberCreateRequest("phree@woowa.com", "password", "프리"));
         ReservationCreateRequest request = new ReservationCreateRequest(LocalDate.of(2024, 4, 26), 1L, 1L);
-        Member member = Member.generateNormalMember("프리", "phree@woowa.com", "password");
         Reservation actual = reservationService.createReservation(request, member);
 
         assertAll(() -> {
@@ -56,7 +62,7 @@ public class ReservationServiceTest {
     @DisplayName("날짜와 시간, 테마가 같은 경우에는 예약 추가를 할 수 없다.")
     void cannotCreateReservation() {
         // Given
-        Member member = Member.generateNormalMember("프리", "phree@woowa.com", "password");
+        Member member = memberService.createUser(new MemberCreateRequest("phree@woowa.com", "password", "프리"));
         ReservationCreateRequest request = new ReservationCreateRequest(LocalDate.of(2024, 4, 26), 1L, 1L);
         ReservationCreateRequest request2 = new ReservationCreateRequest(LocalDate.of(2024, 4, 26), 1L, 1L);
         reservationService.createReservation(request, member);

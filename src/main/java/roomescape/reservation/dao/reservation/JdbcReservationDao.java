@@ -1,4 +1,4 @@
-package roomescape.reservation.dao;
+package roomescape.reservation.dao.reservation;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -31,7 +31,7 @@ public class JdbcReservationDao implements ReservationDao {
     }
 
     @Override
-    public Reservation add(Reservation reservation) {
+    public Reservation save(Reservation reservation) {
         Map<String, Object> param = new HashMap<>();
         param.put("date", Date.valueOf(reservation.getDate()));
         param.put("member_id", reservation.getMember().getId());
@@ -80,7 +80,7 @@ public class JdbcReservationDao implements ReservationDao {
     }
 
     @Override
-    public List<Reservation> findByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
+    public List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
         String sql = generateFindAllQuery();
         List<String> whereCluases = new ArrayList<>();
         List<Object> parameters = new ArrayList<>();
@@ -125,7 +125,7 @@ public class JdbcReservationDao implements ReservationDao {
     }
 
     @Override
-    public boolean existByDateTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String sql = "SELECT EXISTS(SELECT id FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?)";
         return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
     }
