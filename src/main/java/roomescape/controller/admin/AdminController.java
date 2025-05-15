@@ -14,7 +14,7 @@ import roomescape.dto.admin.AdminReservationAddDto;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.service.reservation.ReservationService;
-`import roomescape.service.reserveticket.ReserveTicketService;
+import roomescape.service.reserveticket.ReserveTicketService;
 
 @RestController
 @RequestMapping("/admin")
