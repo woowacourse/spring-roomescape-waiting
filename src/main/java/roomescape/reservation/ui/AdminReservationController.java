@@ -43,10 +43,10 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public ResponseEntity<List<ReservationResponse>> getFilteredReservations(
-            @RequestParam(name = "themeId") final long themeId,
-            @RequestParam(name = "memberId") final long memberId,
-            @RequestParam(name = "dateFrom") final LocalDate start,
-            @RequestParam(name = "dateTo") final LocalDate end
+            @RequestParam(required = false, name = "themeId") final Long themeId,
+            @RequestParam(required = false, name = "memberId") final Long memberId,
+            @RequestParam(required = false, name = "from") final LocalDate start,
+            @RequestParam(required = false, name = "to") final LocalDate end
     ) {
         final List<ReservationResponse> reservationResponses = reservationService.findReservationByThemeIdAndMemberIdInDuration(
                 themeId, memberId, start, end);

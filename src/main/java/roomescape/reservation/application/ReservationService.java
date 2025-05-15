@@ -74,8 +74,8 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservationByThemeIdAndMemberIdInDuration(
-            final long themeId,
-            final long memberId,
+            final Long themeId,
+            final Long memberId,
             final LocalDate start,
             final LocalDate end
     ) {
