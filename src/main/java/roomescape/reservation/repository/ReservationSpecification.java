@@ -1,9 +1,5 @@
 package roomescape.reservation.repository;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.reservation.domain.Reservation;
@@ -28,38 +24,18 @@ public class ReservationSpecification {
     }
 
     public static Specification<Reservation> equalMemberId(Long memberId) {
-        return new Specification<Reservation>() {
-            @Override
-            public Predicate toPredicate(Root<Reservation> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                return criteriaBuilder.equal(root.get("member").get("id"), memberId);
-            }
-        };
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("member").get("id"), memberId);
     }
 
     public static Specification<Reservation> equalThemeId(Long themeId) {
-        return new Specification<Reservation>() {
-            @Override
-            public Predicate toPredicate(Root<Reservation> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                return criteriaBuilder.equal(root.get("theme").get("id"), themeId);
-            }
-        };
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("theme").get("id"), themeId);
     }
 
     public static Specification<Reservation> dateFrom(LocalDate from) {
-        return new Specification<Reservation>() {
-            @Override
-            public Predicate toPredicate(Root<Reservation> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("date"), from);
-            }
-        };
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("date"), from);
     }
 
     public static Specification<Reservation> dateTo(LocalDate to) {
-        return new Specification<Reservation>() {
-            @Override
-            public Predicate toPredicate(Root<Reservation> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                return criteriaBuilder.lessThanOrEqualTo(root.get("date"), to);
-            }
-        };
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("date"), to);
     }
 }

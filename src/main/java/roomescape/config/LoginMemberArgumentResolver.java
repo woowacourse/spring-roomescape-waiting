@@ -26,7 +26,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = authorizationExtractor.extract(request);
         return memberService.findMemberByToken(token);
