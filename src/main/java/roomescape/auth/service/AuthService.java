@@ -5,10 +5,13 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginCheckResponse;
+import roomescape.auth.dto.LoginMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.infrastructure.TokenProvider;
+import roomescape.error.ForbiddenException;
 import roomescape.error.NotFoundException;
 import roomescape.error.UnauthorizedException;
 import roomescape.member.domain.Member;
@@ -16,6 +19,7 @@ import roomescape.member.repository.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private static final String MEMBER_ID = "memberId";
@@ -28,11 +32,17 @@ public class AuthService {
                 .orElseThrow(() -> new UnauthorizedException("이메일 또는 패스워드가 올바르지 않습니다."));
         return jwtTokenProvider.createToken(createClaims(member));
     }
-    
+
     private Claims createClaims(final Member member) {
         return Jwts.claims()
                 .subject(member.getId().toString())
                 .build();
+    }
+
+    public void checkAdmin(final HttpServletRequest request) {
+        if (isAdmin(request)) {
+            throw new ForbiddenException("관리자 권한이 필요합니다.");
+        }
     }
 
     public LoginCheckResponse checkLogin(final String token) {
@@ -50,12 +60,18 @@ public class AuthService {
         }
     }
 
-    /**
-     * @throws IllegalArgumentException 유효하지 않은 memberId 형식이거나 요청 속성에 memberId가 없을 경우
-     * @throws NotFoundException        해당 memberId의 회원을 찾지 못한 경우
-     */
-    public Member extractMemberByRequest(final HttpServletRequest request) {
-        return findMemberByMemberId(extractMemberId(request));
+    private boolean isAdmin(final HttpServletRequest request) {
+        final LoginMember loginMember = extractMemberByRequest(request);
+        return loginMember.isAdmin();
+    }
+
+    public LoginMember extractMemberByRequest(final HttpServletRequest request) {
+        try {
+            return findMemberByMemberId(extractMemberId(request));
+        } catch (IllegalArgumentException | NotFoundException e) {
+            log.debug(e.getMessage());
+            throw new UnauthorizedException("인증에 실패했습니다.");
+        }
     }
 
     private Long extractMemberId(final HttpServletRequest request) {
@@ -66,8 +82,9 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("memberId 형식이 올바르지 않습니다. memberId =" + raw));
     }
 
-    private Member findMemberByMemberId(final Long memberId) {
-        return memberRepository.findById(memberId)
+    private LoginMember findMemberByMemberId(final Long memberId) {
+        final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다. memberId =" + memberId));
+        return new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole());
     }
 }

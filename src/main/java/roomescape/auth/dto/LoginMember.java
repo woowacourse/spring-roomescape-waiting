@@ -9,4 +9,8 @@ public record LoginMember(
         @NonNull String email,
         @NonNull MemberRole role
 ) {
+
+    public boolean isAdmin() {
+        return role.isAdmin();
+    }
 }
