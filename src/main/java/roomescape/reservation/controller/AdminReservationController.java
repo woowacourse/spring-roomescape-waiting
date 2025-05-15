@@ -12,9 +12,9 @@ import jakarta.validation.Valid;
 import roomescape.auth.annotation.RequiredAdmin;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.service.AuthService;
-import roomescape.reservation.dto.AdminReservationRequest;
-import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.request.AdminReservationRequest;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RequestMapping("/admin/reservations")

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.ThemeRequest;
-import roomescape.reservation.dto.ThemeResponse;
+import roomescape.reservation.dto.request.ThemeRequest;
+import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 

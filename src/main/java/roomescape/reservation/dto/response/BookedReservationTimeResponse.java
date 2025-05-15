@@ -1,4 +1,4 @@
-package roomescape.reservation.dto;
+package roomescape.reservation.dto.response;
 
 public record BookedReservationTimeResponse(
         ReservationTimeResponse timeResponse,
