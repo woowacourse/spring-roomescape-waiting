@@ -1,9 +1,5 @@
 package roomescape.reservation.repository.jpa;
 
-import static roomescape.reservation.repository.jpa.ReservationSpecs.isMemberReservation;
-import static roomescape.reservation.repository.jpa.ReservationSpecs.isReservationByPeriod;
-import static roomescape.reservation.repository.jpa.ReservationSpecs.isThemeReservation;
-
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;

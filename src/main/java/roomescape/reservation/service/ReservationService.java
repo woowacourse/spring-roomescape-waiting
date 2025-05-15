@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
@@ -85,12 +84,6 @@ public class ReservationService {
     private Theme findTheme(final long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
-    }
-
-    public List<ReservationInfo> getReservations() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationInfo::new)
-                .toList();
     }
 
     public List<ReservationInfo> getReservations(ReservationSearchCondition condition) {

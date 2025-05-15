@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,18 +15,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.fake.TestCurrentDateTime;
-import roomescape.member.repository.MemberRepository;
+import roomescape.CurrentDateTime;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationSearchCondition;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -35,26 +35,17 @@ public class ReservationServiceIntegrationTest {
     @Autowired
     ReservationRepository reservationRepository;
 
-    @Autowired
-    ThemeRepository themeRepository;
+    @MockBean
+    CurrentDateTime currentDateTime;
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    MemberRepository memberRepository;
-
     ReservationService reservationService;
-    TestCurrentDateTime currentDateTime;
 
     @BeforeEach
     void init() {
-        LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
-        currentDateTime = new TestCurrentDateTime(now);
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
-                themeRepository,
-                memberRepository,
-                currentDateTime);
+        when(currentDateTime.getDateTime()).thenReturn(LocalDateTime.of(2025, 5, 1, 10, 00));
+        when(currentDateTime.getDate()).thenReturn(LocalDate.of(2025, 5, 1));
+        when(currentDateTime.getTime()).thenReturn(LocalTime.of(10, 00));
     }
 
     @DisplayName("새로운 예약을 추가할 수 있다")
@@ -118,8 +109,12 @@ public class ReservationServiceIntegrationTest {
     @DisplayName("모든 예약을 조회할 수 있다")
     @Test
     void getReservations() {
+        // given
+        ReservationSearchCondition condition = new ReservationSearchCondition(null, null, null, null);
+
         // when
-        List<ReservationInfo> result = reservationService.getReservations();
+        List<ReservationInfo> result = reservationService.getReservations(condition);
+
         // then
         assertThat(result).hasSize(13);
     }
