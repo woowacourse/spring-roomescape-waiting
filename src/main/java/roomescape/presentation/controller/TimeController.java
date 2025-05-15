@@ -17,6 +17,8 @@ import roomescape.application.TimeService;
 import roomescape.application.dto.TimeCreateDto;
 import roomescape.application.dto.TimeDto;
 import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
+import roomescape.presentation.controller.dto.TimeDataWithBookingInfoResponse;
+import roomescape.presentation.controller.dto.TimeResponse;
 
 @RestController
 @RequestMapping("/times")
@@ -29,14 +31,15 @@ public class TimeController {
     }
 
     @GetMapping
-    public List<TimeDto> getAllTimes() {
-        return service.getAllTimes();
+    public List<TimeResponse> getAllTimes() {
+        return TimeResponse.from(service.getAllTimes());
     }
 
     @PostMapping
-    public ResponseEntity<TimeDto> addTime(@Valid @RequestBody TimeCreateDto request) {
+    public ResponseEntity<TimeResponse> addTime(@Valid @RequestBody TimeCreateDto request) {
         TimeDto timeDto = service.registerNewTime(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(timeDto);
+        TimeResponse timeResponse = TimeResponse.from(timeDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(timeResponse);
     }
 
     @DeleteMapping("/{id}")
@@ -46,11 +49,13 @@ public class TimeController {
     }
 
     @GetMapping("/booking-status")
-    public ResponseEntity<List<TimeDataWithBookingInfo>> getTimesWithBookingInfo(
+    public ResponseEntity<List<TimeDataWithBookingInfoResponse>> getTimesWithBookingInfo(
             @RequestParam LocalDate date,
             @RequestParam Long themeId
     ) {
         List<TimeDataWithBookingInfo> timesWithBookingInfo = service.getTimesWithBookingInfo(date, themeId);
-        return ResponseEntity.ok().body(timesWithBookingInfo);
+        List<TimeDataWithBookingInfoResponse> timesWithBookingResponses = TimeDataWithBookingInfoResponse.from(
+                timesWithBookingInfo);
+        return ResponseEntity.ok().body(timesWithBookingResponses);
     }
 }

@@ -17,6 +17,7 @@ import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.application.dto.UserReservationCreateDto;
 import roomescape.infrastructure.AuthenticatedMemberId;
+import roomescape.presentation.controller.dto.ReservationWaitingResponse;
 
 @RestController
 @RequestMapping("/reservations")
@@ -34,8 +35,11 @@ public class ReservationController {
     }
 
     @GetMapping("/member")
-    public List<ReservationWaitingDto> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
-        return service.getReservationsByMember(memberIdDto.id());
+    public List<ReservationWaitingResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
+        List<ReservationWaitingDto> reservationWaitingDtos = service.getReservationsByMember(memberIdDto.id());
+        return reservationWaitingDtos.stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
     }
 
     @PostMapping
