@@ -1,10 +1,10 @@
 package roomescape.auth.service;
 
 import jakarta.servlet.http.Cookie;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.auth.constant.AuthConstant;
 import roomescape.member.dao.MemberDao;
+import roomescape.member.exception.MemberNotExistException;
 import roomescape.member.model.Member;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.exception.InvalidCredentialsException;
@@ -30,11 +30,8 @@ public class AuthService {
     }
 
     private Member findMemberByEmailAndPassword(String email, String password) {
-        try {
-            return memberDao.findByEmailAndPassword(email, password);
-        } catch (DataAccessException exception) {
-            throw new InvalidCredentialsException();
-        }
+        return memberDao.findByEmailAndPassword(email, password)
+                .orElseThrow(InvalidCredentialsException::new);
     }
 
     public Member checkAuthenticationStatus(Cookie[] cookies) {
@@ -44,7 +41,8 @@ public class AuthService {
 
     private Member findMemberWithAccessToken(String accessToken) {
         String email = jwtTokenProvider.getPayload(accessToken);
-        return memberDao.findByEmail(email);
+        return memberDao.findByEmail(email)
+                .orElseThrow(MemberNotExistException::new);
     }
 
     private String extractTokenFromCookie(Cookie[] cookies) {

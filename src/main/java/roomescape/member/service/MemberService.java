@@ -22,14 +22,14 @@ public class MemberService {
         String name = memberCreateRequest.name();
         validateDuplicateUser(email, name);
         Member newMember = Member.generateNormalMember(name, email, memberCreateRequest.password());
-        return memberDao.add(newMember);
+        return memberDao.save(newMember);
     }
 
     private void validateDuplicateUser(String email, String name) {
-        if (memberDao.existByEmail(email)) {
+        if (memberDao.existsByEmail(email)) {
             throw new DuplicateMemberException("이미 가입된 이메일이다.");
         }
-        if (memberDao.existByName(name)) {
+        if (memberDao.existsByName(name)) {
             throw new DuplicateMemberException("이미 존재하는 이름이다.");
         }
     }
