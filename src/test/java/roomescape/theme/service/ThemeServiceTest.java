@@ -21,7 +21,6 @@ import roomescape.theme.repository.ThemeRepository;
 @Sql("/data.sql")
 class ThemeServiceTest {
 
-
     @Autowired
     private ReservationRepository reservationRepository;
 

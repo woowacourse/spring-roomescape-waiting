@@ -68,21 +68,14 @@ class ReservationServiceTest {
         service = new ReservationService(reservationRepository, timeRepo, themeRepo, memberRepo);
         time1 = new ReservationTime(LocalTime.of(14, 0));
         time2 = new ReservationTime(LocalTime.of(13, 0));
-//        reservationTimeRepository.save(time1);
-//        reservationTimeRepository.save(time2);
 
         theme1 = new Theme("테마1", "설명1", "썸네일1");
         theme2 = new Theme("테마2", "설명2", "썸네일2");
-//        themeRepository.save(theme1);
-//        themeRepository.save(theme2);
 
         member = new Member("member", "member@naver.com", "1234");
-//        memberRepo.save(member);
 
-        r1 = new Reservation(LocalDate.of(2999, 5, 11), time1, theme1, member);
-        r2 = new Reservation(LocalDate.of(2999, 6, 11), time2, theme2, member);
-//        reservationRepository.save(r1);
-//        reservationRepository.save(r2);
+        r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member);
+        r2 = Reservation.booked(LocalDate.of(2999, 6, 11), time2, theme2, member);
     }
 
     @Test

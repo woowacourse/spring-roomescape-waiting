@@ -10,11 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -26,7 +26,6 @@ import roomescape.theme.domain.Theme;
 
 @Getter
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
 
@@ -58,20 +57,37 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status = ReservationStatus.BOOKED;
 
-    public Reservation(@NonNull final LocalDate date,
-                       @NonNull final ReservationTime reservationTime,
-                       @NonNull final Theme theme,
-                       @NonNull final Member member) {
-        validateFutureOrPresent(date, reservationTime.getStartAt());
-        this.id = null;
+    @Builder
+    private Reservation(
+            final Long id,
+            @NonNull final LocalDate date,
+            @NonNull final ReservationTime time,
+            @NonNull final Theme theme,
+            @NonNull final Member member,
+            @NonNull final ReservationStatus status
+    ) {
+        this.id = id;
         this.date = date;
-        this.time = reservationTime;
+        this.time = time;
         this.theme = theme;
         this.member = member;
+        this.status = status;
     }
 
-    private void validateFutureOrPresent(final LocalDate date, final LocalTime time) {
-        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
+    public static Reservation booked(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        return builder()
+                .id(null)
+                .date(date)
+                .time(reservationTime)
+                .theme(theme)
+                .member(member)
+                .status(ReservationStatus.BOOKED)
+                .build();
+    }
+
+    @PrePersist
+    private void validateFutureOrPresent() {
+        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         final LocalDateTime currentDateTime = LocalDateTime.now();
         if (reservationDateTime.isBefore(currentDateTime)) {
             throw new ReservationException("예약은 현재 시간 이후로 가능합니다.");

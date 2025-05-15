@@ -9,7 +9,9 @@ spring:
     basename: reservationStatus
     encoding: UTF-8
     fallback-to-system-locale: false
-
+  sql:
+    init:
+      mode: never
   jpa:
     defer-datasource-initialization: true
     hibernate:
@@ -29,3 +31,5 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+

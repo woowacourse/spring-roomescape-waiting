@@ -54,7 +54,7 @@ public class ReservationService {
         }
 
         final Member member = new Member(loginMember);
-        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
+        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
     }
@@ -69,7 +69,7 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
-        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
+        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
     }
