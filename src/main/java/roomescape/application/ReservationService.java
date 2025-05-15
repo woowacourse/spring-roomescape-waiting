@@ -45,6 +45,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationDto registerReservation(ReservationCreateDto request) {
+        validateNotDuplicate(request);
         Theme theme = themeService.getThemeById(request.themeId()).toEntity();
         ReservationTime reservationTime = timeService.getTimeById(request.timeId()).toEntity();
         Member member = memberService.getMemberById(request.memberId()).toEntity();
@@ -57,15 +58,16 @@ public class ReservationService {
                 waiting
         );
         validateNotPast(reservationWithoutId);
-        validateNotDuplicate(reservationWithoutId);
         Reservation reservation = reservationRepository.save(reservationWithoutId);
         return ReservationDto.from(reservation);
     }
 
-    private void validateNotDuplicate(Reservation reservation) {
-        List<Reservation> allReservations = reservationRepository.findAll();
-        boolean duplicated = allReservations.stream()
-                .anyMatch(r -> r.isDuplicated(reservation));
+    private void validateNotDuplicate(ReservationCreateDto request) {
+        boolean duplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(
+                request.date(),
+                request.timeId(),
+                request.themeId()
+        );
         if (duplicated) {
             throw new IllegalArgumentException("이미 예약된 일시입니다");
         }

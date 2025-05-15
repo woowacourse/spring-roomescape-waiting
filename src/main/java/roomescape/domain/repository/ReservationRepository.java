@@ -31,5 +31,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("dateTo") LocalDate dateTo
     );
 
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
     void deleteById(Long id);
 }
