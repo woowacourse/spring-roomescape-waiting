@@ -60,7 +60,7 @@ class ReserveTicketServiceTest {
     @Test
     void 유저정보를_추가하여_예약을_진행한다() {
         long timeId = reservationTimeService.addReservationTime(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)));
+                new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)));
         long themeId = themeService.addTheme(new AddThemeDto("tuda", "asdf", "asdf"));
         AddReservationDto addReservationDto = new AddReservationDto("asdf", LocalDate.now(), Long.valueOf(timeId),
                 Long.valueOf(themeId));
@@ -87,7 +87,7 @@ class ReserveTicketServiceTest {
     @Test
     void 유저와_예약_정보를_합친_정보를_반환할_수_있다() {
         long timeId = reservationTimeService.addReservationTime(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)));
+                new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)));
         long themeId = themeService.addTheme(new AddThemeDto("tuda", "asdf", "asdf"));
 
         AddReservationDto addReservationDto = new AddReservationDto("asdf", LocalDate.now(), Long.valueOf(timeId),

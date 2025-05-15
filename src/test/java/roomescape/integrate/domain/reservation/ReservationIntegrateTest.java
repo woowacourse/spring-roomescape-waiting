@@ -46,7 +46,7 @@ class ReservationIntegrateTest {
         requestFixture.reqeustSignup("투다", "test@email.com", "testtest");
         cookies = requestFixture.requestLogin("test@email.com", "testtest");
         themeId = requestFixture.requestAddTheme("테마 명", "description", "thumbnail");
-        LocalTime afterTime = LocalTime.now().plusHours(1L);
+        LocalTime afterTime = LocalTime.now().plusMinutes(1L);
         timeId = requestFixture.requestAddTime(afterTime.toString());
     }
 
@@ -88,7 +88,7 @@ class ReservationIntegrateTest {
 
     @Test
     void 테마_랭킹_테스트(@Autowired ReservationRepository reservationRepository) {
-        LocalTime afterTime = LocalTime.now().plusHours(1);
+        LocalTime afterTime = LocalTime.now().plusMinutes(1);
         long timeId = requestFixture.requestAddTime(afterTime.toString());
 
         long themeId1 = requestFixture.requestAddTheme("테마 명1", "description", "thumbnail");
