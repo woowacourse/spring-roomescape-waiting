@@ -18,7 +18,7 @@ VALUES ('테마 D', '테마 D입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6e
 INSERT INTO theme (name, description, thumbnail)
 VALUES ('테마 E', '테마 E입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO member (name, email, password, auth_role)
+INSERT INTO member (name, email, password, role)
 VALUES ('가이온', 'jumdo12', 'jumdo12', 'ADMIN');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id)
