@@ -12,7 +12,6 @@ import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.model.AvailableReservationTime;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.repository.ReservationRepository;
@@ -60,16 +59,7 @@ public class ReservationTimeService {
 
         reservationTimes.removeAll(nonDuplicatedReservationTimes);
 
-        List<AvailableReservationTime> availableReservationTimes = getAvailableReservationTimes(
-                reservationTimes, nonDuplicatedReservationTimes);
-
-        return availableReservationTimes.stream()
-                .map(
-                        availableReservationTime -> new AvailableReservationTimeResponseDto(
-                                availableReservationTime.getId(),
-                                availableReservationTime.getStartAt(),
-                                availableReservationTime.getAlreadyBooked()))
-                .toList();
+        return getAvailableReservationTimes(reservationTimes, nonDuplicatedReservationTimes);
     }
 
     private List<Reservation> getReservationsBy(String date, Long themeId) {
@@ -83,30 +73,31 @@ public class ReservationTimeService {
                 .collect(Collectors.toSet());
     }
 
-    private List<AvailableReservationTime> getAvailableReservationTimes(List<ReservationTime> reservationTimes,
-                                                                        Set<ReservationTime> nonDuplicatedReservationTimes) {
-        List<AvailableReservationTime> availableReservationTimes = getAvailableReservationTimes(reservationTimes);
-        List<AvailableReservationTime> nonAvailableReservationTimes = getAvailableReservationTimes(
+    private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
+            List<ReservationTime> reservationTimes,
+            Set<ReservationTime> nonDuplicatedReservationTimes) {
+        List<AvailableReservationTimeResponseDto> availableReservationTimes = getAvailableReservationTimes(
+                reservationTimes);
+        List<AvailableReservationTimeResponseDto> nonAvailableReservationTimes = getAvailableReservationTimes(
                 nonDuplicatedReservationTimes);
         availableReservationTimes.addAll(nonAvailableReservationTimes);
         return availableReservationTimes;
     }
 
-    private List<AvailableReservationTime> getAvailableReservationTimes(List<ReservationTime> reservationTimes) {
+    private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
+            List<ReservationTime> reservationTimes) {
         return new java.util.ArrayList<>(reservationTimes.stream()
-                .map(reservationTime -> new AvailableReservationTime(
-                        reservationTime.getId(),
-                        reservationTime.getStartAt(),
+                .map(reservationTime -> AvailableReservationTimeResponseDto.from(
+                        reservationTime,
                         false))
                 .toList());
     }
 
-    private List<AvailableReservationTime> getAvailableReservationTimes(
+    private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
             Set<ReservationTime> nonDuplicatedReservationTimes) {
         return nonDuplicatedReservationTimes.stream()
-                .map(reservationTime -> new AvailableReservationTime(
-                        reservationTime.getId(),
-                        reservationTime.getStartAt(),
+                .map(reservationTime -> AvailableReservationTimeResponseDto.from(
+                        reservationTime,
                         true))
                 .toList();
     }
