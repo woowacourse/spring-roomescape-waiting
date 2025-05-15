@@ -45,15 +45,15 @@ public class Member {
     }
 
     public String getName() {
-        return name.name();
+        return name.value();
     }
 
     public String getEmail() {
-        return email.email();
+        return email.value();
     }
 
     public String getPassword() {
-        return password.password();
+        return password.value();
     }
 
     public Role getRole() {

@@ -3,13 +3,13 @@ package roomescape.member.domain;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public record MemberName(String name) {
+public record MemberName(String value) {
 
     private static final int MIN_LENGTH = 2;
     private static final int MAX_LENGTH = 10;
 
     public MemberName {
-        validate(name);
+        validate(value);
     }
 
     private void validate(final String name) {

@@ -5,12 +5,12 @@ import java.util.regex.Pattern;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public record Email(String email) {
+public record Email(String value) {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
     public Email {
-        validate(email);
+        validate(value);
     }
 
     private void validate(final String email) {
