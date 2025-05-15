@@ -16,11 +16,11 @@ import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
 import roomescape.auth.service.AuthServiceFacade;
 
 @RestController
-public class LoginController {
+public class AuthController {
     private final AuthServiceFacade authService;
     private final AuthorizationHandler authorizationHandler;
 
-    public LoginController(AuthServiceFacade authService, AuthorizationHandler authorizationHandler) {
+    public AuthController(AuthServiceFacade authService, AuthorizationHandler authorizationHandler) {
         this.authService = authService;
         this.authorizationHandler = authorizationHandler;
     }
