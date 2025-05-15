@@ -50,7 +50,7 @@ public class ReservationMemberService {
         reservationMembers.removeIf(reservationMember ->
                 reservationService.searchReservation(
                         reservationMember.getReservationId(), themeId, dateFrom, dateTo
-                ).isPresent()
+                ).isEmpty()
         );
 
         return reservationMembers;

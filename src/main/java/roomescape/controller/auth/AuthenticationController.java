@@ -23,7 +23,7 @@ import roomescape.service.member.MemberService;
 public class AuthenticationController {
 
     private final MemberService memberService;
-    private static int ONE_HOUR = 3600;
+    private static final int ONE_HOUR = 3600;
 
     public AuthenticationController(MemberService memberService) {
         this.memberService = memberService;

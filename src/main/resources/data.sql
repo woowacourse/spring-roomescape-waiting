@@ -1,5 +1,5 @@
-INSERT INTO MEMBER(name, username, password, role)
-VALUES ('praisebak', 'praisebak@naver.com', '$2a$10$4DDpj4fav96RdKr/uG8A0etFZb4/NSZpf1Km/MA6gyZpoEcD4q6i.', 'ADMIN');
+INSERT INTO MEMBER(name, username, password, role) VALUES ('ad', 'ad@ad.com', '$2a$10$VtdQedu.URsd2YQ67xVN5uG5.bw31RLkbYrH9auYGdCiyu9xqrJ3G', 'ADMIN');
+INSERT INTO MEMBER(name, username, password, role) VALUES ('aa', 'aa@aa.com', '$2a$10$VtdQedu.URsd2YQ67xVN5uG5.bw31RLkbYrH9auYGdCiyu9xqrJ3G', 'USER');
 
 INSERT INTO THEME(name, description, thumbnail)
 VALUES ('asdf', 'asdf', 'asdf');
