@@ -7,9 +7,11 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Theme {
@@ -17,14 +19,10 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private final Long id;
+    private Long id;
     private String name;
     private String description;
     private String thumbnail;
-
-    public Theme() {
-        id = null;
-    }
 
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);

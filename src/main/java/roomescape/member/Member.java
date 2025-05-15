@@ -1,19 +1,14 @@
 package roomescape.member;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import roomescape.reservation.Reservation;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -24,7 +19,7 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private final Long id;
+    private Long id;
 
     private String email;
     private String password;
@@ -37,7 +32,6 @@ public class Member {
     private final Set<Reservation> reservations;
 
     public Member() {
-        id = null;
         reservations = new HashSet<>();
     }
 

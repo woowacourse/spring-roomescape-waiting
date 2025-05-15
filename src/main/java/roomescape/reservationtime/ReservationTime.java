@@ -4,10 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+
+import java.time.LocalTime;
 
 @Entity
 @AllArgsConstructor
@@ -15,13 +16,14 @@ import lombok.Getter;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReservationTime {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private final Long id;
+    private Long id;
     private final LocalTime startAt;
 
     public ReservationTime() {
-        this(null, null);
+        this.startAt = null;
     }
 
     public ReservationTime(final LocalTime startAt) {
