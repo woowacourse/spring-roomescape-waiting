@@ -7,23 +7,16 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookie;
 import io.restassured.response.Response;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ReservationTestFixture;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.web.controller.dto.LoginRequest;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
-import roomescape.member.model.Role;
 import roomescape.support.IntegrationTestSupport;
 
 class AuthControllerTest extends IntegrationTestSupport {
