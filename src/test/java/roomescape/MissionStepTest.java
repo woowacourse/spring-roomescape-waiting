@@ -60,7 +60,7 @@ class MissionStepTest {
                 ALTER TABLE member ALTER COLUMN id RESTART WITH 1;
                 SET REFERENTIAL_INTEGRITY TRUE;
                 """);
-        memberRepository.save(new Member("name", "admin@naver.com", "1234", MemberRole.ADMIN));
+        memberRepository.save(Member.withRole("name", "admin@naver.com", "1234", MemberRole.ADMIN));
     }
 
     @Test

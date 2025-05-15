@@ -53,7 +53,7 @@ public class ReservationService {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
 
-        final Member member = new Member(loginMember);
+        final Member member = Member.from(loginMember);
         final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
@@ -86,7 +86,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
-        final Member member = new Member(loginMember);
+        final Member member = Member.from(loginMember);
         return reservationRepository.findAllByMember(member).stream()
                 .map(MyReservationResponse::new)
                 .toList();

@@ -55,8 +55,8 @@ class JdbcReservationRepositoryTest {
         time2 = ReservationTime.from(LocalTime.of(11, 0));
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
         theme2 = Theme.of("테마2", "설명2", "썸네일2");
-        member1 = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
-        member2 = new Member(2L, "유저2", "user2@naver.com", "pwd", MemberRole.MEMBER.name());
+        member1 = Member.withRole("유저1", "user1@naver.com", "pwd", MemberRole.MEMBER);
+        member2 = Member.withRole("유저2", "user2@naver.com", "pwd", MemberRole.MEMBER);
     }
 
     @Test
@@ -131,7 +131,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         SoftAssertions.assertSoftly(soft -> {
-            soft.assertThat(reservations).hasSize(RESERVATION_COUNT + 2);
+            soft.assertThat(reservations).hasSize(3);
             soft.assertThat(reservations.get(0).getMember().getId()).isEqualTo(member1.getId());
             soft.assertThat(reservations.get(1).getMember().getId()).isEqualTo(member1.getId());
             soft.assertThat(reservations.get(2).getMember().getId()).isEqualTo(member1.getId());
@@ -160,7 +160,7 @@ class JdbcReservationRepositoryTest {
     void 예약_시간이_현재_이전이면_ReservationException이_발생한다() {
         // given
         Theme defaultTheme = Theme.of("테마", "설명", "썸네일");
-        Member defaultMember = new Member(1L, "member", "member@naver.com", "1234", MemberRole.MEMBER.name());
+        Member defaultMember = Member.withRole("member", "member@naver.com", "1234", MemberRole.MEMBER);
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);
         ReservationTime pastTime = ReservationTime.from(oneMinuteBefore);

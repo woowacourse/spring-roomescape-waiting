@@ -49,8 +49,8 @@ class MemberServiceTest {
     @Test
     void repository_findAll_결과가_MemberResponse_리스트로_매핑된다() {
         // given
-        Member m1 = new Member(1L, "A", "a@a.com", "pw", "ADMIN");
-        Member m2 = new Member(2L, "B", "b@b.com", "pw", "MEMBER");
+        Member m1 = Member.withRole("A", "a@a.com", "pw", MemberRole.ADMIN);
+        Member m2 = Member.withRole("B", "b@b.com", "pw", MemberRole.MEMBER);
         when(memberRepository.findAll()).thenReturn(List.of(m1, m2));
 
         // when

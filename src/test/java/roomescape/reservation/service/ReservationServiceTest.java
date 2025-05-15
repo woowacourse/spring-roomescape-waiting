@@ -72,7 +72,7 @@ class ReservationServiceTest {
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
         theme2 = Theme.of("테마2", "설명2", "썸네일2");
 
-        member = new Member("member", "member@naver.com", "1234");
+        member = Member.withoutRole("member", "member@naver.com", "1234");
 
         r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member);
         r2 = Reservation.booked(LocalDate.of(2999, 6, 11), time2, theme2, member);

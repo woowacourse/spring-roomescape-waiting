@@ -18,7 +18,8 @@ public class MemberService {
         if (memberRepository.existsByEmail(memberRequest.email())) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다. email=" + memberRequest.email());
         }
-        memberRepository.save(new Member(memberRequest.name(), memberRequest.email(), memberRequest.password()));
+        memberRepository.save(
+                Member.withoutRole(memberRequest.name(), memberRequest.email(), memberRequest.password()));
     }
 
     public List<MemberResponse> findAllMember() {

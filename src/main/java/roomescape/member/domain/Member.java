@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -39,9 +40,13 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    public Member(final Long id, @NonNull final String name, @NonNull final String email,
-                  @NonNull final String password,
-                  @NonNull final MemberRole role) {
+    @Builder
+    private Member(final Long id,
+                   @NonNull final String name,
+                   @NonNull final String email,
+                   final String password,
+                   @NonNull final MemberRole role
+    ) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -49,41 +54,43 @@ public class Member {
         this.role = role;
     }
 
-    public Member(final Long id, @NonNull final String name, @NonNull final String email,
-                  @NonNull final String password,
-                  @NonNull final String role) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        try {
-            this.role = MemberRole.valueOf(role);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("유효하지 않은 회원 역할입니다.: " + role);
-        }
+    public static Member withoutRole(
+            @NonNull final String name,
+            @NonNull final String email,
+            @NonNull final String password
+    ) {
+        return builder()
+                .id(null)
+                .name(name)
+                .email(email)
+                .password(password)
+                .role(MemberRole.MEMBER)
+                .build();
     }
 
-    public Member(@NonNull final String name, @NonNull final String email, @NonNull final String password) {
-        this.id = null;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = MemberRole.MEMBER;
+    public static Member withRole(
+            @NonNull final String name,
+            @NonNull final String email,
+            @NonNull final String password,
+            @NonNull final MemberRole role
+    ) {
+        return builder()
+                .id(null)
+                .name(name)
+                .email(email)
+                .password(password)
+                .role(role)
+                .build();
     }
 
-    public Member(@NonNull final String name, @NonNull final String email, @NonNull final String password,
-                  @NonNull final MemberRole role) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
-
-    public Member(final LoginMember loginMember) {
-        this.id = loginMember.id();
-        this.name = loginMember.name();
-        this.email = loginMember.email();
-        this.role = loginMember.role();
+    public static Member from(final LoginMember loginMember) {
+        return builder()
+                .id(loginMember.id())
+                .name(loginMember.name())
+                .email(loginMember.email())
+                .password(null)
+                .role(loginMember.role())
+                .build();
     }
 
     public boolean matchesPassword(final String password) {
