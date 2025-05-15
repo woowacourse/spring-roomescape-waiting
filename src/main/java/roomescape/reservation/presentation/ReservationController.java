@@ -25,27 +25,10 @@ import roomescape.reservation.service.ReservationService;
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    public static final String GET_ADMIN_RESERVATION = "admin/reservation";
-
     private final ReservationService reservationService;
 
     public ReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<ReservationResponse> response = reservationService.getReservations();
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(
-            @RequestBody final ReservationRequest request,
-            @LoginMember final LoginMemberInfo memberInfo)
-    {
-        ReservationResponse response = reservationService.createReservation(request, memberInfo.id());
-        return ResponseEntity.created(URI.create(GET_ADMIN_RESERVATION)).body(response);
     }
 
     @DeleteMapping("/{id}")

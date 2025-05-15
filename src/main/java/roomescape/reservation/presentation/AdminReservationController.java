@@ -25,6 +25,12 @@ public class AdminReservationController {
         this.reservationService = reservationService;
     }
 
+    @GetMapping("/reservations")
+    public ResponseEntity<List<ReservationResponse>> getReservations() {
+        List<ReservationResponse> response = reservationService.getReservations();
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody AdminReservationRequest request)
     {
