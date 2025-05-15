@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.common.interceptor.AdminRoleInterceptor;
 import roomescape.common.resolver.LoginMemberArgumentResolver;
-import roomescape.member.service.AuthService;
+import roomescape.member.application.service.AuthService;
 
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {

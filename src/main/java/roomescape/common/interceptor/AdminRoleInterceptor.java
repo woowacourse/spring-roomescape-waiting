@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Optional;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.common.exception.MissingLoginException;
-import roomescape.common.exception.NoPermissionException;
-import roomescape.member.service.AuthService;
-import roomescape.member.service.dto.LoginMemberInfo;
+import roomescape.common.error.MissingLoginException;
+import roomescape.common.error.NoPermissionException;
+import roomescape.member.application.service.AuthService;
+import roomescape.member.application.dto.LoginMemberInfo;
 
 public class AdminRoleInterceptor implements HandlerInterceptor {
 

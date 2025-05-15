@@ -9,9 +9,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.common.exception.MissingLoginException;
-import roomescape.member.service.AuthService;
-import roomescape.member.service.dto.LoginMemberInfo;
+import roomescape.common.error.MissingLoginException;
+import roomescape.member.application.service.AuthService;
+import roomescape.member.application.dto.LoginMemberInfo;
 
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
