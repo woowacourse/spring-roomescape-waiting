@@ -111,9 +111,7 @@ public class ReservationService {
             LocalDate dateFrom,
             LocalDate dateTo
     ) {
-        Theme theme = themeService.findThemeById(themeId);
-        Member member = memberService.findMemberById(memberId);
-        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDate(theme, member, dateFrom, dateTo);
+        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDate(themeId, memberId, dateFrom, dateTo);
 
         return ReservationResponse.from(reservations);
     }

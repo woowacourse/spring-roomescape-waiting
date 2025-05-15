@@ -27,8 +27,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByTheme(Theme theme);
 
-    @Query("SELECT r FROM Reservation r WHERE r.theme =:theme AND r.member =:member AND (r.date BETWEEN :dateFrom AND :dateTo)")
-    List<Reservation> findAllByThemeAndMemberAndDate(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo);
+    @Query("""
+        SELECT r FROM Reservation r
+        JOIN FETCH r.time
+        WHERE r.theme.id =:themeId
+        AND r.member.id =:memberId
+        AND (r.date BETWEEN :dateFrom AND :dateTo)
+        """)
+    List<Reservation> findAllByThemeAndMemberAndDate(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
 }
