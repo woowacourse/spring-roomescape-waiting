@@ -7,7 +7,6 @@ import roomescape.auth.infrastructure.JwtExtractor;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.model.Principal;
 import roomescape.global.exception.ForbiddenException;
-import roomescape.auth.service.AuthService;
 
 public class AdminInterceptor implements HandlerInterceptor {
 

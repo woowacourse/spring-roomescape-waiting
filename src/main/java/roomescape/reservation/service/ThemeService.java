@@ -1,10 +1,7 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.constant.GlobalConstant;
 import roomescape.reservation.dao.theme.ThemeDao;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.dto.request.ThemeCreateRequest;
@@ -13,9 +10,6 @@ import roomescape.global.exception.InvalidInputException;
 
 @Service
 public class ThemeService {
-
-    public static final int TOP_RANK_PERIOD_DAYS = 7;
-    public static final int TOP_RANK_THRESHOLD = 10;
 
     private final ThemeDao themeDao;
 

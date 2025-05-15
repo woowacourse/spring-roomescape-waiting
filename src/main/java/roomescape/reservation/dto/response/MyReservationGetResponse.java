@@ -13,4 +13,5 @@ public record MyReservationGetResponse(Long id,
                                        ReservationTime time,
                                        Theme theme,
                                        String status) {
+
 }

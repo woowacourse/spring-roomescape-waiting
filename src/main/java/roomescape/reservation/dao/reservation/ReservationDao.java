@@ -3,7 +3,6 @@ package roomescape.reservation.dao.reservation;
 import java.time.LocalDate;
 import java.util.List;
 
-import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
 
 public interface ReservationDao {
