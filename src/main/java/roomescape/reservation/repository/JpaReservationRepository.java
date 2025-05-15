@@ -3,12 +3,10 @@ package roomescape.reservation.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 
-@Repository
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepository {
 
     @Override
