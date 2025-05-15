@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.login.presentation.dto.SearchCondition;
-import roomescape.auth.login.presentation.dto.annotation.LoginAdmin;
-import roomescape.auth.login.presentation.dto.LoginAdminInfo;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -32,16 +30,16 @@ public class AdminReservationController {
     }
 
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody AdminReservationRequest request)
-    {
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody AdminReservationRequest request) {
         ReservationResponse response = reservationService.createReservation(
-                new ReservationRequest(request.date(), request.timeId(), request.themeId()),
-                request.memberId()
-        );
+            new ReservationRequest(
+                request.date(),
+                request.timeId(),
+                request.themeId()
+            ), request.memberId());
 
         return ResponseEntity.created(URI.create("/admin/reservation")).body(response);
     }
-
 
     @GetMapping("/user-reservation")
     public ResponseEntity<List<ReservationResponse>> reservationFilter(@ModelAttribute SearchCondition condition) {

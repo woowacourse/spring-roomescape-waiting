@@ -23,5 +23,4 @@ public interface ReservationRepository {
     boolean existsByTimeId(Long timeId);
 
     boolean existByThemeId(Long themeId);
-
 }

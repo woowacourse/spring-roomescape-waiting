@@ -36,11 +36,11 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(
-            final DateTime dateTime,
-            final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+        final DateTime dateTime,
+        final ReservationRepository reservationRepository,
+        final ReservationTimeRepository reservationTimeRepository,
+        final ThemeRepository themeRepository,
+        final MemberRepository memberRepository
     ) {
         this.dateTime = dateTime;
         this.reservationRepository = reservationRepository;
@@ -51,7 +51,7 @@ public class ReservationService {
 
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new ReservationTimeException("예약 시간을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ReservationTimeException("예약 시간을 찾을 수 없습니다."));
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new ThemeException("테마를 찾을 수 없습니다."));
         Member member = memberRepository.findById(memberId)
@@ -84,8 +84,8 @@ public class ReservationService {
 
     public List<ReservationResponse> getReservations() {
         return reservationRepository.findAll().stream()
-                .map(ReservationResponse::from)
-                .toList();
+            .map(ReservationResponse::from)
+            .toList();
     }
 
     public void deleteReservationById(final Long id) {
@@ -97,19 +97,20 @@ public class ReservationService {
 
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {
         List<Reservation> reservations = reservationRepository.findBy(
-                condition.memberId(), condition.themeId(),
-                condition.dateFrom(), condition.dateTo()
+            condition.memberId(), condition.themeId(),
+            condition.dateFrom(), condition.dateTo()
         );
 
         return reservations.stream()
-                .map(reservation -> new ReservationResponse(
-                        reservation.getId(),
-                        reservation.getDate(),
-                        new ReservationTimeResponse(reservation.getTime().getId(), reservation.getTime().getStartAt()),
-                        new ThemeResponse(reservation.getTheme().getId(), reservation.getTheme().getName(), reservation.getTheme().getDescription(), reservation.getTheme().getThumbnail()),
-                        new MemberResponse(reservation.getMember().getId(), reservation.getMember().getName())
-                ))
-                .toList();
+            .map(reservation -> new ReservationResponse(
+                reservation.getId(),
+                reservation.getDate(),
+                new ReservationTimeResponse(reservation.getTime().getId(), reservation.getTime().getStartAt()),
+                new ThemeResponse(reservation.getTheme().getId(), reservation.getTheme().getName(),
+                    reservation.getTheme().getDescription(), reservation.getTheme().getThumbnail()),
+                new MemberResponse(reservation.getMember().getId(), reservation.getMember().getName())
+            ))
+            .toList();
     }
 
     public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {

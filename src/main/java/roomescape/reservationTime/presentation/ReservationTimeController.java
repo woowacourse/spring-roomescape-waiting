@@ -45,7 +45,9 @@ public class ReservationTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> createReservationTime(@RequestBody final ReservationTimeRequest request) {
+    public ResponseEntity<ReservationTimeResponse> createReservationTime(
+        @RequestBody final ReservationTimeRequest request)
+    {
         ReservationTimeResponse response = reservationTimeService.createReservationTime(request);
         return ResponseEntity.created(URI.create(GET_ADMIN_TIME)).body(response);
     }
@@ -59,7 +61,7 @@ public class ReservationTimeController {
     @ExceptionHandler(value = DateTimeParseException.class)
     public ResponseEntity<ExceptionResponse> noMatchTimeType(final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(
-                400, "[ERROR] 요청 시간 형식이 맞지 않습니다.", request.getRequestURI()
+            400, "[ERROR] 요청 시간 형식이 맞지 않습니다.", request.getRequestURI()
         );
         return ResponseEntity.badRequest().body(exceptionResponse);
     }
