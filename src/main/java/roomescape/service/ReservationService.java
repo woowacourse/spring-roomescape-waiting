@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -15,9 +17,6 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.ReservationCreateDto;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class ReservationService {
@@ -57,7 +56,8 @@ public class ReservationService {
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId) {
-        List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId,
+                themeId);
         if (!reservations.isEmpty()) {
             throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 다른 예약 일정을 선택해주세요.");
         }
@@ -67,19 +67,23 @@ public class ReservationService {
         List<Reservation> allReservations = reservationRepository.findAll();
 
         return allReservations.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(), reservation.getTheme()))
+                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
+                        reservation.getTheme()))
                 .toList();
     }
 
-    public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from, LocalDate to) {
-        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(from, to, themeId, memberId);
+    public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from,
+                                                               LocalDate to) {
+        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(
+                from, to, themeId, memberId);
         return reservationsByPeriodAndMemberAndTheme.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(), reservation.getTheme()))
+                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
+                        reservation.getTheme()))
                 .toList();
     }
 
     public void deleteReservation(Long id) {
-        if(!reservationRepository.existsById(id)){
+        if (!reservationRepository.existsById(id)) {
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
         reservationRepository.deleteById(id);

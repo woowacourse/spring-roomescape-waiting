@@ -12,7 +12,6 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.dto.auth.LoginRequestDto;
 import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.MemberRepository;
 
 import java.util.Map;
 

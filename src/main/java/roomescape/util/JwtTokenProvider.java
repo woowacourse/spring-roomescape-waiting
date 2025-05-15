@@ -7,16 +7,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Objects;
+import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.exception.UnauthorizationException;
-
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Objects;
 
 @Component
 public class JwtTokenProvider {

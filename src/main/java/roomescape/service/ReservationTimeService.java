@@ -64,7 +64,7 @@ public class ReservationTimeService {
             throw new IllegalStateException("[ERROR] 이 시간의 예약이 이미 존재합니다. id : " + id);
         }
 
-        if(!reservationTimeRepository.existsById(id)){
+        if (!reservationTimeRepository.existsById(id)) {
             throw new NotFoundException("[ERROR] 등록된 시간만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
 

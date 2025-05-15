@@ -1,5 +1,6 @@
 package roomescape.controller.api;
 
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,8 +10,6 @@ import roomescape.dto.auth.SignUpRequestDto;
 import roomescape.dto.member.MemberResponseDto;
 import roomescape.dto.member.MemberSignupResponseDto;
 import roomescape.service.MemberService;
-
-import java.util.List;
 
 @RestController
 public class MemberController {

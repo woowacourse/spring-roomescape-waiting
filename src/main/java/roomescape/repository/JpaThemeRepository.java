@@ -9,17 +9,17 @@ import roomescape.domain.Theme;
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(value = """
-                SELECT
-                th.id,
-                th.name,
-                th.description,
-                th.thumbnail
-                FROM theme as th
-                INNER JOIN reservation as r on r.theme_id = th.id
-                WHERE r.date >= ? and r.date < ?
-                GROUP BY th.id
-                ORDER BY COUNT(th.id) DESC
-                LIMIT 10
-                """, nativeQuery = true)
+            SELECT
+            th.id,
+            th.name,
+            th.description,
+            th.thumbnail
+            FROM theme as th
+            INNER JOIN reservation as r on r.theme_id = th.id
+            WHERE r.date >= ? and r.date < ?
+            GROUP BY th.id
+            ORDER BY COUNT(th.id) DESC
+            LIMIT 10
+            """, nativeQuery = true)
     List<Theme> findPopular(LocalDate start, LocalDate end);
 }

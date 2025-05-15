@@ -1,5 +1,6 @@
 package roomescape.config;
 
+import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -8,8 +9,6 @@ import roomescape.controller.AuthAdminInterceptor;
 import roomescape.controller.AuthArgumentResolver;
 import roomescape.service.MemberService;
 import roomescape.util.JwtTokenProvider;
-
-import java.util.List;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {

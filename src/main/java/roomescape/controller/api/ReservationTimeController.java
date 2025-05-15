@@ -21,7 +21,7 @@ import roomescape.service.ReservationTimeService;
 @RequestMapping("/times")
 public class ReservationTimeController {
 
-    private ReservationTimeService reservationTimeService;
+    private final ReservationTimeService reservationTimeService;
 
     public ReservationTimeController(ReservationTimeService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
@@ -34,13 +34,16 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<AvailableReservationTimeResponseDto>> getAvailableReservationTimes(@RequestParam("date") LocalDate date, @RequestParam("themeId") Long themeId) {
-        List<AvailableReservationTimeResponseDto> allReservationTimeResponses = reservationTimeService.findAvailableReservationTimes(date, themeId);
+    public ResponseEntity<List<AvailableReservationTimeResponseDto>> getAvailableReservationTimes(
+            @RequestParam("date") LocalDate date, @RequestParam("themeId") Long themeId) {
+        List<AvailableReservationTimeResponseDto> allReservationTimeResponses = reservationTimeService.findAvailableReservationTimes(
+                date, themeId);
         return ResponseEntity.ok(allReservationTimeResponses);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponseDto> addReservationTime(@RequestBody final ReservationTimeCreateRequestDto requestDto) {
+    public ResponseEntity<ReservationTimeResponseDto> addReservationTime(
+            @RequestBody final ReservationTimeCreateRequestDto requestDto) {
         ReservationTimeResponseDto responseDto = reservationTimeService.createReservationTime(requestDto);
         return ResponseEntity.created(URI.create("times/" + responseDto.id())).body(responseDto);
     }

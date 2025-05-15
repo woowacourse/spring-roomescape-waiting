@@ -5,7 +5,6 @@ import roomescape.domain.member.Member;
 import roomescape.dto.auth.LoginRequestDto;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.MemberRepository;
 import roomescape.util.JwtTokenProvider;
 
 @Service
