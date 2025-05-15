@@ -1,0 +1,55 @@
+package roomescape.auth.controller;
+
+import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.dto.LoginMember;
+import roomescape.auth.dto.request.LoginRequest;
+import roomescape.auth.dto.response.CheckLoginResponse;
+import roomescape.auth.dto.response.LoginResponse;
+import roomescape.auth.service.AuthService;
+import roomescape.common.AuthTokenCookieProvider;
+
+@RestController
+public class AuthController {
+
+    private final AuthService authService;
+    private final AuthTokenCookieProvider authTokenCookieProvider;
+
+    public AuthController(final AuthService authService, final AuthTokenCookieProvider authTokenCookieProvider) {
+        this.authService = authService;
+        this.authTokenCookieProvider = authTokenCookieProvider;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody @Valid final LoginRequest request) {
+        LoginResponse loginResponse = authService.login(request);
+        ResponseCookie cookie = authTokenCookieProvider.generate(loginResponse.tokenValue());
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
+    }
+
+    @GetMapping("/login/check")
+    public ResponseEntity<CheckLoginResponse> checkLogin(final LoginMember member) {
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new CheckLoginResponse("unauthorized"));
+        }
+        return ResponseEntity.ok(new CheckLoginResponse(member.name()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie cookie = authTokenCookieProvider.generateExpired();
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
+    }
+}
