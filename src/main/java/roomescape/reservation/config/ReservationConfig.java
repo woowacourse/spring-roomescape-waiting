@@ -1,6 +1,5 @@
 package roomescape.reservation.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import roomescape.reservation.dao.reservation.ReservationDaoImpl;
@@ -14,17 +13,17 @@ import roomescape.reservation.dao.theme.ThemeDao;
 public class ReservationConfig {
 
     @Bean
-    public ReservationDao reservationDao(@Autowired ReservationDaoImpl reservationDao) {
+    public ReservationDao reservationDao(ReservationDaoImpl reservationDao) {
         return reservationDao;
     }
 
     @Bean
-    public ReservationTimeDao reservationTimeDao(@Autowired ReservationTimeDaoImpl reservationTimeDao) {
+    public ReservationTimeDao reservationTimeDao(ReservationTimeDaoImpl reservationTimeDao) {
         return reservationTimeDao;
     }
 
     @Bean
-    public ThemeDao themeDao(@Autowired ThemeDaoImpl themeDao) {
+    public ThemeDao themeDao(ThemeDaoImpl themeDao) {
         return themeDao;
     }
 }
