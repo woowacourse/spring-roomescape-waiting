@@ -46,6 +46,8 @@ public class ReservationService {
     }
 
     public void removeById(final long id) {
+        reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
         reservationRepository.deleteById(id);
     }
 

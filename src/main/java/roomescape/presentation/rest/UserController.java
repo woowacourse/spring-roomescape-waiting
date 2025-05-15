@@ -1,6 +1,7 @@
 package roomescape.presentation.rest;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,7 @@ public class UserController {
     public ResponseEntity<UserResponse> register(@RequestBody @Valid final SignupRequest request) {
         var user = userService.register(request.email(), request.password(), request.name());
         var response = UserResponse.from(user);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.created(URI.create("/users/" + user.id())).body(response);
     }
 
     @GetMapping("/reservations")

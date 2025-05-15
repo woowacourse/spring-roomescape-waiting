@@ -8,6 +8,7 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InUseException;
+import roomescape.exception.NotFoundException;
 
 @Service
 public class ThemeService {
@@ -38,6 +39,8 @@ public class ThemeService {
         if (!reservations.isEmpty()) {
             throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
         }
+        themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
         themeRepository.deleteById(id);
     }
 
