@@ -4,6 +4,8 @@ import io.jsonwebtoken.JwtException;
 import java.time.DateTimeException;
 import java.time.format.DateTimeParseException;
 import java.util.NoSuchElementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionController {
 
     private static final String PREFIX = "[ERROR] ";
+    private static final Logger log = LoggerFactory.getLogger(ExceptionController.class);
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<String> handleJwtException(JwtException e) {
@@ -38,7 +41,8 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException() {
-        return ResponseEntity.badRequest().body(PREFIX + "예상하지 못한 예외가 발생하였습니다.");
+    public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
+        log.error("Unexpected error occurred", e);
+        return ResponseEntity.badRequest().body(PREFIX + "예상하지 못한 예외가 발생하였습니다. 상세 정보: " + e.getMessage());
     }
 }
