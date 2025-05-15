@@ -38,16 +38,16 @@ class MemberTest {
     }
 
     @Test
-    void null_값_입력_시_IllegalArgumentException_발생() {
+    void null_값_입력_시_NullPointerException_발생() {
         SoftAssertions.assertSoftly(soft -> {
             soft.assertThatThrownBy(() -> new Member(1L, null, "b", "c", "MEMBER"))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             soft.assertThatThrownBy(() -> new Member(1L, "a", null, "c", "MEMBER"))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             soft.assertThatThrownBy(() -> new Member(1L, "a", "b", null, "MEMBER"))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             soft.assertThatThrownBy(() -> new Member(1L, "a", "b", "c", (String) null))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
         });
     }
 }

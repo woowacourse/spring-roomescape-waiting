@@ -76,21 +76,21 @@ class ReservationTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThatThrownBy(
                             () -> new Reservation(null, null, reservationTime, theme, member, ReservationStatus.BOOKED))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             softly.assertThatThrownBy(
                             () -> new Reservation(null, localDate, null, theme, member, ReservationStatus.BOOKED))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             softly.assertThatThrownBy(
                             () -> new Reservation(null, localDate, reservationTime, null, member, ReservationStatus.BOOKED))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             softly.assertThatThrownBy(() -> new Reservation(null, reservationTime, theme, member))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             softly.assertThatThrownBy(() -> new Reservation(localDate, null, theme, member))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             softly.assertThatThrownBy(() -> new Reservation(localDate, reservationTime, null, member))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
             softly.assertThatThrownBy(() -> new Reservation(localDate, reservationTime, theme, null))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(NullPointerException.class);
         });
     }
 }
