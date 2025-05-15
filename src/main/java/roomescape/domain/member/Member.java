@@ -36,10 +36,6 @@ public class Member {
         return new Member(id, member.username, member.password, member.name, member.role);
     }
 
-    public boolean isSamePassword(String password) {
-        return this.password.equals(password);
-    }
-
     public boolean isSameUsername(String username) {
         return this.username.equals(username);
     }
