@@ -22,8 +22,8 @@ class UserControllerTest {
             "name", "razel"
     );
 
-    @DisplayName("멤버 추가 요청시, id를 포함한 멤버와 CREATED를 응답한다")
     @Test
+    @DisplayName("멤버 추가 요청시, id를 포함한 멤버와 CREATED를 응답한다")
     void addMemberTest() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -34,11 +34,10 @@ class UserControllerTest {
                 .body("name", Matchers.equalTo("razel"));
     }
 
-    @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다")
     @Test
+    @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다")
     void getAllReservationsByUser() {
-
-        String token = RestAssured.given()
+        var token = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "popo@email.com", "password", "password"))
                 .when().post("/login")

@@ -22,8 +22,8 @@ class ThemeControllerTest {
             "thumbnail", "url"
     );
 
-    @DisplayName("방 테마 추가 요청시, id를 포함한 방 테마와 CREATED를 응답한다")
     @Test
+    @DisplayName("방 테마 추가 요청시, id를 포함한 방 테마와 CREATED를 응답한다")
     void addTheme() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -35,8 +35,8 @@ class ThemeControllerTest {
                 .body("name", Matchers.equalTo("공포 테마"));
     }
 
-    @DisplayName("방 테마 조회 요청시, 존재하는 모든 방 테마와 OK를 응답한다")
     @Test
+    @DisplayName("방 테마 조회 요청시, 존재하는 모든 방 테마와 OK를 응답한다")
     void findAllTheme() {
         RestAssured.given().log().all()
                 .when().get("/themes")
@@ -45,9 +45,8 @@ class ThemeControllerTest {
                 .body("size()", Matchers.is(5));
     }
 
-    // TODO: 기능 삭제함 구현 필요
-    @DisplayName("방 테마 삭제 요청시, 주어진 아이디에 해당하는 방 테마가 없다면 NOT FOUND를 응답한다.")
     @Test
+    @DisplayName("방 테마 삭제 요청시, 주어진 아이디에 해당하는 방 테마가 없다면 NOT FOUND를 응답한다.")
     void removeTheme_WhenThemeDoesNotExisted() {
         RestAssured.given().log().all()
                 .when().delete("/themes/1000")
@@ -55,8 +54,8 @@ class ThemeControllerTest {
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
-    @DisplayName("방 테마 삭제 요청시, 주어진 아이디에 해당하는 방테마가 사용중이라면 CONFLICT를 응답한다.")
     @Test
+    @DisplayName("방 테마 삭제 요청시, 주어진 아이디에 해당하는 방테마가 사용중이라면 CONFLICT를 응답한다.")
     void removeTheme() {
         RestAssured.given().log().all()
                 .when().delete("/themes/3")

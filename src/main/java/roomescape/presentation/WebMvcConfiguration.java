@@ -16,8 +16,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final AuthenticationService authenticationService;
     private final AuthenticationTokenHandler authenticationTokenHandler;
 
-    public WebMvcConfiguration(final AuthenticationService authenticationService,
-                               final AuthenticationTokenHandler authenticationTokenHandler) {
+    public WebMvcConfiguration(final AuthenticationService authenticationService, final AuthenticationTokenHandler authenticationTokenHandler) {
         this.authenticationService = authenticationService;
         this.authenticationTokenHandler = authenticationTokenHandler;
     }

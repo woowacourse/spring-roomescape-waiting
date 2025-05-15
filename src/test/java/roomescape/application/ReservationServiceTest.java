@@ -33,6 +33,8 @@ import roomescape.exception.BusinessRuleViolationException;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
+    private ReservationService service;
+
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
@@ -41,7 +43,6 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private TimeSlotRepository timeSlotRepository;
-    private ReservationService service;
 
     @BeforeEach
     void setUp() {
@@ -97,8 +98,7 @@ class ReservationServiceTest {
         // when
         var fromYesterday_toToday = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), yesterday(), today());
         var fromToday_toTomorrow = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), today(), tomorrow());
-        var fromTomorrow_toThreeDays = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), tomorrow(),
-                afterThreeDay.date());
+        var fromTomorrow_toThreeDays = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), tomorrow(), afterThreeDay.date());
 
         assertAll(
                 () -> assertThat(service.findAllReservations(fromYesterday_toToday)).isEmpty(),

@@ -18,11 +18,12 @@ import roomescape.domain.theme.ThemeRepository;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeServiceTest {
 
+    private ThemeService service;
+
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
     private ThemeRepository themeRepository;
-    private ThemeService service;
 
     @BeforeEach
     void setUp() {
@@ -38,7 +39,7 @@ class ThemeServiceTest {
         var thumbnail = "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg";
 
         // when
-        Theme created = service.register(name, description, thumbnail);
+        var created = service.register(name, description, thumbnail);
 
         // then
         var themes = service.findAllThemes();
@@ -52,7 +53,7 @@ class ThemeServiceTest {
         var name = "포포는 힘들다";
         var description = "우테코 레벨2를 탈출하는 내용입니다.";
         var thumbnail = "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg";
-        Theme created = service.register(name, description, thumbnail);
+        var created = service.register(name, description, thumbnail);
 
         // when
         service.removeById(created.id());

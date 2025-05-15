@@ -36,7 +36,7 @@ public class TimeSlotService {
     }
 
     public void removeById(final long id) {
-        List<Reservation> reservations = reservationRepository.findByTimeSlotId(id);
+        var reservations = reservationRepository.findByTimeSlotId(id);
         if (!reservations.isEmpty()) {
             throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
         }

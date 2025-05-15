@@ -37,10 +37,7 @@ import roomescape.exception.NotFoundException;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex,
-                                                                  final HttpHeaders headers,
-                                                                  final HttpStatusCode status,
-                                                                  final WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex, final HttpHeaders headers, final HttpStatusCode status, final WebRequest request) {
         var problemDetail = ProblemDetail.forStatusAndDetail(ex.getStatusCode(), "유효성 검증에 실패했습니다.");
         var fieldErrors = ex.getFieldErrors()
                 .stream()
@@ -50,10 +47,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex,
-                                                                  final HttpHeaders headers,
-                                                                  final HttpStatusCode status,
-                                                                  final WebRequest request) {
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex, final HttpHeaders headers, final HttpStatusCode status, final WebRequest request) {
         var problemDetail = ProblemDetail.forStatusAndDetail(BAD_REQUEST, "해석할 수 없는 요청입니다.");
         if (ex.getCause() instanceof InvalidFormatException ife) {
             var invalidFields = ife.getPath().stream().collect(toMap(Reference::getFieldName, r -> ife.getValue()));
@@ -110,8 +104,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(INTERNAL_SERVER_ERROR, "예기치 못한 오류가 발생했습니다.");
     }
 
-    private ProblemDetail createProblemDetail(final HttpStatus status, final String detail,
-                                              final String exceptionMessage) {
+    private ProblemDetail createProblemDetail(final HttpStatus status, final String detail, final String exceptionMessage) {
         var problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
         problemDetail.setProperties(Map.of("message", exceptionMessage));
         return problemDetail;

@@ -26,11 +26,12 @@ import roomescape.exception.InUseException;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TimeSlotServiceTest {
 
+    private TimeSlotService service;
+
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
     private TimeSlotRepository timeSlotRepository;
-    private TimeSlotService service;
 
     @BeforeEach
     void setUp() {
@@ -44,7 +45,7 @@ class TimeSlotServiceTest {
         var startAt = LocalTime.of(11, 0);
 
         // when
-        TimeSlot created = service.register(startAt);
+        var created = service.register(startAt);
 
         // then
         var timeSlots = service.findAllTimeSlots();
@@ -71,8 +72,7 @@ class TimeSlotServiceTest {
     void deleteTimeSlotWithReservation() {
         // given
         var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
-        var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, DateUtils.tomorrow(),
-                timeSlotToBeRemoved, JUNK_THEME);
+        var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, DateUtils.tomorrow(), timeSlotToBeRemoved, JUNK_THEME);
         reservationRepository.save(reservationWithTheTimeSlot);
 
         // when & then

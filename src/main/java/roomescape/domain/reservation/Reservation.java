@@ -40,8 +40,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status = ReservationStatus.RESERVED;
 
-    private Reservation(final Long id, final User user, final LocalDate date, final TimeSlot timeSlot,
-                        final Theme theme) {
+    private Reservation(final Long id, final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         this.id = id;
         this.user = user;
         this.date = date;
@@ -52,13 +51,11 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public static Reservation ofExisting(final long id, final User user, final LocalDate date, final TimeSlot timeSlot,
-                                         final Theme theme) {
+    public static Reservation ofExisting(final long id, final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         return new Reservation(id, user, date, timeSlot, theme);
     }
 
-    public static Reservation reserveNewly(final User user, final LocalDate date, final TimeSlot timeSlot,
-                                           final Theme theme) {
+    public static Reservation reserveNewly(final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         if (isBeforeNow(date, timeSlot)) {
             throw new BusinessRuleViolationException("이전 날짜로 예약할 수 없습니다.");
         }

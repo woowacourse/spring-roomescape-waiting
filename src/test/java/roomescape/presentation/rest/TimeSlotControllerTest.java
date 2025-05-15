@@ -20,8 +20,8 @@ class TimeSlotControllerTest {
             "startAt", "13:00"
     );
 
-    @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다")
     @Test
+    @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다")
     void addReservationTimeTest() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -33,8 +33,8 @@ class TimeSlotControllerTest {
                 .body("startAt", Matchers.equalTo("13:00:00"));
     }
 
-    @DisplayName("예약 시간 조회 요청시, 존재하는 모든 예약 시간과 OK를 응답한다")
     @Test
+    @DisplayName("예약 시간 조회 요청시, 존재하는 모든 예약 시간과 OK를 응답한다")
     void findAllReservationTimeTest() {
         RestAssured.given().log().all()
                 .when().get("/times")
@@ -43,22 +43,21 @@ class TimeSlotControllerTest {
                 .body("size()", Matchers.is(6));
     }
 
-    // 구현 필요
-    @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 없다면 NOT FOUND를 응답한다.")
     @Test
+    @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 없다면 NOT FOUND를 응답한다.")
     void removeReservationTimeTest_WhenReservationTimeDoesNotExisted() {
         RestAssured.given().log().all()
                 .when().delete("/times/1000")
                 .then().log().all()
-                .statusCode(HttpStatus.NOT_FOUND.value());  //204
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
-    @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 사용 중이라면 CONFLICT를 응답한다.")
     @Test
+    @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 사용 중이라면 CONFLICT를 응답한다.")
     void removeReservationTimeTest() {
         RestAssured.given().log().all()
-                .when().delete("/times/3")
-                .then().log().all()
-                .statusCode(HttpStatus.CONFLICT.value());
+            .when().delete("/times/3")
+            .then().log().all()
+            .statusCode(HttpStatus.CONFLICT.value());
     }
 }

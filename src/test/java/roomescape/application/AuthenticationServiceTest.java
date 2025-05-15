@@ -8,27 +8,27 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AuthenticationException;
-import roomescape.infrastructure.JwtTokenHandler;
 
-@DataJpaTest
 @ActiveProfiles("test")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AuthenticationServiceTest {
 
     @Autowired
-    private UserRepository userRepository;
     private AuthenticationService service;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        service = new AuthenticationService(new JwtTokenHandler(), userRepository);
-        User user = User.createUser("라젤", "razel@email.com", "password");
+        var user = User.createUser("라젤", "razel@email.com", "password");
         userRepository.save(user);
     }
 

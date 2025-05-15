@@ -32,10 +32,10 @@ class AdminControllerTest {
                 .extract().response().getDetailedCookies().getValue("token");
     }
 
-    @DisplayName("어드민 페이지에서 예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다")
     @Test
+    @DisplayName("어드민 페이지에서 예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다")
     void addReservationTest() {
-        String token = getAdminToken();
+        var token = getAdminToken();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -48,10 +48,10 @@ class AdminControllerTest {
 
     }
 
-    @DisplayName("어드민 페이지에서 유저 조회 요청 시, 존재하는 유저들과 OK를 응답한다.]")
     @Test
+    @DisplayName("어드민 페이지에서 유저 조회 요청 시, 존재하는 유저들과 OK를 응답한다.]")
     void findAllUsersTest() {
-        String token = getAdminToken();
+        var token = getAdminToken();
 
         RestAssured.given().log().all()
                 .cookie("token", token)

@@ -26,6 +26,7 @@ class UserServiceTest {
 
     @Autowired
     private UserService service;
+
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
@@ -40,7 +41,7 @@ class UserServiceTest {
         var user = JUNK_USER;
 
         // when
-        User created = service.register(user.email(), user.password(), user.name());
+        var created = service.register(user.email(), user.password(), user.name());
 
         // then
         var users = service.findAllUsers();
@@ -53,12 +54,13 @@ class UserServiceTest {
         // given
         var savedTimeSlot = timeSlotRepository.save(JUNK_TIME_SLOT);
         var savedTheme = themeRepository.save(JUNK_THEME);
-        User createdUser = service.register(JUNK_USER.email(), JUNK_USER.password(), JUNK_USER.name());
+        var createdUser = service.register(JUNK_USER.email(), JUNK_USER.password(), JUNK_USER.name());
         var savedReservation = reservationRepository.save(
                 Reservation.reserveNewly(createdUser, tomorrow(), savedTimeSlot, savedTheme));
 
         // when
-        List<Reservation> reservations = service.getReservations(createdUser.id());
+        var reservations = service.getReservations(createdUser.id());
+
         // then
         assertThat(reservations).contains(savedReservation);
     }

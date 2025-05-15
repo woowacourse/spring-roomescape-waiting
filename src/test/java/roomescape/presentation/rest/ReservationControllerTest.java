@@ -23,11 +23,10 @@ class ReservationControllerTest {
             "memberId", "2"
     );
 
-    @DisplayName("예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다")
     @Test
+    @DisplayName("예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다")
     void reserve() {
-
-        String token = RestAssured.given()
+        var token = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "popo@email.com", "password", "password"))
                 .when().post("/login")
@@ -45,8 +44,8 @@ class ReservationControllerTest {
 
     }
 
-    @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다")
     @Test
+    @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다")
     void findReservations() {
         RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -56,8 +55,8 @@ class ReservationControllerTest {
                 .body("size()", Matchers.is(8));
     }
 
-    @DisplayName("예약 삭제 요청시, 주어진 아이디에 해당하는 예약이 없다면 NOT FOUND를 응답한다.")
     @Test
+    @DisplayName("예약 삭제 요청시, 주어진 아이디에 해당하는 예약이 없다면 NOT FOUND를 응답한다.")
     void removeReservation_WhenReservationDoesNotExisted() {
         RestAssured.given().log().all()
                 .when().delete("/reservations/1000")
@@ -65,8 +64,8 @@ class ReservationControllerTest {
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
-    @DisplayName("예약 삭제 요청시, 주어진 아이디에 해당하는 예약이 있다면 삭제하고 NO CONTENT를 응답한다.")
     @Test
+    @DisplayName("예약 삭제 요청시, 주어진 아이디에 해당하는 예약이 있다면 삭제하고 NO CONTENT를 응답한다.")
     void removeReservation() {
         RestAssured.given().log().all()
                 .when().delete("/reservations/1")

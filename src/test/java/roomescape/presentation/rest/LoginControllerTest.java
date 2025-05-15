@@ -26,7 +26,7 @@ class LoginControllerTest {
     @DisplayName("어드민 계정으로 로그인 한다")
     @Test
     void adminLoginTest() {
-        final String token = getToken("admin@email.com", "password");
+        var token = getToken("admin@email.com", "password");
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -38,7 +38,7 @@ class LoginControllerTest {
     @DisplayName("사용자 계정으로 로그인 한다")
     @Test
     void userLoginTest() {
-        final String token = getToken("popo@email.com", "password");
+        final var token = getToken("popo@email.com", "password");
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -70,7 +70,7 @@ class LoginControllerTest {
     @DisplayName("로그아웃 시 토큰 쿠키가 삭제되고 메인 페이지로 리다이렉트 된다")
     @Test
     void logoutTest() {
-        final String token = getToken("popo@email.com", "password");
+        var token = getToken("popo@email.com", "password");
 
         RestAssured.given()
                 .cookie("token", token)

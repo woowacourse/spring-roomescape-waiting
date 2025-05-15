@@ -34,8 +34,8 @@ public class UserService {
     }
 
     @Transactional
-    public List<Reservation> getReservations(long id) {
-        User user = repository.findById(id)
+    public List<Reservation> getReservations(final long id) {
+        var user = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + id));
 
         return user.reservations().stream()

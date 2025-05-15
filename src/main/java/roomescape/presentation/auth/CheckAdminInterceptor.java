@@ -14,8 +14,7 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response,
-                             final Object handler) {
+    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {
         if (isCurrentRequestorAdmin(request)) {
             return true;
         }

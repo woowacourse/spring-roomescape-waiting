@@ -75,10 +75,9 @@ public class User {
     }
 
     private void validateEmailFormat(final String email) {
-        if (email.matches(VALID_EMAIL_FORMAT)) {
-            return;
+        if (!email.matches(VALID_EMAIL_FORMAT)) {
+            throw new InvalidInputException("잘못된 형식의 이메일입니다 : " + email);
         }
-        throw new InvalidInputException("잘못된 형식의 이메일입니다 : " + email);
     }
 
     private void validatePasswordLength(final String password) {

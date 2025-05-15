@@ -42,10 +42,10 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations(
-            @RequestParam(name = "themeId", required = false) Long themeId,
-            @RequestParam(name = "userId", required = false) Long userId,
-            @RequestParam(name = "dateFrom", required = false) LocalDate dateFrom,
-            @RequestParam(name = "dateTo", required = false) LocalDate dateTo
+            @RequestParam(name = "themeId", required = false) final Long themeId,
+            @RequestParam(name = "userId", required = false) final Long userId,
+            @RequestParam(name = "dateFrom", required = false) final LocalDate dateFrom,
+            @RequestParam(name = "dateTo", required = false) final LocalDate dateTo
     ) {
 
         var searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);

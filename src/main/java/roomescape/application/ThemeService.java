@@ -35,7 +35,7 @@ public class ThemeService {
     }
 
     public void removeById(final long id) {
-        List<Reservation> reservations = reservationRepository.findByThemeId(id);
+        var reservations = reservationRepository.findByThemeId(id);
         if (!reservations.isEmpty()) {
             throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
         }
