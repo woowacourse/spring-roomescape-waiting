@@ -42,16 +42,6 @@ public class Member {
         return of(null, name, email, password, role);
     }
 
-    public static Member assignId(Long id, Member memberWithoutId) {
-        return new Member(
-                id,
-                memberWithoutId.getName(),
-                memberWithoutId.getEmail(),
-                memberWithoutId.getPassword(),
-                memberWithoutId.getRole()
-        );
-    }
-
     public Long getId() {
         return id;
     }
