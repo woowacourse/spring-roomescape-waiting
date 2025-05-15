@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.auth.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MemberReservationCreateRequestDto;
+import roomescape.dto.reservation.MyReservationResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.ReservationCreateDto;
@@ -46,5 +47,13 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<MyReservationResponseDto>> getMyReservations(
+            @CurrentMember LoginInfo loginInfo
+    ) {
+        List<MyReservationResponseDto> myReservations = reservationService.findMyReservations(loginInfo);
+        return ResponseEntity.ok(myReservations);
     }
 }
