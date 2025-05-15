@@ -38,7 +38,7 @@ class JdbcThemeRepositoryTest {
 
     @BeforeEach
     public void beforeEach() {
-        User savedUser = memberTestDataConfig.getSavedMember();
+        User savedUser = memberTestDataConfig.getSavedUser();
 
         Theme savedTheme1 = repository.save(new Theme("name1", "dd1", "tt1"));
         Theme savedTheme2 = repository.save(new Theme("name2", "dd2", "tt2"));

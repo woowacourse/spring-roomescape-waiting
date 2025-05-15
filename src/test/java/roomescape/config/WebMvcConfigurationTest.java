@@ -42,7 +42,7 @@ class WebMvcConfigurationTest {
     @DisplayName("/admin/** URL 요청 시 인터셉터 발동")
     class addInterceptors {
 
-        private final User member = memberTestDataConfig.getSavedMember();
+        private final User member = memberTestDataConfig.getSavedUser();
         private final User admin = adminTestDataConfig.getSavedAdmin();
 
         @DisplayName("admin 권한을 가지고 있는 관리자가 /admin/** URL로 요청 시 가로채지지 않는다.")
@@ -71,7 +71,7 @@ class WebMvcConfigurationTest {
             // then
             RestAssured
                     .given().log().all()
-                    .when().get("/admin")
+                    .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(HttpStatus.UNAUTHORIZED.value());
         }
@@ -89,7 +89,7 @@ class WebMvcConfigurationTest {
             RestAssured
                     .given().log().all()
                     .cookie(TOKEN_NAME_FILED, token)
-                    .when().get("/admin")
+                    .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(HttpStatus.FORBIDDEN.value());
         }

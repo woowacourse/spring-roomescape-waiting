@@ -44,7 +44,7 @@ class UserServiceTest {
     @DisplayName("유저에 예약 리스트를 조회하는 기능")
     class findAllReservationByMember {
 
-        private final User savedMember = memberTestDataConfig.getSavedMember();
+        private final User savedMember = memberTestDataConfig.getSavedUser();
         private final Theme savedTheme = themeTestDataConfig.getSavedTheme();
         private final ReservationTime savedTime = timeTestDataConfig.getSavedReservationTime();
 

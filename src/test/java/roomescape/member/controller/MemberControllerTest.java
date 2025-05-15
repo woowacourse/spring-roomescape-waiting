@@ -51,7 +51,7 @@ class MemberControllerTest {
     ) {
         date = LocalDate.now().plusDays(1);
 
-        memberStatic = memberTestDataConfig.getSavedMember();
+        memberStatic = memberTestDataConfig.getSavedUser();
 
         memberTokenResponseDto = authService.login(
                 AuthFixture.createTokenRequestDto(memberStatic.getEmail(), memberStatic.getPassword()));

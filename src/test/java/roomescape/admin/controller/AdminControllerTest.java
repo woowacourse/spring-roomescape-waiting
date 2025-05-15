@@ -69,7 +69,7 @@ class AdminControllerTest {
         ) {
             date = LocalDate.now().plusDays(1);
 
-            memberStatic = memberTestDataConfig.getSavedMember();
+            memberStatic = memberTestDataConfig.getSavedUser();
             adminStatic = adminTestDataConfig.getSavedAdmin();
 
             memberTokenResponseDto = authService.login(

@@ -41,14 +41,14 @@ class ReservationRepositoryTest {
     private Reservation createReservation(int plusDays, ReservationTime time) {
         LocalDate date = LocalDate.now().plusDays(plusDays);
         return ReservationFixture.createByBookedStatus(date, time, themeTestDataConfig.getSavedTheme(),
-                memberTestDataConfig.getSavedMember());
+                memberTestDataConfig.getSavedUser());
     }
 
     @DisplayName("유저의 모든 예약 정보들을 조회할 수 있다.")
     @Test
     void findByUser_success_byMember() {
         // given
-        User savedMember = memberTestDataConfig.getSavedMember();
+        User savedMember = memberTestDataConfig.getSavedUser();
         Theme savedTheme = themeTestDataConfig.getSavedTheme();
         ReservationTime savedTime = timeTestDataConfig.getSavedReservationTime();
         List<Reservation> reservations = List.of(ReservationFixture.createByBookedStatus(
