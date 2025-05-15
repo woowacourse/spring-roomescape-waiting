@@ -32,8 +32,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ReservationTimeCommandUseCaseTest {
 
     private ReservationTimeCommandUseCase reservationTimeCommandUseCase;
-    private ReservationQueryUseCase reservationQueryUseCase;
-    private ReservationTimeQueryUseCase reservationTimeQueryUseCase;
 
     private ReservationTimeRepository reservationTimeRepository;
     private ReservationRepository reservationRepository;
@@ -43,8 +41,11 @@ class ReservationTimeCommandUseCaseTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         reservationRepository = new FakeReservationRepository();
 
-        reservationTimeQueryUseCase = new ReservationTimeQueryUseCase(reservationTimeRepository);
-        reservationQueryUseCase = new ReservationQueryUseCase(reservationRepository, reservationTimeQueryUseCase);
+        ReservationTimeQueryUseCase reservationTimeQueryUseCase = new ReservationTimeQueryUseCase(
+                reservationTimeRepository);
+        ReservationQueryUseCase reservationQueryUseCase = new ReservationQueryUseCase(reservationRepository,
+                reservationTimeQueryUseCase);
+        
         reservationTimeCommandUseCase = new ReservationTimeCommandUseCase(
                 reservationTimeRepository,
                 reservationQueryUseCase,

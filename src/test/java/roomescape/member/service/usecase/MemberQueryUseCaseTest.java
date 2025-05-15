@@ -23,15 +23,14 @@ class MemberQueryUseCaseTest {
     private MemberRepository memberRepository;
     private MemberQueryUseCase memberQueryUseCase;
     private AccountRepository accountRepository;
+    private AccountQueryUseCase accountQueryUseCase;
 
     @BeforeEach
     void setUp() {
         memberRepository = new FakeMemberRepository();
         accountRepository = new FakeAccountRepository();
-        memberQueryUseCase = new MemberQueryUseCase(
-                memberRepository,
-                accountRepository
-        );
+        memberQueryUseCase = new MemberQueryUseCase(memberRepository);
+        accountQueryUseCase = new AccountQueryUseCase(accountRepository);
     }
 
     @Test
@@ -70,7 +69,7 @@ class MemberQueryUseCaseTest {
 
         // when & then
         SoftAssertions.assertSoftly(softAssertions -> {
-            final Account loadedAccount = memberQueryUseCase.getAccount(loginRequest);
+            final Account loadedAccount = accountQueryUseCase.getAccount(loginRequest);
             assertThat(loadedAccount.getMember())
                     .isEqualTo(member);
             assertThat(loadedAccount.getPassword())

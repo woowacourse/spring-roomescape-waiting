@@ -3,6 +3,7 @@ package roomescape.member.service;
 import java.util.List;
 import roomescape.member.auth.vo.MemberInfo;
 import roomescape.member.controller.dto.MemberInfoResponse;
+import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 
 public class MemberConverter {
@@ -13,6 +14,14 @@ public class MemberConverter {
                 member.getName().getValue(),
                 member.getEmail().getValue(),
                 member.getRole());
+    }
+
+    public static MemberInfo toDto(Account account) {
+        return new MemberInfo(
+                account.getMember().getId(),
+                account.getMember().getName().getValue(),
+                account.getMember().getEmail().getValue(),
+                account.getMember().getRole());
     }
 
     public static MemberInfoResponse toResponse(MemberInfo memberInfo) {

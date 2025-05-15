@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.member.controller.dto.LoginRequest;
 import roomescape.member.controller.dto.SignupRequest;
+import roomescape.member.domain.Role;
 import roomescape.member.service.AuthService;
 import roomescape.reservation.controller.ReservationController;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
@@ -54,9 +55,9 @@ public class MissionStepTest {
         authService.signup(new SignupRequest(memberEmail, memberPassword, "시소"));
         jdbcTemplate.update("""
                 INSERT INTO member (name, email, role) VALUES (?, ?, ?)
-                """, "솔라", adminEmail, 1);
+                """, "솔라", adminEmail, Role.ADMIN.name());
         jdbcTemplate.update("""
-                INSERT INTO account (password, member_id) VALUES (?, ?)
+                INSERT INTO account (password, id) VALUES (?, ?)
                 """, passwordEncoder.encode(memberPassword), 2);
 
         memberToken = authService.login(new LoginRequest(memberEmail, memberPassword));

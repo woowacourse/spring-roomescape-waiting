@@ -1,9 +1,8 @@
 package roomescape.member.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,7 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.utils.Validator;
 
@@ -35,7 +33,7 @@ public class Member {
     @Embedded
     private MemberEmail email;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     private static Member of(final Long id, final MemberName name, final MemberEmail email, final Role role) {

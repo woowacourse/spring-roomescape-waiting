@@ -5,13 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.AuthenticationException;
 import roomescape.common.exception.ErrorCode;
-import roomescape.common.exception.NotFoundException;
 import roomescape.member.auth.vo.MemberInfo;
-import roomescape.member.controller.dto.LoginRequest;
-import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberEmail;
-import roomescape.member.repository.AccountRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberConverter;
 
@@ -20,12 +15,6 @@ import roomescape.member.service.MemberConverter;
 public class MemberQueryUseCase {
 
     private final MemberRepository memberRepository;
-    private final AccountRepository accountRepository;
-
-    public Account getAccount(LoginRequest loginRequest) {
-        return accountRepository.findAccountByMemberEmail(MemberEmail.from(loginRequest.email()))
-                .orElseThrow(() -> new NotFoundException("등록된 이메일이 존재하지 않습니다."));
-    }
 
     public Member get(Long id) {
         return memberRepository.findById(id)

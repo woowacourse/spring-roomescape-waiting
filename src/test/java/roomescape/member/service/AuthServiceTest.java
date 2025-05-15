@@ -11,8 +11,12 @@ import roomescape.member.auth.jwt.JwtTokenProvider;
 import roomescape.member.controller.dto.LoginRequest;
 import roomescape.member.controller.dto.MemberInfoResponse;
 import roomescape.member.controller.dto.SignupRequest;
+import roomescape.member.repository.AccountRepository;
 import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.usecase.AccountCommandUseCase;
+import roomescape.member.service.usecase.AccountQueryUseCase;
 import roomescape.member.service.usecase.MemberCommandUseCase;
 import roomescape.member.service.usecase.MemberQueryUseCase;
 
@@ -35,15 +39,18 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        FakeMemberRepository fakeMemberRepository = new FakeMemberRepository();
-        FakeAccountRepository fakeAccountRepository = new FakeAccountRepository();
-        MemberService memberService = new MemberService(
-                new MemberCommandUseCase(fakeMemberRepository, fakeAccountRepository),
-                new MemberQueryUseCase(fakeMemberRepository, fakeAccountRepository)
+        MemberRepository fakeMemberRepository = new FakeMemberRepository();
+        AccountRepository fakeAccountRepository = new FakeAccountRepository();
+
+        AccountMemberService accountMemberService = new AccountMemberService(
+                new MemberCommandUseCase(fakeMemberRepository),
+                new MemberQueryUseCase(fakeMemberRepository),
+                new AccountCommandUseCase(fakeAccountRepository),
+                new AccountQueryUseCase(fakeAccountRepository)
         );
 
         authService = new AuthService(
-                memberService,
+                accountMemberService,
                 jwtTokenProvider,
                 jwtTokenExtractor,
                 passwordEncoder
