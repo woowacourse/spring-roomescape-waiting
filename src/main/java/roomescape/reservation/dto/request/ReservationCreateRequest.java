@@ -6,8 +6,8 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
 
 public record ReservationCreateRequest(
-    @JsonFormat(pattern = "yyyy-MM-dd") @NotNull(message = "ì˜ˆì•½í•  ë‚ ì§œê°€ ì…ë ¥ë˜ì§€ ì•Šì•˜ë‹¤.") LocalDate date,
-    @NotNull(message = "ì˜ˆì•½í•  ì‹œê°„ì´ ì…ë ¥ë˜ì§€ ì•Šì•˜ë‹¤.") Long timeId,
-    @NotNull(message = "ì˜ˆì•½í•  í…Œë§ˆê°€ ì…ë ¥ë˜ì§€ ì•Šì•˜ë‹¤.") Long themeId) {
+        @JsonFormat(pattern = "yyyy-MM-dd") @NotNull(message = "¿¹¾àÇÒ ³¯Â¥°¡ ÀÔ·ÂµÇÁö ¾Ê¾Ò´Ù.") LocalDate date,
+        @NotNull(message = "¿¹¾àÇÒ ½Ã°£ÀÌ ÀÔ·ÂµÇÁö ¾Ê¾Ò´Ù.") Long timeId,
+        @NotNull(message = "¿¹¾àÇÒ Å×¸¶°¡ ÀÔ·ÂµÇÁö ¾Ê¾Ò´Ù.") Long themeId) {
 
 }

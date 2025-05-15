@@ -13,8 +13,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.member.dto.request.MemberCreateRequest;
 import roomescape.member.model.Member;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.model.Reservation;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.model.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.NotCorrectDateTimeException;
 
