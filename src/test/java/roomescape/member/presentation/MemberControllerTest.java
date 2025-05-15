@@ -1,5 +1,7 @@
 package roomescape.member.presentation;
 
+import static org.hamcrest.Matchers.greaterThan;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
@@ -44,6 +46,22 @@ public class MemberControllerTest {
                 .cookies(cookies)
                 .when().get("/members")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .body("size()", greaterThan(0));
+    }
+
+    @Test
+    @DisplayName("비관리자 사용자는 전체 회원 조회가 불가능")
+    void getMembersWithNonAdminTest(){
+        // given
+        final Map<String, String> cookies = memberFixture.loginUser();
+
+        // when - then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .when().get("/members")
+                .then().log().all()
+                .statusCode(403);
     }
 }
