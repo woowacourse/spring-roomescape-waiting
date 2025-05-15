@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.annotation.Login;
+import roomescape.member.dto.response.MemberGetResponse;
 import roomescape.member.model.Member;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.response.MyReservationGetResponse;
 import roomescape.reservation.dto.response.ReservationGetResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -39,6 +41,19 @@ public class ReservationController {
     public List<ReservationGetResponse> readAllReservations() {
         return reservationService.findAllReservations().stream()
                 .map(ReservationGetResponse::from)
+                .toList();
+    }
+
+    @Login
+    @GetMapping("/mine")
+    public List<MyReservationGetResponse> readMyReservations(Member member) {
+        return reservationService.findByMember(member).stream()
+                .map(reservation -> new MyReservationGetResponse(reservation.getId(),
+                        MemberGetResponse.from(reservation.getMember()),
+                        reservation.getDate(),
+                        reservation.getTime(),
+                        reservation.getTheme(),
+                        "¿¹¾à"))
                 .toList();
     }
 

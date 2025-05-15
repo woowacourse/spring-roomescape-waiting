@@ -1,6 +1,7 @@
 package roomescape.reservation.dao.reservation;
 
 import org.springframework.stereotype.Repository;
+import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
 
 import java.time.LocalDate;
@@ -23,6 +24,11 @@ public class ReservationDaoImpl implements ReservationDao {
     @Override
     public List<Reservation> findAll() {
         return jpaReservationDao.findAll();
+    }
+
+    @Override
+    public List<Reservation> findByMember(Member member) {
+        return jpaReservationDao.findByMember(member);
     }
 
     @Override

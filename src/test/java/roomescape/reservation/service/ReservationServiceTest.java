@@ -104,10 +104,10 @@ public class ReservationServiceTest {
     @Test
     void 특정_멤버의_예약을_조회할_수_있다() {
         // Given
-        Long memberId = 1L;
-        
+        Member member = memberService.findAllMembers().getFirst();
+
         // When
         // Then
-        assertThat(reservationService.findByMemberId(memberId)).hasSize(20);
+        assertThat(reservationService.findByMember(member)).hasSize(10);
     }
 }

@@ -4,14 +4,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.model.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface JpaReservationDao extends JpaRepository<Reservation, Long> {
+
+    List<Reservation> findByMember(Member member);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 

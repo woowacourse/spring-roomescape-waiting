@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.Theme;
 
@@ -13,6 +14,8 @@ public interface ReservationDao {
     Reservation save(Reservation reservation);
 
     List<Reservation> findAll();
+
+    List<Reservation> findByMember(Member member);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 

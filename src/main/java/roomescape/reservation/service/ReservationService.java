@@ -95,6 +95,11 @@ public class ReservationService {
         return reservationDao.findAll();
     }
 
+    public List<Reservation> findByMember(Member member) {
+        System.out.println(member.getId() + "        asdfasdfasdfasdfsadf");
+        return reservationDao.findByMember(member);
+    }
+
     public List<Reservation> findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {
         validateAtLeastOneFilterProvided(memberId, themeId, startDate, endDate);
         return reservationDao.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, startDate, endDate);
