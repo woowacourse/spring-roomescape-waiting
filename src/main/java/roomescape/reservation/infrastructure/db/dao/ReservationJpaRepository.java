@@ -81,4 +81,6 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
         WHERE r.id IN (:reservationIds)
         """)
     List<ReservationWithMember> findAllWithMemberByIds(@Param("reservationIds") List<Long> reservationIds);
+
+    List<Reservation> findAllByMemberId(Long memberId);
 }

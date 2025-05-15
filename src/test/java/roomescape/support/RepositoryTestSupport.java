@@ -1,21 +1,23 @@
 package roomescape.support;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
-@JdbcTest
+@DataJpaTest
 @ActiveProfiles("test")
-public abstract class JdbcTestSupport{
+public abstract class RepositoryTestSupport {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("""
+        entityManager.createNativeQuery("""
                 SET REFERENTIAL_INTEGRITY FALSE;
                 TRUNCATE TABLE reservation;
                 ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;
