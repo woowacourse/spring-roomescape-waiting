@@ -185,7 +185,7 @@ class ReservationRepositoryTest {
         reservationRepository.save(reservation5);
 
         // when
-        final List<Theme> popularThemes = reservationRepository.findTop10ThemesByReservationCountWithin7Days(
+        final List<Theme> popularThemes = reservationRepository.findPopularThemesByReservationBetween(
                 LocalDate.of(2025, 12, 19), LocalDate.of(2025, 12, 26), PageRequest.of(0, 1));
 
         // then

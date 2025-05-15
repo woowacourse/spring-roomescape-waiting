@@ -52,7 +52,7 @@ public class ThemeService {
         final LocalDate today = LocalDate.now();
         final PageRequest pageRequest = PageRequest.of(0, POPULAR_THEME_LIMIT);
 
-        return reservationRepository.findTop10ThemesByReservationCountWithin7Days(
+        return reservationRepository.findPopularThemesByReservationBetween(
                 sevenDaysAgo,
                 today,
                 pageRequest

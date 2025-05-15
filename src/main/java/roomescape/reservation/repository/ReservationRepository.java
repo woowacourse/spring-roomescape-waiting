@@ -27,8 +27,8 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
                 GROUP BY r.theme
                 ORDER BY COUNT(r) DESC
             """)
-    List<Theme> findTop10ThemesByReservationCountWithin7Days(final LocalDate dateFrom, final LocalDate dateTo,
-                                                             final PageRequest pageRequest);
+    List<Theme> findPopularThemesByReservationBetween(final LocalDate dateFrom, final LocalDate dateTo,
+                                                      final PageRequest pageRequest);
 
     List<Reservation> findByMember(final Member member);
 }
