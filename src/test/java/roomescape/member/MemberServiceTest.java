@@ -6,14 +6,25 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
+import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.member.dto.MemberRequest;
+import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
+import roomescape.reservationtime.ReservationTime;
+import roomescape.theme.Theme;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
@@ -31,20 +42,14 @@ public class MemberServiceTest {
     void createMember() {
         // given
         final MemberRequest memberRequest = new MemberRequest("admin@email.com", "password", "부기");
-        final Member expected = new Member(
-                memberRequest.email(),
-                memberRequest.password(),
-                memberRequest.name(),
-                MemberRole.MEMBER
-        );
+        final Member expected = new Member(memberRequest.email(), memberRequest.password(), memberRequest.name(),
+                MemberRole.MEMBER);
 
         // when
         memberService.createMember(memberRequest);
 
         // then
-        then(memberRepository)
-                .should()
-                .save(expected);
+        then(memberRepository).should().save(expected);
     }
 
     @DisplayName("이미 존재하는 이메일로 생성하면, 예외가 발생한다.")
@@ -52,8 +57,7 @@ public class MemberServiceTest {
     void createMember1() {
         // given
         final MemberRequest memberRequest = new MemberRequest("admin@email.com", "password", "부기");
-        given(memberRepository.existsByEmail("admin@email.com"))
-                .willReturn(true);
+        given(memberRepository.existsByEmail("admin@email.com")).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> {
@@ -65,8 +69,8 @@ public class MemberServiceTest {
     @Test
     void readAll() {
         // given
-        given(memberRepository.findAll())
-                .willReturn(List.of(new Member(1L,"email", "pass", "name", MemberRole.MEMBER)));
+        given(memberRepository.findAll()).willReturn(
+                List.of(new Member(1L, "email", "pass", "name", MemberRole.MEMBER)));
 
         // when
         final List<MemberResponse> actual = memberService.readAllMember();
@@ -83,5 +87,38 @@ public class MemberServiceTest {
 
         // then
         assertThat(actual).isEmpty();
+    }
+
+    @DisplayName("member의 예약을 모두 조회한다.")
+    @Test
+    void readAllReservation() {
+        // given
+        final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
+        final MemberReservationResponse response = new MemberReservationResponse(1L, "테마", LocalDate.of(2026, 12, 31),
+                LocalTime.of(12, 40), "예약");
+        given(memberRepository.findByEmail("email")).willReturn(Optional.of(
+                new Member(1L, "email", "pass", "name", MemberRole.MEMBER,
+                        Set.of(new Reservation(1L, LocalDate.of(2026, 12, 31), null,
+                                new ReservationTime(LocalTime.of(12, 40)), new Theme("테마", "설명", "썸네일"),
+                                ReservationStatus.PENDING)))));
+
+        // when
+        final List<MemberReservationResponse> actual = memberService.readAllReservationsByMember(loginMember);
+
+        // then
+        assertThat(actual).isNotEmpty().contains(response);
+    }
+
+    @DisplayName("이메일의 member가 존재하지 않는다면, 예외가 발생한다.")
+    @Test
+    void readAllReservation1() {
+        // given
+        final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
+        given(memberRepository.findByEmail("email")).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> {
+            memberService.readAllReservationsByMember(loginMember);
+        }).isInstanceOf(MemberNotFoundException.class);
     }
 }

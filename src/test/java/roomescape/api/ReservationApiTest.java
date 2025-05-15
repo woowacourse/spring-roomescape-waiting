@@ -240,6 +240,44 @@ public class ReservationApiTest {
         }
     }
 
+
+    @DisplayName("member가 가진 예약이 없다면 빈 리스트를 반환한다.")
+    @Test
+    void readAllMemberReservations() {
+        // given
+        givenCreateMember();
+        final Cookie cookie = givenAuthCookie();
+        givenCreateReservationTime();
+        givenCreateTheme();
+
+        // when
+        RestAssured.given().port(port).log().all()
+                .cookie(cookie)
+                .when().get("/members/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
+    }
+
+    @DisplayName("member가 가진 예약이 있다면 예약 리스트를 반환한다.")
+    @Test
+    void readAllMemberReservations1() {
+        // given
+        givenCreateMember();
+        final Cookie cookie = givenAuthCookie();
+        givenCreateReservationTime();
+        givenCreateTheme();
+        givenCreateReservation(cookie);
+
+        // when
+        RestAssured.given().port(port).log().all()
+                .cookie(cookie)
+                .when().get("/members/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
+
     private void givenCreateReservationTime() {
         RestAssured.given().port(port).log().all()
                 .contentType(ContentType.JSON)
