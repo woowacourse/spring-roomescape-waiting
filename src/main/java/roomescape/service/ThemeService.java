@@ -20,7 +20,7 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
 
-    public ThemeService(final ThemeRepository themeRepository) {
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
     }
 
@@ -30,7 +30,7 @@ public class ThemeService {
                 .collect(Collectors.toList());
     }
 
-    public ThemeResponseDto saveTheme(final ThemeRegisterDto themeRegisterDto) {
+    public ThemeResponseDto saveTheme(ThemeRegisterDto themeRegisterDto) {
         validateTheme(themeRegisterDto);
 
         Theme theme = themeRegisterDto.convertToTheme();
@@ -44,14 +44,14 @@ public class ThemeService {
         );
     }
 
-    private void validateTheme(final ThemeRegisterDto themeRegisterDto) {
+    private void validateTheme(ThemeRegisterDto themeRegisterDto) {
         boolean duplicatedNameExisted = themeRepository.existsByName(themeRegisterDto.name());
         if (duplicatedNameExisted) {
             throw new DuplicatedException("중복된 테마명은 등록할 수 없습니다.");
         }
     }
 
-    public void deleteTheme(final Long id) {
+    public void deleteTheme(Long id) {
         try {
             themeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
@@ -59,12 +59,12 @@ public class ThemeService {
         }
     }
 
-    public List<ThemeResponseDto> findPopularThemes(final String date) {
+    public List<ThemeResponseDto> findPopularThemes(String date) {
         LocalDate parsedDate = LocalDate.parse(date);
 
         return themeRepository.findTopReservedThemesSince(
                         parsedDate,
-                        parsedDate.plusDays(POPULAR_DAY_RANGE),
+                        parsedDate.minusDays(POPULAR_DAY_RANGE),
                         POPULAR_THEME_SIZE).stream()
                 .map(theme -> new ThemeResponseDto(
                         theme.getId(),
