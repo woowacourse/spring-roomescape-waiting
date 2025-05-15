@@ -1,18 +1,19 @@
-package roomescape.reservation.dao;
+package roomescape.reservation.dao.reservationTime;
 
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.dao.DataAccessException;
+import java.util.Optional;
+
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.exception.AssociatedReservationExistsException;
-import roomescape.reservation.exception.TimeNotExistException;
 
 @Repository
 public class JdbcReservationTimeDao implements ReservationTimeDao {
@@ -28,7 +29,7 @@ public class JdbcReservationTimeDao implements ReservationTimeDao {
     }
 
     @Override
-    public ReservationTime add(ReservationTime reservationTime) {
+    public ReservationTime save(ReservationTime reservationTime) {
         Map<String, Object> param = new HashMap<>();
         param.put("start_at", reservationTime.getStartAt());
 
@@ -47,13 +48,13 @@ public class JdbcReservationTimeDao implements ReservationTimeDao {
     }
 
     @Override
-    public ReservationTime findById(Long id) {
+    public Optional<ReservationTime> findById(Long id) {
         String whereClause = " WHERE id = ?";
         String sql = generateFindAllQuery() + whereClause;
         try {
-            return jdbcTemplate.queryForObject(sql, mapResultsToReservationTime(), id);
-        } catch (DataAccessException e) {
-            throw new TimeNotExistException();
+            return Optional.of(jdbcTemplate.queryForObject(sql, mapResultsToReservationTime(), id));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
         }
     }
 
@@ -68,7 +69,7 @@ public class JdbcReservationTimeDao implements ReservationTimeDao {
     }
 
     @Override
-    public boolean existByStartAt(LocalTime startAt) {
+    public boolean existsByStartAt(LocalTime startAt) {
         String sql = "SELECT EXISTS(SELECT id FROM reservation_time WHERE start_at = ?)";
         return jdbcTemplate.queryForObject(sql, Boolean.class, startAt);
     }

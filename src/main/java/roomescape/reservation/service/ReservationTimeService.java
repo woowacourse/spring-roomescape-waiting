@@ -5,8 +5,8 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationTimeDao;
+import roomescape.reservation.dao.reservation.ReservationDao;
+import roomescape.reservation.dao.reservationTime.ReservationTimeDao;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
@@ -28,11 +28,11 @@ public class ReservationTimeService {
     public ReservationTime createReservationTime(ReservationTimeCreateRequest reservationTimeCreateRequest) {
         LocalTime startAt = reservationTimeCreateRequest.startAt();
         validateDuplicateStartAt(startAt);
-        return reservationTimeDao.add(new ReservationTime(null, startAt));
+        return reservationTimeDao.save(new ReservationTime(null, startAt));
     }
 
     private void validateDuplicateStartAt(LocalTime startAt) {
-        if (reservationTimeDao.existByStartAt(startAt)) {
+        if (reservationTimeDao.existsByStartAt(startAt)) {
             throw new DuplicateTimeException();
         }
     }
