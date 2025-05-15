@@ -1,14 +1,10 @@
 package roomescape.auth.service;
 
-import jakarta.servlet.http.Cookie;
 import org.springframework.stereotype.Service;
-import roomescape.auth.constant.AuthConstant;
 import roomescape.member.dao.MemberDao;
-import roomescape.member.exception.MemberNotExistException;
 import roomescape.member.model.Member;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.exception.InvalidCredentialsException;
-import roomescape.global.exception.UnauthorizedException;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 
 @Service
@@ -26,7 +22,7 @@ public class AuthService {
         String email = loginRequest.email();
         String password = loginRequest.password();
         Member member = findMemberByEmailAndPassword(email, password);
-        return jwtTokenProvider.createToken(member.getEmail());
+        return jwtTokenProvider.createToken(member);
     }
 
     private Member findMemberByEmailAndPassword(String email, String password) {

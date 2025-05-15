@@ -8,20 +8,26 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.auth.exception.InvalidTokenException;
+import roomescape.auth.model.Principal;
+import roomescape.member.model.Member;
 
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
 
+    public static final String IS_ADMIN_KEY = "isAdmin";
+    public static final String MEMBER_NAME_KEY = "memberName";
+
     @Value("${auth.jwt.secret-key}")
     private String secretKey;
-
     @Value("${auth.jwt.validity-ms}")
     private long validityInMilliseconds;
 
-    public String createToken(String payload) {
-        Claims claims = Jwts.claims().setSubject(payload);
+    public String createToken(Member member) {
+        Claims claims = Jwts.claims().setSubject(String.valueOf(member.getId()));
+        claims.put(MEMBER_NAME_KEY, member.getName());
+        claims.put(IS_ADMIN_KEY, member.isAdmin());
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
@@ -32,13 +38,16 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getPayload(String token) {
+    public Principal resolvePrincipalFromToken(String token) {
         try {
-            return Jwts.parser()
+            Claims claims = Jwts.parser()
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
+                    .getBody();
+            Long memberId = Long.valueOf(claims.getSubject());
+            String name = claims.get(MEMBER_NAME_KEY).toString();
+            boolean isAdmin = (Boolean) claims.get(IS_ADMIN_KEY);
+            return new Principal(memberId, name, isAdmin);
         } catch (ExpiredJwtException expiredJwtException) {
             throw new InvalidTokenException("만료된 토큰입니다.");
         } catch (JwtException | IllegalArgumentException jwtException) {

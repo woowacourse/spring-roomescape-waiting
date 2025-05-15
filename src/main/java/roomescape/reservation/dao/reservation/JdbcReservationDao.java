@@ -72,11 +72,11 @@ public class JdbcReservationDao implements ReservationDao {
     }
 
     @Override
-    public List<Reservation> findByMember(Member member) {
+    public List<Reservation> findByMemberId(Long memberId) {
         String whereClause = " WHERE memberId = ?";
         String sql = generateFindAllQuery()
                 + whereClause;
-        return jdbcTemplate.query(sql, mapResultsToReservation(), member.getId());
+        return jdbcTemplate.query(sql, mapResultsToReservation(), memberId);
     }
 
     @Override
