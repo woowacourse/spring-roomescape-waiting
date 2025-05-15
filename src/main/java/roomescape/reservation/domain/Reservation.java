@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.reservation.exception.InvalidReservationTimeException;
-import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.user.domain.User;
 

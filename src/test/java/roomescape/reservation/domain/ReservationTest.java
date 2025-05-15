@@ -14,8 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import roomescape.reservation.exception.InvalidReservationTimeException;
 import roomescape.reservation.fixture.ReservationFixture;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.fixture.ReservationTimeFixture;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.fixture.ReservationTimeFixture;
 import roomescape.theme.ThemeTestDataConfig;
 import roomescape.user.MemberTestDataConfig;
 

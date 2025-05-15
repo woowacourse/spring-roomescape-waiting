@@ -1,4 +1,4 @@
-package roomescape.reservationTime.exception;
+package roomescape.reservationtime.exception;
 
 import roomescape.global.exception.NotFoundException;
 

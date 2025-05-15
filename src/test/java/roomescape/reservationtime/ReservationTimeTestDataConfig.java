@@ -1,12 +1,12 @@
-package roomescape.reservationTime;
+package roomescape.reservationtime;
 
 import jakarta.annotation.PostConstruct;
 import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.reservationTime.repository.ReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.fixture.ReservationTimeFixture;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @TestConfiguration
 public class ReservationTimeTestDataConfig {

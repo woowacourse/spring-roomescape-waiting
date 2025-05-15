@@ -2,7 +2,7 @@ package roomescape.member.domain.dto;
 
 import java.time.LocalDate;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
+import roomescape.reservationtime.domain.dto.ReservationTimeResponseDto;
 import roomescape.theme.domain.dto.ThemeResponseDto;
 
 public record ReservationWithBookStateDto(

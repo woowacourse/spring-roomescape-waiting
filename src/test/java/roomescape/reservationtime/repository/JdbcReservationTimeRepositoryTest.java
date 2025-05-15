@@ -1,4 +1,4 @@
-package roomescape.reservationTime.repository;
+package roomescape.reservationtime.repository;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.fixture.ReservationTimeFixture;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.fixture.ReservationTimeFixture;
 
 @DataJpaTest
 class JdbcReservationTimeRepositoryTest {

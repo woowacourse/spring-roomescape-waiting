@@ -1,11 +1,11 @@
-package roomescape.reservationTime.domain;
+package roomescape.reservationtime.domain;
 
 import java.time.LocalTime;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.reservationTime.fixture.ReservationTimeFixture;
+import roomescape.reservationtime.fixture.ReservationTimeFixture;
 
 class ReservationTimeTest {
 
