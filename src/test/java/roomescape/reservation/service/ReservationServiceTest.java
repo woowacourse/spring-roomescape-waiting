@@ -1,7 +1,11 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -13,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
+import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
@@ -36,6 +42,19 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @DisplayName("멤버별 예약을 조회 할 수 있다.")
+    @Test
+    void can_find_my_reservation() {
+        LoginMemberInfo loginMemberInfo = new LoginMemberInfo(1L);
+
+        List<MyReservationResponse> result = reservationService.getMemberReservations(loginMemberInfo);
+
+        List<MyReservationResponse> expected = List.of(
+            new MyReservationResponse(1L, "테마1", LocalDate.of(2025, 4, 28), LocalTime.of(10, 0), "예약"),
+            new MyReservationResponse(2L, "테마1", LocalDate.of(2025, 4, 28), LocalTime.of(11, 0), "예약"));
+        assertThat(result).isEqualTo(expected);
+    }
 
     @DisplayName("지나간 날짜와 시간에 대한 예약을 생성할 수 없다.")
     @ParameterizedTest

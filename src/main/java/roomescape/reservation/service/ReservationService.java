@@ -3,12 +3,14 @@ package roomescape.reservation.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.SearchCondition;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.presentation.dto.MemberResponse;
+import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
@@ -108,5 +110,14 @@ public class ReservationService {
                         new MemberResponse(reservation.getMember().getId(), reservation.getMember().getName())
                 ))
                 .toList();
+    }
+
+    public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
+        Member member = memberRepository.findById(loginMemberInfo.id())
+            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+
+        return member.getReservations().stream()
+            .map(MyReservationResponse::from)
+            .toList();
     }
 }

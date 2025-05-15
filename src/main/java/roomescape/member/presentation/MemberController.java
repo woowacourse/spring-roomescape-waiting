@@ -33,11 +33,4 @@ public class MemberController {
 
         return ResponseEntity.ok().body(response);
     }
-
-    @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
-        List<MyReservationResponse> response = memberService.getMemberReservations(loginMemberInfo);
-
-        return ResponseEntity.ok().body(response);
-    }
 }

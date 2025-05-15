@@ -56,13 +56,4 @@ public class MemberService {
                 .map(member -> new MemberResponse(member.getId(), member.getName()))
                 .toList();
     }
-
-    public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
-        Member member = memberRepository.findById(loginMemberInfo.id())
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
-
-        return member.getReservations().stream()
-            .map(MyReservationResponse::from)
-            .toList();
-    }
 }

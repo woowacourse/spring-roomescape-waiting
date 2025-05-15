@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
 import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
+import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
