@@ -64,3 +64,19 @@
     - /admin/** 경로는 **ADMIN Role**만 접근 가능
 
 ---
+
+## 실행 환경
+
+1. 터미널에서 /docker 디렉토리로 이동합니다.
+2. 다음 명령어를 통해 MySQL 컨테이너를 실행합니다.
+   ```bash
+   docker compose up -d
+    ```
+
+- data.sql 파일로 초기 데이터를 세팅합니다.
+    - 계정 정보
+        - 유저 계정
+            - email: user1@email.com, password: 1234
+            - user: user2@email.com, password: 1234
+        - 어드민 계정
+            - email: admin@email.com, password: 1234 
