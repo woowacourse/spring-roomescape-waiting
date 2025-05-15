@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.global.auth.Auth;
 import roomescape.member.domain.Role;
+import roomescape.member.presentation.resolver.LoginMember;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -35,7 +36,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             final @RequestBody @Valid ReservationRequest reservationRequest,
-            final Long memberId
+            final @LoginMember Long memberId
     ) {
         ReservationResponse reservation = reservationService.createUserReservation(reservationRequest, memberId);
 
@@ -59,7 +60,7 @@ public class ReservationController {
     @Auth(Role.USER)
     @GetMapping("/mine")
     public ResponseEntity<List<UserReservationsResponse>> getUserReservations(
-            final Long memberId
+            final @LoginMember Long memberId
     ) {
         return ResponseEntity.ok().body(
                 reservationService.getUserReservations(memberId)
