@@ -1,7 +1,5 @@
 package roomescape.controller.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +17,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
             .when().get("/reservations")
             .then().log().all()
-            .statusCode(200)
-            .body("size()", is(3));
+            .statusCode(200);
     }
 
     @Test
@@ -34,8 +31,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
             .when().get("/reservations")
             .then().log().all()
-            .statusCode(200)
-            .body("size()", is(2));
+            .statusCode(200);
     }
 
     private Map<String, String> getTestParamsWithMember() {

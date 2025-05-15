@@ -22,7 +22,7 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
                   ON r.theme_id = t.id
                 WHERE
                   r.date >= :startDate
-                  AND r.date < :endDate
+                  AND r.date <= :endDate
                 GROUP BY
                   theme_id
                 ORDER BY

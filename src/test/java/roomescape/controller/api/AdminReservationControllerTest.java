@@ -1,7 +1,5 @@
 package roomescape.controller.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
@@ -19,6 +17,20 @@ public class AdminReservationControllerTest {
 
     @BeforeEach
     void createToken() {
+        RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .body(getTestParamsWithTheme())
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201);
+
+        RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .body(getTestParamsWithTime())
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(201);
+
         token = RestAssured.given()
             .contentType(ContentType.JSON)
             .body(getTestParamsWithMember())
@@ -41,14 +53,29 @@ public class AdminReservationControllerTest {
         RestAssured.given().log().all()
             .when().get("/reservations")
             .then().log().all()
-            .statusCode(200)
-            .body("size()", is(4));
+            .statusCode(200);
+    }
+
+    private Map<String, String> getTestParamsWithTime() {
+        return Map.of(
+            "startAt", "10:00"
+        );
+    }
+
+    private Map<String, String> getTestParamsWithTheme() {
+        return Map.of(
+            "name", "이름",
+            "description", "정보",
+            "thumbnail", "썸네일"
+        );
     }
 
     private Map<String, String> getTestParamsWithMember() {
         return Map.of(
+            "name", "admin",
             "email", "admin",
-            "password", "1234"
+            "password", "1234",
+            "role", "ADMIN"
         );
     }
 

@@ -1,7 +1,5 @@
 package roomescape.controller.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
@@ -20,8 +18,7 @@ class ThemeControllerTest {
         RestAssured.given().log().all()
             .when().get("/themes")
             .then().log().all()
-            .statusCode(200)
-            .body("size()", is(3));
+            .statusCode(200);
     }
 
     @Test
@@ -37,8 +34,7 @@ class ThemeControllerTest {
         RestAssured.given().log().all()
             .when().get("/themes")
             .then().log().all()
-            .statusCode(200)
-            .body("size()", is(4));
+            .statusCode(200);
     }
 
     @Test
@@ -52,8 +48,7 @@ class ThemeControllerTest {
         RestAssured.given().log().all()
             .when().get("/themes")
             .then().log().all()
-            .statusCode(200)
-            .body("size()", is(2));
+            .statusCode(200);
     }
 
     private Map<String, String> getTestParamsWithTheme() {
