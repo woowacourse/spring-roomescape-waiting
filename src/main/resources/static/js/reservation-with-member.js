@@ -199,7 +199,11 @@ function applyFilter(event) {
   [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
         요청 포맷에 맞게 설정
   */
-  const params = new URLSearchParams({themeId, memberId, dateFrom, dateTo}).toString();
+  const params = new URLSearchParams();
+  if (themeId) params.append("themeId", themeId);
+  if (memberId) params.append("memberId", memberId);
+  if (dateFrom) params.append("dateFrom", dateFrom);
+  if (dateTo) params.append("dateTo", dateTo);
 
   fetch(`/reservations/filtering?${params}`, { // 예약 검색 API 호출
     method: 'GET',
