@@ -52,6 +52,13 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<MyReservationsResponse> getAllMemberReservations(LoginMember loginMember) {
+        return reservationRepository.findAllByMemberId(loginMember.id())
+                .stream()
+                .map(MyReservationsResponse::from)
+                .toList();
+    }
+
     public ReservationResponse create(final ReservationRequest request, final LoginMember member) {
         if (isAlreadyBooked(request)) {
             throw new AlreadyInUseException("reservation is already in use");
