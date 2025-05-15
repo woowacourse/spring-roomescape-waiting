@@ -3,13 +3,7 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import roomescape.member.domain.Member;
 
 @Entity
@@ -19,6 +13,8 @@ public class Reservation {
     private Long id;
     @ManyToOne @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus status;
     @Column(nullable = false)
     private LocalDate date;
     @ManyToOne @JoinColumn(name = "time_id", nullable = false)
@@ -32,19 +28,21 @@ public class Reservation {
     public Reservation(
             final Long id,
             final Member member,
+            final ReservationStatus status,
             final LocalDate date,
             final ReservationTime time,
             final Theme theme
     ) {
         this.id = id;
         this.member = member;
+        this.status = status;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+        this(null, member, ReservationStatus.CONFIRMED, date, time, theme);
     }
 
     public Long getId() {
@@ -53,6 +51,10 @@ public class Reservation {
 
     public Member getMember() {
         return member;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public LocalDate getDate() {

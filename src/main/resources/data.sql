@@ -17,15 +17,15 @@ values ('포스티', 'posty@woowa.com', '12341234', 'MEMBER');
 insert into member (name, email, password, role)
 values ('밍곰', 'minggom@woowa.com', '12341234', 'ADMIN');
 
-insert into reservation (date, time_id, theme_id, member_id)
-values ('2025-05-10', 1, 3, 1);
-insert into reservation (date, time_id, theme_id, member_id)
-values ('2025-05-10', 2, 3, 1);
-insert into reservation (date, time_id, theme_id, member_id)
-values ('2025-05-10', 3, 3, 1);
-insert into reservation (date, time_id, theme_id, member_id)
-values ('2025-05-10', 1, 1, 1);
-insert into reservation (date, time_id, theme_id, member_id)
-values ('2025-05-10', 2, 1, 1);
-insert into reservation (date, time_id, theme_id, member_id)
-values ('2025-05-10', 1, 2, 1);
+insert into reservation (date, time_id, theme_id, member_id, status)
+values ('2025-05-10', 1, 3, 1, 'CONFIRMED');
+insert into reservation (date, time_id, theme_id, member_id, status)
+values ('2025-05-10', 2, 3, 1, 'CONFIRMED');
+insert into reservation (date, time_id, theme_id, member_id, status)
+values ('2025-05-10', 3, 3, 1, 'CONFIRMED');
+insert into reservation (date, time_id, theme_id, member_id, status)
+values ('2025-05-10', 1, 1, 1, 'CONFIRMED');
+insert into reservation (date, time_id, theme_id, member_id, status)
+values ('2025-05-10', 2, 1, 1, 'CONFIRMED');
+insert into reservation (date, time_id, theme_id, member_id, status)
+values ('2025-05-10', 1, 2, 1, 'CONFIRMED');
