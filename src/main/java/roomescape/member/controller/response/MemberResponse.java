@@ -1,12 +1,13 @@
 package roomescape.member.controller.response;
 
 import roomescape.member.domain.Member;
+import roomescape.member.role.Role;
 
 public record MemberResponse(
         Long id,
         String name,
         String email,
-        String role
+        Role role
 ) {
 
     public static MemberResponse from(Member member) {

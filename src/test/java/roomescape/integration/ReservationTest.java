@@ -165,7 +165,8 @@ public class ReservationTest extends BaseTest {
     @Test
     void 예약_삭제시_존재하지_않는_예약이면_예외를_응답한다() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .cookie("token", token)
+                .when().delete("/admin/reservations/999")
                 .then().log().all()
                 .statusCode(404);
     }

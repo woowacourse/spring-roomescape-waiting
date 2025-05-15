@@ -32,7 +32,6 @@ public class MemberJdbcRepository implements MemberRepository {
             Role.valueOf(result.getString("role"))
     );
 
-
     public MemberJdbcRepository(JdbcTemplate jdbcTemplate,
                                 @Qualifier("userJdbcInsert") SimpleJdbcInsert simpleJdbcInsert) {
         this.jdbcTemplate = jdbcTemplate;

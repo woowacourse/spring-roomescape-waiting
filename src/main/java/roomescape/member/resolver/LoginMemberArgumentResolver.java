@@ -1,6 +1,5 @@
 package roomescape.member.resolver;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,6 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         this.authService = authService;
     }
 
-
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(LoginMember.class)
@@ -29,33 +27,15 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     @Override
-    public Object resolveArgument
-            (MethodParameter parameter,
-             ModelAndViewContainer mavContainer,
-             NativeWebRequest webRequest,
-             WebDataBinderFactory binderFactory
-            )
-            throws Exception
-    {
+    public Object resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory
+    ) {
 
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new UnauthenticatedException("[ERROR] 로그인이 필요합니다.");
-        }
-
-        String token = extractTokenFromCookie(cookies);
-
-        return authService.findUserByToken(token);
-    }
-
-    private String extractTokenFromCookie(Cookie[] cookies) {
-        for (Cookie cookie : cookies) {
-            if (TOKEN.equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        return "";
+        return authService.findUserByToken(authService.extractToken(request));
     }
 }

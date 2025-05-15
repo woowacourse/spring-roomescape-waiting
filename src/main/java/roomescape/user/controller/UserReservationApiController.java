@@ -35,7 +35,6 @@ public class UserReservationApiController {
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
         List<ReservationResponse> responses = reservationService.getAll();
-
         return ResponseEntity.ok(responses);
     }
 

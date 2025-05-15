@@ -10,6 +10,7 @@ import roomescape.member.role.Role;
 
 @Entity
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,7 +52,7 @@ public class Member {
         return password.getPassword();
     }
 
-    public String getRole() {
-        return role.getRole();
+    public Role getRole() {
+        return role;
     }
 }
