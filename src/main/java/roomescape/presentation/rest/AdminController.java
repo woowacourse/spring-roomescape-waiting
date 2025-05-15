@@ -1,21 +1,22 @@
 package roomescape.presentation.rest;
 
+import static org.springframework.http.HttpStatus.CREATED;
+
 import jakarta.validation.Valid;
-import java.net.URI;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.application.UserService;
 import roomescape.presentation.request.CreateReservationAdminRequest;
 import roomescape.presentation.response.ReservationResponse;
 import roomescape.presentation.response.UserResponse;
 
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 
@@ -28,17 +29,16 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> reserve(@RequestBody @Valid final CreateReservationAdminRequest request) {
+    @ResponseStatus(CREATED)
+    public ReservationResponse reserve(@RequestBody @Valid final CreateReservationAdminRequest request) {
         var user = userService.getById(request.userId());
         var reservation = reservationService.reserve(user, request.date(), request.timeId(), request.themeId());
-        var response = ReservationResponse.from(reservation);
-        return ResponseEntity.created(URI.create("reservations/" + reservation.id())).body(response);
+        return ReservationResponse.from(reservation);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         var users = userService.findAllUsers();
-        var response = UserResponse.from(users);
-        return ResponseEntity.ok(response);
+        return UserResponse.from(users);
     }
 }
