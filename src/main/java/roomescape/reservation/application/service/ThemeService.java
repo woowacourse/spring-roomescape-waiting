@@ -38,12 +38,12 @@ public class ThemeService {
 
     @Transactional
     public void deleteTheme(final Long id) {
-        validateIsDuplicated(id);
+        validateIsReservationExist(id);
 
-        themeRepository.findById(id)
+        final Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
-        themeRepository.deleteById(id);
+        themeRepository.delete(theme);
     }
 
     public List<ThemeResponse> getPopularThemes() {
@@ -52,7 +52,7 @@ public class ThemeService {
                 .toList();
     }
 
-    private void validateIsDuplicated(final Long id) {
+    private void validateIsReservationExist(final Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalStateException("예약이 이미 존재하는 테마입니다.");
         }

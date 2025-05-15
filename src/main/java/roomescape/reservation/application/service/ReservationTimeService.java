@@ -40,10 +40,10 @@ public class ReservationTimeService {
     public void deleteReservationTime(final Long id) {
         validateIsDuplicatedReservation(id);
 
-        reservationTimeRepository.findById(id)
+        final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
-        reservationTimeRepository.deleteById(id);
+        reservationTimeRepository.delete(reservationTime);
     }
 
     public List<AvailableReservationTimeResponse> getReservationTimes(final LocalDate date, final Long themeId) {

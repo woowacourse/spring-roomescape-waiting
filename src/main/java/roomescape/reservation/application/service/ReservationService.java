@@ -102,10 +102,10 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(final Long id) {
 
-        reservationRepository.findById(id)
+        final Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
-        reservationRepository.deleteById(id);
+        reservationRepository.delete(reservation);
     }
 
     private ReservationTime getReservationTime(Long timeId) {
