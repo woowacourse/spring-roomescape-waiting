@@ -12,8 +12,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.service.AuthService;
-import roomescape.error.NotFoundException;
-import roomescape.error.UnauthorizedException;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.UnauthorizedException;
 
 @Component
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package roomescape.error;
+package roomescape.exception;
 
 public class TokenCreationException extends RuntimeException {
 

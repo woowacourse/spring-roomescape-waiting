@@ -11,9 +11,9 @@ import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.infrastructure.TokenProvider;
-import roomescape.error.ForbiddenException;
-import roomescape.error.NotFoundException;
-import roomescape.error.UnauthorizedException;
+import roomescape.exception.ForbiddenException;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 

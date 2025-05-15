@@ -16,8 +16,8 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import roomescape.error.TokenCreationException;
-import roomescape.error.UnauthorizedException;
+import roomescape.exception.TokenCreationException;
+import roomescape.exception.UnauthorizedException;
 
 @Component
 @Slf4j

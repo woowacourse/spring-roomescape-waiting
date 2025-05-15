@@ -18,7 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import roomescape.error.ReservationException;
+import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
