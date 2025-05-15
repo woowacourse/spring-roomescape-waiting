@@ -6,7 +6,11 @@ public class ThemeRequest {
 
     @NotBlank
     private final String name;
+
+    @NotBlank
     private final String description;
+
+    @NotBlank
     private final String thumbnail;
 
     public ThemeRequest(String name, String description, String thumbnail) {
