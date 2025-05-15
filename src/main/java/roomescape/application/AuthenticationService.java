@@ -13,8 +13,8 @@ public class AuthenticationService {
     private final AuthenticationTokenHandler tokenProvider;
     private final UserRepository userRepository;
 
-    public AuthenticationService(final AuthenticationTokenHandler tokenProvider, final UserRepository userRepository) {
-        this.tokenProvider = tokenProvider;
+    public AuthenticationService(final AuthenticationTokenHandler tokenHandler, final UserRepository userRepository) {
+        this.tokenProvider = tokenHandler;
         this.userRepository = userRepository;
     }
 
