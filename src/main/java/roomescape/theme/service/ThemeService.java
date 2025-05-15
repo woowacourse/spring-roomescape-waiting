@@ -2,9 +2,9 @@ package roomescape.theme.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NoElementsException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
 import roomescape.theme.controller.response.ThemeResponse;
@@ -43,7 +43,7 @@ public class ThemeService {
 
     public Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoElementsException("해당 테마가 존재하지 않습니다."));
     }
 
     public List<ThemeResponse> getPopularThemes() {

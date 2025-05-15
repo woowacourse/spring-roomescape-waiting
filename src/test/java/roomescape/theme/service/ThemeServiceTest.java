@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import roomescape.fixture.ReservationDateTimeDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -103,7 +103,7 @@ class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마를_삭제할_수_없다() {
         assertThatThrownBy(() -> themeService.deleteById(3L))
-                .isInstanceOf(NoSuchElementException.class)
+                .isInstanceOf(NoElementsException.class)
                 .hasMessage("해당 테마가 존재하지 않습니다.");
     }
 

@@ -2,9 +2,9 @@ package roomescape.time.service;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NoElementsException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.controller.request.AvailableReservationTimeRequest;
 import roomescape.time.controller.request.ReservationTimeCreateRequest;
@@ -58,7 +58,7 @@ public class ReservationTimeService {
 
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoElementsException("예약 시간을 찾을 수 없습니다."));
     }
 
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(

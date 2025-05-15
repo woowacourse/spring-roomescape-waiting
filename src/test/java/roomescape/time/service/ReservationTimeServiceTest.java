@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import roomescape.fixture.ReservationDateTimeDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDateTime;
@@ -91,7 +91,7 @@ class ReservationTimeServiceTest {
 
     @Test
     void 존재하지_않는_예약시간을_삭제할_수_없다() {
-        assertThatThrownBy(() -> reservationTimeService.deleteById(1L)).isInstanceOf(NoSuchElementException.class)
+        assertThatThrownBy(() -> reservationTimeService.deleteById(1L)).isInstanceOf(NoElementsException.class)
                 .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
 
