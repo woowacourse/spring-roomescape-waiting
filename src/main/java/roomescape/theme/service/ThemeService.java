@@ -24,7 +24,7 @@ public class ThemeService {
 
     public void deleteById(Long id) {
         if (reservationRepository.existsByTheme_Id(id)) {
-            throw new InvalidArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
+            throw new InvalidArgumentException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
         Theme theme = getTheme(id);
         themeRepository.deleteById(theme.getId());
@@ -43,7 +43,7 @@ public class ThemeService {
 
     public Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
     }
 
     public List<ThemeResponse> getPopularThemes() {

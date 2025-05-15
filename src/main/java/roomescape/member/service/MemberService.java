@@ -32,13 +32,13 @@ public class MemberService implements MemberQueryService {
 
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new InvalidArgumentException("[ERROR] 존재하지 않는 멤버입니다."));
+                .orElseThrow(() -> new InvalidArgumentException("존재하지 않는 멤버입니다."));
     }
 
     public Member getMember(String email, String password) {
         String encryptPassword = passwordEncryptor.encrypt(password);
         return memberRepository.findByEmailAndPassword_Password(email, encryptPassword)
-                .orElseThrow(() -> new InvalidArgumentException("[ERROR] 가입되지 않은 회원입니다."));
+                .orElseThrow(() -> new InvalidArgumentException("가입되지 않은 회원입니다."));
     }
 
     public List<MemberResponse> getMembers() {

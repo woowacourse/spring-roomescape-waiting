@@ -29,7 +29,7 @@ public class AdminMemberHandlerInterceptor implements HandlerInterceptor {
 
         boolean isAdmin = authService.isAdmin(token);
         if (!isAdmin) {
-            throw new NotAdminException("[ERROR] 관리자 권한이 없습니다.");
+            throw new NotAdminException("관리자 권한이 없습니다.");
         }
         return true;
     }

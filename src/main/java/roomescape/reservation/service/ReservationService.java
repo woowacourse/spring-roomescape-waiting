@@ -48,7 +48,7 @@ public class ReservationService {
 
     private void isAlreadyReservedTime(LocalDate date, Long timeId) {
         if (reservationRepository.existsByDateAndTimeId(date, timeId)) {
-            throw new InvalidArgumentException("[ERROR] 이미 예약이 존재하는 시간입니다.");
+            throw new InvalidArgumentException("이미 예약이 존재하는 시간입니다.");
         }
     }
 
@@ -59,7 +59,7 @@ public class ReservationService {
 
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("예약을 찾을 수 없습니다."));
     }
 
     public List<ReservationResponse> getFilteredReservations(Long themeId,

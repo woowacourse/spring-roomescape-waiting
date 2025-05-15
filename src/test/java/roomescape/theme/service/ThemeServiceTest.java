@@ -97,14 +97,14 @@ class ThemeServiceTest {
 
         assertThatThrownBy(() -> themeService.deleteById(reservation.getTheme().getId()))
                 .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
+                .hasMessage("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     @Test
     void 존재하지_않는_테마를_삭제할_수_없다() {
         assertThatThrownBy(() -> themeService.deleteById(3L))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("[ERROR] 해당 테마가 존재하지 않습니다.");
+                .hasMessage("해당 테마가 존재하지 않습니다.");
     }
 
     @Test

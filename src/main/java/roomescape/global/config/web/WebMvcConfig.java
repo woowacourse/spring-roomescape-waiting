@@ -1,4 +1,4 @@
-package roomescape.config.web;
+package roomescape.global.config.web;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

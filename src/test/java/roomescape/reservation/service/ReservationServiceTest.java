@@ -46,7 +46,7 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
-    
+
     @Autowired
     private CleanUp cleanUp;
 
@@ -97,7 +97,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("[ERROR] 이미 예약이 존재하는 시간입니다.");
+                .hasMessage("이미 예약이 존재하는 시간입니다.");
     }
 
     @Test
@@ -134,7 +134,7 @@ class ReservationServiceTest {
     void 존재하지_않는_예약을_삭제할_수_없다() {
         assertThatThrownBy(() -> reservationService.deleteById(1L))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("[ERROR] 예약을 찾을 수 없습니다.");
+                .hasMessage("예약을 찾을 수 없습니다.");
     }
 
     @Test

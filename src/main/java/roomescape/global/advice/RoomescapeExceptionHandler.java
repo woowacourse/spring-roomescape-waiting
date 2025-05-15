@@ -36,7 +36,7 @@ public class RoomescapeExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return ResponseEntity
                 .status(BAD_REQUEST)
-                .body(ApiResponse.fail(WRONG_ARGUMENT, e.getMessage()));
+                .body(ApiResponse.fail(WRONG_ARGUMENT, "요청 인자값이 잘못되었습니다."));
     }
 
     @ExceptionHandler(RuntimeException.class)

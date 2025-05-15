@@ -33,7 +33,7 @@ public class AuthenticatedMemberArgumentResolver implements HandlerMethodArgumen
         String token = cookieProvider.extractTokenFromCookie(request.getCookies());
 
         if (token == null || token.isBlank()) {
-            throw new TokenNotFoundException("[ERROR] 토큰이 존재하지 않습니다.");
+            throw new TokenNotFoundException("토큰이 존재하지 않습니다.");
         }
 
         return authService.getMemberId(token);
