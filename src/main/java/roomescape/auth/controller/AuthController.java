@@ -34,7 +34,6 @@ public class AuthController {
 
     @GetMapping("/login/check")
     public ResponseEntity<MemberLoginCheckResponse> loginCheck(@AuthorizedMember MemberPrincipal memberPrincipal) {
-        System.out.println("memberPrincipal = " + memberPrincipal);
         authService.validateMemberExistence(memberPrincipal);
         MemberLoginCheckResponse response = MemberLoginCheckResponse.fromMemberPrincipal(memberPrincipal);
         return ResponseEntity.ok(response);
