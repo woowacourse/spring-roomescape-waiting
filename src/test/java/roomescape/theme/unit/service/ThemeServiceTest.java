@@ -14,7 +14,6 @@ import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.ThemeService;
 
-// TODO: 모키토 라이브러리 추가
 @DataJpaTest
 class ThemeServiceTest {
 
