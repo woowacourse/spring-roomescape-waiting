@@ -1,0 +1,30 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  # DB connection setting
+  datasource:
+    url: jdbc:h2:mem:database
+    username: sa
+    password: password
+  # DB initialization
+  sql:
+    init:
+      mode: embedded
+      schema-locations: classpath:schema.sql
+  # JPA settings
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+
+security:
+  jwt:
+    token:
+      secret-key: "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E="
+      expire-length: 3600000
