@@ -18,9 +18,9 @@
         - 8일인 경우 1일부터 7일까지의 예약 건수 많은 순서대로 10개의 테마를 조회할 수 있다.
     - [x] `/` 요청 시 인기 테마 페이지를 응답한다.
         - `templates/index.html`
-- [ ] 내 예약 목록을 조회하는 API 구현
-  - [ ] 내 예약 목록 호출 시 GET /reservation-mine 요청한다.
-  - [ ] `reservation-mine.html` 페이지가 응답된다.
+- [x] 내 예약 목록을 조회하는 API 구현
+  - [x] 내 예약 목록 호출 시 GET /reservation-mine 요청한다.
+  - [x] `reservation-mine.html` 페이지가 응답된다.
 
 ### 예외 사항
 - [x] 시간 생성 시 시작 시간에 유효하지 않은 값이 입력되었을 때
