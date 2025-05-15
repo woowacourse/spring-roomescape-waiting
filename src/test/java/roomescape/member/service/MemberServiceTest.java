@@ -1,5 +1,9 @@
 package roomescape.member.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,10 +12,6 @@ import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.repository.FakeTokenProvider;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DisplayName("사용자 조회")
 class MemberServiceTest {
@@ -43,7 +43,8 @@ class MemberServiceTest {
         String token = "invalid";
 
         // when & then
-        assertThatThrownBy(() -> memberService.findMemberByToken(token)).isInstanceOf(InvalidAuthorizationException.class);
+        assertThatThrownBy(() -> memberService.findMemberByToken(token)).isInstanceOf(
+                InvalidAuthorizationException.class);
     }
 
     @DisplayName("모든 사용자 정보를 추출할 수 있다")

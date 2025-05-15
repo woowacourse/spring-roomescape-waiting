@@ -1,5 +1,7 @@
 package roomescape.theme.controller;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
@@ -19,8 +21,6 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.theme.dto.ThemeCreateRequest;
-
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -69,6 +69,21 @@ class ThemeControllerTest {
     @Nested
     @DisplayName("테마 생성")
     class ThemePostTest {
+
+        static Stream<Arguments> invalidStrings() {
+            return Stream.of(
+                    Arguments.of(" "),
+                    Arguments.of("")
+            );
+        }
+
+        static Stream<Arguments> invalidUrls() {
+            return Stream.of(
+                    Arguments.of(" "),
+                    Arguments.of(""),
+                    Arguments.of("ftp://")
+            );
+        }
 
         @DisplayName("어드민은 /themes API를 통해 Theme를 생성할 수 있다")
         @Test
@@ -158,13 +173,6 @@ class ThemeControllerTest {
                     .statusCode(400);
         }
 
-        static Stream<Arguments> invalidStrings() {
-            return Stream.of(
-                    Arguments.of(" "),
-                    Arguments.of("")
-            );
-        }
-
         @DisplayName("유효하지 않은 thumbnail 필드값을 가진 Theme는 생성할 수 없다")
         @ParameterizedTest
         @MethodSource("invalidUrls")
@@ -182,14 +190,6 @@ class ThemeControllerTest {
                     .when().post("/themes")
                     .then().log().all()
                     .statusCode(400);
-        }
-
-        static Stream<Arguments> invalidUrls() {
-            return Stream.of(
-                    Arguments.of(" "),
-                    Arguments.of(""),
-                    Arguments.of("ftp://")
-            );
         }
     }
 

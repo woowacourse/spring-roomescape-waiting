@@ -1,5 +1,7 @@
 package roomescape.theme.domain;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,9 +9,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 class ThemeTest {
+
+    static Stream<Arguments> invalidNames() {
+        return Stream.of(
+                Arguments.of(" "),
+                Arguments.of(""),
+                Arguments.of((String) null)
+        );
+    }
 
     @DisplayName("Description이 존재하지 않으면 생성 불가능하다")
     @Test
@@ -41,13 +49,5 @@ class ThemeTest {
 
         assertThatThrownBy(() -> new Theme(1L, themeName, description, thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    static Stream<Arguments> invalidNames() {
-        return Stream.of(
-                Arguments.of(" "),
-                Arguments.of(""),
-                Arguments.of((String) null)
-        );
     }
 }

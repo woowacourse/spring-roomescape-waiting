@@ -1,5 +1,9 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
@@ -14,17 +18,14 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 @DisplayName("예약 요청 검증 테스트")
 class ReservationCheckerTest {
 
     private final ReservationTimeRepository reservationTimeRepository = FakeReservationTimeRepositoryFixture.create();
     private final ThemeRepository themeRepository = FakeThemeRepositoryFixture.create();
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
-    private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository, themeRepository, memberRepository);
+    private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository,
+            themeRepository, memberRepository);
 
     @DisplayName("요청 받은 데이터로 빈 id의 예약 객체를 생성할 수 있다")
     @Test

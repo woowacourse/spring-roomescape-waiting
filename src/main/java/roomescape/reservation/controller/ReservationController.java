@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.exception.UnauthorizedAccessException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
-import roomescape.exception.UnauthorizedAccessException;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -39,7 +39,8 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody final UserReservationRequest request, Member member) {
+    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody final UserReservationRequest request,
+                                                              Member member) {
         ReservationResponse responseDto = reservationService.createUserReservation(request, member);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
     }

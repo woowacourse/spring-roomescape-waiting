@@ -1,5 +1,9 @@
 package roomescape.reservationtime.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -22,15 +26,13 @@ import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 class ReservationTimeServiceTest {
 
-    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository(new ArrayList<>());
+    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository(
+            new ArrayList<>());
     private final ReservationRepository reservationRepository = new FakeReservationRepository(new ArrayList<>());
-    private final ReservationTimeService reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+    private final ReservationTimeService reservationTimeService = new ReservationTimeService(reservationTimeRepository,
+            reservationRepository);
 
     @Nested
     @DisplayName("예약시간 생성")
@@ -83,10 +85,12 @@ class ReservationTimeServiceTest {
             ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
             Theme theme = new Theme(1L, "ABC", "DEF", "https://");
             Member member = new Member(1L, "어드민", "admin@gmail.com", "wooteco7", Role.ADMIN);
-            Reservation reservation = new Reservation(1L, member, LocalDate.now().plusDays(1), reservationTime, theme, ReservationStatus.RESERVED);
+            Reservation reservation = new Reservation(1L, member, LocalDate.now().plusDays(1), reservationTime, theme,
+                    ReservationStatus.RESERVED);
             reservationRepository.save(reservation);
 
-            List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.findAvailableReservationTimes(LocalDate.now().plusDays(1), 1L);
+            List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.findAvailableReservationTimes(
+                    LocalDate.now().plusDays(1), 1L);
 
             boolean alreadyBooked = availableReservationTimes.stream()
                     .filter(dto -> dto.startAt().equals(LocalTime.of(10, 0)))

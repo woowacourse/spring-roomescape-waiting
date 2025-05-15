@@ -25,12 +25,14 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        List<Reservation> existingReservations = findByDateTimeTheme(reservation.getDate(), reservation.getTime().getStartAt(), reservation.getTheme().getId());
+        List<Reservation> existingReservations = findByDateTimeTheme(reservation.getDate(),
+                reservation.getTime().getStartAt(), reservation.getTheme().getId());
         if (!existingReservations.isEmpty()) {
             throw new DuplicateKeyException("동일한 예약이 존재합니다.");
         }
         long id = reservationId.getAndIncrement();
-        Reservation newReservation = new Reservation(id, reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED);
+        Reservation newReservation = new Reservation(id, reservation.getMember(), reservation.getDate(),
+                reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED);
         reservations.add(newReservation);
         return newReservation;
     }
@@ -64,7 +66,8 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberIdAndThemeIdAndDateRange(Long memberId, Long themeId, LocalDate from, LocalDate to) {
+    public List<Reservation> findByMemberIdAndThemeIdAndDateRange(Long memberId, Long themeId, LocalDate from,
+                                                                  LocalDate to) {
         return reservations.stream()
                 .filter(r -> themeId == null || r.getTheme().getId().equals(themeId))
                 .filter(r -> memberId == null || r.getMember().getId().equals(memberId))

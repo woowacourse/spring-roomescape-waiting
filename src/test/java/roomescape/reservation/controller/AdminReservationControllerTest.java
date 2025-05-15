@@ -1,5 +1,7 @@
 package roomescape.reservation.controller;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
@@ -15,8 +17,6 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 import roomescape.member.domain.Member;
-
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

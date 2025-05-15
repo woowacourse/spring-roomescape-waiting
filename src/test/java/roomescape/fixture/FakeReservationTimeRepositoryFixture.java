@@ -2,8 +2,8 @@ package roomescape.fixture;
 
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.repository.FakeReservationTimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 
 public class FakeReservationTimeRepositoryFixture {
 

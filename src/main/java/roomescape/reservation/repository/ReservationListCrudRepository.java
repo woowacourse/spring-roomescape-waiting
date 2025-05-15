@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.reservation.domain.Reservation;
 
-public interface ReservationListCrudRepository extends ListCrudRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
+public interface ReservationListCrudRepository extends ListCrudRepository<Reservation, Long>,
+        JpaSpecificationExecutor<Reservation> {
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 

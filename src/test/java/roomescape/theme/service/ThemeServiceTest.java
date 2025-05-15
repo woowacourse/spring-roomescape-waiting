@@ -1,5 +1,9 @@
 package roomescape.theme.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -20,10 +24,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ThemeServiceTest {
 
@@ -63,7 +63,8 @@ class ThemeServiceTest {
             themeService.createTheme(requestDto);
 
             // then
-            assertThatThrownBy(() -> themeService.createTheme(requestDto)).isInstanceOf(DuplicateContentException.class);
+            assertThatThrownBy(() -> themeService.createTheme(requestDto)).isInstanceOf(
+                    DuplicateContentException.class);
         }
     }
 
@@ -91,10 +92,18 @@ class ThemeServiceTest {
             Member member = LoginMemberFixture.getUser();
 
             // when
-            themeRepository.addReservation(new Reservation(1L, member, LocalDate.now().minusDays(1), reservationTime, theme1, ReservationStatus.RESERVED));
-            themeRepository.addReservation(new Reservation(2L, member, LocalDate.now().minusDays(2), reservationTime, theme2, ReservationStatus.RESERVED));
-            themeRepository.addReservation(new Reservation(3L, member, LocalDate.now().minusDays(3), reservationTime, theme2, ReservationStatus.RESERVED));
-            themeRepository.addReservation(new Reservation(4L, member, LocalDate.now().minusDays(10), reservationTime, theme1, ReservationStatus.RESERVED));
+            themeRepository.addReservation(
+                    new Reservation(1L, member, LocalDate.now().minusDays(1), reservationTime, theme1,
+                            ReservationStatus.RESERVED));
+            themeRepository.addReservation(
+                    new Reservation(2L, member, LocalDate.now().minusDays(2), reservationTime, theme2,
+                            ReservationStatus.RESERVED));
+            themeRepository.addReservation(
+                    new Reservation(3L, member, LocalDate.now().minusDays(3), reservationTime, theme2,
+                            ReservationStatus.RESERVED));
+            themeRepository.addReservation(
+                    new Reservation(4L, member, LocalDate.now().minusDays(10), reservationTime, theme1,
+                            ReservationStatus.RESERVED));
             List<ThemeResponse> responses = themeService.findPopularThemes();
 
             // then

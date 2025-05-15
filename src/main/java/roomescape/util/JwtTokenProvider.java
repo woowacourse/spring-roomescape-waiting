@@ -11,8 +11,8 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.member.domain.Member;
 import roomescape.exception.InvalidAuthorizationException;
+import roomescape.member.domain.Member;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
@@ -20,7 +20,8 @@ public class JwtTokenProvider implements TokenProvider {
     private final int jwtExpirationMs;
     private final SecretKey key;
 
-    public JwtTokenProvider(@Value("${security.jwt.token.secret-key}") String jwtSecret, @Value("${security.jwt.token.expire-length}") int jwtExpirationMs) {
+    public JwtTokenProvider(@Value("${security.jwt.token.secret-key}") String jwtSecret,
+                            @Value("${security.jwt.token.expire-length}") int jwtExpirationMs) {
         this.jwtExpirationMs = jwtExpirationMs;
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }

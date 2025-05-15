@@ -1,6 +1,5 @@
 package roomescape.theme.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -89,7 +88,9 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Theme theme = (Theme) o;
         return Objects.equals(id, theme.id);
     }

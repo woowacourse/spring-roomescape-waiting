@@ -1,5 +1,7 @@
 package roomescape.auth.controller;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
@@ -16,11 +18,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.member.domain.Member;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
-
-import static org.hamcrest.Matchers.is;
+import roomescape.member.domain.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -81,6 +81,32 @@ class AuthControllerTest {
     @DisplayName("회원 가입")
     class MemberPostTest {
 
+        static Stream<Arguments> invalidNames() {
+            return Stream.of(
+                    Arguments.of(" "),
+                    Arguments.of(""),
+                    Arguments.of((String) null)
+            );
+        }
+
+        static Stream<Arguments> invalidEmails() {
+            return Stream.of(
+                    Arguments.of(" "),
+                    Arguments.of(""),
+                    Arguments.of((String) null),
+                    Arguments.of("asdf")
+            );
+        }
+
+        static Stream<Arguments> invalidPasswords() {
+            return Stream.of(
+                    Arguments.of(" "),
+                    Arguments.of(""),
+                    Arguments.of((String) null),
+                    Arguments.of("asdf")
+            );
+        }
+
         @DisplayName("새 계정을 생성할 수 있다")
         @Test
         void addMemberTest1() {
@@ -114,14 +140,6 @@ class AuthControllerTest {
                     .statusCode(400);
         }
 
-        static Stream<Arguments> invalidNames() {
-            return Stream.of(
-                    Arguments.of(" "),
-                    Arguments.of(""),
-                    Arguments.of((String) null)
-            );
-        }
-
         @DisplayName("이메일이 유효하지 않으면 계정을 생성할 수 없다")
         @ParameterizedTest
         @MethodSource("invalidEmails")
@@ -139,15 +157,6 @@ class AuthControllerTest {
                     .statusCode(400);
         }
 
-        static Stream<Arguments> invalidEmails() {
-            return Stream.of(
-                    Arguments.of(" "),
-                    Arguments.of(""),
-                    Arguments.of((String) null),
-                    Arguments.of("asdf")
-            );
-        }
-
         @DisplayName("비밀번호가 유효하지 않으면 계정을 생성할 수 없다")
         @ParameterizedTest
         @MethodSource("invalidPasswords")
@@ -163,15 +172,6 @@ class AuthControllerTest {
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(400);
-        }
-
-        static Stream<Arguments> invalidPasswords() {
-            return Stream.of(
-                    Arguments.of(" "),
-                    Arguments.of(""),
-                    Arguments.of((String) null),
-                    Arguments.of("asdf")
-            );
         }
 
         @DisplayName("동일한 이메일 주소로 중복 가입할 수 없다")

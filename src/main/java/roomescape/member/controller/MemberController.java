@@ -20,7 +20,8 @@ public class MemberController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@CookieValue(name = "token", required = false) String token) {
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
+            @CookieValue(name = "token", required = false) String token) {
         List<MemberReservationResponse> allMemberReservations = reservationService.findAllMemberReservations(token);
         return ResponseEntity.ok(allMemberReservations);
     }

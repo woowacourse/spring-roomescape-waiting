@@ -6,7 +6,8 @@ import roomescape.reservation.domain.Reservation;
 
 public class ReservationSpecification {
 
-    public static Specification<Reservation> getReservationSpecification(Long themeId, Long memberId, LocalDate from, LocalDate to) {
+    public static Specification<Reservation> getReservationSpecification(Long themeId, Long memberId, LocalDate from,
+                                                                         LocalDate to) {
         Specification<Reservation> specification = Specification.where(null);
         if (themeId != null) {
             specification = specification.and(ReservationSpecification.equalThemeId(themeId));

@@ -2,17 +2,17 @@ package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
-import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.UserReservationRequest;
 import roomescape.exception.InvalidRequestException;
 import roomescape.exception.NotFoundException;
+import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.UserReservationRequest;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @Component
@@ -22,7 +22,8 @@ public class ReservationChecker {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationChecker(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, MemberRepository memberRepository) {
+    public ReservationChecker(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              MemberRepository memberRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;

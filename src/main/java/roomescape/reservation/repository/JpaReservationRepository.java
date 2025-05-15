@@ -37,8 +37,10 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberIdAndThemeIdAndDateRange(Long memberId, Long themeId, LocalDate from, LocalDate to) {
-        Specification<Reservation> specification = ReservationSpecification.getReservationSpecification(themeId, memberId, from, to);
+    public List<Reservation> findByMemberIdAndThemeIdAndDateRange(Long memberId, Long themeId, LocalDate from,
+                                                                  LocalDate to) {
+        Specification<Reservation> specification = ReservationSpecification.getReservationSpecification(themeId,
+                memberId, from, to);
         return reservationListCrudRepository.findAll(specification);
     }
 

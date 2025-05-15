@@ -1,5 +1,9 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -24,18 +28,16 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 class ReservationServiceTest {
 
     private final ReservationRepository reservationRepository = FakeReservationRepositoryFixture.create();
     private final ReservationTimeRepository reservationTimeRepository = FakeReservationTimeRepositoryFixture.create();
     private final ThemeRepository themeRepository = FakeThemeRepositoryFixture.create();
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
-    private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository, themeRepository, memberRepository);
-    private final ReservationService reservationService = new ReservationService(reservationRepository, reservationChecker, new FakeTokenProvider());
+    private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository,
+            themeRepository, memberRepository);
+    private final ReservationService reservationService = new ReservationService(reservationRepository,
+            reservationChecker, new FakeTokenProvider());
 
     @Nested
     @DisplayName("예약 조회")
@@ -71,7 +73,8 @@ class ReservationServiceTest {
             LocalDate to = LocalDate.now().plusDays(10);
 
             // when
-            List<ReservationResponse> responses = reservationService.searchReservations(targetMemberId, targetThemeId, from, to);
+            List<ReservationResponse> responses = reservationService.searchReservations(targetMemberId, targetThemeId,
+                    from, to);
 
             // then
             assertAll(
@@ -197,7 +200,8 @@ class ReservationServiceTest {
             long targetId = 10L;
 
             // when & then
-            assertThatThrownBy(() -> reservationService.deleteReservation(targetId)).isInstanceOf(NotFoundException.class);
+            assertThatThrownBy(() -> reservationService.deleteReservation(targetId)).isInstanceOf(
+                    NotFoundException.class);
         }
     }
 }

@@ -32,7 +32,8 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
             throw new DuplicateKeyException("동일한 시간이 존재합니다.");
         }
 
-        ReservationTime newReservationTime = new ReservationTime(reservationTimeId.getAndIncrement(), reservationTime.getStartAt());
+        ReservationTime newReservationTime = new ReservationTime(reservationTimeId.getAndIncrement(),
+                reservationTime.getStartAt());
         reservationTimes.add(newReservationTime);
         return newReservationTime;
     }

@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.member.dto.MemberResponse;
 import roomescape.auth.dto.RegistrationRequest;
 import roomescape.auth.dto.TokenResponse;
-import roomescape.exception.UnauthorizedAccessException;
 import roomescape.auth.service.LoginService;
-import roomescape.member.service.MemberService;
 import roomescape.auth.service.SignupService;
+import roomescape.exception.UnauthorizedAccessException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.dto.MemberResponse;
+import roomescape.member.service.MemberService;
 
 @RestController
 public class AuthController {
@@ -54,7 +54,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> processLogin(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<Void> processLogin(@Valid @RequestBody LoginRequest loginRequest,
+                                             HttpServletResponse response) {
         TokenResponse tokenResponse = loginService.createToken(loginRequest);
 
         Cookie cookie = new Cookie("token", tokenResponse.accessToken());

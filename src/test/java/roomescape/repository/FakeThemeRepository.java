@@ -29,13 +29,15 @@ public class FakeThemeRepository implements ThemeRepository {
     @Override
     public Theme save(Theme theme) {
         long count = themes.stream()
-                .filter(t -> t.getName().equals(theme.getName()) && t.getDescription().equals(theme.getDescription()) && t.getThumbnail().equals(theme.getThumbnail()))
+                .filter(t -> t.getName().equals(theme.getName()) && t.getDescription().equals(theme.getDescription())
+                        && t.getThumbnail().equals(theme.getThumbnail()))
                 .count();
         if (count != 0) {
             throw new DuplicateKeyException("동일한 테마가 존재합니다.");
         }
 
-        Theme newTheme = new Theme(themeId.getAndIncrement(), theme.getName(), theme.getDescription(), theme.getThumbnail());
+        Theme newTheme = new Theme(themeId.getAndIncrement(), theme.getName(), theme.getDescription(),
+                theme.getThumbnail());
         themes.add(newTheme);
         return newTheme;
     }

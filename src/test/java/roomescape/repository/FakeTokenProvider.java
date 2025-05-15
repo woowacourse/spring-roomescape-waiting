@@ -1,7 +1,7 @@
 package roomescape.repository;
 
-import roomescape.member.domain.Member;
 import roomescape.exception.InvalidAuthorizationException;
+import roomescape.member.domain.Member;
 import roomescape.util.TokenProvider;
 
 public class FakeTokenProvider implements TokenProvider {
@@ -13,7 +13,7 @@ public class FakeTokenProvider implements TokenProvider {
 
     @Override
     public Long getMemberIdFromToken(String token) {
-        if(token.equals("invalid")) {
+        if (token.equals("invalid")) {
             throw new InvalidAuthorizationException("유효하지 않습니다.");
         }
         return 1L;

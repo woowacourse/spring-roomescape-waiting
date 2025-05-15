@@ -10,7 +10,9 @@ public class CookieTokenExtractor {
     public String extract(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
 
-        if (cookies == null) return "";
+        if (cookies == null) {
+            return "";
+        }
 
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(TOKEN)) {

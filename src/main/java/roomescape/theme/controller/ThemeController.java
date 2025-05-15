@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.exception.UnauthorizedAccessException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
-import roomescape.exception.UnauthorizedAccessException;
 import roomescape.theme.service.ThemeService;
 
 @RestController
@@ -35,7 +35,8 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> addTheme(@Valid @RequestBody final ThemeCreateRequest requestDto, Member member) {
+    public ResponseEntity<ThemeResponse> addTheme(@Valid @RequestBody final ThemeCreateRequest requestDto,
+                                                  Member member) {
         if (Role.isUser(member.getRole())) {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
         }

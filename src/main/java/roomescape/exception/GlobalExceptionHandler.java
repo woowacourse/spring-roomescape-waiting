@@ -30,7 +30,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public ProblemDetail handleIllegalStateException(IllegalStateException ex, HttpServletRequest request) {
-        return GlobalProblemDetail.of(HttpStatus.SERVICE_UNAVAILABLE, List.of(ex.getMessage()), request.getRequestURI());
+        return GlobalProblemDetail.of(HttpStatus.SERVICE_UNAVAILABLE, List.of(ex.getMessage()),
+                request.getRequestURI());
     }
 
     @ExceptionHandler(ConstrainedDataException.class)
@@ -39,12 +40,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        return GlobalProblemDetail.of(HttpStatus.BAD_REQUEST, List.of("[ERROR] 입력한 값의 형식이 올바르지 않습니다."), request.getRequestURI());
+    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex,
+                                                               HttpServletRequest request) {
+        return GlobalProblemDetail.of(HttpStatus.BAD_REQUEST, List.of("[ERROR] 입력한 값의 형식이 올바르지 않습니다."),
+                request.getRequestURI());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
+                                                               HttpServletRequest request) {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -55,7 +59,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidAuthorizationException.class)
-    public ProblemDetail handleInvalidAuthorizationException(InvalidAuthorizationException ex, HttpServletRequest request) {
+    public ProblemDetail handleInvalidAuthorizationException(InvalidAuthorizationException ex,
+                                                             HttpServletRequest request) {
         return GlobalProblemDetail.of(HttpStatus.UNAUTHORIZED, List.of(ex.getMessage()), request.getRequestURI());
     }
 
@@ -65,7 +70,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ProblemDetail handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    public ProblemDetail handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,
+                                                                   HttpServletRequest request) {
         MethodParameter parameter = ex.getParameter();
         return GlobalProblemDetail.of(HttpStatus.BAD_REQUEST,
                 List.of("[ERROR] " + parameter.getParameterName() + " 값의 형식이 올바르지 않습니다."),

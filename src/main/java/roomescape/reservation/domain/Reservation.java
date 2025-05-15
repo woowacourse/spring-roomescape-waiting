@@ -11,9 +11,9 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.time.LocalDate;
 import java.util.Objects;
+import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.member.domain.Member;
 
 @Entity
 public class Reservation {
@@ -40,7 +40,8 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
+                       ReservationStatus status) {
         validateMember(member);
         validateDate(date);
         validateReservationTime(time);
@@ -104,7 +105,9 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id);
     }

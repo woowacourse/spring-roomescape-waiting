@@ -1,5 +1,7 @@
 package roomescape.reservationtime.controller;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalTime;
@@ -17,8 +19,6 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.dto.ReservationTimeCreateRequest;
-
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

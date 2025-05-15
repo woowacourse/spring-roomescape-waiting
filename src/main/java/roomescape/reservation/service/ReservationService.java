@@ -3,14 +3,14 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.exception.DuplicateContentException;
+import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
-import roomescape.exception.DuplicateContentException;
-import roomescape.exception.NotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.util.TokenProvider;
 
@@ -21,7 +21,8 @@ public class ReservationService {
     private final ReservationChecker reservationChecker;
     private final TokenProvider tokenProvider;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker, TokenProvider tokenProvider) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker,
+                              TokenProvider tokenProvider) {
         this.reservationRepository = reservationRepository;
         this.reservationChecker = reservationChecker;
         this.tokenProvider = tokenProvider;
@@ -38,7 +39,8 @@ public class ReservationService {
     }
 
     private ReservationResponse createReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId())) {
             throw new DuplicateContentException("[ERROR] 해당 날짜와 테마로 이미 예약된 내역이 존재합니다.");
         }
         Reservation newReservation = reservationRepository.save(reservation);
@@ -49,15 +51,18 @@ public class ReservationService {
         List<Reservation> allReservations = reservationRepository.findAll();
 
         return allReservations.stream()
-                .map(reservation -> ReservationResponse.from(reservation, reservation.getTime(), reservation.getTheme()))
+                .map(reservation -> ReservationResponse.from(reservation, reservation.getTime(),
+                        reservation.getTheme()))
                 .toList();
     }
 
     public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate from, LocalDate to) {
-        List<Reservation> searchResults = reservationRepository.findByMemberIdAndThemeIdAndDateRange(memberId, themeId, from, to);
+        List<Reservation> searchResults = reservationRepository.findByMemberIdAndThemeIdAndDateRange(memberId, themeId,
+                from, to);
 
         return searchResults.stream()
-                .map(reservation -> ReservationResponse.from(reservation, reservation.getTime(), reservation.getTheme()))
+                .map(reservation -> ReservationResponse.from(reservation, reservation.getTime(),
+                        reservation.getTheme()))
                 .toList();
     }
 

@@ -44,7 +44,9 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ReservationTime that = (ReservationTime) o;
         return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
     }

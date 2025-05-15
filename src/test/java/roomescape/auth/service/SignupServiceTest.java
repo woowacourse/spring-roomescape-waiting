@@ -1,14 +1,14 @@
 package roomescape.auth.service;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.dto.RegistrationRequest;
 import roomescape.exception.DuplicateContentException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.member.repository.MemberRepository;
-
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("사용자 생성")
 class SignupServiceTest {

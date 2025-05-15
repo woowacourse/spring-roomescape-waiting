@@ -22,7 +22,8 @@ public record ReservationRequest(
         @PositiveOrZero(message = "[ERROR] id는 양수여야 합니다.") Long memberId
 ) {
 
-    public Reservation createWithoutId(ReservationTime reservationTime, Theme theme, Member member, ReservationStatus status) {
+    public Reservation createWithoutId(ReservationTime reservationTime, Theme theme, Member member,
+                                       ReservationStatus status) {
         return new Reservation(null, member, date, reservationTime, theme, status);
     }
 }
