@@ -65,7 +65,7 @@ public class AuthApiTest {
     }
 
     @Test
-    void 잘못된_값으로_로그인하면_예외가_발생한다() {
+    void 잘못된_아이디로_로그인하면_예외가_발생한다() {
         // given
         final String email = "test1234@test.com";
         final String password = "1234";
@@ -116,5 +116,75 @@ public class AuthApiTest {
 
         // then
         assertThat(actual).isEqualTo("엠제이");
+    }
+
+    @Test
+    void 잘못된_비밀번호로_로그인하면_예외가_발생한다() {
+        // given
+        final String email = "test1@test.com";
+        final String password = "wrong_password";
+
+        final LoginRequest request = new LoginRequest(email, password);
+
+        // when
+        final String message = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(404)
+                .extract()
+                .asString();
+
+        // then
+        assertThat(message).isEqualTo("회원 정보가 존재하지 않습니다.");
+    }
+
+    @Test
+    void 토큰없이_로그인_체크를_하면_예외가_발생한다() {
+        // given
+        final String message = RestAssured.given().log().all()
+                .when().get("/login/check")
+                .then().log().all()
+                .statusCode(401)
+                .extract()
+                .asString();
+
+        // when & then
+        assertThat(message).isEqualTo("로그인이 필요합니다.");
+    }
+
+    @Test
+    void 만료된_토큰으로_로그인_체크를_하면_예외가_발생한다() {
+        // given
+        final String expiredToken = "expired_token";
+
+        final String message = RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, expiredToken)
+                .when().get("/login/check")
+                .then().log().all()
+                .statusCode(401)
+                .extract()
+                .asString();
+
+        // when & then
+        assertThat(message).isEqualTo("로그인 정보가 유효하지 않습니다.");
+    }
+
+    @Test
+    void 유효하지_않은_이메일_형식으로_로그인하면_예외가_발생한다() {
+        // given
+        final String invalidEmail = "invalid-email";
+        final String password = "1234";
+
+        final LoginRequest request = new LoginRequest(invalidEmail, password);
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(400);
     }
 }
