@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.reservation.Reservation;
@@ -28,28 +28,24 @@ import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
 
+@DataJpaTest
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
     @Autowired
-    private ReservationService service;
-
-    @Autowired
     private ReservationRepository reservationRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private ThemeRepository themeRepository;
-
     @Autowired
     private TimeSlotRepository timeSlotRepository;
+    private ReservationService service;
 
     @BeforeEach
     void setUp() {
+        service = new ReservationService(reservationRepository, timeSlotRepository, themeRepository);
         userRepository.save(JUNK_USER);
         themeRepository.save(JUNK_THEME);
         timeSlotRepository.save(JUNK_TIME_SLOT);

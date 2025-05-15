@@ -26,13 +26,10 @@ class UserServiceTest {
 
     @Autowired
     private UserService service;
-
     @Autowired
     private ReservationRepository reservationRepository;
-
     @Autowired
     private TimeSlotRepository timeSlotRepository;
-
     @Autowired
     private ThemeRepository themeRepository;
 

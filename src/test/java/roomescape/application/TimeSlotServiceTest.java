@@ -7,28 +7,35 @@ import static roomescape.DomainFixtures.JUNK_THEME;
 import static roomescape.DomainFixtures.JUNK_USER;
 
 import java.time.LocalTime;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DateUtils;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.exception.InUseException;
 
+@DataJpaTest
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TimeSlotServiceTest {
 
     @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
     private TimeSlotService service;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    @BeforeEach
+    void setUp() {
+        service = new TimeSlotService(reservationRepository, timeSlotRepository);
+    }
 
     @Test
     @DisplayName("예약 시간을 추가할 수 있다.")
