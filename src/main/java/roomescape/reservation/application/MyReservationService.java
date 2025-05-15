@@ -22,7 +22,7 @@ public class MyReservationService {
             .toList();
     }
 
-    private static MyReservationServiceResponse buildMyReservationServiceResponse(
+    private MyReservationServiceResponse buildMyReservationServiceResponse(
         Reservation reservation
     ) {
         ReservationStatus reservationStatus = ReservationStatus.getStatus(
