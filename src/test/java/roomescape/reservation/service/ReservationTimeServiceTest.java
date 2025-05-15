@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -31,14 +31,8 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
-@JdbcTest
-@Import({
-        ReservationRepository.class,
-        ReservationTimeRepository.class,
-        ThemeRepository.class,
-        MemberRepository.class,
-        ReservationTimeService.class
-})
+@DataJpaTest
+@Import(ReservationTimeService.class)
 class ReservationTimeServiceTest {
 
     @Autowired

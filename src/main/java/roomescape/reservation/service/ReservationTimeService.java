@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.common.exception.AlreadyInUseException;
+import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
@@ -47,6 +48,9 @@ public class ReservationTimeService {
     public void delete(final Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new AlreadyInUseException("Reservation is already in use");
+        }
+        if (!reservationTimeRepository.existsById(id)) {
+            throw new EntityNotFoundException("존재하지 않는 예약 시간입니다.");
         }
         reservationTimeRepository.deleteById(id);
     }

@@ -6,33 +6,19 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.utils.JdbcTemplateUtils;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeControllerTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void setUp() {
-        JdbcTemplateUtils.deleteAllTables(jdbcTemplate);
-        String sql = "insert into member (name, email, password, role) values ('어드민', 'admin@woowa.com', '12341234', 'ADMIN')";
-        jdbcTemplate.update(sql);
-    }
 
     @DisplayName("예약 시간을 추가한다.")
     @Test

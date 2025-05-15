@@ -46,10 +46,19 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:h2:mem:test-database
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+
   sql:
     init:
       mode: always
-      data-locations:
+      data-locations: classpath:test-data.sql
 
 security:
   jwt:

@@ -13,10 +13,11 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
@@ -35,13 +36,8 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
-@JdbcTest
-@Import({ReservationRepository.class,
-        ReservationTimeRepository.class,
-        ThemeRepository.class,
-        MemberRepository.class,
-        ReservationService.class
-})
+@DataJpaTest
+@Import(ReservationService.class)
 class ReservationServiceTest {
 
     private final LocalDateTime now = LocalDateTime.now();
@@ -103,7 +99,7 @@ class ReservationServiceTest {
         ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
 
         // when
-        ReservationResponse result = reservationService.create(requestDto, savedMember);
+        ReservationResponse result = reservationService.create(requestDto, LoginMember.of(savedMember));
 
         // then
         SoftAssertions softAssertions = new SoftAssertions();
@@ -133,10 +129,10 @@ class ReservationServiceTest {
         LocalDate date = nextDay();
 
         ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
-        reservationService.create(requestDto, savedMember);
+        reservationService.create(requestDto, LoginMember.of(savedMember));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(requestDto, savedMember))
+        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
                 .isInstanceOf(AlreadyInUseException.class);
     }
 
@@ -158,7 +154,7 @@ class ReservationServiceTest {
         ReservationRequest requestDto = new ReservationRequest(date, timeId, themeId);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(requestDto, savedMember))
+        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -175,7 +171,7 @@ class ReservationServiceTest {
         Long notExistId = 1000L;
         ReservationRequest requestDto = new ReservationRequest(date, notExistId, themeId);
 
-        assertThatThrownBy(() -> reservationService.create(requestDto, savedMember))
+        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -193,7 +189,7 @@ class ReservationServiceTest {
         Long notExistId = 1000L;
         ReservationRequest requestDto = new ReservationRequest(date, timeId, notExistId);
 
-        assertThatThrownBy(() -> reservationService.create(requestDto, savedMember))
+        assertThatThrownBy(() -> reservationService.create(requestDto, LoginMember.of(savedMember)))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

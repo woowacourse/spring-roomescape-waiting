@@ -6,18 +6,16 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.utils.JdbcTemplateUtils;
+import roomescape.reservation.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -25,14 +23,7 @@ import roomescape.utils.JdbcTemplateUtils;
 class ThemeControllerTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void setUp() {
-        JdbcTemplateUtils.deleteAllTables(jdbcTemplate);
-        String sql = "insert into member (name, email, password, role) values ('어드민', 'admin@woowa.com', '12341234', 'ADMIN')";
-        jdbcTemplate.update(sql);
-    }
+    private ThemeRepository themeRepository;
 
     @DisplayName("테마를 추가한다.")
     @Test
@@ -80,7 +71,11 @@ class ThemeControllerTest {
         params.put("description", "테마1");
         params.put("thumbnail", "www.m.com");
 
-        int themeId = addTheme(params);
+        int themeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/themes")
+                .then().extract().path("id");
 
         RestAssured.given().log().all()
                 .when().delete("/themes/" + themeId)

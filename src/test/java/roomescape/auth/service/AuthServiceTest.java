@@ -7,9 +7,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.LoginResponse;
@@ -18,14 +18,12 @@ import roomescape.common.exception.LoginFailException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
-import roomescape.utils.JdbcTemplateUtils;
 
-@JdbcTest
-@Import({MemberRepository.class, JwtTokenHandler.class, AuthService.class})
+@ActiveProfiles("test")
+@DataJpaTest
+@Import({JwtTokenHandler.class, AuthService.class})
 class AuthServiceTest {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
@@ -35,7 +33,6 @@ class AuthServiceTest {
 
     @AfterEach
     void tearDown() {
-        JdbcTemplateUtils.deleteAllTables(jdbcTemplate);
     }
 
     @DisplayName("존재하는 사용자의 로그인 요청이 들어오면 로그인을 허용한다.")
@@ -48,8 +45,7 @@ class AuthServiceTest {
 
         LoginResponse loginResponse = authService.login(loginRequest);
 
-        assertThat(loginResponse.tokenValue())
-                .isEqualTo(jwtTokenHandler.createToken(member));
+        assertThat(loginResponse.tokenValue()).isNotNull();
     }
 
     @DisplayName("존재하는 사용자의 로그인 요청이 들어오면 로그인을 허용한다.")

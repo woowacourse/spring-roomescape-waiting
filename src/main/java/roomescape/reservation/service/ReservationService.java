@@ -19,7 +19,12 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.*;
+import roomescape.reservation.dto.BookedReservationTimeResponse;
+import roomescape.reservation.dto.FilteringReservationRequest;
+import roomescape.reservation.dto.MyReservationsResponse;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -120,7 +125,9 @@ public class ReservationService {
     }
 
     public void delete(final Long id) {
-        // TODO: 존재 여부 확인해서 EntityNotFoundException 검증
+        if (!reservationRepository.existsById(id)) {
+            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
+        }
         reservationRepository.deleteById(id);
     }
 
