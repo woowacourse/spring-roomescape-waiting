@@ -9,6 +9,7 @@
 - 관리자 메인 페이지: localhost:8080/admin
 - 예약 관리 페이지: localhost:8080/admin/reservation
 - 시간 관리 페이지: localhost:8080/admin/time
+- 내 예약 페이지: localhost:8080/reservation-mine
 
 # API 명세
 
