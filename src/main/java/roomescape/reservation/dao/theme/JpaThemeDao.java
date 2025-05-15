@@ -16,7 +16,7 @@ public interface JpaThemeDao extends JpaRepository<Theme, Long> {
         SELECT t.*
         FROM reservation r
             JOIN theme t ON r.theme_id = t.id
-        WHERE r.date BETWEEN :startDate AND :endDAte
+        WHERE r.date BETWEEN :startDate AND :endDate
         GROUP BY t.id
         ORDER BY COUNT(r.id) DESC
         LIMIT :limitCount
