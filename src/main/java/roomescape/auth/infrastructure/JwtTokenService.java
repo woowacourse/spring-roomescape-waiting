@@ -9,6 +9,7 @@ import java.util.Objects;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import roomescape.auth.application.TokenService;
 import roomescape.auth.config.JwtProperties;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.global.exception.AuthenticationException.InvalidTokenException;

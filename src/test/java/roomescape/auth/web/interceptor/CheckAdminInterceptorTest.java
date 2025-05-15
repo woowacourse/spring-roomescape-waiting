@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import roomescape.auth.dto.AuthenticatedMember;
-import roomescape.auth.infrastructure.TokenService;
+import roomescape.auth.application.TokenService;
 import roomescape.auth.web.constant.AuthConstant;
 import roomescape.auth.web.support.AuthorizationExtractor;
 import roomescape.member.model.Role;

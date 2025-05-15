@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.dto.AuthenticatedMember;
-import roomescape.auth.infrastructure.TokenService;
+import roomescape.auth.application.TokenService;
 import roomescape.auth.web.support.AuthorizationExtractor;
 import roomescape.global.exception.AuthorizationException;
 import roomescape.member.model.Role;

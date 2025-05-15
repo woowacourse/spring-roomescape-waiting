@@ -1,4 +1,4 @@
-package roomescape.auth.infrastructure;
+package roomescape.auth.application;
 
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.member.model.Member;
