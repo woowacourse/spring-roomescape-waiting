@@ -65,6 +65,20 @@ class ReservationRestControllerTest {
     }
 
     @Test
+    void 과거_시간으로_예약을_추가할_수_없다() {
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final Map<String, String> reservationParams = pastReservationParams();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(memberCookies)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
     void 로그인_상태가_아니면_예약을_추가할_수_없다() {
         final Map<String, String> reservationParams = reservationParams1();
 
@@ -259,6 +273,19 @@ class ReservationRestControllerTest {
 
         return createReservationParams(date, timeId, themeId);
     }
+
+    private Map<String, String> pastReservationParams() {
+        final String date = LocalDate.now().minusDays(5).toString();
+        final String timeId = createReservationTimeResponses.get(0).extract().body()
+                .as(Map.class)
+                .get("id").toString();
+        final String themeId = createThemeResponses.get(0).extract().body()
+                .as(Map.class)
+                .get("id").toString();
+
+        return createReservationParams(date, timeId, themeId);
+    }
+
 
     private Map<String, String> createReservationParams(
             final String date,
