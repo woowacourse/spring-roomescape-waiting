@@ -127,23 +127,22 @@ class ReservationServiceTest {
     void test6() {
         //given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
-        ReservationTime savedReservationTime = this.reservationTimeRepository.save(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
         Theme theme = new Theme("테마", "공포", "image");
-        Theme savedTheme = this.themeRepository.save(theme);
+        Theme savedTheme = themeRepository.save(theme);
 
         Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
-        Member savedMember = this.memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
 
         Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                 savedMember, LocalDate.now());
-        Reservation savedReservation = this.reservationRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
         LoginMember loginMember = new LoginMember(savedMember);
 
         //when
-        List<MemberReservationResponseDto> response = this.reservationService.getReservationsOfMember(
-                loginMember);
+        List<MemberReservationResponseDto> response = reservationService.getReservationsOfMember(loginMember);
 
         List<MemberReservationResponseDto> comparedResponse = List.of(
                 new MemberReservationResponseDto(savedReservation));

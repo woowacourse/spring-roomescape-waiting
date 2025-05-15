@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/reservation")
 public class ReservationViewController {
+
     @GetMapping
     public String reservationView() {
         return "reservation";

@@ -2,7 +2,6 @@ package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,20 +10,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.model.Member;
-import roomescape.model.Role;
 import roomescape.service.JwtProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationAdminAcceptanceTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -33,10 +24,7 @@ class ReservationAdminAcceptanceTest {
 
     @BeforeEach
     void setUp() {
-        String email = "example@gmail.com";
-        Member member = new Member("히로", email, "password", Role.ADMIN);
-
-        // insertNewRMemberWithJdbcTemplate(member);
+        final String email = "example@gmail.com";
 
         this.token = jwtProvider.createToken(email);
     }
@@ -79,22 +67,5 @@ class ReservationAdminAcceptanceTest {
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201);
-    }
-
-    private Long insertNewRMemberWithJdbcTemplate(final Member member) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO member (name, email, password, role) VALUES (?, ?, ?, ?)",
-                    new String[]{"id"});
-            ps.setString(1, member.getName());
-            ps.setString(2, member.getEmail());
-            ps.setString(3, member.getPassword());
-            ps.setString(4, member.getRole().getValue());
-            return ps;
-        }, keyHolder);
-
-        return keyHolder.getKey().longValue();
     }
 }

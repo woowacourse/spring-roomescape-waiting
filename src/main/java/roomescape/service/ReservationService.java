@@ -9,10 +9,7 @@ import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
 import roomescape.dto.response.MemberReservationResponseDto;
-import roomescape.dto.response.MemberResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
-import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -46,15 +43,7 @@ public class ReservationService {
         assertReservationIsNotDuplicated(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
-        ReservationTime time = reservation.getReservationTime();
-        Theme theme = reservation.getTheme();
-        return new ReservationResponseDto(
-                savedReservation.getId(),
-                new MemberResponseDto(savedReservation.getMember()),
-                savedReservation.getDate(),
-                new ReservationTimeResponseDto(time.getId(), time.getStartAt()),
-                new ThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail())
-        );
+        return ReservationResponseDto.from(savedReservation);
     }
 
     public List<ReservationResponseDto> getAllReservations() {
@@ -91,14 +80,26 @@ public class ReservationService {
     }
 
     private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
-        ReservationTime foundTime = reservationTimeRepository.findById(reservationRegisterDto.timeId())
-                .orElseThrow(() -> new NotFoundException("id 에 해당하는 예약 시각이 존재하지 않습니다."));
-
-        Theme foundTheme = themeRepository.findById(reservationRegisterDto.themeId())
-                .orElseThrow(() -> new NotFoundException("id 에 해당하는 테마가 존재하지 않습니다."));
-
+        ReservationTime time = findTimeById(reservationRegisterDto.timeId());
+        Theme theme = findThemeById(reservationRegisterDto.themeId());
         Member member = findMemberById(loginMember.id());
-        return reservationRegisterDto.convertToReservation(foundTime, foundTheme, member);
+
+        return reservationRegisterDto.convertToReservation(time, theme, member);
+    }
+
+    private ReservationTime findTimeById(final Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id 에 해당하는 예약 시각이 존재하지 않습니다."));
+    }
+
+    private Theme findThemeById(final Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id 에 해당하는 테마가 존재하지 않습니다."));
+    }
+
+    private Member findMemberById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자에 대한 예약 요청입니다."));
     }
 
     private void assertReservationIsNotDuplicated(Reservation reservation) {
@@ -108,8 +109,4 @@ public class ReservationService {
                 });
     }
 
-    private Member findMemberById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자에 대한 예약 요청입니다."));
-    }
 }
