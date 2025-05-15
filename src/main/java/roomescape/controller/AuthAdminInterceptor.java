@@ -3,10 +3,12 @@ package roomescape.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Role;
 import roomescape.util.JwtTokenProvider;
 
+@Component
 public class AuthAdminInterceptor implements HandlerInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;

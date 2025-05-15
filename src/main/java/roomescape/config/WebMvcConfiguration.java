@@ -7,28 +7,27 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.controller.AuthAdminInterceptor;
 import roomescape.controller.AuthArgumentResolver;
-import roomescape.service.MemberService;
-import roomescape.util.JwtTokenProvider;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private final MemberService memberService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthAdminInterceptor authAdminInterceptor;
+    private final AuthArgumentResolver authArgumentResolver;
 
-    public WebMvcConfiguration(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
-        this.memberService = memberService;
-        this.jwtTokenProvider = jwtTokenProvider;
+    public WebMvcConfiguration(final AuthAdminInterceptor authAdminInterceptor,
+                               final AuthArgumentResolver authArgumentResolver) {
+        this.authAdminInterceptor = authAdminInterceptor;
+        this.authArgumentResolver = authArgumentResolver;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AuthAdminInterceptor(jwtTokenProvider))
+        registry.addInterceptor(authAdminInterceptor)
                 .addPathPatterns("/admin/**");
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthArgumentResolver(memberService, jwtTokenProvider));
+        resolvers.add(authArgumentResolver);
     }
 }

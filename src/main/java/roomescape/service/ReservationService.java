@@ -91,6 +91,6 @@ public class ReservationService {
 
     public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
         List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
-        return reservations.stream().map(reservation -> new MyReservationResponseDto(reservation)).toList();
+        return reservations.stream().map(MyReservationResponseDto::new).toList();
     }
 }
