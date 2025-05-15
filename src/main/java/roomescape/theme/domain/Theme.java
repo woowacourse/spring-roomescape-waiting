@@ -21,15 +21,12 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     @Column(nullable = false)
     private String name;
 
-    @NonNull
     @Column(nullable = false)
     private String description;
 
-    @NonNull
     @Column(nullable = false)
     private String thumbnail;
 

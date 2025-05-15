@@ -32,26 +32,21 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     @Column(nullable = false)
     private LocalDate date;
 
-    @NonNull
     @JoinColumn(nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private ReservationTime time;
 
-    @NonNull
     @JoinColumn(nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
 
-    @NonNull
     @JoinColumn(nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
-    @NonNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ReservationStatus status = ReservationStatus.BOOKED;

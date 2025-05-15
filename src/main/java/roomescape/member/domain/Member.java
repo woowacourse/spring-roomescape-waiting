@@ -23,19 +23,15 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     @Column(nullable = false)
     private String name;
 
-    @NonNull
     @Column(nullable = false)
     private String email;
 
-    @NonNull
     @Column(nullable = false)
     private String password;
 
-    @NonNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberRole role;
