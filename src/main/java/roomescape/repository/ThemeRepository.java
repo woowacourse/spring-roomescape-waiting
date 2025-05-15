@@ -14,21 +14,18 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     boolean existsByName(String name);
 
     @Query(value = """
-            SELECT t.id AS id,
-            t.name AS name,
-            t.description AS description,
-            t.thumbnail AS thumbnail,
-            COUNT(r.id) AS reservation_count
-            FROM Theme as t
-            INNER JOIN Reservation as r ON t.id = r.theme.id
-            WHERE r.date < :startDate
-            AND r.date >= :endDate
+            SELECT t.*
+            FROM theme t
+            INNER JOIN reservation r ON t.id = r.theme_id
+            WHERE r.date >= :startDate
+            AND r.date <  :endDate
             GROUP BY t.id
-            ORDER BY reservation_count DESC
+            ORDER BY COUNT(r.id) DESC
             LIMIT :size
-            """)
+            """, nativeQuery = true)
     List<Theme> findTopReservedThemesSince(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            @Param("size") int size);
+            @Param("size") int size
+    );
 }
