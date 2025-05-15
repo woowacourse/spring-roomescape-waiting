@@ -1,5 +1,7 @@
 package roomescape.time.service.usecase;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,13 +20,10 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.time.repository.FakeReservationTimeRepository;
-import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
+import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,13 +55,14 @@ class ReservationTimeCommandUseCaseTest {
     @DisplayName("예약 시간을 생성할 수 있다")
     void createReservationTime() {
         // given
-        final CreateReservationTimeServiceRequest request = new CreateReservationTimeServiceRequest(LocalTime.of(12, 30));
+        final CreateReservationTimeServiceRequest request = new CreateReservationTimeServiceRequest(
+                LocalTime.of(12, 30));
 
         // when
         final ReservationTime reservationTime = reservationTimeCommandUseCase.create(request);
 
         // then
-        assertThat(reservationTime.getTime()).isEqualTo(LocalTime.of(12, 30));
+        assertThat(reservationTime.getStartAt()).isEqualTo(LocalTime.of(12, 30));
         assertThat(reservationTimeRepository.findById(reservationTime.getId()))
                 .isPresent();
     }
@@ -71,8 +71,9 @@ class ReservationTimeCommandUseCaseTest {
     @DisplayName("예약 시간을 삭제할 수 있다")
     void deleteReservationTime() {
         // given
-        final ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.withoutId(LocalTime.of(23, 30)));
-        final ReservationTimeId id = savedTime.getId();
+        final ReservationTime savedTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(LocalTime.of(23, 30)));
+        final Long id = savedTime.getId();
 
         // when
         reservationTimeCommandUseCase.delete(id);
@@ -85,7 +86,7 @@ class ReservationTimeCommandUseCaseTest {
     @DisplayName("존재하지 않는 예약 시간을 삭제하려 하면 예외가 발생한다")
     void deleteNonExistentReservationTime() {
         // given
-        final ReservationTimeId id = ReservationTimeId.from(100L);
+        final Long id = 100L;
 
         // when
         // then
@@ -97,7 +98,8 @@ class ReservationTimeCommandUseCaseTest {
     @DisplayName("참조 중인 예약 시간을 삭제하려 하면 예외가 발생한다")
     void deleteRefReservationTime() {
         // given
-        final ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.withoutId(LocalTime.of(23, 30)));
+        final ReservationTime savedTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(LocalTime.of(23, 30)));
 
         final Theme theme = Theme.withoutId(
                 ThemeName.from("공포"),
@@ -105,8 +107,8 @@ class ReservationTimeCommandUseCaseTest {
                 ThemeThumbnail.from("www.making.com"));
 
         final Member member = Member.withoutId(MemberName.from("강산"),
-                                MemberEmail.from("123@gmail.com"),
-                                Role.MEMBER);
+                MemberEmail.from("123@gmail.com"),
+                Role.MEMBER);
 
         final Reservation reservation = reservationRepository.save(Reservation.withoutId(
                 member,
@@ -126,8 +128,10 @@ class ReservationTimeCommandUseCaseTest {
     @DisplayName("추가하려는 시간이 이미 존재한다면, 예외가 발생한다")
     void existsTime() {
         // given
-        final ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.withoutId(LocalTime.of(23, 30)));
-        final CreateReservationTimeServiceRequest sameTimeRequest = new CreateReservationTimeServiceRequest(savedTime.getTime());
+        final ReservationTime savedTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(LocalTime.of(23, 30)));
+        final CreateReservationTimeServiceRequest sameTimeRequest = new CreateReservationTimeServiceRequest(
+                savedTime.getStartAt());
 
         // when & then
         assertThatThrownBy(() -> reservationTimeCommandUseCase.create(sameTimeRequest))

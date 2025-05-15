@@ -2,6 +2,12 @@ package roomescape;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,17 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.member.controller.dto.LoginRequest;
 import roomescape.member.controller.dto.SignupRequest;
-import roomescape.member.domain.Role;
 import roomescape.member.service.AuthService;
 import roomescape.reservation.controller.ReservationController;
-import roomescape.reservation.controller.dto.ReservationWebResponse;
-
-import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -55,8 +53,11 @@ public class MissionStepTest {
 
         authService.signup(new SignupRequest(memberEmail, memberPassword, "시소"));
         jdbcTemplate.update("""
-                INSERT INTO member (name, email, password, role) VALUES (?, ?, ?, ?)
-                """, "솔라", adminEmail, passwordEncoder.encode(memberPassword), Role.ADMIN.name());
+                INSERT INTO member (name, email, role) VALUES (?, ?, ?)
+                """, "솔라", adminEmail, 1);
+        jdbcTemplate.update("""
+                INSERT INTO account (password, member_id) VALUES (?, ?)
+                """, passwordEncoder.encode(memberPassword), 2);
 
         memberToken = authService.login(new LoginRequest(memberEmail, memberPassword));
         adminToken = authService.login(new LoginRequest(adminEmail, adminPassword));
@@ -236,15 +237,16 @@ public class MissionStepTest {
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)",
                 "공포", "설명", "엄지손톱");
 
-        jdbcTemplate.update("INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+        jdbcTemplate.update(
+                "INSERT INTO reservation (member_id, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 1, "2023-08-05", 1, 1);
 
-        final List<ReservationWebResponse> reservations = RestAssured.given().log().all()
+        final List<ReservationWithStatusResponse> reservations = RestAssured.given().log().all()
                 .cookie("token", memberToken)
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationWebResponse.class);
+                .jsonPath().getList(".", ReservationWithStatusResponse.class);
 
         final Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 

@@ -1,36 +1,33 @@
 package roomescape.reservation.service.usecase;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
-import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.FakeMemberRepository;
-import roomescape.member.repository.MemberRepositoryInterface;
-import roomescape.reservation.repository.FakeReservationRepository;
-import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
-import roomescape.reservation.service.dto.AvailableReservationTimeServiceResponse;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.repository.FakeReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
+import roomescape.reservation.service.dto.AvailableReservationTimeServiceResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
+import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.theme.repository.FakeThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +40,7 @@ class ReservationQueryUseCaseTest {
 
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
-    private MemberRepositoryInterface memberRepository;
+    private MemberRepository memberRepository;
 
     private ReservationTime reservationTime;
 
@@ -53,7 +50,8 @@ class ReservationQueryUseCaseTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
         memberRepository = new FakeMemberRepository();
-        reservationQueryUseCase = new ReservationQueryUseCase(reservationRepository, new ReservationTimeQueryUseCase(reservationTimeRepository));
+        reservationQueryUseCase = new ReservationQueryUseCase(reservationRepository,
+                new ReservationTimeQueryUseCase(reservationTimeRepository));
 
         reservationTime = reservationTimeRepository.save(ReservationTime.withoutId(LocalTime.of(18, 0)));
     }
@@ -68,11 +66,12 @@ class ReservationQueryUseCaseTest {
                         ThemeThumbnail.from("www.making.com")));
 
         final Member member = memberRepository.save(
-                Account.of(Member.withoutId(
-                                MemberName.from("강산"),
-                                MemberEmail.from("123@gmail.com"),
-                                Role.MEMBER),
-                        Password.from("1234")));
+                Member.withoutId(
+                        MemberName.from("강산"),
+                        MemberEmail.from("123@gmail.com"),
+                        Role.MEMBER
+                )
+        );
 
         final Reservation given1 = Reservation.withoutId(
                 member,
@@ -121,11 +120,11 @@ class ReservationQueryUseCaseTest {
                         ThemeThumbnail.from("www.making.com")));
 
         final Member member = memberRepository.save(
-                Account.of(Member.withoutId(
-                                MemberName.from("강산"),
-                                MemberEmail.from("123@gmail.com"),
-                                Role.MEMBER),
-                        Password.from("1234"))
+                Member.withoutId(
+                        MemberName.from("강산"),
+                        MemberEmail.from("123@gmail.com"),
+                        Role.MEMBER
+                )
         );
 
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
@@ -154,7 +153,7 @@ class ReservationQueryUseCaseTest {
                     .map(AvailableReservationTimeServiceResponse::startAt)
                     .findFirst()
                     .orElseThrow()
-            ).isEqualTo(booked.getTime());
+            ).isEqualTo(booked.getStartAt());
 
         });
     }
@@ -171,11 +170,11 @@ class ReservationQueryUseCaseTest {
                         ThemeThumbnail.from("www.making.com")));
 
         final Member member = memberRepository.save(
-                Account.of(Member.withoutId(
-                                MemberName.from("강산"),
-                                MemberEmail.from("123@gmail.com"),
-                                Role.MEMBER),
-                        Password.from("1234"))
+                Member.withoutId(
+                        MemberName.from("강산"),
+                        MemberEmail.from("123@gmail.com"),
+                        Role.MEMBER
+                )
         );
 
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
@@ -187,7 +186,7 @@ class ReservationQueryUseCaseTest {
                 theme));
 
         // when & then
-        assertThat(reservationQueryUseCase.getAllByMemberId(member.getId()))
+        assertThat(reservationQueryUseCase.getByMemberId(member.getId()))
                 .contains(reservation);
     }
 
@@ -203,11 +202,11 @@ class ReservationQueryUseCaseTest {
                         ThemeThumbnail.from("www.making.com")));
 
         final Member member = memberRepository.save(
-                Account.of(Member.withoutId(
-                                MemberName.from("강산"),
-                                MemberEmail.from("123@gmail.com"),
-                                Role.MEMBER),
-                        Password.from("1234"))
+                Member.withoutId(
+                        MemberName.from("강산"),
+                        MemberEmail.from("123@gmail.com"),
+                        Role.MEMBER
+                )
         );
 
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));

@@ -1,8 +1,8 @@
 package roomescape.reservation.repository;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -19,13 +19,13 @@ public class FakeReservationRepository implements ReservationRepository {
     private final AtomicLong index = new AtomicLong(1L);
 
     @Override
-    public boolean existsByParams(Long timeId) {
+    public boolean existsByTimeId(Long timeId) {
         return reservations.stream()
                 .anyMatch(reservation -> Objects.equals(reservation.getTime().getId(), timeId));
     }
 
     @Override
-    public boolean existsByParams(ReservationDate date, Long timeId, Long themeId) {
+    public boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> Objects.equals(reservation.getDate(), date)
                         && Objects.equals(reservation.getTime().getId(), timeId)
@@ -33,15 +33,8 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
-        return reservations.stream()
-                .filter(reservation -> Objects.equals(reservation.getId(), id))
-                .findFirst();
-    }
-
-    @Override
-    public List<Reservation> findByParams(Long memberId, Long themeId, ReservationDate from,
-                                          ReservationDate to) {
+    public List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
+                                                                    ReservationDate to) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getMember().getId(), memberId)
                         && Objects.equals(reservation.getTheme().getId(), themeId)
@@ -52,11 +45,10 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Long> findTimeIdByParams(ReservationDate date, Long themeId) {
+    public List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getDate(), date)
                         && Objects.equals(reservation.getTheme().getId(), themeId))
-                .map(reservation -> reservation.getTime().getId())
                 .toList();
     }
 
@@ -68,36 +60,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return new CopyOnWriteArrayList<>(reservations);
-    }
-
-    @Override
-    public Reservation save(Reservation reservation) {
-        Reservation saved = Reservation.withId(
-                index.getAndIncrement(),
-                reservation.getMember(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme());
-
-        reservations.add(saved);
-        return saved;
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        Reservation targetReservation = reservations.stream()
-                .filter(reservation -> Objects.equals(reservation.getId(), id))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("데이터베이스에 해당 id가 존재하지 않습니다."));
-
-        reservations.remove(targetReservation);
-    }
-
-    @Override
-    public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(ReservationDate startDate,
-                                                                                 ReservationDate endDate, int count) {
+    public List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit) {
         return reservations.stream()
                 .filter(reservation -> (reservation.getDate().getValue().isEqual(startDate.getValue()) ||
                         reservation.getDate().getValue().isAfter(startDate.getValue()))
@@ -108,13 +71,46 @@ public class FakeReservationRepository implements ReservationRepository {
                         Collectors.summingInt(reservation -> 1)
                 ))
                 .entrySet().stream()
-                .sorted(Map.Entry.<Theme, Integer>comparingByValue().reversed())
-                .limit(count)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (oldValue, newValue) -> oldValue,
-                        LinkedHashMap::new
-                ));
+                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+                .map(Entry::getKey)
+                .limit(limit)
+                .toList();
+
+    }
+
+    @Override
+    public Reservation save(Reservation reservation) {
+        Reservation saved = Reservation.withId(
+                index.getAndIncrement(),
+                reservation.getMember(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
+
+        reservations.add(saved);
+        return saved;
+    }
+
+    @Override
+    public List<Reservation> findAll() {
+        return new ArrayList<>(reservations);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        Reservation reservation = reservations.stream()
+                .filter(value -> Objects.equals(value.getId(), id))
+                .findFirst()
+                .orElseThrow(NotFoundException::new);
+
+        reservations.remove(reservation);
+    }
+
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return reservations.stream()
+                .filter(reservation -> Objects.equals(reservation.getId(), id))
+                .findFirst();
     }
 }

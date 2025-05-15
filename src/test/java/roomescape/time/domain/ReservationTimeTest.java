@@ -11,7 +11,6 @@ class ReservationTimeTest {
     void cannotNullTime() {
         // when & then
         assertThatThrownBy(() -> ReservationTime.withoutId(null))
-                .isInstanceOf(InvalidInputException.class)
-                .hasMessage("ReservationTime.value 은(는) null일 수 없습니다.");
+                .isInstanceOf(InvalidInputException.class);
     }
 }

@@ -11,11 +11,13 @@ import roomescape.member.auth.jwt.JwtTokenProvider;
 import roomescape.member.controller.dto.LoginRequest;
 import roomescape.member.controller.dto.MemberInfoResponse;
 import roomescape.member.controller.dto.SignupRequest;
+import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
 import roomescape.member.service.usecase.MemberCommandUseCase;
 import roomescape.member.service.usecase.MemberQueryUseCase;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class AuthServiceTest {
@@ -34,9 +36,10 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         FakeMemberRepository fakeMemberRepository = new FakeMemberRepository();
+        FakeAccountRepository fakeAccountRepository = new FakeAccountRepository();
         MemberService memberService = new MemberService(
-                new MemberCommandUseCase(fakeMemberRepository),
-                new MemberQueryUseCase(fakeMemberRepository)
+                new MemberCommandUseCase(fakeMemberRepository, fakeAccountRepository),
+                new MemberQueryUseCase(fakeMemberRepository, fakeAccountRepository)
         );
 
         authService = new AuthService(
@@ -61,7 +64,8 @@ class AuthServiceTest {
     void 이메일과_비밀번호로_로그인한다() {
         // given
         final String password = "1234";
-        final MemberInfoResponse memberInfoResponse = authService.signup(new SignupRequest("siso@gmail.com", password, "siso"));
+        final MemberInfoResponse memberInfoResponse = authService.signup(
+                new SignupRequest("siso@gmail.com", password, "siso"));
 
         final LoginRequest request = new LoginRequest(memberInfoResponse.email(), password);
 
@@ -115,7 +119,7 @@ class AuthServiceTest {
 
         final String token = authService.login(request);
 
-        assertThat(authService.get(token).getId().getValue())
+        assertThat(authService.get(token).getId())
                 .isEqualTo(memberInfo.id());
     }
 }

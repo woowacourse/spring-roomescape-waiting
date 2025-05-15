@@ -1,18 +1,17 @@
 package roomescape.theme.service.usecase;
 
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
-import roomescape.theme.repository.FakeThemeRepository;
-import roomescape.theme.service.dto.CreateThemeServiceRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
-
-import java.util.NoSuchElementException;
+import roomescape.theme.repository.FakeThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.service.dto.CreateThemeServiceRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -84,7 +83,7 @@ class ThemeCommandUseCaseTest {
     @DisplayName("저장되지 않은 테마를 삭제할 수 없다")
     void cannotDelete() {
         // given
-        final ThemeId themeId = ThemeId.from(100L);
+        final Long themeId = 100L;
 
         // when
         // then

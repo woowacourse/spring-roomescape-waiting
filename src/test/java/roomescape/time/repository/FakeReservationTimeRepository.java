@@ -18,7 +18,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public boolean existsByStartAt(LocalTime startAt) {
         return reservationTimes.stream()
-                .anyMatch(reservationTime -> Objects.equals(reservationTime.getTime(), startAt));
+                .anyMatch(reservationTime -> Objects.equals(reservationTime.getStartAt(), startAt));
     }
 
     @Override
@@ -39,7 +39,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     public ReservationTime save(ReservationTime reservationTime) {
         ReservationTime savedReservationTime = ReservationTime.withId(
                 index.getAndIncrement(),
-                reservationTime.getTime());
+                reservationTime.getStartAt());
 
         reservationTimes.add(savedReservationTime);
         return savedReservationTime;

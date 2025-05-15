@@ -1,17 +1,18 @@
 package roomescape.theme.service.usecase;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.member.domain.Account;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
-import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.FakeMemberRepository;
-import roomescape.member.repository.MemberRepositoryInterface;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.FakeReservationRepository;
@@ -20,16 +21,12 @@ import roomescape.reservation.service.usecase.ReservationQueryUseCase;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
+import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.theme.repository.FakeThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +37,7 @@ class ThemeQueryUseCaseTest {
     private ThemeRepository themeRepository;
     private ReservationRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
-    private MemberRepositoryInterface memberRepository;
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -162,11 +159,12 @@ class ThemeQueryUseCaseTest {
         };
 
         final Member member = memberRepository.save(
-                Account.of(
-                        Member.withoutId(MemberName.from("강산"),
-                                MemberEmail.from("123@gmail.com"),
-                                Role.MEMBER),
-                        Password.from("1234")));
+                Member.withoutId(
+                        MemberName.from("강산"),
+                        MemberEmail.from("123@gmail.com"),
+                        Role.MEMBER
+                )
+        );
 
         for (int i = 0; i < themes.length; i++) {
             if (i == 3) {

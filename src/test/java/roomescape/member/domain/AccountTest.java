@@ -17,7 +17,7 @@ class AccountTest {
         final String rawPassword = "1234";
         final Password encodedPassword = Password.from(passwordEncoder.encode(rawPassword));
 
-        final Account account = Account.of(
+        final Account account = Account.withoutId(
                 Member.withoutId(
                         MemberName.from("siso"),
                         MemberEmail.from("siso@gmail.com"),
@@ -37,7 +37,7 @@ class AccountTest {
         final String other = "wrongPassword";
         final Password encodedPassword = Password.from(passwordEncoder.encode(rawPassword));
 
-        final Account account = Account.of(
+        final Account account = Account.withoutId(
                 Member.withoutId(
                         MemberName.from("siso"),
                         MemberEmail.from("siso@gmail.com"),
@@ -52,7 +52,7 @@ class AccountTest {
     @Test
     void 멤버가_null이면_예외가_발생한다() {
         // when & then
-        assertThatThrownBy(() -> Account.of(null, Password.from("1234")))
+        assertThatThrownBy(() -> Account.withoutId(null, Password.from("1234")))
                 .isInstanceOf(InvalidInputException.class);
 
     }
@@ -60,7 +60,7 @@ class AccountTest {
     @Test
     void 비밀번호가_null이면_예외가_발생한다() {
         // when & then
-        assertThatThrownBy(() -> Account.of(
+        assertThatThrownBy(() -> Account.withoutId(
                 Member.withoutId(
                         MemberName.from("siso"),
                         MemberEmail.from("siso@gmail.com"),

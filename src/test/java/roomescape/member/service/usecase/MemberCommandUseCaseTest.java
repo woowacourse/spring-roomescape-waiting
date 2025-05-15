@@ -9,6 +9,7 @@ import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
+import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,14 +22,17 @@ class MemberCommandUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        memberCommandUseCase = new MemberCommandUseCase(new FakeMemberRepository());
+        memberCommandUseCase = new MemberCommandUseCase(
+                new FakeMemberRepository(),
+                new FakeAccountRepository()
+        );
     }
 
     @Test
     void 멤버가_정상적으로_생성되면_예외가_발생하지_않는다() {
         // when & then
         assertThatNoException().isThrownBy(() -> memberCommandUseCase.create(
-                Account.of(
+                Account.withoutId(
                         Member.withoutId(
                                 MemberName.from("siso"),
                                 MemberEmail.from("siso@gmail.com"),
@@ -42,7 +46,7 @@ class MemberCommandUseCaseTest {
     void 멤버가_정상적으로_생성된다() {
         // when & then
         assertThat(memberCommandUseCase.create(
-                Account.of(
+                Account.withoutId(
                         Member.withoutId(
                                 MemberName.from("siso"),
                                 MemberEmail.from("siso@gmail.com"),
@@ -55,7 +59,7 @@ class MemberCommandUseCaseTest {
     @Test
     void 이미_저장된_멤버_생성_시_예외가_발생한다() {
         // given
-        Account account = Account.of(
+        Account account = Account.withoutId(
                 Member.withoutId(
                         MemberName.from("siso"),
                         MemberEmail.from("siso@gmail.com"),
@@ -69,5 +73,4 @@ class MemberCommandUseCaseTest {
         assertThatThrownBy(() -> memberCommandUseCase.create(account))
                 .isInstanceOf(ConflictException.class);
     }
-
 }

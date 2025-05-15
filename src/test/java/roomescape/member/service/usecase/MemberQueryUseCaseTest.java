@@ -10,53 +10,58 @@ import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
+import roomescape.member.repository.AccountRepository;
+import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
-import roomescape.member.repository.MemberRepositoryInterface;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberConverter;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MemberQueryUseCaseTest {
 
-    private MemberRepositoryInterface memberRepository;
+    private MemberRepository memberRepository;
     private MemberQueryUseCase memberQueryUseCase;
+    private AccountRepository accountRepository;
 
     @BeforeEach
     void setUp() {
         memberRepository = new FakeMemberRepository();
-        memberQueryUseCase = new MemberQueryUseCase(memberRepository);
+        accountRepository = new FakeAccountRepository();
+        memberQueryUseCase = new MemberQueryUseCase(
+                memberRepository,
+                accountRepository
+        );
     }
 
     @Test
     void 저장된_멤버를_불러온다() {
         // given
-        final Account account = Account.of(
+        final Member member = memberRepository.save(
                 Member.withoutId(
                         MemberName.from("siso"),
                         MemberEmail.from("siso@gmail.com"),
                         Role.ADMIN
-                ),
-                Password.from("1234"));
-
-        final Member member = memberRepository.save(account);
+                )
+        );
 
         // when & then
         assertThat(memberQueryUseCase.get(member.getId()).getEmail())
-                .isEqualTo(account.getMember().getEmail());
+                .isEqualTo(member.getEmail());
     }
 
     @Test
     void 저장된_계정을_불러온다() {
         // given
-        final Account account = Account.of(
-                Member.withoutId(
-                        MemberName.from("siso"),
-                        MemberEmail.from("siso@gmail.com"),
-                        Role.ADMIN
-                ),
-                Password.from("1234"));
+        Member member = memberRepository.save(Member.withoutId(
+                MemberName.from("siso"),
+                MemberEmail.from("siso@gmail.com"),
+                Role.ADMIN
+        ));
 
-        final Member member = memberRepository.save(account);
+        final Account account = accountRepository.save(Account.withoutId(
+                member, Password.from("1234")
+        ));
 
         final LoginRequest loginRequest = new LoginRequest(
                 account.getMember().getEmail().getValue(),
@@ -75,17 +80,20 @@ class MemberQueryUseCaseTest {
 
     @Test
     void 저장된_모든_회원정보를_불러온다() {
-        final Account account = Account.of(
-                Member.withoutId(
-                        MemberName.from("siso"),
-                        MemberEmail.from("siso@gmail.com"),
-                        Role.ADMIN
-                ),
+        Member member = Member.withoutId(
+                MemberName.from("siso"),
+                MemberEmail.from("siso@gmail.com"),
+                Role.ADMIN
+        );
+
+        final Account account = Account.withoutId(
+                member,
                 Password.from("1234"));
 
-        final Member member = memberRepository.save(account);
+        final Member savedMember = memberRepository.save(member);
+        final Account savedAccount = accountRepository.save(account);
 
         assertThat(memberQueryUseCase.getAll())
-                .contains(MemberConverter.toDto(member));
+                .contains(MemberConverter.toDto(savedMember));
     }
 }
