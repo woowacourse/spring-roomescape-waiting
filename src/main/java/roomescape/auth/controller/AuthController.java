@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
+import roomescape.auth.infrastructure.JwtProperties;
 import roomescape.auth.service.AuthService;
 import roomescape.exception.UnauthorizedException;
 
@@ -26,6 +27,7 @@ public class AuthController {
     private static final String COOKIE_TOKEN = "token";
 
     private final AuthService authService;
+    private final JwtProperties jwtProperties;
 
     @PostMapping("/login")
     public void login(@RequestBody @Valid final LoginRequest request, final HttpServletResponse response) {
@@ -36,6 +38,7 @@ public class AuthController {
         final ResponseCookie cookie = ResponseCookie.from(COOKIE_TOKEN, token)
                 .httpOnly(true)
                 .path("/")
+                .maxAge(jwtProperties.getExpireLength())
                 .build();
         log.debug("쿠키 생성 완료");
 
