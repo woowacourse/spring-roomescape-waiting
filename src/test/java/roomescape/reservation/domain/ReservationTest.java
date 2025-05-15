@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.error.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -73,11 +74,14 @@ class ReservationTest {
         // when
         // then
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThatThrownBy(() -> new Reservation(null, null, reservationTime, theme, member))
+            softly.assertThatThrownBy(
+                            () -> new Reservation(null, null, reservationTime, theme, member, ReservationStatus.BOOKED))
                     .isInstanceOf(IllegalStateException.class);
-            softly.assertThatThrownBy(() -> new Reservation(null, localDate, null, theme, member))
+            softly.assertThatThrownBy(
+                            () -> new Reservation(null, localDate, null, theme, member, ReservationStatus.BOOKED))
                     .isInstanceOf(IllegalStateException.class);
-            softly.assertThatThrownBy(() -> new Reservation(null, localDate, reservationTime, null, member))
+            softly.assertThatThrownBy(
+                            () -> new Reservation(null, localDate, reservationTime, null, member, ReservationStatus.BOOKED))
                     .isInstanceOf(IllegalStateException.class);
             softly.assertThatThrownBy(() -> new Reservation(null, reservationTime, theme, member))
                     .isInstanceOf(IllegalStateException.class);

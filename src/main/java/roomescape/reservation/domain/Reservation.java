@@ -56,11 +56,12 @@ public class Reservation {
     @NonNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
+    private ReservationStatus status = ReservationStatus.BOOKED;
 
     public Reservation(@NonNull final LocalDate date,
                        @NonNull final ReservationTime reservationTime,
-                       @NonNull final Theme theme, @NonNull final Member member) {
+                       @NonNull final Theme theme,
+                       @NonNull final Member member) {
         validateFutureOrPresent(date, reservationTime.getStartAt());
         this.id = null;
         this.date = date;

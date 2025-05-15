@@ -199,8 +199,9 @@ class MissionStepTest {
                 .statusCode(200)
                 .extract()
                 .cookie("token");
-        jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                "2023-08-05", 1, 1, 1);
+        jdbcTemplate.update(
+                "INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (?, ?, ?, ?, ?)",
+                "2023-08-05", 1, 1, 1, "BOOKED");
 
         // when
         // then

@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -35,8 +36,8 @@ class JdbcReservationRepositoryTest {
         Member member1 = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
         Member member2 = new Member(2L, "유저2", "user2@naver.com", "pwd", MemberRole.MEMBER.name());
 
-        Reservation reservation1 = new Reservation(null, date, time1, theme1, member1);
-        Reservation reservation2 = new Reservation(null, date, time2, theme2, member2);
+        Reservation reservation1 = new Reservation(null, date, time1, theme1, member1, ReservationStatus.BOOKED);
+        Reservation reservation2 = new Reservation(null, date, time2, theme2, member2, ReservationStatus.BOOKED);
         repository.save(reservation1);
         repository.save(reservation2);
 
@@ -57,9 +58,9 @@ class JdbcReservationRepositoryTest {
         Theme theme = new Theme(1L, "테마1", "설명1", "썸네일1");
         Member member = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
 
-        repository.save(new Reservation(null, date1, time, theme, member));
-        repository.save(new Reservation(null, date2, time, theme, member));
-        repository.save(new Reservation(null, date3, time, theme, member));
+        repository.save(new Reservation(null, date1, time, theme, member, ReservationStatus.BOOKED));
+        repository.save(new Reservation(null, date2, time, theme, member, ReservationStatus.BOOKED));
+        repository.save(new Reservation(null, date3, time, theme, member, ReservationStatus.BOOKED));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, null, date2, null);
@@ -85,11 +86,11 @@ class JdbcReservationRepositoryTest {
         Member member1 = new Member(1L, "유저1", "user1@naver.com", "pwd", MemberRole.MEMBER.name());
         Member member2 = new Member(2L, "유저2", "user2@naver.com", "pwd", MemberRole.MEMBER.name());
 
-        repository.save(new Reservation(null, date1, time, theme, member1));
-        repository.save(new Reservation(null, date2, time, theme, member1));
-        repository.save(new Reservation(null, date3, time, theme, member1));
-        repository.save(new Reservation(null, date4, time, theme, member2));
-        repository.save(new Reservation(null, date5, time, theme, member2));
+        repository.save(new Reservation(null, date1, time, theme, member1, ReservationStatus.BOOKED));
+        repository.save(new Reservation(null, date2, time, theme, member1, ReservationStatus.BOOKED));
+        repository.save(new Reservation(null, date3, time, theme, member1, ReservationStatus.BOOKED));
+        repository.save(new Reservation(null, date4, time, theme, member2, ReservationStatus.BOOKED));
+        repository.save(new Reservation(null, date5, time, theme, member2, ReservationStatus.BOOKED));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, member1.getId(), null, null);
