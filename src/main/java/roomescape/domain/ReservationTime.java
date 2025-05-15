@@ -38,10 +38,6 @@ public class ReservationTime {
         return new ReservationTime(null, startAt);
     }
 
-    public static ReservationTime assignId(Long id, ReservationTime reservationTime) {
-        return new ReservationTime(id, reservationTime.startAt);
-    }
-
     public boolean hasReservationOn(LocalDate date, Long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.isAlreadyBookedTime(date, themeId, this.id));

@@ -13,6 +13,7 @@ public record ReservationWaitingResponse(
         LocalTime time,
         String status
 ) {
+
     public static ReservationWaitingResponse from(ReservationWaitingDto reservationWaiting) {
         return new ReservationWaitingResponse(
                 reservationWaiting.reservationId(),

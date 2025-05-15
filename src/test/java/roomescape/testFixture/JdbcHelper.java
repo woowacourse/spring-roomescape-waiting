@@ -8,6 +8,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 public class JdbcHelper {
+
     public static void insertTheme(JdbcTemplate template, Theme theme) {
         template.update("INSERT INTO theme (name, description, thumbnail) VALUES (?,?,?)",
                 theme.getName(), theme.getDescription(), theme.getThumbnail());

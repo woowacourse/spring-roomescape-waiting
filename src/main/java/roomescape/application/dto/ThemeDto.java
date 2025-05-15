@@ -9,6 +9,7 @@ public record ThemeDto(
         String description,
         String thumbnail
 ) {
+
     public static ThemeDto from(Theme theme) {
         return new ThemeDto(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail());
     }

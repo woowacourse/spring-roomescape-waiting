@@ -67,17 +67,6 @@ public class Reservation {
         return new Reservation(null, member, theme, reservationDate, reservationTime, waiting);
     }
 
-    public static Reservation assignId(Long id, Reservation reservation) {
-        return new Reservation(
-                id,
-                reservation.getMember(),
-                reservation.getTheme(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getWaiting()
-        );
-    }
-
     public boolean isPast() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());

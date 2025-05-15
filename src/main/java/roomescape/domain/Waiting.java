@@ -40,10 +40,6 @@ public class Waiting {
         return id;
     }
 
-    public LocalDateTime getSavedDateTime() {
-        return savedDateTime;
-    }
-
     public ReservationStatus getStatus() {
         return status;
     }

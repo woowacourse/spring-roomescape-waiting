@@ -26,15 +26,12 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(
-                new AuthenticatedMemberIdArgumentResolver(authenticatedMemberIdExtractor)
-        );
+        resolvers.add(new AuthenticatedMemberIdArgumentResolver(authenticatedMemberIdExtractor));
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(
-                        new CheckAdminRoleInterceptor(authenticatedMemberIdExtractor, authService))
+        registry.addInterceptor(new CheckAdminRoleInterceptor(authenticatedMemberIdExtractor, authService))
                 .addPathPatterns("/admin/**");
     }
 }

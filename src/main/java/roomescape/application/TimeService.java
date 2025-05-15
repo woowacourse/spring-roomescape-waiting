@@ -49,7 +49,6 @@ public class TimeService {
     }
 
     public List<TimeDataWithBookingInfo> getTimesWithBookingInfo(LocalDate date, Long themeId) {
-
         List<ReservationTime> times = repository.findAll();
         return times.stream()
                 .map(time ->

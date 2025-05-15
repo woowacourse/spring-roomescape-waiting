@@ -9,11 +9,5 @@ import roomescape.domain.Member;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    List<Member> findAll();
-
-    Member save(Member member);
-
-    Optional<Member> findById(Long id);
-
     Optional<Member> findByEmailAndPassword(String email, String password);
 }

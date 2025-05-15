@@ -34,10 +34,6 @@ public class Theme {
         return new Theme(null, name, description, thumbnail);
     }
 
-    public static Theme assignId(Long id, Theme themeWithoutId) {
-        return new Theme(id, themeWithoutId.name, themeWithoutId.description, themeWithoutId.thumbnail);
-    }
-
     public Long getId() {
         return id;
     }

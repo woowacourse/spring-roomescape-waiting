@@ -10,6 +10,7 @@ public record TimeResponse(
         @JsonFormat(pattern = "HH:mm")
         LocalTime startAt
 ) {
+
     public static TimeResponse from(TimeDto timeDto) {
         return new TimeResponse(
                 timeDto.id(),

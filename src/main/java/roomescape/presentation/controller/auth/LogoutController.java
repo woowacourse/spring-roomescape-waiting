@@ -15,7 +15,6 @@ public class LogoutController {
         return ResponseEntity
                 .status(HttpStatus.SEE_OTHER)
                 .header("Location", "/")
-                // https://stackoverflow.com/a/5285982
                 .header("Set-Cookie", "token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT")
                 .build();
     }

@@ -12,8 +12,13 @@ public record MemberDto(
         Role role
 ) {
     public static MemberDto from(Member member) {
-        return new MemberDto(member.getId(), member.getName(), member.getEmail(), member.getPassword(),
-                member.getRole());
+        return new MemberDto(
+                member.getId(),
+                member.getName(),
+                member.getEmail(),
+                member.getPassword(),
+                member.getRole()
+        );
     }
 
     public static List<MemberDto> from(List<Member> members) {

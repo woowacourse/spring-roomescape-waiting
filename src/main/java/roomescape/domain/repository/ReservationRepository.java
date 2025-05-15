@@ -10,9 +10,7 @@ import roomescape.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Reservation save(Reservation reservation);
-
-    List<Reservation> findAll();
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     List<Reservation> findByMember(Member member);
 
@@ -30,8 +28,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo
     );
-
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
-
-    void deleteById(Long id);
 }

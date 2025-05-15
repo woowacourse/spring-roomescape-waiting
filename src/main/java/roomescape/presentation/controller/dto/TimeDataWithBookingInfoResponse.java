@@ -11,6 +11,7 @@ public record TimeDataWithBookingInfoResponse(
         LocalTime startAt,
         boolean alreadyBooked
 ) {
+
     public static List<TimeDataWithBookingInfoResponse> from(List<TimeDataWithBookingInfo> dtos) {
         return dtos.stream()
                 .map(dto -> new TimeDataWithBookingInfoResponse(

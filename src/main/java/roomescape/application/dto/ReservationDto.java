@@ -11,6 +11,7 @@ public record ReservationDto(
         LocalDate date,
         TimeDto time
 ) {
+
     public static ReservationDto from(Reservation reservation) {
         return new ReservationDto(
                 reservation.getId(),

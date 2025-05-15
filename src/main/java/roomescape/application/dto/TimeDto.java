@@ -8,6 +8,7 @@ public record TimeDto(
         Long id,
         LocalTime startAt
 ) {
+
     public static TimeDto from(ReservationTime reservationTime) {
         return new TimeDto(reservationTime.getId(), reservationTime.getStartAt());
     }

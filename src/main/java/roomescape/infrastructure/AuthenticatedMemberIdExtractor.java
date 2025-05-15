@@ -8,6 +8,7 @@ import roomescape.infrastructure.jwt.JwtTokenProvider;
 
 @Component
 public class AuthenticatedMemberIdExtractor {
+
     private final JwtTokenExtractor jwtTokenExtractor;
     private final JwtTokenProvider jwtTokenProvider;
 
