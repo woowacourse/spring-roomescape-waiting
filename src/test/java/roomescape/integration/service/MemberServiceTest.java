@@ -1,4 +1,4 @@
-package roomescape.unit.service;
+package roomescape.integration.service;
 
 import static org.assertj.core.api.Assertions.*;
 

@@ -25,9 +25,6 @@ class ReservationTimeRepositoryTest extends RepositoryBaseTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
-    private static final String SELECT_BY_ID = "SELECT * FROM reservation_time WHERE id = ?";
-    private static final String COUNT_BY_ID = "SELECT COUNT(*) FROM reservation_time WHERE id = ?";
-
     @Autowired
     private ReservationTimeDbFixture reservationTimeDbFixture;
 

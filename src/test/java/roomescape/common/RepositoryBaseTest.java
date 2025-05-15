@@ -6,5 +6,5 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 @Import(RepositoryTestConfig.class)
 public class RepositoryBaseTest {
-    
+
 }

@@ -1,5 +1,4 @@
-// ThemeServiceTest with BDD style and Fakes
-package roomescape.unit.service;
+package roomescape.integration.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static roomescape.common.Constant.FIXED_CLOCK;
