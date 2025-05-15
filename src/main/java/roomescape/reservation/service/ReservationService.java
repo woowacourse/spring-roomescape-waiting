@@ -91,7 +91,7 @@ public class ReservationService {
     }
 
     private void checkIfReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, themeId, timeId)) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new ReservationAlreadyExistsException("해당 시간에 이미 예약이 존재합니다.");
         }
     }

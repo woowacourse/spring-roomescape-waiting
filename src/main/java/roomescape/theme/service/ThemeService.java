@@ -8,7 +8,6 @@ import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
@@ -42,7 +41,7 @@ public class ThemeService {
 
     public List<ThemeResponse> getPopularThemes() {
         final LocalDate date = LocalDate.now();
-        return themeRepository.findTop10PopularThemesWithinLastWeek(date, date.plusDays(7)).stream()
+        return themeRepository.findTop10PopularThemesWithinLastWeek(date.minusDays(7), date.minusDays(1)).stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
