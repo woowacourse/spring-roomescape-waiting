@@ -1,21 +1,21 @@
 package roomescape.auth.service;
 
-import java.util.Arrays;
-import java.util.Date;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import roomescape.common.exception.AuthenticationException;
+import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+
+import java.util.Arrays;
+import java.util.Date;
 
 @Component
 public class JwtTokenHandler {
@@ -33,21 +33,23 @@ public class JwtTokenHandler {
     @PostConstruct
     public void init() {
         this.parser = Jwts.parser()
-                .setSigningKey(secretKey);
+                .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .build();
     }
 
-    public String createToken(final String payload, final String role) {
+    public String createToken(Member member) {
         Claims claims = Jwts.claims()
-                .setSubject(payload);
+                .subject(member.getId().toString())
+                .add(CLAIM_ROLE, member.getRole().name())
+                .build();
+
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
-
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .claim(CLAIM_ROLE, role)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .claims(claims)
+                .issuedAt(now)
+                .expiration(validity)
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
 
@@ -75,7 +77,7 @@ public class JwtTokenHandler {
 
     private Claims getBodyWithValidation(final String token) {
         try {
-            return parser.parseClaimsJws(token).getBody();
+            return parser.parseSignedClaims(token).getPayload();
         } catch (JwtException | IllegalArgumentException e) {
             throw new AuthenticationException("사용할 수 없는 토큰입니다.");
         }

@@ -27,7 +27,7 @@ public class AuthService {
                 new Email(request.email()), new Password(request.password())
         ).orElseThrow(() -> new LoginFailException("이메일 또는 비밀번호가 잘못 되었습니다."));
 
-        String tokenValue = jwtTokenHandler.createToken(member.getId().toString(), member.getRole());
+        String tokenValue = jwtTokenHandler.createToken(member);
         return new LoginResponse(tokenValue);
     }
 

@@ -49,7 +49,7 @@ class AuthServiceTest {
         LoginResponse loginResponse = authService.login(loginRequest);
 
         assertThat(loginResponse.tokenValue())
-                .isEqualTo(jwtTokenHandler.createToken(member.getId().toString(), Role.ADMIN.name()));
+                .isEqualTo(jwtTokenHandler.createToken(member));
     }
 
     @DisplayName("존재하는 사용자의 로그인 요청이 들어오면 로그인을 허용한다.")

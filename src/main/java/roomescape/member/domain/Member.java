@@ -56,8 +56,8 @@ public class Member {
         return password.password();
     }
 
-    public String getRole() {
-        return role.name();
+    public Role getRole() {
+        return role;
     }
 
     @Override
