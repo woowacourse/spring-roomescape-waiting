@@ -1,4 +1,4 @@
-package roomescape.auth.infrastructure;
+package roomescape.auth.infrastructure.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
+import roomescape.auth.infrastructure.TokenProvider;
 import roomescape.exception.TokenCreationException;
 import roomescape.exception.UnauthorizedException;
 

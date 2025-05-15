@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.auth.infrastructure.CookieManager;
+import roomescape.auth.infrastructure.util.CookieManager;
 import roomescape.auth.service.AuthService;
 import roomescape.exception.UnauthorizedException;
 

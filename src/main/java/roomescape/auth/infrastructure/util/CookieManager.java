@@ -1,10 +1,11 @@
-package roomescape.auth.infrastructure;
+package roomescape.auth.infrastructure.util;
 
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+import roomescape.auth.infrastructure.jwt.JwtProperties;
 
 @Component
 @RequiredArgsConstructor

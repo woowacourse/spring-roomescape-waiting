@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import roomescape.auth.infrastructure.jwt.JwtTokenProvider;
+import roomescape.auth.infrastructure.util.CookieManager;
 
 @RequiredArgsConstructor
 @Component
