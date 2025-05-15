@@ -14,7 +14,6 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.auth.service.AuthService;
 import roomescape.error.NotFoundException;
 import roomescape.error.UnauthorizedException;
-import roomescape.member.domain.Member;
 
 @Component
 @RequiredArgsConstructor
@@ -37,12 +36,7 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
     ) {
         final HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         try {
-            final Member member = authService.extractMemberByRequest(request);
-            return new LoginMember(
-                    member.getId(),
-                    member.getName(),
-                    member.getEmail(),
-                    member.getRole());
+            return authService.extractMemberByRequest(request);
         } catch (IllegalArgumentException | NotFoundException e) {
             log.error(e.getMessage());
             throw new UnauthorizedException("인증에 실패했습니다.");

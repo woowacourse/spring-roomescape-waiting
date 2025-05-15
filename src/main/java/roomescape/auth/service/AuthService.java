@@ -39,12 +39,6 @@ public class AuthService {
                 .build();
     }
 
-    public void checkAdmin(final HttpServletRequest request) {
-        if (isAdmin(request)) {
-            throw new ForbiddenException("관리자 권한이 필요합니다.");
-        }
-    }
-
     public LoginCheckResponse checkLogin(final String token) {
         final Long memberId = parseMemberId(token);
         final Member member = memberRepository.findById(memberId)
@@ -60,9 +54,11 @@ public class AuthService {
         }
     }
 
-    private boolean isAdmin(final HttpServletRequest request) {
+    public void checkAdmin(final HttpServletRequest request) {
         final LoginMember loginMember = extractMemberByRequest(request);
-        return loginMember.isAdmin();
+        if (!loginMember.isAdmin()) {
+            throw new ForbiddenException("관리자 권한이 필요합니다.");
+        }
     }
 
     public LoginMember extractMemberByRequest(final HttpServletRequest request) {
