@@ -16,18 +16,23 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    jjwtVersion = '0.12.6'
+    restAssuredVersion = '5.3.1'
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'io.jsonwebtoken:jjwt:0.12.6'
+    implementation "io.jsonwebtoken:jjwt:${jjwtVersion}"
 
     runtimeOnly 'com.h2database:h2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.rest-assured:rest-assured:5.3.1'
+    testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
 }
 
 test {
