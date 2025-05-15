@@ -8,12 +8,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.global.auth.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@Sql({"/test-schema.sql", "/test-member-data.sql"})
+@DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+@Sql("/test-member-data.sql")
 public class AuthApiTest {
 
     public static final String TOKEN_COOKIE_NAME = "token";
