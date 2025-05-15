@@ -15,7 +15,7 @@ import roomescape.domain.Member;
 import roomescape.exception.InvalidAuthorizationException;
 
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements TokenProvider {
 
     private final int jwtExpirationMs;
     private final SecretKey key;

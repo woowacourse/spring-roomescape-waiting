@@ -5,15 +5,15 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
-import roomescape.util.JwtTokenProvider;
+import roomescape.util.TokenProvider;
 
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenProvider jwtTokenProvider;
 
-    public MemberService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
+    public MemberService(MemberRepository memberRepository, TokenProvider jwtTokenProvider) {
         this.memberRepository = memberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
     }

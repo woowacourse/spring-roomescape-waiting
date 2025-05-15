@@ -1,21 +1,17 @@
 package roomescape.repository;
 
+import roomescape.domain.Member;
 import roomescape.util.TokenProvider;
 
 public class FakeTokenProvider implements TokenProvider {
 
     @Override
-    public String createToken(String payload) {
-        return payload;
+    public String createToken(Member member) {
+        return "wooteco";
     }
 
     @Override
-    public String getPayload(String token) {
-        return token;
-    }
-
-    @Override
-    public boolean validateToken(String token) {
-        return true;
+    public Long getMemberIdFromToken(String token) {
+        return 1L;
     }
 }

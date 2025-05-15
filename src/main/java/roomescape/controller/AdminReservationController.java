@@ -47,6 +47,6 @@ public class AdminReservationController {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
         }
 
-        return ResponseEntity.ok(reservationService.searchReservations(themeId, memberId, from, to));
+        return ResponseEntity.ok(reservationService.searchReservations(memberId, themeId, from, to));
     }
 }

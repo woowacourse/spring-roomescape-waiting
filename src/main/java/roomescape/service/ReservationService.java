@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -13,20 +12,19 @@ import roomescape.dto.reservation.UserReservationRequest;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationSpecification;
-import roomescape.util.JwtTokenProvider;
+import roomescape.util.TokenProvider;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationChecker reservationChecker;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenProvider tokenProvider;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker, JwtTokenProvider jwtTokenProvider) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker, TokenProvider tokenProvider) {
         this.reservationRepository = reservationRepository;
         this.reservationChecker = reservationChecker;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenProvider = tokenProvider;
     }
 
     public ReservationResponse createUserReservation(UserReservationRequest dto, Member member) {
@@ -55,9 +53,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> searchReservations(Long themeId, Long memberId, LocalDate from, LocalDate to) {
-        Specification<Reservation> specification = ReservationSpecification.getReservationSpecification(themeId, memberId, from, to);
-        List<Reservation> searchResults = reservationRepository.findAll(specification);
+    public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate from, LocalDate to) {
+        List<Reservation> searchResults = reservationRepository.findByMemberIdAndThemeIdAndDateRange(memberId, themeId, from, to);
 
         return searchResults.stream()
                 .map(reservation -> ReservationResponse.from(reservation, reservation.getTime(), reservation.getTheme()))
@@ -73,7 +70,7 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponse> findAllMemberReservations(String token) {
-        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        Long memberId = tokenProvider.getMemberIdFromToken(token);
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         return reservations.stream()
                 .map(MemberReservationResponse::from)

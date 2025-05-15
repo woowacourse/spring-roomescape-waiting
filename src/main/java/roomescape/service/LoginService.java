@@ -8,16 +8,16 @@ import roomescape.dto.member.MemberResponse;
 import roomescape.dto.member.TokenResponse;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.repository.MemberRepository;
-import roomescape.util.JwtTokenProvider;
+import roomescape.util.TokenProvider;
 
 @Service
 public class LoginService {
 
     private final MemberRepository memberRepository;
     private final MemberService memberService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenProvider jwtTokenProvider;
 
-    public LoginService(MemberRepository memberRepository, MemberService memberService, JwtTokenProvider jwtTokenProvider) {
+    public LoginService(MemberRepository memberRepository, MemberService memberService, TokenProvider jwtTokenProvider) {
         this.memberRepository = memberRepository;
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
