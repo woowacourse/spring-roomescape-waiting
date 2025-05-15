@@ -47,29 +47,23 @@ class ReservationServiceTest {
     private ReservationService service;
 
     private ReservationTime time1;
-    private ReservationTime time2;
 
     private Theme theme1;
-    private Theme theme2;
 
     private Member member;
 
     private Reservation r1;
-    private Reservation r2;
 
     @BeforeEach
     void setUp() {
         service = new ReservationService(reservationRepository, timeRepo, themeRepo, memberRepo);
         time1 = ReservationTime.from(LocalTime.of(14, 0));
-        time2 = ReservationTime.from(LocalTime.of(13, 0));
 
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
-        theme2 = Theme.of("테마2", "설명2", "썸네일2");
 
         member = Member.withoutRole("member", "member@naver.com", "1234");
 
         r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member);
-        r2 = Reservation.booked(LocalDate.of(2999, 6, 11), time2, theme2, member);
     }
 
     @Test

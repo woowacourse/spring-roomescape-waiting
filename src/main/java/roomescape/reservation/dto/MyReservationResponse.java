@@ -22,6 +22,8 @@ public record MyReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
+                // TODO
+//                reservation.getOutputStatus()
                 RESOURCE_BUNDLE.getString(reservation.getStatus().name())
         );
     }

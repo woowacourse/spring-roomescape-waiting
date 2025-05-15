@@ -31,8 +31,12 @@ public class Theme {
     private String thumbnail;
 
     @Builder
-    private Theme(final Long id, @NonNull final String name, @NonNull final String description,
-                  @NonNull final String thumbnail) {
+    private Theme(
+            final Long id,
+            @NonNull final String name,
+            @NonNull final String description,
+            @NonNull final String thumbnail
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;

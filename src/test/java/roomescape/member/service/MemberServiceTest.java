@@ -17,6 +17,7 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 
+// TODO: mock -> jpa
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 

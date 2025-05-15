@@ -36,4 +36,3 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 }
-

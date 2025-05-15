@@ -14,8 +14,7 @@ import roomescape.theme.domain.Theme;
 class ReservationTest {
 
     private Theme defaultTheme = Theme.of("테마", "설명", "썸네일");
-    private Member defaultMember = Member.withRole("member", "member@naver.com", "1234",
-            MemberRole.MEMBER);
+    private Member defaultMember = Member.withRole("member", "member@naver.com", "1234", MemberRole.MEMBER);
 
     @Test
     void 새_예약의_id_필드는_null이다() {
