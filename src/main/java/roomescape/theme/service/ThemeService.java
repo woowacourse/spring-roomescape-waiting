@@ -1,5 +1,6 @@
 package roomescape.theme.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +33,10 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public List<ThemeResponse> findLimitedThemesByPopularDesc(String orderType, Long listNum) {
-        List<Theme> themes;
-        if (orderType.equals("popular_desc")) {
-            themes = themeRepository.findTopByReservationCountDesc(listNum);
-            return toThemeResponses(themes);
-        }
-
-        themes = themeRepository.findTopByReservationCountDesc(listNum);
+    public List<ThemeResponse> findLimitedThemesByPopularDesc() {
+        LocalDate fromDate = LocalDate.now().minusDays(7);
+        LocalDate toDate = LocalDate.now().minusDays(1);
+        List<Theme> themes = themeRepository.findTopByReservationCountDesc(fromDate, toDate, 10L);
         return toThemeResponses(themes);
     }
 

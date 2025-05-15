@@ -38,9 +38,7 @@ public class JpaThemeRepositoryComposite implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findTopByReservationCountDesc(Long listNum) {
-        LocalDate fromDate = LocalDate.now().minusDays(7);
-        LocalDate toDate = LocalDate.now().minusDays(1);
+    public List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum) {
         return jpaThemeRepository.findTopByReservationCountDesc(fromDate, toDate, listNum);
     }
 }

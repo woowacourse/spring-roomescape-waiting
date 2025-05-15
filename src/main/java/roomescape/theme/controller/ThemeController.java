@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
@@ -46,13 +45,8 @@ public class ThemeController {
     }
 
     @GetMapping("/lists")
-    public ResponseEntity<List<ThemeResponse>> readLists(
-        @RequestParam(value = "order_type", required = false) String orderType,
-        @RequestParam(value = "list_num", required = false) Long listNum
-    ) {
-        orderType = "popular_desc";
-        listNum = 10L;
-        List<ThemeResponse> listedTheme = themeService.findLimitedThemesByPopularDesc(orderType, listNum);
+    public ResponseEntity<List<ThemeResponse>> readLists() {
+        List<ThemeResponse> listedTheme = themeService.findLimitedThemesByPopularDesc();
         return ResponseEntity.ok(listedTheme);
     }
 }

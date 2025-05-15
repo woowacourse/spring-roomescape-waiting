@@ -1,5 +1,6 @@
 package roomescape.theme.repository.jdbc;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,13 +52,13 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findTopByReservationCountDesc(Long listNum) {
+    public List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum) {
         final String query = """
             SELECT t.id, t.name, t.description, t.thumbnail, rc.reservation_count
             FROM (
                 SELECT r.theme_id, COUNT(*) AS reservation_count
                 FROM reservation r
-                WHERE r.date BETWEEN DATEADD('DAY', -7, CURRENT_DATE) AND DATEADD('DAY', -1, CURRENT_DATE)
+                WHERE r.date BETWEEN ? AND ?
                 GROUP BY r.theme_id
                 ORDER BY reservation_count DESC
                 LIMIT ?
@@ -73,7 +74,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getString("description"),
                 resultSet.getString("thumbnail")
             ),
-            listNum
+            fromDate, toDate, listNum
         );
 
         return listedTheme;

@@ -29,8 +29,8 @@ public class ThemeServiceFacade {
         themeService.deleteThemeById(id);
     }
 
-    public List<ThemeResponse> findLimitedThemesByPopularDesc(String orderType, Long listNum) {
-        return themeService.findLimitedThemesByPopularDesc(orderType, listNum);
+    public List<ThemeResponse> findLimitedThemesByPopularDesc() {
+        return themeService.findLimitedThemesByPopularDesc();
     }
 
     public Optional<Theme> findById(Long id) {
