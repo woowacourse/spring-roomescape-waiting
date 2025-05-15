@@ -7,6 +7,7 @@ import roomescape.reservation.application.dto.request.ReservationSearchServiceRe
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.repository.ReservationRepository;
+import roomescape.reservation.model.repository.dto.ReservationWithMember;
 
 @Service
 @RequiredArgsConstructor
@@ -15,20 +16,20 @@ public class AdminReservationService {
     private final ReservationRepository reservationRepository;
 
     public List<ReservationServiceResponse> getAll() {
-        List<Reservation> reservations = reservationRepository.getAll();
-        return reservations.stream()
+        List<ReservationWithMember> reservationWithMembers = reservationRepository.getAllWithMember();
+        return reservationWithMembers.stream()
                 .map(ReservationServiceResponse::from)
                 .toList();
     }
 
     public List<ReservationServiceResponse> getSearchedAll(ReservationSearchServiceRequest request) {
-        List<Reservation> reservations = reservationRepository.getSearchReservations(
+        List<ReservationWithMember> reservationWithMembers = reservationRepository.getSearchReservationsWithMember(
                 request.themeId(),
                 request.memberId(),
                 request.dateFrom(),
                 request.dateTo()
         );
-        return reservations.stream()
+        return reservationWithMembers.stream()
                 .map(ReservationServiceResponse::from)
                 .toList();
     }

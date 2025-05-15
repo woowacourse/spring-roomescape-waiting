@@ -17,7 +17,6 @@ public record ReservationDetails(
 
     public Reservation toReservation() {
         return Reservation.builder()
-                .name(memberName)
                 .memberId(memberId)
                 .date(date)
                 .time(reservationTime)
