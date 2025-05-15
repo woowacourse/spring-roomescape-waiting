@@ -218,7 +218,7 @@ function applyFilter(event) {
     */
     const queryParams = new URLSearchParams({themeId, memberId, dateFrom, dateTo}).toString();
 
-    fetch(`/admin/reservations/filtered?${queryParams}`, { // 예약 검색 API 호출
+    fetch(`${RESERVATION_API_ENDPOINT}/filtered?${queryParams}`, { // 예약 검색 API 호출
         method: 'GET',
         credentials: 'include'
     }).then(response => {
