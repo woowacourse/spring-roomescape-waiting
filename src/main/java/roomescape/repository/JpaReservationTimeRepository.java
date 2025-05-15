@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -32,5 +33,10 @@ public class JpaReservationTimeRepository implements ReservationTimeRepository {
     @Override
     public void deleteById(Long id) {
         reservationTimeListCrudRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsByStartAt(LocalTime startAt) {
+        return reservationTimeListCrudRepository.existsByStartAt(startAt);
     }
 }

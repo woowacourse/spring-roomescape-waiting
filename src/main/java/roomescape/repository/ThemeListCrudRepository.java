@@ -20,4 +20,5 @@ public interface ThemeListCrudRepository extends ListCrudRepository<Theme, Long>
             """)
     List<Theme> findTopThemes(@Param("from") LocalDate from, @Param("to") LocalDate to, PageRequest pageable);
 
+    boolean existsByName(String name);
 }

@@ -6,16 +6,20 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationName;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.theme.ThemeCreateRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
+import roomescape.fixture.FakeReservationRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
+import roomescape.fixture.LoginMemberFixture;
 import roomescape.repository.FakeThemeRepository;
+import roomescape.repository.ReservationRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,7 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class ThemeServiceTest {
 
     private final FakeThemeRepository themeRepository = FakeThemeRepositoryFixture.create();
-    private final ThemeService themeService = new ThemeService(themeRepository);
+    private final ReservationRepository reservationRepository = FakeReservationRepositoryFixture.create();
+    private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
 
     @Nested
     @DisplayName("테마 생성")
@@ -83,12 +88,13 @@ class ThemeServiceTest {
             ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now());
             Theme theme1 = themeRepository.findById(1L).get();
             Theme theme2 = themeRepository.findById(2L).get();
+            Member member = LoginMemberFixture.getUser();
 
             // when
-            themeRepository.addReservation(new Reservation(1L, new ReservationName(1L, "a"), LocalDate.now().minusDays(1), reservationTime, theme1));
-            themeRepository.addReservation(new Reservation(2L, new ReservationName(1L, "a"), LocalDate.now().minusDays(2), reservationTime, theme2));
-            themeRepository.addReservation(new Reservation(3L, new ReservationName(1L, "a"), LocalDate.now().minusDays(3), reservationTime, theme2));
-            themeRepository.addReservation(new Reservation(4L, new ReservationName(1L, "a"), LocalDate.now().minusDays(10), reservationTime, theme1));
+            themeRepository.addReservation(new Reservation(1L, member, LocalDate.now().minusDays(1), reservationTime, theme1, ReservationStatus.RESERVED));
+            themeRepository.addReservation(new Reservation(2L, member, LocalDate.now().minusDays(2), reservationTime, theme2, ReservationStatus.RESERVED));
+            themeRepository.addReservation(new Reservation(3L, member, LocalDate.now().minusDays(3), reservationTime, theme2, ReservationStatus.RESERVED));
+            themeRepository.addReservation(new Reservation(4L, member, LocalDate.now().minusDays(10), reservationTime, theme1, ReservationStatus.RESERVED));
             List<ThemeResponse> responses = themeService.findPopularThemes();
 
             // then
@@ -107,6 +113,9 @@ class ThemeServiceTest {
         @DisplayName("Theme을 삭제할 수 있다")
         @Test
         void deleteThemeByIdTest() {
+            // given
+            reservationRepository.deleteById(1L);
+
             // when
             themeService.deleteThemeById(1L);
 

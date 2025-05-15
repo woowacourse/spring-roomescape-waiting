@@ -18,6 +18,7 @@ import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.fixture.FakeReservationRepositoryFixture;
 import roomescape.fixture.FakeReservationTimeRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
+import roomescape.repository.FakeTokenProvider;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -34,7 +35,7 @@ class ReservationServiceTest {
     private final ThemeRepository themeRepository = FakeThemeRepositoryFixture.create();
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
     private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository, themeRepository, memberRepository);
-    private final ReservationService reservationService = new ReservationService(reservationRepository, reservationChecker);
+    private final ReservationService reservationService = new ReservationService(reservationRepository, reservationChecker, new FakeTokenProvider());
 
     @Nested
     @DisplayName("예약 조회")
@@ -70,7 +71,7 @@ class ReservationServiceTest {
             LocalDate to = LocalDate.now().plusDays(10);
 
             // when
-            List<ReservationResponse> responses = reservationService.searchReservations(targetThemeId, targetMemberId, from, to);
+            List<ReservationResponse> responses = reservationService.searchReservations(targetMemberId, targetThemeId, from, to);
 
             // then
             assertAll(

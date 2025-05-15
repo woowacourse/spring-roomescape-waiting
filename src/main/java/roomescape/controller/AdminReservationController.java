@@ -28,7 +28,7 @@ public class AdminReservationController {
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody ReservationRequest request, Member member) {
-        if (Role.isAdmin(member.getRole())) {
+        if (Role.isUser(member.getRole())) {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
         }
 

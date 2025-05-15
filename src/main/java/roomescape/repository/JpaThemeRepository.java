@@ -41,4 +41,9 @@ public class JpaThemeRepository implements ThemeRepository {
     public void deleteById(Long id) {
         themeListCrudRepository.deleteById(id);
     }
+
+    @Override
+    public boolean existsByName(String name) {
+        return themeListCrudRepository.existsByName(name);
+    }
 }

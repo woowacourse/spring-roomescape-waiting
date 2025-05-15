@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -27,13 +26,12 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse createReservationTime(final ReservationTimeCreateRequest requestDto) {
-        try {
-            ReservationTime requestTime = requestDto.createWithoutId();
-            ReservationTime savedTime = reservationTimeRepository.save(requestTime);
-            return ReservationTimeResponse.from(savedTime);
-        } catch (DuplicateKeyException e) {
+        if (reservationTimeRepository.existsByStartAt(requestDto.startAt())) {
             throw new DuplicateContentException("[ERROR] 이미 동일한 예약 시간이 존재합니다.");
         }
+        ReservationTime requestTime = requestDto.createWithoutId();
+        ReservationTime savedTime = reservationTimeRepository.save(requestTime);
+        return ReservationTimeResponse.from(savedTime);
     }
 
     public List<ReservationTimeResponse> findAllReservationTimes() {

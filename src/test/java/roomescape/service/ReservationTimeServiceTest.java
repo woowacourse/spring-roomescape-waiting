@@ -7,9 +7,11 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationName;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.dto.time.AvailableReservationTimeResponse;
 import roomescape.dto.time.ReservationTimeCreateRequest;
@@ -80,7 +82,8 @@ class ReservationTimeServiceTest {
 
             ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
             Theme theme = new Theme(1L, "ABC", "DEF", "https://");
-            Reservation reservation = new Reservation(1L, new ReservationName(1L, "가이온"), LocalDate.now().plusDays(1), reservationTime, theme);
+            Member member = new Member(1L, "어드민", "admin@gmail.com", "wooteco7", Role.ADMIN);
+            Reservation reservation = new Reservation(1L, member, LocalDate.now().plusDays(1), reservationTime, theme, ReservationStatus.RESERVED);
             reservationRepository.save(reservation);
 
             List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.findAvailableReservationTimes(LocalDate.now().plusDays(1), 1L);

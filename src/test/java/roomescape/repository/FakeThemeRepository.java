@@ -77,10 +77,17 @@ public class FakeThemeRepository implements ThemeRepository {
                     .count() != 0) {
                 throw new DataIntegrityViolationException("연결된 예약 데이터로 인해 삭제할 수 없습니다.");
             }
-            int affectedRows = (int) themes.stream()
-                    .filter(theme -> Objects.equals(theme.getId(), id))
-                    .count();
             themes.remove(deleteTheme);
         }
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return themes.stream()
+                .anyMatch(theme -> theme.getName().equalsIgnoreCase(name));
+    }
+
+    public void addReservation(Reservation reservation) {
+        reservations.add(reservation);
     }
 }

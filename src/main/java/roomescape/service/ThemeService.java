@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.dto.theme.ThemeCreateRequest;
@@ -21,19 +20,18 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository1) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository1;
+        this.reservationRepository = reservationRepository;
     }
 
     public ThemeResponse createTheme(final ThemeCreateRequest requestDto) {
-        Theme requestTheme = requestDto.createWithoutId();
-        try {
-            Theme savedTheme = themeRepository.save(requestTheme);
-            return ThemeResponse.from(savedTheme);
-        } catch (DuplicateKeyException e) {
+        if (themeRepository.existsByName(requestDto.name())) {
             throw new DuplicateContentException("[ERROR] 이미 동일한 이름의 테마가 존재합니다.");
         }
+        Theme requestTheme = requestDto.createWithoutId();
+        Theme savedTheme = themeRepository.save(requestTheme);
+        return ThemeResponse.from(savedTheme);
     }
 
     public List<ThemeResponse> findAllThemes() {

@@ -5,4 +5,4 @@ INSERT INTO theme (name, description, thumbnail) VALUES ('테마 A', '테마 A�
 
 INSERT INTO reservation_time (start_at) VALUES ('09:00');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2025-05-11', 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id, status) VALUES (1, '2025-05-11', 1, 1, 'RESERVED');

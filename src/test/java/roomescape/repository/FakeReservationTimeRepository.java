@@ -66,4 +66,10 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
             reservationTimes.remove(deleteReservation);
         }
     }
+
+    @Override
+    public boolean existsByStartAt(LocalTime startAt) {
+        return reservationTimes.stream()
+                .anyMatch(time -> time.getStartAt().equals(startAt));
+    }
 }
