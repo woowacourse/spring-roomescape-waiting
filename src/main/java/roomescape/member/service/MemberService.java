@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import roomescape.common.exception.AuthenticationException;
 import roomescape.common.exception.AuthorizationException;
 import roomescape.common.exception.InvalidEmailException;
-import roomescape.common.exception.InvalidIdException;
-import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.LoginExceptionMessage;
 import roomescape.common.exception.message.MemberExceptionMessage;
 import roomescape.member.domain.Member;
@@ -40,12 +38,6 @@ public class MemberService {
                         member.getEmail())
                 )
                 .toList();
-    }
-
-    public MemberResponse findById(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_MEMBER_ID.getMessage()));
-        return new MemberResponse(member.getId(), member.getName(), member.getEmail());
     }
 
     public MemberResponse findByEmail(final String email) {

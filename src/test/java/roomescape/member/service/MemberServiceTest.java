@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import roomescape.common.exception.AuthenticationException;
 import roomescape.common.exception.AuthorizationException;
-import roomescape.common.exception.InvalidIdException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
@@ -54,20 +53,6 @@ class MemberServiceTest {
 
         assertThat(members).hasSize(1);
         verify(memberRepository, times(1)).findAll();
-    }
-
-    @DisplayName("회원을 아이디로 조회하는 기능을 구현한다")
-    @Test
-    void findById() {
-        String hashedPassword = passwordEncoder.encode("password123");
-        Member member = new Member(1L, "admin", "admin@email.com", hashedPassword, Role.ADMIN);
-        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-
-        MemberResponse foundMember = memberService.findById(1L);
-
-        assertThat(foundMember.id()).isEqualTo(1L);
-        assertThat(foundMember.name()).isEqualTo("admin");
-        verify(memberRepository, times(1)).findById(1L);
     }
 
     @DisplayName("회원을 이메일로 조회하는 기능을 구현한다")
@@ -138,16 +123,5 @@ class MemberServiceTest {
                 .isInstanceOf(AuthorizationException.class);
 
         verify(memberRepository, times(1)).existsByEmail("admin@email.com");
-    }
-
-    @DisplayName("회원가입 시 존재하지 않는 회원 아이디로 조회하는 경우 예외를 발생시킨다")
-    @Test
-    void exception_invalid_id() {
-        when(memberRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> memberService.findById(1L))
-                .isInstanceOf(InvalidIdException.class);
-
-        verify(memberRepository, times(1)).findById(1L);
     }
 }
