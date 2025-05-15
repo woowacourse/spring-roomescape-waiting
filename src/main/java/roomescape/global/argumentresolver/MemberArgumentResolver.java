@@ -6,27 +6,29 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.auth.infrastructure.JwtExtractor;
+import roomescape.auth.infrastructure.JwtTokenProvider;
+import roomescape.auth.model.Principal;
 import roomescape.global.annotation.Login;
-import roomescape.member.model.Member;
-import roomescape.auth.service.AuthService;
 
 public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public MemberArgumentResolver(AuthService authService) {
-        this.authService = authService;
+    public MemberArgumentResolver(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasMethodAnnotation(Login.class)
-                && parameter.getParameterType().equals(Member.class);
+        return parameter.hasParameterAnnotation(Login.class)
+                && parameter.getParameterType().equals(Principal.class);
     }
 
     @Override
-    public Member resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public Principal resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        return authService.checkAuthenticationStatus(request.getCookies());
+        String accessToken = JwtExtractor.extractTokenFromCookie(request.getCookies());
+        return jwtTokenProvider.resolvePrincipalFromToken(accessToken);
     }
 }

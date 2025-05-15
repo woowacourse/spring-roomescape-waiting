@@ -3,22 +3,27 @@ package roomescape.global.interceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.auth.infrastructure.JwtExtractor;
+import roomescape.auth.infrastructure.JwtTokenProvider;
+import roomescape.auth.model.Principal;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.auth.service.AuthService;
 
 public class AdminInterceptor implements HandlerInterceptor {
 
-    private AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public AdminInterceptor(AuthService authService) {
-        this.authService = authService;
+    public AdminInterceptor(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if (authService.isAdminRequest(request.getCookies())) {
+        String accessToken = JwtExtractor.extractTokenFromCookie(request.getCookies());
+        Principal principal = jwtTokenProvider.resolvePrincipalFromToken(accessToken);
+        if (principal.isAdmin()) {
             return true;
         }
-        throw new ForbiddenException("관리자만 접근 가능한 페이지이다.");
+        throw  new ForbiddenException();
     }
 }

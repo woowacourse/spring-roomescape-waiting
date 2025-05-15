@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.model.Principal;
 import roomescape.global.annotation.Login;
 import roomescape.member.dto.response.MemberGetResponse;
-import roomescape.member.model.Member;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.response.MyReservationGetResponse;
 import roomescape.reservation.dto.response.ReservationGetResponse;
@@ -30,11 +30,10 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @Login
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationGetResponse createReservation(@RequestBody @Valid ReservationCreateRequest requestBody, Member member) {
-        return ReservationGetResponse.from(reservationService.createReservationAfterNow(requestBody, member));
+    public ReservationGetResponse createReservation(@RequestBody @Valid ReservationCreateRequest requestBody, @Login Principal principal) {
+        return ReservationGetResponse.from(reservationService.createReservationAfterNow(requestBody, principal.memberId()));
     }
 
     @GetMapping
@@ -44,16 +43,15 @@ public class ReservationController {
                 .toList();
     }
 
-    @Login
     @GetMapping("/mine")
-    public List<MyReservationGetResponse> readMyReservations(Member member) {
-        return reservationService.findByMember(member).stream()
+    public List<MyReservationGetResponse> readMyReservations(@Login Principal principal) {
+        return reservationService.findByMemberId(principal.memberId()).stream()
                 .map(reservation -> new MyReservationGetResponse(reservation.getId(),
                         MemberGetResponse.from(reservation.getMember()),
                         reservation.getDate(),
                         reservation.getTime(),
                         reservation.getTheme(),
-                        "¿¹¾à"))
+                        "Reserved"))
                 .toList();
     }
 

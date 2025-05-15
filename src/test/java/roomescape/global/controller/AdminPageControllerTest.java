@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.infrastructure.JwtTokenProvider;
+import roomescape.member.model.Member;
+import roomescape.member.model.Role;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -20,8 +22,8 @@ public class AdminPageControllerTest {
 
     @BeforeEach
     void initialize() {
-        String adminMemberEmail = "admin@admin.com";
-        adminAccessToken = jwtTokenProvider.createToken(adminMemberEmail);
+        Member adminMember = new Member(1L, "admin", "admin@admin.com", "password", Role.ADMIN);
+        adminAccessToken = jwtTokenProvider.createToken(adminMember);
     }
 
     @Test

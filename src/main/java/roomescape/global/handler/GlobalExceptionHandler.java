@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleForbidden(ForbiddenException exception) {
-        return generateErrorResponse("접근 권한이 없다.");
+        return generateErrorResponse(exception.getMessage());
     }
 
     @ExceptionHandler(value = AssociatedReservationExistsException.class)

@@ -27,8 +27,8 @@ public class ReservationDaoImpl implements ReservationDao {
     }
 
     @Override
-    public List<Reservation> findByMember(Member member) {
-        return jpaReservationDao.findByMember(member);
+    public List<Reservation> findByMemberId(Long memberId) {
+        return jpaReservationDao.findByMemberId(memberId);
     }
 
     @Override

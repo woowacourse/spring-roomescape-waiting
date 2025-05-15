@@ -42,7 +42,9 @@ public class ReservationService {
         this.memberDao = memberDao;
     }
 
-    public Reservation createReservationAfterNow(ReservationCreateRequest request, Member member) {
+    public Reservation createReservationAfterNow(ReservationCreateRequest request, Long memberId) {
+        Member member = memberDao.findById(memberId)
+                .orElseThrow(MemberNotExistException::new);
         LocalDate date = request.date();
         ReservationTime time = reservationTimeDao.findById(request.timeId())
                 .orElseThrow(TimeNotExistException::new);
@@ -95,9 +97,8 @@ public class ReservationService {
         return reservationDao.findAll();
     }
 
-    public List<Reservation> findByMember(Member member) {
-        System.out.println(member.getId() + "        asdfasdfasdfasdfsadf");
-        return reservationDao.findByMember(member);
+    public List<Reservation> findByMemberId(Long memberId) {
+        return reservationDao.findByMemberId(memberId);
     }
 
     public List<Reservation> findReservationByMemberIdAndThemeIdAndStartDateAndEndDate(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate) {

@@ -59,17 +59,6 @@ public class JdbcMemberDao implements MemberDao {
     }
 
     @Override
-    public Optional<Member> findByEmail(String email) {
-        String whereClause = " WHERE email = ?";
-        String sql = generateFindAllQuery() + whereClause;
-        try {
-            return Optional.of(jdbcTemplate.queryForObject(sql, mapResultsToMember(), email));
-        } catch (EmptyResultDataAccessException exception) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
     public Optional<Member> findByEmailAndPassword(String email, String password) {
         String whereClause = " WHERE email = ? AND password = ?";
         String sql = generateFindAllQuery() + whereClause;

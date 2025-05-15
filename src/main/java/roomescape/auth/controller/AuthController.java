@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.constant.AuthConstant;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.dto.response.AuthenticationCheckResponse;
+import roomescape.auth.model.Principal;
 import roomescape.auth.service.AuthService;
 import roomescape.global.annotation.Login;
-import roomescape.member.model.Member;
 
 @RestController
 @RequestMapping("/login")
@@ -34,9 +34,8 @@ public class AuthController {
         response.addCookie(cookie);
     }
 
-    @Login
     @GetMapping("/check")
-    public AuthenticationCheckResponse authenticationCheck(Member member) {
-        return AuthenticationCheckResponse.from(member);
+    public AuthenticationCheckResponse authenticationCheck(@Login Principal principal) {
+        return new AuthenticationCheckResponse(principal.name());
     }
 }

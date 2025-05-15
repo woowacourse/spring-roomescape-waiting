@@ -13,8 +13,6 @@ public interface MemberDao {
 
     Optional<Member> findById(Long memberId);
 
-    Optional<Member> findByEmail(String email);
-
     Optional<Member> findByEmailAndPassword(String email, String password);
 
     boolean existsByEmail(String email);

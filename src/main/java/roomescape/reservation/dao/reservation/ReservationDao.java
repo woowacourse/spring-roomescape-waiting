@@ -3,11 +3,8 @@ package roomescape.reservation.dao.reservation;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.model.Theme;
 
 public interface ReservationDao {
 
@@ -15,7 +12,7 @@ public interface ReservationDao {
 
     List<Reservation> findAll();
 
-    List<Reservation> findByMember(Member member);
+    List<Reservation> findByMemberId(Long memberId);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 

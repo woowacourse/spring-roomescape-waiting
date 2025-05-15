@@ -31,11 +31,6 @@ public class MemberDaoImpl implements MemberDao {
     }
 
     @Override
-    public Optional<Member> findByEmail(String email) {
-        return jpaMemberDao.findByEmail(email);
-    }
-
-    @Override
     public Optional<Member> findByEmailAndPassword(String email, String password) {
         return jpaMemberDao.findByEmailAndPassword(email, password);
     }

@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.infrastructure.JwtTokenProvider;
+import roomescape.member.model.Member;
+import roomescape.member.model.Role;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -30,8 +32,8 @@ public class ReservationControllerTest {
 
     @BeforeEach
     void initialize() {
-        String normalMemberEmail = "normal1@normal.com";
-        normalAccessToken = jwtTokenProvider.createToken(normalMemberEmail);
+        Member normalMember = new Member(1L, "normal", "normal@normal.com", "password", Role.NORMAL);
+        normalAccessToken = jwtTokenProvider.createToken(normalMember);
     }
 
     @Test

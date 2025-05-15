@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.dto.request.MemberCreateRequest;
 import roomescape.member.model.Member;
 import roomescape.member.service.MemberService;
@@ -49,11 +48,11 @@ public class ReservationServiceTest {
     @DisplayName("createReservationAfterNow 메서드를 사용하면 이전 시간으로의 예약은 추가할 수 없다.")
     void createReservationAfterNow() {
         // Given
-        Member member = Member.generateNormalMember("프리", "phree@woowa.com", "password");
+        Member member = memberService.createUser(new MemberCreateRequest("phree@woowa.com", "password", "프리"));
         ReservationCreateRequest request = new ReservationCreateRequest(LocalDate.of(2024, 4, 26), 1L, 1L);
 
         // When & Then
-        assertThatThrownBy(() -> reservationService.createReservationAfterNow(request, member))
+        assertThatThrownBy(() -> reservationService.createReservationAfterNow(request, member.getId()))
                 .isInstanceOf(NotCorrectDateTimeException.class)
                 .hasMessage("지나간 날짜와 시간에 대한 예약 생성은 불가능하다.");
     }
@@ -108,6 +107,6 @@ public class ReservationServiceTest {
 
         // When
         // Then
-        assertThat(reservationService.findByMember(member)).hasSize(10);
+        assertThat(reservationService.findByMemberId(member.getId())).hasSize(10);
     }
 }
