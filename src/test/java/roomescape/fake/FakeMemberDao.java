@@ -22,11 +22,6 @@ public class FakeMemberDao implements MemberRepository {
     }
 
     @Override
-    public <S extends Member> Iterable<S> saveAll(final Iterable<S> entities) {
-        return null;
-    }
-
-    @Override
     public Optional<Member> findById(final Long id) {
         return members.stream()
                 .filter(member -> member.getId().equals(id))
@@ -34,55 +29,15 @@ public class FakeMemberDao implements MemberRepository {
     }
 
     @Override
-    public boolean existsById(final Long aLong) {
-        return false;
+    public Optional<Member> findByEmailAndPassword(final MemberEmail email, final String password) {
+        return members.stream()
+                .filter(member -> member.getEmail().equals(email) && member.getPassword().equals(password))
+                .findFirst();
     }
 
     @Override
     public List<Member> findAll() {
         return members;
-    }
-
-    @Override
-    public Iterable<Member> findAllById(final Iterable<Long> longs) {
-        return null;
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
-    public void deleteById(final Long aLong) {
-
-    }
-
-    @Override
-    public void delete(final Member entity) {
-
-    }
-
-    @Override
-    public void deleteAllById(final Iterable<? extends Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAll(final Iterable<? extends Member> entities) {
-
-    }
-
-    @Override
-    public void deleteAll() {
-
-    }
-
-    @Override
-    public Optional<Member> findByEmailAndPassword(final MemberEmail email, final String password) {
-        return members.stream()
-                .filter(member -> member.getEmail().equals(email) && member.getPassword().equals(password))
-                .findFirst();
     }
 
     @Override
@@ -95,5 +50,50 @@ public class FakeMemberDao implements MemberRepository {
     public boolean existsByName(final MemberName name) {
         return members.stream()
                 .anyMatch(member -> member.getName().equals(name));
+    }
+
+    @Override
+    public <S extends Member> Iterable<S> saveAll(final Iterable<S> entities) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public boolean existsById(final Long aLong) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public Iterable<Member> findAllById(final Iterable<Long> longs) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public long count() {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteById(final Long aLong) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void delete(final Member entity) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends Long> longs) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAll(final Iterable<? extends Member> entities) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAll() {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 }

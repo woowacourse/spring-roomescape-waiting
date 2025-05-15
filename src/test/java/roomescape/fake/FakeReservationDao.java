@@ -22,48 +22,15 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public <S extends Reservation> Iterable<S> saveAll(final Iterable<S> entities) {
-        return null;
-    }
-
-    @Override
-    public boolean existsById(final Long aLong) {
-        return false;
-    }
-
-    @Override
     public List<Reservation> findAll() {
         return reservations;
     }
 
     @Override
-    public Iterable<Reservation> findAllById(final Iterable<Long> longs) {
-        return null;
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
-    public void delete(final Reservation entity) {
-
-    }
-
-    @Override
-    public void deleteAllById(final Iterable<? extends Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAll(final Iterable<? extends Reservation> entities) {
-
-    }
-
-    @Override
-    public void deleteAll() {
-
+    public Optional<Reservation> findById(final Long id) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getId() == id)
+                .findFirst();
     }
 
     @Override
@@ -77,14 +44,22 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByDateBetween(final LocalDate from, final LocalDate to) {
-        return List.of();
+    public List<Reservation> findAllByMemberIdOrderByDateDesc(final long id) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getMember().getId() == id)
+                .sorted(Comparator.comparing(Reservation::getDate).reversed())
+                .toList();
     }
 
     @Override
     public void deleteById(final Long id) {
         Reservation reservation = findById(id).orElseThrow();
         reservations.remove(reservation);
+    }
+
+    @Override
+    public boolean existsById(final Long aLong) {
+        return false;
     }
 
     @Override
@@ -109,17 +84,42 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByMemberIdOrderByDateDesc(final long id) {
-        return reservations.stream()
-                .filter(reservation -> reservation.getMember().getId() == id)
-                .sorted(Comparator.comparing(Reservation::getDate).reversed())
-                .toList();
+    public Iterable<Reservation> findAllById(final Iterable<Long> longs) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 
     @Override
-    public Optional<Reservation> findById(final Long id) {
-        return reservations.stream()
-                .filter(reservation -> reservation.getId() == id)
-                .findFirst();
+    public <S extends Reservation> Iterable<S> saveAll(final Iterable<S> entities) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public long count() {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void delete(final Reservation entity) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends Long> longs) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAll(final Iterable<? extends Reservation> entities) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAll() {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public List<Reservation> findByDateBetween(final LocalDate from, final LocalDate to) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 }

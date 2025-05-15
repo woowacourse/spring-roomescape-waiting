@@ -22,8 +22,8 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     }
 
     @Override
-    public <S extends ReservationTime> Iterable<S> saveAll(final Iterable<S> entities) {
-        return null;
+    public List<ReservationTime> findAll() {
+        return times;
     }
 
     @Override
@@ -34,49 +34,9 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     }
 
     @Override
-    public boolean existsById(final Long aLong) {
-        return false;
-    }
-
-    @Override
-    public List<ReservationTime> findAll() {
-        return times;
-    }
-
-    @Override
-    public Iterable<ReservationTime> findAllById(final Iterable<Long> longs) {
-        return null;
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
     public void deleteById(final Long id) {
         ReservationTime reservationTime = findById(id).orElseThrow();
         times.remove(reservationTime);
-    }
-
-    @Override
-    public void delete(final ReservationTime entity) {
-
-    }
-
-    @Override
-    public void deleteAllById(final Iterable<? extends Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAll(final Iterable<? extends ReservationTime> entities) {
-
-    }
-
-    @Override
-    public void deleteAll() {
-
     }
 
     @Override
@@ -86,7 +46,47 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     }
 
     @Override
+    public <S extends ReservationTime> Iterable<S> saveAll(final Iterable<S> entities) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public boolean existsById(final Long aLong) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public Iterable<ReservationTime> findAllById(final Iterable<Long> longs) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public long count() {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void delete(final ReservationTime entity) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAllById(final Iterable<? extends Long> longs) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAll(final Iterable<? extends ReservationTime> entities) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void deleteAll() {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
     public List<ReservationAvailability> findAllReservationAvailability(final LocalDate date, final long themeId) {
-        return List.of();
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 }

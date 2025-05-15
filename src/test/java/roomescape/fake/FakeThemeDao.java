@@ -13,12 +13,6 @@ public class FakeThemeDao implements ThemeRepository {
     Long index = 1L;
 
     @Override
-    public boolean existsByName(final ThemeName name) {
-        return themes.stream()
-                .anyMatch(theme -> theme.getName().getValue().equals(name.getValue()));
-    }
-
-    @Override
     public Theme save(final Theme theme) {
         Theme savedTheme = new Theme(index++, theme.getName().getValue(), theme.getDescription().getValue(),
                 theme.getThumbnail().getValue());
@@ -27,8 +21,8 @@ public class FakeThemeDao implements ThemeRepository {
     }
 
     @Override
-    public <S extends Theme> Iterable<S> saveAll(final Iterable<S> entities) {
-        return null;
+    public List<Theme> findAll() {
+        return themes;
     }
 
     @Override
@@ -39,48 +33,54 @@ public class FakeThemeDao implements ThemeRepository {
     }
 
     @Override
-    public boolean existsById(final Long aLong) {
-        return false;
-    }
-
-    @Override
-    public List<Theme> findAll() {
-        return themes;
-    }
-
-    @Override
-    public Iterable<Theme> findAllById(final Iterable<Long> longs) {
-        return null;
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
     public void deleteById(final Long id) {
         Theme theme = findById(id).orElseThrow();
         themes.remove(theme);
     }
 
     @Override
-    public void delete(final Theme entity) {
+    public boolean existsByName(final ThemeName name) {
+        return themes.stream()
+                .anyMatch(theme -> theme.getName().getValue().equals(name.getValue()));
+    }
 
+    @Override
+    public <S extends Theme> Iterable<S> saveAll(final Iterable<S> entities) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public boolean existsById(final Long aLong) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public Iterable<Theme> findAllById(final Iterable<Long> longs) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public long count() {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
+    }
+
+    @Override
+    public void delete(final Theme entity) {
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 
     @Override
     public void deleteAllById(final Iterable<? extends Long> longs) {
-
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 
     @Override
     public void deleteAll(final Iterable<? extends Theme> entities) {
-
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 
     @Override
     public void deleteAll() {
-
+        throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 }
