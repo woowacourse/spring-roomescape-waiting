@@ -1,7 +1,12 @@
 package roomescape.reservation.repository.jpa;
 
+import static roomescape.reservation.repository.jpa.ReservationSpecs.isMemberReservation;
+import static roomescape.reservation.repository.jpa.ReservationSpecs.isReservationByPeriod;
+import static roomescape.reservation.repository.jpa.ReservationSpecs.isThemeReservation;
+
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
@@ -58,6 +63,9 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public List<Reservation> findAllByCondition(final Long memberId, final Long themeId, final LocalDate from,
                                                 final LocalDate to) {
-        return reservationJpaRepository.findAllByCondition(memberId, themeId, from, to);
+        Specification<Reservation> spec = Specification.where(ReservationSpecs.isMemberReservation(memberId))
+                .and(ReservationSpecs.isThemeReservation(themeId))
+                .and(ReservationSpecs.isReservationByPeriod(from, to));
+        return reservationJpaRepository.findAll(spec);
     }
 }
