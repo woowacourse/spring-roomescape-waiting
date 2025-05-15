@@ -35,10 +35,6 @@ public class ReservationTime {
         this(null, startAt);
     }
 
-    public ReservationTime assignId(Long id) {
-        return new ReservationTime(id, startAt);
-    }
-
     private void validateNotNull(LocalTime startAt) {
         if (startAt == null) {
             throw new IllegalArgumentException("예약 시작시간은 null이 될 수 없습니다.");

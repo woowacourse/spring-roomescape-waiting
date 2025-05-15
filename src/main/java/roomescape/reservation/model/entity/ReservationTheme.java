@@ -44,13 +44,6 @@ public class ReservationTheme {
         this(null, name, description, thumbnail);
     }
 
-    public ReservationTheme assignId(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("할당할 id는 null이 될 수 없습니다.");
-        }
-        return new ReservationTheme(id, name, description, thumbnail);
-    }
-
     private void validateNotBlank(String name, String description, String thumbnail) {
         if (name == null) {
             throw new IllegalArgumentException("테마명은 null이 될 수 없습니다.");
