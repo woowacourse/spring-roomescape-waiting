@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.CreateReservationParam;
 import roomescape.application.reservation.dto.ReservationResult;
 import roomescape.application.reservation.dto.ReservationSearchParam;
+import roomescape.application.reservation.dto.ReservationWithStatusResult;
 import roomescape.application.support.exception.NotFoundEntityException;
 import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Member;
@@ -108,6 +109,13 @@ public class ReservationService {
         );
         return reservations.stream()
                 .map(ReservationResult::from)
+                .toList();
+    }
+
+    public List<ReservationWithStatusResult> findReservationsWithStatus(Long memberId) {
+        return reservationRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(ReservationWithStatusResult::from)
                 .toList();
     }
 }
