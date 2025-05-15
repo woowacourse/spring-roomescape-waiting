@@ -6,7 +6,7 @@ import roomescape.unit.repository.member.FakeMemberRepository;
 import roomescape.unit.repository.reservation.FakeReservationRepository;
 import roomescape.unit.repository.reservation.FakeReservationTimeRepository;
 import roomescape.unit.repository.reservation.FakeThemeRepository;
-import roomescape.unit.repository.reservationmember.FakeReservationMemberRepository;
+import roomescape.unit.repository.reserveticket.FakeReserveTicketRepository;
 
 public class ServiceFixture {
 
@@ -36,7 +36,7 @@ public class ServiceFixture {
         return new FakeThemeRepository();
     }
 
-    public static FakeReservationMemberRepository fakeReservationMemberRepository() {
-        return new FakeReservationMemberRepository();
+    public static FakeReserveTicketRepository fakeReservationMemberRepository() {
+        return new FakeReserveTicketRepository();
     }
 }

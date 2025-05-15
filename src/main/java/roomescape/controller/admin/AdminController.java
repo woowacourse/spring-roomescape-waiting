@@ -14,7 +14,7 @@ import roomescape.dto.admin.AdminReservationAddDto;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.service.reservation.ReservationService;
-import roomescape.service.reservationmember.ReservationMemberService;
+import roomescape.service.reserveticket.ReserveTicketService;
 
 @RestController
 @RequestMapping("/admin")
@@ -23,11 +23,11 @@ public class AdminController {
     private static final String ADMIN_CREATED_MESSAGE = "어드민이 생성한 예약입니다.";
 
     private final ReservationService reservationService;
-    private final ReservationMemberService reservationMemberService;
+    private final ReserveTicketService reserveTicketService;
 
-    public AdminController(ReservationService reservationService, ReservationMemberService reservationMemberService) {
+    public AdminController(ReservationService reservationService, ReserveTicketService reserveTicketService) {
         this.reservationService = reservationService;
-        this.reservationMemberService = reservationMemberService;
+        this.reserveTicketService = reserveTicketService;
     }
 
     @PostMapping("/reservations")
@@ -37,7 +37,7 @@ public class AdminController {
                 newReservationDto.timeId(),
                 newReservationDto.themeId());
 
-        long id = reservationMemberService.addReservation(addReservationDto,
+        long id = reserveTicketService.addReservation(addReservationDto,
                 newReservationDto.memberId());
         Reservation reservation = reservationService.getReservationById(id);
 
@@ -48,7 +48,7 @@ public class AdminController {
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservations(@PathVariable Long id) {
-        reservationMemberService.deleteReservation(id);
+        reserveTicketService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 }

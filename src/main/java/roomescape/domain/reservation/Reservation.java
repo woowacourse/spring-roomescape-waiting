@@ -24,8 +24,10 @@ public class Reservation {
     private Long id;
     private String name;
     private LocalDate date;
+
     @ManyToOne
     private ReservationTime time;
+
     @ManyToOne
     private Theme theme;
 
