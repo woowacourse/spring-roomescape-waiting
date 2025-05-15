@@ -153,6 +153,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public List<Reservation> findAllByMember(Member member) {
+        return List.of();
+    }
+
     @Override
     public boolean existsByTimeId(Long timeId) {
         final String query = """

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 
@@ -49,5 +50,10 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
             dateFrom,
             dateTo
         );
+    }
+
+    @Override
+    public List<Reservation> findAllByMember(Member member) {
+        return jpaReservationRepository.findAllByMember(member);
     }
 }

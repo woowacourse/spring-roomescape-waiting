@@ -9,6 +9,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchConditionRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
@@ -76,5 +77,10 @@ public class ReservationServiceFacade {
 
     public boolean existsByTimeId(Long id) {
         return reservationService.existsByTimeId(id);
+    }
+
+    public List<MyReservationResponse> findMyReservations(MemberPrincipal memberPrincipal) {
+        Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
+        return reservationService.findAllByMember(member);
     }
 }

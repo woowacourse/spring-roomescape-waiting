@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
@@ -27,4 +28,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         LocalDate dateFrom,
         LocalDate dateTo
     );
+
+    List<Reservation> findAllByMember(Member member);
 }

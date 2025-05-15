@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
@@ -10,6 +11,8 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchConditionRequest;
+import roomescape.reservation.dto.response.MyReservationJsonResponse;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -87,5 +90,25 @@ public class ReservationService {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new ConflictException("해당 예약 시간을 사용하는 예약이 존재합니다.");
         }
+    }
+
+    public List<MyReservationResponse> findAllByMember(Member member) {
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        return reservations.stream()
+            .map(reservation ->
+                MyReservationJsonResponse.fromReservationAndStatus(
+                    reservation,
+                    getReservationStatus(reservation)
+                )
+            )
+            .collect(Collectors.toList());
+    }
+
+    private String getReservationStatus(Reservation reservation) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getTime().getStartAt());
+        if (reservationDateTime.isBefore(LocalDateTime.now())) {
+            return "완료";
+        }
+        return "예약";
     }
 }
