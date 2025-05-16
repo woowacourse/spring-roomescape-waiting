@@ -3,10 +3,12 @@ package roomescape.presentation.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.response.MemberResponseDto;
@@ -27,6 +29,7 @@ public class AuthController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.OK)
     public void login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletResponse httpServletResponse) {
         authService.login(loginRequestDto);
         TokenResponseDto tokenResponseDto = authService.createToken(loginRequestDto.email());
@@ -35,6 +38,7 @@ public class AuthController {
     }
 
     @GetMapping("/check")
+    @ResponseStatus(HttpStatus.OK)
     public MemberResponseDto loginCheck(HttpServletRequest httpServletRequest) {
         String tokenFromCookie = cookieUtils.getToken(httpServletRequest);
         return authService.getMemberByToken(tokenFromCookie);
