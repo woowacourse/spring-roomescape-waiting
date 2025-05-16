@@ -1,22 +1,19 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundReservationTimeException;
 import roomescape.exception.ReservationException;
+import roomescape.persistence.dto.ReservationTimeAvailabilityData;
 import roomescape.service.param.CreateReservationTimeParam;
 import roomescape.service.result.AvailableReservationTimeResult;
 import roomescape.service.result.ReservationTimeResult;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class ReservationTimeService {
@@ -27,7 +24,8 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
+                                  final ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -55,23 +53,15 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId, LocalDate reservationDate) {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+    public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId,
+                                                                                   LocalDate reservationDate) {
+        List<ReservationTimeAvailabilityData> availableTimesData = reservationTimeRepository.findAvailableTimesByThemeAndDate(
+                themeId, reservationDate);
 
-        Set<ReservationTime> bookedTimes = reservationRepository.findByThemeIdAndDate(themeId, reservationDate).stream()
-                .map(Reservation::getTime)
-                .filter(reservationTimes::contains)
-                .collect(Collectors.toSet());
-
-        return reservationTimes.stream()
-                .map(reservationTime ->
-                        new AvailableReservationTimeResult(
-                                reservationTime.getId(),
-                                reservationTime.getStartAt(),
-                                bookedTimes.contains(reservationTime)
-                        )
-                )
-                .toList();
+        return availableTimesData.stream()
+                .map(data -> new AvailableReservationTimeResult(
+                        data.id(), data.startAt(), data.booked()
+                )).toList();
     }
 
     public void deleteById(Long reservationTimeId) {

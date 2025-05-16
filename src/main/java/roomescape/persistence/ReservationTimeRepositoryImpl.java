@@ -1,11 +1,13 @@
 package roomescape.persistence;
 
+import java.time.LocalDate;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
 
 import java.util.List;
 import java.util.Optional;
+import roomescape.persistence.dto.ReservationTimeAvailabilityData;
 
 @Repository
 public class ReservationTimeRepositoryImpl implements ReservationTimeRepository {
@@ -34,5 +36,11 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     @Override
     public void deleteById(final Long reservationTimeId) {
         jpaReservationTimeRepository.deleteById(reservationTimeId);
+    }
+
+    @Override
+    public List<ReservationTimeAvailabilityData> findAvailableTimesByThemeAndDate(Long themeId,
+                                                                                  LocalDate reservationDate) {
+        return jpaReservationTimeRepository.findAvailableTimesByThemeAndDate(themeId, reservationDate);
     }
 }
