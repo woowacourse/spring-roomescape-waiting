@@ -40,7 +40,10 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<CheckLoginUserResponse> loginCheck(@CookieValue("token") Cookie cookie) {
+    public ResponseEntity<CheckLoginUserResponse> loginCheck(@CookieValue(value = "token", required = false) Cookie cookie) {
+        if (cookie == null) {
+            return ResponseEntity.ok().build();
+        }
         String token = cookieProvider.extractTokenFromCookie(cookie);
         Long id = jwtTokenProvider.extractIdFromToken(token);
         return ResponseEntity.ok().body(CheckLoginUserResponse.from(memberService.findById(id)));
