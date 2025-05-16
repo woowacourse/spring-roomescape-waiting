@@ -59,7 +59,8 @@ public class Reservation {
 
     public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
         final LocalTime startAt = time.getStartAt();
-        return reservationTime.hasConflict(theme.getDuration(), startAt);
+        return this.theme.equals(theme) &&
+                reservationTime.hasConflict(theme.getDuration(), startAt);
     }
 
     public Long getId() {
