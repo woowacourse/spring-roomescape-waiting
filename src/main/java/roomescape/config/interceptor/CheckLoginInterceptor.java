@@ -31,6 +31,9 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
     }
 
     private String extractTokenFromCookie(Cookie[] cookies) {
+        if (cookies == null) {
+            throw new AuthenticatedException("token not found");
+        }
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("token")) {
                 return cookie.getValue();
