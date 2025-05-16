@@ -23,12 +23,7 @@ public class AdminController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations")
     public ReservationResponse createReservation(@RequestBody CreateReservationAdminRequest reservationRequest) {
-        CreateReservationParam createReservationParam = new CreateReservationParam(
-                reservationRequest.memberId(),
-                reservationRequest.date(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId()
-        );
+        CreateReservationParam createReservationParam = CreateReservationParam.from(reservationRequest);
         ReservationResult reservationResult = reservationService.create(createReservationParam, LocalDateTime.now());
         return ReservationResponse.from(reservationResult);
     }
