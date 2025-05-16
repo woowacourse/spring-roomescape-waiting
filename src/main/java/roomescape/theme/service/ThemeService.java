@@ -2,7 +2,9 @@ package roomescape.theme.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NoElementsException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -11,17 +13,15 @@ import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 @Service
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-    }
-
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByTheme_Id(id)) {
             throw new InvalidArgumentException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
@@ -30,6 +30,7 @@ public class ThemeService {
         themeRepository.deleteById(theme.getId());
     }
 
+    @Transactional
     public ThemeResponse create(ThemeCreateRequest request) {
         Theme created = Theme.create(request.name(), request.description(), request.thumbnail());
         Theme saved = themeRepository.save(created);

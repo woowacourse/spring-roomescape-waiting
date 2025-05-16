@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
@@ -19,6 +20,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.service.ReservationTimeService;
 
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class ReservationService {
@@ -28,6 +30,7 @@ public class ReservationService {
     private final ThemeService themeService;
     private final MemberService memberService;
 
+    @Transactional
     public ReservationResponse reserve(ReserveCommand reserveCommand) {
         LocalDate date = reserveCommand.date();
         Long timeId = reserveCommand.timeId();
@@ -52,6 +55,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteById(Long id) {
         Reservation reservation = getReservation(id);
         reservationRepository.deleteById(reservation.getId());

@@ -3,21 +3,21 @@ package roomescape.auth.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.fixture.MemberDbFixture.RAW_PASSWORD;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.stub.StubTokenProvider;
 import roomescape.auth.web.controller.request.LoginRequest;
 import roomescape.auth.web.controller.response.MemberNameResponse;
+import roomescape.common.CleanUp;
 import roomescape.config.AuthServiceTestConfig;
 import roomescape.fixture.MemberDbFixture;
 import roomescape.member.domain.Member;
 
 @Import(AuthServiceTestConfig.class)
-@Transactional
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class AuthServiceTest {
 
@@ -25,6 +25,13 @@ class AuthServiceTest {
     private AuthService authService;
     @Autowired
     private MemberDbFixture memberDbFixture;
+    @Autowired
+    private CleanUp cleanUp;
+
+    @BeforeEach
+    void setUp() {
+        cleanUp.all();
+    }
 
     @Test
     void 로그인한다() {

@@ -2,7 +2,9 @@ package roomescape.time.service;
 
 import java.time.LocalTime;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NoElementsException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -13,18 +15,15 @@ import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 @Service
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
-    }
-
+    @Transactional
     public ReservationTimeResponse open(ReservationTimeCreateRequest request) {
         LocalTime startAt = request.startAt();
         isAlreadyOpened(startAt);
@@ -47,6 +46,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTimes);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new InvalidArgumentException("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
