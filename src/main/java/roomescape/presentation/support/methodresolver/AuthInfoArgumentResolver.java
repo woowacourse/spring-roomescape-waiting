@@ -11,8 +11,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.application.auth.dto.JwtPayload;
 import roomescape.application.support.exception.JwtExtractException;
 import roomescape.infrastructure.security.JwtProvider;
+import roomescape.presentation.support.AuthInfoResolveException;
 import roomescape.presentation.support.JwtTokenExtractor;
-import roomescape.presentation.support.ParameterResolveException.AuthInfoResolveException;
 
 @Component
 public class AuthInfoArgumentResolver implements HandlerMethodArgumentResolver {

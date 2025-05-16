@@ -13,11 +13,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.application.support.exception.CoreException;
 import roomescape.application.support.exception.ForbiddenException;
+import roomescape.application.support.exception.LoginAuthException;
 import roomescape.application.support.exception.NotFoundEntityException;
 import roomescape.application.support.exception.UnauthorizedException;
-import roomescape.application.support.exception.UnauthorizedException.LoginAuthException;
 import roomescape.domain.BusinessRuleViolationException;
-import roomescape.presentation.support.ParameterResolveException.AuthInfoResolveException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
