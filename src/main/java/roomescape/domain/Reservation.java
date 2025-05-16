@@ -1,29 +1,42 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import roomescape.exception.reservation.ReservationFieldRequiredException;
 
 @Entity
+@Table(name = "reservation")
 public class Reservation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private LocalDate date;
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reservation_time_id", nullable = false)
     private ReservationTime time;
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    public Reservation() {
+    }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         validate(date, time, theme, member);
@@ -36,10 +49,6 @@ public class Reservation {
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(null, date, time, theme, member);
-    }
-
-    public Reservation() {
-
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
