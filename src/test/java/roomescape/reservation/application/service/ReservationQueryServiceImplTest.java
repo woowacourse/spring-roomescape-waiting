@@ -12,6 +12,7 @@ import roomescape.reservation.application.dto.AvailableReservationTimeServiceRes
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.ui.ReservationSearchRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
@@ -19,6 +20,7 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -49,6 +51,8 @@ class ReservationQueryServiceImplTest {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserQueryService userQueryService;
 
     @Test
     @DisplayName("예약을 조회할 수 있다")
@@ -229,5 +233,102 @@ class ReservationQueryServiceImplTest {
         // then
         assertThat(reservations).hasSize(2);
         assertThat(reservations).contains(reservation1, reservation3);
+    }
+
+    @Test
+    @DisplayName("테마 아이디, 유저 아이디, 시작/끝 날짜 조건으로 검색할 수 있다")
+    void getByParams() {
+        // given
+        final User user = userRepository.save(
+                User.withoutId(
+                        UserName.from("강산"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("password"),
+                        UserRole.NORMAL
+                )
+        );
+
+        final ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.withoutId(
+                        LocalTime.of(10, 0)));
+
+        final Theme theme = themeRepository.save(
+                Theme.withoutId(ThemeName.from("공포1"),
+                        ThemeDescription.from("지구별 방탈출 최고1"),
+                        ThemeThumbnail.from("www.making.com")));
+
+        final Reservation reservation = reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(1)),
+                        time,
+                        theme
+                )
+        );
+
+        // when
+        final List<Reservation> foundByThemeIdAndUserIdAndDateToFrom = reservationQueryService.getByParams(
+                new ReservationSearchRequest(
+                        theme.getId(),
+                        user.getId(),
+                        ReservationDate.from(LocalDate.now()),
+                        ReservationDate.from(LocalDate.now().plusDays(1))
+                )
+        );
+
+        final List<Reservation> foundByThemeIdAndUserIdAndDateTo = reservationQueryService.getByParams(
+                new ReservationSearchRequest(
+                        theme.getId(),
+                        user.getId(),
+                        ReservationDate.from(LocalDate.now()),
+                        null
+                )
+        );
+
+        final List<Reservation> foundByThemeIdAndUserId = reservationQueryService.getByParams(
+                new ReservationSearchRequest(
+                        theme.getId(),
+                        user.getId(),
+                        null,
+                        null
+                )
+        );
+
+        final List<Reservation> foundByThemeId = reservationQueryService.getByParams(
+                new ReservationSearchRequest(
+                        theme.getId(),
+                        null,
+                        null,
+                        null
+                )
+        );
+
+        final List<Reservation> noFilter = reservationQueryService.getByParams(
+                new ReservationSearchRequest(
+                        null,
+                        null,
+                        null,
+                        null
+                )
+        );
+
+        final List<Reservation> wrongFilter = reservationQueryService.getByParams(
+                new ReservationSearchRequest(
+                        null,
+                        null,
+                        ReservationDate.from(LocalDate.now().plusMonths(1)),
+                        null
+                )
+        );
+
+        // then
+        assertAll(() -> {
+            assertThat(foundByThemeIdAndUserIdAndDateToFrom.contains(reservation)).isTrue();
+            assertThat(foundByThemeIdAndUserIdAndDateTo.contains(reservation)).isTrue();
+            assertThat(foundByThemeIdAndUserId.contains(reservation)).isTrue();
+            assertThat(foundByThemeId.contains(reservation)).isTrue();
+            assertThat(noFilter.contains(reservation)).isTrue();
+            assertThat(wrongFilter.isEmpty()).isTrue();
+        });
     }
 }
