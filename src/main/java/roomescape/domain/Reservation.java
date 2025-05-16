@@ -35,7 +35,8 @@ public class Reservation {
     protected Reservation() {
     }
 
-    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
+                        ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
@@ -73,15 +74,24 @@ public class Reservation {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Reservation other)) {
+            return false;
+        }
+        if (this.id == null || other.id == null) {
+            return false;
+        }
+        return Objects.equals(id, other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
+        if (id == null) {
+            return System.identityHashCode(this);
+        }
+        return Objects.hash(id);
     }
-
 }

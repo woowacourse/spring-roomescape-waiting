@@ -40,17 +40,24 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ReservationTime) obj;
-        return Objects.equals(this.id, that.id) &&
-                Objects.equals(this.startAt, that.startAt);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ReservationTime other)) {
+            return false;
+        }
+        if (this.id == null || other.id == null) {
+            return false;
+        }
+        return Objects.equals(id, other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startAt);
+        if (id == null) {
+            return System.identityHashCode(this);
+        }
+        return Objects.hash(id);
     }
-
 }
