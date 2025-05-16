@@ -14,7 +14,7 @@ class BookedCountTest {
     void throwWhenNegativeCountValue() {
         // when
         // then
-        assertAll(()->{
+        assertAll(() -> {
             assertThatCode(() -> BookedCount.from(0))
                     .doesNotThrowAnyException();
 

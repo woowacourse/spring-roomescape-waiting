@@ -20,35 +20,35 @@ class ReservationTimeTest {
         assertThatThrownBy(() -> ReservationTime.withoutId(null))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: ReservationTime.startAt");
-        
+
         assertThatThrownBy(() -> ReservationTime.withId(ReservationTimeId.from(1L), null))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: ReservationTime.startAt");
     }
-    
+
     @Test
     @DisplayName("유효한 시간으로 ReservationTime 객체를 생성할 수 있다")
     void createValidReservationTime() {
         // given
         final LocalTime time = LocalTime.of(10, 0);
-        
+
         // when
         final ReservationTime reservationTime = ReservationTime.withoutId(time);
-        
+
         // then
         assertAll(() -> {
             assertThat(reservationTime).isNotNull();
             assertThat(reservationTime.getStartAt()).isEqualTo(time);
         });
     }
-    
+
     @Test
     @DisplayName("isBefore 메서드는 주어진 시간과 예약 시간을 비교한다")
     void testIsBefore() {
         // given
         final LocalTime time = LocalTime.of(10, 0);
         final ReservationTime reservationTime = ReservationTime.withoutId(time);
-        
+
         // when & then
         assertAll(() -> {
             assertThat(reservationTime.isBefore(LocalTime.of(11, 0))).isTrue();
