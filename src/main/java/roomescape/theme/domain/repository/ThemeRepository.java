@@ -3,6 +3,7 @@ package roomescape.theme.domain.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.repository.query.Param;
 import roomescape.theme.domain.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
@@ -23,9 +24,9 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                 t.id, t.name, t.description, t.thumbnail
             ORDER BY
                 COUNT(r.id) DESC
-            LIMIT 10
+            LIMIT :limit
             """)
-    List<Theme> findByRank();
+    List<Theme> findByRank(@Param("limit") int limit);
 
     boolean existsByName(String name);
 }

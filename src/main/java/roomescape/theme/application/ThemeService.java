@@ -12,6 +12,8 @@ import roomescape.theme.domain.repository.ThemeRepository;
 @Service
 public class ThemeService {
 
+    private static final int TOP_THEME_COUNT = 10;
+    
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
@@ -44,7 +46,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> sortByRank() {
-        final List<Theme> themes = themeRepository.findByRank();
+        final List<Theme> themes = themeRepository.findByRank(TOP_THEME_COUNT);
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
