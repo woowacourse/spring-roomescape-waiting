@@ -219,4 +219,129 @@ class ReservationServiceTest {
         softly.assertAll();
     }
 
+    @Test
+    void 존재하지_않는_회원으로_예약할_수_없다() {
+        ReservationTime reservationTime = reservationTimeDbFixture.열시();
+        Theme theme = themeDbFixture.공포();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
+        
+        ReserveCommand command = new ReserveCommand(
+                date,
+                theme.getId(),
+                reservationTime.getId(),
+                999L
+        );
+        
+        assertThatThrownBy(() -> reservationService.reserve(command))
+                .isInstanceOf(InvalidArgumentException.class)
+                .hasMessage("존재하지 않는 멤버입니다.");
+    }
+    
+    @Test
+    void 존재하지_않는_테마로_예약할_수_없다() {
+        ReservationTime reservationTime = reservationTimeDbFixture.열시();
+        Member reserver = memberDbFixture.유저1_생성();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
+        
+        ReserveCommand command = new ReserveCommand(
+                date,
+                999L,
+                reservationTime.getId(),
+                reserver.getId()
+        );
+        
+        assertThatThrownBy(() -> reservationService.reserve(command))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("해당 테마가 존재하지 않습니다.");
+    }
+    
+    @Test
+    void 존재하지_않는_시간으로_예약할_수_없다() {
+        Theme theme = themeDbFixture.공포();
+        Member reserver = memberDbFixture.유저1_생성();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
+        
+        ReserveCommand command = new ReserveCommand(
+                date,
+                theme.getId(),
+                999L,
+                reserver.getId()
+        );
+        
+        assertThatThrownBy(() -> reservationService.reserve(command))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("해당 시간이 존재하지 않습니다.");
+    }
+    
+    @Test
+    void 존재하지_않는_회원의_예약목록을_조회하면_빈_리스트를_반환한다() {
+        List<MyReservationResponse> myReservations = reservationService.getMyReservations(999L);
+        
+        assertThat(myReservations).isEmpty();
+    }
+    
+    @Test
+    void 날짜가_범위를_벗어나는_필터_조건으로_조회하면_빈_리스트를_반환한다() {
+        // given
+        Member reserver = memberDbFixture.유저1_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+        
+        reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
+        
+        LocalDate pastDate = LocalDate.now().minusDays(10);
+        LocalDate pastDateEnd = LocalDate.now().minusDays(5);
+        
+        List<ReservationResponse> responses = reservationService.getFilteredReservations(
+                null, null, pastDate, pastDateEnd);
+        
+        assertThat(responses).isEmpty();
+    }
+    
+    @Test
+    void 비어있는_날짜_필터링으로_조회하면_모든_예약을_반환한다() {
+        // given
+        Member member1 = memberDbFixture.유저1_생성();
+        Member member2 = memberDbFixture.유저2_생성();
+        
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+        
+        Reservation reservation1 = Reservation.reserve(member1, reservationDateTime, theme);
+        Reservation reservation2 = Reservation.reserve(member2, reservationDateTime, theme);
+        
+        reservationRepository.saveAll(List.of(reservation1, reservation2));
+        
+        // when
+        List<ReservationResponse> responses = reservationService.getFilteredReservations(
+                null, null, null, null);
+        
+        // then
+        assertThat(responses).hasSize(2);
+    }
+    
+    @Test
+    void 다수의_회원_예약을_테마별로_필터링_조회할_수_있다() {
+        // given
+        Member member = memberDbFixture.유저1_생성();
+        Theme horror = themeDbFixture.공포();
+        Theme adventure = themeDbFixture.커스텀_테마("모험");
+        
+        ReservationDateTime tomorrow10 = reservationDateTimeDbFixture.내일_열시();
+        
+        // 두 개의 다른 테마로 예약
+        Reservation horrorReservation = Reservation.reserve(member, tomorrow10, horror);
+        Reservation adventureReservation = Reservation.reserve(member, tomorrow10, adventure);
+        
+        reservationRepository.saveAll(List.of(horrorReservation, adventureReservation));
+        
+        // when - 공포 테마만 필터링
+        List<ReservationResponse> horrorOnly = reservationService.getFilteredReservations(
+                horror.getId(), null, null, null);
+        
+        // then
+        assertThat(horrorOnly).hasSize(1);
+        assertThat(horrorOnly.get(0).theme().name()).isEqualTo(horror.getName());
+    }
+
 }
