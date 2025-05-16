@@ -19,7 +19,7 @@ public class PersonalReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping("reservations-mine")
+    @GetMapping("/reservations-mine")
     public ResponseEntity<List<ReservationWithStatusResponse>> findMineReservations(@AuthPrincipal AuthInfo authInfo) {
         List<ReservationWithStatusResult> reservationsWithStatus = reservationService.findReservationsWithStatus(
                 authInfo.memberId()
