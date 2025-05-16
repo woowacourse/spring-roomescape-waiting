@@ -17,8 +17,6 @@ import roomescape.application.reservation.dto.ReservationSearchParam;
 import roomescape.application.reservation.dto.ReservationTimeResult;
 import roomescape.application.reservation.dto.ReservationWithStatusResult;
 import roomescape.application.reservation.dto.ThemeResult;
-import roomescape.application.support.exception.NotFoundEntityException;
-import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -30,6 +28,10 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.infrastructure.error.exception.MemberException;
+import roomescape.infrastructure.error.exception.ReservationException;
+import roomescape.infrastructure.error.exception.ReservationTimeException;
+import roomescape.infrastructure.error.exception.ThemeException;
 
 class ReservationServiceTest extends AbstractServiceIntegrationTest {
 
@@ -86,7 +88,7 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatThrownBy(() -> reservationService.create(param))
-                .isInstanceOf(NotFoundEntityException.class)
+                .isInstanceOf(MemberException.class)
                 .hasMessage("999에 해당하는 member 튜플이 없습니다.");
     }
 
@@ -102,7 +104,7 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatThrownBy(() -> reservationService.create(param))
-                .isInstanceOf(NotFoundEntityException.class)
+                .isInstanceOf(ReservationTimeException.class)
                 .hasMessage("999에 해당하는 reservation_time 튜플이 없습니다.");
     }
 
@@ -118,7 +120,7 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatThrownBy(() -> reservationService.create(param))
-                .isInstanceOf(NotFoundEntityException.class)
+                .isInstanceOf(ThemeException.class)
                 .hasMessage("999에 해당하는 theme 튜플이 없습니다.");
     }
 
@@ -139,7 +141,7 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatThrownBy(() -> reservationService.create(param))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ReservationException.class)
                 .hasMessage("날짜와 시간이 중복된 예약이 존재합니다.");
     }
 

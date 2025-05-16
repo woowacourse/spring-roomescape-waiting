@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.Date;
 import org.springframework.stereotype.Component;
 import roomescape.application.auth.dto.JwtPayload;
-import roomescape.application.support.exception.JwtExtractException;
+import roomescape.infrastructure.error.exception.JwtExtractException;
 import roomescape.domain.member.Role;
 
 @Component

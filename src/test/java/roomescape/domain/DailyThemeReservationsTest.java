@@ -15,6 +15,7 @@ import roomescape.domain.reservation.DailyThemeReservations;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.infrastructure.error.exception.ThemeException;
 
 class DailyThemeReservationsTest {
 
@@ -40,7 +41,7 @@ class DailyThemeReservationsTest {
 
         //when & then
         assertThatThrownBy(() -> new DailyThemeReservations(reservations, 1L, LocalDate.of(2025, 5, 8)))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ThemeException.class)
                 .hasMessage("특정 테마, 특정 날짜에 속한 예약이 아닙니다.");
     }
 

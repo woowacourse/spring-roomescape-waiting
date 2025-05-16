@@ -9,9 +9,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.application.auth.dto.JwtPayload;
-import roomescape.application.support.exception.JwtExtractException;
+import roomescape.infrastructure.error.exception.JwtExtractException;
 import roomescape.infrastructure.security.JwtProvider;
-import roomescape.presentation.support.AuthInfoResolveException;
+import roomescape.infrastructure.error.exception.AuthInfoResolveException;
 import roomescape.presentation.support.JwtTokenExtractor;
 
 @Component

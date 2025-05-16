@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.ReservationException;
 import roomescape.domain.member.Member;
 
 @Entity
@@ -68,11 +68,11 @@ public class Reservation {
     public void validateReservable(LocalDateTime currentDateTime) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new BusinessRuleViolationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
+            throw new ReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
         }
         Duration duration = Duration.between(currentDateTime, reservationDateTime);
         if (duration.toMinutes() < 10) {
-            throw new BusinessRuleViolationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
+            throw new ReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
         }
     }
 

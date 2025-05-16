@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.CreateThemeParam;
 import roomescape.application.reservation.dto.ThemeResult;
-import roomescape.application.support.exception.NotFoundEntityException;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.ThemeException;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
@@ -38,7 +37,7 @@ public class ThemeService {
     @Transactional
     public Long create(CreateThemeParam createThemeParam) {
         if (themeRepository.existsByName(createThemeParam.name())) {
-            throw new BusinessRuleViolationException("이미 같은 이름의 테마가 존재합니다.");
+            throw new ThemeException("이미 같은 이름의 테마가 존재합니다.");
         }
         Theme theme = themeRepository.save(new Theme(
                         createThemeParam.name(),
@@ -56,13 +55,13 @@ public class ThemeService {
 
     private Theme getThemeById(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
+                .orElseThrow(() -> new ThemeException(themeId + "에 해당하는 theme 튜플이 없습니다."));
     }
 
     @Transactional
     public void deleteById(final Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new BusinessRuleViolationException("해당 테마에 예약이 존재합니다.");
+            throw new ThemeException("해당 테마에 예약이 존재합니다.");
         }
         themeRepository.deleteById(themeId);
     }

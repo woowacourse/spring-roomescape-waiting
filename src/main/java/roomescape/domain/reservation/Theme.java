@@ -5,7 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.ThemeException;
 
 @Entity
 public class Theme {
@@ -43,28 +43,28 @@ public class Theme {
 
     private void validateName(String name) {
         if (name.isBlank()) {
-            throw new BusinessRuleViolationException("테마 이름은 비어있을 수 없습니다.");
+            throw new ThemeException("테마 이름은 비어있을 수 없습니다.");
         }
         if (MAX_NAME_LENGTH < name.length()) {
-            throw new BusinessRuleViolationException("테마 이름은 %d자 이하여야 합니다.".formatted(MAX_NAME_LENGTH));
+            throw new ThemeException("테마 이름은 %d자 이하여야 합니다.".formatted(MAX_NAME_LENGTH));
         }
     }
 
     private void validateDescription(String description) {
         if (description.isBlank()) {
-            throw new BusinessRuleViolationException("테마 설명은 비어있을 수 없습니다.");
+            throw new ThemeException("테마 설명은 비어있을 수 없습니다.");
         }
         if (MAX_DESCRIPTION_LENGTH < description.length()) {
-            throw new BusinessRuleViolationException("테마 설명은 %d자 이하여야 합니다.".formatted(MAX_DESCRIPTION_LENGTH));
+            throw new ThemeException("테마 설명은 %d자 이하여야 합니다.".formatted(MAX_DESCRIPTION_LENGTH));
         }
     }
 
     private void validateThumbnail(String thumbnail) {
         if (thumbnail.isBlank()) {
-            throw new BusinessRuleViolationException("테마 썸네일은 비어있을 수 없습니다.");
+            throw new ThemeException("테마 썸네일은 비어있을 수 없습니다.");
         }
         if (MAX_THUMBNAIL_LENGTH < thumbnail.length()) {
-            throw new BusinessRuleViolationException("테마 썸네일은 %d자 이하여야 합니다.".formatted(MAX_THUMBNAIL_LENGTH));
+            throw new ThemeException("테마 썸네일은 %d자 이하여야 합니다.".formatted(MAX_THUMBNAIL_LENGTH));
         }
     }
 

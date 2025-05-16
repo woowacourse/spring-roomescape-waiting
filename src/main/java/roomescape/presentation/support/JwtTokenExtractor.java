@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import org.springframework.stereotype.Component;
-import roomescape.application.support.exception.JwtExtractException;
+import roomescape.infrastructure.error.exception.JwtExtractException;
 
 @Component
 public class JwtTokenExtractor {

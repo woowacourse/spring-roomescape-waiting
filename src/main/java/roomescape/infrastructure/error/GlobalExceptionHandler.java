@@ -1,4 +1,4 @@
-package roomescape.presentation.support;
+package roomescape.infrastructure.error;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import java.time.LocalDate;
@@ -11,12 +11,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.application.support.exception.CoreException;
-import roomescape.application.support.exception.ForbiddenException;
-import roomescape.application.support.exception.LoginAuthException;
-import roomescape.application.support.exception.NotFoundEntityException;
-import roomescape.application.support.exception.UnauthorizedException;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.ForbiddenException;
+import roomescape.infrastructure.error.exception.LoginAuthException;
+import roomescape.infrastructure.error.exception.UnauthorizedException;
+import roomescape.infrastructure.error.exception.AuthInfoResolveException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -48,29 +46,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ApiFailResponse("잘못된 요청입니다."));
     }
 
-    @ExceptionHandler(ParameterResolveException.class)
-    public ResponseEntity<ApiFailResponse> handleParameterResolveException(ParameterResolveException e) {
-        return ResponseEntity.badRequest().body(new ApiFailResponse("잘못된 요청입니다."));
-    }
-
     @ExceptionHandler(AuthInfoResolveException.class)
     public ResponseEntity<ApiFailResponse> handleAuthInfoResolveException(AuthInfoResolveException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiFailResponse("인증 정보를 확인할 수 없습니다."));
-    }
-
-    @ExceptionHandler(CoreException.class)
-    public ResponseEntity<ApiFailResponse> handleCoreException(CoreException e) {
-        return ResponseEntity.badRequest().body(new ApiFailResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler(NotFoundEntityException.class)
-    public ResponseEntity<ApiFailResponse> handleNotFoundEntityException(NotFoundEntityException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiFailResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler(BusinessRuleViolationException.class)
-    public ResponseEntity<ApiFailResponse> handleBusinessRuleViolationException(BusinessRuleViolationException e) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ApiFailResponse(e.getMessage()));
     }
 
     @ExceptionHandler(UnauthorizedException.class)

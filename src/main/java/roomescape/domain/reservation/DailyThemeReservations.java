@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.ThemeException;
 
 public class DailyThemeReservations {
 
@@ -18,7 +18,7 @@ public class DailyThemeReservations {
     private void validate(List<Reservation> reservations, Long themeId, LocalDate reservationDate) {
         for (Reservation reservation : reservations) {
             if (!reservation.isEqualThemeId(themeId) || !reservation.getDate().equals(reservationDate)) {
-                throw new BusinessRuleViolationException("특정 테마, 특정 날짜에 속한 예약이 아닙니다.");
+                throw new ThemeException("특정 테마, 특정 날짜에 속한 예약이 아닙니다.");
             }
         }
     }

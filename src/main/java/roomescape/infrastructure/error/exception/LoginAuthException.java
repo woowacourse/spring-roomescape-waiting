@@ -1,4 +1,4 @@
-package roomescape.application.support.exception;
+package roomescape.infrastructure.error.exception;
 
 public class LoginAuthException extends UnauthorizedException {
 

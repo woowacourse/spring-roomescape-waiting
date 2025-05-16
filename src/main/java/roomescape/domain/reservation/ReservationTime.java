@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.ReservationTimeException;
 
 @Entity
 public final class ReservationTime {
@@ -26,7 +26,7 @@ public final class ReservationTime {
 
     public ReservationTime(Long id, LocalTime startAt) {
         if (startAt.isBefore(RESERVATION_START_TIME) || startAt.isAfter(RESERVATION_END_TIME)) {
-            throw new BusinessRuleViolationException("해당 시간은 예약 가능 시간이 아닙니다.");
+            throw new ReservationTimeException("해당 시간은 예약 가능 시간이 아닙니다.");
         }
         this.id = id;
         this.startAt = startAt;

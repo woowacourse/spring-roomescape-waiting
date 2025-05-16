@@ -8,8 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.AvailableReservationTimeResult;
 import roomescape.application.reservation.dto.CreateReservationTimeParam;
 import roomescape.application.reservation.dto.ReservationTimeResult;
-import roomescape.application.support.exception.NotFoundEntityException;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.ReservationTimeException;
 import roomescape.domain.reservation.DailyThemeReservations;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
@@ -31,7 +30,7 @@ public class ReservationTimeService {
     @Transactional
     public Long create(CreateReservationTimeParam createReservationTimeParam) {
         if (reservationTimeRepository.existsByStartAt(createReservationTimeParam.startAt())) {
-            throw new BusinessRuleViolationException("이미 존재하는 얘약시간입니다.");
+            throw new ReservationTimeException("이미 존재하는 얘약시간입니다.");
         }
         ReservationTime reservationTime = reservationTimeRepository.save(
                 new ReservationTime(createReservationTimeParam.startAt())
@@ -46,7 +45,7 @@ public class ReservationTimeService {
 
     private ReservationTime getReservationTimeById(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundEntityException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
+                .orElseThrow(() -> new ReservationTimeException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
     }
 
     public List<ReservationTimeResult> findAll() {
@@ -83,7 +82,7 @@ public class ReservationTimeService {
     @Transactional
     public void deleteById(Long reservationTimeId) {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
-            throw new BusinessRuleViolationException("해당 예약 시간에 예약이 존재합니다.");
+            throw new ReservationTimeException("해당 예약 시간에 예약이 존재합니다.");
         }
         reservationTimeRepository.deleteById(reservationTimeId);
     }

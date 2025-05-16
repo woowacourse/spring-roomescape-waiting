@@ -14,8 +14,6 @@ import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.reservation.dto.AvailableReservationTimeResult;
 import roomescape.application.reservation.dto.CreateReservationTimeParam;
 import roomescape.application.reservation.dto.ReservationTimeResult;
-import roomescape.application.support.exception.NotFoundEntityException;
-import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -26,6 +24,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.infrastructure.error.exception.ReservationTimeException;
 
 class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
 
@@ -70,7 +69,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatCode(() -> reservationTimeService.create(createReservationTimeParam))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ReservationTimeException.class)
                 .hasMessage("해당 시간은 예약 가능 시간이 아닙니다.");
     }
 
@@ -83,7 +82,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatCode(() -> reservationTimeService.create(createReservationTimeParam))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ReservationTimeException.class)
                 .hasMessage("이미 존재하는 얘약시간입니다.");
     }
 
@@ -107,7 +106,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatCode(() -> reservationTimeService.findById(invalidId))
-                .isInstanceOf(NotFoundEntityException.class)
+                .isInstanceOf(ReservationTimeException.class)
                 .hasMessage(invalidId + "에 해당하는 reservation_time 튜플이 없습니다.");
     }
 
@@ -151,7 +150,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatThrownBy(() -> reservationTimeService.deleteById(reservationTime.getId()))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ReservationTimeException.class)
                 .hasMessage("해당 예약 시간에 예약이 존재합니다.");
     }
 

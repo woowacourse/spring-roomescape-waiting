@@ -11,6 +11,7 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.infrastructure.error.exception.ReservationException;
 
 class ReservationTest {
 
@@ -27,7 +28,7 @@ class ReservationTest {
 
         //when & then
         assertThatThrownBy(() -> reservation.validateReservable(currentDateTime))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ReservationException.class)
                 .hasMessage("지난 날짜와 시간에 대한 예약은 불가능합니다.");
     }
 
@@ -44,7 +45,7 @@ class ReservationTest {
 
         //when & then
         assertThatThrownBy(() -> reservation.validateReservable(currentDateTime))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ReservationException.class)
                 .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
     }
 }

@@ -1,4 +1,4 @@
-package roomescape.presentation.support;
+package roomescape.infrastructure.error;
 
 public record ApiFailResponse(
         String message

@@ -1,6 +1,6 @@
-package roomescape.presentation.support;
+package roomescape.infrastructure.error.exception;
 
-public class AuthInfoResolveException extends ParameterResolveException {
+public class AuthInfoResolveException extends RuntimeException {
 
     public AuthInfoResolveException(String message) {
         super(message);

@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import roomescape.domain.BusinessRuleViolationException;
+import roomescape.infrastructure.error.exception.MemberException;
 
 @Entity
 public class Member {
@@ -52,16 +52,16 @@ public class Member {
 
     private void validateName(String name) {
         if (name.isBlank()) {
-            throw new BusinessRuleViolationException("사용자명은 비어있을 수 없습니다.");
+            throw new MemberException("사용자명은 비어있을 수 없습니다.");
         }
         if (MAX_NAME_LENGTH < name.length()) {
-            throw new BusinessRuleViolationException("사용자명은 %d자 이하여야 합니다.".formatted(MAX_NAME_LENGTH));
+            throw new MemberException("사용자명은 %d자 이하여야 합니다.".formatted(MAX_NAME_LENGTH));
         }
     }
 
     private void validatePassword(String password) {
         if (password.isBlank()) {
-            throw new BusinessRuleViolationException("비밀번호는 비어있을 수 없습니다.");
+            throw new MemberException("비밀번호는 비어있을 수 없습니다.");
         }
     }
 

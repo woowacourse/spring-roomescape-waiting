@@ -16,12 +16,10 @@ import roomescape.domain.member.Role;
 class MemberServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    private MemberService memberService;
-
-    @Autowired
     EntityManager entityManager;
+    @Autowired
+    private MemberRepository memberRepository;
+    private MemberService memberService;
 
     @BeforeEach
     void setUp() {

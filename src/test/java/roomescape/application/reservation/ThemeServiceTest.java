@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.reservation.dto.CreateThemeParam;
 import roomescape.application.reservation.dto.ThemeResult;
-import roomescape.application.support.exception.NotFoundEntityException;
-import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -25,6 +23,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.infrastructure.error.exception.ThemeException;
 
 class ThemeServiceTest extends AbstractServiceIntegrationTest {
 
@@ -74,7 +73,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatCode(() -> themeService.create(param))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ThemeException.class)
                 .hasMessage("이미 같은 이름의 테마가 존재합니다.");
     }
 
@@ -114,7 +113,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.findById(invalidId))
-                .isInstanceOf(NotFoundEntityException.class)
+                .isInstanceOf(ThemeException.class)
                 .hasMessage("999에 해당하는 theme 튜플이 없습니다.");
     }
 
@@ -141,7 +140,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
         // when
         // then
         assertThatThrownBy(() -> themeService.deleteById(theme.getId()))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ThemeException.class)
                 .hasMessage("해당 테마에 예약이 존재합니다.");
     }
 

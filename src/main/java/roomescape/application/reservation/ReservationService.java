@@ -10,8 +10,6 @@ import roomescape.application.reservation.dto.CreateReservationParam;
 import roomescape.application.reservation.dto.ReservationResult;
 import roomescape.application.reservation.dto.ReservationSearchParam;
 import roomescape.application.reservation.dto.ReservationWithStatusResult;
-import roomescape.application.support.exception.NotFoundEntityException;
-import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
@@ -20,6 +18,10 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.infrastructure.error.exception.MemberException;
+import roomescape.infrastructure.error.exception.ReservationException;
+import roomescape.infrastructure.error.exception.ReservationTimeException;
+import roomescape.infrastructure.error.exception.ThemeException;
 
 @Service
 public class ReservationService {
@@ -48,7 +50,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTimeById(createReservationParam.timeId());
         Theme theme = getThemeById(createReservationParam.themeId());
         if (isAlreadyReservedAt(createReservationParam.date(), reservationTime, theme)) {
-            throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
+            throw new ReservationException("날짜와 시간이 중복된 예약이 존재합니다.");
         }
         Reservation reservation = new Reservation(
                 member,
@@ -62,17 +64,17 @@ public class ReservationService {
 
     private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundEntityException(memberId + "에 해당하는 member 튜플이 없습니다."));
+                .orElseThrow(() -> new MemberException(memberId + "에 해당하는 member 튜플이 없습니다."));
     }
 
     private ReservationTime getReservationTimeById(Long timeId) {
         return reservationTImeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundEntityException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
+                .orElseThrow(() -> new ReservationTimeException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
     }
 
     private Theme getThemeById(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
+                .orElseThrow(() -> new ThemeException(themeId + "에 해당하는 theme 튜플이 없습니다."));
     }
 
     private boolean isAlreadyReservedAt(LocalDate date, ReservationTime reservationTime, Theme theme) {
@@ -97,7 +99,7 @@ public class ReservationService {
 
     private Reservation getReservationById(Long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundEntityException(reservationId + "에 해당하는 reservation 튜플이 없습니다."));
+                .orElseThrow(() -> new ReservationException(reservationId + "에 해당하는 reservation 튜플이 없습니다."));
     }
 
     public List<ReservationResult> findReservationsBy(ReservationSearchParam reservationSearchParam) {
