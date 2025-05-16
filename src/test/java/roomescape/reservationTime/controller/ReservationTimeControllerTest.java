@@ -18,11 +18,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.dto.ReservationTimeRequestDto;
-import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
+import roomescape.domain.ReservationTime;
+import roomescape.dto.request.ReservationTimeRequestDto;
+import roomescape.dto.response.ReservationTimeResponseDto;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.reservationTime.repository.ReservationTimeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -30,23 +30,23 @@ public class ReservationTimeControllerTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-    
+
     @Autowired
     private TestEntityManager entityManager;
 
     @LocalServerPort
     int port;
-    
+
     private ReservationTime savedReservationTime;
     private Long savedReservationTimeId;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        
+
         // Create and persist test data
         ReservationTime reservationTime = ReservationTimeFixture.create(LocalTime.of(2, 40));
         savedReservationTime = entityManager.persist(reservationTime);

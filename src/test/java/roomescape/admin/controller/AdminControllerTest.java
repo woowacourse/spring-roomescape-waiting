@@ -16,16 +16,16 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.admin.domain.dto.AdminReservationRequestDto;
-import roomescape.auth.domain.dto.TokenResponseDto;
 import roomescape.auth.fixture.AuthFixture;
-import roomescape.auth.service.AuthService;
-import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
+import roomescape.domain.User;
+import roomescape.dto.request.AdminReservationRequestDto;
+import roomescape.dto.response.TokenResponseDto;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.theme.domain.Theme;
+import roomescape.service.AuthService;
 import roomescape.theme.fixture.ThemeFixture;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
 import roomescape.user.fixture.UserFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -35,13 +35,13 @@ class AdminControllerTest {
 
     @Autowired
     private TestEntityManager entityManager;
-    
+
     @Autowired
     private AuthService authService;
 
     @LocalServerPort
     int port;
-    
+
     private User savedMember;
     private User savedAdmin;
     private Theme savedTheme;
@@ -53,11 +53,12 @@ class AdminControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        
+
         date = LocalDate.now().plusDays(1);
 
         // Create and persist test data
-        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail",
+                "member_dummyPassword");
         User admin = UserFixture.create(Role.ROLE_ADMIN, "admin_dummyName", "admin_dummyEmail", "admin_dummyPassword");
         Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
         ReservationTime time = ReservationTimeFixture.create(LocalTime.of(2, 40));
@@ -66,7 +67,7 @@ class AdminControllerTest {
         savedAdmin = entityManager.persist(admin);
         savedTheme = entityManager.persist(theme);
         savedTime = entityManager.persist(time);
-        
+
         entityManager.flush();
 
         memberTokenResponseDto = authService.login(

@@ -15,20 +15,21 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.global.exception.NotFoundException;
-import roomescape.reservation.domain.dto.ReservationRequestDto;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
-import roomescape.reservationTime.exception.AlreadyReservedTimeException;
-import roomescape.reservationTime.exception.DuplicateReservationException;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
+import roomescape.domain.User;
+import roomescape.dto.request.ReservationRequestDto;
+import roomescape.dto.response.ReservationTimeResponseDto;
+import roomescape.exception.global.NotFoundException;
+import roomescape.exception.local.AlreadyReservedTimeException;
+import roomescape.exception.local.DuplicateReservationException;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.UserRepository;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
+import roomescape.service.ReservationService;
+import roomescape.service.ReservationTimeService;
 import roomescape.user.fixture.UserFixture;
-import roomescape.user.repository.UserRepository;
 
 @DataJpaTest
 @Import({
@@ -41,22 +42,22 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeService service;
-    
+
     @Autowired
     private ReservationService reservationService;
-    
+
     @Autowired
     private ThemeRepository themeRepository;
-    
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private TestEntityManager entityManager;
-    
+
     private ReservationTime savedReservationTime;
     private Long savedReservationTimeId;
 

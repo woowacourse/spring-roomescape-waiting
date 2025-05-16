@@ -12,10 +12,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.dto.ThemeRequestDto;
+import roomescape.domain.Theme;
+import roomescape.dto.request.ThemeRequestDto;
+import roomescape.repository.ThemeRepository;
 import roomescape.theme.fixture.ThemeFixture;
-import roomescape.theme.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)

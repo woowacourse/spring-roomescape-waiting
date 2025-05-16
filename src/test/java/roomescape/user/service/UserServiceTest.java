@@ -14,17 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.member.domain.dto.ReservationWithBookStateDto;
-import roomescape.reservation.domain.Reservation;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
+import roomescape.domain.User;
+import roomescape.dto.business.ReservationWithBookStateDto;
+import roomescape.exception.local.NotFoundUserException;
+import roomescape.repository.ReservationRepository;
 import roomescape.reservation.fixture.ReservationFixture;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.theme.domain.Theme;
+import roomescape.service.UserService;
 import roomescape.theme.fixture.ThemeFixture;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
-import roomescape.user.exception.NotFoundUserException;
 import roomescape.user.fixture.UserFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -33,13 +34,13 @@ class UserServiceTest {
 
     @Autowired
     private UserService service;
-    
+
     @Autowired
     private ReservationRepository reservationRepository;
-    
+
     @Autowired
     private TestEntityManager entityManager;
-    
+
     private User savedMember;
     private Theme savedTheme;
     private ReservationTime savedTime;
@@ -47,14 +48,15 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         // Create and persist test data
-        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail",
+                "member_dummyPassword");
         Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
         ReservationTime time = ReservationTimeFixture.create(LocalTime.of(2, 40));
 
         savedMember = entityManager.persist(member);
         savedTheme = entityManager.persist(theme);
         savedTime = entityManager.persist(time);
-        
+
         entityManager.flush();
     }
 

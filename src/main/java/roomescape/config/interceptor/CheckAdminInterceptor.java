@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.auth.JwtTokenProvider;
-import roomescape.auth.exception.NotFoundCookieException;
-import roomescape.global.exception.ForbiddenException;
-import roomescape.user.domain.Role;
+import roomescape.domain.Role;
+import roomescape.exception.global.ForbiddenException;
+import roomescape.exception.local.NotFoundCookieException;
+import roomescape.utility.JwtTokenProvider;
 
 @Component
 public class CheckAdminInterceptor implements HandlerInterceptor {

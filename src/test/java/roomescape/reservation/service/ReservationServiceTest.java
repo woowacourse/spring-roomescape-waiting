@@ -12,20 +12,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.global.exception.ConflictException;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.dto.ReservationRequestDto;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
+import roomescape.domain.User;
+import roomescape.dto.request.ReservationRequestDto;
+import roomescape.exception.global.ConflictException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.UserRepository;
 import roomescape.reservation.fixture.ReservationFixture;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.reservationTime.repository.ReservationTimeRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
+import roomescape.service.ReservationService;
 import roomescape.user.fixture.UserFixture;
-import roomescape.user.repository.UserRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = AFTER_CLASS)

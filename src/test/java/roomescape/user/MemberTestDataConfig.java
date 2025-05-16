@@ -3,10 +3,10 @@ package roomescape.user;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
+import roomescape.domain.Role;
+import roomescape.domain.User;
+import roomescape.repository.UserRepository;
 import roomescape.user.fixture.UserFixture;
-import roomescape.user.repository.UserRepository;
 
 @TestConfiguration
 public class MemberTestDataConfig {

@@ -1,8 +1,8 @@
 package roomescape.user.fixture;
 
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
-import roomescape.user.domain.dto.UserRequestDto;
+import roomescape.domain.Role;
+import roomescape.domain.User;
+import roomescape.dto.request.UserRequestDto;
 
 public class UserFixture {
 

@@ -1,6 +1,6 @@
 package roomescape.auth.fixture;
 
-import roomescape.auth.domain.dto.TokenRequestDto;
+import roomescape.dto.request.TokenRequestDto;
 
 public class AuthFixture {
 

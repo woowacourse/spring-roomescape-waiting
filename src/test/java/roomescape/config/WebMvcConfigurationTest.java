@@ -10,12 +10,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import roomescape.auth.domain.dto.TokenRequestDto;
-import roomescape.auth.domain.dto.TokenResponseDto;
 import roomescape.auth.fixture.AuthFixture;
-import roomescape.auth.service.AuthService;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
+import roomescape.domain.Role;
+import roomescape.domain.User;
+import roomescape.dto.request.TokenRequestDto;
+import roomescape.dto.response.TokenResponseDto;
+import roomescape.service.AuthService;
 import roomescape.user.fixture.UserFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -40,12 +40,13 @@ class WebMvcConfigurationTest {
         RestAssured.port = port;
 
         // Create and persist test data
-        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail",
+                "member_dummyPassword");
         User admin = UserFixture.create(Role.ROLE_ADMIN, "admin_dummyName", "admin_dummyEmail", "admin_dummyPassword");
 
         savedMember = entityManager.persist(member);
         savedAdmin = entityManager.persist(admin);
-        
+
         entityManager.flush();
     }
 
@@ -57,7 +58,8 @@ class WebMvcConfigurationTest {
         @Test
         void addInterceptors_pass_withAdminRole() {
             // given
-            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedAdmin.getEmail(), savedAdmin.getPassword());
+            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedAdmin.getEmail(),
+                    savedAdmin.getPassword());
             TokenResponseDto responseDto = authService.login(requestDto);
             String token = responseDto.accessToken();
 
@@ -88,7 +90,8 @@ class WebMvcConfigurationTest {
         @Test
         void addInterceptors_false_byRoleIsNotAdmin() {
             // given
-            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedMember.getEmail(), savedMember.getPassword());
+            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedMember.getEmail(),
+                    savedMember.getPassword());
             TokenResponseDto responseDto = authService.login(requestDto);
             String token = responseDto.accessToken();
 

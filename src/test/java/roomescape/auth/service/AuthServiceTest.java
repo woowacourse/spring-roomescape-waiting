@@ -8,15 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.auth.JwtTokenProvider;
-import roomescape.auth.domain.dto.TokenResponseDto;
-import roomescape.auth.exception.InvalidTokenException;
 import roomescape.auth.fixture.AuthFixture;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
-import roomescape.user.domain.dto.UserResponseDto;
+import roomescape.domain.Role;
+import roomescape.domain.User;
+import roomescape.dto.response.TokenResponseDto;
+import roomescape.dto.response.UserResponseDto;
+import roomescape.exception.local.InvalidTokenException;
+import roomescape.repository.UserRepository;
+import roomescape.service.AuthService;
 import roomescape.user.fixture.UserFixture;
-import roomescape.user.repository.UserRepository;
+import roomescape.utility.JwtTokenProvider;
 
 @DataJpaTest
 @Import({

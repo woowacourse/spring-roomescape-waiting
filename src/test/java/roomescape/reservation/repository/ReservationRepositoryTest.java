@@ -11,15 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import roomescape.reservation.domain.Reservation;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
+import roomescape.domain.User;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.reservation.fixture.ReservationFixture;
-import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.reservationTime.repository.ReservationTimeRepository;
-import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
 import roomescape.user.fixture.UserFixture;
 
 @DataJpaTest
@@ -27,13 +28,13 @@ class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-    
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-    
+
     @Autowired
     private TestEntityManager entityManager;
-    
+
     private User savedMember;
     private Theme savedTheme;
     private ReservationTime savedTime;
@@ -41,14 +42,15 @@ class ReservationRepositoryTest {
     @BeforeEach
     void setUp() {
         // Create and persist test data
-        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail",
+                "member_dummyPassword");
         Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
         ReservationTime time = ReservationTimeFixture.create(LocalTime.of(2, 40));
 
         savedMember = entityManager.persist(member);
         savedTheme = entityManager.persist(theme);
         savedTime = entityManager.persist(time);
-        
+
         entityManager.flush();
     }
 

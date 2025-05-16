@@ -8,10 +8,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.auth.JwtTokenProvider;
-import roomescape.auth.exception.NotFoundCookieException;
-import roomescape.auth.service.AuthService;
-import roomescape.user.domain.User;
+import roomescape.domain.User;
+import roomescape.exception.local.NotFoundCookieException;
+import roomescape.service.AuthService;
+import roomescape.utility.JwtTokenProvider;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
@@ -33,7 +33,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public User resolveArgument(MethodParameter methodParameter, ModelAndViewContainer mavContainer,
-                                NativeWebRequest nativeWebRequest, WebDataBinderFactory binderFactory)
+            NativeWebRequest nativeWebRequest, WebDataBinderFactory binderFactory)
             throws Exception {
         HttpServletRequest request = (HttpServletRequest) nativeWebRequest.getNativeRequest();
 

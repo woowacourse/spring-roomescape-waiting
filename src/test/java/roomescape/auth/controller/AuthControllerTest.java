@@ -14,15 +14,15 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.auth.JwtTokenProvider;
-import roomescape.auth.domain.dto.TokenRequestDto;
-import roomescape.auth.domain.dto.TokenResponseDto;
 import roomescape.auth.fixture.AuthFixture;
-import roomescape.auth.service.AuthService;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
+import roomescape.domain.Role;
+import roomescape.domain.User;
+import roomescape.dto.request.TokenRequestDto;
+import roomescape.dto.response.TokenResponseDto;
+import roomescape.repository.UserRepository;
+import roomescape.service.AuthService;
 import roomescape.user.fixture.UserFixture;
-import roomescape.user.repository.UserRepository;
+import roomescape.utility.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)

@@ -1,12 +1,12 @@
 package roomescape.reservation.fixture;
 
 import java.time.LocalDate;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.dto.ReservationRequestDto;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
-import roomescape.user.domain.User;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.User;
+import roomescape.dto.request.ReservationRequestDto;
 
 public class ReservationFixture {
 

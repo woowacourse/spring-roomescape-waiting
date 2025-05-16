@@ -10,8 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.user.domain.Role;
-import roomescape.user.domain.User;
+import roomescape.domain.Role;
+import roomescape.domain.User;
+import roomescape.repository.UserRepository;
 import roomescape.user.fixture.UserFixture;
 
 @DataJpaTest
@@ -19,18 +20,19 @@ class UserRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private TestEntityManager entityManager;
-    
+
     private User savedUser;
-    
+
     @BeforeEach
     void setUp() {
-        User user = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        User user = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail",
+                "member_dummyPassword");
         savedUser = entityManager.persist(user);
         entityManager.flush();
     }
