@@ -13,13 +13,14 @@ import roomescape.auth.infrastructure.jwt.JwtProperties;
 public final class CookieManager {
 
     private static final String LOGIN_TOKEN_NAME = "token";
+    private static final String PATH = "/";
 
     private final JwtProperties jwtProperties;
 
     public ResponseCookie generateLoginCookie(String token) {
         return ResponseCookie.from(LOGIN_TOKEN_NAME, token)
                 .httpOnly(true)
-                .path("/")
+                .path(PATH)
                 .maxAge(jwtProperties.getExpireLength())
                 .build();
     }
