@@ -8,9 +8,7 @@ public abstract class TokenAuthorizationProvider implements AuthorizationProvide
 
     @Override
     public final AuthorizationPrincipal createPrincipal(AuthorizationPayload payload) {
-        String token = createToken(
-            new AuthorizationPayload(payload.name(), payload.role())
-        );
+        String token = createToken(payload);
         return new AuthorizationPrincipal(token);
     }
 
