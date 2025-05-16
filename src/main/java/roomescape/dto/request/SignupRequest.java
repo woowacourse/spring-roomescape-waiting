@@ -6,7 +6,8 @@ import roomescape.entity.Member;
 import roomescape.global.Role;
 
 public record SignupRequest(
-        @NotBlank(message = "이름은 비어있을 수 없습니다.") String name,
+        @NotBlank(message = "이름은 비어있을 수 없습니다.")
+        String name,
         @Email
         @NotBlank(message = "이메일은 비어있을 수 없습니다.")
         String email,

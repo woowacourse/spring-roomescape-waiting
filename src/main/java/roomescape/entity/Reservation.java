@@ -42,12 +42,7 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Long id,
-                       Member member,
-                       LocalDate date,
-                       ReservationTime time,
-                       Theme theme,
-                       ReservationStatus status) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
