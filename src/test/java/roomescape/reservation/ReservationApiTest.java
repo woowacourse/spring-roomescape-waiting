@@ -15,9 +15,9 @@ import org.springframework.context.annotation.Import;
 import roomescape.auth.stub.StubTokenProvider;
 import roomescape.common.CleanUp;
 import roomescape.config.AuthServiceTestConfig;
-import roomescape.fixture.MemberDbFixture;
-import roomescape.fixture.ReservationDateTimeDbFixture;
-import roomescape.fixture.ThemeDbFixture;
+import roomescape.fixture.db.MemberDbFixture;
+import roomescape.fixture.db.ReservationDateTimeDbFixture;
+import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.reservation.domain.ReservationDateTime;
 
 @Import(AuthServiceTestConfig.class)

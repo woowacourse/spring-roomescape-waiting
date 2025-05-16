@@ -1,7 +1,7 @@
 package roomescape.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.fixture.MemberDbFixture.RAW_PASSWORD;
+import static roomescape.fixture.db.MemberDbFixture.RAW_PASSWORD;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import roomescape.auth.stub.StubTokenProvider;
 import roomescape.auth.web.controller.request.LoginRequest;
 import roomescape.auth.web.controller.response.MemberNameResponse;
 import roomescape.config.AuthServiceTestConfig;
-import roomescape.fixture.MemberDbFixture;
+import roomescape.fixture.db.MemberDbFixture;
 import roomescape.member.domain.Member;
 
 @Import(AuthServiceTestConfig.class)

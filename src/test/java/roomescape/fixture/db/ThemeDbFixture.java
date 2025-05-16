@@ -1,4 +1,4 @@
-package roomescape.fixture;
+package roomescape.fixture.db;
 
 import org.springframework.stereotype.Component;
 import roomescape.theme.domain.Theme;

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.fixture.MemberDbFixture;
+import roomescape.fixture.db.MemberDbFixture;
 import roomescape.member.domain.Member;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)

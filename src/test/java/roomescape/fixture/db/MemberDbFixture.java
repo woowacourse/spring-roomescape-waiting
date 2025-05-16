@@ -1,4 +1,4 @@
-package roomescape.fixture;
+package roomescape.fixture.db;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

@@ -2,7 +2,7 @@ package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.fixture.MemberDbFixture.RAW_PASSWORD;
+import static roomescape.fixture.db.MemberDbFixture.RAW_PASSWORD;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.common.CleanUp;
-import roomescape.fixture.MemberDbFixture;
+import roomescape.fixture.db.MemberDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.controller.request.SignUpRequest;
 import roomescape.member.controller.response.MemberResponse;

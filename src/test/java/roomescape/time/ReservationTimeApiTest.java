@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.common.CleanUp;
-import roomescape.fixture.ReservationTimeDbFixture;
+import roomescape.fixture.db.ReservationTimeDbFixture;
 
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

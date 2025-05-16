@@ -1,4 +1,4 @@
-package roomescape.fixture;
+package roomescape.fixture.db;
 
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
