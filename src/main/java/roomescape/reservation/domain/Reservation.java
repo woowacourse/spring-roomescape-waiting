@@ -38,7 +38,7 @@ public class Reservation {
     @ColumnDefault(value = "'CONFIRMATION'")
     private Status status;
 
-    public Reservation() {
+    protected Reservation() {
 
     }
 
