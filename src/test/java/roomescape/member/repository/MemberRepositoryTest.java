@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +30,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("이메일과 비밀번호로 회원을 찾을 수 있다")
-    void findByEmailAndPassword() {
+    void 이메일과_비밀번호로_회원을_찾을_수_있다() {
         // given
         String email = "test@example.com";
         String rawPassword = "password123";
@@ -41,7 +39,7 @@ class MemberRepositoryTest {
         memberRepository.save(member);
 
         // when
-        Optional<Member> foundMember = memberRepository.findByEmailAndPassword_Password(email, rawPassword);
+        Optional<Member> foundMember = memberRepository.findByEmailAndPassword(email, rawPassword);
 
         // then
         SoftAssertions softly = new SoftAssertions();
@@ -51,22 +49,20 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 이메일과 비밀번호로 회원을 찾을 수 없다")
-    void findByEmailAndPasswordWhenNotExists() {
+    void 존재하지_않는_이메일과_비밀번호로_회원을_찾을_수_없다() {
         // given
         String email = "nonexistent@example.com";
         String password = "password123";
 
         // when
-        Optional<Member> foundMember = memberRepository.findByEmailAndPassword_Password(email, password);
+        Optional<Member> foundMember = memberRepository.findByEmailAndPassword(email, password);
 
         // then
         assertThat(foundMember).isEmpty();
     }
 
     @Test
-    @DisplayName("이메일 존재 여부를 확인할 수 있다")
-    void existsByEmail() {
+    void 이메일_존재_여부를_확인할_수_있다() {
         // given
         String email = "test@example.com";
         Password password = Password.encrypt("password123", passwordEncryptor);

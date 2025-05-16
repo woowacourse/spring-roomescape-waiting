@@ -35,7 +35,7 @@ public class MemberService implements MemberQueryService {
     @Transactional(readOnly = true)
     public Member getMember(String email, String password) {
         String encryptPassword = passwordEncryptor.encrypt(password);
-        return memberRepository.findByEmailAndPassword_Password(email, encryptPassword)
+        return memberRepository.findByEmailAndPassword(email, encryptPassword)
                 .orElseThrow(() -> new InvalidArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
     }
 
