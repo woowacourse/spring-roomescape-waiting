@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.RegisterMemberRequest;
@@ -21,11 +22,12 @@ public class MemberController {
         this.memberService = memberService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<RegisterUserResponse> signup(@RequestBody final RegisterMemberRequest registerMemberRequest) {
+    public RegisterUserResponse signup(@RequestBody final RegisterMemberRequest registerMemberRequest) {
         RegisterMemberParam registerMemberParam = registerMemberRequest.toServiceParam();
         MemberResult memberResult = memberService.create(registerMemberParam);
-        return ResponseEntity.ok(RegisterUserResponse.from(memberResult));
+        return RegisterUserResponse.from(memberResult);
     }
 
     @GetMapping
