@@ -7,11 +7,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 
 @Repository
-public class JpaMemberRepositoryImpl implements MemberRepository {
+public class MemberRepositoryImpl implements MemberRepository {
 
     private final JpaMemberRepository jpaMemberRepository;
 
-    public JpaMemberRepositoryImpl(JpaMemberRepository jpaMemberRepository) {
+    public MemberRepositoryImpl(JpaMemberRepository jpaMemberRepository) {
         this.jpaMemberRepository = jpaMemberRepository;
     }
 

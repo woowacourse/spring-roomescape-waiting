@@ -2,9 +2,11 @@ package roomescape.theme.infrastructure;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.theme.domain.Theme;
 
+@Repository
 public class ThemeCustomRepositoryImpl implements ThemeCustomRepository {
 
     private EntityManager em;

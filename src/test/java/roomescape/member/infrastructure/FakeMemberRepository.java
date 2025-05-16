@@ -1,4 +1,4 @@
-package roomescape.member.service;
+package roomescape.member.infrastructure;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +11,6 @@ import roomescape.member.domain.MemberRepository;
 public class FakeMemberRepository implements MemberRepository {
 
     private final List<Member> members;
-
     private AtomicLong index = new AtomicLong(0);
 
     public FakeMemberRepository(List<Member> members) {

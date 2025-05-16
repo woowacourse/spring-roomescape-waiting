@@ -11,6 +11,7 @@ import roomescape.member.domain.Role;
 import roomescape.member.dto.request.SignupRequest;
 import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.dto.response.SignupResponse;
+import roomescape.member.infrastructure.FakeMemberRepository;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

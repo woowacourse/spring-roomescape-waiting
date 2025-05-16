@@ -5,32 +5,33 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
-import roomescape.member.infrastructure.JpaMemberRepository;
+import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
+import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.infrastructure.JpaThemeRepository;
+import roomescape.theme.domain.ThemeRepository;
 
 @Service
 public class ReservationService {
 
     private final DateTime dateTime;
-    private final JpaReservationRepository reservationRepository;
-    private final JpaReservationTimeRepository reservationTimeRepository;
-    private final JpaThemeRepository themeRepository;
-    private final JpaMemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationService(
             final DateTime dateTime,
-            final JpaReservationRepository reservationRepository,
-            final JpaReservationTimeRepository reservationTimeRepository,
-            final JpaThemeRepository themeRepository, JpaMemberRepository memberRepository
+            final ReservationRepository reservationRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
+            final MemberRepository memberRepository
     ) {
         this.dateTime = dateTime;
         this.reservationRepository = reservationRepository;
@@ -53,7 +54,7 @@ public class ReservationService {
         Reservation reservation = Reservation.createWithoutId(dateTime.now(), findMember.get(), request.date(), time,
                 theme);
 
-        if (reservationRepository.existsByDateAndTime_StartAtAndTheme_Id(reservation.getDate(),
+        if (reservationRepository.existsByDateAndTimeStartAtAndThemeId(reservation.getDate(),
                 reservation.getReservationTime(), reservation.getThemeId())) {
             throw new IllegalArgumentException("이미 예약이 존재합니다.");
         }
@@ -81,7 +82,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(final Long id) {
-        List<Reservation> reservations = reservationRepository.findByMember_Id(id);
+        List<Reservation> reservations = reservationRepository.findByMemberId(id);
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
