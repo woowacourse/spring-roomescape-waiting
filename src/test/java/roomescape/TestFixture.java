@@ -1,6 +1,7 @@
 package roomescape;
 
 import jakarta.servlet.http.Cookie;
+import org.springframework.http.ResponseCookie;
 import roomescape.domain.*;
 
 import java.time.LocalDate;
@@ -44,5 +45,13 @@ public class TestFixture {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         return cookie;
+    }
+
+    public static ResponseCookie createAuthResponseCookie(String token) {
+        return ResponseCookie.from(AUTH_COOKIE_NAME)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .build();
     }
 }
