@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
@@ -19,10 +18,10 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                   AND (:endDate IS NULL OR r.date <= :endDate)
             """)
     List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
-            @Param("memberId") Long memberId,
-            @Param("themeId") Long themeId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("endDate") LocalDate endDate
+            Long memberId,
+            Long themeId,
+            LocalDate fromDate,
+            LocalDate endDate
     );
 
     List<Reservation> findByMemberId(Long memberId);
