@@ -14,17 +14,22 @@ public class Reservation {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    private LocalDate date;
-
     @ManyToOne
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
+    @Column(nullable = false)
+    private LocalDate date;
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ReservationStatus status;
 
     protected Reservation() {
