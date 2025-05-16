@@ -18,16 +18,18 @@ class MemberServiceTest {
     MemberService memberService;
 
     @BeforeEach
-    void init() {
+    void setUp() {
         memberRepository = new FakeMemberRepository();
         memberService = new MemberService(memberRepository);
-        memberRepository.save(new Member(null, "레오", "레오@gmail.com", "qwer!", MemberRole.ADMIN));
-        memberRepository.save(new Member(null, "몽이", "몽이@gmail.com", "ㅂㅈㄷㄱ!", MemberRole.ADMIN));
     }
 
     @DisplayName("모든 멤버 정보를 조회하여 반환할 수 있다")
     @Test
     void findAll() {
+        // given
+        memberRepository.save(new Member(null, "레오", "레오@gmail.com", "qwer!", MemberRole.ADMIN));
+        memberRepository.save(new Member(null, "몽이", "몽이@gmail.com", "ㅂㅈㄷㄱ!", MemberRole.ADMIN));
+
         // when
         List<MemberInfo> result = memberService.findAll();
 

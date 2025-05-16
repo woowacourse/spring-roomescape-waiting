@@ -10,9 +10,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 class ThemeNameTest {
 
     @DisplayName("테마 이름은 최소 1글자, 최대 20글자가 아니면 예외가 발생한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {" ", "   ", "123456789012345678901"})
     @NullAndEmptySource
+    @ValueSource(strings = {" ", "   ", "123456789012345678901"})
+    @ParameterizedTest
     void testValidateName(String name) {
         // when
         // then

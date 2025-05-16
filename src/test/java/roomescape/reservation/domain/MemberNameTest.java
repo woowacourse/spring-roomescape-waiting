@@ -11,9 +11,9 @@ import roomescape.member.domain.MemberName;
 class MemberNameTest {
 
     @DisplayName("예약자명은 최소 1글자, 최대 5글자가 아니면 예외가 발생한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"aaaaaa", " ", "   "})
     @NullAndEmptySource
+    @ValueSource(strings = {"aaaaaa", " ", "   "})
+    @ParameterizedTest
     void testValidateName(String name) {
         // when
         // then
