@@ -5,14 +5,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import org.springframework.stereotype.Component;
 import roomescape.infrastructure.error.exception.JwtExtractException;
+import roomescape.infrastructure.security.AccessToken;
 
 @Component
 public class JwtTokenExtractor {
 
     private final static String JWT_TOKEN_COOKIE_KEY = "token";
 
-    public String extract(HttpServletRequest request) {
-        return getTokenCookie(request).getValue();
+    public AccessToken extract(HttpServletRequest request) {
+        return AccessToken.of(getTokenCookie(request).getValue());
     }
 
     private Cookie getTokenCookie(HttpServletRequest request) {

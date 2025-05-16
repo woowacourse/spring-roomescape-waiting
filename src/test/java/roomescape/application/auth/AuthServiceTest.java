@@ -8,14 +8,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
-import roomescape.application.auth.dto.JwtPayload;
 import roomescape.application.auth.dto.LoginParam;
 import roomescape.application.auth.dto.LoginResult;
-import roomescape.infrastructure.error.exception.LoginAuthException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
+import roomescape.infrastructure.error.exception.LoginAuthException;
 import roomescape.infrastructure.security.JwtProperties;
 import roomescape.infrastructure.security.JwtProvider;
 
@@ -50,7 +49,7 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
 
         // then
         assertThat(loginResult)
-                .isEqualTo(new LoginResult(jwtProvider.issue(new JwtPayload(1L, "벨로", Role.NORMAL))));
+                .isEqualTo(new LoginResult(jwtProvider.issue(1L).value()));
     }
 
     @Test
