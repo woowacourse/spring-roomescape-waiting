@@ -1,6 +1,7 @@
 package roomescape.member.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -78,5 +79,14 @@ class MemberRepositoryTest {
         softly.assertThat(exists).isTrue();
         softly.assertThat(notExists).isFalse();
         softly.assertAll();
+    }
+
+    @Test
+    void 유저_저장_테스트(){
+        Password password = new Password("1234");
+
+        Member member = Member.signUpUser("꾹", "admin@naver.com", password);
+        assertThatCode(() -> memberRepository.save(member))
+                .doesNotThrowAnyException();
     }
 }
