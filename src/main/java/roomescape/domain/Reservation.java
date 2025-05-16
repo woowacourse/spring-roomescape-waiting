@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.exception.local.InvalidReservationTimeException;
+import java.util.Objects;
 
 @Entity
 public class Reservation {
@@ -32,40 +32,28 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationStatus status, ReservationTime reservationTime, Theme theme,
-            User user) {
+    public Reservation(
+            Long id, LocalDate date, ReservationStatus status,
+            ReservationTime time, Theme theme, User user
+    ) {
         this.id = id;
         this.date = date;
         this.status = status;
-        this.reservationTime = reservationTime;
+        this.reservationTime = time;
         this.theme = theme;
         this.user = user;
     }
 
-    public static Reservation of(LocalDate date, ReservationStatus status, ReservationTime reservationTime, Theme theme,
-            User user) {
-        LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
-        validateTense(dateTime);
-        return new Reservation(null, date, status, reservationTime, theme, user);
+    public static Reservation createWithoutId(
+            LocalDate date, ReservationStatus status, ReservationTime time,
+            Theme theme, User user
+    ) {
+        return new Reservation(null, date, status, time, theme, user);
     }
 
-    private static void validateTense(LocalDateTime dateTime) {
-        if (isPastTense(dateTime)) {
-            throw new InvalidReservationTimeException("과거시점으로 예약을 진행할 수 없습니다.");
-        }
-    }
-
-    private static boolean isPastTense(LocalDateTime dateTime) {
-        LocalDateTime now = LocalDateTime.now();
-        return dateTime.isBefore(now);
-    }
-
-    public boolean isSameDateTime(Reservation compare) {
-        return this.getDateTime().isEqual(compare.getDateTime());
-    }
-
-    public LocalDateTime getDateTime() {
-        return LocalDateTime.of(date, reservationTime.getStartAt());
+    public boolean isPastDateTime() {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
+        return reservationDateTime.isBefore(LocalDateTime.now());
     }
 
     public Long getId() {
@@ -90,5 +78,19 @@ public class Reservation {
 
     public User getUser() {
         return user;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Reservation that = (Reservation) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

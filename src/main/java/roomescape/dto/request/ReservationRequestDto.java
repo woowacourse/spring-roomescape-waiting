@@ -10,7 +10,7 @@ import roomescape.domain.User;
 public record ReservationRequestDto(LocalDate date, Long timeId, Long themeId) {
 
     public Reservation toEntity(ReservationTime reservationTime, Theme theme, User user) {
-        return Reservation.of(date, ReservationStatus.BOOKED, reservationTime, theme, user);
+        return Reservation.createWithoutId(date, ReservationStatus.BOOKED, reservationTime, theme, user);
     }
 }
 

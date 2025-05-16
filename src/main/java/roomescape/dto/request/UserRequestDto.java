@@ -1,10 +1,11 @@
 package roomescape.dto.request;
 
+import roomescape.domain.Role;
 import roomescape.domain.User;
 
-public record UserRequestDto(String role, String name, String email, String password) {
+public record UserRequestDto(Role role, String name, String email, String password) {
 
     public User toEntity() {
-        return new User(role, name, email, password);
+        return User.createWithoutId(role, name, email, password);
     }
 }

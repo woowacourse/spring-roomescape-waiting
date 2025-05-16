@@ -13,7 +13,7 @@ public class ReservationFixture {
     public static Reservation create(LocalDate date, ReservationStatus status, ReservationTime reservationTime,
             Theme theme,
             User user) {
-        return Reservation.of(date, status, reservationTime, theme, user);
+        return Reservation.createWithoutId(date, status, reservationTime, theme, user);
     }
 
     public static Reservation createByBookedStatus(LocalDate date, ReservationTime reservationTime, Theme theme,

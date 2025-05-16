@@ -23,10 +23,8 @@ class ReservationTimeTest {
         ReservationTime reservationTime = ReservationTimeFixture.create(reservationStartAt);
 
         // when
-        boolean actual = reservationTime.isSameTime(inputReservationTime);
-
         // then
-        Assertions.assertThat(actual).isTrue();
+        Assertions.assertThat(reservationTime).isEqualTo(inputReservationTime);
     }
 
     @Nested

@@ -47,17 +47,17 @@ class JdbcThemeRepositoryTest {
         savedUser = entityManager.persist(member);
         entityManager.flush();
 
-        Theme savedTheme1 = repository.save(new Theme("name1", "dd1", "tt1"));
-        Theme savedTheme2 = repository.save(new Theme("name2", "dd2", "tt2"));
-        Theme savedTheme3 = repository.save(new Theme("name3", "dd3", "tt3"));
-        Theme savedTheme4 = repository.save(new Theme("name4", "dd4", "tt4"));
-        Theme savedTheme5 = repository.save(new Theme("name5", "dd5", "tt5"));
-        Theme savedTheme6 = repository.save(new Theme("name6", "dd6", "tt6"));
-        Theme savedTheme7 = repository.save(new Theme("name7", "dd7", "tt7"));
-        Theme savedTheme8 = repository.save(new Theme("name8", "dd8", "tt8"));
-        Theme savedTheme9 = repository.save(new Theme("name9", "dd9", "tt9"));
-        Theme savedTheme10 = repository.save(new Theme("name10", "dd10", "tt10"));
-        Theme savedTheme11 = repository.save(new Theme("name11", "dd11", "tt11"));
+        Theme savedTheme1 = repository.save(Theme.createWithoutId("name1", "dd1", "tt1"));
+        Theme savedTheme2 = repository.save(Theme.createWithoutId("name2", "dd2", "tt2"));
+        Theme savedTheme3 = repository.save(Theme.createWithoutId("name3", "dd3", "tt3"));
+        Theme savedTheme4 = repository.save(Theme.createWithoutId("name4", "dd4", "tt4"));
+        Theme savedTheme5 = repository.save(Theme.createWithoutId("name5", "dd5", "tt5"));
+        Theme savedTheme6 = repository.save(Theme.createWithoutId("name6", "dd6", "tt6"));
+        Theme savedTheme7 = repository.save(Theme.createWithoutId("name7", "dd7", "tt7"));
+        Theme savedTheme8 = repository.save(Theme.createWithoutId("name8", "dd8", "tt8"));
+        Theme savedTheme9 = repository.save(Theme.createWithoutId("name9", "dd9", "tt9"));
+        Theme savedTheme10 = repository.save(Theme.createWithoutId("name10", "dd10", "tt10"));
+        Theme savedTheme11 = repository.save(Theme.createWithoutId("name11", "dd11", "tt11"));
 
         ReservationTime savedTime2 = reservationTimeRepository.save(
                 ReservationTimeFixture.create(LocalTime.of(11, 30)));

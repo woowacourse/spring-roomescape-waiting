@@ -78,7 +78,8 @@ class ReservationRepositoryTest {
     @Test
     void existsByReservationTime() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.createWithoutId(LocalTime.now()));
 
         Reservation reservation = createReservation(1, reservationTime);
         reservationRepository.save(reservation);

@@ -10,6 +10,6 @@ public class ThemeFixture {
     }
 
     public static Theme create(String name, String description, String thumbnail) {
-        return new Theme(name, description, thumbnail);
+        return Theme.createWithoutId(name, description, thumbnail);
     }
 }

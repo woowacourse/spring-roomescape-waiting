@@ -187,7 +187,7 @@ class ReservationTimeServiceTest {
         @Test
         void deleteById_throwException_whenUsingInReservation() {
             // given
-            Theme theme = themeRepository.save(new Theme("name1", "dd", "tt"));
+            Theme theme = themeRepository.save(Theme.createWithoutId("name1", "dd", "tt"));
             User savedUser = userRepository.save(UserFixture.create(Role.ROLE_MEMBER, "n1", "e1", "p1"));
 
             reservationService.add(

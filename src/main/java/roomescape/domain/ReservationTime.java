@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity
 public class ReservationTime {
@@ -22,13 +23,8 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime(LocalTime time) {
-        this.id = null;
-        this.startAt = time;
-    }
-
-    public boolean isSameTime(ReservationTime reservationTime) {
-        return this.startAt.equals(reservationTime.startAt);
+    public static ReservationTime createWithoutId(LocalTime startAt) {
+        return new ReservationTime(null, startAt);
     }
 
     public Long getId() {
@@ -41,20 +37,15 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ReservationTime that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (this.id == null || that.id == null) {
-            return false;
-        }
-        return this.id.equals(that.id);
+        ReservationTime time = (ReservationTime) o;
+        return Objects.equals(id, time.id);
     }
 
     @Override
     public int hashCode() {
-        return (id != null) ? id.hashCode() : 0;
+        return Objects.hashCode(id);
     }
 }

@@ -6,9 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Objects;
 
 @Entity(name = "users")
 public class User {
@@ -23,9 +21,6 @@ public class User {
     private String email;
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    private Set<Reservation> reservations;
-
     protected User() {
     }
 
@@ -35,11 +30,10 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.reservations = new HashSet<>();
     }
 
-    public User(String roleName, String name, String email, String password) {
-        this(null, Role.findByName(roleName), name, email, password);
+    public static User createWithoutId(Role role, String name, String email, String password) {
+        return new User(null, role, name, email, password);
     }
 
     public boolean isMember() {
@@ -68,20 +62,15 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof User that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (this.id == null || that.id == null) {
-            return false;
-        }
-        return this.id.equals(that.id);
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return (id != null) ? id.hashCode() : 0;
+        return Objects.hashCode(id);
     }
 }

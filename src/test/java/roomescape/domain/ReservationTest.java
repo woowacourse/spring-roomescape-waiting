@@ -91,7 +91,7 @@ class ReservationTest {
                     duplicateReservationTime);
 
             // when
-            Assertions.assertThat(reservation1.isSameDateTime(reservation2)).isFalse();
+            Assertions.assertThat(reservation1).isEqualTo(reservation2);
         }
 
         @DisplayName("date와 reservationTime의 startAt 필드를 합쳐서 LocalDateTime 형식으로 반환할 수 있다")
