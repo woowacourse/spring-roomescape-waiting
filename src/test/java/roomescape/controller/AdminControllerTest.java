@@ -105,7 +105,7 @@ class AdminControllerTest {
                 .content(createTestReservationJson())
         )
                 .andDo(print())
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     private ReservationResult createTestReservationResult() {
