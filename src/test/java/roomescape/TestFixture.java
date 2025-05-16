@@ -21,7 +21,7 @@ public class TestFixture {
     }
 
     public static Member createMemberByName(String name) {
-        return Member.createNew(name, MemberRole.USER, "email", "password");
+        return Member.createNew(name, MemberRole.USER, "email" + name, "password");
     }
 
     public static Theme createDefaultTheme() {
