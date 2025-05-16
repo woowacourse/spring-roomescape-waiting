@@ -30,7 +30,7 @@ public class AdminReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody CreateAdminReservationRequest createAdminReservationRequest) {
-        Long reservationId = reservationService.create(createAdminReservationRequest.toServiceParam());
+        Long reservationId = reservationService.create(createAdminReservationRequest.toCreateParameter());
         ReservationResult reservationResult = reservationService.findById(reservationId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse.from(reservationResult));
     }

@@ -12,7 +12,7 @@ public record CreateThemeRequest(
         String thumbnail
 ) {
 
-    public CreateThemeParam toServiceParam() {
+    public CreateThemeParam toCreateParameter() {
         return new CreateThemeParam(name, description, thumbnail);
     }
 }

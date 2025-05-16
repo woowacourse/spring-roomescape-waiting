@@ -13,7 +13,7 @@ public record CreateReservationRequest(
         Long themeId
 ) {
 
-    public CreateReservationParam toServiceParam(Long memberId) {
+    public CreateReservationParam toCreateParameter(Long memberId) {
         return new CreateReservationParam(date, timeId, themeId, memberId);
     }
 }

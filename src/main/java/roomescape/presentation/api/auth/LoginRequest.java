@@ -9,7 +9,7 @@ public record LoginRequest(
         @NotBlank(message = "password는 필수입니다.") String password
 ) {
 
-    public LoginParam toServiceParam() {
+    public LoginParam toLoginParameter() {
         return new LoginParam(email, password);
     }
 }

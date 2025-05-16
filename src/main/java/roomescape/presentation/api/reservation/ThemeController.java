@@ -37,7 +37,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@Valid @RequestBody CreateThemeRequest createThemeRequest) {
-        Long id = themeService.create(createThemeRequest.toServiceParam());
+        Long id = themeService.create(createThemeRequest.toCreateParameter());
         return ResponseEntity.status(HttpStatus.CREATED).body(ThemeResponse.from(themeService.findById(id)));
     }
 

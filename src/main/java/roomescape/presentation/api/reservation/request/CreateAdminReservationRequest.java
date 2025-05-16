@@ -15,7 +15,7 @@ public record CreateAdminReservationRequest(
         Long memberId
 ) {
 
-    public CreateReservationParam toServiceParam() {
+    public CreateReservationParam toCreateParameter() {
         return new CreateReservationParam(date, timeId, themeId, memberId);
     }
 }

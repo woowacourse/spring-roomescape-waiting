@@ -9,7 +9,7 @@ public record CreateReservationTimeRequest(
         LocalTime startAt
 ) {
 
-    public CreateReservationTimeParam toServiceParam() {
+    public CreateReservationTimeParam toCreateParameter() {
         return new CreateReservationTimeParam(startAt);
     }
 }

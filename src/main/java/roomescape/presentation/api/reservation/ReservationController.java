@@ -41,7 +41,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @AuthPrincipal AuthInfo authInfo,
             @Valid @RequestBody CreateReservationRequest createReservationRequest) {
-        Long reservationId = reservationService.create(createReservationRequest.toServiceParam(authInfo.memberId()));
+        Long reservationId = reservationService.create(createReservationRequest.toCreateParameter(authInfo.memberId()));
         ReservationResult reservationResult = reservationService.findById(reservationId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse.from(reservationResult));
     }

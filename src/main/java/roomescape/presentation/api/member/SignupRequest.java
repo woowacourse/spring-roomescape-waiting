@@ -8,7 +8,8 @@ public record SignupRequest(
         @NotBlank(message = "비밀번호는 필수입니다.") String password,
         @NotBlank(message = "사용자명은 필수입니다.") String name
 ) {
-    public RegisterParam toServiceParam() {
+
+    public RegisterParam toRegisterParameter() {
         return new RegisterParam(email, password, name);
     }
 }

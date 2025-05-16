@@ -33,7 +33,7 @@ public class ReservationTimeController {
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> create(
             @Valid @RequestBody CreateReservationTimeRequest createReservationTImeRequest) {
-        Long id = reservationService.create(createReservationTImeRequest.toServiceParam());
+        Long id = reservationService.create(createReservationTImeRequest.toCreateParameter());
         ReservationTimeResult reservationTimeResult = reservationService.findById(id);
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationTimeResponse.from(reservationTimeResult));
     }

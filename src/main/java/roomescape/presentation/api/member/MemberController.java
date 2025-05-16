@@ -33,7 +33,7 @@ public class MemberController {
 
     @PostMapping
     public ResponseEntity<Void> createMember(@Valid @RequestBody SignupRequest signupRequest) {
-        memberService.register(signupRequest.toServiceParam());
+        memberService.register(signupRequest.toRegisterParameter());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .build();
     }
