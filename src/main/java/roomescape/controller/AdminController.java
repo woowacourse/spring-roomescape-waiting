@@ -1,0 +1,35 @@
+package roomescape.controller;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import roomescape.controller.request.CreateReservationAdminRequest;
+import roomescape.controller.response.ReservationResponse;
+import roomescape.service.ReservationService;
+import roomescape.service.param.CreateReservationParam;
+import roomescape.service.result.ReservationResult;
+
+import java.time.LocalDateTime;
+
+@RestController
+@RequestMapping("/admin")
+public class AdminController {
+
+    private final ReservationService reservationService;
+
+    public AdminController(final ReservationService reservationService) {
+        this.reservationService = reservationService;
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/reservations")
+    public ReservationResponse createReservation(@RequestBody CreateReservationAdminRequest reservationRequest) {
+        CreateReservationParam createReservationParam = new CreateReservationParam(
+                reservationRequest.memberId(),
+                reservationRequest.date(),
+                reservationRequest.timeId(),
+                reservationRequest.themeId()
+        );
+        ReservationResult reservationResult = reservationService.create(createReservationParam, LocalDateTime.now());
+        return ReservationResponse.from(reservationResult);
+    }
+}
