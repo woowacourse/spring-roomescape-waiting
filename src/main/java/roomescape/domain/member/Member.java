@@ -16,12 +16,13 @@ public class Member {
     private Long id;
     private String username;
     private String password;
-    @Enumerated(value = EnumType.STRING)
-    private Role role;
     private String name;
 
-    public Member() {
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
 
+    public Member() {
+        
     }
 
     public Member(Long id, String username, String password, String name, Role role) {
