@@ -19,7 +19,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.business.ReservationWithBookStateDto;
 import roomescape.exception.local.NotFoundUserException;
 import roomescape.repository.ReservationRepository;
 import roomescape.test.fixture.ReservationFixture;
@@ -74,7 +73,7 @@ class UserServiceTest {
             List<Reservation> savedReservations = reservationRepository.saveAll(reservations);
 
             // when
-            List<ReservationWithBookStateDto> allReservationByMember = service.findAllReservationByMember(savedMember);
+            List<ReservationWithBookState> allReservationByMember = service.findAllReservationByMember(savedMember);
 
             // then
             Assertions.assertThat(allReservationByMember).hasSize(2);
@@ -85,7 +84,7 @@ class UserServiceTest {
         void findAllReservationByMember_success_byNonExistedReservation() {
             // given
             // when
-            List<ReservationWithBookStateDto> allReservationByMember = service.findAllReservationByMember(savedMember);
+            List<ReservationWithBookState> allReservationByMember = service.findAllReservationByMember(savedMember);
 
             // then
             Assertions.assertThat(allReservationByMember).hasSize(0);

@@ -8,9 +8,4 @@ public record ReservationCreationRequest(
         Long timeId
 ) {
 
-    public ReservationCreationRequest(AdminReservationRequestDto request) {
-        this(request.themeId(), request.date(), request.timeId());
-    }
 }
-
-

@@ -6,7 +6,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.request.ReservationCreationRequest;
+import roomescape.dto.business.ReservationCreationContent;
 
 public class ReservationFixture {
 
@@ -21,7 +21,7 @@ public class ReservationFixture {
         return create(date, ReservationStatus.BOOKED, reservationTime, theme, user);
     }
 
-    public static ReservationCreationRequest createRequestDto(LocalDate date, Long timeId, Long themeId) {
-        return new ReservationCreationRequest(themeId, date, timeId);
+    public static ReservationCreationContent createRequestDto(LocalDate date, Long timeId, Long themeId) {
+        return new ReservationCreationContent(themeId, date, timeId);
     }
 }

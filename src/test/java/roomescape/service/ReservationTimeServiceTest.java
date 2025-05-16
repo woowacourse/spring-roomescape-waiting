@@ -19,7 +19,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.request.ReservationCreationRequest;
+import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.global.NotFoundException;
 import roomescape.exception.local.AlreadyReservedTimeException;
@@ -191,11 +191,12 @@ class ReservationTimeServiceTest {
             User savedUser = userRepository.save(UserFixture.create(Role.ROLE_MEMBER, "n1", "e1", "p1"));
 
             reservationService.addReservation(
-                    new ReservationCreationRequest(
+                    savedUser.getId(),
+                    new ReservationCreationContent(
+                            theme.getId(),
                             LocalDate.now().plusMonths(3),
-                            savedReservationTimeId,
-                            theme.getId()
-                    ), savedUser);
+                            savedReservationTimeId
+                    ));
 
             // when, then
             Assertions.assertThatCode(

@@ -1,10 +1,10 @@
 package roomescape.test.fixture;
 
-import roomescape.dto.request.loginRequest;
+import roomescape.dto.request.LoginRequest;
 
 public class AuthFixture {
 
-    public static loginRequest createTokenRequestDto(String email, String password) {
-        return new loginRequest(email, password);
+    public static LoginRequest createTokenRequestDto(String email, String password) {
+        return new LoginRequest(email, password);
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.dto.request.ThemeCreationRequest;
+import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.repository.ThemeRepository;
 
@@ -32,7 +32,7 @@ public class ThemeService {
                 .toList();
     }
 
-    public ThemeResponse addTheme(ThemeCreationRequest request) {
+    public ThemeResponse addTheme(ThemeCreationContent request) {
         Theme theme = Theme.createWithoutId(request.name(), request.description(), request.thumbnail());
         Theme savedTheme = repository.save(theme);
         return new ThemeResponse(savedTheme);

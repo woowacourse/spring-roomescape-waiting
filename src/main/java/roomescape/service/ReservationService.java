@@ -9,8 +9,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.business.ReservationWithBookStateDto;
-import roomescape.dto.request.ReservationCreationRequest;
+import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.local.DuplicateReservationException;
 import roomescape.exception.local.NotFoundReservationTimeException;
@@ -48,11 +47,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationWithBookStateDto> findAllReservationsByMember(User member) {
+    public List<ReservationResponse> findAllReservationsByMember(User member) {
         validateNotExistenceUser(member.getId());
         List<Reservation> reservations = reservationRepository.findByUser(member);
         return reservations.stream()
-                .map(ReservationWithBookStateDto::new)
+                .map(ReservationResponse::new)
                 .toList();
     }
 
@@ -65,7 +64,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse addReservation(long userId, ReservationCreationRequest request) {
+    public ReservationResponse addReservation(long userId, ReservationCreationContent request) {
         User user = loadUserById(userId);
         Theme theme = loadThemeById(request.themeId());
         ReservationTime time = loadReservationTimeById(request.timeId());

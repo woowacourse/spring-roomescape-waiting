@@ -2,13 +2,13 @@ package roomescape.test.fixture;
 
 import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.request.ReservationTimeCreationRequest;
+import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.response.ReservationTimeResponse;
 
 public class ReservationTimeFixture {
 
-    public static ReservationTimeCreationRequest createRequestDto(LocalTime time) {
-        return new ReservationTimeCreationRequest(time);
+    public static ReservationTimeCreationContent createRequestDto(LocalTime time) {
+        return new ReservationTimeCreationContent(time);
     }
 
     public static ReservationTime create(LocalTime time) {

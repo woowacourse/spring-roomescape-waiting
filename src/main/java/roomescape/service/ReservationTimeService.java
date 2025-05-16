@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
-import roomescape.dto.request.ReservationTimeCreationRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.local.AlreadyReservedTimeException;
 import roomescape.exception.local.DuplicateReservationException;
@@ -48,7 +48,7 @@ public class ReservationTimeService {
         return timeRepository.findReservationTimesWithBookState(theme, date);
     }
 
-    public ReservationTimeResponse addReservationTime(ReservationTimeCreationRequest request) {
+    public ReservationTimeResponse addReservationTime(ReservationTimeCreationContent request) {
         validateDuplicateTime(request.startAt());
         ReservationTime reservationTime = ReservationTime.createWithoutId(request.startAt());
         ReservationTime savedReservationTime = timeRepository.save(reservationTime);

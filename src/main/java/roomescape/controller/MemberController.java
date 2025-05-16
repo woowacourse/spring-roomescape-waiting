@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.User;
-import roomescape.dto.business.ReservationWithBookStateDto;
+import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.UserProfileResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.UserService;
@@ -28,7 +28,7 @@ public class MemberController {
     }
 
     @GetMapping("/reservations-mine")
-    public List<ReservationWithBookStateDto> findAllReservationsByUser(User user) {
+    public List<ReservationResponse> findAllReservationsByUser(User user) {
         return reservationService.findAllReservationsByMember(user);
     }
 }

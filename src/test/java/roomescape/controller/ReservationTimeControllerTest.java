@@ -19,7 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.request.ReservationTimeCreationRequest;
+import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.test.fixture.ReservationTimeFixture;
@@ -101,7 +101,7 @@ public class ReservationTimeControllerTest {
             LocalTime dummyTime = LocalTime.of(18, 22);
 
             // when
-            ReservationTimeCreationRequest dto = new ReservationTimeCreationRequest(dummyTime);
+            ReservationTimeCreationContent dto = new ReservationTimeCreationContent(dummyTime);
 
             // then
             RestAssured.given().log().all()
@@ -120,7 +120,7 @@ public class ReservationTimeControllerTest {
             reservationTimeRepository.save(ReservationTimeFixture.create(dummyTime));
 
             // when
-            ReservationTimeCreationRequest dto = new ReservationTimeCreationRequest(dummyTime);
+            ReservationTimeCreationContent dto = new ReservationTimeCreationContent(dummyTime);
 
             // then
             RestAssured.given().log().all()

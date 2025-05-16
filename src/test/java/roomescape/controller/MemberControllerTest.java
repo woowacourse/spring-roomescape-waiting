@@ -19,8 +19,8 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.request.AdminReservationRequestDto;
-import roomescape.dto.response.TokenResponse;
+import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.response.AccessTokenResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.AuthService;
 import roomescape.service.UserService;
@@ -52,7 +52,7 @@ class MemberControllerTest {
     private User savedMember;
     private Theme savedTheme;
     private ReservationTime savedTime;
-    private TokenResponse memberTokenResponse;
+    private AccessTokenResponse memberAccessTokenResponse;
 
     @BeforeEach
     void setUp() {
@@ -72,7 +72,7 @@ class MemberControllerTest {
 
         entityManager.flush();
 
-        memberTokenResponse = authService.login(
+        memberAccessTokenResponse = authService.login(
                 AuthFixture.createTokenRequestDto(savedMember.getEmail(), savedMember.getPassword()));
     }
 
@@ -80,12 +80,13 @@ class MemberControllerTest {
     @Test
     void findAllReservationsByMember_success_byMember() {
         // given
-        AdminReservationRequestDto dto = new AdminReservationRequestDto(date,
+        AdminReservationRequest dto = new AdminReservationRequest(
+                savedMember.getId(),
                 savedTheme.getId(),
-                savedTime.getId(),
-                savedMember.getId());
+                date,
+                savedTime.getId());
 
-        String token = memberTokenResponse.accessToken();
+        String token = memberAccessTokenResponse.accessToken();
 
         // when
         // then

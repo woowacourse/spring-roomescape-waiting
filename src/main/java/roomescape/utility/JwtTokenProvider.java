@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.dto.business.TokenInfoDto;
+import roomescape.dto.business.AccessTokenContent;
 import roomescape.exception.global.AuthorizationException;
 
 @Component
@@ -32,15 +32,15 @@ public class JwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(strSecretKey.getBytes());
     }
 
-    public String createToken(TokenInfoDto tokenInfoDto) {
+    public String createToken(AccessTokenContent accessTokenContent) {
 
-        Map<String, ?> claims = getMyClaimMap(tokenInfoDto);
+        Map<String, ?> claims = getMyClaimMap(accessTokenContent);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
         try {
             return Jwts.builder()
-                    .subject(String.valueOf(tokenInfoDto.id()))
+                    .subject(String.valueOf(accessTokenContent.id()))
                     .claims(claims)
                     .issuedAt(now)
                     .expiration(validity)
@@ -53,10 +53,10 @@ public class JwtTokenProvider {
 
     }
 
-    private Map<String, ?> getMyClaimMap(TokenInfoDto tokenInfoDto) {
+    private Map<String, ?> getMyClaimMap(AccessTokenContent accessTokenContent) {
         Map<String, Object> map = new HashMap<>();
-        map.put("id", tokenInfoDto.id());
-        map.put("role", tokenInfoDto.role());
+        map.put("id", accessTokenContent.id());
+        map.put("role", accessTokenContent.role());
 
         return new HashMap<>(map);
     }

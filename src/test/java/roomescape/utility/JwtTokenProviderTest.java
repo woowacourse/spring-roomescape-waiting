@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.domain.Role;
-import roomescape.dto.business.TokenInfoDto;
+import roomescape.dto.business.AccessTokenContent;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class JwtTokenProviderTest {
@@ -35,11 +35,11 @@ class JwtTokenProviderTest {
         private static final long USER_ID_FIELD = 1L;
         private static final Role ROLE_FIELD = Role.ROLE_MEMBER;
 
-        private TokenInfoDto tokenInfoDto;
+        private AccessTokenContent accessTokenContent;
 
         @BeforeEach
         public void beforeEach() {
-            tokenInfoDto = new TokenInfoDto(USER_ID_FIELD, ROLE_FIELD);
+            accessTokenContent = new AccessTokenContent(USER_ID_FIELD, ROLE_FIELD);
         }
 
         @DisplayName("토큰이 잘 생성되는 지 확인")
@@ -48,7 +48,7 @@ class JwtTokenProviderTest {
             // given
 
             // when
-            String token = jwtTokenProvider.createToken(tokenInfoDto);
+            String token = jwtTokenProvider.createToken(accessTokenContent);
             Claims claims = jwtTokenProvider.getClaims(token);
 
             // then

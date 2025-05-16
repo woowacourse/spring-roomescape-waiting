@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Theme;
-import roomescape.dto.request.ThemeCreationRequest;
+import roomescape.dto.business.ThemeCreationContent;
 import roomescape.repository.ThemeRepository;
 import roomescape.test.fixture.ThemeFixture;
 
@@ -43,7 +43,7 @@ class ThemeControllerTest {
     @DisplayName("theme를 생성하면, 201 응답이 도착한다.")
     @Test
     public void addTheme() {
-        ThemeCreationRequest dto = new ThemeCreationRequest("a", "b", "c");
+        ThemeCreationContent dto = new ThemeCreationContent("a", "b", "c");
 
         RestAssured.given().port(port).log().all()
                 .contentType(ContentType.JSON).body(dto)

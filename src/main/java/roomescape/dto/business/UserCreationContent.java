@@ -1,8 +1,8 @@
-package roomescape.dto.request;
+package roomescape.dto.business;
 
 import roomescape.domain.Role;
 
-public record UserCreationRequest(
+public record UserCreationContent(
         Role role,
         String name,
         String email,
