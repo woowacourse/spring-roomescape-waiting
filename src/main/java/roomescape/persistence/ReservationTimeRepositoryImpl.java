@@ -2,7 +2,7 @@ package roomescape.persistence;
 
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.repository.ReservationTimeRepository;
 
 import java.util.List;
 import java.util.Optional;

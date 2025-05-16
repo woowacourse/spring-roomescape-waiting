@@ -1,9 +1,9 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.ReservationRepository;
+import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
+import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundThemeException;
 import roomescape.service.param.CreateThemeParam;

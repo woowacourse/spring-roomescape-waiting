@@ -2,6 +2,10 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.*;
+import roomescape.domain.repository.MemberRepository;
+import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.repository.ReservationTimeRepository;
+import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.*;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;

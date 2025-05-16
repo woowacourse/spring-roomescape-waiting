@@ -2,7 +2,7 @@ package roomescape.persistence;
 
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.domain.repository.MemberRepository;
 
 import java.util.List;
 import java.util.Optional;
