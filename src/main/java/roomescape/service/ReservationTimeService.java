@@ -1,13 +1,9 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.*;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundReservationTimeException;
-import roomescape.exception.ReservationException;
 import roomescape.service.param.CreateReservationTimeParam;
 import roomescape.service.result.AvailableReservationTimeResult;
 import roomescape.service.result.ReservationTimeResult;
@@ -20,9 +16,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReservationTimeService {
-    // TODO: 정책으로 빼기
-    private static final LocalTime RESERVATION_START_TIME = LocalTime.of(12, 0);
-    private static final LocalTime RESERVATION_END_TIME = LocalTime.of(22, 0);
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -34,10 +27,7 @@ public class ReservationTimeService {
 
     public ReservationTimeResult create(CreateReservationTimeParam createReservationTimeParam) {
         LocalTime startAt = createReservationTimeParam.startAt();
-        if (startAt.isBefore(RESERVATION_START_TIME) || startAt.isAfter(RESERVATION_END_TIME)) {
-            throw new ReservationException("해당 시간은 예약 가능 시간이 아닙니다.");
-        }
-
+        ReservationTimePolicy.checkAvailabilty(startAt);
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.createNew(startAt));
         return ReservationTimeResult.from(reservationTime);
     }
