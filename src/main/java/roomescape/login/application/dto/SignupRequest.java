@@ -11,6 +11,6 @@ public record SignupRequest(
 ) {
 
     public Member toMember() {
-        return new Member(name, email, password);
+        return Member.ofMember(name, email, password);
     }
 }

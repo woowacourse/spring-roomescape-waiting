@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.theme.domain.Theme;
 
 
@@ -24,7 +23,7 @@ class ReservationTest {
 
         final Theme theme = new Theme(1L, "인터스텔라", "설명1", "썸네일1");
         final Reservation reservation = new Reservation(1L, LocalDate.of(2025, 1, 1), ten, theme,
-                new Member("엠제이", "", "", Role.MEMBER), Status.CONFIRMATION);
+                Member.ofMember("엠제이", "", ""), Status.CONFIRMATION);
 
         // 현재 테마 이용시간은 2시간으로 고정됨
         // 10시로 예약을 했으니, 8시 초과 12시 미만일 때는 예약을 할 수 없음

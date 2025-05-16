@@ -44,12 +44,8 @@ public class Member {
         this(id, new MemberName(name), new Email(email), new Password(password), role);
     }
 
-    public Member(final String name, final String email, final String password, final Role role) {
-        this(null, new MemberName(name), new Email(email), new Password(password), role);
-    }
-
-    public Member(final String name, final String email, final String password) {
-        this(null, new MemberName(name), new Email(email), new Password(password), Role.MEMBER);
+    public static Member ofMember(final String name, final String email, final String password) {
+        return new Member(null, new MemberName(name), new Email(email), new Password(password), Role.MEMBER);
     }
 
     public Long getId() {
