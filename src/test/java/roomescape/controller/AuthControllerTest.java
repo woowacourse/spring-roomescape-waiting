@@ -103,6 +103,6 @@ class AuthControllerTest {
                     "email": "%s",
                     "password": "%s"
                 }
-                """, TEST_EMAIL, "wrong-password");
+                """, TEST_EMAIL, TEST_PASSWORD);
     }
 }
