@@ -10,13 +10,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import roomescape.auth.fixture.AuthFixture;
 import roomescape.domain.Role;
 import roomescape.domain.User;
 import roomescape.dto.request.TokenRequestDto;
 import roomescape.dto.response.TokenResponseDto;
 import roomescape.service.AuthService;
-import roomescape.user.fixture.UserFixture;
+import roomescape.test.fixture.AuthFixture;
+import roomescape.test.fixture.UserFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class WebMvcConfigurationTest {
