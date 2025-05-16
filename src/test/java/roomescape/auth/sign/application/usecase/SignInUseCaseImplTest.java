@@ -14,6 +14,7 @@ import roomescape.auth.session.Session;
 import roomescape.auth.sign.application.dto.CreateUserRequest;
 import roomescape.auth.sign.application.dto.SignInRequest;
 import roomescape.auth.sign.application.dto.SignInResult;
+import roomescape.auth.sign.exception.InvalidSignInException;
 import roomescape.auth.sign.password.Password;
 import roomescape.auth.sign.password.PasswordEncoder;
 import roomescape.common.domain.Email;
@@ -23,6 +24,7 @@ import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -73,5 +75,35 @@ class SignInUseCaseImplTest {
         assertThat(parsedClaims.get(Session.Fields.id).toString()).isEqualTo(claims.get(Session.Fields.id).toString());
         assertThat(parsedClaims.get(Session.Fields.name)).isEqualTo(claims.get(Session.Fields.name));
         assertThat(parsedClaims.get(Session.Fields.role)).isEqualTo(claims.get(Session.Fields.role));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 테스트")
+    public void testSignErrorInUseCase() {
+        // given
+        final Email email = Email.from("email@email.com");
+        final String rawPassword = "password";
+        final CreateUserRequest request = new CreateUserRequest(
+                UserName.from("강산"),
+                email,
+                Password.fromRaw(rawPassword, passwordEncoder)
+        );
+        final User user = userCommandService.create(request);
+
+        final Claims claims = Jwts.claims()
+                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.name, user.getName().getValue())
+                .add(Session.Fields.role, user.getRole().name())
+                .build();
+
+        final String wrongPassword = "wrongPassword";
+        // when
+        // then
+        assertThatThrownBy(() -> {
+            final SignInResult result = signInUseCase.execute(
+                    new SignInRequest(email, wrongPassword));
+        })
+                .isInstanceOf(InvalidSignInException.class)
+                .hasMessageContaining("Password mismatch params={Email=Email(value=email@email.com)}");
     }
 }
