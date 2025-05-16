@@ -13,32 +13,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
 @Sql("/data.sql")
 class JdbcReservationRepositoryTest {
 
     @Autowired
+    private TestEntityManager tm;
+
+    @Autowired
     private ReservationRepository repository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
 
     private LocalDate date;
     private ReservationTime time1;
@@ -62,16 +54,19 @@ class JdbcReservationRepositoryTest {
     @Test
     void 모든_예약_조회() {
         // given
-        reservationTimeRepository.save(time1);
-        reservationTimeRepository.save(time2);
-        themeRepository.save(theme1);
-        themeRepository.save(theme2);
-        memberRepository.save(member1);
-        memberRepository.save(member2);
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(time2);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(theme2);
+        tm.persistAndFlush(member1);
+        tm.persistAndFlush(member2);
+
         Reservation reservation1 = Reservation.booked(date, time1, theme1, member1);
         Reservation reservation2 = Reservation.booked(date, time2, theme2, member2);
-        repository.save(reservation1);
-        repository.save(reservation2);
+        tm.persistAndFlush(reservation1);
+        tm.persistAndFlush(reservation2);
+
+        tm.clear();
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, null, null, null);
@@ -83,17 +78,19 @@ class JdbcReservationRepositoryTest {
     @Test
     void 특정_날짜로_예약_조회() {
         // given
-        reservationTimeRepository.save(time1);
-        themeRepository.save(theme1);
-        memberRepository.save(member1);
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(member1);
 
         LocalDate date1 = LocalDate.of(2999, 7, 1);
         LocalDate date2 = LocalDate.of(2999, 7, 2);
         LocalDate date3 = LocalDate.of(2999, 7, 3);
 
-        repository.save(Reservation.booked(date1, time1, theme1, member1));
-        repository.save(Reservation.booked(date2, time1, theme1, member1));
-        repository.save(Reservation.booked(date3, time1, theme1, member1));
+        tm.persistAndFlush(Reservation.booked(date1, time1, theme1, member1));
+        tm.persistAndFlush(Reservation.booked(date2, time1, theme1, member1));
+        tm.persistAndFlush(Reservation.booked(date3, time1, theme1, member1));
+
+        tm.clear();
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, null, date2, null);
@@ -115,16 +112,20 @@ class JdbcReservationRepositoryTest {
         LocalDate date4 = LocalDate.of(2999, 7, 4);
         LocalDate date5 = LocalDate.of(2999, 7, 5);
 
-        reservationTimeRepository.save(time1);
-        themeRepository.save(theme1);
-        memberRepository.save(member1);
-        memberRepository.save(member2);
+        tm.persistAndFlush(time1);
 
-        repository.save(Reservation.booked(date1, time1, theme1, member1));
-        repository.save(Reservation.booked(date2, time1, theme1, member1));
-        repository.save(Reservation.booked(date3, time1, theme1, member1));
-        repository.save(Reservation.booked(date4, time1, theme1, member2));
-        repository.save(Reservation.booked(date5, time1, theme1, member2));
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(member1);
+        tm.persistAndFlush(member2);
+
+        tm.persistAndFlush(Reservation.booked(date1, time1, theme1, member1));
+        tm.persistAndFlush(Reservation.booked(date2, time1, theme1, member1));
+        tm.persistAndFlush(Reservation.booked(date3, time1, theme1, member1));
+        tm.persistAndFlush(Reservation.booked(date4, time1, theme1, member2));
+        tm.persistAndFlush(Reservation.booked(date5, time1, theme1, member2));
+
+        tm.clear();
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, member1.getId(), null, null);
@@ -145,11 +146,13 @@ class JdbcReservationRepositoryTest {
         LocalTime oneMinuteLater = LocalTime.now().plusMinutes(1);
         ReservationTime futureTime = ReservationTime.from(oneMinuteLater);
 
-        reservationTimeRepository.save(time1);
-        themeRepository.save(theme1);
-        memberRepository.save(member1);
-        reservationTimeRepository.save(futureTime);
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(member1);
+        tm.persistAndFlush(futureTime);
         final Reservation booked = Reservation.booked(today, futureTime, theme1, member1);
+
+        tm.clear();
 
         // when
         // then

@@ -2,13 +2,14 @@ package roomescape.auth.infrastructure.util;
 
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import roomescape.auth.infrastructure.jwt.JwtProperties;
 
 @Component
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CookieManager {
 
     private static final String LOGIN_TOKEN_NAME = "token";

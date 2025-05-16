@@ -9,7 +9,6 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import roomescape.auth.infrastructure.jwt.JwtTokenProvider;
 import roomescape.auth.infrastructure.util.CookieManager;
@@ -31,10 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final FilterChain filterChain
     ) throws ServletException, IOException {
         final String token = cookieManager.extractLoginToken(request.getCookies());
-        if (!StringUtils.hasText(token)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         Long memberId = null;
         try {

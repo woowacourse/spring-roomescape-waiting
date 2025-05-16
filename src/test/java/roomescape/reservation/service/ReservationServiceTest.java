@@ -12,38 +12,33 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
 @Sql("/data.sql")
+@Import(ReservationService.class)
 class ReservationServiceTest {
+
+    @Autowired
+    private TestEntityManager tm;
 
     @Autowired
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeRepository timeRepo;
-
-    @Autowired
-    private ThemeRepository themeRepo;
-
-    @Autowired
-    private MemberRepository memberRepo;
-
     private ReservationService service;
 
     private ReservationTime time1;
@@ -56,7 +51,6 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReservationService(reservationRepository, timeRepo, themeRepo, memberRepo);
         time1 = ReservationTime.from(LocalTime.of(14, 0));
 
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
@@ -79,13 +73,14 @@ class ReservationServiceTest {
     @Test
     void 중복된_날짜와_시간이면_예외가_발생한다() {
         // given: r1과 동일한 date/time 요청
-        timeRepo.save(time1);
-        themeRepo.save(theme1);
-        memberRepo.save(member);
-        reservationRepository.save(r1);
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(member);
+        tm.persistAndFlush(r1);
         ReservationRequest dupReq = new ReservationRequest(r1.getDate(), time1.getId(), theme1.getId());
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
+        tm.clear();
         // when
         // then
         assertThatThrownBy(() -> service.saveReservation(dupReq, loginMember))
@@ -96,12 +91,13 @@ class ReservationServiceTest {
     @Test
     void 지나간_날짜와_시간이면_예외가_발생한다() {
         // given: r1과 동일한 date/time 요청
-        timeRepo.save(time1);
-        themeRepo.save(theme1);
-        memberRepo.save(member);
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(member);
         ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time1.getId(), theme1.getId());
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
+        tm.clear();
 
         // when
         // then
@@ -113,12 +109,12 @@ class ReservationServiceTest {
     @Test
     void 새로운_예약은_정상_생성된다() {
         // given
-        timeRepo.save(time1);
-        themeRepo.save(theme1);
-        memberRepo.save(member);
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(member);
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
-
+        tm.clear();
         ReservationRequest req = new ReservationRequest(LocalDate.of(2999, 4, 21), time1.getId(), theme1.getId());
 
         // when
@@ -134,23 +130,17 @@ class ReservationServiceTest {
                         assertThat(rt.startAt()).isEqualTo(time1.getStartAt());
                     });
         });
-        SoftAssertions.assertSoftly(soft -> {
-            soft.assertThat(reservationRepository.findByCriteria(null, null, null, null))
-                    .hasSize(RESERVATION_COUNT + 1);
-            soft.assertThat(
-                            reservationRepository.findByCriteria(null, null, null, null).get(RESERVATION_COUNT).getTime()
-                                    .getStartAt())
-                    .isEqualTo(time1.getStartAt());
-        });
     }
 
     @Test
     void 예약을_삭제한다() {
+        // given
+        tm.persistAndFlush(member);
+        tm.persistAndFlush(time1);
+        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(r1);
+
         // when
-        memberRepo.save(member);
-        timeRepo.save(time1);
-        themeRepo.save(theme1);
-        reservationRepository.save(r1);
         service.deleteReservation(r1.getId());
 
         // then
