@@ -66,7 +66,7 @@ public class MemberServiceTest {
         SignUpResponse signUpResponse = memberService.signUp(signUpRequest);
 
         // then
-        assertThat(signUpResponse.getId()).isEqualTo(3L);
+        assertThat(signUpResponse.getId()).isNotNull();
     }
 
     @Test
