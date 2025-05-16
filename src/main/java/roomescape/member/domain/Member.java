@@ -8,13 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.global.exception.InvalidArgumentException;
 
 @Entity
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Member {
 
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -29,6 +30,7 @@ public class Member {
     @Embedded
     private Password password;
 
+    @Builder
     private Member(Long id, String name, Role role, String email, Password password) {
         this.id = id;
         this.name = name;
@@ -36,6 +38,24 @@ public class Member {
         this.email = email;
         this.password = password;
         validate();
+    }
+
+    public static Member signUpUser(String name, String email, Password password) {
+        return Member.builder()
+                .name(name)
+                .role(Role.USER)
+                .email(email)
+                .password(password)
+                .build();
+    }
+
+    public static Member signUpAdmin(String name, String email, Password password) {
+        return Member.builder()
+                .name(name)
+                .role(Role.ADMIN)
+                .email(email)
+                .password(password)
+                .build();
     }
 
     public void validate() {
@@ -54,13 +74,5 @@ public class Member {
         if (!email.matches(EMAIL_REGEX)) {
             throw new InvalidArgumentException("이메일 형식이 아닙니다.");
         }
-    }
-
-    public static Member signUpUser(String name, String email, Password password) {
-        return new Member(null, name, Role.USER, email, password);
-    }
-
-    public static Member signUpAdmin(String name, String email, Password password) {
-        return new Member(null, name, Role.ADMIN, email, password);
     }
 }

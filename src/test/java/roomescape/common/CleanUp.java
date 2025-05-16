@@ -8,8 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CleanUp {
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public CleanUp(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     public void all() {
         String sql = """

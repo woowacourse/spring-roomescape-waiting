@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
@@ -20,33 +21,31 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Reservation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @JoinColumn(name = "member_id")
     @ManyToOne
+    @JoinColumn(name = "member_id")
     private Member reserver;
     @Embedded
     private ReservationDateTime reservationDatetime;
-    @JoinColumn(name = "theme_id")
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
-
-    @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "status")
     private ReservationStatus status;
 
+    @Builder
     private Reservation(
-            Long id,
-            Member reserver,
-            ReservationDateTime reservationDateTime,
-            Theme theme,
-            ReservationStatus status
+            final Long id,
+            final Member reserver,
+            final ReservationDateTime reservationDateTime,
+            final Theme theme,
+            final ReservationStatus status
     ) {
         this.id = id;
         this.reserver = reserver;
@@ -56,11 +55,16 @@ public class Reservation {
     }
 
     public static Reservation reserve(
-            Member reserver,
-            ReservationDateTime reservationDateTime,
-            Theme theme
+            final Member reserver,
+            final ReservationDateTime reservationDateTime,
+            final Theme theme
     ) {
-        return new Reservation(null, reserver, reservationDateTime, theme, ReservationStatus.RESERVED);
+        return Reservation.builder()
+                .reserver(reserver)
+                .reservationDateTime(reservationDateTime)
+                .theme(theme)
+                .status(ReservationStatus.RESERVED)
+                .build();
     }
 
     public String getReserverName() {

@@ -5,12 +5,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Theme {
 
     @Id
@@ -20,6 +21,7 @@ public class Theme {
     private String description;
     private String thumbnail;
 
+    @Builder
     private Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;
         this.name = name;
@@ -28,6 +30,10 @@ public class Theme {
     }
 
     public static Theme create(String name, String description, String thumbnail) {
-        return new Theme(null, name, description, thumbnail);
+        return Theme.builder()
+                .name(name)
+                .description(description)
+                .thumbnail(thumbnail)
+                .build();
     }
 }
