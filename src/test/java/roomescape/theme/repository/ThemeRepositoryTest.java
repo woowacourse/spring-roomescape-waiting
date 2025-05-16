@@ -26,13 +26,14 @@ class ThemeRepositoryTest {
         Optional<Theme> foundTheme = themeRepository.findById(savedTheme.getId());
 
         // then
-        assertThat(foundTheme).isPresent();
-        Theme actual = foundTheme.get();
-        
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(actual.getName()).isEqualTo("공포");
-        softly.assertThat(actual.getDescription()).isEqualTo("공포 테마입니다.");
-        softly.assertThat(actual.getThumbnail()).isEqualTo("horror.jpg");
+        softly.assertThat(foundTheme).isPresent();
+        if (foundTheme.isPresent()) {
+            Theme actual = foundTheme.get();
+            softly.assertThat(actual.getName()).isEqualTo("공포");
+            softly.assertThat(actual.getDescription()).isEqualTo("공포 테마입니다.");
+            softly.assertThat(actual.getThumbnail()).isEqualTo("horror.jpg");
+        }
         softly.assertAll();
     }
 

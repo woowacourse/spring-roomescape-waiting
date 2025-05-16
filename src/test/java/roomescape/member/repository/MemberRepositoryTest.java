@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class MemberRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
-    
+
     private PasswordEncryptor passwordEncryptor;
 
     @BeforeEach
@@ -43,8 +44,10 @@ class MemberRepositoryTest {
         Optional<Member> foundMember = memberRepository.findByEmailAndPassword_Password(email, rawPassword);
 
         // then
-        assertThat(foundMember).isPresent();
-        assertThat(foundMember.get().getEmail()).isEqualTo(email);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(foundMember).isPresent();
+        softly.assertThat(foundMember.get().getEmail()).isEqualTo(email);
+        softly.assertAll();
     }
 
     @Test
@@ -75,7 +78,9 @@ class MemberRepositoryTest {
         boolean notExists = memberRepository.existsByEmail("nonexistent@example.com");
 
         // then
-        assertThat(exists).isTrue();
-        assertThat(notExists).isFalse();
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(exists).isTrue();
+        softly.assertThat(notExists).isFalse();
+        softly.assertAll();
     }
 }
