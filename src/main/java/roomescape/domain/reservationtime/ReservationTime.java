@@ -45,6 +45,11 @@ public class ReservationTime {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
+        if (id == null && ((ReservationTime) o).id == null) {
+            return false;
+        }
+
         ReservationTime that = (ReservationTime) o;
         return Objects.equals(id, that.id) && Objects.equals(time, that.time);
     }
