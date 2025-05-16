@@ -18,18 +18,15 @@ public class JwtUtil {
     private long validityInMilliseconds;
 
     public String createToken(LoginMember loginMember) {
-        Claims claims = Jwts.claims();
-        claims.put("id", loginMember.id());
-        claims.put("name", loginMember.name());
-        claims.put("role", loginMember.role().name());
-
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
-                .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
+                .claim("id", loginMember.id())
+                .claim("name", loginMember.name())
+                .claim("role", loginMember.role().name())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }

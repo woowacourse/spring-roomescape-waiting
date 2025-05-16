@@ -4,14 +4,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
+import roomescape.member.entity.Member;
+import roomescape.member.entity.RoleType;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationTime;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.dto.request.ThemeCreateRequest;
+import roomescape.theme.dto.response.ThemeCreateResponse;
+import roomescape.theme.entity.Theme;
 import roomescape.theme.service.ThemeService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -20,6 +32,15 @@ class ThemeIntegrationTest {
 
     @Autowired
     private ThemeService themeService;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("테마를 생성한다.")
@@ -89,7 +110,7 @@ class ThemeIntegrationTest {
         // then
         assertAll(
                 () -> assertThat(responses).hasSize(2),
-                () -> assertThat(responses.get(0).name()).isEqualTo("미소"),
+                () -> assertThat(responses.getFirst().name()).isEqualTo("미소"),
                 () -> assertThat(responses.get(1).name()).isEqualTo("우테코")
         );
     }
@@ -134,5 +155,27 @@ class ThemeIntegrationTest {
 
         // then
         assertThat(themeService.getAllThemes()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("이미 예약 된 예약이 있을 경우 삭제할 수없다.")
+    void cantDeleteWhenReserved() {
+        //given
+        var request = new ThemeCreateRequest(
+                "미소",
+                "미소 테마",
+                "https://miso.com"
+        );
+        ThemeCreateResponse response = themeService.createTheme(request);
+
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Theme theme = new Theme(response.id(), response.name(), response.description(), response.thumbnail());
+        Member member = memberRepository.save(new Member("앤지", "test@test.com", "test", RoleType.USER));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, member));
+
+        //when & then
+        assertThatThrownBy(() -> themeService.deleteTheme(response.id()))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("해당 테마에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
     }
 }
