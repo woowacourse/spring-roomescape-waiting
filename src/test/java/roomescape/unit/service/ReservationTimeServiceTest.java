@@ -64,7 +64,7 @@ class ReservationTimeServiceTest {
         // given
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now());
         ReservationTime reservationTime1 = new ReservationTime(2L, LocalTime.now());
-        when(reservationTimeRepository.findAll()).thenReturn(List.of(reservationTime1,reservationTime));
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(reservationTime1, reservationTime));
         // when
         List<ReservationTime> actual = reservationTimeService.findAll();
 
@@ -75,7 +75,7 @@ class ReservationTimeServiceTest {
     @Test
     void 특정_시간에_대한_예약이_존재할때_시간을_삭제하려고하면_예외가_발생한다() {
         // given
-        when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
+        when(reservationRepository.existsByReservationTimeId(1L)).thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))

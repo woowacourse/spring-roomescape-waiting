@@ -14,20 +14,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByDateBetween(LocalDate start, LocalDate end);
 
     @Query(value = """
-        select r from Reservation r
-        where (:memberId is null or r.member.id  = :memberId)
-        and (:themeId is null or r.theme.id = :themeId)
-        and (:dateFrom is null or r.date >= :dateFrom)
-        and (:dateTo is null or r.date <= :dateTo)
-    """)
+                select r from Reservation r
+                where (:memberId is null or r.member.id  = :memberId)
+                and (:themeId is null or r.theme.id = :themeId)
+                and (:dateFrom is null or r.date >= :dateFrom)
+                and (:dateTo is null or r.date <= :dateTo)
+            """)
     List<Reservation> findAllByFilter(@Param("memberId") Long memberId,
                                       @Param("themeId") Long themeId,
                                       @Param("dateFrom") LocalDate dateFrom,
                                       @Param("dateTo") LocalDate dateTo);
 
-    boolean existsByTimeIdAndThemeIdAndDate(Long reservationTimeId, Long themeId, LocalDate date);
+    boolean existsByReservationTimeIdAndThemeIdAndDate(Long reservationTimeId, Long themeId, LocalDate date);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByReservationTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
 

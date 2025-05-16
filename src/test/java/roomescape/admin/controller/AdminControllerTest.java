@@ -7,9 +7,13 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import roomescape.dto.request.LoginRequest;
+import roomescape.entity.Member;
+import roomescape.global.Role;
+import roomescape.repository.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -18,10 +22,16 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class AdminControllerTest {
 
+    @Autowired
+    MemberRepository memberRepository;
+
     @Test
     void url을_기반으로_html을_요청받을_수_있다() {
+        Member member = new Member("admin-test", "admin-test@admin.com", "admin", Role.ADMIN);
+        memberRepository.save(member);
+
         LoginRequest request = new LoginRequest(
-                "admin@admin.com",
+                "admin-test@admin.com",
                 "admin"
         );
 
@@ -47,8 +57,9 @@ class AdminControllerTest {
 
     @Test
     void 어드민이_아니라면_접근할_수_없다() {
+        memberRepository.save(new Member("user-test", "user-test@test.com", "test", Role.USER));
         LoginRequest request = new LoginRequest(
-                "test@test.com",
+                "user-test@test.com",
                 "test"
         );
 

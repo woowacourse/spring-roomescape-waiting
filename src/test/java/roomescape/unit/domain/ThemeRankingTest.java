@@ -18,20 +18,26 @@ class ThemeRankingTest {
     @Test
     void 예약_수에_따라_테마가_내림차순으로_정렬된다() {
         // given
-        Theme themeA = new Theme("A", "a", "a");
-        Theme themeB = new Theme("B", "b", "b");
-        Theme themeC = new Theme("C", "c", "c");
+        Theme themeA = new Theme(1L, "A", "a", "a");
+        Theme themeB = new Theme(2L, "B", "b", "b");
+        Theme themeC = new Theme(3L, "C", "c", "c");
 
         List<Reservation> reservations = new ArrayList<>();
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB,
+                ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB,
+                ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB,
+                ReservationStatus.RESERVED));
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA, ReservationStatus.RESERVED));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA, ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA,
+                ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA,
+                ReservationStatus.RESERVED));
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeC, ReservationStatus.RESERVED));
+        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeC,
+                ReservationStatus.RESERVED));
 
         ThemeRanking ranking = new ThemeRanking(reservations);
 
@@ -47,10 +53,11 @@ class ThemeRankingTest {
     void 랭킹은_10개_까지로_제한한다() {
         // given
         List<Reservation> reservations = new ArrayList<>();
-        for (int i = 1; i <= 11; i++) {
-            Theme theme = new Theme("T" + i, "T" + i, "T" + i);
+        for (long i = 1; i <= 11; i++) {
+            Theme theme = new Theme(i, "T" + i, "T" + i, "T" + i);
             for (int j = 0; j < i; j++) {
-                reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), theme, ReservationStatus.RESERVED));
+                reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), theme,
+                        ReservationStatus.RESERVED));
             }
         }
 
@@ -63,3 +70,4 @@ class ThemeRankingTest {
         assertThat(result).hasSize(10);
     }
 }
+
