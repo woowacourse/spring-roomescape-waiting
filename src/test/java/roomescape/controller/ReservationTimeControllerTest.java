@@ -7,16 +7,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.TestFixture;
 import roomescape.auth.CookieProvider;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.auth.LoginMemberArgumentResolver;
-import roomescape.controller.request.LoginMemberInfo;
-import roomescape.domain.MemberRole;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.param.CreateReservationTimeParam;
-import roomescape.service.result.MemberResult;
 import roomescape.service.result.ReservationTimeResult;
 
 import java.time.LocalTime;
@@ -32,9 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ReservationTimeController.class)
 class ReservationTimeControllerTest {
 
-    private static final String TEST_EMAIL = "test@email.com";
-    private static final String TEST_NAME = "test";
-    private static final String VALID_TOKEN = "valid.token.here";
     private static final LocalTime TEST_TIME = LocalTime.of(12, 0);
 
     @Autowired
@@ -52,10 +44,6 @@ class ReservationTimeControllerTest {
     @MockitoBean
     private CookieProvider cookieProvider;
 
-    @MockitoBean
-    private LoginMemberArgumentResolver loginMemberArgumentResolver;
-
-
     @Test
     @DisplayName("예약 시간을 생성할 수 있다.")
     void createReservationTime() throws Exception {
@@ -67,19 +55,12 @@ class ReservationTimeControllerTest {
                 """, TEST_TIME);
 
         ReservationTimeResult timeResult = new ReservationTimeResult(1L, TEST_TIME);
-        MemberResult memberResult = new MemberResult(1L, TEST_NAME, MemberRole.ADMIN, TEST_EMAIL);
-
-        when(cookieProvider.extractTokenFromCookie(any())).thenReturn(VALID_TOKEN);
-        when(jwtTokenProvider.extractIdFromToken(VALID_TOKEN)).thenReturn(1L);
-        when(memberService.findById(1L)).thenReturn(memberResult);
-        when(loginMemberArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(LoginMemberInfo.of(1L));
         when(reservationTimeService.create(any(CreateReservationTimeParam.class))).thenReturn(timeResult);
 
         // when & then
         mockMvc.perform(post("/times")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(timeJson)
-                .cookie(TestFixture.createAuthCookie(VALID_TOKEN))
         )
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -103,17 +84,7 @@ class ReservationTimeControllerTest {
     @Test
     @DisplayName("예약 시간을 삭제할 수 있다.")
     void deleteReservationTime() throws Exception {
-        // given
-        MemberResult memberResult = new MemberResult(1L, TEST_NAME, MemberRole.ADMIN, TEST_EMAIL);
-        when(cookieProvider.extractTokenFromCookie(any())).thenReturn(VALID_TOKEN);
-        when(jwtTokenProvider.extractIdFromToken(VALID_TOKEN)).thenReturn(1L);
-        when(memberService.findById(1L)).thenReturn(memberResult);
-        when(loginMemberArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(LoginMemberInfo.of(1L));
-
-        // when & then
-        mockMvc.perform(delete("/times/1")
-                .cookie(TestFixture.createAuthCookie(VALID_TOKEN))
-        )
+        mockMvc.perform(delete("/times/1"))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
