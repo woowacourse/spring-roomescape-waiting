@@ -16,9 +16,11 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final AdminHandlerInterceptor adminHandlerInterceptor;
     private final CheckRoleHandlerInterceptor checkRoleHandlerInterceptor;
 
-    public WebMvcConfiguration(LoginMemberArgumentResolver loginMemberArgumentResolver,
-                               AdminHandlerInterceptor adminHandlerInterceptor,
-                               CheckRoleHandlerInterceptor checkRoleHandlerInterceptor) {
+    public WebMvcConfiguration(
+            LoginMemberArgumentResolver loginMemberArgumentResolver,
+            AdminHandlerInterceptor adminHandlerInterceptor,
+            CheckRoleHandlerInterceptor checkRoleHandlerInterceptor
+    ) {
         this.loginMemberArgumentResolver = loginMemberArgumentResolver;
         this.adminHandlerInterceptor = adminHandlerInterceptor;
         this.checkRoleHandlerInterceptor = checkRoleHandlerInterceptor;

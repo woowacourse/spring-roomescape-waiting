@@ -14,7 +14,12 @@ public class CookieUtil {
         addCookie(name, value, MAX_AGE, response);
     }
 
-    public static void addCookie(String name, String value, int maxAge, HttpServletResponse response) {
+    public static void addCookie(
+            String name,
+            String value,
+            int maxAge,
+            HttpServletResponse response
+    ) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAge);

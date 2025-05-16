@@ -12,7 +12,10 @@ public class ReservationSlots {
 
     private final List<ReservationSlot> reservationSlots;
 
-    public ReservationSlots(List<ReservationTime> times, List<Reservation> alreadyReservedReservations) {
+    public ReservationSlots(
+            List<ReservationTime> times,
+            List<Reservation> alreadyReservedReservations
+    ) {
         List<ReservationSlot> reservationSlots = new ArrayList<>();
         Set<ReservationTime> alreadyReservationTimes = alreadyReservedReservations.stream()
                 .map(Reservation::getReservationTime)

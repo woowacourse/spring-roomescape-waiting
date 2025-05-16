@@ -20,7 +20,11 @@ public class AdminHandlerInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler
+    ) {
         String token = JwtExtractor.extractFromRequest(request);
         LoginMemberRequest loginMemberRequest = authService.getLoginMemberByToken(token);
         if (loginMemberRequest.role() == Role.ADMIN) {

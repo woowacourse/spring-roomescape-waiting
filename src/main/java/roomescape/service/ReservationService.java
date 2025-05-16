@@ -29,17 +29,22 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationService(MemberRepository memberRepository,
-                              ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository) {
+    public ReservationService(
+            MemberRepository memberRepository,
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository
+    ) {
         this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
     }
 
-    public Reservation addReservation(CreateReservationRequest request, LoginMemberRequest loginMemberRequest) {
+    public Reservation addReservation(
+            CreateReservationRequest request,
+            LoginMemberRequest loginMemberRequest
+    ) {
         return createReservation(loginMemberRequest.id(), request.themeId(), request.date(), request.timeId());
     }
 
@@ -47,7 +52,12 @@ public class ReservationService {
         return createReservation(request.memberId(), request.themeId(), request.date(), request.timeId());
     }
 
-    private Reservation createReservation(long memberId, long themeId, LocalDate date, long timeId) {
+    private Reservation createReservation(
+            long memberId,
+            long themeId,
+            LocalDate date,
+            long timeId
+    ) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidMemberException("존재하지 않는 멤버 ID입니다."));
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
