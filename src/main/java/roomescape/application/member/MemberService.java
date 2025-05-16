@@ -9,6 +9,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;

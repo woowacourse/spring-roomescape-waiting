@@ -12,6 +12,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.infrastructure.security.JwtProvider;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final MemberRepository memberRepository;

@@ -24,6 +24,7 @@ import roomescape.infrastructure.error.exception.ReservationTimeException;
 import roomescape.infrastructure.error.exception.ThemeException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationTimeRepository reservationTImeRepository;

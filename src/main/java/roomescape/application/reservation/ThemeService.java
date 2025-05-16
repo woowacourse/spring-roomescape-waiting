@@ -13,6 +13,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int RANK_LIMIT = 10;
