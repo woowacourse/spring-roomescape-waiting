@@ -10,7 +10,7 @@ import java.util.Objects;
 @Entity
 public class Theme {
 
-    private static final Duration DURATION = Duration.ofHours(2);
+    private static final Duration THEME_USAGE_DURATION = Duration.ofHours(2);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +51,7 @@ public class Theme {
     }
 
     public Duration getDuration() {
-        return DURATION;
+        return THEME_USAGE_DURATION;
     }
 
     @Override
