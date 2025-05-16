@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.BadRequestException;
 import roomescape.common.exception.impl.ConflictException;
 import roomescape.common.exception.impl.NotFoundException;
@@ -44,6 +45,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         final List<Reservation> reservations = reservationRepository.findAllWithAssociations();
         return reservations.stream()
@@ -51,14 +53,17 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse addMemberReservation(final MemberReservationRequest request, final Long memberId) {
         return addReservation(request.timeId(), request.themeId(), memberId, request.date());
     }
 
+    @Transactional
     public ReservationResponse addAdminReservation(final AdminReservationRequest request) {
         return addReservation(request.timeId(), request.themeId(), request.memberId(), request.date());
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
@@ -66,6 +71,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId, final String date) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         final Theme selectedTheme = getTheme(themeId);
@@ -75,6 +81,7 @@ public class ReservationService {
         return getAvailableReservationTimeResponses(reservationTimes, bookedReservations, selectedTheme);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservationByThemeIdAndMemberIdInDuration(
             final Long themeId,
             final Long memberId,
@@ -88,6 +95,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservation> findByMemberId(final Long memberId) {
         final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
         return reservations.stream()

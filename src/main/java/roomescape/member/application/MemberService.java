@@ -2,6 +2,7 @@ package roomescape.member.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.domain.Member;
@@ -16,6 +17,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
         final List<Member> members = memberRepository.findAll();
         return members.stream()
@@ -23,6 +25,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public MemberResponse findById(final Long id) {
         return MemberResponse.from(memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당하는 사용자가 없습니다.")));
