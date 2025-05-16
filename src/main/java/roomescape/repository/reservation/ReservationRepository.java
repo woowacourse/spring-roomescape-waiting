@@ -4,12 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 
-@Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     boolean existsByTimeId(Long timeId);
@@ -23,7 +21,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Long> findTopThemesByReservationCountBetween(LocalDate startDate, LocalDate endDate);
 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
-                                                         LocalDate dateTo);
+                                                                LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
 }

@@ -14,7 +14,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
 
-
     public WebMvcConfiguration(MemberService memberService,JwtTokenProvider jwtTokenProvider) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
