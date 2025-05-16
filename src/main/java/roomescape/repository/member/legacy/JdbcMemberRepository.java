@@ -8,12 +8,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.repository.member.MemberRepository;
 
-@Repository
 public class JdbcMemberRepository implements MemberRepository {
 
     private final JdbcTemplate jdbcTemplate;
