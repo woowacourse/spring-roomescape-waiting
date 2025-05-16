@@ -89,6 +89,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByCondition(ReservationCondition condition) {
         List<Reservation> filteredReservations = new ArrayList<>(reservations);
+
         if (condition.themeId().isPresent()) {
             filteredReservations = filteredReservations.stream()
                     .filter(reservation -> reservation.getTheme().getId().equals(condition.themeId().get()))
