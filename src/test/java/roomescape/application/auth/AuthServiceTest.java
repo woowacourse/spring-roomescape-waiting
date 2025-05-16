@@ -66,7 +66,7 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    void 로그인시_비밃번호가_틀린경우_예외가_발생한다() {
+    void 로그인시_비밀번호가_틀린경우_예외가_발생한다() {
         // given
         memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
         LoginParam loginParam = new LoginParam("test@email.com", "invalidpw");
