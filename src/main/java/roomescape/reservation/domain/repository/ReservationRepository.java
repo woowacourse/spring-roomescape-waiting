@@ -8,24 +8,46 @@ import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByDateAndTheme_Id(LocalDate date, Long themeId);
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            JOIN FETCH r.member
+            """)
+    List<Reservation> findAllWithAssociations();
 
     @Query("""
-            SELECT r FROM Reservation r 
-            WHERE (:themeId IS NULL OR r.theme.id = :themeId) 
-            AND (:memberId IS NULL OR r.member.id = :memberId) 
-            AND (:from IS NULL OR r.date >= :from) 
-            AND (:to IS NULL OR r.date <= :to)
+              SELECT r FROM Reservation r
+              JOIN FETCH r.time
+              WHERE r.date = :date AND r.theme.id = :themeId
             """)
-    List<Reservation> findByTheme_IdAndMember_IdAndDateBetween(
+    List<Reservation> findByDateAndThemeIdWithAssociations(LocalDate date, Long themeId);
+
+    @Query("""
+              SELECT r FROM Reservation r
+              JOIN FETCH r.time
+              JOIN FETCH r.theme
+              JOIN FETCH r.member
+              WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+                AND (:memberId IS NULL OR r.member.id = :memberId)
+                AND (:from IS NULL OR r.date >= :from)
+                AND (:to IS NULL OR r.date <= :to)
+            """)
+    List<Reservation> findByFilteringWithAssociations(
             Long themeId,
             Long memberId,
             LocalDate from,
             LocalDate to);
 
-    boolean existsByTime_Id(Long timeId);
+    @Query("""
+              SELECT r FROM Reservation r
+              JOIN FETCH r.theme
+              JOIN FETCH r.time
+              WHERE r.member.id = :memberId
+            """)
+    List<Reservation> findByMemberIdWithAssociations(Long memberId);
 
-    boolean existsByTheme_Id(Long themeId);
+    boolean existsByTimeId(Long timeId);
 
-    List<Reservation> findByMember_Id(Long memberId);
+    boolean existsByThemeId(Long themeId);
 }

@@ -38,7 +38,7 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final Long id) {
-        if (reservationRepository.existsByTime_Id(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new BadRequestException("이 시간의 예약이 존재합니다.");
         }
         reservationTimeRepository.deleteById(id);
