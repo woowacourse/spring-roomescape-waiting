@@ -2,6 +2,8 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dto.request.AdminCreateReservationRequest;
@@ -105,7 +107,9 @@ public class ReservationService {
     }
 
     private void validateAddReservationDateTime(Reservation reservation) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
+        ZoneId zoneId = ZoneId.of("Asia/Seoul");
+        LocalDateTime currentDateTime = ZonedDateTime.now(zoneId).toLocalDateTime();
+
         if (reservation.isBefore(currentDateTime)) {
             throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
         }
