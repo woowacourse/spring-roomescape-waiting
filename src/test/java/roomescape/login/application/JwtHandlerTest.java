@@ -11,7 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.impl.UnauthorizedException;
 import roomescape.login.application.dto.Token;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 
 class JwtHandlerTest {
@@ -31,7 +34,13 @@ class JwtHandlerTest {
 
     @Test
     void 토큰을_생성하고_디코드할_수_있다() {
-        final Member member = new Member(1L, "엠제이", "test1@test.com", "1234", Role.ADMIN);
+        final Member member = new Member(
+                1L,
+                new MemberName("엠제이"),
+                new Email("test1@test.com"),
+                new Password("1234"),
+                Role.ADMIN
+        );
 
         final Token token = jwtHandler.createToken(member);
         final Map<String, String> decoded = jwtHandler.decode(token.accessToken());

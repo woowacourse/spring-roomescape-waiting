@@ -40,10 +40,6 @@ public class Member {
         this.role = role;
     }
 
-    public Member(final Long id, final String name, final String email, final String password, final Role role) {
-        this(id, new MemberName(name), new Email(email), new Password(password), role);
-    }
-
     public static Member ofMember(final String name, final String email, final String password) {
         return new Member(null, new MemberName(name), new Email(email), new Password(password), Role.MEMBER);
     }
