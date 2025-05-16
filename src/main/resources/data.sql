@@ -34,24 +34,24 @@ VALUES ('메롱유저', 'melong@naver.com', '1234', 'USER');
 
 -- 4. 예약 (member_id는 슬링키의 id 1로 고정)
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-04', 1, 1, 1);
+VALUES (DATEADD('DAY', -7, CURRENT_DATE), 1, 1, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-04', 2, 2, 1);
+VALUES (DATEADD('DAY', -7, CURRENT_DATE), 2, 2, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-05', 3, 3, 1);
+VALUES (DATEADD('DAY', -6, CURRENT_DATE), 3, 3, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-05', 4, 4, 1);
+VALUES (DATEADD('DAY', -6, CURRENT_DATE), 4, 4, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-05', 5, 1, 1);
+VALUES (DATEADD('DAY', -6, CURRENT_DATE), 5, 1, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-06', 6, 2, 1);
+VALUES (DATEADD('DAY', -1, CURRENT_DATE), 6, 2, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-06', 7, 3, 1);
+VALUES (DATEADD('DAY', -1, CURRENT_DATE), 7, 3, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-06', 8, 4, 1);
+VALUES (DATEADD('DAY', -1, CURRENT_DATE), 8, 4, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-04', 1, 1, 1);
+VALUES (DATEADD('DAY', -7, CURRENT_DATE), 1, 1, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-05', 2, 2, 1);
+VALUES (DATEADD('DAY', -6, CURRENT_DATE), 2, 2, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-06', 3, 3, 1);
+VALUES (DATEADD('DAY', -1, CURRENT_DATE), 3, 3, 1);
