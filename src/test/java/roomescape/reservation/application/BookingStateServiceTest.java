@@ -10,13 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.fixture.config.TestConfig;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
+import roomescape.reservation.domain.BookingState;
+import roomescape.reservation.ui.dto.response.BookingStateResponse;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
-class ReservationStatusServiceTest {
+class BookingStateServiceTest {
 
     @Autowired
     private ReservationStatusService reservationStatusService;
@@ -24,9 +24,9 @@ class ReservationStatusServiceTest {
     @Test
     void 예약_상태_목록을_조회한다() {
         // when
-        final List<ReservationStatusResponse> responses = reservationStatusService.findAll();
+        final List<BookingStateResponse> responses = reservationStatusService.findAll();
 
         // then
-        assertThat(responses).hasSize(ReservationStatus.values().length);
+        assertThat(responses).hasSize(BookingState.values().length);
     }
 }

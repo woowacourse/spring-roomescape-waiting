@@ -25,9 +25,9 @@ import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
+import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
@@ -100,7 +100,7 @@ class ReservationServiceTest {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
-                ReservationStatus.CONFIRMED);
+                BookingState.CONFIRMED);
         final Long reservationId = reservationCommandRepository.save(reservation);
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
@@ -127,7 +127,7 @@ class ReservationServiceTest {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
-                ReservationStatus.CONFIRMED);
+                BookingState.CONFIRMED);
         final Long reservationId = reservationCommandRepository.save(reservation);
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
@@ -158,10 +158,10 @@ class ReservationServiceTest {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
 
         reservationCommandRepository.save(
-                new Reservation(date1, time1, theme1, member, ReservationStatus.CONFIRMED)
+                new Reservation(date1, time1, theme1, member, BookingState.CONFIRMED)
         );
         reservationCommandRepository.save(
-                new Reservation(date2, time2, theme2, member, ReservationStatus.CONFIRMED)
+                new Reservation(date2, time2, theme2, member, BookingState.CONFIRMED)
         );
 
         // when
@@ -192,7 +192,7 @@ class ReservationServiceTest {
                 .filter(AvailableReservationTimeResponse::alreadyBooked)
                 .count();
         reservationCommandRepository.save(
-                new Reservation(date, reservationTime1, theme, member, ReservationStatus.CONFIRMED));
+                new Reservation(date, reservationTime1, theme, member, BookingState.CONFIRMED));
 
         // when
         final long afterCount = reservationService.findAvailableReservationTimes(request)
@@ -219,7 +219,7 @@ class ReservationServiceTest {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         reservationCommandRepository.save(
-                new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
+                new Reservation(date, reservationTime, theme, member, BookingState.CONFIRMED));
 
         final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, timeId,
                 themeId);
@@ -248,7 +248,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         reservationCommandRepository.save(
-                new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
+                new Reservation(date, reservationTime, theme, member, BookingState.CONFIRMED));
 
         // when & then
         Assertions.assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id()))
@@ -275,11 +275,11 @@ class ReservationServiceTest {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
 
         reservationCommandRepository.save(
-                new Reservation(date1, time1, theme1, member, ReservationStatus.CONFIRMED)
+                new Reservation(date1, time1, theme1, member, BookingState.CONFIRMED)
         );
 
         reservationCommandRepository.save(
-                new Reservation(date2, time2, theme2, member, ReservationStatus.CONFIRMED)
+                new Reservation(date2, time2, theme2, member, BookingState.CONFIRMED)
         );
 
         // when

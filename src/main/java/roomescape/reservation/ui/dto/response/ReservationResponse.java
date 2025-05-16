@@ -22,7 +22,7 @@ public record ReservationResponse(
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservation.getStatus().getDescription()
+                reservation.getState().getDescription()
         );
     }
 
@@ -40,7 +40,7 @@ public record ReservationResponse(
                     reservation.getTheme().getName(),
                     reservation.getDate(),
                     reservation.getTime().getStartAt(),
-                    reservation.getStatus().getDescription()
+                    reservation.getState().getDescription()
             );
         }
     }

@@ -13,10 +13,10 @@ import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberQueryRepository;
+import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
@@ -31,7 +31,7 @@ import roomescape.theme.domain.ThemeQueryRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private static final ReservationStatus DEFAULT_MEMBER_RESERVATION_STATUS = ReservationStatus.WAITING;
+    private static final BookingState DEFAULT_MEMBER_RESERVATION_STATUS = BookingState.WAITING;
 
     private final ReservationCommandRepository reservationCommandRepository;
     private final ReservationQueryRepository reservationQueryRepository;
@@ -53,7 +53,7 @@ public class ReservationService {
     }
 
     private ReservationResponse createReservation(final LocalDate date, final Long timeId, final Long themeId,
-                                                  final Long memberId, final ReservationStatus status) {
+                                                  final Long memberId, final BookingState state) {
         validateNoDuplicateReservation(date, timeId, themeId);
         final ReservationTime time = reservationTimeQueryRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
@@ -63,7 +63,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
         final Member member = memberQueryRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-        final Reservation reservation = new Reservation(date, time, theme, member, status);
+        final Reservation reservation = new Reservation(date, time, theme, member, state);
 
         final Long id = reservationCommandRepository.save(reservation);
         final Reservation found = reservationQueryRepository.findById(id)

@@ -2,7 +2,7 @@ package roomescape.reservation.ui.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.BookingState;
 
 public record CreateReservationRequest(
 ) {
@@ -27,7 +27,7 @@ public record CreateReservationRequest(
             @NotNull
             Long themeId,
             @NotNull
-            ReservationStatus status
+            BookingState status
     ) {
     }
 }

@@ -43,29 +43,29 @@ public class Reservation {
     @JoinColumn(name = "member_id")
     private Member member;
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
+    private BookingState state;
 
     public Reservation(final Long id, final LocalDate date, final ReservationTime time,
-                       final Theme theme, final Member member, final ReservationStatus status) {
+                       final Theme theme, final Member member, final BookingState state) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
         validateMember(member);
-        validateStatus(status);
+        validateState(state);
 
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = status;
+        this.state = state;
     }
 
     public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
-                       final ReservationStatus status) {
-        this(null, date, time, theme, member, status);
+                       final BookingState state) {
+        this(null, date, time, theme, member, state);
     }
-    
+
     private void validateMember(final Member member) {
         if (member == null) {
             throw new IllegalArgumentException("멤버는 null이면 안됩니다.");
@@ -90,8 +90,8 @@ public class Reservation {
         }
     }
 
-    private void validateStatus(final ReservationStatus status) {
-        if (status == null) {
+    private void validateState(final BookingState state) {
+        if (state == null) {
             throw new IllegalArgumentException("예약 상태는 null이면 안됩니다.");
         }
     }
