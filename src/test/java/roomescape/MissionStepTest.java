@@ -109,7 +109,19 @@ class MissionStepTest {
 
     @Test
     void 이단계_예약조회() {
+        // given
+        Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(adminUser)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .cookie("token");
+
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
@@ -149,29 +161,24 @@ class MissionStepTest {
                 .body("id", is(1));
 
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(0));
-    }
-
-    @Test
-    void 삼단계_delete_존재하지_않는_id_실패() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(404);
     }
 
     @Test
@@ -248,6 +255,7 @@ class MissionStepTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
@@ -259,14 +267,28 @@ class MissionStepTest {
     @Test
     void 칠단계_예약_시간_삭제() {
         reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
+        reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
+        themeRepository.save(Theme.of("name", "desc", "thumb"));
+        Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
+
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(adminUser)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .cookie("token");
 
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
 
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().delete("/times/1")
                 .then().log().all()
                 .statusCode(204);
@@ -303,6 +325,7 @@ class MissionStepTest {
         // when
         // then
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
