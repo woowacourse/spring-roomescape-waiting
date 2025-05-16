@@ -6,12 +6,16 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -23,59 +27,69 @@ import roomescape.auth.fixture.AuthFixture;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.dto.ReservationWithBookStateDto;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationTime.ReservationTimeTestDataConfig;
-import roomescape.theme.ThemeTestDataConfig;
+import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.theme.domain.Theme;
-import roomescape.user.AdminTestDataConfig;
-import roomescape.user.MemberTestDataConfig;
+import roomescape.theme.fixture.ThemeFixture;
+import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
+import roomescape.user.fixture.UserFixture;
 import roomescape.user.service.UserService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes =
-        {MemberTestDataConfig.class, ThemeTestDataConfig.class, ReservationTimeTestDataConfig.class,})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class MemberControllerTest {
 
     @Autowired
     private UserService service;
-    @Autowired
-    private ReservationTimeTestDataConfig reservationTimeTestDataConfig;
+    
     @Autowired
     private ReservationRepository reservationRepository;
+    
     @Autowired
-    private MemberTestDataConfig memberTestDataConfig;
+    private TestEntityManager entityManager;
+    
     @Autowired
-    private ThemeTestDataConfig themeTestDataConfig;
-    @Autowired
-    private ReservationTimeTestDataConfig timeTestDataConfig;
+    private AuthService authService;
+    
+    @LocalServerPort
+    private int port;
 
     private static LocalDate date;
-    private static User memberStatic;
-    private static TokenResponseDto memberTokenResponseDto;
+    private User savedMember;
+    private Theme savedTheme;
+    private ReservationTime savedTime;
+    private TokenResponseDto memberTokenResponseDto;
 
-    @BeforeAll
-    public static void setUp(@Autowired AuthService authService,
-                             @Autowired MemberTestDataConfig memberTestDataConfig
-    ) {
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+        
         date = LocalDate.now().plusDays(1);
 
-        memberStatic = memberTestDataConfig.getSavedMember();
+        // Create and persist test data
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
+        ReservationTime time = ReservationTimeFixture.create(LocalTime.of(2, 40));
+
+        savedMember = entityManager.persist(member);
+        savedTheme = entityManager.persist(theme);
+        savedTime = entityManager.persist(time);
+        
+        entityManager.flush();
 
         memberTokenResponseDto = authService.login(
-                AuthFixture.createTokenRequestDto(memberStatic.getEmail(), memberStatic.getPassword()));
+                AuthFixture.createTokenRequestDto(savedMember.getEmail(), savedMember.getPassword()));
     }
 
     @DisplayName("유저의 예약 리스트 조회 기능 : 성공 시 200 OK 반환")
     @Test
     void findAllReservationsByMember_success_byMember() {
         // given
-        Long themeId = themeTestDataConfig.getSavedId();
-        Long reservationTimeId = reservationTimeTestDataConfig.getSavedId();
-
         AdminReservationRequestDto dto = new AdminReservationRequestDto(date,
-                themeId,
-                reservationTimeId,
-                memberStatic.getId());
+                savedTheme.getId(),
+                savedTime.getId(),
+                savedMember.getId());
 
         String token = memberTokenResponseDto.accessToken();
 

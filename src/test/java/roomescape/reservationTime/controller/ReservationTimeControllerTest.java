@@ -11,36 +11,47 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.reservationTime.ReservationTimeTestDataConfig;
+import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.dto.ReservationTimeRequestDto;
 import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.reservationTime.repository.ReservationTimeRepository;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = {
-        ReservationTimeTestDataConfig.class})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ReservationTimeControllerTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private ReservationTimeTestDataConfig reservationTimeTestDataConfig;
+    
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+    
+    @Autowired
+    private TestEntityManager entityManager;
 
     @LocalServerPort
     int port;
+    
+    private ReservationTime savedReservationTime;
+    private Long savedReservationTimeId;
 
     @BeforeEach
-    void restAssuredSetUp() {
+    void setUp() {
         RestAssured.port = port;
+        
+        // Create and persist test data
+        ReservationTime reservationTime = ReservationTimeFixture.create(LocalTime.of(2, 40));
+        savedReservationTime = entityManager.persist(reservationTime);
+        savedReservationTimeId = savedReservationTime.getId();
+        entityManager.flush();
     }
 
     @Nested
@@ -129,12 +140,12 @@ public class ReservationTimeControllerTest {
         @Test
         void deleteById_success_withExistId() {
             RestAssured.given().log().all()
-                    .when().delete("/times/" + reservationTimeTestDataConfig.getSavedId())
+                    .when().delete("/times/" + savedReservationTimeId)
                     .then().log().all()
                     .statusCode(HttpStatus.NO_CONTENT.value());
 
             Integer countAfterDelete = jdbcTemplate.queryForObject(
-                    "SELECT count(1) from reservation_time WHERE id = " + reservationTimeTestDataConfig.getSavedId(),
+                    "SELECT count(1) from reservation_time WHERE id = " + savedReservationTimeId,
                     Integer.class);
             assertThat(countAfterDelete).isEqualTo(0);
         }

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -20,25 +20,34 @@ import roomescape.reservationTime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.dto.PopularThemeRequestDto;
 import roomescape.theme.fixture.ThemeFixture;
-import roomescape.user.MemberTestDataConfig;
+import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
+import roomescape.user.fixture.UserFixture;
 
 @DataJpaTest
-@Import({MemberTestDataConfig.class})
 class JdbcThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository repository;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     private ReservationRepository reservationRepository;
+
     @Autowired
-    private MemberTestDataConfig memberTestDataConfig;
+    private TestEntityManager entityManager;
+
+    private User savedUser;
 
     @BeforeEach
     public void beforeEach() {
-        User savedUser = memberTestDataConfig.getSavedMember();
+        // Create and persist test data
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail",
+                "member_dummyPassword");
+        savedUser = entityManager.persist(member);
+        entityManager.flush();
 
         Theme savedTheme1 = repository.save(new Theme("name1", "dd1", "tt1"));
         Theme savedTheme2 = repository.save(new Theme("name2", "dd2", "tt2"));
@@ -111,7 +120,7 @@ class JdbcThemeRepositoryTest {
                 ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(1), savedTime2, savedTheme2,
                         savedUser));
 
-// theme3: 예약 8개
+        // theme3: 예약 8개
         reservationRepository.save(
                 ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime1, savedTheme3,
                         savedUser));
@@ -137,7 +146,7 @@ class JdbcThemeRepositoryTest {
                 ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(1), savedTime1, savedTheme3,
                         savedUser));
 
-// theme4: 예약 7개
+        // theme4: 예약 7개
         reservationRepository.save(
                 ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime2, savedTheme4,
                         savedUser));
@@ -160,7 +169,7 @@ class JdbcThemeRepositoryTest {
                 ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2), savedTime2, savedTheme4,
                         savedUser));
 
-// theme5: 예약 6개
+        // theme5: 예약 6개
         reservationRepository.save(
                 ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(8), savedTime1, savedTheme5,
                         savedUser));
@@ -250,11 +259,10 @@ class JdbcThemeRepositoryTest {
         Optional<Theme> actualTheme = repository.findById(expectTheme.getId());
 
         // then
-        SoftAssertions.assertSoftly(s -> {
-                    s.assertThat(actualTheme).isPresent();
-                    s.assertThat(actualTheme.get()).isEqualTo(expectTheme);
-                }
-        );
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(actualTheme).isPresent();
+            softAssertions.assertThat(actualTheme.get()).isEqualTo(expectTheme);
+        });
     }
 
     @Nested
@@ -264,22 +272,22 @@ class JdbcThemeRepositoryTest {
         @DisplayName("dto 기본 값을 사용하여 조회한다.")
         @Test
         void findThemesOrderByReservationTime_expected() {
-
             // given
-            LocalDate now = LocalDate.now();
-            LocalDate from = now.plusDays(1);
-            LocalDate to = now.plusDays(8);
+            PopularThemeRequestDto dto = new PopularThemeRequestDto();
 
             // when
-            List<Theme> actual = repository.findThemesOrderByReservationCount(from, to,
-                    new PopularThemeRequestDto().size());
+            List<Theme> themes = repository.findThemesOrderByReservationCount(LocalDate.now(),
+                    LocalDate.now().plusDays(1), dto.size());
 
             // then
-            SoftAssertions.assertSoftly(s -> {
-                        s.assertThat(actual).isNotNull();
-                        s.assertThat(actual).hasSize(10);
-                    }
-            );
+            SoftAssertions.assertSoftly(softAssertions -> {
+                softAssertions.assertThat(themes).hasSize(5);
+                softAssertions.assertThat(themes.get(0).getName()).isEqualTo("name1");
+                softAssertions.assertThat(themes.get(1).getName()).isEqualTo("name2");
+                softAssertions.assertThat(themes.get(2).getName()).isEqualTo("name3");
+                softAssertions.assertThat(themes.get(3).getName()).isEqualTo("name4");
+                softAssertions.assertThat(themes.get(4).getName()).isEqualTo("name5");
+            });
         }
     }
 }

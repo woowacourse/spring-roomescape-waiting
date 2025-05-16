@@ -3,50 +3,64 @@ package roomescape.user.service;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.member.domain.dto.ReservationWithBookStateDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationTime.ReservationTimeTestDataConfig;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.theme.ThemeTestDataConfig;
+import roomescape.reservationTime.fixture.ReservationTimeFixture;
 import roomescape.theme.domain.Theme;
-import roomescape.user.MemberTestDataConfig;
+import roomescape.theme.fixture.ThemeFixture;
 import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
 import roomescape.user.exception.NotFoundUserException;
+import roomescape.user.fixture.UserFixture;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes =
-        {MemberTestDataConfig.class, ThemeTestDataConfig.class, ReservationTimeTestDataConfig.class, })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class UserServiceTest {
 
     @Autowired
     private UserService service;
+    
     @Autowired
     private ReservationRepository reservationRepository;
+    
     @Autowired
-    private MemberTestDataConfig memberTestDataConfig;
-    @Autowired
-    private ThemeTestDataConfig themeTestDataConfig;
-    @Autowired
-    private ReservationTimeTestDataConfig timeTestDataConfig;
+    private TestEntityManager entityManager;
+    
+    private User savedMember;
+    private Theme savedTheme;
+    private ReservationTime savedTime;
+
+    @BeforeEach
+    void setUp() {
+        // Create and persist test data
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
+        ReservationTime time = ReservationTimeFixture.create(LocalTime.of(2, 40));
+
+        savedMember = entityManager.persist(member);
+        savedTheme = entityManager.persist(theme);
+        savedTime = entityManager.persist(time);
+        
+        entityManager.flush();
+    }
 
     @Nested
     @DisplayName("유저에 예약 리스트를 조회하는 기능")
     class findAllReservationByMember {
-
-        private final User savedMember = memberTestDataConfig.getSavedMember();
-        private final Theme savedTheme = themeTestDataConfig.getSavedTheme();
-        private final ReservationTime savedTime = timeTestDataConfig.getSavedReservationTime();
 
         @DisplayName("유저의 예약 리스트가 여러개 존재할 때 예약 리스트를 모두 가져올 수 있다.")
         @Test

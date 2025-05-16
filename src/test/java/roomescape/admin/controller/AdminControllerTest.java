@@ -3,12 +3,13 @@ package roomescape.admin.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import org.junit.jupiter.api.BeforeAll;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -19,73 +20,73 @@ import roomescape.admin.domain.dto.AdminReservationRequestDto;
 import roomescape.auth.domain.dto.TokenResponseDto;
 import roomescape.auth.fixture.AuthFixture;
 import roomescape.auth.service.AuthService;
-import roomescape.reservationTime.ReservationTimeTestDataConfig;
-import roomescape.theme.ThemeTestDataConfig;
-import roomescape.user.AdminTestDataConfig;
-import roomescape.user.MemberTestDataConfig;
+import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationTime.fixture.ReservationTimeFixture;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.fixture.ThemeFixture;
+import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
+import roomescape.user.fixture.UserFixture;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
-        classes = {
-                ThemeTestDataConfig.class,
-                ReservationTimeTestDataConfig.class,
-                MemberTestDataConfig.class,
-                AdminTestDataConfig.class})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AdminControllerTest {
 
     @Autowired
-    private ThemeTestDataConfig themeTestDataConfig;
+    private TestEntityManager entityManager;
+    
     @Autowired
-    private ReservationTimeTestDataConfig reservationTimeTestDataConfig;
+    private AuthService authService;
 
     @LocalServerPort
     int port;
+    
+    private User savedMember;
+    private User savedAdmin;
+    private Theme savedTheme;
+    private ReservationTime savedTime;
+    private TokenResponseDto memberTokenResponseDto;
+    private TokenResponseDto adminTokenResponseDto;
+    private LocalDate date;
 
     @BeforeEach
-    void restAssuredSetUp() {
+    void setUp() {
         RestAssured.port = port;
+        
+        date = LocalDate.now().plusDays(1);
+
+        // Create and persist test data
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        User admin = UserFixture.create(Role.ROLE_ADMIN, "admin_dummyName", "admin_dummyEmail", "admin_dummyPassword");
+        Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
+        ReservationTime time = ReservationTimeFixture.create(LocalTime.of(2, 40));
+
+        savedMember = entityManager.persist(member);
+        savedAdmin = entityManager.persist(admin);
+        savedTheme = entityManager.persist(theme);
+        savedTime = entityManager.persist(time);
+        
+        entityManager.flush();
+
+        memberTokenResponseDto = authService.login(
+                AuthFixture.createTokenRequestDto(savedMember.getEmail(), savedMember.getPassword()));
+        adminTokenResponseDto = authService.login(
+                AuthFixture.createTokenRequestDto(savedAdmin.getEmail(), savedAdmin.getPassword()));
     }
 
     @Nested
     @DisplayName("POST /admin/reservations 요청")
     class createReservation {
 
-        private static LocalDate date;
-
-        private final Long themeId = themeTestDataConfig.getSavedId();
-        private final Long reservationTimeId = reservationTimeTestDataConfig.getSavedId();
-
-        private static User memberStatic;
-        private static User adminStatic;
-        private static TokenResponseDto memberTokenResponseDto;
-        private static TokenResponseDto adminTokenResponseDto;
-
-        @BeforeAll
-        public static void setUp(@Autowired AuthService authService,
-                                 @Autowired MemberTestDataConfig memberTestDataConfig,
-                                 @Autowired AdminTestDataConfig adminTestDataConfig
-        ) {
-            date = LocalDate.now().plusDays(1);
-
-            memberStatic = memberTestDataConfig.getSavedMember();
-            adminStatic = adminTestDataConfig.getSavedAdmin();
-
-            memberTokenResponseDto = authService.login(
-                    AuthFixture.createTokenRequestDto(memberStatic.getEmail(), memberStatic.getPassword()));
-            adminTokenResponseDto = authService.login(
-                    AuthFixture.createTokenRequestDto(adminStatic.getEmail(), adminStatic.getPassword()));
-        }
-
         @DisplayName("memberId의 role이 ROLE_MEMBER 일 때 201 CREATED 와 함께 member의 예약이 추가된다.")
         @Test
         void createReservation_success_byMemberId() {
             // given
             AdminReservationRequestDto dto = new AdminReservationRequestDto(date,
-                    themeId,
-                    reservationTimeId,
-                    memberStatic.getId());
+                    savedTheme.getId(),
+                    savedTime.getId(),
+                    savedMember.getId());
 
             String token = adminTokenResponseDto.accessToken();
 
@@ -105,9 +106,9 @@ class AdminControllerTest {
         void createReservation_throwException_byAdminId() {
             // given
             AdminReservationRequestDto dto = new AdminReservationRequestDto(date,
-                    themeId,
-                    reservationTimeId,
-                    adminStatic.getId());
+                    savedTheme.getId(),
+                    savedTime.getId(),
+                    savedAdmin.getId());
 
             String token = adminTokenResponseDto.accessToken();
 

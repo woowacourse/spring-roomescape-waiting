@@ -2,25 +2,38 @@ package roomescape.user.repository;
 
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
+import roomescape.user.fixture.UserFixture;
 
 @DataJpaTest
-@Import({MemberTestDataConfig.class})
 class UserRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private TestEntityManager entityManager;
+    
+    private User savedUser;
+    
+    @BeforeEach
+    void setUp() {
+        User user = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        savedUser = entityManager.persist(user);
+        entityManager.flush();
+    }
 
     @Nested
     @DisplayName("저장된 모든 유저 불러오는 기능")
@@ -29,7 +42,6 @@ class UserRepositoryTest {
         @DisplayName("데이터가 있을 때 모든 유저를 불러온다")
         @Test
         void findAll_success_whenDataExists() {
-            // given
             // when
             List<User> users = userRepository.findAll();
 

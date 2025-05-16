@@ -1,23 +1,23 @@
 package roomescape.reservationTime.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static roomescape.reservationTime.ReservationTimeTestDataConfig.TIME_FIELD;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservationTime.ReservationTimeTestDataConfig;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationTime.exception.AlreadyReservedTimeException;
@@ -33,23 +33,40 @@ import roomescape.user.repository.UserRepository;
 @DataJpaTest
 @Import({
         ReservationTimeService.class,
-        ReservationService.class,
-        ReservationTimeTestDataConfig.class,
+        ReservationService.class
 })
 class ReservationTimeServiceTest {
 
+    private static final LocalTime TIME_FIELD = LocalTime.of(2, 40);
+
     @Autowired
     private ReservationTimeService service;
+    
     @Autowired
     private ReservationService reservationService;
+    
     @Autowired
     private ThemeRepository themeRepository;
+    
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private ReservationTimeTestDataConfig testDataConfig;
+    
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private TestEntityManager entityManager;
+    
+    private ReservationTime savedReservationTime;
+    private Long savedReservationTimeId;
+
+    @BeforeEach
+    void setUp() {
+        ReservationTime reservationTime = ReservationTimeFixture.create(TIME_FIELD);
+        savedReservationTime = entityManager.persist(reservationTime);
+        savedReservationTimeId = savedReservationTime.getId();
+        entityManager.flush();
+    }
 
     @DisplayName("ReservationTime 객체를 ReservationTimeResponseDto로 변환할 수 있다")
     @Test
@@ -75,7 +92,6 @@ class ReservationTimeServiceTest {
         @DisplayName("데이터가 있을 때 모든 예약 시간을 불러온다")
         @Test
         void findAll_success_whenDataExists() {
-            // given
             // when
             List<ReservationTimeResponseDto> resDtos = service.findAll();
 
@@ -148,7 +164,7 @@ class ReservationTimeServiceTest {
         @Test
         void deleteById_success_withValidId() {
             // given
-            service.deleteById(testDataConfig.getSavedId());
+            service.deleteById(savedReservationTimeId);
 
             // when
             List<ReservationTimeResponseDto> resDtos = service.findAll();
@@ -178,13 +194,13 @@ class ReservationTimeServiceTest {
             reservationService.add(
                     new ReservationRequestDto(
                             LocalDate.now().plusMonths(3),
-                            testDataConfig.getSavedId(),
+                            savedReservationTimeId,
                             theme.getId()
                     ), savedUser);
 
             // when, then
             Assertions.assertThatCode(
-                    () -> service.deleteById(testDataConfig.getSavedId())
+                    () -> service.deleteById(savedReservationTimeId)
             ).isInstanceOf(AlreadyReservedTimeException.class);
         }
     }

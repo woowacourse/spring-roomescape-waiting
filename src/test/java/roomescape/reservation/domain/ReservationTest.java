@@ -4,37 +4,46 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.reservation.exception.InvalidReservationTimeException;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.fixture.ReservationTimeFixture;
-import roomescape.theme.ThemeTestDataConfig;
-import roomescape.user.MemberTestDataConfig;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.fixture.ThemeFixture;
+import roomescape.user.domain.Role;
+import roomescape.user.domain.User;
+import roomescape.user.fixture.UserFixture;
 
 @DataJpaTest
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-        ThemeTestDataConfig.class,
-        MemberTestDataConfig.class
-})
 class ReservationTest {
 
     @Autowired
-    private ThemeTestDataConfig themeTestDataConfig;
-    @Autowired
-    private MemberTestDataConfig memberTestDataConfig;
+    private TestEntityManager entityManager;
+    
+    private User savedMember;
+    private Theme savedTheme;
+
+    @BeforeEach
+    void setUp() {
+        // Create and persist test data
+        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail", "member_dummyPassword");
+        Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
+
+        savedMember = entityManager.persist(member);
+        savedTheme = entityManager.persist(theme);
+        
+        entityManager.flush();
+    }
 
     private Reservation createReservation(LocalDate date, ReservationTime time) {
-        return ReservationFixture.createByBookedStatus(date, time, themeTestDataConfig.getSavedTheme(),
-                memberTestDataConfig.getSavedMember());
+        return ReservationFixture.createByBookedStatus(date, time, savedTheme, savedMember);
     }
 
     @Nested
@@ -45,7 +54,6 @@ class ReservationTest {
         @Test
         void isPastTense_throwsExceptionByPastTime() {
             // given
-            String dummyName = "kali";
             LocalDate dummyPastDate = LocalDate.of(2024, 4, 25);
             LocalTime dummyTime = LocalTime.of(11, 13);
             ReservationTime reservationTime = ReservationTimeFixture.create(dummyTime);
