@@ -24,14 +24,6 @@ public final class BookedStatus {
         return new BookedStatus(value);
     }
 
-    public static BookedStatus from(final boolean value) {
-        if (value) {
-            return new BookedStatus(0);
-        }
-        final int unBookedSequence = 1; //Todo. 3단계 수정 예정
-        return new BookedStatus(unBookedSequence);
-    }
-
     public boolean isBooked() {
         return sequence == 0;
     }

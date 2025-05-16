@@ -46,7 +46,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
                 ReservationDate.from(date),
                 ThemeId.from(themeId));
 
-        return reservationQueryService.getTimesWithAvailability(request).stream()
+        return reservationQueryService.getTimesWithBookedStatus(request).stream()
                 .map(AvailableReservationTimeWebResponse::from)
                 .toList();
     }

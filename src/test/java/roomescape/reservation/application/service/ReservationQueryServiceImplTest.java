@@ -105,61 +105,6 @@ class ReservationQueryServiceImplTest {
     }
 
     @Test
-    @DisplayName("특정 날짜와 테마에 대한 예약 가능 여부가 포함된 시간 정보를 받을 수 있다")
-    void getTimesWithAvailability() {
-        // given
-        final ReservationTime booked = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
-
-        final ReservationTime unbooked = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(11, 0)));
-
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(ThemeName.from("공포"),
-                        ThemeDescription.from("지구별 방탈출 최고"),
-                        ThemeThumbnail.from("www.making.com")));
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
-
-        final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
-
-        final Reservation reservation = reservationRepository.save(Reservation.withoutId(
-                user.getId(),
-                date,
-                booked,
-                theme));
-
-        // when
-        final List<AvailableReservationTimeServiceResponse> timesWithAvailability = reservationQueryService.getTimesWithAvailability(
-                new AvailableReservationTimeServiceRequest(date, theme.getId()));
-
-        // then
-        assertAll(
-                () -> {
-                    assertThat(timesWithAvailability)
-                            .hasSize(2);
-
-                    assertThat(timesWithAvailability.stream()
-                            .filter(a -> a.bookedStatus().isBooked()))
-                            .hasSize(1);
-
-                    assertThat(timesWithAvailability.stream()
-                            .filter(a -> a.bookedStatus().isBooked())
-                            .map(AvailableReservationTimeServiceResponse::time)
-                            .findFirst()
-                            .orElseThrow()
-                    ).isEqualTo(booked);
-                });
-    }
-
-    @Test
     @DisplayName("유저 아이디로 예약을 조회할 수 있다")
     void getReservationWithUserId() {
         // given

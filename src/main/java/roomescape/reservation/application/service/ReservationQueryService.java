@@ -16,7 +16,7 @@ public interface ReservationQueryService {
 
     List<Reservation> getAll();
 
-    List<AvailableReservationTimeServiceResponse> getTimesWithAvailability(AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest);
+    List<AvailableReservationTimeServiceResponse> getTimesWithBookedStatus(AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest);
 
     List<ThemeToBookCountServiceResponse> getRanking(ReservationDate startDate, ReservationDate endDate, int count);
 

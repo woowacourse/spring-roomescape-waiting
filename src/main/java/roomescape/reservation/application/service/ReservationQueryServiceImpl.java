@@ -37,25 +37,16 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
     }
 
     @Override
-    public List<AvailableReservationTimeServiceResponse> getTimesWithAvailability(
+    public List<AvailableReservationTimeServiceResponse> getTimesWithBookedStatus(
             final AvailableReservationTimeServiceRequest request) {
         final List<ReservationTime> allTimes = reservationTimeQueryService.getAll();
-
         final Set<ReservationTimeId> bookedTimeIds = new HashSet<>(reservationRepository.findTimeIdByParams(
                 request.date(),
                 request.themeId())
         );
-
-        final List<AvailableReservationTimeServiceResponse> responses = new ArrayList<>();
-
-        for (final ReservationTime reservationTime : allTimes) {
-            final BookedStatus isBooked = BookedStatus.from(bookedTimeIds.contains(reservationTime.getId()));
-            responses.add(new AvailableReservationTimeServiceResponse(
-                    reservationTime,
-                    isBooked));
-        }
-
-        return responses;
+        return allTimes.stream()
+                .map(time -> createAvailabilityResponse(time, bookedTimeIds))
+                .toList();
     }
 
     @Override
@@ -94,5 +85,15 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
                                   final ReservationTimeId timeId,
                                   final ThemeId themeId) {
         return reservationRepository.existsByParams(date, timeId, themeId);
+    }
+
+    private AvailableReservationTimeServiceResponse createAvailabilityResponse(final ReservationTime time,
+                                                                               final Set<ReservationTimeId> bookedTimeIds) {
+        final int bookingCount = (int) bookedTimeIds.stream()
+                .filter(id -> id.equals(time.getId()))
+                .count();
+
+        final BookedStatus bookedStatus = BookedStatus.from(bookingCount);
+        return new AvailableReservationTimeServiceResponse(time, bookedStatus);
     }
 }
