@@ -29,7 +29,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    public Reservation() {
+    protected Reservation() {
 
     }
 
