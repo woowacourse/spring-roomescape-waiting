@@ -21,9 +21,9 @@ import roomescape.auth.infrastructure.util.CookieManager;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String MEMBER_ID_ATTRIBUTE = "memberId";
-    private static final List<String> WHITELIST = List.of(
-            "/", "/login", "/signup"
-    );
+    private static final List<String> WHITELIST = List.of("/login", "/logout", "/signup");
+    private static final List<String> TOKEN_CHECK_LIST = List.of("/");
+
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CookieManager cookieManager;
@@ -37,14 +37,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String uri = request.getRequestURI();
         final String token = cookieManager.extractLoginToken(request.getCookies());
 
-        if (isWhitelisted(uri)) {
+        if (isTokenCheckListed(uri)) {
             if (StringUtils.hasText(token)) {
+                Long memberId = null;
                 try {
-                    final String subject = jwtTokenProvider.extractPrincipal(token);
-                    Long memberId = Long.valueOf(subject);
+                    String subject = jwtTokenProvider.extractPrincipal(token);
+                    memberId = Long.valueOf(subject);
                     request.setAttribute(MEMBER_ID_ATTRIBUTE, memberId);
-                } catch (JwtException | NumberFormatException e) {
-                    log.debug("유효하지 않은 토큰이 메인 화면 등에서 발견됨", e);
+                } catch (JwtException e) {
+                    log.debug("토큰을 추출하는 과정에서 문제가 발생했습니다.", e);
+                    return;
+                } catch (NumberFormatException e) {
+                    log.debug("memberId의 형식이 올바르지 않습니다 memberId = {}", memberId, e);
+                    return;
                 }
             }
             filterChain.doFilter(request, response);
@@ -74,8 +79,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isWhitelisted(String uri) {
-        return WHITELIST.stream()
-                .anyMatch(uri::startsWith);
+    private boolean isTokenCheckListed(String uri) {
+        return TOKEN_CHECK_LIST.stream().anyMatch(uri::equals);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(final HttpServletRequest request) throws ServletException {
+        final String path = request.getRequestURI();
+        return WHITELIST.stream().anyMatch(path::equals);
     }
 }
