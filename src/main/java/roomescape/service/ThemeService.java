@@ -19,8 +19,10 @@ import roomescape.exception.ExistedThemeException;
 @Service
 public class ThemeService {
 
-    public static final int TOP_THEMES_COUNT = 10;
-    public static final int THEME_TRACKING_PERIOD = 7;
+    private static final int TOP_THEMES_COUNT = 10;
+    private static final int DAYS_BEFORE_START = 7;
+    private static final int DAYS_BEFORE_END = 1;
+
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -64,9 +66,9 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getTopThemes() {
-        LocalDate startDate = LocalDate.now().minusDays(THEME_TRACKING_PERIOD);
-        List<Reservation> reservations = reservationRepository.findByDateBetween(startDate,
-                LocalDate.now().minusDays(1));
+        LocalDate startDate = LocalDate.now().minusDays(DAYS_BEFORE_START);
+        LocalDate endDate = LocalDate.now().minusDays(DAYS_BEFORE_END);
+        List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
 
         Map<Theme, Long> themeCount = countTheme(reservations);
         List<Theme> themes = themeCount
