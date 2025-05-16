@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 
 public record ReservationTimeRequest(
-        @NotNull LocalTime startAt
+        @NotNull(message = "startAt 값이 없습니다.") LocalTime startAt
 ) {
     public ReservationTime toTime() {
         return ReservationTime.createWithoutId(startAt);

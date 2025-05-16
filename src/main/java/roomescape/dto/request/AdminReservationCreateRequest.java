@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record AdminReservationCreateRequest(
-        @NotNull Long memberId,
-        @NotNull LocalDate date,
-        @NotNull Long timeId,
-        @NotNull Long themeId
+        @NotNull(message = "memberId 값이 없습니다.") Long memberId,
+        @NotNull(message = "date 값이 없습니다.") LocalDate date,
+        @NotNull(message = "timeId 값이 없습니다.") Long timeId,
+        @NotNull(message = "themeId 값이 없습니다.") Long themeId
 ) {
 }

@@ -3,8 +3,8 @@ package roomescape.dto.request;
 import jakarta.validation.constraints.NotBlank;
 
 public record ThemeRequest(
-        @NotBlank String name,
-        @NotBlank String description,
-        @NotBlank String thumbnail
+        @NotBlank(message = "name 값이 없습니다.") String name,
+        @NotBlank(message = "description 값이 없습니다.") String description,
+        @NotBlank(message = "thumbnail 값이 없습니다.") String thumbnail
 ) {
 }

@@ -6,9 +6,9 @@ import roomescape.auth.Role;
 import roomescape.domain.Member;
 
 public record MemberRequest(
-        @Email String email,
-        @NotBlank String password,
-        @NotBlank String name
+        @Email(message = "잘못된 이메일 형식입니다.") String email,
+        @NotBlank(message = "password 값이 없습니다.") String password,
+        @NotBlank(message = "name 값이 없습니다.") String name
 ) {
 
     public Member toMember() {
