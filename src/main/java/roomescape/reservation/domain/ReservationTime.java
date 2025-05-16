@@ -44,7 +44,7 @@ public class ReservationTime {
         validateTimeRange(startAt);
     }
 
-    private void validateNull(LocalTime startAt) {
+    private void validateNull(final LocalTime startAt) {
         if (startAt == null) {
             throw new IllegalArgumentException("예약 시간은 null일 수 없습니다.");
         }

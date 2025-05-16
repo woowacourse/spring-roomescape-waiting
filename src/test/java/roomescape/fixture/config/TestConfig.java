@@ -8,7 +8,6 @@ import roomescape.member.domain.MemberQueryRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.MemberRepositoryImpl;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.application.ReservationStatusService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
@@ -114,10 +113,5 @@ public class TestConfig {
                 themeQueryRepository,
                 memberQueryRepository
         );
-    }
-
-    @Bean
-    public ReservationStatusService reservationStatusService() {
-        return new ReservationStatusService();
     }
 }

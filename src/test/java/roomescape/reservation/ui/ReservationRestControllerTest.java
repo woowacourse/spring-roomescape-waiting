@@ -24,7 +24,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.fixture.ui.LoginApiFixture;
+import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
+import roomescape.reservation.ui.dto.response.BookingStateResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -223,6 +226,22 @@ class ReservationRestControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", is(2));
+    }
+
+    @Test
+    void 예약_상태_목록을_조회한다() {
+        final Map<String, String> adminCookies = LoginApiFixture.adminLoginAndGetCookies();
+
+        final List<BookingStateResponse> responses =
+                RestAssured.given().log().all()
+                        .contentType(ContentType.JSON)
+                        .cookies(adminCookies)
+                        .when().get("/reservations/states")
+                        .then().log().all()
+                        .extract().jsonPath()
+                        .getList(".", BookingStateResponse.class);
+
+        assertThat(responses).hasSize(BookingState.values().length);
     }
 
     private Map<String, String> reservationParams1() {
