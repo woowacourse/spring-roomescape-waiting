@@ -17,9 +17,9 @@ import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
 import roomescape.reservation.application.dto.MyReservation;
 import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -116,7 +116,8 @@ public class ReservationService {
         validateIsBooked(sameDateAndThemeReservations, reservationTime, theme);
         validatePastDateTime(date, reservationTime.getStartAt());
 
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member, Status.CONFIRMATION);
+        final Reservation reservation = new Reservation(date, reservationTime, theme, member,
+                BookingStatus.CONFIRMATION);
         final Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);
     }

@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -35,26 +36,27 @@ public class Reservation {
     private Member member;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     @ColumnDefault(value = "'CONFIRMATION'")
-    private Status status;
+    private BookingStatus bookingStatus;
 
     protected Reservation() {
 
     }
 
     public Reservation(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
-                       final Member member, final Status status) {
+                       final Member member, final BookingStatus bookingStatus) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = status;
+        this.bookingStatus = bookingStatus;
     }
 
     public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
-                       final Status status) {
-        this(null, date, time, theme, member, status);
+                       final BookingStatus bookingStatus) {
+        this(null, date, time, theme, member, bookingStatus);
     }
 
     public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
@@ -95,12 +97,12 @@ public class Reservation {
         return time.getStartAt();
     }
 
-    public Status getStatus() {
-        return status;
+    public BookingStatus getStatus() {
+        return bookingStatus;
     }
 
     public String getStatusValue() {
-        return status.getValue();
+        return bookingStatus.getValue();
     }
 
     @Override
