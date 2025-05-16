@@ -100,6 +100,10 @@ public class Reservation {
         return theme.getId().equals(themeId);
     }
 
+    public ReservationStatus getStatus() {
+        return this.status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
@@ -116,9 +120,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id, member, date, time, theme);
-    }
-
-    public ReservationStatus getStatus() {
-        return this.status;
     }
 }
