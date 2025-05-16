@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -12,47 +13,49 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.User;
-import roomescape.dto.request.ReservationTimeRequestDto;
-import roomescape.dto.response.AvailableReservationTimeResponseDto;
-import roomescape.dto.response.ReservationTimeResponseDto;
+import roomescape.dto.business.ReservationTimeWithBookState;
+import roomescape.dto.request.ReservationTimeCreationRequest;
+import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
 
 @RestController
 @RequestMapping("/times")
 public class ReservationTimeController {
 
-    private final ReservationTimeService service;
+    private final ReservationTimeService timeService;
 
-    public ReservationTimeController(ReservationTimeService service) {
-        this.service = service;
+    public ReservationTimeController(ReservationTimeService timeService) {
+        this.timeService = timeService;
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationTimeResponseDto>> findAll() {
-        List<ReservationTimeResponseDto> resDtos = service.findAll();
-        return ResponseEntity.ok(resDtos);
+    public List<ReservationTimeResponse> findAllReservationTimes() {
+        return timeService.findAllReservationTimes();
     }
 
-    @GetMapping("/availability")
-    public ResponseEntity<List<AvailableReservationTimeResponseDto>> findReservationTimesWithAvailableStatus(
-            @RequestParam("themeId") Long themeId, @RequestParam("date") LocalDate date, User user) {
-        List<AvailableReservationTimeResponseDto> availableReservationTimeResponseDtos = service.findReservationTimesWithAvailableStatus(
-                themeId,
-                date,
-                user);
-        return ResponseEntity.ok(availableReservationTimeResponseDtos);
+    @GetMapping(params = {"themeId", "date"})
+    public List<ReservationTimeWithBookState> findReservationTimesWithBookState(
+            @RequestParam("themeId") Long themeId,
+            @RequestParam("date") LocalDate date
+    ) {
+        return timeService.findReservationTimesWithBookState(themeId, date);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponseDto> add(@RequestBody ReservationTimeRequestDto requestDto) {
-        ReservationTimeResponseDto resDto = service.add(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(resDto);
+    public ResponseEntity<ReservationTimeResponse> addReservationTime(
+            @RequestBody ReservationTimeCreationRequest requestDto
+    ) {
+        ReservationTimeResponse reservationTimeResponse = timeService.addReservationTime(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/times/" + reservationTimeResponse.id()))
+                .body(reservationTimeResponse);
     }
 
     @DeleteMapping("/{reservationTimeId}")
-    public ResponseEntity<Void> deleteById(@PathVariable("reservationTimeId") Long id) {
-        service.deleteById(id);
+    public ResponseEntity<Void> deleteReservationTimeById(
+            @PathVariable("reservationTimeId") Long id
+    ) {
+        timeService.deleteReservationTimeById(id);
         return ResponseEntity.noContent().build();
     }
 }

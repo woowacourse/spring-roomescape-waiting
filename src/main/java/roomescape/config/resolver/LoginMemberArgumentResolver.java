@@ -10,7 +10,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.domain.User;
 import roomescape.exception.local.NotFoundCookieException;
-import roomescape.service.AuthService;
+import roomescape.service.UserService;
 import roomescape.utility.JwtTokenProvider;
 
 @Component
@@ -19,11 +19,11 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     private static final String TOKEN_NAME_FIELD = "token";
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final AuthService authService;
+    private final UserService userService;
 
-    public LoginMemberArgumentResolver(JwtTokenProvider jwtTokenProvider, AuthService authService) {
+    public LoginMemberArgumentResolver(JwtTokenProvider jwtTokenProvider, UserService userService) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.authService = authService;
+        this.userService = userService;
     }
 
     @Override
@@ -32,9 +32,12 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     @Override
-    public User resolveArgument(MethodParameter methodParameter, ModelAndViewContainer mavContainer,
-            NativeWebRequest nativeWebRequest, WebDataBinderFactory binderFactory)
-            throws Exception {
+    public User resolveArgument(
+            MethodParameter methodParameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest nativeWebRequest,
+            WebDataBinderFactory binderFactory
+    ) {
         HttpServletRequest request = (HttpServletRequest) nativeWebRequest.getNativeRequest();
 
         Cookie[] cookies = request.getCookies();
@@ -43,7 +46,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                 if (TOKEN_NAME_FIELD.equals(cookie.getName())) {
                     String token = cookie.getValue();
                     String payload = jwtTokenProvider.getPayload(token);
-                    return authService.findMember(payload);
+                    return userService.getUserById(Long.parseLong(payload));
                 }
             }
         }

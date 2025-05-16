@@ -20,7 +20,7 @@ import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.dto.request.AdminReservationRequestDto;
-import roomescape.dto.response.TokenResponseDto;
+import roomescape.dto.response.TokenResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.AuthService;
 import roomescape.service.UserService;
@@ -52,7 +52,7 @@ class MemberControllerTest {
     private User savedMember;
     private Theme savedTheme;
     private ReservationTime savedTime;
-    private TokenResponseDto memberTokenResponseDto;
+    private TokenResponse memberTokenResponse;
 
     @BeforeEach
     void setUp() {
@@ -72,7 +72,7 @@ class MemberControllerTest {
 
         entityManager.flush();
 
-        memberTokenResponseDto = authService.login(
+        memberTokenResponse = authService.login(
                 AuthFixture.createTokenRequestDto(savedMember.getEmail(), savedMember.getPassword()));
     }
 
@@ -85,7 +85,7 @@ class MemberControllerTest {
                 savedTime.getId(),
                 savedMember.getId());
 
-        String token = memberTokenResponseDto.accessToken();
+        String token = memberTokenResponse.accessToken();
 
         // when
         // then

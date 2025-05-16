@@ -1,26 +1,23 @@
 package roomescape.controller;
 
 import java.time.Duration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.request.TokenRequestDto;
-import roomescape.dto.response.TokenResponseDto;
-import roomescape.dto.response.UserResponseDto;
+import roomescape.domain.User;
+import roomescape.dto.request.loginRequest;
+import roomescape.dto.response.TokenResponse;
+import roomescape.dto.response.UserProfileResponse;
 import roomescape.service.AuthService;
 
 @RestController
 public class AuthController {
 
     private static final String TOKEN_NAME_FIELD = "token";
-    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -28,39 +25,38 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody TokenRequestDto tokenRequestDto) {
-        TokenResponseDto tokenResponseDto = authService.login(tokenRequestDto);
+    public ResponseEntity<Void> login(
+            @RequestBody loginRequest loginRequest
+    ) {
+        TokenResponse tokenResponse = authService.login(loginRequest);
         ResponseCookie cookie = ResponseCookie
-                .from(TOKEN_NAME_FIELD, tokenResponseDto.accessToken())
+                .from(TOKEN_NAME_FIELD, tokenResponse.accessToken())
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
-                .maxAge(Duration.ofDays(30))
-                .sameSite("Lax")
                 .build();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<UserResponseDto> checkAuth(@CookieValue(name = TOKEN_NAME_FIELD) String token) {
-        UserResponseDto userResponseDto = authService.findMemberByToken(token);
-        return ResponseEntity.ok().body(userResponseDto);
+    public ResponseEntity<UserProfileResponse> checkLogin(User user) {
+        return ResponseEntity.ok().body(new UserProfileResponse(user));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@CookieValue(name = TOKEN_NAME_FIELD) String token) {
-        authService.findMemberByToken(token);
-
+    public ResponseEntity<Void> logout() {
         ResponseCookie cookie = ResponseCookie
                 .from(TOKEN_NAME_FIELD, "")
-                .domain("localhost")
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
                 .maxAge(Duration.ofDays(0))
-                .sameSite("Strict")
                 .build();
-
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 }

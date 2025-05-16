@@ -5,9 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.dto.request.PopularThemeRequestDto;
-import roomescape.dto.request.ThemeRequestDto;
-import roomescape.dto.response.ThemeResponseDto;
+import roomescape.dto.request.ThemeCreationRequest;
+import roomescape.dto.response.ThemeResponse;
 import roomescape.repository.ThemeRepository;
 
 @Service
@@ -20,26 +19,26 @@ public class ThemeService {
         this.repository = repository;
     }
 
-    public List<ThemeResponseDto> findAll() {
+    public List<ThemeResponse> findAllThemes() {
         return repository.findAll().stream()
-                .map(ThemeResponseDto::of)
+                .map(ThemeResponse::new)
                 .toList();
     }
 
-    public List<ThemeResponseDto> findThemesOrderByReservationCount(LocalDate from, LocalDate to,
-            PopularThemeRequestDto popularThemeRequestDto) {
-        return repository.findThemesOrderByReservationCount(from, to, popularThemeRequestDto.size()).stream()
-                .map(ThemeResponseDto::of)
+    public List<ThemeResponse> findTopThemes(LocalDate from, LocalDate to, int size) {
+        List<Theme> themes = repository.findThemesOrderByReservationCount(from, to, size);
+        return themes.stream()
+                .map(ThemeResponse::new)
                 .toList();
     }
 
-    public ThemeResponseDto add(ThemeRequestDto dto) {
-        Theme notSavedTheme = dto.toEntity();
-        Theme savedTheme = repository.save(notSavedTheme);
-        return ThemeResponseDto.of(savedTheme);
+    public ThemeResponse addTheme(ThemeCreationRequest request) {
+        Theme theme = Theme.createWithoutId(request.name(), request.description(), request.thumbnail());
+        Theme savedTheme = repository.save(theme);
+        return new ThemeResponse(savedTheme);
     }
 
-    public void deleteById(Long id) {
+    public void deleteThemeById(Long id) {
         repository.deleteById(id);
     }
 }

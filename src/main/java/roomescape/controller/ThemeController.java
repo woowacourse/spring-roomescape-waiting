@@ -6,15 +6,14 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.request.PopularThemeRequestDto;
-import roomescape.dto.request.ThemeRequestDto;
-import roomescape.dto.response.ThemeResponseDto;
+import roomescape.dto.request.ThemeCreationRequest;
+import roomescape.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
 
 @RestController
@@ -28,34 +27,30 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponseDto>> findAll() {
-        return ResponseEntity.ok(themeService.findAll());
+    public List<ThemeResponse> findAllTheme() {
+        return themeService.findAllThemes();
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<List<ThemeResponseDto>> findThemesOrderByReservationCount(
-            @ModelAttribute PopularThemeRequestDto popularThemeRequestDto) {
-        LocalDate now = LocalDate.now();
-        LocalDate from = now.minusDays(7);
-        LocalDate to = now.minusDays(1);
-        List<ThemeResponseDto> topRankThemes = themeService.findThemesOrderByReservationCount(from, to,
-                popularThemeRequestDto);
-        return ResponseEntity.ok(topRankThemes);
+    public List<ThemeResponse> findTopTheme(@RequestParam("size") int size) {
+        LocalDate to = LocalDate.now();
+        LocalDate from = to.minusDays(7);
+        return themeService.findTopThemes(from, to, size);
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponseDto> add(
-            @RequestBody ThemeRequestDto requestDto
+    public ResponseEntity<ThemeResponse> addTheme(
+            @RequestBody ThemeCreationRequest request
     ) {
-        ThemeResponseDto resDto = themeService.add(requestDto);
+        ThemeResponse resDto = themeService.addTheme(request);
         return ResponseEntity.created(URI.create("/themes/" + resDto.id())).body(resDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(
+    public ResponseEntity<Void> deleteThemeById(
             @PathVariable("id") Long id
     ) {
-        themeService.deleteById(id);
+        themeService.deleteThemeById(id);
         return ResponseEntity.noContent().build();
     }
 }

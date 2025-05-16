@@ -1,14 +1,13 @@
 package roomescape.controller;
 
 import java.util.List;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.User;
 import roomescape.dto.business.ReservationWithBookStateDto;
-import roomescape.dto.response.UserResponseDto;
+import roomescape.dto.response.UserProfileResponse;
+import roomescape.service.ReservationService;
 import roomescape.service.UserService;
 
 @RestController
@@ -16,20 +15,20 @@ import roomescape.service.UserService;
 public class MemberController {
 
     private final UserService memberService;
+    private final ReservationService reservationService;
 
-    public MemberController(UserService memberService) {
+    public MemberController(UserService memberService, ReservationService reservationService) {
         this.memberService = memberService;
+        this.reservationService = reservationService;
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> findAll() {
-        List<UserResponseDto> userResponseDtos = memberService.findAll();
-        return ResponseEntity.status(HttpStatus.OK).body(userResponseDtos);
+    public List<UserProfileResponse> findAllUser() {
+        return memberService.findAllUserProfile();
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<ReservationWithBookStateDto>> findAllReservationsByMember(User member) {
-        List<ReservationWithBookStateDto> reservations = memberService.findAllReservationByMember(member);
-        return ResponseEntity.status(HttpStatus.OK).body(reservations);
+    public List<ReservationWithBookStateDto> findAllReservationsByUser(User user) {
+        return reservationService.findAllReservationsByMember(user);
     }
 }

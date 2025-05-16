@@ -1,19 +1,19 @@
-package roomescape.controller;
+package roomescape.controller.view;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class UserViewController {
-
-    @GetMapping("/reservation")
-    public String getReservationPage() {
-        return "reservation";
-    }
+public class MemberViewController {
 
     @GetMapping
     public String getHomePage() {
         return "index";
+    }
+
+    @GetMapping("/reservation")
+    public String getReservationPage() {
+        return "reservation";
     }
 
     @GetMapping("/login")

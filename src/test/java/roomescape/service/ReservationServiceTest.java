@@ -17,7 +17,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.request.ReservationRequestDto;
+import roomescape.dto.request.ReservationCreationRequest;
 import roomescape.exception.global.ConflictException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -61,7 +61,7 @@ class ReservationServiceTest {
         return ReservationFixture.createByBookedStatus(date, time, savedTheme, savedUser);
     }
 
-    private ReservationRequestDto createRequestDto(int plusDays, Long timeId, Long themeId) {
+    private ReservationCreationRequest createRequestDto(int plusDays, Long timeId, Long themeId) {
         LocalDate date = LocalDate.now().plusDays(plusDays);
 
         return ReservationFixture.createRequestDto(date, timeId, themeId);
@@ -87,11 +87,11 @@ class ReservationServiceTest {
             // when & then
             LocalDate duplicateDate = reservation1.getDate();
             Long duplicateReservationTimeId = reservationTime1.getId();
-            ReservationRequestDto requestDto = ReservationFixture.createRequestDto(duplicateDate,
+            ReservationCreationRequest creationRequest = ReservationFixture.createRequestDto(duplicateDate,
                     duplicateReservationTimeId, savedTheme.getId());
 
             Assertions.assertThatThrownBy(
-                    () -> service.add(requestDto, savedUser)
+                    () -> service.addReservation(savedUser.getId(), creationRequest)
             ).isInstanceOf(ConflictException.class);
         }
 
@@ -110,11 +110,11 @@ class ReservationServiceTest {
 
             // when & then
             Long duplicateReservationTimeId = reservationTime1.getId();
-            ReservationRequestDto requestDto = createRequestDto(3, duplicateReservationTimeId,
+            ReservationCreationRequest creationRequest = createRequestDto(3, duplicateReservationTimeId,
                     savedTheme.getId());
 
             Assertions.assertThatCode(
-                    () -> service.add(requestDto, savedUser)
+                    () -> service.addReservation(savedUser.getId(), creationRequest)
             ).doesNotThrowAnyException();
         }
     }

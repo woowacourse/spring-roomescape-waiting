@@ -19,8 +19,8 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.request.ReservationRequestDto;
-import roomescape.dto.response.ReservationTimeResponseDto;
+import roomescape.dto.request.ReservationCreationRequest;
+import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.global.NotFoundException;
 import roomescape.exception.local.AlreadyReservedTimeException;
 import roomescape.exception.local.DuplicateReservationException;
@@ -74,13 +74,13 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = ReservationTimeFixture.create(TIME_FIELD);
 
         // when
-        ReservationTimeResponseDto resDto = ReservationTimeFixture.createResponseDto(reservationTime);
+        ReservationTimeResponse resDto = ReservationTimeFixture.createResponseDto(reservationTime);
 
         // then
         Assertions.assertThat(resDto.startAt()).isEqualTo(TIME_FIELD);
     }
 
-    private void deleteByIdAll() {
+    private void deleteReservationTimeByIdAll() {
         jdbcTemplate.update("delete from reservation_time");
     }
 
@@ -92,13 +92,13 @@ class ReservationTimeServiceTest {
         @Test
         void findAll_success_whenDataExists() {
             // when
-            List<ReservationTimeResponseDto> resDtos = service.findAll();
+            List<ReservationTimeResponse> resDtos = service.findAllReservationTimes();
 
             // then
             assertSoftly(s -> {
                         s.assertThat(resDtos).hasSize(1);
                         s.assertThat(resDtos)
-                                .extracting(ReservationTimeResponseDto::startAt)
+                                .extracting(ReservationTimeResponse::startAt)
                                 .contains(TIME_FIELD);
                         resDtos.forEach(resDto ->
                                 s.assertThat(resDto.id()).isNotNull());
@@ -110,10 +110,10 @@ class ReservationTimeServiceTest {
         @Test
         void findAll_success_whenNoData() {
             // given
-            deleteByIdAll();
+            deleteReservationTimeByIdAll();
 
             // when
-            List<ReservationTimeResponseDto> resDtos = service.findAll();
+            List<ReservationTimeResponse> resDtos = service.findAllReservationTimes();
 
             // then
             Assertions.assertThat(resDtos).hasSize(0);
@@ -131,12 +131,12 @@ class ReservationTimeServiceTest {
             LocalTime dummyTime1 = LocalTime.of(12, 33);
 
             // when
-            service.add(ReservationTimeFixture.createRequestDto(dummyTime1));
+            service.addReservationTime(ReservationTimeFixture.createRequestDto(dummyTime1));
 
             // then
-            List<ReservationTimeResponseDto> resDtos = service.findAll();
+            List<ReservationTimeResponse> resDtos = service.findAllReservationTimes();
             Assertions.assertThat(resDtos)
-                    .extracting(ReservationTimeResponseDto::startAt)
+                    .extracting(ReservationTimeResponse::startAt)
                     .contains(dummyTime1);
         }
 
@@ -145,12 +145,12 @@ class ReservationTimeServiceTest {
         void add_throwException_byDuplicationReservationTime() {
             // given
             LocalTime dummyTime1 = LocalTime.of(12, 33);
-            service.add(ReservationTimeFixture.createRequestDto(dummyTime1));
+            service.addReservationTime(ReservationTimeFixture.createRequestDto(dummyTime1));
 
             // when
             // then
             Assertions.assertThatThrownBy(
-                    () -> service.add(ReservationTimeFixture.createRequestDto(dummyTime1))
+                    () -> service.addReservationTime(ReservationTimeFixture.createRequestDto(dummyTime1))
             ).isInstanceOf(DuplicateReservationException.class);
         }
     }
@@ -163,10 +163,10 @@ class ReservationTimeServiceTest {
         @Test
         void deleteById_success_withValidId() {
             // given
-            service.deleteById(savedReservationTimeId);
+            service.deleteReservationTimeById(savedReservationTimeId);
 
             // when
-            List<ReservationTimeResponseDto> resDtos = service.findAll();
+            List<ReservationTimeResponse> resDtos = service.findAllReservationTimes();
 
             // then
             Assertions.assertThat(resDtos).hasSize(0);
@@ -179,7 +179,7 @@ class ReservationTimeServiceTest {
             // when
             // then
             Assertions.assertThatCode(
-                    () -> service.deleteById(Long.MAX_VALUE)
+                    () -> service.deleteReservationTimeById(Long.MAX_VALUE)
             ).isInstanceOf(NotFoundException.class);
         }
 
@@ -190,8 +190,8 @@ class ReservationTimeServiceTest {
             Theme theme = themeRepository.save(Theme.createWithoutId("name1", "dd", "tt"));
             User savedUser = userRepository.save(UserFixture.create(Role.ROLE_MEMBER, "n1", "e1", "p1"));
 
-            reservationService.add(
-                    new ReservationRequestDto(
+            reservationService.addReservation(
+                    new ReservationCreationRequest(
                             LocalDate.now().plusMonths(3),
                             savedReservationTimeId,
                             theme.getId()
@@ -199,7 +199,7 @@ class ReservationTimeServiceTest {
 
             // when, then
             Assertions.assertThatCode(
-                    () -> service.deleteById(savedReservationTimeId)
+                    () -> service.deleteReservationTimeById(savedReservationTimeId)
             ).isInstanceOf(AlreadyReservedTimeException.class);
         }
     }

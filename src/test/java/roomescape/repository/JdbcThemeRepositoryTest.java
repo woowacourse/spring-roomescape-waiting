@@ -16,7 +16,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.request.PopularThemeRequestDto;
 import roomescape.test.fixture.ReservationFixture;
 import roomescape.test.fixture.ReservationTimeFixture;
 import roomescape.test.fixture.ThemeFixture;

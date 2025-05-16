@@ -1,104 +1,111 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.request.ReservationRequestDto;
-import roomescape.dto.request.SearchReservationRequestDto;
-import roomescape.dto.response.ReservationResponseDto;
-import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.dto.response.ThemeResponseDto;
-import roomescape.dto.response.UserResponseDto;
+import roomescape.dto.business.ReservationWithBookStateDto;
+import roomescape.dto.request.ReservationCreationRequest;
+import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.local.DuplicateReservationException;
-import roomescape.exception.local.InvalidReservationTimeException;
-import roomescape.exception.local.InvalidThemeException;
-import roomescape.exception.local.NotFoundReservationException;
+import roomescape.exception.local.NotFoundReservationTimeException;
+import roomescape.exception.local.NotFoundThemeException;
+import roomescape.exception.local.NotFoundUserException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.UserRepository;
 
 @Service
 @Transactional
 public class ReservationService {
 
-    private final ReservationRepository repository;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final UserRepository userRepository;
 
-    public ReservationService(ReservationRepository repository,
-            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
-        this.repository = repository;
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository, UserRepository userRepository
+    ) {
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.userRepository = userRepository;
     }
 
-    public List<ReservationResponseDto> findAll() {
-        List<Reservation> reservations = repository.findAll();
+    public List<ReservationResponse> findAllReservations() {
+        List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
-                .map(this::convertReservationResponseDto)
-                .collect(Collectors.toList());
+                .map(ReservationResponse::new)
+                .toList();
     }
 
-    public ReservationResponseDto add(ReservationRequestDto requestDto, User user) {
-        Reservation reservation = convertReservation(requestDto, user);
-        validateDuplicateDateTime(reservation);
-        Reservation savedReservation = repository.save(reservation);
-        return convertReservationResponseDto(savedReservation);
+    public List<ReservationWithBookStateDto> findAllReservationsByMember(User member) {
+        validateNotExistenceUser(member.getId());
+        List<Reservation> reservations = reservationRepository.findByUser(member);
+        return reservations.stream()
+                .map(ReservationWithBookStateDto::new)
+                .toList();
     }
 
-    public void deleteById(Long id) {
-        findByIdOrThrow(id);
-        repository.deleteById(id);
+    public List<ReservationResponse> findReservationsByFilter(
+            long userId, long themeId, LocalDate from, LocalDate to
+    ) {
+        List<Reservation> reservations = reservationRepository.findReservationsByFilter(userId, themeId, from, to);
+        return reservations.stream()
+                .map(ReservationResponse::new)
+                .toList();
     }
 
-    private Reservation findByIdOrThrow(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new NotFoundReservationException("해당 예약 id가 존재하지 않습니다."));
+    public ReservationResponse addReservation(long userId, ReservationCreationRequest request) {
+        User user = loadUserById(userId);
+        Theme theme = loadThemeById(request.themeId());
+        ReservationTime time = loadReservationTimeById(request.timeId());
+        validateDuplicateReservation(request.date(), time);
+        Reservation reservation = Reservation.createWithoutId(
+                request.date(), ReservationStatus.BOOKED, time, theme, user);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return new ReservationResponse(savedReservation);
     }
 
-    private void validateDuplicateDateTime(Reservation inputReservation) {
-        boolean exists = repository.existsByDateAndReservationTime(
-                inputReservation.getDate(),
-                inputReservation.getReservationTime()
-        );
-        if (exists) {
+    public void deleteReservationById(long reservationId) {
+        reservationRepository.deleteById(reservationId);
+    }
+
+    private void validateDuplicateReservation(LocalDate date, ReservationTime time) {
+        boolean isDuplicatedReservation = reservationRepository.existsByDateAndReservationTime(date, time);
+        if (isDuplicatedReservation) {
             throw new DuplicateReservationException();
         }
     }
 
-    public List<ReservationResponseDto> findReservationsByUserAndThemeAndFromAndTo(
-            SearchReservationRequestDto searchReservationRequestDto) {
-        List<Reservation> reservations = repository.findReservationsByUserAndThemeAndFromAndTo(
-                searchReservationRequestDto.userId(),
-                searchReservationRequestDto.themeId(),
-                searchReservationRequestDto.from(),
-                searchReservationRequestDto.to()
-        );
-
-        return reservations.stream()
-                .map(this::convertReservationResponseDto)
-                .toList();
+    private void validateNotExistenceUser(long userId) {
+        boolean isExistUser = userRepository.existsById(userId);
+        if (!isExistUser) {
+            throw new NotFoundUserException();
+        }
     }
 
-    private Reservation convertReservation(ReservationRequestDto dto, User user) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
-                .orElseThrow(InvalidReservationTimeException::new);
-        Theme theme = themeRepository.findById(dto.themeId())
-                .orElseThrow(InvalidThemeException::new);
-
-        return dto.toEntity(reservationTime, theme, user);
+    private User loadUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(NotFoundUserException::new);
     }
 
-    private ReservationResponseDto convertReservationResponseDto(Reservation reservation) {
-        ReservationTimeResponseDto reservationTimeResponseDto = ReservationTimeResponseDto.of(
-                reservation.getReservationTime());
-        ThemeResponseDto themeResponseDto = ThemeResponseDto.of(reservation.getTheme());
-        UserResponseDto userResponseDto = UserResponseDto.of(reservation.getUser());
-        return ReservationResponseDto.from(reservation, reservationTimeResponseDto, themeResponseDto, userResponseDto);
+    private Theme loadThemeById(long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(NotFoundThemeException::new);
+    }
+
+    private ReservationTime loadReservationTimeById(long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(NotFoundReservationTimeException::new);
     }
 }

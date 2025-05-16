@@ -2,23 +2,23 @@ package roomescape.dto.business;
 
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
-import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.dto.response.ThemeResponseDto;
+import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.ThemeResponse;
 
 public record ReservationWithBookStateDto(
         Long id,
         LocalDate date,
         String statusText,
-        ReservationTimeResponseDto time,
-        ThemeResponseDto theme
+        ReservationTimeResponse time,
+        ThemeResponse theme
 ) {
 
     public ReservationWithBookStateDto(Reservation reservation) {
         this(reservation.getId(),
                 reservation.getDate(),
                 reservation.getStatus().getDisplayName(),
-                ReservationTimeResponseDto.of(reservation.getReservationTime()),
-                ThemeResponseDto.of(reservation.getTheme())
+                new ReservationTimeResponse(reservation.getReservationTime()),
+                new ThemeResponse(reservation.getTheme())
         );
     }
 }

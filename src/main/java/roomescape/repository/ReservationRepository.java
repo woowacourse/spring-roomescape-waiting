@@ -40,7 +40,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "AND theme.id = :themeId " +
             "AND reservation.date BETWEEN :fromDate AND :toDate",
             nativeQuery = true)
-    List<Reservation> findReservationsByUserAndThemeAndFromAndTo(
+    List<Reservation> findReservationsByFilter(
             @Param("userId") Long userId,
             @Param("themeId") Long themeId,
             @Param("fromDate") LocalDate fromDate,

@@ -1,12 +1,12 @@
 package roomescape.test.fixture;
 
 import roomescape.domain.Theme;
-import roomescape.dto.request.ThemeRequestDto;
+import roomescape.dto.request.ThemeCreationRequest;
 
 public class ThemeFixture {
 
-    public static ThemeRequestDto createRequestDto(String name, String description, String thumbnail) {
-        return new ThemeRequestDto(name, description, thumbnail);
+    public static ThemeCreationRequest createRequestDto(String name, String description, String thumbnail) {
+        return new ThemeCreationRequest(name, description, thumbnail);
     }
 
     public static Theme create(String name, String description, String thumbnail) {

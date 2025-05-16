@@ -12,8 +12,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import roomescape.domain.Role;
 import roomescape.domain.User;
-import roomescape.dto.request.TokenRequestDto;
-import roomescape.dto.response.TokenResponseDto;
+import roomescape.dto.request.loginRequest;
+import roomescape.dto.response.TokenResponse;
 import roomescape.service.AuthService;
 import roomescape.test.fixture.AuthFixture;
 import roomescape.test.fixture.UserFixture;
@@ -58,9 +58,9 @@ class WebMvcConfigurationTest {
         @Test
         void addInterceptors_pass_withAdminRole() {
             // given
-            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedAdmin.getEmail(),
+            loginRequest requestDto = AuthFixture.createTokenRequestDto(savedAdmin.getEmail(),
                     savedAdmin.getPassword());
-            TokenResponseDto responseDto = authService.login(requestDto);
+            TokenResponse responseDto = authService.login(requestDto);
             String token = responseDto.accessToken();
 
             // when
@@ -90,9 +90,9 @@ class WebMvcConfigurationTest {
         @Test
         void addInterceptors_false_byRoleIsNotAdmin() {
             // given
-            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedMember.getEmail(),
+            loginRequest requestDto = AuthFixture.createTokenRequestDto(savedMember.getEmail(),
                     savedMember.getPassword());
-            TokenResponseDto responseDto = authService.login(requestDto);
+            TokenResponse responseDto = authService.login(requestDto);
             String token = responseDto.accessToken();
 
             // when

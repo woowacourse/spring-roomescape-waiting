@@ -19,8 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.request.ReservationTimeRequestDto;
-import roomescape.dto.response.ReservationTimeResponseDto;
+import roomescape.dto.request.ReservationTimeCreationRequest;
+import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.test.fixture.ReservationTimeFixture;
 
@@ -65,11 +65,11 @@ public class ReservationTimeControllerTest {
             reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(15, 40)));
 
             // when & then
-            List<ReservationTimeResponseDto> resDtos = RestAssured.given().log().all()
+            List<ReservationTimeResponse> resDtos = RestAssured.given().log().all()
                     .when().get("/times")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value()).extract()
-                    .jsonPath().getList(".", ReservationTimeResponseDto.class);
+                    .jsonPath().getList(".", ReservationTimeResponse.class);
 
             Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_time", Integer.class);
             assertThat(resDtos.size()).isEqualTo(count);
@@ -79,11 +79,11 @@ public class ReservationTimeControllerTest {
         @Test
         void findAll_success_whenNoData() {
             // when & then
-            List<ReservationTimeResponseDto> resDtos = RestAssured.given().log().all()
+            List<ReservationTimeResponse> resDtos = RestAssured.given().log().all()
                     .when().get("/times")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value()).extract()
-                    .jsonPath().getList(".", ReservationTimeResponseDto.class);
+                    .jsonPath().getList(".", ReservationTimeResponse.class);
 
             Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_time", Integer.class);
             assertThat(resDtos.size()).isEqualTo(count);
@@ -101,7 +101,7 @@ public class ReservationTimeControllerTest {
             LocalTime dummyTime = LocalTime.of(18, 22);
 
             // when
-            ReservationTimeRequestDto dto = new ReservationTimeRequestDto(dummyTime);
+            ReservationTimeCreationRequest dto = new ReservationTimeCreationRequest(dummyTime);
 
             // then
             RestAssured.given().log().all()
@@ -120,7 +120,7 @@ public class ReservationTimeControllerTest {
             reservationTimeRepository.save(ReservationTimeFixture.create(dummyTime));
 
             // when
-            ReservationTimeRequestDto dto = new ReservationTimeRequestDto(dummyTime);
+            ReservationTimeCreationRequest dto = new ReservationTimeCreationRequest(dummyTime);
 
             // then
             RestAssured.given().log().all()

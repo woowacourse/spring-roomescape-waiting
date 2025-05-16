@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Role;
 import roomescape.domain.User;
-import roomescape.dto.response.TokenResponseDto;
+import roomescape.dto.response.TokenResponse;
 import roomescape.dto.response.UserResponseDto;
 import roomescape.exception.local.InvalidTokenException;
 import roomescape.repository.UserRepository;
@@ -44,8 +44,8 @@ class AuthServiceTest {
         @BeforeEach
         void setUPLogin() {
             savedUser = userRepository.save(UserFixture.create(Role.ROLE_MEMBER, NAME, EMAIL, PASSWORD));
-            TokenResponseDto tokenResponseDto = authService.login(AuthFixture.createTokenRequestDto(EMAIL, PASSWORD));
-            accessToken = tokenResponseDto.accessToken();
+            TokenResponse tokenResponse = authService.login(AuthFixture.createTokenRequestDto(EMAIL, PASSWORD));
+            accessToken = tokenResponse.accessToken();
         }
 
         @DisplayName("유효한 토큰으로 요청 시 유저를 찾을 수 있다")

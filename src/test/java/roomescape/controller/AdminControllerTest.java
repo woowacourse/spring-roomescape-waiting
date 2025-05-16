@@ -21,7 +21,7 @@ import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.dto.request.AdminReservationRequestDto;
-import roomescape.dto.response.TokenResponseDto;
+import roomescape.dto.response.TokenResponse;
 import roomescape.service.AuthService;
 import roomescape.test.fixture.AuthFixture;
 import roomescape.test.fixture.ReservationTimeFixture;
@@ -46,8 +46,8 @@ class AdminControllerTest {
     private User savedAdmin;
     private Theme savedTheme;
     private ReservationTime savedTime;
-    private TokenResponseDto memberTokenResponseDto;
-    private TokenResponseDto adminTokenResponseDto;
+    private TokenResponse memberTokenResponse;
+    private TokenResponse adminTokenResponse;
     private LocalDate date;
 
     @BeforeEach
@@ -70,9 +70,9 @@ class AdminControllerTest {
 
         entityManager.flush();
 
-        memberTokenResponseDto = authService.login(
+        memberTokenResponse = authService.login(
                 AuthFixture.createTokenRequestDto(savedMember.getEmail(), savedMember.getPassword()));
-        adminTokenResponseDto = authService.login(
+        adminTokenResponse = authService.login(
                 AuthFixture.createTokenRequestDto(savedAdmin.getEmail(), savedAdmin.getPassword()));
     }
 
@@ -84,12 +84,10 @@ class AdminControllerTest {
         @Test
         void createReservation_success_byMemberId() {
             // given
-            AdminReservationRequestDto dto = new AdminReservationRequestDto(date,
-                    savedTheme.getId(),
-                    savedTime.getId(),
-                    savedMember.getId());
+            AdminReservationRequestDto dto = new AdminReservationRequestDto(
+                    savedMember.getId(), savedTheme.getId(), date, savedTime.getId());
 
-            String token = adminTokenResponseDto.accessToken();
+            String token = adminTokenResponse.accessToken();
 
             // when
             // then
@@ -106,12 +104,10 @@ class AdminControllerTest {
         @Test
         void createReservation_throwException_byAdminId() {
             // given
-            AdminReservationRequestDto dto = new AdminReservationRequestDto(date,
-                    savedTheme.getId(),
-                    savedTime.getId(),
-                    savedAdmin.getId());
+            AdminReservationRequestDto dto = new AdminReservationRequestDto(
+                    savedMember.getId(), savedTheme.getId(), date, savedTime.getId());
 
-            String token = adminTokenResponseDto.accessToken();
+            String token = adminTokenResponse.accessToken();
 
             // when
             // then

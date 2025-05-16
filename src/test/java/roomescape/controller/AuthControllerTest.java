@@ -16,8 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Role;
 import roomescape.domain.User;
-import roomescape.dto.request.TokenRequestDto;
-import roomescape.dto.response.TokenResponseDto;
+import roomescape.dto.request.loginRequest;
+import roomescape.dto.response.TokenResponse;
 import roomescape.repository.UserRepository;
 import roomescape.service.AuthService;
 import roomescape.test.fixture.AuthFixture;
@@ -63,7 +63,7 @@ class AuthControllerTest {
             // given
 
             // when
-            TokenRequestDto requestDto = new TokenRequestDto(savedMember.getEmail(), savedMember.getPassword());
+            loginRequest requestDto = new loginRequest(savedMember.getEmail(), savedMember.getPassword());
 
             // then
             RestAssured
@@ -82,7 +82,7 @@ class AuthControllerTest {
             // given
 
             // when
-            TokenRequestDto requestDto = new TokenRequestDto(savedAdmin.getEmail(), savedAdmin.getPassword());
+            loginRequest requestDto = new loginRequest(savedAdmin.getEmail(), savedAdmin.getPassword());
 
             // then
             RestAssured
@@ -100,7 +100,7 @@ class AuthControllerTest {
         void login_throwException_byInvalidEmail() {
             // given
             // when
-            TokenRequestDto requestDto = new TokenRequestDto("invalidEmail@example.com", "adfasdf");
+            loginRequest requestDto = new loginRequest("invalidEmail@example.com", "adfasdf");
 
             // then
             RestAssured
@@ -122,9 +122,9 @@ class AuthControllerTest {
         @Test
         void checkAuth_success_withRoleISMember() {
             // given
-            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedMember.getEmail(),
+            loginRequest requestDto = AuthFixture.createTokenRequestDto(savedMember.getEmail(),
                     savedMember.getPassword());
-            TokenResponseDto responseDto = authService.login(requestDto);
+            TokenResponse responseDto = authService.login(requestDto);
             String token = responseDto.accessToken();
 
             // when
@@ -146,9 +146,9 @@ class AuthControllerTest {
         @Test
         void checkAuth_success_withRoleISAdmin() {
             // given
-            TokenRequestDto requestDto = AuthFixture.createTokenRequestDto(savedAdmin.getEmail(),
+            loginRequest requestDto = AuthFixture.createTokenRequestDto(savedAdmin.getEmail(),
                     savedAdmin.getPassword());
-            TokenResponseDto responseDto = authService.login(requestDto);
+            TokenResponse responseDto = authService.login(requestDto);
 
             // when
             String token = responseDto.accessToken();

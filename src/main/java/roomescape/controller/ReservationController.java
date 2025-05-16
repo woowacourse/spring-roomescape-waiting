@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.User;
-import roomescape.dto.request.ReservationRequestDto;
-import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.request.ReservationCreationRequest;
+import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -26,21 +27,25 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponseDto>> findAll() {
-        List<ReservationResponseDto> resDtos = service.findAll();
-        return ResponseEntity.ok(resDtos);
+    public List<ReservationResponse> findAllReservations() {
+        return service.findAllReservations();
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponseDto> add(@RequestBody ReservationRequestDto requestDto,
-            User user) {
-        ReservationResponseDto resDto = service.add(requestDto, user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(resDto);
+    public ResponseEntity<ReservationResponse> addReservation(
+            @RequestBody ReservationCreationRequest request, User user
+    ) {
+        ReservationResponse reservationResponse = service.addReservation(user.getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/reservation/" + user.getId()))
+                .body(reservationResponse);
     }
 
     @DeleteMapping("/{reservationId}")
-    public ResponseEntity<Void> deleteById(@PathVariable("reservationId") Long id) {
-        service.deleteById(id);
+    public ResponseEntity<Void> deleteReservationById(
+            @PathVariable("reservationId") Long id
+    ) {
+        service.deleteReservationById(id);
         return ResponseEntity.noContent().build();
     }
 }

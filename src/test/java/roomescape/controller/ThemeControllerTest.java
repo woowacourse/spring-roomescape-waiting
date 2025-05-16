@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Theme;
-import roomescape.dto.request.ThemeRequestDto;
+import roomescape.dto.request.ThemeCreationRequest;
 import roomescape.repository.ThemeRepository;
 import roomescape.test.fixture.ThemeFixture;
 
@@ -42,8 +42,8 @@ class ThemeControllerTest {
 
     @DisplayName("theme를 생성하면, 201 응답이 도착한다.")
     @Test
-    public void add() {
-        ThemeRequestDto dto = new ThemeRequestDto("a", "b", "c");
+    public void addTheme() {
+        ThemeCreationRequest dto = new ThemeCreationRequest("a", "b", "c");
 
         RestAssured.given().port(port).log().all()
                 .contentType(ContentType.JSON).body(dto)
@@ -54,7 +54,7 @@ class ThemeControllerTest {
 
     @DisplayName("전체 Theme를 조회한다.")
     @Test
-    public void findAll() {
+    public void findAllTheme() {
         RestAssured.given().port(port).log().all()
                 .when().get("/themes")
                 .then().log().all()
@@ -63,7 +63,7 @@ class ThemeControllerTest {
 
     @DisplayName("Theme를 삭제한다.")
     @Test
-    public void deleteById() {
+    public void deleteThemeById() {
         Theme theme = ThemeFixture.create("tt1", "dd1", "th1");
         Theme savedTheme = themeRepository.save(theme);
 
