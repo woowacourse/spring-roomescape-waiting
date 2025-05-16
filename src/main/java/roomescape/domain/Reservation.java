@@ -20,10 +20,13 @@ public class Reservation {
 
     @ManyToOne
     private Member member;
+
     @ManyToOne
     private ReservationTime reservationTime;
+
     @ManyToOne
     private Theme theme;
+
     @Column(nullable = false)
     private LocalDate date;
 
