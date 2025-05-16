@@ -28,7 +28,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Void> login(HttpServletResponse response, @RequestBody @Valid LoginRequest request) {
         AuthorizationPrincipal principal = authService.login(request);
-        authorizationHandler.set(response, principal);
+        authorizationHandler.setPrincipal(response, principal);
         return ResponseEntity.ok().build();
     }
 
@@ -41,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        authorizationHandler.remove(response);
+        authorizationHandler.removePrincipal(response);
         return ResponseEntity.ok().build();
     }
 }

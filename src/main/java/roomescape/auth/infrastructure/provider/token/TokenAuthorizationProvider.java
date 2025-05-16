@@ -17,14 +17,9 @@ public abstract class TokenAuthorizationProvider implements AuthorizationProvide
     @Override
     public final AuthorizationPayload getPayload(AuthorizationPrincipal principal) {
         String token = principal.value();
+        validateToken(token);
         AuthorizationPayload payload = getPayload(token);
         return new AuthorizationPayload(payload.name(), payload.role());
-    }
-
-    @Override
-    public final void validatePrincipal(AuthorizationPrincipal principal) {
-        String token = principal.value();
-        validateToken(token);
     }
 
     protected abstract String createToken(AuthorizationPayload payload);

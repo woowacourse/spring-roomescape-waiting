@@ -15,6 +15,9 @@ import roomescape.member.domain.MemberRole;
 
 @Component
 public class JwtAuthorizationProvider extends TokenAuthorizationProvider {
+    private static final String NAME_KEY = "name";
+    private static final String ROLE_KEY = "role";
+
     private final String secretKey;
     private final long validityInMilliseconds;
 
@@ -29,8 +32,8 @@ public class JwtAuthorizationProvider extends TokenAuthorizationProvider {
     @Override
     public String createToken(AuthorizationPayload payload) {
         Claims claims = Jwts.claims();
-        claims.put("name", payload.name());
-        claims.put("role", payload.role());
+        claims.put(NAME_KEY, payload.name());
+        claims.put(ROLE_KEY, payload.role());
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
@@ -50,8 +53,8 @@ public class JwtAuthorizationProvider extends TokenAuthorizationProvider {
             .parseClaimsJws(token)
             .getBody();
 
-        String name = claims.get("name", String.class);
-        MemberRole role = MemberRole.valueOf(claims.get("role", String.class));
+        String name = claims.get(NAME_KEY, String.class);
+        MemberRole role = MemberRole.valueOf(claims.get(ROLE_KEY, String.class));
 
         return new AuthorizationPayload(name, role);
     }

@@ -33,7 +33,7 @@ public class CookieTokenAuthorizationHandler extends TokenAuthorizationHandler {
     }
 
     @Override
-    public void remove(HttpServletResponse response) {
+    public void removeToken(HttpServletResponse response) {
         Cookie cookie = new Cookie(TOKEN_NAME, null);
         cookie.setHttpOnly(true);
         cookie.setPath("/");

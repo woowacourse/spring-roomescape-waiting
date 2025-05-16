@@ -6,9 +6,9 @@ import java.util.Optional;
 import roomescape.auth.infrastructure.AuthorizationPrincipal;
 
 public interface AuthorizationHandler {
-    Optional<AuthorizationPrincipal> get(HttpServletRequest request);
+    Optional<AuthorizationPrincipal> getPrincipal(HttpServletRequest request);
 
-    void set(HttpServletResponse response, AuthorizationPrincipal principal);
+    void setPrincipal(HttpServletResponse response, AuthorizationPrincipal principal);
 
-    void remove(HttpServletResponse response);
+    void removePrincipal(HttpServletResponse response);
 }
