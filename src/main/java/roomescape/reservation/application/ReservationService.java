@@ -16,7 +16,6 @@ import roomescape.member.domain.MemberQueryRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
@@ -67,8 +66,7 @@ public class ReservationService {
         final Member member = memberQueryRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
         // TODO: 예약 대기 기능 추가 후 분기 처리
-        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
-                ReservationStatus.CONFIRMED);
+        final Reservation reservation = Reservation.ofWaitingStatus(request.date(), reservationTime, theme, member);
 
         final Long id = reservationCommandRepository.save(reservation);
         final Reservation found = reservationQueryRepository.findById(id)
