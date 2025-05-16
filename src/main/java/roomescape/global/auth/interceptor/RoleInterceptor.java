@@ -24,23 +24,17 @@ public class RoleInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
             throws Exception {
-        String requestURI = request.getRequestURI();
-        if (requestURI.startsWith("/admin/")) {
-            return validateAdminToken(request, MemberRole.ADMIN);
-        }
-        if (!(handler instanceof HandlerMethod)) {
+        if (!(handler instanceof final HandlerMethod handlerMethod)) {
             return true;
         }
 
-        HandlerMethod handlerMethod = (HandlerMethod) handler;
         Class<?> declaringClass = handlerMethod.getMethod().getDeclaringClass();
         if (!declaringClass.isAnnotationPresent(RequireRole.class)) {
             return true;
         }
 
         MemberRole memberRole = declaringClass.getAnnotation(RequireRole.class).value();
-        validateAdminToken(request, memberRole);
-        return true;
+        return validateAdminToken(request, memberRole);
     }
 
     private boolean validateAdminToken(final HttpServletRequest request, final MemberRole memberRole) {
