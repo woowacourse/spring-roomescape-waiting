@@ -6,7 +6,6 @@ import static roomescape.auth.domain.AuthRole.MEMBER;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +26,6 @@ import roomescape.reservation.ui.dto.response.ReservationResponse;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 public class ReservationRestController {
 
     private final ReservationService reservationService;
@@ -35,24 +33,20 @@ public class ReservationRestController {
     @PostMapping("/admin/reservations")
     @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<ReservationResponse> create(
-            @RequestBody @Valid final CreateReservationRequest request
+            @RequestBody @Valid final CreateReservationRequest.ForAdmin request
     ) {
-        final ReservationResponse response = reservationService.create(request);
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(response);
+                .body(reservationService.createForAdmin(request));
     }
 
     @PostMapping("/reservations")
-    @RequiresRole(authRoles = {MEMBER, ADMIN})
+    @RequiresRole(authRoles = {ADMIN, MEMBER})
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid final CreateReservationRequest.ForMember request,
             final MemberAuthInfo memberAuthInfo
     ) {
-        final ReservationResponse response = reservationService.create(request, memberAuthInfo.id());
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(response);
+                .body(reservationService.createForMember(request, memberAuthInfo.id()));
     }
 
     @DeleteMapping("/reservations/{id}")

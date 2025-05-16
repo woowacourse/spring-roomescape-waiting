@@ -65,12 +65,7 @@ public class Reservation {
                        final ReservationStatus status) {
         this(null, date, time, theme, member, status);
     }
-
-    public static Reservation ofWaitingStatus(final LocalDate date, final ReservationTime time,
-                                              final Theme theme, final Member member) {
-        return new Reservation(date, time, theme, member, ReservationStatus.WAITING);
-    }
-
+    
     private void validateMember(final Member member) {
         if (member == null) {
             throw new IllegalArgumentException("멤버는 null이면 안됩니다.");

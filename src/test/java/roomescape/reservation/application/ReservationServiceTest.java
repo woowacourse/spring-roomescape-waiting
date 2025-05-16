@@ -81,7 +81,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatCode(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatCode(() -> reservationService.createForMember(request, memberAuthInfo.id()))
                 .doesNotThrowAnyException();
     }
 
@@ -226,7 +226,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id()))
                 .isInstanceOf(AlreadyExistException.class);
     }
 
@@ -251,7 +251,7 @@ class ReservationServiceTest {
                 new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id()))
                 .isInstanceOf(AlreadyExistException.class);
     }
 
