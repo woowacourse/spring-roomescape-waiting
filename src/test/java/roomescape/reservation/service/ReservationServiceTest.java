@@ -270,7 +270,7 @@ class ReservationServiceTest {
         
         assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("해당 시간이 존재하지 않습니다.");
+                .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
     
     @Test
