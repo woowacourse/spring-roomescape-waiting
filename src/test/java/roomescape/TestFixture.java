@@ -1,5 +1,6 @@
 package roomescape;
 
+import jakarta.servlet.http.Cookie;
 import roomescape.domain.*;
 
 import java.time.LocalDate;
@@ -7,6 +8,7 @@ import java.time.LocalTime;
 
 public class TestFixture {
     public static final LocalDate DEFAULT_DATE = LocalDate.of(2025, 1, 1);
+    private static final String AUTH_COOKIE_NAME = "token";
 
     public static ReservationTime createDefaultReservationTime() {
         return ReservationTime.createNew(LocalTime.of(12, 0));
@@ -34,5 +36,13 @@ public class TestFixture {
 
     public static Reservation createDefaultReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         return Reservation.createNew(member, date, time, theme);
+    }
+
+    public static Cookie createAuthCookie(String token) {
+        Cookie cookie = new Cookie(AUTH_COOKIE_NAME, token);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        return cookie;
     }
 }
