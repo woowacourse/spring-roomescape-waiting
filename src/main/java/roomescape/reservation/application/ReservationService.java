@@ -109,10 +109,11 @@ public class ReservationService {
         final Theme theme = getTheme(themeId);
         final Member member = getMember(memberId);
 
-        final List<Reservation> sameTimeReservations = reservationRepository.findByDateAndThemeIdWithAssociations(date,
+        final List<Reservation> sameDateAndThemeReservations = reservationRepository.findByDateAndThemeIdWithAssociations(
+                date,
                 themeId);
 
-        validateIsBooked(sameTimeReservations, reservationTime, theme);
+        validateIsBooked(sameDateAndThemeReservations, reservationTime, theme);
         validatePastDateTime(date, reservationTime.getStartAt());
 
         final Reservation reservation = new Reservation(date, reservationTime, theme, member, Status.CONFIRMATION);
