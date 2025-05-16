@@ -6,9 +6,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import roomescape.auth.infrastructure.jwt.JwtTokenProvider;
 import roomescape.auth.infrastructure.util.CookieManager;
@@ -19,6 +21,9 @@ import roomescape.auth.infrastructure.util.CookieManager;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String MEMBER_ID_ATTRIBUTE = "memberId";
+    private static final List<String> WHITELIST = List.of(
+            "/", "/login", "/signup"
+    );
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CookieManager cookieManager;
@@ -29,7 +34,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final HttpServletResponse response,
             final FilterChain filterChain
     ) throws ServletException, IOException {
+        final String uri = request.getRequestURI();
         final String token = cookieManager.extractLoginToken(request.getCookies());
+
+        if (isWhitelisted(uri)) {
+            if (StringUtils.hasText(token)) {
+                try {
+                    final String subject = jwtTokenProvider.extractPrincipal(token);
+                    Long memberId = Long.valueOf(subject);
+                    request.setAttribute(MEMBER_ID_ATTRIBUTE, memberId);
+                } catch (JwtException | NumberFormatException e) {
+                    log.debug("유효하지 않은 토큰이 메인 화면 등에서 발견됨", e);
+                }
+            }
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (!StringUtils.hasText(token)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다.");
+            return;
+        }
 
         Long memberId = null;
         try {
@@ -47,5 +72,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isWhitelisted(String uri) {
+        return WHITELIST.stream()
+                .anyMatch(uri::startsWith);
     }
 }
