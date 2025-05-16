@@ -8,7 +8,7 @@ import java.util.List;
 
 public record ReservationResult(
         Long id,
-        MemberResult memberResult,
+        MemberResult member,
         LocalDate date,
         ReservationTimeResult time,
         ThemeResult theme,

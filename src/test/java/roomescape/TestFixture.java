@@ -9,7 +9,7 @@ import java.time.LocalTime;
 
 public class TestFixture {
     public static final LocalDate DEFAULT_DATE = LocalDate.of(2025, 1, 1);
-    private static final String AUTH_COOKIE_NAME = "token";
+    public static final String AUTH_COOKIE_NAME = "token";
 
     public static ReservationTime createDefaultReservationTime() {
         return ReservationTime.createNew(LocalTime.of(12, 0));
