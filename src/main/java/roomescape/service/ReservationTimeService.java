@@ -5,11 +5,11 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimePolicy;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundReservationTimeException;
-import roomescape.exception.ReservationException;
 import roomescape.persistence.dto.ReservationTimeAvailabilityData;
 import roomescape.service.param.CreateReservationTimeParam;
 import roomescape.service.result.AvailableReservationTimeResult;
@@ -17,24 +17,21 @@ import roomescape.service.result.ReservationTimeResult;
 
 @Service
 public class ReservationTimeService {
-    // TODO: 정책으로 빼기
-    private static final LocalTime RESERVATION_START_TIME = LocalTime.of(12, 0);
-    private static final LocalTime RESERVATION_END_TIME = LocalTime.of(22, 0);
-
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationTimePolicy reservationTimePolicy;
 
     public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
-                                  final ReservationRepository reservationRepository) {
+                                  final ReservationRepository reservationRepository,
+                                  ReservationTimePolicy reservationTimePolicy) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationTimePolicy = reservationTimePolicy;
     }
 
     public ReservationTimeResult create(CreateReservationTimeParam createReservationTimeParam) {
         LocalTime startAt = createReservationTimeParam.startAt();
-        if (startAt.isBefore(RESERVATION_START_TIME) || startAt.isAfter(RESERVATION_END_TIME)) {
-            throw new ReservationException("해당 시간은 예약 가능 시간이 아닙니다.");
-        }
+        reservationTimePolicy.canCreate(startAt);
 
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.createNew(startAt));
         return ReservationTimeResult.from(reservationTime);
