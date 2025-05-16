@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,10 +58,12 @@ class ThemeServiceTest {
 
         ThemeResponse response = themeService.create(request);
 
-        assertThat(response.id()).isNotNull();
-        assertThat(response.name()).isEqualTo("공포");
-        assertThat(response.description()).isEqualTo("공포 테마");
-        assertThat(response.thumbnail()).isEqualTo("공포.jpg");
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(response.id()).isNotNull();
+        softly.assertThat(response.name()).isEqualTo("공포");
+        softly.assertThat(response.description()).isEqualTo("공포 테마");
+        softly.assertThat(response.thumbnail()).isEqualTo("공포.jpg");
+        softly.assertAll();
     }
 
     @Test
@@ -69,11 +72,12 @@ class ThemeServiceTest {
 
         ThemeResponse response = themeService.getAll().get(0);
 
-        assertThat(response.id()).isNotNull();
-        assertThat(response.name()).isEqualTo(theme.getName());
-        assertThat(response.description()).isEqualTo(theme.getDescription());
-        assertThat(response.thumbnail()).isEqualTo(theme.getThumbnail());
-
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(response.id()).isNotNull();
+        softly.assertThat(response.name()).isEqualTo(theme.getName());
+        softly.assertThat(response.description()).isEqualTo(theme.getDescription());
+        softly.assertThat(response.thumbnail()).isEqualTo(theme.getThumbnail());
+        softly.assertAll();
     }
 
     @Test
@@ -138,5 +142,23 @@ class ThemeServiceTest {
                     member, new ReservationDateTime(date, time), theme
             ));
         }
+    }
+
+    @Test
+    void 인기_테마가_10개_미만일_경우_전체_테마를_반환한다() {
+        List<Theme> themes = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            themes.add(themeDbFixture.커스텀_테마("테마" + i));
+        }
+        Member member = memberDbFixture.유저1_생성();
+
+        for (int i = 0; i < 5; i++) {
+            addReservation(1, member, ReservationDateFixture.예약날짜_오늘,
+                    reservationTimeDbFixture.열시(), themes.get(i));
+        }
+
+        List<ThemeResponse> popularThemes = themeService.getPopularThemes();
+
+        assertThat(popularThemes).hasSize(5);
     }
 }
