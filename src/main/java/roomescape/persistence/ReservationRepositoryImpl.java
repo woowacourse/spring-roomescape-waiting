@@ -58,7 +58,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public int countWaitingReservations(LocalDate date, Long timeId, Long themeId) {
-        return jpaReservationRepository.countWaitingReservations(date, timeId, themeId);
+    public int countBeforeWaitings(LocalDate date, Long themeId, Long timeId, Long reservationId) {
+        return jpaReservationRepository.countBeforeWaitings(date, timeId, themeId, reservationId);
+
     }
 }

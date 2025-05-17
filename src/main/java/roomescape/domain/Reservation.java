@@ -43,29 +43,25 @@ public class Reservation {
     @Column(nullable = false)
     private ReservationStatus status;
 
-    @Column(nullable = false)
-    private int waitingOrder;
-
     protected Reservation() {
     }
 
     private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                        ReservationStatus status, int waitingOrder) {
+                        ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.status = status;
-        this.waitingOrder = waitingOrder;
     }
 
     public static Reservation createNew(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED, 0);
+        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
     }
 
-    public static Reservation createWaiting(Member member, LocalDate date, ReservationTime time, Theme theme, int waitingOrder) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.WAITING, waitingOrder);
+    public static Reservation createWaiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(null, member, date, time, theme, ReservationStatus.WAITING);
     }
 
     public boolean isPast(Clock clock) {
@@ -103,10 +99,6 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    public int getWaitingOrder() {
-        return waitingOrder;
     }
 
     @Override

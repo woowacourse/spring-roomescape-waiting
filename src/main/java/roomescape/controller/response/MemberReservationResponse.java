@@ -3,27 +3,42 @@ package roomescape.controller.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.service.result.ReservationResult;
+import roomescape.domain.ReservationStatus;
+import roomescape.service.result.ReservationWithWaitingResult;
+import roomescape.service.result.WaitingWithRank;
 
-public record MemberReservationResponse(Long reservationId,
-                                        String theme,
-                                        LocalDate date,
-                                        LocalTime time,
-                                        String reservationStatus) {
-    public static MemberReservationResponse from(ReservationResult reservationResult) {
-        StringBuilder statusStringBuilder = new StringBuilder();
-        if(reservationResult.waitingOrder() > 0) {
-            statusStringBuilder.append(reservationResult.waitingOrder() + "번째 ");
-        }
-        statusStringBuilder.append(reservationResult.status().getName());
-
-        return new MemberReservationResponse(reservationResult.id(), reservationResult.theme().name(),
-                reservationResult.date(), reservationResult.time().startAt(),
-                statusStringBuilder.toString());
+public record MemberReservationResponse(
+        Long reservationId,
+        String theme,
+        LocalDate date,
+        LocalTime time,
+        String reservationStatus
+) {
+    public static MemberReservationResponse from(ReservationWithWaitingResult result) {
+        return new MemberReservationResponse(
+                result.reservationResult().id(),
+                result.reservationResult().theme().name(),
+                result.reservationResult().date(),
+                result.reservationResult().time().startAt(),
+                formatStatus(result.waitingWithRank())
+        );
     }
 
-    public static List<MemberReservationResponse> from(List<ReservationResult> reservationResults) {
-        return reservationResults.stream()
+    private static String formatStatus(WaitingWithRank waitingWithRank) {
+        ReservationStatus status = waitingWithRank.reservationStatus();
+        int rank = waitingWithRank.rank();
+
+        StringBuilder sb = new StringBuilder();
+        if(status == ReservationStatus.WAITING) {
+            sb.append(rank + "번째 ");
+        }
+        sb.append(status.getDisplayName());
+
+        return sb.toString();
+    }
+
+    public static List<MemberReservationResponse> from(List<ReservationWithWaitingResult> results) {
+        return results.stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }

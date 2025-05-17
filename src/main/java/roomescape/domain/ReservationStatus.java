@@ -5,13 +5,13 @@ public enum ReservationStatus {
     WAITING("대기"),
     ;
 
-    private final String name;
+    private final String displayName;
 
-    ReservationStatus(String name) {
-        this.name = name;
+    ReservationStatus(String displayName) {
+        this.displayName = displayName;
     }
 
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 }

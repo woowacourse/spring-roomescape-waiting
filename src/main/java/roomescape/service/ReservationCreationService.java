@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -55,17 +54,12 @@ public class ReservationCreationService {
 
     public ReservationResult createWaiting(CreateReservationParam param) {
         ReservationComponents components = loadContext(param);
-        int nextWaitingOrder = calculateNextWaitingOrder(param.date(), components.reservationTime.getId(), components.theme.getId());
         Reservation reservation = Reservation.createWaiting(
-                components.member, param.date(), components.reservationTime, components.theme, nextWaitingOrder);
+                components.member, param.date(), components.reservationTime, components.theme);
         validateCanWaiting(reservation);
         reservationRepository.save(reservation);
 
         return ReservationResult.from(reservation);
-    }
-
-    private int calculateNextWaitingOrder(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.countWaitingReservations(date, timeId, themeId) + 1;
     }
 
     private void validateCanWaiting(Reservation reservation) {

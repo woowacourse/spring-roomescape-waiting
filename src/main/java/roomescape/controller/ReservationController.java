@@ -20,6 +20,7 @@ import roomescape.controller.response.ReservationResponse;
 import roomescape.service.ReservationCreationService;
 import roomescape.service.ReservationService;
 import roomescape.service.result.ReservationResult;
+import roomescape.service.result.ReservationWithWaitingResult;
 
 @RestController
 @RequestMapping("/reservations")
@@ -63,6 +64,15 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse.from(reservationResult));
     }
 
+    @DeleteMapping("/waitings/{reservationId}")
+    public ResponseEntity<Void> deleteWaitingReservation(
+            @PathVariable("reservationId") Long reservationId,
+            @LoginMember LoginMemberInfo loginMemberInfo) {
+
+        reservationService.deleteWaitingById(reservationId, loginMemberInfo);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId) {
         reservationService.deleteById(reservationId);
@@ -71,7 +81,9 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
-        List<ReservationResult> reservationResults = reservationService.getMemberReservationsById(loginMemberInfo.id());
-        return ResponseEntity.ok(MemberReservationResponse.from(reservationResults));
+        List<ReservationWithWaitingResult> results = reservationService.getMemberReservationsById(
+                loginMemberInfo.id());
+
+        return ResponseEntity.ok(MemberReservationResponse.from(results));
     }
 }

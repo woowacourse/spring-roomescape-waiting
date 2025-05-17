@@ -24,5 +24,6 @@ public interface ReservationRepository {
 
     List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
-    int countWaitingReservations(LocalDate date, Long timeId, Long themeId);
+    int countBeforeWaitings(LocalDate date, Long themeId, Long timeId, Long reservationId);
+
 }

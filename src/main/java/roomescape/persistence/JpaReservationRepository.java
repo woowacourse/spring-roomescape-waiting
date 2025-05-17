@@ -33,19 +33,20 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     """)
     List<Reservation> findByMemberIdWithDetails(Long memberId);
 
+    @Query("""
+    SELECT COUNT(r)
+    FROM Reservation r
+    WHERE r.status = 'WAITING'
+      AND r.date = :date
+      AND r.theme.id = :themeId
+      AND r.time.id = :timeId
+      AND r.id < :reservationId
+""")
+    int countBeforeWaitings(LocalDate date, Long themeId, Long timeId, Long reservationId);
+
     boolean existsByTimeId(Long reservationTimeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean existsByThemeId(Long themeId);
-
-    @Query("""
-        SELECT COUNT(r)
-        FROM Reservation r
-        WHERE r.date = :date
-        AND r.time.id = :timeId
-        AND r.theme.id = :themeId
-        AND r.status = 'WAITING'
-    """)
-    int countWaitingReservations(LocalDate date, Long timeId, Long themeId);
 }
