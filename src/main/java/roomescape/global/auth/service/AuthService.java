@@ -7,16 +7,16 @@ import roomescape.global.auth.dto.UserInfo;
 import roomescape.global.auth.exception.UnAuthorizedException;
 import roomescape.global.auth.infrastructure.JwtProvider;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.JpaMemberRepository;
 
 @Component
 public class AuthService {
 
     private final JwtProvider jwtProvider;
-    private final MemberRepository memberRepository;
+    private final JpaMemberRepository memberRepository;
     private final MyPasswordEncoder myPasswordEncoder;
 
-    public AuthService(final JwtProvider jwtProvider, final MemberRepository memberRepository,
+    public AuthService(final JwtProvider jwtProvider, final roomescape.member.repository.JpaMemberRepository memberRepository,
                        final MyPasswordEncoder myPasswordEncoder) {
         this.jwtProvider = jwtProvider;
         this.memberRepository = memberRepository;
