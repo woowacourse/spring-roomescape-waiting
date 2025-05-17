@@ -19,7 +19,6 @@ public abstract class DomainId {
 
     protected DomainId(final Long value) {
         validate(value);
-
         this.value = value;
     }
 

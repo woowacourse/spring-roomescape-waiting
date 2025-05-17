@@ -30,13 +30,13 @@ class ReservationTest {
     @DisplayName("과거 날짜와 시간에 대한 예약 생성은 불가능하다.")
     void validatePast() {
         final Theme savedTheme = Theme.withId(
-                ThemeId.from(1234L),
+                ThemeId.from(1L),
                 ThemeName.from("공포"),
                 ThemeDescription.from("지구별 방탈출 최고"),
                 ThemeThumbnail.from("www.making.com"));
 
         final User savedUser = User.withId(
-                UserId.from(1234L),
+                UserId.from(1L),
                 UserName.from("강산"),
                 Email.from("email@email.com"),
                 Password.fromEncoded("1234"),
@@ -59,7 +59,6 @@ class ReservationTest {
                 savedTheme);
 
         assertAll(() -> {
-
             assertThatThrownBy(() -> minusDay.validatePast(now))
                     .isInstanceOf(PastDateReservationException.class);
 

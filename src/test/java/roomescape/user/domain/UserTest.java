@@ -24,7 +24,8 @@ class UserTest {
         // then
         assertAll(
                 () -> assertThatThrownBy(() -> User.withId(null, name, email, password, role))
-                        .isInstanceOf(NullPointerException.class),
+                        .isInstanceOf(InvalidInputException.class)
+                        .hasMessageContaining("Validation failed [while checking null]: User.id"),
 
                 () -> assertThatThrownBy(() -> User.withoutId(null, email, password, role))
                         .isInstanceOf(InvalidInputException.class)

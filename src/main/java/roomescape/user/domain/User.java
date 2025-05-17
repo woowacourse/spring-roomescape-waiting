@@ -6,14 +6,15 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 import roomescape.auth.sign.password.Password;
-import roomescape.common.domain.BaseEntity;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.domain.Email;
 import roomescape.common.validate.Validator;
@@ -21,10 +22,13 @@ import roomescape.common.validate.Validator;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldNameConstants
-@ToString
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity {
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Embedded
     @AttributeOverride(
@@ -59,9 +63,10 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public User(final Long id, final UserName name, final Email email, final Password password, final UserRole role) {
-        super(id);
+    public User(final UserId id, final UserName name, final Email email, final Password password, final UserRole role) {
+        validate(id);
         validate(name, email, password, role);
+        this.id = id.getValue();
         this.name = name;
         this.email = email;
         this.password = password;
@@ -73,7 +78,7 @@ public class User extends BaseEntity {
                               final Email email,
                               final Password password,
                               final UserRole role) {
-        return new User(id.getValue(), name, email, password, role);
+        return new User(id, name, email, password, role);
     }
 
     public static User withoutId(final UserName name,
@@ -92,6 +97,11 @@ public class User extends BaseEntity {
                 .validateNotNull(Fields.email, email, DomainTerm.USER_EMAIL.label())
                 .validateNotNull(Fields.password, password, DomainTerm.USER_PASSWORD.label())
                 .validateNotNull(Fields.role, role, DomainTerm.USER_ROLE.label());
+    }
+
+    private static void validate(final UserId id) {
+        Validator.of(User.class)
+                .validateNotNull(Fields.id, id, DomainTerm.USER_ID.label());
     }
 
     public UserId getId() {

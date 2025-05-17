@@ -4,14 +4,15 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
-import roomescape.common.domain.BaseEntity;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.exception.PastDateReservationException;
@@ -25,10 +26,13 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-@ToString
 @Entity
 @Table(name = "reservations")
-public class Reservation extends BaseEntity {
+public class Reservation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Embedded
     @AttributeOverride(
@@ -68,15 +72,16 @@ public class Reservation extends BaseEntity {
         this.status = status;
     }
 
-    public Reservation(final Long id,
+    public Reservation(final ReservationId id,
                        final UserId userId,
                        final ReservationDate date,
                        final ReservationTime time,
                        final Theme theme,
                        final BookedStatus status
     ) {
-        super(id);
+        validate(id);
         validate(userId, date, time, theme);
+        this.id = id.getValue();
         this.userId = userId;
         this.date = date;
         this.time = time;
@@ -89,7 +94,7 @@ public class Reservation extends BaseEntity {
                                      final ReservationDate date,
                                      final ReservationTime time,
                                      final Theme theme) {
-        return new Reservation(id.getValue(), userId, date, time, theme, BookedStatus.from(0));
+        return new Reservation(id, userId, date, time, theme, BookedStatus.from(0));
     }
 
     public static Reservation withoutId(final UserId userId,
@@ -109,6 +114,11 @@ public class Reservation extends BaseEntity {
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
                 .validateNotNull(Fields.time, time, DomainTerm.RESERVATION_TIME.label())
                 .validateNotNull(Fields.theme, theme, DomainTerm.THEME.label());
+    }
+
+    private static void validate(final ReservationId id) {
+        Validator.of(Reservation.class)
+                .validateNotNull(Fields.id, id, DomainTerm.RESERVATION_ID.label());
     }
 
     public void validatePast(final LocalDateTime now) {

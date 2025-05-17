@@ -4,23 +4,27 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
-import roomescape.common.domain.BaseEntity;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-@ToString
 @Entity
 @Table(name = "themes")
-public class Theme extends BaseEntity {
+public class Theme {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Embedded
     @AttributeOverride(
@@ -44,8 +48,9 @@ public class Theme extends BaseEntity {
                   final ThemeName name,
                   final ThemeDescription description,
                   final ThemeThumbnail thumbnail) {
-        super(id.getValue());
+        validate(id);
         validate(name, description, thumbnail);
+        this.id = id.getValue();
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
@@ -80,6 +85,11 @@ public class Theme extends BaseEntity {
                 .validateNotNull(Fields.name, name, DomainTerm.THEME_NAME.label())
                 .validateNotNull(Fields.description, description, DomainTerm.THEME_DESCRIPTION.label())
                 .validateNotNull(Fields.thumbnail, thumbnail, DomainTerm.THEME_THUMBNAIL.label());
+    }
+
+    private static void validate(final ThemeId id) {
+        Validator.of(Theme.class)
+                .validateNotNull(Fields.id, id, DomainTerm.THEME_ID.label());
     }
 
     public ThemeId getId() {
