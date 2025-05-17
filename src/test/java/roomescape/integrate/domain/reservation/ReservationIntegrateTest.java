@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -26,14 +25,15 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
+import roomescape.integrate.IntegrationTest;
 import roomescape.integrate.fixture.RequestFixture;
 import roomescape.repository.reservation.ReservationRepository;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-class ReservationIntegrateTest {
+class ReservationIntegrateTest extends IntegrationTest {
 
     private final RequestFixture requestFixture = new RequestFixture();
 
@@ -122,7 +122,7 @@ class ReservationIntegrateTest {
     }
 
     @Test
-    void 유저의_예약을_가져올_수_있다(){
+    void 유저의_예약을_가져올_수_있다() {
         requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(1).toString(), themeId, timeId, cookies);
         requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
 
@@ -135,7 +135,7 @@ class ReservationIntegrateTest {
     }
 
     @Test
-    void 유저의_예약은_예약_상태를_가진다(){
+    void 유저의_예약은_예약_상태를_가진다() {
         requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(1).toString(), themeId, timeId, cookies);
         requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
 

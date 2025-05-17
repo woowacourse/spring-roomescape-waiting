@@ -18,13 +18,14 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.integrate.IntegrationTest;
 import roomescape.integrate.fixture.RequestFixture;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-class AvailableReservationTimeIntegratedTest {
+class AvailableReservationTimeIntegratedTest extends IntegrationTest {
 
     private final RequestFixture requestFixture = new RequestFixture();
     private String todayDateString;

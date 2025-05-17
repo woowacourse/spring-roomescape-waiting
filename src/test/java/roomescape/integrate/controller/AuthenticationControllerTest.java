@@ -10,9 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.dto.member.MemberResponseDto;
+import roomescape.integrate.IntegrationTest;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-class AuthenticationControllerTest {
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+class AuthenticationControllerTest extends IntegrationTest {
 
     @Test
     void 회원가입_테스트() {

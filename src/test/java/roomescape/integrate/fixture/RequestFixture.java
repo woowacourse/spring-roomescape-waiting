@@ -11,6 +11,7 @@ import roomescape.dto.theme.ThemeResponseDto;
 public class RequestFixture {
 
     public void reqeustSignup(String name, String email, String password) {
+        
         Map<String, String> signupParam = Map.of("name", name, "email", email, "password", password);
 
         RestAssured.given()
