@@ -14,8 +14,8 @@ import roomescape.fixture.domain.MemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
-import roomescape.member.ui.dto.CreateMemberRequest;
 import roomescape.member.ui.dto.MemberResponse;
+import roomescape.member.ui.dto.SignUpRequest;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -33,7 +33,7 @@ class MemberServiceTest {
     @Test
     void 회원을_추가한다() {
         // given
-        final CreateMemberRequest request = new CreateMemberRequest(
+        final SignUpRequest request = new SignUpRequest(
                 MemberFixture.NOT_SAVED_MEMBER_1().getEmail(),
                 MemberFixture.NOT_SAVED_MEMBER_1().getPassword(),
                 MemberFixture.NOT_SAVED_MEMBER_1().getName()

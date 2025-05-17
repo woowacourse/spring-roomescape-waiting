@@ -16,9 +16,9 @@ import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.member.application.MemberService;
 import roomescape.member.domain.Member;
-import roomescape.member.ui.dto.CreateMemberRequest;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
+import roomescape.member.ui.dto.SignUpRequest;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,10 +29,10 @@ public class MemberRestController {
 
     @PostMapping
     public ResponseEntity<MemberResponse.IdName> create(
-            @RequestBody @Valid final CreateMemberRequest request
+            @RequestBody @Valid final SignUpRequest request
     ) {
         final MemberResponse.IdName response = memberService.create(request);
-        
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
     }

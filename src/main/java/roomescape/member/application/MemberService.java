@@ -9,9 +9,9 @@ import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
-import roomescape.member.ui.dto.CreateMemberRequest;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
+import roomescape.member.ui.dto.SignUpRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class MemberService {
     private final MemberCommandRepository memberCommandRepository;
     private final MemberQueryRepository memberQueryRepository;
 
-    public MemberResponse.IdName create(final CreateMemberRequest request) {
+    public MemberResponse.IdName create(final SignUpRequest request) {
         final Member member = new Member(
                 request.name(),
                 request.email(),
