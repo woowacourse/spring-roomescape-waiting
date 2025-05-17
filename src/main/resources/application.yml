@@ -4,11 +4,9 @@ spring:
     url: jdbc:mysql://localhost:33061/roomescape
     username: root
     password: root
-
   sql:
     init:
       mode: always
-
   jpa:
     show-sql: true
     properties:

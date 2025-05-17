@@ -36,7 +36,6 @@ public class Reservation {
     @JoinColumn(name = "theme_id")
     private Theme theme;
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "status")
     private ReservationStatus status;
 
     @Builder
