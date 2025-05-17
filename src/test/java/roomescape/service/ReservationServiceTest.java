@@ -105,7 +105,7 @@ class ReservationServiceTest {
 
 
         //when
-        List<ReservationResult> reservationResults = reservationService.getAll();
+        List<ReservationResult> reservationResults = reservationService.getReservationsInConditions(null, null, null, null);
 
         //then
         assertAll(

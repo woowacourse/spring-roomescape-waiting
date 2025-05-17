@@ -8,8 +8,6 @@ import roomescape.domain.Reservation;
 
 public interface ReservationRepository {
 
-    List<Reservation> findAll();
-
     Reservation save(Reservation reservation);
 
     void deleteById(Long reservationId);

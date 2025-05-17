@@ -58,13 +58,6 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    public List<ReservationResult> getAll() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        return reservations.stream()
-                .map(ReservationResult::from)
-                .toList();
-    }
-
     public ReservationResult getById(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundReservationException(reservationId + "에 해당하는 reservation 튜플이 없습니다."));

@@ -18,11 +18,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return jpaReservationRepository.findAll();
-    }
-
-    @Override
     public Reservation save(final Reservation reservation) {
         return jpaReservationRepository.save(reservation);
     }
@@ -39,7 +34,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     public List<Reservation> findByMemberId(final Long memberId) {
-        return jpaReservationRepository.findByMemberId(memberId);
+        return jpaReservationRepository.findByMemberIdWithDetails(memberId);
     }
 
     @Override

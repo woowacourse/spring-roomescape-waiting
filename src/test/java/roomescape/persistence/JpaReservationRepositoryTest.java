@@ -1,7 +1,13 @@
 package roomescape.persistence;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.TestFixture.DEFAULT_DATE;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +18,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DEFAULT_DATE;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -44,7 +43,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(reservation);
 
         // when
-        List<Reservation> result = jpaReservationRepository.findByMemberId(member.getId());
+        List<Reservation> result = jpaReservationRepository.findByMemberIdWithDetails(member.getId());
 
         // then
         assertAll(
@@ -111,29 +110,6 @@ class JpaReservationRepositoryTest {
 
         //then
         assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("테마 ID와 날짜로 예약을 조회할 수 있다.")
-    void findByThemeIdAndDate() {
-        // given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        // when
-        List<Reservation> result = jpaReservationRepository.findByThemeIdAndDate(theme.getId(), DEFAULT_DATE);
-
-        // then
-        assertAll(
-                () -> assertThat(result.size()).isEqualTo(1),
-                () -> assertThat(result.getFirst()).isEqualTo(reservation)
-        );
     }
 
     @Test
