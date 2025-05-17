@@ -58,7 +58,7 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
     @Transactional
     public void deleteReservationTimeById(Long id) {
         ReservationTime reservationTime = findReservationTimeById(id);
-        if (reservationRepository.existsByTime(reservationTime)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(reservationTime.getId());

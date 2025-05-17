@@ -23,9 +23,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    boolean existsByTime(ReservationTime time);
+    boolean existsByTimeId(Long timeId);
 
-    boolean existsByTheme(Theme theme);
+    boolean existsByThemeId(Long themeId);
 
     @Query("""
         SELECT r FROM Reservation r
@@ -38,6 +38,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByThemeAndMemberAndDate(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
-
-    List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 }

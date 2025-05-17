@@ -49,7 +49,7 @@ public class ThemeService {
     @Transactional
     public void deleteThemeById(Long id) {
         Theme theme = findThemeById(id);
-        if (reservationRepository.existsByTheme(theme)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(theme.getId());
