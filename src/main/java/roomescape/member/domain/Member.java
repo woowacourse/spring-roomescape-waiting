@@ -23,7 +23,8 @@ import roomescape.auth.domain.AuthRole;
 @EqualsAndHashCode(of = {"id"})
 public class Member {
 
-    private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,7 +66,7 @@ public class Member {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("이메일은 null 이거나 빈 문자열일 수 없습니다.");
         }
-        if (!Pattern.matches(EMAIL_REGEX, email)) {
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
             throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
         }
     }
